@@ -12,7 +12,7 @@ module.exports = {
         "plugin:react/recommended",
         "plugin:react/jsx-runtime",
     ],
-    ignorePatterns: ["dist", ".eslintrc.cjs"],
+    ignorePatterns: ["dist", ".eslintrc.cjs", "vite.config.ts"],
     parser: "@typescript-eslint/parser",
     plugins: ["react-refresh"],
     rules: {
@@ -20,9 +20,6 @@ module.exports = {
             "warn",
             { allowConstantExport: true },
         ],
-        "quotes": [2, "double"],
-        "indent": ["off", 2],
-        "import/prefer-default-export": "off",
     },
     parserOptions: {
         ecmaVersion: "latest",
