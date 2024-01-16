@@ -5,7 +5,6 @@ module.exports = {
         'eslint:recommended',
         'plugin:@typescript-eslint/recommended',
         'plugin:react-hooks/recommended',
-        'airbnb-base'
     ],
     ignorePatterns: ['dist', '.eslintrc.cjs'],
     parser: '@typescript-eslint/parser',
@@ -19,15 +18,4 @@ module.exports = {
         "indent": ["off", 2],
         "import/prefer-default-export": "off",
     },
-    settings: {
-        "import/resolver": {
-            "typescript": {}
-        },
-        "import/core-modules": [
-            "vite",
-            "@vitejs/plugin-react",
-            "vite-tsconfig-paths",
-            "vite-plugin-eslint"
-        ]
-    }
 }
