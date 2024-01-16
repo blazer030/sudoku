@@ -1,6 +1,10 @@
+import { Outlet } from "react-router-dom";
+
 function App() {
     return (
-        <div className="text-3xl">test</div>
+        <div className="container mx-auto">
+            <Outlet />
+        </div>
     )
 }
 
