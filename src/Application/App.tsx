@@ -5,7 +5,7 @@ function App() {
         <div className="container mx-auto">
             <Outlet />
         </div>
-    )
+    );
 }
 
-export default App
+export default App;
