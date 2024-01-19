@@ -1,6 +1,7 @@
-import Button from "@/presentation/components/ui/button/button.tsx";
+import Button from "@/presentation/components/ui/button/button";
 import { useNavigate } from "react-router-dom";
-import { MdFormatListBulleted, MdInfo, MdSettings, MdShoppingCart } from "react-icons/md";
+import Icon from "@/presentation/components/icon/Icon";
+import ICON_TYPE from "@/presentation/components/icon/IconType"
 
 export const Home = () => {
     const navigate = useNavigate();
@@ -17,18 +18,16 @@ export const Home = () => {
 
         <div className="w-full flex justify-between mt-12">
             <div>
-                <Button variant="ghost" className="rounded-full">
-                    <MdSettings size="1.5rem" />
-                </Button>
+                <Icon type={ICON_TYPE.Settings} />
             </div>
             <div>
-                <MdShoppingCart size="1.5rem" />
+                <Icon type={ICON_TYPE.Cart} />
             </div>
             <div>
-                <MdFormatListBulleted size="1.5rem" />
+                <Icon type={ICON_TYPE.List} />
             </div>
             <div>
-                <MdInfo size="1.5rem" />
+                <Icon type={ICON_TYPE.Info} />
             </div>
         </div>
     </div>;
