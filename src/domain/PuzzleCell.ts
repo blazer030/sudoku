@@ -1,14 +1,9 @@
 class PuzzleCell {
-    private readonly _answer: number;
-    private readonly _isHole: boolean;
+    private readonly _value: number;
     private _note: number[];
 
-    get answer(): number {
-        return this._answer;
-    }
-
-    get isHole(): boolean {
-        return this._isHole;
+    get value(): string {
+        return this._value > 0 ? this._value.toString() : "";
     }
 
     get note(): number[] {
@@ -23,9 +18,8 @@ class PuzzleCell {
         }
     }
 
-    constructor(answer: number, isHole: boolean) {
-        this._answer = answer;
-        this._isHole = isHole;
+    constructor(answer: number) {
+        this._value = answer;
         this._note = [];
     }
 }

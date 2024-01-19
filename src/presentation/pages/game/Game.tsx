@@ -12,9 +12,9 @@ export const Game = () => {
             puzzle.map((row, rowIndex) => {
                 return <div key={rowIndex} className="flex">
                     {
-                        row.map((cell, cellIndex) => {
-                            return <div key={cellIndex} className="flex-1 border border-gray-300">
-                                {cell.isHole ? "" : cell.answer}
+                        row.map((cell, colIndex) => {
+                            return <div key={`cell-${rowIndex}-${colIndex}`} className="flex-1 border border-gray-300">
+                                {cell.value}
                             </div>;
                         })
                     }

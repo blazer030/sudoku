@@ -1,10 +1,11 @@
 import PuzzleCell from "@/domain/PuzzleCell";
 
 class Sudoku {
-    private puzzle: PuzzleCell[][] = [];
+    private _answer: number[][] = [];
+    private _puzzle: PuzzleCell[][] = [];
 
     public generate() {
-        const solution = [
+        this._answer = [
             [4, 9, 6, 7, 5, 1, 8, 2, 3],
             [2, 1, 8, 6, 9, 3, 7, 5, 4],
             [7, 5, 3, 4, 8, 2, 1, 6, 9],
@@ -25,17 +26,20 @@ class Sudoku {
             [3, 0, 4, 0, 0, 9, 5, 0, 0],
             [5, 0, 0, 0, 7, 0, 9, 0, 8],
             [0, 0, 9, 0, 0, 8, 0, 0, 5],
-            [0, 0, 8, 0, 0, 0, 0, 3, 1]
+            [8, 0, 0, 0, 0, 0, 0, 3, 1]
         ];
 
-        this.puzzle = solution.map((row, rowIndex) => {
-            return row.map((answer, columnIndex) => {
-                const isHole = puzzle[rowIndex][columnIndex] === 0;
-                return new PuzzleCell(answer, isHole);
+        this._puzzle = puzzle.map((row) => {
+            return row.map((value) => {
+                return new PuzzleCell(value);
             })
         });
 
-        return this.puzzle;
+        return this._puzzle;
+    }
+
+    public check(row: number, column: number, value: number): boolean {
+        return this._answer[row][column] === value;
     }
 }
 
