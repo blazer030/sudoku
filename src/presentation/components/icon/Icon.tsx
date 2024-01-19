@@ -1,6 +1,6 @@
 import React from "react";
 import * as Icons from "react-icons/md";
-import ICON_TYPE from "@/presentation/components/icon/IconType.ts";
+import ICON_TYPE from "@/presentation/components/icon/IconType";
 
 interface IconProps {
     type: ICON_TYPE;

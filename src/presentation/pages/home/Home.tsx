@@ -7,6 +7,10 @@ export const Home = () => {
     const navigate = useNavigate();
 
     return <div className="flex flex-col h-full justify-center items-center gap-4 px-12">
+        <div className="mb-32">
+            <Icon type={ICON_TYPE.Logo} size="10rem" />
+        </div>
+
         <Button variant="outline"
                 className="rounded-full w-full"
                 onClick={() => {

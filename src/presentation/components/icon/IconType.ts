@@ -1,4 +1,5 @@
 enum ICON_TYPE {
+    Logo = "MdOutlineAppRegistration",
     Settings = "MdSettings",
     Cart = "MdShoppingCart",
     List = "MdFormatListBulleted",
