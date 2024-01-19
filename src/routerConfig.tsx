@@ -3,19 +3,24 @@ import App from "@/presentation/App";
 import Home from "@/presentation/pages/home/Home";
 import Game from "@/presentation/pages/game/Game";
 
-const router = createBrowserRouter([{
-    path: import.meta.env.BASE_URL,
+const baseUrl: string = import.meta.env.VITE_BASE_URL as string
+
+export const ROUTER_PATH = {
+    home: baseUrl,
+    game: `${baseUrl}game`,
+};
+
+export const router = createBrowserRouter([{
+    path: baseUrl,
     element: <App />,
     children: [{
-        path: "/",
+        path: ROUTER_PATH.home,
         element: <Home />,
     }, {
-        path: "/game",
+        path: ROUTER_PATH.game,
         element: <Game />,
     }],
 }, {
     path: "*",
-    element: <Navigate to={"/"} />,
+    element: <Navigate to={baseUrl} />,
 }]);
-
-export default router;

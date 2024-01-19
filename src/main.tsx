@@ -2,7 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import "@/style/index.scss";
 import { RouterProvider } from "react-router-dom";
-import router from "@/routerConfig";
+import { router } from "@/routerConfig";
 
 
 const domNode = document.getElementById("root");
