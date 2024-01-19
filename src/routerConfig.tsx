@@ -4,7 +4,7 @@ import Home from "@/presentation/pages/home/Home";
 import Game from "@/presentation/pages/game/Game";
 
 const router = createBrowserRouter([{
-    path: "/",
+    path: import.meta.env.BASE_URL,
     element: <App />,
     children: [{
         path: "/",
