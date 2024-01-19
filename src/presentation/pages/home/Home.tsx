@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Icon from "@/presentation/components/icon/Icon";
 import ICON_TYPE from "@/presentation/components/icon/IconType"
 
-export const Home = () => {
+const Home = () => {
     const navigate = useNavigate();
 
     return <div className="flex flex-col h-full justify-center items-center gap-4 px-12">
@@ -52,3 +52,5 @@ export const Home = () => {
         </div>
     </div>;
 };
+
+export default Home;
