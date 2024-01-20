@@ -1,7 +1,6 @@
 import Button from "@/presentation/components/ui/button/button";
 import { useNavigate } from "react-router-dom";
-import Icon from "@/presentation/components/icon/Icon";
-import ICON_TYPE from "@/presentation/components/icon/IconType"
+import Icon from "@/presentation/components/icon/Icon"
 import { ROUTER_PATH } from "@/routerConfig";
 
 const Home = () => {
@@ -9,7 +8,7 @@ const Home = () => {
 
     return <div className="flex flex-col h-full justify-center items-center gap-4 px-12">
         <div className="mb-32 rounded-full bg-sky-200 p-4 text-white">
-            <Icon type={ICON_TYPE.Logo} size="10rem" />
+            <Icon.Logo size="10rem" />
         </div>
 
         <Button
@@ -27,28 +26,28 @@ const Home = () => {
                 variant="ghost"
                 className="rounded-full text-gray-500"
             >
-                <Icon type={ICON_TYPE.Settings} />
+                <Icon.Settings size="1.5rem" />
             </Button>
 
             <Button
                 variant="ghost"
                 className="rounded-full text-gray-500"
             >
-                <Icon type={ICON_TYPE.Cart} />
+                <Icon.Cart size="1.5rem" />
             </Button>
 
             <Button
                 variant="ghost"
                 className="rounded-full text-gray-500"
             >
-                <Icon type={ICON_TYPE.List} />
+                <Icon.List size="1.5rem" />
             </Button>
 
             <Button
                 variant="ghost"
                 className="rounded-full text-gray-500"
             >
-                <Icon type={ICON_TYPE.Info} />
+                <Icon.Info size="1.5rem" />
             </Button>
         </div>
     </div>;
