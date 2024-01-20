@@ -1,6 +1,7 @@
 import Sudoku from "@/domain/Sudoku";
 import React, { useState } from "react";
 import PuzzleCell from "@/domain/PuzzleCell";
+import Button from "@/presentation/components/ui/button/button";
 
 interface PuzzleBoxProps {
     puzzleCell: PuzzleCell;
@@ -61,6 +62,25 @@ export const Game = () => {
                                 </div>;
                             })
                         }
+                    </div>;
+                })
+            }
+        </div>
+        <div className="flex justify-center px-4 gap-2 mb-4">
+            <Button variant="outline">Undo</Button>
+            <Button variant="outline">Erase</Button>
+            <Button variant="outline">Note</Button>
+        </div>
+        <div className="flex px-4 gap-2">
+            {
+                Array.from({ length: 9 }).map((_, index) => {
+                    return <div key={`note-${index}`} className="flex-1 aspect-square">
+                        <Button
+                            variant="outline"
+                            className="w-full h-full text-2xl rounded-full"
+                        >
+                            {index + 1}
+                        </Button>
                     </div>;
                 })
             }
