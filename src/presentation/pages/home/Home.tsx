@@ -8,7 +8,7 @@ const Home = () => {
 
     return <div className="flex flex-col h-full justify-center items-center gap-4 px-12">
         <div className="mb-32 rounded-full bg-sky-200 p-4 text-white">
-            <Icon.Logo size="10rem" />
+            <Icon.Logo />
         </div>
 
         <Button
@@ -26,28 +26,28 @@ const Home = () => {
                 variant="ghost"
                 className="rounded-full text-gray-500"
             >
-                <Icon.Settings size="1.5rem" />
+                <Icon.Settings />
             </Button>
 
             <Button
                 variant="ghost"
                 className="rounded-full text-gray-500"
             >
-                <Icon.Cart size="1.5rem" />
+                <Icon.Cart />
             </Button>
 
             <Button
                 variant="ghost"
                 className="rounded-full text-gray-500"
             >
-                <Icon.List size="1.5rem" />
+                <Icon.List />
             </Button>
 
             <Button
                 variant="ghost"
                 className="rounded-full text-gray-500"
             >
-                <Icon.Info size="1.5rem" />
+                <Icon.Info />
             </Button>
         </div>
     </div>;
