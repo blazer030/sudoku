@@ -8,7 +8,12 @@ class PuzzleCell {
     }
 
     set input(value: number) {
+        if (this.isTip) return;
+        
         this._input = value;
+        if (value > 0) {
+            this._notes = [];
+        }
     }
 
     get isTip(): boolean {
@@ -32,6 +37,8 @@ class PuzzleCell {
     }
 
     set notes(value: number) {
+        if (this.isTip || this.isEntered) return;
+        
         if (this._notes.includes(value)) {
             this._notes = this._notes.filter((x) => x !== value);
         } else {
@@ -46,7 +53,7 @@ class PuzzleCell {
     constructor(answer: number) {
         this._value = answer;
         this._input = 0;
-        this._notes = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+        this._notes = [];
     }
 }
 
