@@ -2,8 +2,8 @@ import { beforeEach, describe, expect, it } from "vitest";
 import PuzzleCell from "@/domain/PuzzleCell";
 
 describe("PuzzleCell", () => {
-    describe("建構子和基本屬性", () => {
-        it("應該正確初始化提示格（非空格）", () => {
+    describe("Constructor and basic properties", () => {
+        it("should correctly initialize tip cells (non-empty)", () => {
             const cell = new PuzzleCell(5);
 
             expect(cell.value).toBe(5);
@@ -13,7 +13,7 @@ describe("PuzzleCell", () => {
             expect(cell.isEntered).toBe(false);
         });
 
-        it("應該正確初始化空格", () => {
+        it("should correctly initialize empty cells", () => {
             const cell = new PuzzleCell(0);
 
             expect(cell.value).toBe(0);
@@ -23,14 +23,14 @@ describe("PuzzleCell", () => {
             expect(cell.isEntered).toBe(false);
         });
 
-        it("空格初始化時不應該有候選數字", () => {
+        it("should not have notes when empty cell is initialized", () => {
             const cell = new PuzzleCell(0);
 
             expect(cell.hasNotes).toBe(false);
             expect(cell.notes).toEqual([]);
         });
 
-        it("提示格初始化時不應該有候選數字", () => {
+        it("should not have notes when tip cell is initialized", () => {
             const cell = new PuzzleCell(7);
 
             expect(cell.hasNotes).toBe(false);
@@ -38,14 +38,14 @@ describe("PuzzleCell", () => {
         });
     });
 
-    describe("數字輸入功能", () => {
+    describe("Number input functionality", () => {
         let emptyCell: PuzzleCell;
 
         beforeEach(() => {
             emptyCell = new PuzzleCell(0);
         });
 
-        it("應該允許在空格中輸入數字", () => {
+        it("should allow inputting numbers in empty cells", () => {
             emptyCell.input = 3;
 
             expect(emptyCell.input).toBe(3);
@@ -53,7 +53,7 @@ describe("PuzzleCell", () => {
             expect(emptyCell.isSlot).toBe(true);
         });
 
-        it("輸入數字後應該清除候選數字", () => {
+        it("should clear notes after inputting a number", () => {
             emptyCell.notes = 1;
             emptyCell.notes = 2;
             expect(emptyCell.hasNotes).toBe(true);
@@ -64,7 +64,7 @@ describe("PuzzleCell", () => {
             expect(emptyCell.notes).toEqual([]);
         });
 
-        it("應該允許清除已輸入的數字", () => {
+        it("should allow clearing inputted numbers", () => {
             emptyCell.input = 7;
             expect(emptyCell.isEntered).toBe(true);
 
@@ -74,7 +74,7 @@ describe("PuzzleCell", () => {
             expect(emptyCell.isEntered).toBe(false);
         });
 
-        it("不應該允許在提示格中輸入數字", () => {
+        it("should not allow inputting numbers in tip cells", () => {
             const tipCell = new PuzzleCell(4);
 
             tipCell.input = 9;
@@ -83,21 +83,21 @@ describe("PuzzleCell", () => {
         });
     });
 
-    describe("候選數字管理", () => {
+    describe("Notes management", () => {
         let emptyCell: PuzzleCell;
 
         beforeEach(() => {
             emptyCell = new PuzzleCell(0);
         });
 
-        it("應該允許新增候選數字", () => {
+        it("should allow adding candidate numbers", () => {
             emptyCell.notes = 3;
 
             expect(emptyCell.hasNotes).toBe(true);
             expect(emptyCell.notes).toContain(3);
         });
 
-        it("應該允許移除已存在的候選數字", () => {
+        it("should allow removing existing candidate numbers", () => {
             emptyCell.notes = 5;
             expect(emptyCell.notes).toContain(5);
 
@@ -106,7 +106,7 @@ describe("PuzzleCell", () => {
             expect(emptyCell.notes).not.toContain(5);
         });
 
-        it("不應該允許在提示格中設定候選數字", () => {
+        it("should not allow setting notes in tip cells", () => {
             const tipCell = new PuzzleCell(6);
 
             tipCell.notes = 2;
@@ -115,7 +115,7 @@ describe("PuzzleCell", () => {
             expect(tipCell.notes).toEqual([]);
         });
 
-        it("不應該允許在已輸入數字的格中設定候選數字", () => {
+        it("should not allow setting notes in cells with inputted numbers", () => {
             emptyCell.input = 8;
 
             emptyCell.notes = 3;
