@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isValidInRow, isValidInColumn } from "@/domain/SudokuBoard";
+import { isValidInRow, isValidInColumn, isValidInBox } from "@/domain/SudokuBoard";
 
 describe("SudokuBoard", () => {
     describe("isValidInRow", () => {
@@ -38,6 +38,14 @@ describe("SudokuBoard", () => {
             board[4][0] = 5;
 
             expect(isValidInColumn(board, 0, 5)).toBe(false);
+        });
+    });
+
+    describe("isValidInBox", () => {
+        it("should return true when placing a number in an empty box", () => {
+            const board = Array.from({ length: 9 }, () => Array.from({ length: 9 }, () => 0));
+
+            expect(isValidInBox(board, 0, 0, 5)).toBe(true);
         });
     });
 });
