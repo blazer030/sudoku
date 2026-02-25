@@ -36,16 +36,16 @@
 
 ### 1.6 Tailwind CSS 3 → 4 遷移
 
-- [ ] 安裝 `tailwindcss@^4`、`@tailwindcss/postcss`，移除 `autoprefixer`
-- [ ] 更新 `postcss.config.js`：替換為 `@tailwindcss/postcss`
-- [ ] 將 `src/style/index.scss` → `src/style/index.css`：`@tailwind` 改為 `@import "tailwindcss"`
-- [ ] 刪除 `tailwind.config.js`，遷移設定至 CSS `@theme` 區塊
-- [ ] 更新 `main.tsx` import 路徑（`.scss` → `.css`）
-- [ ] 移除 `tailwindcss-animate`，手動定義需要的動畫或安裝 `tw-animate-css`
-- [ ] 升級 `tailwind-merge` 2 → 3
-- [ ] 審查並修正所有 Tailwind class 相容性問題
-- [ ] 移除 `sass` devDependency
-- [ ] 確認測試通過，手動驗證 UI 樣式正確
+- [x] 安裝 `tailwindcss@^4`、`@tailwindcss/postcss`，移除 `autoprefixer`
+- [x] 更新 `postcss.config.js`：替換為 `@tailwindcss/postcss`
+- [x] 將 `src/style/index.scss` → `src/style/index.css`：`@tailwind` 改為 `@import "tailwindcss"`
+- [x] 刪除 `tailwind.config.js`，遷移設定至 CSS `@theme` 區塊
+- [x] 更新 `main.tsx` import 路徑（`.scss` → `.css`）
+- [x] 移除 `tailwindcss-animate`，手動定義需要的動畫或安裝 `tw-animate-css`
+- [x] 升級 `tailwind-merge` 2 → 3
+- [x] 審查並修正所有 Tailwind class 相容性問題
+- [x] 移除 `sass` devDependency
+- [x] 確認測試通過，手動驗證 UI 樣式正確
 
 ### 1.7 其餘套件升級
 
