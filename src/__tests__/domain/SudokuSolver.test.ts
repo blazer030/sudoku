@@ -1,6 +1,30 @@
 import { describe, expect, it } from "vitest";
 import { solve } from "@/domain/SudokuSolver";
 
+function hasAllDigits(numbers: number[]): boolean {
+    return new Set(numbers).size === 9
+        && numbers.every(number => number >= 1 && number <= 9);
+}
+
+function isValidSolution(board: number[][]): boolean {
+    for (let index = 0; index < 9; index++) {
+        const row = board[index];
+        const column = board.map(row => row[index]);
+        const boxRowStart = Math.floor(index / 3) * 3;
+        const boxColStart = (index % 3) * 3;
+        const box = [];
+        for (let row = boxRowStart; row < boxRowStart + 3; row++) {
+            for (let col = boxColStart; col < boxColStart + 3; col++) {
+                box.push(board[row][col]);
+            }
+        }
+        if (!hasAllDigits(row) || !hasAllDigits(column) || !hasAllDigits(box)) {
+            return false;
+        }
+    }
+    return true;
+}
+
 describe("SudokuSolver", () => {
     it("should correctly fill in a board missing only one cell", () => {
         const board = [
@@ -42,5 +66,24 @@ describe("SudokuSolver", () => {
         expect(result![8][6]).toBe(6);
         expect(result![8][7]).toBe(3);
         expect(result![8][8]).toBe(1);
+    });
+
+    it("should solve a standard difficulty puzzle", () => {
+        const board = [
+            [4, 9, 0, 0, 0, 0, 8, 0, 0],
+            [2, 0, 0, 0, 9, 0, 0, 0, 4],
+            [0, 0, 3, 0, 0, 2, 0, 6, 0],
+            [0, 0, 5, 3, 0, 0, 0, 0, 2],
+            [0, 0, 0, 5, 0, 4, 0, 0, 0],
+            [3, 0, 4, 0, 0, 9, 5, 0, 0],
+            [5, 0, 0, 0, 7, 0, 9, 0, 8],
+            [0, 0, 9, 0, 0, 8, 0, 0, 5],
+            [8, 0, 0, 0, 0, 0, 0, 3, 1],
+        ];
+
+        const result = solve(board);
+
+        expect(result).not.toBeNull();
+        expect(isValidSolution(result!)).toBe(true);
     });
 });
