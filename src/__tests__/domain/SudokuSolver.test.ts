@@ -68,6 +68,24 @@ describe("SudokuSolver", () => {
         expect(result![8][8]).toBe(1);
     });
 
+    it("should return null for an unsolvable board", () => {
+        const board = [
+            [1, 2, 3, 4, 5, 6, 7, 8, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 9],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 9],
+        ];
+
+        const result = solve(board);
+
+        expect(result).toBeNull();
+    });
+
     it("should solve a standard difficulty puzzle", () => {
         const board = [
             [4, 9, 0, 0, 0, 0, 8, 0, 0],
