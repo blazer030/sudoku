@@ -78,7 +78,7 @@
 
 - [x] **測試**：`isValidInBox` — 空白宮中放置數字應返回 true
 - [x] **測試**：`isValidInBox` — 宮中已有相同數字應返回 false
-- [ ] **測試**：`isValidInBox` — 正確計算不同位置所屬的宮
+- [x] **測試**：`isValidInBox` — 正確計算不同位置所屬的宮
 
 ### 2.4 Board 驗證 — 整合函數
 

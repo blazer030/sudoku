@@ -54,5 +54,14 @@ describe("SudokuBoard", () => {
 
             expect(isValidInBox(board, 0, 0, 5)).toBe(false);
         });
+
+        it("should correctly identify the box for different positions", () => {
+            const board = Array.from({ length: 9 }, () => Array.from({ length: 9 }, () => 0));
+            board[5][8] = 7;
+
+            expect(isValidInBox(board, 4, 7, 7)).toBe(false);
+            expect(isValidInBox(board, 3, 6, 7)).toBe(false);
+            expect(isValidInBox(board, 0, 7, 7)).toBe(true);
+        });
     });
 });
