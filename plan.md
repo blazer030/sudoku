@@ -90,7 +90,7 @@
 > `src/__tests__/domain/SudokuSolver.test.ts` + `src/domain/SudokuSolver.ts`
 
 - [x] **測試**：`solve` — 解一個只差一格的 board 應正確填入
-- [ ] **測試**：`solve` — 解一個差少量格子的 board 應回傳完整解
+- [x] **測試**：`solve` — 解一個差少量格子的 board 應回傳完整解
 - [ ] **測試**：`solve` — 解一個標準難度的 puzzle 應回傳完整合法 board
 - [ ] **測試**：`solve` — 無解的 board 應回傳 null
 - [ ] **測試**：`solve` — 解出的 board 每行每列每宮都包含 1-9
