@@ -49,10 +49,10 @@
 
 ### 1.7 其餘套件升級
 
-- [ ] 升級 `@radix-ui/react-slot`、`@testing-library/*` 到最新
-- [ ] 升級或移除 `lucide-react`（檢查是否使用中）
-- [ ] 移除未使用的依賴（`match-sorter`、`localforage` 暫時保留）
-- [ ] 確認測試通過
+- [x] 升級 `@radix-ui/react-slot`、`@testing-library/*` 到最新
+- [x] 升級或移除 `lucide-react`（已在 1.3 移除）
+- [x] 移除未使用的依賴（`match-sorter` 移除、`localforage` 保留）
+- [x] 確認測試通過
 
 ---
 

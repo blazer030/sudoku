@@ -4,7 +4,7 @@
 
 | 階段 | 說明 | 狀態 |
 |------|------|------|
-| Phase 1 | 套件全面升級 | 🔲 未開始 |
+| Phase 1 | 套件全面升級 | ✅ 完成 |
 | Phase 2 | 核心 Domain 邏輯 | 🔲 未開始 |
 | Phase 3 | 遊戲互動 | 🔲 未開始 |
 | Phase 4 | 上架品質 | 🔲 未開始 |
@@ -19,13 +19,13 @@
 
 ## Phase 1: 套件升級
 
-- [ ] 1.1 TypeScript 5.2 → 5.9
-- [ ] 1.2 ESLint 8 → 9（flat config 遷移）
-- [ ] 1.3 React 18 → 19
-- [ ] 1.4 React Router 6 → 7
-- [ ] 1.5 Vite plugin 升級
-- [ ] 1.6 Tailwind CSS 3 → 4
-- [ ] 1.7 其餘套件清理
+- [x] 1.1 TypeScript 5.2 → 5.9
+- [x] 1.2 ESLint 8 → 9（flat config 遷移）
+- [x] 1.3 React 18 → 19
+- [x] 1.4 React Router 6 → 7
+- [x] 1.5 Vite plugin 升級
+- [x] 1.6 Tailwind CSS 3 → 4
+- [x] 1.7 其餘套件清理
 
 ## Phase 2: 核心 Domain
 
