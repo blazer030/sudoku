@@ -24,9 +24,9 @@
 
 ### 1.4 React Router 6 → 7 升級
 
-- [ ] 升級 `react-router-dom` → `react-router@^7`，更新所有 import 路徑
-- [ ] 調整 `routerConfig.tsx` 和所有使用 router hooks 的檔案
-- [ ] 確認測試通過，確認路由正常運作
+- [x] 升級 `react-router-dom` → `react-router@^7`，更新所有 import 路徑
+- [x] 調整 `routerConfig.tsx` 和所有使用 router hooks 的檔案
+- [x] 確認測試通過，確認路由正常運作
 
 ### 1.5 Vite 與 Plugin 升級
 

@@ -1,5 +1,5 @@
 import Button from "@/presentation/components/ui/button/button";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import Icon from "@/presentation/components/icon/Icon"
 import { ROUTER_PATH } from "@/routerConfig";
 
@@ -15,7 +15,7 @@ const Home = () => {
             variant="outline"
             className="rounded-full w-full text-gray-500"
             onClick={() => {
-                navigate(ROUTER_PATH.game);
+                void navigate(ROUTER_PATH.game);
             }}
         >
             New Game
