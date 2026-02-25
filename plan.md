@@ -66,7 +66,7 @@
 > `src/__tests__/domain/SudokuBoard.test.ts` + `src/domain/SudokuBoard.ts`
 
 - [x] **測試**：`isValidInRow` — 空白行中放置數字應返回 true
-- [ ] **測試**：`isValidInRow` — 行中已有相同數字應返回 false
+- [x] **測試**：`isValidInRow` — 行中已有相同數字應返回 false
 - [ ] **測試**：`isValidInRow` — 行中有不同數字應返回 true
 
 ### 2.2 Board 驗證 — 列規則
