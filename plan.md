@@ -72,7 +72,7 @@
 ### 2.2 Board 驗證 — 列規則
 
 - [x] **測試**：`isValidInColumn` — 空白列中放置數字應返回 true
-- [ ] **測試**：`isValidInColumn` — 列中已有相同數字應返回 false
+- [x] **測試**：`isValidInColumn` — 列中已有相同數字應返回 false
 
 ### 2.3 Board 驗證 — 3x3 宮規則
 

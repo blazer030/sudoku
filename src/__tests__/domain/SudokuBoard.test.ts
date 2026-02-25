@@ -32,5 +32,12 @@ describe("SudokuBoard", () => {
 
             expect(isValidInColumn(board, 0, 5)).toBe(true);
         });
+
+        it("should return false when the column already contains the same number", () => {
+            const board = Array.from({ length: 9 }, () => Array.from({ length: 9 }, () => 0));
+            board[4][0] = 5;
+
+            expect(isValidInColumn(board, 0, 5)).toBe(false);
+        });
     });
 });
