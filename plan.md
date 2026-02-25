@@ -18,9 +18,9 @@
 
 ### 1.3 React 18 → 19 升級
 
-- [ ] 升級 `react`、`react-dom`、`@types/react`、`@types/react-dom` 至 v19
-- [ ] 重構 Button 元件：`React.forwardRef` → ref as prop（React 19 風格）
-- [ ] 確認測試通過，手動驗證 UI 正常
+- [x] 升級 `react`、`react-dom`、`@types/react`、`@types/react-dom` 至 v19
+- [x] 重構 Button 元件：`React.forwardRef` → ref as prop（React 19 風格）
+- [x] 確認測試通過，手動驗證 UI 正常
 
 ### 1.4 React Router 6 → 7 升級
 
