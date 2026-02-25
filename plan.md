@@ -10,11 +10,11 @@
 
 ### 1.2 ESLint 8 → 9 遷移
 
-- [ ] 移除 `vite-plugin-eslint`，從 `vite.config.ts` 移除相關設定
-- [ ] 升級 ESLint 8 → 9，安裝 `@eslint/js`、`typescript-eslint` v8、`eslint-plugin-react-hooks@7`、`eslint-plugin-react-refresh@0.5`
-- [ ] 將 `.eslintrc.cjs` 轉換為 `eslint.config.js`（flat config 格式）
-- [ ] 移除舊的 `eslint-plugin-react`，更新 lint script 移除 `--ext` flag
-- [ ] 確認 `npm run lint` 和 `npm test` 皆通過
+- [x] 移除 `vite-plugin-eslint`，從 `vite.config.ts` 移除相關設定
+- [x] 升級 ESLint 8 → 9，安裝 `@eslint/js`、`typescript-eslint` v8、`eslint-plugin-react-hooks@7`、`eslint-plugin-react-refresh@0.5`
+- [x] 將 `.eslintrc.cjs` 轉換為 `eslint.config.js`（flat config 格式）
+- [x] 移除舊的 `eslint-plugin-react`，更新 lint script 移除 `--ext` flag
+- [x] 確認 `npm run lint` 和 `npm test` 皆通過
 
 ### 1.3 React 18 → 19 升級
 

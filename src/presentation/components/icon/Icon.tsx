@@ -20,7 +20,7 @@ const withProps = <T extends object>(iconProps: IconProps) => {
         const EnhancedComponent = (props: T) => {
             return <Component {...iconProps} {...props} />
         };
-        EnhancedComponent.displayName = `withProps(${Component.displayName})`;
+        EnhancedComponent.displayName = `withProps(${Component.displayName ?? "Component"})`;
 
         return EnhancedComponent;
     }
