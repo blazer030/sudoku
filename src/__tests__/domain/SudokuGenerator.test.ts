@@ -3,6 +3,14 @@ import { generateFullBoard } from "@/domain/SudokuGenerator";
 import { isValidSolution } from "./helpers";
 
 describe("SudokuGenerator", () => {
+    it("should generate different boards on multiple calls", () => {
+        const boards = Array.from({ length: 5 }, () => generateFullBoard());
+        const serialized = boards.map(board => JSON.stringify(board));
+        const unique = new Set(serialized);
+
+        expect(unique.size).toBeGreaterThan(1);
+    });
+
     it("should generate a valid 9x9 board that satisfies all sudoku rules", () => {
         const board = generateFullBoard();
 
