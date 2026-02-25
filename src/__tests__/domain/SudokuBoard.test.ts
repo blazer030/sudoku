@@ -47,5 +47,12 @@ describe("SudokuBoard", () => {
 
             expect(isValidInBox(board, 0, 0, 5)).toBe(true);
         });
+
+        it("should return false when the box already contains the same number", () => {
+            const board = Array.from({ length: 9 }, () => Array.from({ length: 9 }, () => 0));
+            board[1][2] = 5;
+
+            expect(isValidInBox(board, 0, 0, 5)).toBe(false);
+        });
     });
 });
