@@ -30,9 +30,9 @@
 
 ### 1.5 Vite 與 Plugin 升級
 
-- [ ] 升級 `@vitejs/plugin-react` 4 → 5、`jsdom` 26 → 27
-- [ ] 清理 `vite.config.ts`
-- [ ] 確認測試通過
+- [x] 升級 `@vitejs/plugin-react` 4 → 5、`jsdom` 26 → 27
+- [x] 清理 `vite.config.ts`
+- [x] 確認測試通過
 
 ### 1.6 Tailwind CSS 3 → 4 遷移
 
