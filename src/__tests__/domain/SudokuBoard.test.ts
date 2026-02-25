@@ -15,5 +15,14 @@ describe("SudokuBoard", () => {
 
             expect(isValidInRow(board, 0, 5)).toBe(false);
         });
+
+        it("should return true when the row contains different numbers", () => {
+            const board = Array.from({ length: 9 }, () => Array.from({ length: 9 }, () => 0));
+            board[0][0] = 1;
+            board[0][1] = 2;
+            board[0][2] = 3;
+
+            expect(isValidInRow(board, 0, 5)).toBe(true);
+        });
     });
 });
