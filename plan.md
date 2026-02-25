@@ -82,8 +82,8 @@
 
 ### 2.4 Board 驗證 — 整合函數
 
-- [ ] **測試**：`isValidPlacement(board, row, col, num)` — 行列宮皆合法時返回 true
-- [ ] **測試**：`isValidPlacement` — 任一規則違反時返回 false
+- [x] **測試**：`isValidPlacement(board, row, col, num)` — 行列宮皆合法時返回 true
+- [x] **測試**：`isValidPlacement` — 任一規則違反時返回 false
 
 ### 2.5 Solver — Backtracking 解法
 

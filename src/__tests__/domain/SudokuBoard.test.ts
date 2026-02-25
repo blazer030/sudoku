@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isValidInRow, isValidInColumn, isValidInBox } from "@/domain/SudokuBoard";
+import { isValidInRow, isValidInColumn, isValidInBox, isValidPlacement } from "@/domain/SudokuBoard";
 
 describe("SudokuBoard", () => {
     describe("isValidInRow", () => {
@@ -62,6 +62,25 @@ describe("SudokuBoard", () => {
             expect(isValidInBox(board, 4, 7, 7)).toBe(false);
             expect(isValidInBox(board, 3, 6, 7)).toBe(false);
             expect(isValidInBox(board, 0, 7, 7)).toBe(true);
+        });
+    });
+
+    describe("isValidPlacement", () => {
+        it("should return true when row, column, and box are all valid", () => {
+            const board = Array.from({ length: 9 }, () => Array.from({ length: 9 }, () => 0));
+            board[0][0] = 1;
+            board[1][3] = 2;
+
+            expect(isValidPlacement(board, 4, 4, 5)).toBe(true);
+        });
+
+        it("should return false when any rule is violated", () => {
+            const board = Array.from({ length: 9 }, () => Array.from({ length: 9 }, () => 0));
+            board[0][4] = 5;
+
+            expect(isValidPlacement(board, 0, 1, 5)).toBe(false);
+            expect(isValidPlacement(board, 3, 4, 5)).toBe(false);
+            expect(isValidPlacement(board, 1, 3, 5)).toBe(false);
         });
     });
 });

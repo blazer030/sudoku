@@ -6,6 +6,12 @@ export function isValidInColumn(board: number[][], col: number, num: number): bo
     return !board.some(row => row[col] === num);
 }
 
+export function isValidPlacement(board: number[][], row: number, col: number, num: number): boolean {
+    return isValidInRow(board, row, num)
+        && isValidInColumn(board, col, num)
+        && isValidInBox(board, row, col, num);
+}
+
 export function isValidInBox(board: number[][], row: number, col: number, num: number): boolean {
     const boxRowStart = Math.floor(row / 3) * 3;
     const boxColStart = Math.floor(col / 3) * 3;
