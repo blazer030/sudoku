@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { solve } from "@/domain/SudokuSolver";
+import { SudokuSolver } from "@/domain/SudokuSolver";
 import { isValidSolution } from "./helpers";
+
+const solver = new SudokuSolver();
 
 describe("SudokuSolver", () => {
     it("should correctly fill in a board missing only one cell", () => {
@@ -16,7 +18,7 @@ describe("SudokuSolver", () => {
             [8, 2, 7, 9, 4, 5, 6, 3, 0],
         ];
 
-        const result = solve(board);
+        const result = solver.solve(board);
 
         expect(result).not.toBeNull();
         expect(result![8][8]).toBe(1);
@@ -35,7 +37,7 @@ describe("SudokuSolver", () => {
             [8, 2, 7, 9, 4, 5, 0, 0, 0],
         ];
 
-        const result = solve(board);
+        const result = solver.solve(board);
 
         expect(result).not.toBeNull();
         expect(result![7][7]).toBe(7);
@@ -58,7 +60,7 @@ describe("SudokuSolver", () => {
             [0, 0, 0, 0, 0, 0, 0, 0, 9],
         ];
 
-        const result = solve(board);
+        const result = solver.solve(board);
 
         expect(result).toBeNull();
     });
@@ -76,7 +78,7 @@ describe("SudokuSolver", () => {
             [8, 0, 0, 0, 0, 0, 0, 3, 1],
         ];
 
-        const result = solve(board);
+        const result = solver.solve(board);
 
         expect(result).not.toBeNull();
         expect(isValidSolution(result!)).toBe(true);

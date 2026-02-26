@@ -1,30 +1,34 @@
-import { isValidPlacement } from "@/domain/SudokuBoard";
+import { SudokuBoard } from "@/domain/SudokuBoard";
 
-export function solve(board: number[][]): number[][] | null {
-    const puzzle = board.map(row => [...row]);
+export class SudokuSolver {
+    private board = new SudokuBoard();
 
-    if (fillBoard(puzzle)) {
-        return puzzle;
+    solve(board: number[][]): number[][] | null {
+        const puzzle = board.map(row => [...row]);
+
+        if (this.fillBoard(puzzle)) {
+            return puzzle;
+        }
+        return null;
     }
-    return null;
-}
 
-function fillBoard(board: number[][]): boolean {
-    for (let row = 0; row < 9; row++) {
-        for (let col = 0; col < 9; col++) {
-            if (board[row][col] === 0) {
-                for (let num = 1; num <= 9; num++) {
-                    if (isValidPlacement(board, row, col, num)) {
-                        board[row][col] = num;
-                        if (fillBoard(board)) {
-                            return true;
+    private fillBoard(board: number[][]): boolean {
+        for (let row = 0; row < 9; row++) {
+            for (let col = 0; col < 9; col++) {
+                if (board[row][col] === 0) {
+                    for (let num = 1; num <= 9; num++) {
+                        if (this.board.isValidPlacement(board, row, col, num)) {
+                            board[row][col] = num;
+                            if (this.fillBoard(board)) {
+                                return true;
+                            }
+                            board[row][col] = 0;
                         }
-                        board[row][col] = 0;
                     }
+                    return false;
                 }
-                return false;
             }
         }
+        return true;
     }
-    return true;
 }
