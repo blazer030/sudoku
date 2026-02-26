@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
+import { SudokuBoard } from "@/domain/SudokuBoard";
 import { SudokuGenerator } from "@/domain/SudokuGenerator";
-import { isValidSolution } from "./helpers";
 
+const sudokuBoard = new SudokuBoard();
 const generator = new SudokuGenerator();
 
 describe("SudokuGenerator", () => {
@@ -20,6 +21,6 @@ describe("SudokuGenerator", () => {
         board.forEach(row => {
             expect(row).toHaveLength(9);
         });
-        expect(isValidSolution(board)).toBe(true);
+        expect(sudokuBoard.isValidSolution(board)).toBe(true);
     });
 });

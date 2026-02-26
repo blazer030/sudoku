@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
+import { SudokuBoard } from "@/domain/SudokuBoard";
 import { SudokuSolver } from "@/domain/SudokuSolver";
-import { isValidSolution } from "./helpers";
 
+const sudokuBoard = new SudokuBoard();
 const solver = new SudokuSolver();
 
 describe("SudokuSolver", () => {
@@ -81,6 +82,6 @@ describe("SudokuSolver", () => {
         const result = solver.solve(board);
 
         expect(result).not.toBeNull();
-        expect(isValidSolution(result!)).toBe(true);
+        expect(sudokuBoard.isValidSolution(result!)).toBe(true);
     });
 });
