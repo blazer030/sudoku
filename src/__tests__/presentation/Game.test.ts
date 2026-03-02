@@ -287,6 +287,31 @@ describe("Game", () => {
         expect(cell.text()).toContain("4");
     });
 
+    it("should auto-remove peer notes when inputting a number", async () => {
+        spyGeneratePuzzle();
+        const wrapper = mount(Game);
+
+        // 先填入 auto-notes
+        const autoNotesButton = wrapper.find("[data-testid='auto-notes-button']");
+        await autoNotesButton.trigger("click");
+
+        // (0, 5) 和 (0, 6) 同行，候選包含 4
+        const cell05 = wrapper.find("[data-testid='cell-0-5']");
+        const cell06 = wrapper.find("[data-testid='cell-0-6']");
+        expect(cell05.text()).toContain("4");
+        expect(cell06.text()).toContain("4");
+
+        // 填入 4 到 (0, 2)
+        const cell02 = wrapper.find("[data-testid='cell-0-2']");
+        await cell02.trigger("click");
+        const numberButton4 = wrapper.find("[data-testid='number-4']");
+        await numberButton4.trigger("click");
+
+        // 同行 peer 的 note 4 應被自動移除
+        expect(cell05.text()).not.toContain("4");
+        expect(cell06.text()).not.toContain("4");
+    });
+
     it("should show cursor-pointer on slot cells", () => {
         spyGeneratePuzzle();
         const wrapper = mount(Game);
