@@ -39,6 +39,16 @@ afterEach(() => {
 });
 
 describe("Game", () => {
+    it("should highlight the selected cell when clicked", async () => {
+        spyGeneratePuzzle();
+        const wrapper = mount(Game);
+
+        const cell = wrapper.find("[data-testid='cell-0-0']");
+        await cell.trigger("click");
+
+        expect(cell.classes()).toContain("selected");
+    });
+
     it("should render slot cells as empty", () => {
         spyGeneratePuzzle();
         const wrapper = mount(Game);

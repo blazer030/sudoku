@@ -24,8 +24,10 @@
             columnIndex === 8 ? 'border-r-2' : '',
             columnIndex === 0 ? 'border-l-4' : '',
             columnIndex % 3 === 2 ? 'border-r-4' : '',
+            isSelected(rowIndex, columnIndex) ? 'selected' : '',
           ]"
             class="flex justify-center items-center flex-1 aspect-square border-sky-200"
+            @click="selectCell(rowIndex, columnIndex)"
         >
           <div
               v-if="puzzleCell.isTip"
@@ -83,9 +85,20 @@
 </template>
 
 <script lang="ts" setup>
+import { ref } from "vue";
 import Sudoku from "@/domain/Sudoku";
 import Button from "@/presentation/components/ui/button/Button.vue";
 
 const sudoku = new Sudoku();
 const puzzle = sudoku.generate();
+
+const selectedCell = ref<{ row: number; column: number } | null>(null);
+
+function selectCell(row: number, column: number) {
+    selectedCell.value = { row, column };
+}
+
+function isSelected(row: number, column: number) {
+    return selectedCell.value?.row === row && selectedCell.value?.column === column;
+}
 </script>
