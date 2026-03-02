@@ -8,7 +8,7 @@ class PuzzleCell {
     }
 
     set input(value: number) {
-        if (this.isTip) return;
+        if (this.isClue) return;
         
         this._input = value;
         if (value > 0) {
@@ -16,7 +16,7 @@ class PuzzleCell {
         }
     }
 
-    get isTip(): boolean {
+    get isClue(): boolean {
         return this._value > 0;
     }
 
@@ -37,7 +37,7 @@ class PuzzleCell {
     }
 
     toggleNote(value: number): void {
-        if (this.isTip || this.isEntered) return;
+        if (this.isClue || this.isEntered) return;
 
         if (this._notes.includes(value)) {
             this._notes = this._notes.filter((note) => note !== value);

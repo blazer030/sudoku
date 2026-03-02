@@ -24,7 +24,7 @@ class Sudoku {
     public isCompleted(): boolean {
         return this._puzzle.every((puzzleRow, rowIndex) =>
             puzzleRow.every((cell, columnIndex) => {
-                const value = cell.isTip ? cell.value : cell.input;
+                const value = cell.isClue ? cell.value : cell.input;
                 return value === this._answer[rowIndex][columnIndex];
             })
         );
@@ -40,7 +40,7 @@ class Sudoku {
 
     public findConflicts(row: number, column: number, value: number): Conflict[] {
         const board = this._puzzle.map(puzzleRow =>
-            puzzleRow.map(cell => cell.isTip ? cell.value : cell.input)
+            puzzleRow.map(cell => cell.isClue ? cell.value : cell.input)
         );
         return this.conflictDetector.findConflicts(board, row, column, value);
     }

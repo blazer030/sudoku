@@ -50,11 +50,11 @@ describe("Game", () => {
         expect(cell.classes()).toContain("selected");
     });
 
-    it("should not select a tip cell", async () => {
+    it("should not select a clue cell", async () => {
         spyGeneratePuzzle();
         const wrapper = mount(Game);
 
-        // (0, 0) 是 tip 格子（值為 5）
+        // (0, 0) 是 clue 格子（值為 5）
         const cell = wrapper.find("[data-testid='cell-0-0']");
         await cell.trigger("click");
 
@@ -99,19 +99,19 @@ describe("Game", () => {
         expect(cell.text()).toBe("");
     });
 
-    it("should ignore number button when tip cell is selected", async () => {
+    it("should ignore number button when clue cell is selected", async () => {
         spyGeneratePuzzle();
         const wrapper = mount(Game);
 
-        // 選取 (0, 0) tip 格子（值為 5），按數字 4
-        const tipCell = wrapper.find("[data-testid='cell-0-0']");
-        await tipCell.trigger("click");
+        // 選取 (0, 0) clue 格子（值為 5），按數字 4
+        const clueCell = wrapper.find("[data-testid='cell-0-0']");
+        await clueCell.trigger("click");
 
         const numberButton = wrapper.find("[data-testid='number-4']");
         await numberButton.trigger("click");
 
-        // tip 格子仍顯示原始值
-        expect(tipCell.text()).toBe("5");
+        // clue 格子仍顯示原始值
+        expect(clueCell.text()).toBe("5");
     });
 
     it("should select number button when clicked without cell selected", async () => {
@@ -139,7 +139,7 @@ describe("Game", () => {
         expect(cell.text()).toBe("4");
     });
 
-    it("should fill multiple slot cells consecutively in number-first mode", async () => {
+    it("should fill mulcluele slot cells consecutively in number-first mode", async () => {
         spyGeneratePuzzle();
         const wrapper = mount(Game);
 
@@ -157,19 +157,19 @@ describe("Game", () => {
         expect(cell2.text()).toBe("1");
     });
 
-    it("should not fill tip cell in number-first mode", async () => {
+    it("should not fill clue cell in number-first mode", async () => {
         spyGeneratePuzzle();
         const wrapper = mount(Game);
 
-        // 選數字 4，點 tip 格子 (0, 0)
+        // 選數字 4，點 clue 格子 (0, 0)
         const numberButton = wrapper.find("[data-testid='number-4']");
         await numberButton.trigger("click");
 
-        const tipCell = wrapper.find("[data-testid='cell-0-0']");
-        await tipCell.trigger("click");
+        const clueCell = wrapper.find("[data-testid='cell-0-0']");
+        await clueCell.trigger("click");
 
-        // tip 格子仍顯示原始值 5
-        expect(tipCell.text()).toBe("5");
+        // clue 格子仍顯示原始值 5
+        expect(clueCell.text()).toBe("5");
     });
 
     it("should deselect number when clicking the same number button again", async () => {
@@ -213,13 +213,13 @@ describe("Game", () => {
         expect(slotCell.classes()).toContain("cursor-pointer");
     });
 
-    it("should not show cursor-pointer on tip cells", () => {
+    it("should not show cursor-pointer on clue cells", () => {
         spyGeneratePuzzle();
         const wrapper = mount(Game);
 
-        // (0, 0) 是 tip 格子
-        const tipCell = wrapper.find("[data-testid='cell-0-0']");
-        expect(tipCell.classes()).not.toContain("cursor-pointer");
+        // (0, 0) 是 clue 格子
+        const clueCell = wrapper.find("[data-testid='cell-0-0']");
+        expect(clueCell.classes()).not.toContain("cursor-pointer");
     });
 
     it("should render slot cells as empty", () => {
@@ -236,7 +236,7 @@ describe("Game", () => {
         }
     });
 
-    it("should render 9x9 grid with tip cells showing their numbers", () => {
+    it("should render 9x9 grid with clue cells showing their numbers", () => {
         spyGeneratePuzzle();
         const wrapper = mount(Game);
 

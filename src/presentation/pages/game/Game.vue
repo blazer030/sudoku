@@ -84,7 +84,7 @@ function clickCell(row: number, column: number) {
 }
 
 function inputToCell(row: number, column: number, value: number) {
-    if (puzzle[row][column].isTip) return;
+    if (puzzle[row][column].isClue) return;
     if (puzzle[row][column].input === value) {
         sudoku.input(row, column, 0);
         return;
@@ -93,7 +93,7 @@ function inputToCell(row: number, column: number, value: number) {
 }
 
 function toggleSelectCell(row: number, column: number) {
-    if (puzzle[row][column].isTip) return;
+    if (puzzle[row][column].isClue) return;
     if (isSelected(row, column)) {
         selectedCell.value = null;
         return;

@@ -3,12 +3,12 @@ import PuzzleCell from "@/domain/PuzzleCell";
 
 describe("PuzzleCell", () => {
     describe("Constructor and basic properties", () => {
-        it("should correctly initialize tip cells (non-empty)", () => {
+        it("should correctly initialize clue cells (non-empty)", () => {
             const cell = new PuzzleCell(5);
 
             expect(cell.value).toBe(5);
             expect(cell.input).toBe(0);
-            expect(cell.isTip).toBe(true);
+            expect(cell.isClue).toBe(true);
             expect(cell.isSlot).toBe(false);
             expect(cell.isEntered).toBe(false);
         });
@@ -18,7 +18,7 @@ describe("PuzzleCell", () => {
 
             expect(cell.value).toBe(0);
             expect(cell.input).toBe(0);
-            expect(cell.isTip).toBe(false);
+            expect(cell.isClue).toBe(false);
             expect(cell.isSlot).toBe(true);
             expect(cell.isEntered).toBe(false);
         });
@@ -61,12 +61,12 @@ describe("PuzzleCell", () => {
             expect(emptyCell.isEntered).toBe(false);
         });
 
-        it("should not allow inputting numbers in tip cells", () => {
-            const tipCell = new PuzzleCell(4);
+        it("should not allow inputting numbers in clue cells", () => {
+            const clueCell = new PuzzleCell(4);
 
-            tipCell.input = 9;
+            clueCell.input = 9;
 
-            expect(tipCell.input).toBe(0);
+            expect(clueCell.input).toBe(0);
         });
     });
 
@@ -93,13 +93,13 @@ describe("PuzzleCell", () => {
             expect(emptyCell.notes).not.toContain(5);
         });
 
-        it("should not allow setting notes in tip cells", () => {
-            const tipCell = new PuzzleCell(6);
+        it("should not allow setting notes in clue cells", () => {
+            const clueCell = new PuzzleCell(6);
 
-            tipCell.toggleNote(2);
+            clueCell.toggleNote(2);
 
-            expect(tipCell.hasNotes).toBe(false);
-            expect(tipCell.notes).toEqual([]);
+            expect(clueCell.hasNotes).toBe(false);
+            expect(clueCell.notes).toEqual([]);
         });
 
         it("should not allow setting notes in cells with inputted numbers", () => {

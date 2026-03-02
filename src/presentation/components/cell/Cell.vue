@@ -1,10 +1,10 @@
 <template>
   <div
-    :class="[selected ? 'selected bg-sky-100' : '', !puzzleCell.isTip ? 'cursor-pointer' : '']"
+    :class="[selected ? 'selected bg-sky-100' : '', !puzzleCell.isClue ? 'cursor-pointer' : '']"
     class="flex justify-center items-center flex-1 aspect-square"
   >
     <div
-      v-if="puzzleCell.isTip"
+      v-if="puzzleCell.isClue"
       class="text-black text-2xl"
     >
       {{ puzzleCell.value }}

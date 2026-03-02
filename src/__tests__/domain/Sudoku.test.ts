@@ -63,7 +63,7 @@ describe("Sudoku", () => {
         const sudoku = new Sudoku();
         sudoku.generate("easy");
 
-        // (0, 2) 是空格，填入 5 → 與 (0, 0) 的 tip=5 衝突
+        // (0, 2) 是空格，填入 5 → 與 (0, 0) 的 clue=5 衝突
         const conflicts = sudoku.findConflicts(0, 2, 5);
 
         expect(conflicts).toContainEqual({ row: 0, column: 0 });
@@ -74,7 +74,7 @@ describe("Sudoku", () => {
         const sudoku = new Sudoku();
         sudoku.generate("easy");
 
-        // (1, 1) 是空格，填入 9 → 與 (2, 1) 的 tip=9 衝突
+        // (1, 1) 是空格，填入 9 → 與 (2, 1) 的 clue=9 衝突
         const conflicts = sudoku.findConflicts(1, 1, 9);
 
         expect(conflicts).toContainEqual({ row: 2, column: 1 });
@@ -85,7 +85,7 @@ describe("Sudoku", () => {
         const sudoku = new Sudoku();
         sudoku.generate("easy");
 
-        // (0, 2) 是空格，填入 6 → 與同宮 (1, 0) 的 tip=6 衝突
+        // (0, 2) 是空格，填入 6 → 與同宮 (1, 0) 的 clue=6 衝突
         const conflicts = sudoku.findConflicts(0, 2, 6);
 
         expect(conflicts).toContainEqual({ row: 1, column: 0 });
@@ -97,8 +97,8 @@ describe("Sudoku", () => {
         sudoku.generate("easy");
 
         // (1, 1) 是空格，填入 9
-        // 行衝突：(1, 4) tip=9
-        // 列衝突：(2, 1) tip=9
+        // 行衝突：(1, 4) clue=9
+        // 列衝突：(2, 1) clue=9
         const conflicts = sudoku.findConflicts(1, 1, 9);
 
         expect(conflicts).toContainEqual({ row: 1, column: 4 });
