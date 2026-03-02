@@ -17,14 +17,14 @@
     </div>
     <div
       v-else-if="puzzleCell.hasNotes"
-      class="flex flex-wrap p-1"
+      class="grid grid-cols-3 grid-rows-3 w-full h-full p-1"
     >
       <div
-        v-for="(note, noteIndex) in puzzleCell.notes"
-        :key="`note-${noteIndex}`"
-        class="w-1/3 flex justify-center items-center text-xs text-gray-400 aspect-square"
+        v-for="n in 9"
+        :key="`note-${n}`"
+        class="flex justify-center items-center text-xs text-gray-400"
       >
-        {{ note }}
+        {{ puzzleCell.notes.includes(n) ? n : '' }}
       </div>
     </div>
   </div>

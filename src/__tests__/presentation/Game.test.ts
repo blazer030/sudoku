@@ -268,8 +268,8 @@ describe("Game", () => {
 
         // 應該是加 note 而非 input
         expect(cell.text()).toContain("4");
-        // 確認不是 input（input 會顯示大字，note 是小字在 flex-wrap 中）
-        const noteContainer = cell.find(".flex.flex-wrap");
+        // 確認不是 input（input 會顯示大字，note 是小字在 grid 中）
+        const noteContainer = cell.find(".grid");
         expect(noteContainer.exists()).toBe(true);
     });
 
