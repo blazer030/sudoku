@@ -76,6 +76,12 @@ const selectedCell = ref<{ row: number; column: number } | null>(null);
 const selectedNumber = ref<number | null>(null);
 
 function selectCell(row: number, column: number) {
+    if (selectedNumber.value !== null) {
+        if (!puzzle[row][column].isTip) {
+            sudoku.input(row, column, selectedNumber.value);
+        }
+        return;
+    }
     if (isSelected(row, column)) {
         selectedCell.value = null;
     } else {

@@ -123,6 +123,21 @@ describe("Game", () => {
         expect(numberButton.classes()).toContain("bg-sky-50");
     });
 
+    it("should fill slot cell when number is selected first then cell is clicked", async () => {
+        spyGeneratePuzzle();
+        const wrapper = mount(Game);
+
+        // 先選數字 4
+        const numberButton = wrapper.find("[data-testid='number-4']");
+        await numberButton.trigger("click");
+
+        // 再點 (0, 2) slot 格子
+        const cell = wrapper.find("[data-testid='cell-0-2']");
+        await cell.trigger("click");
+
+        expect(cell.text()).toBe("4");
+    });
+
     it("should render slot cells as empty", () => {
         spyGeneratePuzzle();
         const wrapper = mount(Game);
