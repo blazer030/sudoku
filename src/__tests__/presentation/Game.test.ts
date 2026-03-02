@@ -71,6 +71,20 @@ describe("Game", () => {
         expect(cell.classes()).not.toContain("selected");
     });
 
+    it("should display number in slot cell after clicking number button", async () => {
+        spyGeneratePuzzle();
+        const wrapper = mount(Game);
+
+        // (0, 2) 是 slot 格子，選取後按數字 4
+        const cell = wrapper.find("[data-testid='cell-0-2']");
+        await cell.trigger("click");
+
+        const numberButton = wrapper.find("[data-testid='number-4']");
+        await numberButton.trigger("click");
+
+        expect(cell.text()).toBe("4");
+    });
+
     it("should render slot cells as empty", () => {
         spyGeneratePuzzle();
         const wrapper = mount(Game);

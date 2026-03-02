@@ -74,8 +74,10 @@
           class="flex-1 aspect-square"
       >
         <Button
+            :data-testid="`number-${index}`"
             class="w-full h-full text-2xl rounded-full"
             variant="outline"
+            @click="inputNumber(index)"
         >
           {{ index }}
         </Button>
@@ -85,11 +87,11 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from "vue";
+import { reactive, ref } from "vue";
 import Sudoku from "@/domain/Sudoku";
 import Button from "@/presentation/components/ui/button/Button.vue";
 
-const sudoku = new Sudoku();
+const sudoku = reactive(new Sudoku());
 const puzzle = sudoku.generate();
 
 const selectedCell = ref<{ row: number; column: number } | null>(null);
@@ -104,5 +106,12 @@ function selectCell(row: number, column: number) {
 
 function isSelected(row: number, column: number) {
     return selectedCell.value?.row === row && selectedCell.value?.column === column;
+}
+
+function inputNumber(value: number) {
+    if (!selectedCell.value) return;
+    const { row, column } = selectedCell.value;
+    if (puzzle[row][column].isTip) return;
+    sudoku.input(row, column, value);
 }
 </script>
