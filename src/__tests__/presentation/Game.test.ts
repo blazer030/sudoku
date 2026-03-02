@@ -39,6 +39,20 @@ afterEach(() => {
 });
 
 describe("Game", () => {
+    it("should render slot cells as empty", () => {
+        spyGeneratePuzzle();
+        const wrapper = mount(Game);
+
+        for (let row = 0; row < 9; row++) {
+            for (let column = 0; column < 9; column++) {
+                if (knownPuzzle[row][column] === 0) {
+                    const cell = wrapper.find(`[data-testid="cell-${row}-${column}"]`);
+                    expect(cell.text()).toBe("");
+                }
+            }
+        }
+    });
+
     it("should render 9x9 grid with tip cells showing their numbers", () => {
         spyGeneratePuzzle();
         const wrapper = mount(Game);
