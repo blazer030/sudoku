@@ -1,5 +1,5 @@
 import { loadEnv } from "vite";
-import react from "@vitejs/plugin-react";
+import vue from "@vitejs/plugin-vue";
 import path from "path";
 import { defineConfig } from "vitest/config";
 
@@ -10,7 +10,7 @@ export default ({ mode }: { mode: string }) => {
     return defineConfig({
         base: process.env.VITE_BASE_URL,
         plugins: [
-            react(),
+            vue(),
         ],
         resolve: {
             alias: {
@@ -20,7 +20,6 @@ export default ({ mode }: { mode: string }) => {
         test: {
             globals: true,
             environment: "jsdom",
-            setupFiles: ["./src/test-setup.ts"],
         },
     });
 }

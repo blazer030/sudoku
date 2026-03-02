@@ -141,55 +141,97 @@
 
 ---
 
+## Phase 2.5: React → Vue 遷移（結構性變更）
+
+> Domain 層完全不動。只替換 UI 框架和工具鏈。
+> 遷移完成後確認所有 domain 測試通過、lint 零警告、build 成功。
+
+### 2.5.1 套件替換
+
+- [x] 移除 React 相關套件：`react`, `react-dom`, `@types/react`, `@types/react-dom`, `@vitejs/plugin-react`, `react-router`, `react-icons`, `@radix-ui/react-slot`, `eslint-plugin-react-hooks`, `eslint-plugin-react-refresh`, `@testing-library/react`, `@testing-library/jest-dom`, `@testing-library/user-event`
+- [x] 安裝 Vue 相關套件：`vue`, `@vitejs/plugin-vue`, `vue-router`, `@vue/test-utils`, `eslint-plugin-vue`, `vue-tsc`
+
+### 2.5.2 設定檔更新
+
+- [x] `vite.config.ts` — `@vitejs/plugin-react` → `@vitejs/plugin-vue`
+- [x] `tsconfig.json` — `jsx: "react-jsx"` → 移除，加入 Vue 編譯器選項
+- [x] `eslint.config.js` — 移除 react 插件，加入 `eslint-plugin-vue`
+- [x] `index.html` — `main.tsx` → `main.ts`
+- [x] `test-setup.ts` — 移除 `@testing-library/jest-dom`
+
+### 2.5.3 UI 層重寫
+
+- [x] `src/main.tsx` → `src/main.ts`（`createApp` + `use(router)`）
+- [x] `src/routerConfig.tsx` → `src/router.ts`（`vue-router` 格式）
+- [x] `src/presentation/App.tsx` → `src/presentation/App.vue`
+- [x] `src/presentation/pages/home/Home.tsx` → `src/presentation/pages/home/Home.vue`
+- [x] `src/presentation/pages/game/Game.tsx` → `src/presentation/pages/game/Game.vue`
+- [x] `src/presentation/components/ui/button/Button.vue`（簡化，不需 Radix Slot）
+- [x] 刪除 `src/presentation/components/icon/Icon.tsx`（之後按需新增）
+- [x] 刪除 `src/presentation/pages/game/gameReducer.ts`
+- [x] 刪除 `src/__tests__/presentation/gameReducer.test.ts`
+- [x] `src/presentation/components/ui/lib/utils.ts` — 保留（純工具函數）
+- [x] `src/presentation/components/ui/button/variants.tsx` → `.ts`（純 JS，不含 JSX）
+
+### 2.5.4 驗證
+
+- [x] `npm test` — 所有 domain 測試通過（33 個）
+- [x] `npm run lint` — 零警告
+- [x] `npm run build` — 無錯誤
+- [ ] `npm run start` — 手動確認頁面可正常顯示
+
+---
+
 ## Phase 3: Game Interaction（TDD 行為變更）
 
-> 使用 `useReducer` 管理遊戲狀態，React Testing Library 測試 UI。
+> 使用 Vue `reactive()` 包裝 Sudoku class，Vue Test Utils 測試 UI。
+> 核心優勢：`reactive(new Sudoku())` 讓 Vue 直接追蹤 class 內部狀態變化，不需 reducer。
 
-### 3.1 GameState Reducer — 基礎架構
+### 3.1 遊戲狀態 Composable — 基礎架構
 
-> `src/__tests__/presentation/gameReducer.test.ts` + `src/presentation/pages/game/gameReducer.ts`
+> `src/__tests__/presentation/useGame.test.ts` + `src/presentation/pages/game/useGame.ts`
 
-- [ ] **測試**：`INIT_GAME` action — 初始化 puzzle、answer、selectedCell 為 null
-- [ ] **測試**：初始狀態的 isNoteMode 為 false、isCompleted 為 false
+- [ ] **測試**：`useGame` — 呼叫 `startGame()` 後 puzzle 不為空
+- [ ] **測試**：`useGame` — 初始 selectedCell 為 null、isNoteMode 為 false、isCompleted 為 false
 
 ### 3.2 格子選取
 
-- [ ] **測試**：`SELECT_CELL` action — 設定 selectedCell 座標
-- [ ] **測試**：`SELECT_CELL` — 選取 tip 格子時仍可選取
-- [ ] **測試**：`SELECT_CELL` — 再次選取同一格子時取消選取
+- [ ] **測試**：`selectCell(row, column)` — 設定 selectedCell 座標
+- [ ] **測試**：`selectCell` — 選取 tip 格子時仍可選取
+- [ ] **測試**：`selectCell` — 再次選取同一格子時取消選取
 
 ### 3.3 數字輸入
 
-- [ ] **測試**：`INPUT_NUMBER` action — 在選取的 slot 格子中輸入數字
-- [ ] **測試**：`INPUT_NUMBER` — 未選取格子時忽略
-- [ ] **測試**：`INPUT_NUMBER` — 選取 tip 格子時忽略
-- [ ] **測試**：`INPUT_NUMBER` — 輸入後更新衝突列表
-- [ ] **測試**：`INPUT_NUMBER` — 填滿所有格子且正確時 isCompleted 為 true
+- [ ] **測試**：`inputNumber(value)` — 在選取的 slot 格子中輸入數字
+- [ ] **測試**：`inputNumber` — 未選取格子時忽略
+- [ ] **測試**：`inputNumber` — 選取 tip 格子時忽略
+- [ ] **測試**：`inputNumber` — 輸入後更新衝突列表
+- [ ] **測試**：`inputNumber` — 填滿所有格子且正確時 isCompleted 為 true
 
 ### 3.4 筆記模式
 
-- [ ] **測試**：`TOGGLE_NOTE_MODE` action — 切換 isNoteMode
-- [ ] **測試**：`INPUT_NUMBER` — noteMode 為 true 時操作 notes 而非 input
-- [ ] **測試**：`INPUT_NUMBER` — noteMode 為 true 時 toggle 已有的 note
+- [ ] **測試**：`toggleNoteMode()` — 切換 isNoteMode
+- [ ] **測試**：`inputNumber` — noteMode 為 true 時操作 notes 而非 input
+- [ ] **測試**：`inputNumber` — noteMode 為 true 時 toggle 已有的 note
 
 ### 3.5 清除與 Undo
 
-- [ ] **測試**：`ERASE` action — 清除選取格子的 input
-- [ ] **測試**：`ERASE` — 清除選取格子的 notes
-- [ ] **測試**：`ERASE` — tip 格子不可清除
-- [ ] **測試**：`UNDO` action — 還原上一次的 input 操作
-- [ ] **測試**：`UNDO` — 還原上一次的 erase 操作
-- [ ] **測試**：`UNDO` — 無歷史記錄時忽略
+- [ ] **測試**：`erase()` — 清除選取格子的 input
+- [ ] **測試**：`erase` — 清除選取格子的 notes
+- [ ] **測試**：`erase` — tip 格子不可清除
+- [ ] **測試**：`undo()` — 還原上一次的 input 操作
+- [ ] **測試**：`undo` — 還原上一次的 erase 操作
+- [ ] **測試**：`undo` — 無歷史記錄時忽略
 
 ### 3.6 計時器
 
-- [ ] **測試**：`TICK` action — timer 遞增 1 秒
-- [ ] **測試**：`PAUSE` / `RESUME` action — 暫停/繼續計時
-- [ ] **測試**：遊戲完成後 TICK 不再增加
+- [ ] **測試**：`tick()` — timer 遞增 1 秒
+- [ ] **測試**：`pause()` / `resume()` — 暫停/繼續計時
+- [ ] **測試**：遊戲完成後 tick 不再增加
 
 ### 3.7 UI 元件測試 — Cell 互動
 
-> `src/__tests__/presentation/GameBoard.test.tsx`
+> `src/__tests__/presentation/GameBoard.test.ts`
 
 - [ ] **測試**：渲染 9x9 grid，所有 tip 格子顯示數字
 - [ ] **測試**：點擊格子觸發選取，選取格子有高亮樣式
