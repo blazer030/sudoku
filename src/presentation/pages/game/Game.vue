@@ -28,7 +28,7 @@
             columnIndex % 3 === 2 ? 'border-r-4' : '',
           ]"
             class="border-sky-200"
-            @click="selectCell(rowIndex, columnIndex)"
+            @click="clickCell(rowIndex, columnIndex)"
         />
       </div>
     </div>
@@ -75,18 +75,21 @@ const puzzle = sudoku.generate();
 const selectedCell = ref<{ row: number; column: number } | null>(null);
 const selectedNumber = ref<number | null>(null);
 
-function selectCell(row: number, column: number) {
+function clickCell(row: number, column: number) {
     if (selectedNumber.value !== null) {
-        if (!puzzle[row][column].isTip) {
-            sudoku.input(row, column, selectedNumber.value);
+        if (puzzle[row][column].isTip) return;
+        if (puzzle[row][column].input === selectedNumber.value) {
+            sudoku.input(row, column, 0);
+            return;
         }
+        sudoku.input(row, column, selectedNumber.value);
         return;
     }
     if (isSelected(row, column)) {
         selectedCell.value = null;
-    } else {
-        selectedCell.value = { row, column };
+        return;
     }
+    selectedCell.value = { row, column };
 }
 
 function isSelected(row: number, column: number) {

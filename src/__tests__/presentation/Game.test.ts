@@ -182,6 +182,27 @@ describe("Game", () => {
         expect(numberButton.classes()).not.toContain("bg-sky-50");
     });
 
+    it("should clear cell when clicking a cell that already has the selected number", async () => {
+        spyGeneratePuzzle();
+        const wrapper = mount(Game);
+
+        // 先用格子優先模式填入 4 到 (0, 2)
+        const cell = wrapper.find("[data-testid='cell-0-2']");
+        await cell.trigger("click");
+        const numberButton4 = wrapper.find("[data-testid='number-4']");
+        await numberButton4.trigger("click");
+        expect(cell.text()).toBe("4");
+
+        // 取消格子選取
+        await cell.trigger("click");
+
+        // 進入數字優先模式，選 4，再點同一格子
+        await numberButton4.trigger("click");
+        await cell.trigger("click");
+
+        expect(cell.text()).toBe("");
+    });
+
     it("should render slot cells as empty", () => {
         spyGeneratePuzzle();
         const wrapper = mount(Game);
