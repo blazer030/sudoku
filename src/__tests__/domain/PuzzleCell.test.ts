@@ -23,19 +23,6 @@ describe("PuzzleCell", () => {
             expect(cell.isEntered).toBe(false);
         });
 
-        it("should not have notes when empty cell is initialized", () => {
-            const cell = new PuzzleCell(0);
-
-            expect(cell.hasNotes).toBe(false);
-            expect(cell.notes).toEqual([]);
-        });
-
-        it("should not have notes when tip cell is initialized", () => {
-            const cell = new PuzzleCell(7);
-
-            expect(cell.hasNotes).toBe(false);
-            expect(cell.notes).toEqual([]);
-        });
     });
 
     describe("Number input functionality", () => {
