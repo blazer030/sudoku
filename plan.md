@@ -99,39 +99,37 @@
 
 > `src/__tests__/domain/SudokuGenerator.test.ts` + `src/domain/SudokuGenerator.ts`
 
-- [ ] **測試**：`generateFullBoard` — 產生的 board 是 9x9
-- [ ] **測試**：`generateFullBoard` — 產生的 board 每格都是 1-9
-- [ ] **測試**：`generateFullBoard` — 產生的 board 滿足所有數獨規則
-- [ ] **測試**：`generateFullBoard` — 多次呼叫產生不同的 board
+- [x] **測試**：`generateFullBoard` — 產生的 board 是 9x9 且滿足所有數獨規則
+- [x] **測試**：`generateFullBoard` — 多次呼叫產生不同的 board
 
 ### 2.7 Generator — 挖空產生謎題
 
-- [ ] **測試**：`generatePuzzle(clueCount)` — 非零格子數量等於 clueCount
-- [ ] **測試**：`generatePuzzle` — 回傳的 board 只有一個合法解
-- [ ] **測試**：`generatePuzzle` — 保留的格子值與完整 board 一致
+- [x] **測試**：`generatePuzzle(clueCount)` — 非零格子數量等於 clueCount
+- [ ] **測試**：`generatePuzzle` — 回傳的 board 只有一個合法解（暫時跳過）
+- [x] **測試**：`generatePuzzle` — 保留的格子值與完整 board 一致
 
 ### 2.8 難度等級
 
-- [ ] **測試**：`generatePuzzle('easy')` — easy 保留 36-45 個提示
-- [ ] **測試**：`generatePuzzle('medium')` — medium 保留 27-35 個提示
-- [ ] **測試**：`generatePuzzle('hard')` — hard 保留 22-26 個提示
+- [x] **測試**：`generatePuzzle('easy')` — easy 保留 36-45 個提示
+- [x] **測試**：`generatePuzzle('medium')` — medium 保留 27-35 個提示
+- [x] **測試**：`generatePuzzle('hard')` — hard 保留 22-26 個提示
 
 ### 2.9 整合到 Sudoku class
 
-- [ ] **測試**：`Sudoku.generate()` — 每次生成不同的 puzzle
-- [ ] **測試**：`Sudoku.generate('easy')` — 回傳對應難度的 PuzzleCell[][]
-- [ ] **測試**：`Sudoku.check(row, col, value)` — 對生成的 puzzle 驗證答案正確性
-- [ ] **重構**：移除硬編碼資料
+- [x] **測試**：`Sudoku.generate()` — 每次生成不同的 puzzle
+- [x] **測試**：`Sudoku.generate('easy')` — 回傳對應難度的 PuzzleCell[][]
+- [x] **測試**：`Sudoku.check(row, col, value)` — 對生成的 puzzle 驗證答案正確性
+- [x] **重構**：移除硬編碼資料
 
 ### 2.10 衝突偵測
 
-> `src/__tests__/domain/ConflictDetector.test.ts` + `src/domain/ConflictDetector.ts`
+> `src/__tests__/domain/Sudoku.test.ts` + `src/domain/ConflictDetector.ts`（透過 Sudoku 整合測試）
 
-- [ ] **測試**：`findConflicts(board, row, col, value)` — 無衝突時回傳空陣列
-- [ ] **測試**：`findConflicts` — 行衝突時回傳衝突格子座標
-- [ ] **測試**：`findConflicts` — 列衝突時回傳衝突格子座標
-- [ ] **測試**：`findConflicts` — 宮衝突時回傳衝突格子座標
-- [ ] **測試**：`findConflicts` — 多重衝突時回傳所有衝突格子
+- [x] **測試**：`findConflicts(row, column, value)` — 無衝突時回傳空陣列
+- [x] **測試**：`findConflicts` — 行衝突時回傳衝突格子座標
+- [x] **測試**：`findConflicts` — 列衝突時回傳衝突格子座標
+- [x] **測試**：`findConflicts` — 宮衝突時回傳衝突格子座標
+- [x] **測試**：`findConflicts` — 多重衝突時回傳所有衝突格子
 
 ### 2.11 遊戲完成偵測
 
