@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { mount } from "@vue/test-utils";
 import Game from "@/presentation/pages/game/Game.vue";
 import { knownAnswer, knownPuzzle, spyGeneratePuzzle } from "@/__tests__/fixtures/knownPuzzle";
+import Cell from "@/presentation/components/cell/Cell.vue";
 
 afterEach(() => {
     vi.restoreAllMocks();
@@ -502,6 +503,25 @@ describe("Game", () => {
         // 完成後計時器不再遞增
         await vi.advanceTimersByTimeAsync(3000);
         expect(wrapper.find("[data-testid='timer']").text()).toBe("00:05");
+    });
+
+    it("should highlight cells in same row, column, and box when a cell is selected", async () => {
+        spyGeneratePuzzle();
+        const wrapper = mount(Game);
+
+        // 選取 (0, 2) slot 格子
+        await wrapper.find("[data-testid='cell-0-2']").trigger("click");
+
+        // 同行
+        expect(wrapper.findComponent<typeof Cell>("[data-testid='cell-0-5']").props("highlighted")).toBe(true);
+        // 同列
+        expect(wrapper.findComponent<typeof Cell>("[data-testid='cell-3-2']").props("highlighted")).toBe(true);
+        // 同宮
+        expect(wrapper.findComponent<typeof Cell>("[data-testid='cell-1-0']").props("highlighted")).toBe(true);
+        // 不相關
+        expect(wrapper.findComponent<typeof Cell>("[data-testid='cell-5-5']").props("highlighted")).toBe(false);
+        // 自身不傳 highlighted
+        expect(wrapper.findComponent<typeof Cell>("[data-testid='cell-0-2']").props("highlighted")).toBe(false);
     });
 
     it("should render 9x9 grid with clue cells showing their numbers", () => {

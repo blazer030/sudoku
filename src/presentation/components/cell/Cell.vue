@@ -37,5 +37,6 @@ defineProps<{
     puzzleCell: PuzzleCell;
     selected?: boolean;
     conflict?: boolean;
+    highlighted?: boolean;
 }>();
 </script>

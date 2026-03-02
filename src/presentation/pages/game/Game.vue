@@ -26,6 +26,7 @@
           ]"
           :conflict="isConflict(rowIndex, columnIndex)"
           :data-testid="`cell-${rowIndex}-${columnIndex}`"
+          :highlighted="isHighlighted(rowIndex, columnIndex)"
           :puzzle-cell="puzzleCell"
           :selected="isSelected(rowIndex, columnIndex)"
           class="border-sky-200"
@@ -169,6 +170,17 @@ function isSelected(row: number, column: number) {
   if (selectedCell.value === null) return false;
   if (selectedCell.value.row !== row) return false;
   return selectedCell.value.column === column;
+}
+
+function isHighlighted(row: number, column: number) {
+  if (!selectedCell.value) return false;
+  const selectedRow = selectedCell.value.row;
+  const selectedColumn = selectedCell.value.column;
+  if (row === selectedRow && column === selectedColumn) return false;
+  if (row === selectedRow || column === selectedColumn) return true;
+  const sameBox = Math.floor(row / 3) === Math.floor(selectedRow / 3)
+    && Math.floor(column / 3) === Math.floor(selectedColumn / 3);
+  return sameBox;
 }
 
 function isConflict(row: number, column: number) {
