@@ -475,6 +475,35 @@ describe("Game", () => {
         expect(timer.text()).toBe("00:03");
     });
 
+    it("should stop timer when game is completed", async () => {
+        vi.useFakeTimers();
+        spyGeneratePuzzle();
+        const wrapper = mount(Game);
+
+        await vi.advanceTimersByTimeAsync(5000);
+
+        // 填入所有正確答案
+        for (let row = 0; row < 9; row++) {
+            for (let column = 0; column < 9; column++) {
+                if (knownPuzzle[row][column] === 0) {
+                    const cell = wrapper.find(`[data-testid='cell-${row}-${column}']`);
+                    const value = knownAnswer[row][column];
+                    const numberButton = wrapper.find(`[data-testid='number-${value}']`);
+                    await numberButton.trigger("click");
+                    await cell.trigger("click");
+                    await numberButton.trigger("click");
+                }
+            }
+        }
+
+        expect(wrapper.text()).toContain("Completed");
+        expect(wrapper.find("[data-testid='timer']").text()).toBe("00:05");
+
+        // 完成後計時器不再遞增
+        await vi.advanceTimersByTimeAsync(3000);
+        expect(wrapper.find("[data-testid='timer']").text()).toBe("00:05");
+    });
+
     it("should render 9x9 grid with clue cells showing their numbers", () => {
         spyGeneratePuzzle();
         const wrapper = mount(Game);
