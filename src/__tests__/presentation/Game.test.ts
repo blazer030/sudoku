@@ -322,6 +322,27 @@ describe("Game", () => {
         expect(eraseButton.classes()).toContain("bg-sky-50");
     });
 
+    it("should clear input when clicking a filled slot cell in erase mode", async () => {
+        spyGeneratePuzzle();
+        const wrapper = mount(Game);
+
+        // 填入 4 到 (0, 2)
+        const cell = wrapper.find("[data-testid='cell-0-2']");
+        await cell.trigger("click");
+        await wrapper.find("[data-testid='number-4']").trigger("click");
+        expect(cell.text()).toBe("4");
+
+        // 取消選取，進入 erase mode
+        await cell.trigger("click");
+        const eraseButton = wrapper.find("[data-testid='erase-button']");
+        await eraseButton.trigger("click");
+
+        // 點擊有輸入的格子
+        await cell.trigger("click");
+
+        expect(cell.text()).toBe("");
+    });
+
     it("should show cursor-pointer on slot cells", () => {
         spyGeneratePuzzle();
         const wrapper = mount(Game);
