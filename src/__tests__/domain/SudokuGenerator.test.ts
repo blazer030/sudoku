@@ -40,6 +40,22 @@ describe("SudokuGenerator", () => {
         expect(filledCells).toBeLessThanOrEqual(45);
     });
 
+    it("should generate a medium puzzle with 27-35 clues", () => {
+        const puzzle = generator.generatePuzzle("medium");
+        const filledCells = puzzle.flat().filter(cell => cell !== 0).length;
+
+        expect(filledCells).toBeGreaterThanOrEqual(27);
+        expect(filledCells).toBeLessThanOrEqual(35);
+    });
+
+    it("should generate a hard puzzle with 22-26 clues", () => {
+        const puzzle = generator.generatePuzzle("hard");
+        const filledCells = puzzle.flat().filter(cell => cell !== 0).length;
+
+        expect(filledCells).toBeGreaterThanOrEqual(22);
+        expect(filledCells).toBeLessThanOrEqual(26);
+    });
+
     it("should generate a valid 9x9 board that satisfies all sudoku rules", () => {
         const board = generator.generateFullBoard();
 
