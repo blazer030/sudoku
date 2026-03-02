@@ -40,6 +40,7 @@ describe("SudokuSolver", () => {
         const result = solver.solve(board);
 
         expect(result).not.toBeNull();
-        expect(sudokuBoard.isValidSolution(result!)).toBe(true);
+        if (!result) return;
+        expect(sudokuBoard.isValidSolution(result)).toBe(true);
     });
 });

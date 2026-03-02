@@ -7,7 +7,9 @@ export class SudokuGenerator {
 
     generateFullBoard(): number[][] {
         const emptyBoard = Array.from({ length: 9 }, () => Array.from({ length: 9 }, () => 0));
-        return this.solver.solve(emptyBoard, () => this.shuffle([1, 2, 3, 4, 5, 6, 7, 8, 9]))!;
+        const board = this.solver.solve(emptyBoard, () => this.shuffle([1, 2, 3, 4, 5, 6, 7, 8, 9]));
+        if (!board) throw new Error("Failed to generate a full board");
+        return board;
     }
 
     generatePuzzle(difficulty: Difficulty): { puzzle: number[][], answer: number[][] } {

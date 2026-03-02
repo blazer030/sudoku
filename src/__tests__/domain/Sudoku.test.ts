@@ -6,7 +6,9 @@ describe("Sudoku", () => {
         const sudoku = new Sudoku();
         const puzzle = sudoku.generate("easy");
 
-        const tipCell = puzzle.flat().find(cell => cell.isTip)!;
+        const tipCell = puzzle.flat().find(cell => cell.isTip);
+        expect(tipCell).toBeDefined();
+        if (!tipCell) return;
         const row = puzzle.findIndex(puzzleRow => puzzleRow.includes(tipCell));
         const col = puzzle[row].indexOf(tipCell);
 
