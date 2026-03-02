@@ -127,6 +127,19 @@ describe("Sudoku", () => {
         expect(puzzle[0][2].notes).toHaveLength(3);
     });
 
+    it("should not clear existing notes when calling autoNotes again", () => {
+        spyGeneratePuzzle();
+        const sudoku = new Sudoku();
+        const puzzle = sudoku.generate("easy");
+
+        sudoku.autoNotes();
+        const notesBefore = [...puzzle[0][2].notes];
+
+        sudoku.autoNotes();
+
+        expect(puzzle[0][2].notes).toEqual(notesBefore);
+    });
+
     it("should remove note from peers when inputting a number", () => {
         spyGeneratePuzzle();
         const sudoku = new Sudoku();

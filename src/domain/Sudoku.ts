@@ -68,6 +68,7 @@ class Sudoku {
             for (let col = 0; col < 9; col++) {
                 const cell = this._puzzle[row][col];
                 if (cell.isClue || cell.isEntered) continue;
+                cell.clearNotes();
                 for (let digit = 1; digit <= 9; digit++) {
                     if (this.board.isValidPlacement(currentBoard, row, col, digit)) {
                         cell.toggleNote(digit);
