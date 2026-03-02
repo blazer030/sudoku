@@ -1,12 +1,4 @@
 export class SudokuBoard {
-    isValidInRow(board: number[][], row: number, num: number): boolean {
-        return !board[row].includes(num);
-    }
-
-    isValidInColumn(board: number[][], col: number, num: number): boolean {
-        return !board.some(row => row[col] === num);
-    }
-
     isValidPlacement(board: number[][], row: number, col: number, num: number): boolean {
         return this.isValidInRow(board, row, num)
             && this.isValidInColumn(board, col, num)
@@ -37,7 +29,15 @@ export class SudokuBoard {
             && numbers.every(number => number >= 1 && number <= 9);
     }
 
-    isValidInBox(board: number[][], row: number, col: number, num: number): boolean {
+    private isValidInRow(board: number[][], row: number, num: number): boolean {
+        return !board[row].includes(num);
+    }
+
+    private isValidInColumn(board: number[][], col: number, num: number): boolean {
+        return !board.some(row => row[col] === num);
+    }
+
+    private isValidInBox(board: number[][], row: number, col: number, num: number): boolean {
         const boxRowStart = Math.floor(row / 3) * 3;
         const boxColStart = Math.floor(col / 3) * 3;
         for (let currentRow = boxRowStart; currentRow < boxRowStart + 3; currentRow++) {

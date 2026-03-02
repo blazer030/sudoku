@@ -36,9 +36,9 @@ class PuzzleCell {
         return this._notes;
     }
 
-    set notes(value: number) {
+    toggleNote(value: number): void {
         if (this.isTip || this.isEntered) return;
-        
+
         if (this._notes.includes(value)) {
             this._notes = this._notes.filter((x) => x !== value);
         } else {

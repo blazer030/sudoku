@@ -1,16 +1,16 @@
 import PuzzleCell from "@/domain/PuzzleCell";
-import { SudokuGenerator } from "@/domain/SudokuGenerator";
+import { Difficulty, SudokuGenerator } from "@/domain/SudokuGenerator";
 
 class Sudoku {
     private _answer: number[][] = [];
     private _puzzle: PuzzleCell[][] = [];
     private generator = new SudokuGenerator();
 
-    public generate(difficulty: string = "easy") {
-        this._answer = this.generator.generateFullBoard();
-        const board = this.generator.generatePuzzle(difficulty, this._answer);
+    public generate(difficulty: Difficulty = "easy") {
+        const { puzzle, answer } = this.generator.generatePuzzle(difficulty);
+        this._answer = answer;
 
-        this._puzzle = board.map((row) => {
+        this._puzzle = puzzle.map((row) => {
             return row.map((value) => {
                 return new PuzzleCell(value);
             });

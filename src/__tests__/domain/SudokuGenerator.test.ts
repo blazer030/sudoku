@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { SudokuBoard } from "@/domain/SudokuBoard";
 import { SudokuGenerator } from "@/domain/SudokuGenerator";
-import { SudokuSolver } from "@/domain/SudokuSolver";
 
 const sudokuBoard = new SudokuBoard();
 const generator = new SudokuGenerator();
@@ -15,25 +14,21 @@ describe("SudokuGenerator", () => {
         expect(unique.size).toBeGreaterThan(1);
     });
 
-    it("should generate a puzzle with the specified number of clues", () => {
-        const clueCount = 30;
-        const puzzle = generator.generatePuzzle(clueCount);
+    it("should return a puzzle and its answer", () => {
+        const { puzzle, answer } = generator.generatePuzzle("easy");
 
-        const filledCells = puzzle.flat().filter(cell => cell !== 0).length;
-        expect(filledCells).toBe(clueCount);
-    });
-
-    it("should preserve clue values that form part of a valid solution", () => {
-        const puzzle = generator.generatePuzzle(30);
-        const solver = new SudokuSolver();
-        const solution = solver.solve(puzzle);
-
-        expect(solution).not.toBeNull();
-        expect(sudokuBoard.isValidSolution(solution!)).toBe(true);
+        expect(sudokuBoard.isValidSolution(answer)).toBe(true);
+        puzzle.flat().forEach((cell, index) => {
+            if (cell !== 0) {
+                const row = Math.floor(index / 9);
+                const col = index % 9;
+                expect(cell).toBe(answer[row][col]);
+            }
+        });
     });
 
     it("should generate an easy puzzle with 36-45 clues", () => {
-        const puzzle = generator.generatePuzzle("easy");
+        const { puzzle } = generator.generatePuzzle("easy");
         const filledCells = puzzle.flat().filter(cell => cell !== 0).length;
 
         expect(filledCells).toBeGreaterThanOrEqual(36);
@@ -41,7 +36,7 @@ describe("SudokuGenerator", () => {
     });
 
     it("should generate a medium puzzle with 27-35 clues", () => {
-        const puzzle = generator.generatePuzzle("medium");
+        const { puzzle } = generator.generatePuzzle("medium");
         const filledCells = puzzle.flat().filter(cell => cell !== 0).length;
 
         expect(filledCells).toBeGreaterThanOrEqual(27);
@@ -49,7 +44,7 @@ describe("SudokuGenerator", () => {
     });
 
     it("should generate a hard puzzle with 22-26 clues", () => {
-        const puzzle = generator.generatePuzzle("hard");
+        const { puzzle } = generator.generatePuzzle("hard");
         const filledCells = puzzle.flat().filter(cell => cell !== 0).length;
 
         expect(filledCells).toBeGreaterThanOrEqual(22);

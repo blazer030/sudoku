@@ -54,8 +54,8 @@ describe("PuzzleCell", () => {
         });
 
         it("should clear notes after inputting a number", () => {
-            emptyCell.notes = 1;
-            emptyCell.notes = 2;
+            emptyCell.toggleNote(1);
+            emptyCell.toggleNote(2);
             expect(emptyCell.hasNotes).toBe(true);
 
             emptyCell.input = 5;
@@ -91,17 +91,17 @@ describe("PuzzleCell", () => {
         });
 
         it("should allow adding candidate numbers", () => {
-            emptyCell.notes = 3;
+            emptyCell.toggleNote(3);
 
             expect(emptyCell.hasNotes).toBe(true);
             expect(emptyCell.notes).toContain(3);
         });
 
         it("should allow removing existing candidate numbers", () => {
-            emptyCell.notes = 5;
+            emptyCell.toggleNote(5);
             expect(emptyCell.notes).toContain(5);
 
-            emptyCell.notes = 5;
+            emptyCell.toggleNote(5);
 
             expect(emptyCell.notes).not.toContain(5);
         });
@@ -109,7 +109,7 @@ describe("PuzzleCell", () => {
         it("should not allow setting notes in tip cells", () => {
             const tipCell = new PuzzleCell(6);
 
-            tipCell.notes = 2;
+            tipCell.toggleNote(2);
 
             expect(tipCell.hasNotes).toBe(false);
             expect(tipCell.notes).toEqual([]);
@@ -118,7 +118,7 @@ describe("PuzzleCell", () => {
         it("should not allow setting notes in cells with inputted numbers", () => {
             emptyCell.input = 8;
 
-            emptyCell.notes = 3;
+            emptyCell.toggleNote(3);
 
             expect(emptyCell.hasNotes).toBe(false);
             expect(emptyCell.notes).toEqual([]);

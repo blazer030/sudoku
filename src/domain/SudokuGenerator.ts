@@ -1,23 +1,21 @@
-import { SudokuBoard } from "@/domain/SudokuBoard";
+import { SudokuSolver } from "@/domain/SudokuSolver";
+
+export type Difficulty = "easy" | "medium" | "hard";
 
 export class SudokuGenerator {
-    private board = new SudokuBoard();
+    private solver = new SudokuSolver();
 
     generateFullBoard(): number[][] {
-        const board = Array.from({ length: 9 }, () => Array.from({ length: 9 }, () => 0));
-        this.fillBoard(board);
-        return board;
+        const emptyBoard = Array.from({ length: 9 }, () => Array.from({ length: 9 }, () => 0));
+        return this.solver.solve(emptyBoard, () => this.shuffle([1, 2, 3, 4, 5, 6, 7, 8, 9]))!;
     }
 
-    generatePuzzle(clueCountOrDifficulty: number | string, fullBoard?: number[][]): number[][] {
-        const clueCount = typeof clueCountOrDifficulty === "string"
-            ? this.clueCountForDifficulty(clueCountOrDifficulty)
-            : clueCountOrDifficulty;
-        const board = fullBoard
-            ? fullBoard.map(row => [...row])
-            : this.generateFullBoard();
-        this.removeClues(board, 81 - clueCount);
-        return board;
+    generatePuzzle(difficulty: Difficulty): { puzzle: number[][], answer: number[][] } {
+        const answer = this.generateFullBoard();
+        const puzzle = answer.map(row => [...row]);
+        const clueCount = this.clueCountForDifficulty(difficulty);
+        this.removeClues(puzzle, 81 - clueCount);
+        return { puzzle, answer };
     }
 
     private removeClues(board: number[][], count: number): void {
@@ -32,35 +30,14 @@ export class SudokuGenerator {
         }
     }
 
-    private clueCountForDifficulty(difficulty: string): number {
-        const ranges: Record<string, [number, number]> = {
+    private clueCountForDifficulty(difficulty: Difficulty): number {
+        const ranges: Record<Difficulty, [number, number]> = {
             easy: [36, 45],
             medium: [27, 35],
             hard: [22, 26],
         };
         const [min, max] = ranges[difficulty];
         return Math.floor(Math.random() * (max - min + 1)) + min;
-    }
-
-    private fillBoard(board: number[][]): boolean {
-        for (let row = 0; row < 9; row++) {
-            for (let col = 0; col < 9; col++) {
-                if (board[row][col] === 0) {
-                    const numbers = this.shuffle([1, 2, 3, 4, 5, 6, 7, 8, 9]);
-                    for (const num of numbers) {
-                        if (this.board.isValidPlacement(board, row, col, num)) {
-                            board[row][col] = num;
-                            if (this.fillBoard(board)) {
-                                return true;
-                            }
-                            board[row][col] = 0;
-                        }
-                    }
-                    return false;
-                }
-            }
-        }
-        return true;
     }
 
     private shuffle(array: number[]): number[] {
