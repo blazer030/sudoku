@@ -34,6 +34,28 @@ class Sudoku {
 
     public input(row: number, column: number, value: number): void {
         this._puzzle[row][column].input = value;
+        if (value > 0) {
+            this.removeNoteFromPeers(row, column, value);
+        }
+    }
+
+    private removeNoteFromPeers(row: number, column: number, value: number): void {
+        // 同行
+        for (let col = 0; col < 9; col++) {
+            if (col !== column) this._puzzle[row][col].removeNote(value);
+        }
+        // 同列
+        for (let r = 0; r < 9; r++) {
+            if (r !== row) this._puzzle[r][column].removeNote(value);
+        }
+        // 同宮
+        const boxRowStart = Math.floor(row / 3) * 3;
+        const boxColStart = Math.floor(column / 3) * 3;
+        for (let r = boxRowStart; r < boxRowStart + 3; r++) {
+            for (let c = boxColStart; c < boxColStart + 3; c++) {
+                if (r !== row || c !== column) this._puzzle[r][c].removeNote(value);
+            }
+        }
     }
 
     public check(row: number, column: number, value: number): boolean {

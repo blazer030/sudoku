@@ -127,6 +127,24 @@ describe("Sudoku", () => {
         expect(puzzle[0][2].notes).toHaveLength(3);
     });
 
+    it("should remove note from peers when inputting a number", () => {
+        spyGeneratePuzzle();
+        const sudoku = new Sudoku();
+        const puzzle = sudoku.generate("easy");
+
+        // 先 autoNotes 填入候選筆記
+        sudoku.autoNotes();
+
+        // (0, 2) 候選 [1, 2, 4]，(0, 3) 候選包含某些數字
+        // 填入 4 到 (0, 2)，同行同宮的空白格中的 4 應被移除
+        sudoku.input(0, 2, 4);
+
+        // (0, 3) 在同一行，其 notes 不應再包含 4
+        expect(puzzle[0][3].notes).not.toContain(4);
+        // (0, 5) 在同一行，其 notes 不應再包含 4
+        expect(puzzle[0][5].notes).not.toContain(4);
+    });
+
     it("should not overwrite existing notes or inputs with autoNotes", () => {
         spyGeneratePuzzle();
         const sudoku = new Sudoku();
