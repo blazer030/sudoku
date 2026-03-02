@@ -21,10 +21,15 @@ const buttonVariants = cva(
                 lg: "h-11 rounded-md px-8",
                 icon: "h-10 w-10",
             },
+            selected: {
+                true: "ring-2 ring-sky-400 bg-sky-50",
+                false: "",
+            },
         },
         defaultVariants: {
             variant: "default",
             size: "default",
+            selected: false,
         },
     }
 )

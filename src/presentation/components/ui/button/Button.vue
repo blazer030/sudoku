@@ -1,5 +1,5 @@
 <template>
-  <button :class="cn(buttonVariants({ variant, size }))">
+  <button :class="cn(buttonVariants({ variant, size, selected }))">
     <slot />
   </button>
 </template>
@@ -12,5 +12,6 @@ import buttonVariants from "@/presentation/components/ui/button/variants";
 defineProps<{
     variant?: VariantProps<typeof buttonVariants>["variant"];
     size?: VariantProps<typeof buttonVariants>["size"];
+    selected?: VariantProps<typeof buttonVariants>["selected"];
 }>();
 </script>
