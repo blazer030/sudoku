@@ -9,6 +9,22 @@ export class SudokuGenerator {
         return board;
     }
 
+    generatePuzzle(clueCount: number): number[][] {
+        const board = this.generateFullBoard();
+        const cellsToRemove = 81 - clueCount;
+        const positions = this.shuffle(
+            Array.from({ length: 81 }, (_, index) => index)
+        );
+
+        for (let index = 0; index < cellsToRemove; index++) {
+            const row = Math.floor(positions[index] / 9);
+            const col = positions[index] % 9;
+            board[row][col] = 0;
+        }
+
+        return board;
+    }
+
     private fillBoard(board: number[][]): boolean {
         for (let row = 0; row < 9; row++) {
             for (let col = 0; col < 9; col++) {

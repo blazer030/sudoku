@@ -14,6 +14,14 @@ describe("SudokuGenerator", () => {
         expect(unique.size).toBeGreaterThan(1);
     });
 
+    it("should generate a puzzle with the specified number of clues", () => {
+        const clueCount = 30;
+        const puzzle = generator.generatePuzzle(clueCount);
+
+        const filledCells = puzzle.flat().filter(cell => cell !== 0).length;
+        expect(filledCells).toBe(clueCount);
+    });
+
     it("should generate a valid 9x9 board that satisfies all sudoku rules", () => {
         const board = generator.generateFullBoard();
 
