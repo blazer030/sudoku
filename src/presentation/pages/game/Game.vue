@@ -77,14 +77,22 @@ const selectedNumber = ref<number | null>(null);
 
 function clickCell(row: number, column: number) {
     if (selectedNumber.value !== null) {
-        if (puzzle[row][column].isTip) return;
-        if (puzzle[row][column].input === selectedNumber.value) {
-            sudoku.input(row, column, 0);
-            return;
-        }
-        sudoku.input(row, column, selectedNumber.value);
+        inputToCell(row, column, selectedNumber.value);
         return;
     }
+    toggleSelectCell(row, column);
+}
+
+function inputToCell(row: number, column: number, value: number) {
+    if (puzzle[row][column].isTip) return;
+    if (puzzle[row][column].input === value) {
+        sudoku.input(row, column, 0);
+        return;
+    }
+    sudoku.input(row, column, value);
+}
+
+function toggleSelectCell(row: number, column: number) {
     if (isSelected(row, column)) {
         selectedCell.value = null;
         return;
@@ -98,11 +106,9 @@ function isSelected(row: number, column: number) {
 
 function inputNumber(value: number) {
     if (selectedCell.value) {
-        const { row, column } = selectedCell.value;
-        if (puzzle[row][column].isTip) return;
-        sudoku.input(row, column, value);
-    } else {
-        selectedNumber.value = selectedNumber.value === value ? null : value;
+        inputToCell(selectedCell.value.row, selectedCell.value.column, value);
+        return;
     }
+    selectedNumber.value = selectedNumber.value === value ? null : value;
 }
 </script>
