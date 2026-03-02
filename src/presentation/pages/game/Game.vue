@@ -46,7 +46,12 @@
       <Button variant="outline">
         Erase
       </Button>
-      <Button variant="outline">
+      <Button
+        data-testid="note-button"
+        :selected="noteMode"
+        variant="outline"
+        @click="noteMode = !noteMode"
+      >
         Note
       </Button>
     </div>
@@ -83,6 +88,7 @@ const selectedCell = ref<{ row: number; column: number } | null>(null);
 const selectedNumber = ref<number | null>(null);
 const conflicts = ref<{ row: number; column: number }[]>([]);
 const completed = ref(false);
+const noteMode = ref(false);
 
 function clickCell(row: number, column: number) {
     if (selectedNumber.value !== null) {
@@ -125,7 +131,12 @@ function isConflict(row: number, column: number) {
 
 function inputNumber(value: number) {
     if (selectedCell.value) {
-        inputToCell(selectedCell.value.row, selectedCell.value.column, value);
+        const { row, column } = selectedCell.value;
+        if (noteMode.value) {
+            puzzle[row][column].toggleNote(value);
+            return;
+        }
+        inputToCell(row, column, value);
         return;
     }
     selectedNumber.value = selectedNumber.value === value ? null : value;

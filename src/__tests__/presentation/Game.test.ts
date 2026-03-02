@@ -207,6 +207,49 @@ describe("Game", () => {
         expect(conflictCell.classes()).toContain("conflict");
     });
 
+    it("should toggle note mode when clicking Note button", async () => {
+        spyGeneratePuzzle();
+        const wrapper = mount(Game);
+
+        const noteButton = wrapper.find("[data-testid='note-button']");
+        await noteButton.trigger("click");
+
+        expect(noteButton.classes()).toContain("bg-sky-50");
+    });
+
+    it("should add note to slot cell in note mode", async () => {
+        spyGeneratePuzzle();
+        const wrapper = mount(Game);
+
+        // 開啟筆記模式
+        const noteButton = wrapper.find("[data-testid='note-button']");
+        await noteButton.trigger("click");
+
+        // 選取 slot 格子 (0, 2)，按數字 4
+        const cell = wrapper.find("[data-testid='cell-0-2']");
+        await cell.trigger("click");
+        const numberButton = wrapper.find("[data-testid='number-4']");
+        await numberButton.trigger("click");
+
+        expect(cell.text()).toContain("4");
+    });
+
+    it("should remove note when clicking the same number again in note mode", async () => {
+        spyGeneratePuzzle();
+        const wrapper = mount(Game);
+
+        const noteButton = wrapper.find("[data-testid='note-button']");
+        await noteButton.trigger("click");
+
+        const cell = wrapper.find("[data-testid='cell-0-2']");
+        await cell.trigger("click");
+        const numberButton = wrapper.find("[data-testid='number-4']");
+        await numberButton.trigger("click");
+        await numberButton.trigger("click");
+
+        expect(cell.text()).not.toContain("4");
+    });
+
     it("should show cursor-pointer on slot cells", () => {
         spyGeneratePuzzle();
         const wrapper = mount(Game);
