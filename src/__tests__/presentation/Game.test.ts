@@ -43,13 +43,14 @@ describe("Game", () => {
         spyGeneratePuzzle();
         const wrapper = mount(Game);
 
-        const cell = wrapper.find("[data-testid='cell-0-0']");
+        // (0, 2) 是 slot 格子
+        const cell = wrapper.find("[data-testid='cell-0-2']");
         await cell.trigger("click");
 
         expect(cell.classes()).toContain("selected");
     });
 
-    it("should allow selecting a tip cell", async () => {
+    it("should not select a tip cell", async () => {
         spyGeneratePuzzle();
         const wrapper = mount(Game);
 
@@ -57,7 +58,7 @@ describe("Game", () => {
         const cell = wrapper.find("[data-testid='cell-0-0']");
         await cell.trigger("click");
 
-        expect(cell.classes()).toContain("selected");
+        expect(cell.classes()).not.toContain("selected");
     });
 
     it("should deselect when clicking the same cell again", async () => {
@@ -201,6 +202,24 @@ describe("Game", () => {
         await cell.trigger("click");
 
         expect(cell.text()).toBe("");
+    });
+
+    it("should show cursor-pointer on slot cells", () => {
+        spyGeneratePuzzle();
+        const wrapper = mount(Game);
+
+        // (0, 2) 是 slot 格子
+        const slotCell = wrapper.find("[data-testid='cell-0-2']");
+        expect(slotCell.classes()).toContain("cursor-pointer");
+    });
+
+    it("should not show cursor-pointer on tip cells", () => {
+        spyGeneratePuzzle();
+        const wrapper = mount(Game);
+
+        // (0, 0) 是 tip 格子
+        const tipCell = wrapper.find("[data-testid='cell-0-0']");
+        expect(tipCell.classes()).not.toContain("cursor-pointer");
     });
 
     it("should render slot cells as empty", () => {

@@ -1,6 +1,6 @@
 <template>
   <div
-    :class="[selected ? 'selected bg-sky-100' : '']"
+    :class="[selected ? 'selected bg-sky-100' : '', !puzzleCell.isTip ? 'cursor-pointer' : '']"
     class="flex justify-center items-center flex-1 aspect-square"
   >
     <div

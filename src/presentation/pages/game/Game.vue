@@ -93,6 +93,7 @@ function inputToCell(row: number, column: number, value: number) {
 }
 
 function toggleSelectCell(row: number, column: number) {
+    if (puzzle[row][column].isTip) return;
     if (isSelected(row, column)) {
         selectedCell.value = null;
         return;
