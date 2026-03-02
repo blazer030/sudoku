@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { SudokuBoard } from "@/domain/SudokuBoard";
 import { SudokuGenerator } from "@/domain/SudokuGenerator";
+import { SudokuSolver } from "@/domain/SudokuSolver";
 
 const sudokuBoard = new SudokuBoard();
 const generator = new SudokuGenerator();
@@ -20,6 +21,15 @@ describe("SudokuGenerator", () => {
 
         const filledCells = puzzle.flat().filter(cell => cell !== 0).length;
         expect(filledCells).toBe(clueCount);
+    });
+
+    it("should preserve clue values that form part of a valid solution", () => {
+        const puzzle = generator.generatePuzzle(30);
+        const solver = new SudokuSolver();
+        const solution = solver.solve(puzzle);
+
+        expect(solution).not.toBeNull();
+        expect(sudokuBoard.isValidSolution(solution!)).toBe(true);
     });
 
     it("should generate a valid 9x9 board that satisfies all sudoku rules", () => {
