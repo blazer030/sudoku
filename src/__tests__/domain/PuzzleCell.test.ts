@@ -110,5 +110,23 @@ describe("PuzzleCell", () => {
             expect(emptyCell.hasNotes).toBe(false);
             expect(emptyCell.notes).toEqual([]);
         });
+
+        it("should remove a specific note without toggling", () => {
+            emptyCell.toggleNote(1);
+            emptyCell.toggleNote(3);
+            emptyCell.toggleNote(5);
+
+            emptyCell.removeNote(3);
+
+            expect(emptyCell.notes).toEqual([1, 5]);
+        });
+
+        it("should do nothing when removing a note that does not exist", () => {
+            emptyCell.toggleNote(1);
+
+            emptyCell.removeNote(7);
+
+            expect(emptyCell.notes).toEqual([1]);
+        });
     });
 });

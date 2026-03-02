@@ -46,6 +46,10 @@ class PuzzleCell {
         }
     }
 
+    removeNote(value: number): void {
+        this._notes = this._notes.filter((note) => note !== value);
+    }
+
     get hasNotes(): boolean {
         return this._notes.length > 0;
     }
