@@ -173,6 +173,87 @@ describe("Sudoku", () => {
         expect(puzzle[0][2].hasNotes).toBe(false);
     });
 
+    it("should undo input and restore cell to empty", () => {
+        spyGeneratePuzzle();
+        const sudoku = new Sudoku();
+        const puzzle = sudoku.generate("easy");
+
+        sudoku.input(0, 2, 4);
+        expect(puzzle[0][2].input).toBe(4);
+
+        sudoku.undo();
+
+        expect(puzzle[0][2].input).toBe(0);
+    });
+
+    it("should restore peer notes removed by input after undo", () => {
+        spyGeneratePuzzle();
+        const sudoku = new Sudoku();
+        const puzzle = sudoku.generate("easy");
+
+        sudoku.autoNotes();
+        const notesBefore03 = [...puzzle[0][3].notes];
+
+        sudoku.input(0, 2, 4);
+        // peer (0, 3) 的 note 4 應被移除
+        expect(puzzle[0][3].notes).not.toContain(4);
+
+        sudoku.undo();
+
+        expect(puzzle[0][3].notes).toEqual(notesBefore03);
+    });
+
+    it("should undo erase and restore input", () => {
+        spyGeneratePuzzle();
+        const sudoku = new Sudoku();
+        const puzzle = sudoku.generate("easy");
+
+        sudoku.input(0, 2, 4);
+        expect(puzzle[0][2].input).toBe(4);
+
+        sudoku.erase(0, 2);
+        expect(puzzle[0][2].input).toBe(0);
+
+        sudoku.undo();
+        expect(puzzle[0][2].input).toBe(4);
+    });
+
+    it("should undo toggleNote and restore notes", () => {
+        spyGeneratePuzzle();
+        const sudoku = new Sudoku();
+        const puzzle = sudoku.generate("easy");
+
+        sudoku.toggleNote(0, 2, 4);
+        expect(puzzle[0][2].notes).toContain(4);
+
+        sudoku.undo();
+        expect(puzzle[0][2].notes).not.toContain(4);
+    });
+
+    it("should undo autoNotes and restore all cells to previous state", () => {
+        spyGeneratePuzzle();
+        const sudoku = new Sudoku();
+        const puzzle = sudoku.generate("easy");
+
+        // 確認 autoNotes 前所有 slot 都沒有 notes
+        expect(puzzle[0][2].hasNotes).toBe(false);
+
+        sudoku.autoNotes();
+        expect(puzzle[0][2].hasNotes).toBe(true);
+
+        sudoku.undo();
+        expect(puzzle[0][2].hasNotes).toBe(false);
+        expect(puzzle[0][2].notes).toEqual([]);
+    });
+
+    it("should not throw when undo with no history", () => {
+        spyGeneratePuzzle();
+        const sudoku = new Sudoku();
+        sudoku.generate("easy");
+
+        expect(() => { sudoku.undo(); }).not.toThrow();
+    });
+
     it("should return false when a cell has wrong input", () => {
         spyGeneratePuzzle();
         const sudoku = new Sudoku();

@@ -377,6 +377,58 @@ describe("Game", () => {
         expect(clueCell.text()).toBe("5");
     });
 
+    it("should undo the last input when clicking Undo button", async () => {
+        spyGeneratePuzzle();
+        const wrapper = mount(Game);
+
+        // 填入 4 到 (0, 2)
+        const cell = wrapper.find("[data-testid='cell-0-2']");
+        await cell.trigger("click");
+        await wrapper.find("[data-testid='number-4']").trigger("click");
+        expect(cell.text()).toBe("4");
+
+        // 點 Undo
+        const undoButton = wrapper.find("[data-testid='undo-button']");
+        await undoButton.trigger("click");
+
+        expect(cell.text()).toBe("");
+    });
+
+    it("should undo the last erase when clicking Undo button", async () => {
+        spyGeneratePuzzle();
+        const wrapper = mount(Game);
+
+        // 填入 4 到 (0, 2)
+        const cell = wrapper.find("[data-testid='cell-0-2']");
+        await cell.trigger("click");
+        await wrapper.find("[data-testid='number-4']").trigger("click");
+        expect(cell.text()).toBe("4");
+
+        // 取消選取，進入 erase mode，清除格子
+        await cell.trigger("click");
+        await wrapper.find("[data-testid='erase-button']").trigger("click");
+        await cell.trigger("click");
+        expect(cell.text()).toBe("");
+
+        // 點 Undo 還原清除
+        const undoButton = wrapper.find("[data-testid='undo-button']");
+        await undoButton.trigger("click");
+
+        expect(cell.text()).toBe("4");
+    });
+
+    it("should do nothing when clicking Undo with no history", async () => {
+        spyGeneratePuzzle();
+        const wrapper = mount(Game);
+
+        const undoButton = wrapper.find("[data-testid='undo-button']");
+        await undoButton.trigger("click");
+
+        // (0, 2) 是 slot，應仍為空
+        const cell = wrapper.find("[data-testid='cell-0-2']");
+        expect(cell.text()).toBe("");
+    });
+
     it("should show cursor-pointer on slot cells", () => {
         spyGeneratePuzzle();
         const wrapper = mount(Game);

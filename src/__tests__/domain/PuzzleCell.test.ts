@@ -136,4 +136,16 @@ describe("PuzzleCell", () => {
             expect(cell.notes).toEqual([1]);
         });
     });
+
+    describe("Restore", () => {
+        it("should restore input and notes to specified state", () => {
+            const cell = new PuzzleCell(0);
+            cell.input = 5;
+
+            cell.restore(3, [1, 2, 4]);
+
+            expect(cell.input).toBe(3);
+            expect(cell.notes).toEqual([1, 2, 4]);
+        });
+    });
 });

@@ -54,6 +54,11 @@ class PuzzleCell {
         this._notes = this._notes.filter((note) => note !== value);
     }
 
+    restore(input: number, notes: number[]): void {
+        this._input = input;
+        this._notes = [...notes];
+    }
+
     get hasNotes(): boolean {
         return this._notes.length > 0;
     }

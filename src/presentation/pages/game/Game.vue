@@ -40,7 +40,11 @@
       Completed
     </div>
     <div class="flex justify-center px-4 gap-2 mb-4">
-      <Button variant="outline">
+      <Button
+        data-testid="undo-button"
+        variant="outline"
+        @click="sudoku.undo()"
+      >
         Undo
       </Button>
       <Button
@@ -120,8 +124,7 @@ function clickCell(row: number, column: number) {
 }
 
 function noteToCell(row: number, column: number, value: number) {
-  if (puzzle[row][column].isClue || puzzle[row][column].isEntered) return;
-  puzzle[row][column].toggleNote(value);
+  sudoku.toggleNote(row, column, value);
 }
 
 function inputToCell(row: number, column: number, value: number) {
@@ -156,14 +159,8 @@ function isConflict(row: number, column: number) {
 }
 
 function eraseCell(row: number, column: number) {
-  const cell = puzzle[row][column];
-  if (cell.isClue) return;
-  if (cell.isEntered) {
-    sudoku.input(row, column, 0);
-    conflicts.value = [];
-  } else if (cell.hasNotes) {
-    cell.clearNotes();
-  }
+  sudoku.erase(row, column);
+  conflicts.value = [];
 }
 
 function toggleEraseMode() {
@@ -178,7 +175,7 @@ function inputNumber(value: number) {
   if (selectedCell.value) {
     const { row, column } = selectedCell.value;
     if (noteMode.value) {
-      puzzle[row][column].toggleNote(value);
+      sudoku.toggleNote(row, column, value);
       return;
     }
     inputToCell(row, column, value);
