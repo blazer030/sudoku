@@ -26,4 +26,19 @@ describe("gameReducer", () => {
         expect(state.answer).toBe(mockAnswer);
         expect(state.selectedCell).toBeNull();
     });
+
+    it("should set isNoteMode to false and isCompleted to false on INIT_GAME", () => {
+        const initialState: GameState = {
+            puzzle: [],
+            answer: [],
+            selectedCell: { row: 1, column: 1 },
+            isNoteMode: true,
+            isCompleted: true,
+        };
+
+        const state = gameReducer(initialState, initGame(mockPuzzle, mockAnswer));
+
+        expect(state.isNoteMode).toBe(false);
+        expect(state.isCompleted).toBe(false);
+    });
 });
