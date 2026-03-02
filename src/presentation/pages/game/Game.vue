@@ -95,7 +95,11 @@ const puzzle = sudoku.generate();
 const selectedCell = ref<{ row: number; column: number } | null>(null);
 
 function selectCell(row: number, column: number) {
-    selectedCell.value = { row, column };
+    if (isSelected(row, column)) {
+        selectedCell.value = null;
+    } else {
+        selectedCell.value = { row, column };
+    }
 }
 
 function isSelected(row: number, column: number) {

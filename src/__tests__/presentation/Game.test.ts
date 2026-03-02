@@ -49,6 +49,28 @@ describe("Game", () => {
         expect(cell.classes()).toContain("selected");
     });
 
+    it("should allow selecting a tip cell", async () => {
+        spyGeneratePuzzle();
+        const wrapper = mount(Game);
+
+        // (0, 0) 是 tip 格子（值為 5）
+        const cell = wrapper.find("[data-testid='cell-0-0']");
+        await cell.trigger("click");
+
+        expect(cell.classes()).toContain("selected");
+    });
+
+    it("should deselect when clicking the same cell again", async () => {
+        spyGeneratePuzzle();
+        const wrapper = mount(Game);
+
+        const cell = wrapper.find("[data-testid='cell-0-0']");
+        await cell.trigger("click");
+        await cell.trigger("click");
+
+        expect(cell.classes()).not.toContain("selected");
+    });
+
     it("should render slot cells as empty", () => {
         spyGeneratePuzzle();
         const wrapper = mount(Game);
