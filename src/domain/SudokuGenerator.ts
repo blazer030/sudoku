@@ -14,18 +14,20 @@ export class SudokuGenerator {
             ? this.clueCountForDifficulty(clueCountOrDifficulty)
             : clueCountOrDifficulty;
         const board = this.generateFullBoard();
-        const cellsToRemove = 81 - clueCount;
+        this.removeClues(board, 81 - clueCount);
+        return board;
+    }
+
+    removeClues(board: number[][], count: number): void {
         const positions = this.shuffle(
             Array.from({ length: 81 }, (_, index) => index)
         );
 
-        for (let index = 0; index < cellsToRemove; index++) {
+        for (let index = 0; index < count; index++) {
             const row = Math.floor(positions[index] / 9);
             const col = positions[index] % 9;
             board[row][col] = 0;
         }
-
-        return board;
     }
 
     private clueCountForDifficulty(difficulty: string): number {
