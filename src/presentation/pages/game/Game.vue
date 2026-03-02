@@ -45,8 +45,9 @@
       </Button>
       <Button
         data-testid="erase-button"
+        :selected="eraseMode"
         variant="outline"
-        @click="erase"
+        @click="toggleEraseMode"
       >
         Erase
       </Button>
@@ -100,6 +101,7 @@ const selectedNumber = ref<number | null>(null);
 const conflicts = ref<{ row: number; column: number }[]>([]);
 const completed = ref(false);
 const noteMode = ref(false);
+const eraseMode = ref(false);
 
 function clickCell(row: number, column: number) {
     if (selectedNumber.value !== null) {
@@ -149,16 +151,11 @@ function isConflict(row: number, column: number) {
     return conflicts.value.some(c => c.row === row && c.column === column);
 }
 
-function erase() {
-    if (!selectedCell.value) return;
-    const { row, column } = selectedCell.value;
-    const cell = puzzle[row][column];
-    if (cell.isClue) return;
-    if (cell.isEntered) {
-        sudoku.input(row, column, 0);
-        conflicts.value = [];
-    } else if (cell.hasNotes) {
-        cell.clearNotes();
+function toggleEraseMode() {
+    eraseMode.value = !eraseMode.value;
+    if (eraseMode.value) {
+        selectedCell.value = null;
+        noteMode.value = false;
     }
 }
 

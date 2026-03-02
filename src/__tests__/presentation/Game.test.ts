@@ -312,22 +312,14 @@ describe("Game", () => {
         expect(cell06.text()).not.toContain("4");
     });
 
-    it("should erase input from selected cell when clicking Erase button", async () => {
+    it("should enter erase mode when clicking Erase button", async () => {
         spyGeneratePuzzle();
         const wrapper = mount(Game);
 
-        // 填入 4 到 (0, 2)
-        const cell = wrapper.find("[data-testid='cell-0-2']");
-        await cell.trigger("click");
-        const numberButton = wrapper.find("[data-testid='number-4']");
-        await numberButton.trigger("click");
-        expect(cell.text()).toBe("4");
-
-        // 格子仍處於選取狀態，點 Erase
         const eraseButton = wrapper.find("[data-testid='erase-button']");
         await eraseButton.trigger("click");
 
-        expect(cell.text()).toBe("");
+        expect(eraseButton.classes()).toContain("bg-sky-50");
     });
 
     it("should show cursor-pointer on slot cells", () => {
