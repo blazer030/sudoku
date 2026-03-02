@@ -184,73 +184,86 @@
 
 ## Phase 3: Game Interaction（TDD 行為變更）
 
-> 使用 Vue `reactive()` 包裝 Sudoku class，Vue Test Utils 測試 UI。
-> 核心優勢：`reactive(new Sudoku())` 讓 Vue 直接追蹤 class 內部狀態變化，不需 reducer。
+> 直接對 Game.vue 元件做測試（Vue Test Utils），不需要額外的 composable 層。
+> `reactive(new Sudoku())` 讓 Vue 直接追蹤 class 狀態，UI 狀態用 `ref()` 管理。
+> 如果元件變太複雜，再於 refactor 階段抽 composable。
 
-### 3.1 遊戲狀態 Composable — 基礎架構
+### 3.1 Game 元件 — 基礎渲染
 
-> `src/__tests__/presentation/useGame.test.ts` + `src/presentation/pages/game/useGame.ts`
+> `src/__tests__/presentation/Game.test.ts` + `src/presentation/pages/game/Game.vue`
 
-- [ ] **測試**：`useGame` — 呼叫 `startGame()` 後 puzzle 不為空
-- [ ] **測試**：`useGame` — 初始 selectedCell 為 null、isNoteMode 為 false、isCompleted 為 false
+- [x] **測試**：渲染 9x9 grid，所有 tip 格子顯示數字
+- [x] **測試**：slot 格子初始為空
 
 ### 3.2 格子選取
 
-- [ ] **測試**：`selectCell(row, column)` — 設定 selectedCell 座標
-- [ ] **測試**：`selectCell` — 選取 tip 格子時仍可選取
-- [ ] **測試**：`selectCell` — 再次選取同一格子時取消選取
+- [x] **測試**：點擊格子後該格子有選取樣式
+- [x] **測試**：點擊 tip 格子時仍可選取
+- [x] **測試**：再次點擊同一格子時取消選取
 
-### 3.3 數字輸入
+### 3.3 元件抽取（結構性變更）
 
-- [ ] **測試**：`inputNumber(value)` — 在選取的 slot 格子中輸入數字
-- [ ] **測試**：`inputNumber` — 未選取格子時忽略
-- [ ] **測試**：`inputNumber` — 選取 tip 格子時忽略
-- [ ] **測試**：`inputNumber` — 輸入後更新衝突列表
-- [ ] **測試**：`inputNumber` — 填滿所有格子且正確時 isCompleted 為 true
+- [x] **重構**：從 Game.vue 抽出 Cell 元件，接受 `puzzleCell` 和 `selected` props，處理 tip/input/notes 顯示與選取樣式
+- [x] **重構**：Button 元件加 `selected` prop，處理選取樣式（用於數字按鈕）
+- [x] 確認現有測試通過
 
-### 3.4 筆記模式
+### 3.4 數字輸入 — 格子優先模式（先選格子、再按數字）
 
-- [ ] **測試**：`toggleNoteMode()` — 切換 isNoteMode
-- [ ] **測試**：`inputNumber` — noteMode 為 true 時操作 notes 而非 input
-- [ ] **測試**：`inputNumber` — noteMode 為 true 時 toggle 已有的 note
+- [x] **測試**：選取 slot 格子後點擊數字按鈕，格子顯示該數字
+- [x] **測試**：未選取格子時點擊數字按鈕無反應
+- [x] **測試**：選取 tip 格子時點擊數字按鈕無反應
 
-### 3.5 清除與 Undo
+### 3.5 數字輸入 — 數字優先模式（先選數字、再點格子）
 
-- [ ] **測試**：`erase()` — 清除選取格子的 input
-- [ ] **測試**：`erase` — 清除選取格子的 notes
-- [ ] **測試**：`erase` — tip 格子不可清除
-- [ ] **測試**：`undo()` — 還原上一次的 input 操作
-- [ ] **測試**：`undo` — 還原上一次的 erase 操作
-- [ ] **測試**：`undo` — 無歷史記錄時忽略
+- [x] **測試**：未選取格子時點擊數字按鈕，該按鈕進入選取狀態
+- [x] **測試**：數字選取後點擊 slot 格子，填入該數字
+- [x] **測試**：數字選取後可連續點擊多個 slot 格子，都填入該數字
+- [x] **測試**：數字選取後點擊 tip 格子無反應
+- [x] **測試**：再次點擊同一數字按鈕取消數字選取
+- [ ] **測試**：數字選取後點擊已有相同數字的格子，清空該格子
 
-### 3.6 計時器
+### 3.5.1 格子選取規則修正
 
-- [ ] **測試**：`tick()` — timer 遞增 1 秒
-- [ ] **測試**：`pause()` / `resume()` — 暫停/繼續計時
-- [ ] **測試**：遊戲完成後 tick 不再增加
+- [ ] **修改**：tip 格子不能被 selected（更新現有測試）
+- [ ] **修改**：slot 格子加 cursor-pointer
 
-### 3.7 UI 元件測試 — Cell 互動
+### 3.6 衝突與完成
 
-> `src/__tests__/presentation/GameBoard.test.ts`
+- [ ] **測試**：輸入錯誤數字後衝突格子顯示錯誤樣式
+- [ ] **測試**：填滿所有格子且正確時顯示完成狀態
 
-- [ ] **測試**：渲染 9x9 grid，所有 tip 格子顯示數字
-- [ ] **測試**：點擊格子觸發選取，選取格子有高亮樣式
-- [ ] **測試**：點擊數字按鈕在選取的 slot 格子中填入數字
+### 3.7 筆記模式
+
 - [ ] **測試**：點擊 Note 按鈕切換筆記模式
-- [ ] **測試**：點擊 Erase 按鈕清除選取格子
-- [ ] **測試**：點擊 Undo 按鈕還原操作
+- [ ] **測試**：筆記模式下點擊數字按鈕，格子顯示小數字筆記
+- [ ] **測試**：筆記模式下再次點擊已有的筆記數字，移除該筆記
 
-### 3.8 高亮系統
+### 3.8 清除與 Undo
+
+- [ ] **測試**：點擊 Erase 按鈕清除選取格子的輸入
+- [ ] **測試**：點擊 Erase 按鈕清除選取格子的筆記
+- [ ] **測試**：選取 tip 格子時點擊 Erase 無反應
+- [ ] **測試**：點擊 Undo 按鈕還原上一次輸入
+- [ ] **測試**：點擊 Undo 按鈕還原上一次清除
+- [ ] **測試**：無操作歷史時點擊 Undo 無反應
+
+### 3.9 計時器
+
+- [ ] **測試**：遊戲開始後計時器遞增
+- [ ] **測試**：暫停/繼續計時
+- [ ] **測試**：遊戲完成後計時器停止
+
+### 3.10 高亮系統
 
 - [ ] **測試**：選取格子時同行/列/宮背景高亮
 - [ ] **測試**：選取有數字的格子時相同數字高亮
 - [ ] **測試**：衝突格子顯示錯誤樣式
 
-### 3.9 數字按鈕狀態
+### 3.11 數字按鈕狀態
 
 - [ ] **測試**：某數字出現 9 次且全部正確時該按鈕 disabled
 
-### 3.10 新遊戲流程
+### 3.12 新遊戲流程
 
 - [ ] **測試**：Home 頁點擊 New Game 導航到 Game 頁
 - [ ] **測試**：Game 頁載入時自動初始化新 puzzle
