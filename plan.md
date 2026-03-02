@@ -1,5 +1,7 @@
 # Sudoku TDD 實作計畫
 
+> **TDD Commit 規則**：每次測試從 RED 變 GREEN 就立即 commit，不要等整個功能完成才 commit。
+
 ## Phase 1: Package Upgrades（結構性變更）
 
 > 每個步驟獨立 commit。每步完成後確認 `npm test`、`npm run lint`、`npm run build` 皆通過。
