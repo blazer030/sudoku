@@ -92,10 +92,19 @@ const noteMode = ref(false);
 
 function clickCell(row: number, column: number) {
     if (selectedNumber.value !== null) {
-        inputToCell(row, column, selectedNumber.value);
+        if (noteMode.value) {
+            noteToCell(row, column, selectedNumber.value);
+        } else {
+            inputToCell(row, column, selectedNumber.value);
+        }
         return;
     }
     toggleSelectCell(row, column);
+}
+
+function noteToCell(row: number, column: number, value: number) {
+    if (puzzle[row][column].isClue || puzzle[row][column].isEntered) return;
+    puzzle[row][column].toggleNote(value);
 }
 
 function inputToCell(row: number, column: number, value: number) {

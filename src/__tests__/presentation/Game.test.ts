@@ -250,6 +250,29 @@ describe("Game", () => {
         expect(cell.text()).not.toContain("4");
     });
 
+    it("should add note instead of input in number-first mode with note mode on", async () => {
+        spyGeneratePuzzle();
+        const wrapper = mount(Game);
+
+        // 開啟筆記模式
+        const noteButton = wrapper.find("[data-testid='note-button']");
+        await noteButton.trigger("click");
+
+        // 數字優先：先選數字 4
+        const numberButton = wrapper.find("[data-testid='number-4']");
+        await numberButton.trigger("click");
+
+        // 再點 slot 格子 (0, 2)
+        const cell = wrapper.find("[data-testid='cell-0-2']");
+        await cell.trigger("click");
+
+        // 應該是加 note 而非 input
+        expect(cell.text()).toContain("4");
+        // 確認不是 input（input 會顯示大字，note 是小字在 flex-wrap 中）
+        const noteContainer = cell.find(".flex.flex-wrap");
+        expect(noteContainer.exists()).toBe(true);
+    });
+
     it("should show cursor-pointer on slot cells", () => {
         spyGeneratePuzzle();
         const wrapper = mount(Game);
