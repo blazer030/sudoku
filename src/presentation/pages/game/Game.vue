@@ -43,7 +43,11 @@
       <Button variant="outline">
         Undo
       </Button>
-      <Button variant="outline">
+      <Button
+        data-testid="erase-button"
+        variant="outline"
+        @click="erase"
+      >
         Erase
       </Button>
       <Button
@@ -143,6 +147,19 @@ function isSelected(row: number, column: number) {
 
 function isConflict(row: number, column: number) {
     return conflicts.value.some(c => c.row === row && c.column === column);
+}
+
+function erase() {
+    if (!selectedCell.value) return;
+    const { row, column } = selectedCell.value;
+    const cell = puzzle[row][column];
+    if (cell.isClue) return;
+    if (cell.isEntered) {
+        sudoku.input(row, column, 0);
+        conflicts.value = [];
+    } else if (cell.hasNotes) {
+        cell.clearNotes();
+    }
 }
 
 function inputNumber(value: number) {
