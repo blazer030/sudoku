@@ -10,9 +10,9 @@ describe("Sudoku", () => {
         expect(tipCell).toBeDefined();
         if (!tipCell) return;
         const row = puzzle.findIndex(puzzleRow => puzzleRow.includes(tipCell));
-        const col = puzzle[row].indexOf(tipCell);
+        const column = puzzle[row].indexOf(tipCell);
 
-        expect(sudoku.check(row, col, tipCell.value)).toBe(true);
-        expect(sudoku.check(row, col, tipCell.value === 9 ? 1 : tipCell.value + 1)).toBe(false);
+        expect(sudoku.check(row, column, tipCell.value)).toBe(true);
+        expect(sudoku.check(row, column, tipCell.value === 9 ? 1 : tipCell.value + 1)).toBe(false);
     });
 });

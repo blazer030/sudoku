@@ -1,8 +1,8 @@
 export class SudokuBoard {
-    isValidPlacement(board: number[][], row: number, col: number, num: number): boolean {
-        return this.isValidInRow(board, row, num)
-            && this.isValidInColumn(board, col, num)
-            && this.isValidInBox(board, row, col, num);
+    isValidPlacement(board: number[][], row: number, column: number, digit: number): boolean {
+        return this.isValidInRow(board, row, digit)
+            && this.isValidInColumn(board, column, digit)
+            && this.isValidInBox(board, row, column, digit);
     }
 
     isValidSolution(board: number[][]): boolean {
@@ -10,11 +10,11 @@ export class SudokuBoard {
             const row = board[index];
             const column = board.map(row => row[index]);
             const boxRowStart = Math.floor(index / 3) * 3;
-            const boxColStart = (index % 3) * 3;
+            const boxColumnStart = (index % 3) * 3;
             const box = [];
             for (let currentRow = boxRowStart; currentRow < boxRowStart + 3; currentRow++) {
-                for (let currentCol = boxColStart; currentCol < boxColStart + 3; currentCol++) {
-                    box.push(board[currentRow][currentCol]);
+                for (let currentColumn = boxColumnStart; currentColumn < boxColumnStart + 3; currentColumn++) {
+                    box.push(board[currentRow][currentColumn]);
                 }
             }
             if (!this.hasAllDigits(row) || !this.hasAllDigits(column) || !this.hasAllDigits(box)) {
@@ -29,20 +29,20 @@ export class SudokuBoard {
             && numbers.every(number => number >= 1 && number <= 9);
     }
 
-    private isValidInRow(board: number[][], row: number, num: number): boolean {
-        return !board[row].includes(num);
+    private isValidInRow(board: number[][], row: number, digit: number): boolean {
+        return !board[row].includes(digit);
     }
 
-    private isValidInColumn(board: number[][], col: number, num: number): boolean {
-        return !board.some(row => row[col] === num);
+    private isValidInColumn(board: number[][], column: number, digit: number): boolean {
+        return !board.some(row => row[column] === digit);
     }
 
-    private isValidInBox(board: number[][], row: number, col: number, num: number): boolean {
+    private isValidInBox(board: number[][], row: number, column: number, digit: number): boolean {
         const boxRowStart = Math.floor(row / 3) * 3;
-        const boxColStart = Math.floor(col / 3) * 3;
+        const boxColumnStart = Math.floor(column / 3) * 3;
         for (let currentRow = boxRowStart; currentRow < boxRowStart + 3; currentRow++) {
-            for (let currentCol = boxColStart; currentCol < boxColStart + 3; currentCol++) {
-                if (board[currentRow][currentCol] === num) return false;
+            for (let currentColumn = boxColumnStart; currentColumn < boxColumnStart + 3; currentColumn++) {
+                if (board[currentRow][currentColumn] === digit) return false;
             }
         }
         return true;

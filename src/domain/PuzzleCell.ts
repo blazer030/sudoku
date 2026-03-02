@@ -40,7 +40,7 @@ class PuzzleCell {
         if (this.isTip || this.isEntered) return;
 
         if (this._notes.includes(value)) {
-            this._notes = this._notes.filter((x) => x !== value);
+            this._notes = this._notes.filter((note) => note !== value);
         } else {
             this._notes.push(value);
         }

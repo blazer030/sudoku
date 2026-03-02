@@ -27,8 +27,8 @@ export class SudokuGenerator {
 
         for (let index = 0; index < count; index++) {
             const row = Math.floor(positions[index] / 9);
-            const col = positions[index] % 9;
-            board[row][col] = 0;
+            const column = positions[index] % 9;
+            board[row][column] = 0;
         }
     }
 
@@ -38,8 +38,8 @@ export class SudokuGenerator {
             medium: [27, 35],
             hard: [22, 26],
         };
-        const [min, max] = ranges[difficulty];
-        return Math.floor(Math.random() * (max - min + 1)) + min;
+        const [minimum, maximum] = ranges[difficulty];
+        return Math.floor(Math.random() * (maximum - minimum + 1)) + minimum;
     }
 
     private shuffle(array: number[]): number[] {

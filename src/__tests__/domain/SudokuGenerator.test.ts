@@ -21,8 +21,8 @@ describe("SudokuGenerator", () => {
         puzzle.flat().forEach((cell, index) => {
             if (cell !== 0) {
                 const row = Math.floor(index / 9);
-                const col = index % 9;
-                expect(cell).toBe(answer[row][col]);
+                const column = index % 9;
+                expect(cell).toBe(answer[row][column]);
             }
         });
     });
