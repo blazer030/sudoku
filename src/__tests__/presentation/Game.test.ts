@@ -85,6 +85,34 @@ describe("Game", () => {
         expect(cell.text()).toBe("4");
     });
 
+    it("should ignore number button when no cell is selected", async () => {
+        spyGeneratePuzzle();
+        const wrapper = mount(Game);
+
+        // 不選取格子，直接按數字
+        const numberButton = wrapper.find("[data-testid='number-4']");
+        await numberButton.trigger("click");
+
+        // (0, 2) 是 slot 格子，應該仍然是空的
+        const cell = wrapper.find("[data-testid='cell-0-2']");
+        expect(cell.text()).toBe("");
+    });
+
+    it("should ignore number button when tip cell is selected", async () => {
+        spyGeneratePuzzle();
+        const wrapper = mount(Game);
+
+        // 選取 (0, 0) tip 格子（值為 5），按數字 4
+        const tipCell = wrapper.find("[data-testid='cell-0-0']");
+        await tipCell.trigger("click");
+
+        const numberButton = wrapper.find("[data-testid='number-4']");
+        await numberButton.trigger("click");
+
+        // tip 格子仍顯示原始值
+        expect(tipCell.text()).toBe("5");
+    });
+
     it("should render slot cells as empty", () => {
         spyGeneratePuzzle();
         const wrapper = mount(Game);
