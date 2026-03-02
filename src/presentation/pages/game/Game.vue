@@ -21,6 +21,7 @@
             :data-testid="`cell-${rowIndex}-${columnIndex}`"
             :puzzle-cell="puzzleCell"
             :selected="isSelected(rowIndex, columnIndex)"
+            :conflict="isConflict(rowIndex, columnIndex)"
             :class="[
             columnIndex % 3 !== 0 ? 'border-l-2' : '',
             columnIndex === 8 ? 'border-r-2' : '',
@@ -74,6 +75,7 @@ const puzzle = sudoku.generate();
 
 const selectedCell = ref<{ row: number; column: number } | null>(null);
 const selectedNumber = ref<number | null>(null);
+const conflicts = ref<{ row: number; column: number }[]>([]);
 
 function clickCell(row: number, column: number) {
     if (selectedNumber.value !== null) {
@@ -87,9 +89,11 @@ function inputToCell(row: number, column: number, value: number) {
     if (puzzle[row][column].isClue) return;
     if (puzzle[row][column].input === value) {
         sudoku.input(row, column, 0);
+        conflicts.value = [];
         return;
     }
     sudoku.input(row, column, value);
+    conflicts.value = sudoku.findConflicts(row, column, value);
 }
 
 function toggleSelectCell(row: number, column: number) {
@@ -103,6 +107,10 @@ function toggleSelectCell(row: number, column: number) {
 
 function isSelected(row: number, column: number) {
     return selectedCell.value?.row === row && selectedCell.value?.column === column;
+}
+
+function isConflict(row: number, column: number) {
+    return conflicts.value.some(c => c.row === row && c.column === column);
 }
 
 function inputNumber(value: number) {
