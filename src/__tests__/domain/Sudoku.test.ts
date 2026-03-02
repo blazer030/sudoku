@@ -13,4 +13,13 @@ describe("Sudoku", () => {
 
         expect(values1).not.toEqual(values2);
     });
+
+    it("should generate an easy puzzle with correct number of tips", () => {
+        const sudoku = new Sudoku();
+        const puzzle = sudoku.generate("easy");
+
+        const tips = puzzle.flat().filter(cell => cell.isTip).length;
+        expect(tips).toBeGreaterThanOrEqual(36);
+        expect(tips).toBeLessThanOrEqual(45);
+    });
 });

@@ -9,16 +9,18 @@ export class SudokuGenerator {
         return board;
     }
 
-    generatePuzzle(clueCountOrDifficulty: number | string): number[][] {
+    generatePuzzle(clueCountOrDifficulty: number | string, fullBoard?: number[][]): number[][] {
         const clueCount = typeof clueCountOrDifficulty === "string"
             ? this.clueCountForDifficulty(clueCountOrDifficulty)
             : clueCountOrDifficulty;
-        const board = this.generateFullBoard();
+        const board = fullBoard
+            ? fullBoard.map(row => [...row])
+            : this.generateFullBoard();
         this.removeClues(board, 81 - clueCount);
         return board;
     }
 
-    removeClues(board: number[][], count: number): void {
+    private removeClues(board: number[][], count: number): void {
         const positions = this.shuffle(
             Array.from({ length: 81 }, (_, index) => index)
         );

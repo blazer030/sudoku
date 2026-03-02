@@ -6,11 +6,9 @@ class Sudoku {
     private _puzzle: PuzzleCell[][] = [];
     private generator = new SudokuGenerator();
 
-    public generate() {
+    public generate(difficulty: string = "easy") {
         this._answer = this.generator.generateFullBoard();
-
-        const board = this._answer.map(row => [...row]);
-        this.generator.removeClues(board, 30);
+        const board = this.generator.generatePuzzle(difficulty, this._answer);
 
         this._puzzle = board.map((row) => {
             return row.map((value) => {
