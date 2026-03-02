@@ -111,6 +111,37 @@ describe("Sudoku", () => {
         expect(sudoku.isCompleted()).toBe(false);
     });
 
+    it("should fill candidate notes for all empty cells with autoNotes", () => {
+        spyGeneratePuzzle();
+        const sudoku = new Sudoku();
+        const puzzle = sudoku.generate("easy");
+
+        sudoku.autoNotes();
+
+        // (0, 2) 是空格，答案是 4，候選數字不應包含同行/列/宮已有的數字
+        // 行 0: [5, 3, _, _, 7, _, _, _, _] → 有 5, 3, 7
+        // 列 2: [_, _, 8, _, _, _, _, _, _] → 有 8
+        // 宮 (0,0): [5, 3, _, 6, _, _, _, 9, 8] → 有 5, 3, 6, 9, 8
+        // 候選：1-9 排除 {3, 5, 6, 7, 8, 9} = {1, 2, 4}
+        expect(puzzle[0][2].notes).toEqual(expect.arrayContaining([1, 2, 4]));
+        expect(puzzle[0][2].notes).toHaveLength(3);
+    });
+
+    it("should not overwrite existing notes or inputs with autoNotes", () => {
+        spyGeneratePuzzle();
+        const sudoku = new Sudoku();
+        const puzzle = sudoku.generate("easy");
+
+        // 先填入一個數字
+        sudoku.input(0, 2, 4);
+
+        sudoku.autoNotes();
+
+        // 已填入的格子不應被覆蓋
+        expect(puzzle[0][2].input).toBe(4);
+        expect(puzzle[0][2].hasNotes).toBe(false);
+    });
+
     it("should return false when a cell has wrong input", () => {
         spyGeneratePuzzle();
         const sudoku = new Sudoku();

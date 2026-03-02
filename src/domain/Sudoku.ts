@@ -1,5 +1,6 @@
 import { ConflictDetector, Conflict } from "@/domain/ConflictDetector";
 import PuzzleCell from "@/domain/PuzzleCell";
+import { SudokuBoard } from "@/domain/SudokuBoard";
 import { Difficulty, SudokuGenerator } from "@/domain/SudokuGenerator";
 
 class Sudoku {
@@ -7,6 +8,7 @@ class Sudoku {
     private _puzzle: PuzzleCell[][] = [];
     private generator = new SudokuGenerator();
     private conflictDetector = new ConflictDetector();
+    private board = new SudokuBoard();
 
     public generate(difficulty: Difficulty = "easy") {
         const { puzzle, answer } = this.generator.generatePuzzle(difficulty);
@@ -38,11 +40,29 @@ class Sudoku {
         return this._answer[row][column] === value;
     }
 
-    public findConflicts(row: number, column: number, value: number): Conflict[] {
-        const board = this._puzzle.map(puzzleRow =>
+    public autoNotes(): void {
+        const currentBoard = this.getCurrentBoard();
+        for (let row = 0; row < 9; row++) {
+            for (let col = 0; col < 9; col++) {
+                const cell = this._puzzle[row][col];
+                if (cell.isClue || cell.isEntered) continue;
+                for (let digit = 1; digit <= 9; digit++) {
+                    if (this.board.isValidPlacement(currentBoard, row, col, digit)) {
+                        cell.toggleNote(digit);
+                    }
+                }
+            }
+        }
+    }
+
+    private getCurrentBoard(): number[][] {
+        return this._puzzle.map(puzzleRow =>
             puzzleRow.map(cell => cell.isClue ? cell.value : cell.input)
         );
-        return this.conflictDetector.findConflicts(board, row, column, value);
+    }
+
+    public findConflicts(row: number, column: number, value: number): Conflict[] {
+        return this.conflictDetector.findConflicts(this.getCurrentBoard(), row, column, value);
     }
 }
 
