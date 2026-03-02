@@ -18,6 +18,7 @@
         <div
             v-for="(puzzleCell, columnIndex) in row"
             :key="`cell-${rowIndex}-${columnIndex}`"
+            :data-testid="`cell-${rowIndex}-${columnIndex}`"
             :class="[
             columnIndex % 3 !== 0 ? 'border-l-2' : '',
             columnIndex === 8 ? 'border-r-2' : '',
