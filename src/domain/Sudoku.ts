@@ -21,6 +21,15 @@ class Sudoku {
         return this._puzzle;
     }
 
+    public isCompleted(): boolean {
+        return this._puzzle.every((puzzleRow, rowIndex) =>
+            puzzleRow.every((cell, columnIndex) => {
+                const value = cell.isTip ? cell.value : cell.input;
+                return value === this._answer[rowIndex][columnIndex];
+            })
+        );
+    }
+
     public input(row: number, column: number, value: number): void {
         this._puzzle[row][column].input = value;
     }

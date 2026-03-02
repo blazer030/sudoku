@@ -116,4 +116,48 @@ describe("Sudoku", () => {
 
         expect(puzzle[0][2].input).toBe(4);
     });
+
+    it("should return true when all cells are correctly filled", () => {
+        spyGeneratePuzzle();
+        const sudoku = new Sudoku();
+        sudoku.generate("easy");
+
+        for (let row = 0; row < 9; row++) {
+            for (let column = 0; column < 9; column++) {
+                if (knownPuzzle[row][column] === 0) {
+                    sudoku.input(row, column, knownAnswer[row][column]);
+                }
+            }
+        }
+
+        expect(sudoku.isCompleted()).toBe(true);
+    });
+
+    it("should return false when there are empty cells", () => {
+        spyGeneratePuzzle();
+        const sudoku = new Sudoku();
+        sudoku.generate("easy");
+
+        // 不填任何數字
+        expect(sudoku.isCompleted()).toBe(false);
+    });
+
+    it("should return false when a cell has wrong input", () => {
+        spyGeneratePuzzle();
+        const sudoku = new Sudoku();
+        sudoku.generate("easy");
+
+        // 填入所有正確答案，但最後一個故意填錯
+        for (let row = 0; row < 9; row++) {
+            for (let column = 0; column < 9; column++) {
+                if (knownPuzzle[row][column] === 0) {
+                    sudoku.input(row, column, knownAnswer[row][column]);
+                }
+            }
+        }
+        // 把 (0, 2) 填入錯誤值（正確是 4，填 1）
+        sudoku.input(0, 2, 1);
+
+        expect(sudoku.isCompleted()).toBe(false);
+    });
 });
