@@ -32,6 +32,14 @@ describe("SudokuGenerator", () => {
         expect(sudokuBoard.isValidSolution(solution!)).toBe(true);
     });
 
+    it("should generate an easy puzzle with 36-45 clues", () => {
+        const puzzle = generator.generatePuzzle("easy");
+        const filledCells = puzzle.flat().filter(cell => cell !== 0).length;
+
+        expect(filledCells).toBeGreaterThanOrEqual(36);
+        expect(filledCells).toBeLessThanOrEqual(45);
+    });
+
     it("should generate a valid 9x9 board that satisfies all sudoku rules", () => {
         const board = generator.generateFullBoard();
 

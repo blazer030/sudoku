@@ -9,7 +9,10 @@ export class SudokuGenerator {
         return board;
     }
 
-    generatePuzzle(clueCount: number): number[][] {
+    generatePuzzle(clueCountOrDifficulty: number | string): number[][] {
+        const clueCount = typeof clueCountOrDifficulty === "string"
+            ? this.clueCountForDifficulty(clueCountOrDifficulty)
+            : clueCountOrDifficulty;
         const board = this.generateFullBoard();
         const cellsToRemove = 81 - clueCount;
         const positions = this.shuffle(
@@ -23,6 +26,16 @@ export class SudokuGenerator {
         }
 
         return board;
+    }
+
+    private clueCountForDifficulty(difficulty: string): number {
+        const ranges: Record<string, [number, number]> = {
+            easy: [36, 45],
+            medium: [27, 35],
+            hard: [22, 26],
+        };
+        const [min, max] = ranges[difficulty];
+        return Math.floor(Math.random() * (max - min + 1)) + min;
     }
 
     private fillBoard(board: number[][]): boolean {
