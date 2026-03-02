@@ -138,6 +138,50 @@ describe("Game", () => {
         expect(cell.text()).toBe("4");
     });
 
+    it("should fill multiple slot cells consecutively in number-first mode", async () => {
+        spyGeneratePuzzle();
+        const wrapper = mount(Game);
+
+        // 選數字 1
+        const numberButton = wrapper.find("[data-testid='number-1']");
+        await numberButton.trigger("click");
+
+        // 連續點兩個 slot 格子
+        const cell1 = wrapper.find("[data-testid='cell-0-3']");
+        await cell1.trigger("click");
+        const cell2 = wrapper.find("[data-testid='cell-0-5']");
+        await cell2.trigger("click");
+
+        expect(cell1.text()).toBe("1");
+        expect(cell2.text()).toBe("1");
+    });
+
+    it("should not fill tip cell in number-first mode", async () => {
+        spyGeneratePuzzle();
+        const wrapper = mount(Game);
+
+        // 選數字 4，點 tip 格子 (0, 0)
+        const numberButton = wrapper.find("[data-testid='number-4']");
+        await numberButton.trigger("click");
+
+        const tipCell = wrapper.find("[data-testid='cell-0-0']");
+        await tipCell.trigger("click");
+
+        // tip 格子仍顯示原始值 5
+        expect(tipCell.text()).toBe("5");
+    });
+
+    it("should deselect number when clicking the same number button again", async () => {
+        spyGeneratePuzzle();
+        const wrapper = mount(Game);
+
+        const numberButton = wrapper.find("[data-testid='number-4']");
+        await numberButton.trigger("click");
+        await numberButton.trigger("click");
+
+        expect(numberButton.classes()).not.toContain("bg-sky-50");
+    });
+
     it("should render slot cells as empty", () => {
         spyGeneratePuzzle();
         const wrapper = mount(Game);

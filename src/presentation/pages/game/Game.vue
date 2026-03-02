@@ -99,7 +99,7 @@ function inputNumber(value: number) {
         if (puzzle[row][column].isTip) return;
         sudoku.input(row, column, value);
     } else {
-        selectedNumber.value = value;
+        selectedNumber.value = selectedNumber.value === value ? null : value;
     }
 }
 </script>
