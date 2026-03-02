@@ -105,4 +105,15 @@ describe("Sudoku", () => {
         expect(conflicts).toContainEqual({ row: 2, column: 1 });
         expect(conflicts).toHaveLength(2);
     });
+
+    it("should allow inputting a number into a slot cell", () => {
+        spyGeneratePuzzle();
+        const sudoku = new Sudoku();
+        const puzzle = sudoku.generate("easy");
+
+        // (0, 2) 是空格，填入 4
+        sudoku.input(0, 2, 4);
+
+        expect(puzzle[0][2].input).toBe(4);
+    });
 });

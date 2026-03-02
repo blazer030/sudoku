@@ -21,6 +21,10 @@ class Sudoku {
         return this._puzzle;
     }
 
+    public input(row: number, column: number, value: number): void {
+        this._puzzle[row][column].input = value;
+    }
+
     public check(row: number, column: number, value: number): boolean {
         return this._answer[row][column] === value;
     }
