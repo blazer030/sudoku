@@ -133,9 +133,9 @@
 
 ### 2.11 遊戲完成偵測
 
-- [ ] **測試**：`isCompleted(puzzle, answer)` — 所有格子正確填入時回傳 true
-- [ ] **測試**：`isCompleted` — 有空格時回傳 false
-- [ ] **測試**：`isCompleted` — 有錯誤填入時回傳 false
+- [x] **測試**：`isCompleted()` — 所有格子正確填入時回傳 true
+- [x] **測試**：`isCompleted` — 有空格時回傳 false
+- [x] **測試**：`isCompleted` — 有錯誤填入時回傳 false
 
 ---
 
