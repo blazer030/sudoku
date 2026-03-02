@@ -19,6 +19,16 @@ export class ConflictDetector {
             }
         }
 
+        const boxRowStart = Math.floor(row / 3) * 3;
+        const boxColumnStart = Math.floor(column / 3) * 3;
+        for (let currentRow = boxRowStart; currentRow < boxRowStart + 3; currentRow++) {
+            for (let currentColumn = boxColumnStart; currentColumn < boxColumnStart + 3; currentColumn++) {
+                if (currentRow !== row && currentColumn !== column && board[currentRow][currentColumn] === value) {
+                    conflicts.push({ row: currentRow, column: currentColumn });
+                }
+            }
+        }
+
         return conflicts;
     }
 }

@@ -79,4 +79,30 @@ describe("Sudoku", () => {
 
         expect(conflicts).toContainEqual({ row: 2, column: 1 });
     });
+
+    it("should return box conflicts when same number exists in the box", () => {
+        spyGeneratePuzzle();
+        const sudoku = new Sudoku();
+        sudoku.generate("easy");
+
+        // (0, 2) 是空格，填入 6 → 與同宮 (1, 0) 的 tip=6 衝突
+        const conflicts = sudoku.findConflicts(0, 2, 6);
+
+        expect(conflicts).toContainEqual({ row: 1, column: 0 });
+    });
+
+    it("should return all conflicts across row, column, and box", () => {
+        spyGeneratePuzzle();
+        const sudoku = new Sudoku();
+        sudoku.generate("easy");
+
+        // (1, 1) 是空格，填入 9
+        // 行衝突：(1, 4) tip=9
+        // 列衝突：(2, 1) tip=9
+        const conflicts = sudoku.findConflicts(1, 1, 9);
+
+        expect(conflicts).toContainEqual({ row: 1, column: 4 });
+        expect(conflicts).toContainEqual({ row: 2, column: 1 });
+        expect(conflicts).toHaveLength(2);
+    });
 });
