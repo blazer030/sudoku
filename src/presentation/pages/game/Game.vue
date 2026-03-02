@@ -54,6 +54,13 @@
       >
         Note
       </Button>
+      <Button
+        data-testid="auto-notes-button"
+        variant="outline"
+        @click="sudoku.autoNotes()"
+      >
+        Auto
+      </Button>
     </div>
     <div class="flex px-4 gap-2">
       <div

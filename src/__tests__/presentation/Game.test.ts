@@ -273,6 +273,20 @@ describe("Game", () => {
         expect(noteContainer.exists()).toBe(true);
     });
 
+    it("should fill candidate notes for empty cells when clicking auto-notes button", async () => {
+        spyGeneratePuzzle();
+        const wrapper = mount(Game);
+
+        const autoNotesButton = wrapper.find("[data-testid='auto-notes-button']");
+        await autoNotesButton.trigger("click");
+
+        // (0, 2) 是空格，候選 [1, 2, 4]
+        const cell = wrapper.find("[data-testid='cell-0-2']");
+        expect(cell.text()).toContain("1");
+        expect(cell.text()).toContain("2");
+        expect(cell.text()).toContain("4");
+    });
+
     it("should show cursor-pointer on slot cells", () => {
         spyGeneratePuzzle();
         const wrapper = mount(Game);
