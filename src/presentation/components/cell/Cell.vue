@@ -1,6 +1,11 @@
 <template>
   <div
-    :class="[selected ? 'selected bg-sky-100' : '', conflict ? 'conflict bg-red-100' : '', !puzzleCell.isClue ? 'cursor-pointer' : '']"
+    :class="[
+      selected ? 'selected bg-sky-100' : '',
+      conflict ? 'conflict bg-red-100' : '',
+      highlighted ? 'bg-sky-50' : '',
+      !puzzleCell.isClue ? 'cursor-pointer' : '',
+    ]"
     class="flex justify-center items-center flex-1 aspect-square"
   >
     <div
