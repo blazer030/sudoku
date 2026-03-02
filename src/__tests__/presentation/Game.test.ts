@@ -343,6 +343,40 @@ describe("Game", () => {
         expect(cell.text()).toBe("");
     });
 
+    it("should clear notes when clicking a noted slot cell in erase mode", async () => {
+        spyGeneratePuzzle();
+        const wrapper = mount(Game);
+
+        // 用 auto-notes 填入筆記
+        const autoNotesButton = wrapper.find("[data-testid='auto-notes-button']");
+        await autoNotesButton.trigger("click");
+
+        const cell = wrapper.find("[data-testid='cell-0-2']");
+        expect(cell.text()).toContain("1");
+
+        // 進入 erase mode，點擊有筆記的格子
+        const eraseButton = wrapper.find("[data-testid='erase-button']");
+        await eraseButton.trigger("click");
+        await cell.trigger("click");
+
+        expect(cell.text()).not.toContain("1");
+        expect(cell.text()).not.toContain("2");
+        expect(cell.text()).not.toContain("4");
+    });
+
+    it("should not affect clue cell in erase mode", async () => {
+        spyGeneratePuzzle();
+        const wrapper = mount(Game);
+
+        const eraseButton = wrapper.find("[data-testid='erase-button']");
+        await eraseButton.trigger("click");
+
+        const clueCell = wrapper.find("[data-testid='cell-0-0']");
+        await clueCell.trigger("click");
+
+        expect(clueCell.text()).toBe("5");
+    });
+
     it("should show cursor-pointer on slot cells", () => {
         spyGeneratePuzzle();
         const wrapper = mount(Game);

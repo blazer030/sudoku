@@ -240,10 +240,10 @@
 
 ### 3.8 清除與 Undo
 
-- [ ] **測試**：點擊 Erase 按鈕進入 erase mode（按鈕顯示選取樣式）
-- [ ] **測試**：erase mode 下點擊有輸入的 slot 格子，清除輸入
-- [ ] **測試**：erase mode 下點擊有筆記的 slot 格子，清除筆記
-- [ ] **測試**：erase mode 下點擊 clue 格子無反應
+- [x] **測試**：點擊 Erase 按鈕進入 erase mode（按鈕顯示選取樣式）
+- [x] **測試**：erase mode 下點擊有輸入的 slot 格子，清除輸入
+- [x] **測試**：erase mode 下點擊有筆記的 slot 格子，清除筆記
+- [x] **測試**：erase mode 下點擊 clue 格子無反應
 - [ ] **測試**：點擊 Undo 按鈕還原上一次輸入
 - [ ] **測試**：點擊 Undo 按鈕還原上一次清除
 - [ ] **測試**：無操作歷史時點擊 Undo 無反應
