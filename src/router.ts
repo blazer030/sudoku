@@ -5,8 +5,8 @@ import Game from "@/presentation/pages/game/Game.vue";
 const baseUrl: string = import.meta.env.VITE_BASE_URL as string;
 
 export const ROUTER_PATH = {
-    home: baseUrl,
-    game: `${baseUrl}game`,
+    home: "/",
+    game: "/game",
 };
 
 export const router = createRouter({

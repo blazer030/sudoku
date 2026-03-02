@@ -108,7 +108,7 @@ describe("Game", () => {
         expect(cell.text()).toBe("4");
     });
 
-    it("should fill mulcluele slot cells consecutively in number-first mode", async () => {
+    it("should fill multiple slot cells consecutively in number-first mode", async () => {
         spyGeneratePuzzle();
         const wrapper = mount(Game);
 
