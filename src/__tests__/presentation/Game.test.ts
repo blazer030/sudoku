@@ -113,6 +113,16 @@ describe("Game", () => {
         expect(tipCell.text()).toBe("5");
     });
 
+    it("should select number button when clicked without cell selected", async () => {
+        spyGeneratePuzzle();
+        const wrapper = mount(Game);
+
+        const numberButton = wrapper.find("[data-testid='number-4']");
+        await numberButton.trigger("click");
+
+        expect(numberButton.classes()).toContain("bg-sky-50");
+    });
+
     it("should render slot cells as empty", () => {
         spyGeneratePuzzle();
         const wrapper = mount(Game);

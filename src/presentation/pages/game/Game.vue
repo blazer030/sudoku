@@ -45,17 +45,18 @@
     </div>
     <div class="flex px-4 gap-2">
       <div
-          v-for="index in 9"
-          :key="`num-${index}`"
+          v-for="number in 9"
+          :key="`num-${number}`"
           class="flex-1 aspect-square"
       >
         <Button
-            :data-testid="`number-${index}`"
+            :data-testid="`number-${number}`"
+            :selected="selectedNumber === number"
             class="w-full h-full text-2xl rounded-full"
             variant="outline"
-            @click="inputNumber(index)"
+            @click="inputNumber(number)"
         >
-          {{ index }}
+          {{ number }}
         </Button>
       </div>
     </div>
@@ -72,6 +73,7 @@ const sudoku = reactive(new Sudoku());
 const puzzle = sudoku.generate();
 
 const selectedCell = ref<{ row: number; column: number } | null>(null);
+const selectedNumber = ref<number | null>(null);
 
 function selectCell(row: number, column: number) {
     if (isSelected(row, column)) {
@@ -86,9 +88,12 @@ function isSelected(row: number, column: number) {
 }
 
 function inputNumber(value: number) {
-    if (!selectedCell.value) return;
-    const { row, column } = selectedCell.value;
-    if (puzzle[row][column].isTip) return;
-    sudoku.input(row, column, value);
+    if (selectedCell.value) {
+        const { row, column } = selectedCell.value;
+        if (puzzle[row][column].isTip) return;
+        sudoku.input(row, column, value);
+    } else {
+        selectedNumber.value = value;
+    }
 }
 </script>
