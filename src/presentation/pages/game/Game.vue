@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="p-4 text-center">
-      This is Navbar
+      <span data-testid="timer">{{ formattedTime }}</span>
     </div>
     <div class="my-9">
       <div
@@ -92,7 +92,7 @@
 </template>
 
 <script lang="ts" setup>
-import { reactive, ref } from "vue";
+import { computed, onBeforeUnmount, reactive, ref } from "vue";
 import Sudoku from "@/domain/Sudoku";
 import Button from "@/presentation/components/ui/button/Button.vue";
 import Cell from "@/presentation/components/cell/Cell.vue";
@@ -106,6 +106,23 @@ const conflicts = ref<{ row: number; column: number }[]>([]);
 const completed = ref(false);
 const noteMode = ref(false);
 const eraseMode = ref(false);
+const elapsedSeconds = ref(0);
+
+const timerInterval = setInterval(() => {
+  if (!completed.value) {
+    elapsedSeconds.value++;
+  }
+}, 1000);
+
+onBeforeUnmount(() => {
+  clearInterval(timerInterval);
+});
+
+const formattedTime = computed(() => {
+  const minutes = Math.floor(elapsedSeconds.value / 60);
+  const seconds = elapsedSeconds.value % 60;
+  return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+});
 
 function clickCell(row: number, column: number) {
   if (eraseMode.value) {

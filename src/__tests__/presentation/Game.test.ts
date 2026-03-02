@@ -5,6 +5,7 @@ import { knownAnswer, knownPuzzle, spyGeneratePuzzle } from "@/__tests__/fixture
 
 afterEach(() => {
     vi.restoreAllMocks();
+    vi.useRealTimers();
 });
 
 describe("Game", () => {
@@ -459,6 +460,19 @@ describe("Game", () => {
                 }
             }
         }
+    });
+
+    it("should increment timer every second after game starts", async () => {
+        vi.useFakeTimers();
+        spyGeneratePuzzle();
+        const wrapper = mount(Game);
+
+        const timer = wrapper.find("[data-testid='timer']");
+        expect(timer.text()).toBe("00:00");
+
+        await vi.advanceTimersByTimeAsync(3000);
+
+        expect(timer.text()).toBe("00:03");
     });
 
     it("should render 9x9 grid with clue cells showing their numbers", () => {
