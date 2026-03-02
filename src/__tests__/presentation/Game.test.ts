@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { mount } from "@vue/test-utils";
 import Game from "@/presentation/pages/game/Game.vue";
-import { knownPuzzle, spyGeneratePuzzle } from "@/__tests__/fixtures/knownPuzzle";
+import { knownAnswer, knownPuzzle, spyGeneratePuzzle } from "@/__tests__/fixtures/knownPuzzle";
 
 afterEach(() => {
     vi.restoreAllMocks();
@@ -171,6 +171,26 @@ describe("Game", () => {
         await cell.trigger("click");
 
         expect(cell.text()).toBe("");
+    });
+
+    it("should show completion message when all cells are correctly filled", async () => {
+        spyGeneratePuzzle();
+        const wrapper = mount(Game);
+
+        for (let row = 0; row < 9; row++) {
+            for (let column = 0; column < 9; column++) {
+                const cell = wrapper.find(`[data-testid='cell-${row}-${column}']`);
+                if (cell.text() !== "") continue;
+
+                const value = knownAnswer[row][column];
+                const numberButton = wrapper.find(`[data-testid='number-${value}']`);
+                await numberButton.trigger("click");
+                await cell.trigger("click");
+                await numberButton.trigger("click");
+            }
+        }
+
+        expect(wrapper.text()).toContain("Completed");
     });
 
     it("should highlight conflicting cells when inputting a wrong number", async () => {

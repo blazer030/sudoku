@@ -33,6 +33,12 @@
         />
       </div>
     </div>
+    <div
+      v-if="completed"
+      class="text-center text-2xl font-bold text-green-600 my-4"
+    >
+      Completed
+    </div>
     <div class="flex justify-center px-4 gap-2 mb-4">
       <Button variant="outline">
         Undo
@@ -76,6 +82,7 @@ const puzzle = sudoku.generate();
 const selectedCell = ref<{ row: number; column: number } | null>(null);
 const selectedNumber = ref<number | null>(null);
 const conflicts = ref<{ row: number; column: number }[]>([]);
+const completed = ref(false);
 
 function clickCell(row: number, column: number) {
     if (selectedNumber.value !== null) {
@@ -94,6 +101,7 @@ function inputToCell(row: number, column: number, value: number) {
     }
     sudoku.input(row, column, value);
     conflicts.value = sudoku.findConflicts(row, column, value);
+    if (sudoku.isCompleted()) completed.value = true;
 }
 
 function toggleSelectCell(row: number, column: number) {
