@@ -1,9 +1,13 @@
-import { ConflictDetector, Conflict } from "@/domain/ConflictDetector";
+import { Conflict, ConflictDetector } from "@/domain/ConflictDetector";
 import PuzzleCell from "@/domain/PuzzleCell";
 import { SudokuBoard } from "@/domain/SudokuBoard";
 import { Difficulty, SudokuGenerator } from "@/domain/SudokuGenerator";
 
-interface CellSnapshot { input: number; notes: number[] }
+interface CellSnapshot {
+    input: number;
+    notes: number[]
+}
+
 type BoardSnapshot = CellSnapshot[][]
 
 class Sudoku {
@@ -29,6 +33,10 @@ class Sudoku {
         return instance;
     }
 
+    public raw() {
+        return this;
+    }
+
     public generate(difficulty: Difficulty = "easy") {
         const { puzzle, answer } = this.generator.generatePuzzle(difficulty);
         this._answer = answer;
@@ -48,14 +56,6 @@ class Sudoku {
                 const value = cell.isClue ? cell.value : cell.input;
                 return value === this._answer[rowIndex][columnIndex];
             })
-        );
-    }
-
-    private snapshot(): void {
-        this._history.push(
-            this._puzzle.map(row =>
-                row.map(cell => ({ input: cell.input, notes: [...cell.notes] }))
-            )
         );
     }
 
@@ -95,25 +95,6 @@ class Sudoku {
         }
     }
 
-    private removeNoteFromPeers(row: number, column: number, value: number): void {
-        // 同行
-        for (let col = 0; col < 9; col++) {
-            if (col !== column) this._puzzle[row][col].removeNote(value);
-        }
-        // 同列
-        for (let r = 0; r < 9; r++) {
-            if (r !== row) this._puzzle[r][column].removeNote(value);
-        }
-        // 同宮
-        const boxRowStart = Math.floor(row / 3) * 3;
-        const boxColStart = Math.floor(column / 3) * 3;
-        for (let r = boxRowStart; r < boxRowStart + 3; r++) {
-            for (let c = boxColStart; c < boxColStart + 3; c++) {
-                if (r !== row || c !== column) this._puzzle[r][c].removeNote(value);
-            }
-        }
-    }
-
     public check(row: number, column: number, value: number): boolean {
         return this._answer[row][column] === value;
     }
@@ -135,14 +116,41 @@ class Sudoku {
         }
     }
 
+    public findConflicts(row: number, column: number, value: number): Conflict[] {
+        return this.conflictDetector.findConflicts(this.getCurrentBoard(), row, column, value);
+    }
+
+    private snapshot(): void {
+        this._history.push(
+            this._puzzle.map(row =>
+                row.map(cell => ({ input: cell.input, notes: [...cell.notes] }))
+            )
+        );
+    }
+
+    private removeNoteFromPeers(row: number, column: number, value: number): void {
+        // 同行
+        for (let col = 0; col < 9; col++) {
+            if (col !== column) this._puzzle[row][col].removeNote(value);
+        }
+        // 同列
+        for (let r = 0; r < 9; r++) {
+            if (r !== row) this._puzzle[r][column].removeNote(value);
+        }
+        // 同宮
+        const boxRowStart = Math.floor(row / 3) * 3;
+        const boxColStart = Math.floor(column / 3) * 3;
+        for (let r = boxRowStart; r < boxRowStart + 3; r++) {
+            for (let c = boxColStart; c < boxColStart + 3; c++) {
+                if (r !== row || c !== column) this._puzzle[r][c].removeNote(value);
+            }
+        }
+    }
+
     private getCurrentBoard(): number[][] {
         return this._puzzle.map(puzzleRow =>
             puzzleRow.map(cell => cell.isClue ? cell.value : cell.input)
         );
-    }
-
-    public findConflicts(row: number, column: number, value: number): Conflict[] {
-        return this.conflictDetector.findConflicts(this.getCurrentBoard(), row, column, value);
     }
 }
 

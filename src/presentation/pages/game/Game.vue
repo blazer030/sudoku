@@ -148,7 +148,7 @@ const timerInterval = setInterval(() => {
 onBeforeUnmount(() => {
     clearInterval(timerInterval);
     if (!completed.value) {
-        const state = GameStateConverter.fromSudoku(sudoku, {
+        const state = GameStateConverter.fromSudoku(sudoku.raw(), {
             difficulty: gameStore.difficulty ?? "easy",
             elapsedSeconds: elapsedSeconds.value,
             completed: completed.value,
