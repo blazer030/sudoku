@@ -2,7 +2,6 @@
   <div
     :class="[
       selected ? 'selected bg-sky-100' : '',
-      conflict ? 'conflict bg-red-100' : '',
       highlight === CellHighlight.Peer ? 'bg-sky-50' : '',
       highlight === CellHighlight.SameNumber ? 'bg-sky-100' : '',
       !puzzleCell.isClue ? 'cursor-pointer' : '',
@@ -43,7 +42,6 @@ import CellHighlight from "@/domain/CellHighlight";
 defineProps<{
     puzzleCell: PuzzleCell;
     selected?: boolean;
-    conflict?: boolean;
     highlight?: CellHighlight;
 }>();
 </script>

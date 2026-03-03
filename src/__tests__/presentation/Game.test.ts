@@ -196,20 +196,6 @@ describe("Game", () => {
         expect(wrapper.text()).toContain("Completed");
     });
 
-    it("should highlight conflicting cells when inputting a wrong number", async () => {
-        spyGeneratePuzzle();
-        const wrapper = mount(Game);
-
-        // (0, 2) 是 slot，填入 5 → 與 (0, 0) 的 clue=5 同行衝突
-        const cell = wrapper.find("[data-testid='cell-0-2']");
-        await cell.trigger("click");
-        const numberButton5 = wrapper.find("[data-testid='number-5']");
-        await numberButton5.trigger("click");
-
-        const conflictCell = wrapper.find("[data-testid='cell-0-0']");
-        expect(conflictCell.classes()).toContain("conflict");
-    });
-
     it("should toggle note mode when clicking Note button", async () => {
         spyGeneratePuzzle();
         const wrapper = mount(Game);

@@ -24,7 +24,6 @@
             columnIndex === 0 ? 'border-l-4' : '',
             columnIndex % 3 === 2 ? 'border-r-4' : '',
           ]"
-          :conflict="isConflict(rowIndex, columnIndex)"
           :data-testid="`cell-${rowIndex}-${columnIndex}`"
           :highlight="getCellHighlight(rowIndex, columnIndex)"
           :puzzle-cell="puzzleCell"
@@ -104,7 +103,6 @@ const puzzle = sudoku.generate();
 
 const selectedCell = ref<{ row: number; column: number } | null>(null);
 const selectedNumber = ref<number | null>(null);
-const conflicts = ref<{ row: number; column: number }[]>([]);
 const completed = ref(false);
 const noteMode = ref(false);
 const eraseMode = ref(false);
@@ -150,11 +148,9 @@ function inputToCell(row: number, column: number, value: number) {
   if (puzzle[row][column].isClue) return;
   if (puzzle[row][column].input === value) {
     sudoku.input(row, column, 0);
-    conflicts.value = [];
     return;
   }
   sudoku.input(row, column, value);
-  conflicts.value = sudoku.findConflicts(row, column, value);
   if (sudoku.isCompleted()) completed.value = true;
 }
 
@@ -189,13 +185,8 @@ function getCellHighlight(row: number, column: number): CellHighlight {
   return CellHighlight.None;
 }
 
-function isConflict(row: number, column: number) {
-  return conflicts.value.some(c => c.row === row && c.column === column);
-}
-
 function eraseCell(row: number, column: number) {
   sudoku.erase(row, column);
-  conflicts.value = [];
 }
 
 function toggleEraseMode() {
