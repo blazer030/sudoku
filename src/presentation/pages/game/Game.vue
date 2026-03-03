@@ -35,7 +35,7 @@
 
         <!-- Board Container -->
         <div class="bg-card rounded-2xl shadow-[0_2px_12px_#1A191808] p-2">
-            <div class="flex flex-col">
+            <div class="flex flex-col border-3 border-foreground/20 rounded-xl">
                 <div
                     v-for="(row, rowIndex) in puzzle"
                     :key="rowIndex"
@@ -148,17 +148,17 @@
         </div>
 
         <!-- Number Pad -->
-        <div class="flex justify-center gap-2">
+        <div class="flex gap-1.5">
             <div
                 v-for="number in 9"
                 :key="`num-${number}`"
-                class="relative"
+                class="relative flex-1 min-w-0"
             >
                 <button
                     :data-testid="`number-${number}`"
                     :disabled="isNumberCompleted(number)"
                     :class="numberButtonClasses(number)"
-                    class="w-9 h-12 rounded-xl flex items-center justify-center text-2xl font-semibold transition-all"
+                    class="w-full h-12 rounded-xl flex items-center justify-center text-2xl font-semibold transition-all"
                     @click="inputNumber(number)"
                 >
                     {{ number }}
@@ -168,7 +168,7 @@
                     :class="selectedNumber === number
                         ? 'bg-white text-primary'
                         : 'bg-foreground-secondary text-white'"
-                    class="absolute -top-1 right-[-4px] w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-semibold"
+                    class="absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-semibold"
                 >
                     {{ getRemainingCount(number) }}
                 </span>

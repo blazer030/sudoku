@@ -51,15 +51,38 @@ const cellBg = computed(() => {
     if (props.selected) return "bg-highlight-strong";
     if (props.highlight === CellHighlight.Peer) return "bg-highlight";
     if (props.highlight === CellHighlight.SameNumber) return "bg-highlight";
-    if (props.puzzleCell.isClue) return "bg-cell-tip";
+    if (props.puzzleCell.isClue) return "bg-cell-clue";
     return "bg-card";
 });
 
 const cellBorder = computed(() => {
-    if (props.selected) return "border-2 border-primary";
+    const classes: string[] = [];
 
-    const bottom = props.row % 3 === 2 && props.row < 8 ? "border-b-2" : "border-b";
-    const right = props.column % 3 === 2 && props.column < 8 ? "border-r-2" : "border-r";
-    return `border-t border-l ${bottom} ${right} border-border`;
+    // 選取高亮用 ring，不影響 layout
+    if (props.selected) {
+        classes.push("ring-2 ring-inset ring-primary");
+    }
+
+    // 四角圓角
+    if (props.row === 0 && props.column === 0) classes.push("rounded-tl-lg");
+    if (props.row === 0 && props.column === 8) classes.push("rounded-tr-lg");
+    if (props.row === 8 && props.column === 0) classes.push("rounded-bl-lg");
+    if (props.row === 8 && props.column === 8) classes.push("rounded-br-lg");
+
+    // 右邊框：宮格右邊界（col 2, 5）加粗
+    if (props.column === 2 || props.column === 5) {
+        classes.push("border-r-3 border-r-foreground/20");
+    } else if (props.column < 8) {
+        classes.push("border-r border-r-border");
+    }
+
+    // 下邊框：宮格下邊界（row 2, 5）加粗
+    if (props.row === 2 || props.row === 5) {
+        classes.push("border-b-3 border-b-foreground/20");
+    } else if (props.row < 8) {
+        classes.push("border-b border-b-border");
+    }
+
+    return classes.join(" ");
 });
 </script>
