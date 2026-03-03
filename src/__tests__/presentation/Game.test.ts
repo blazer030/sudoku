@@ -3,6 +3,7 @@ import { mount } from "@vue/test-utils";
 import Game from "@/presentation/pages/game/Game.vue";
 import { knownAnswer, knownPuzzle, spyGeneratePuzzle } from "@/__tests__/fixtures/knownPuzzle";
 import Cell from "@/presentation/components/cell/Cell.vue";
+import Button from "@/presentation/components/ui/button/Button.vue";
 import CellHighlight from "@/domain/CellHighlight";
 
 afterEach(() => {
@@ -16,10 +17,9 @@ describe("Game", () => {
         const wrapper = mount(Game);
 
         // (0, 2) 是 slot 格子
-        const cell = wrapper.find("[data-testid='cell-0-2']");
-        await cell.trigger("click");
+        await wrapper.find("[data-testid='cell-0-2']").trigger("click");
 
-        expect(cell.classes()).toContain("selected");
+        expect(wrapper.findComponent<typeof Cell>("[data-testid='cell-0-2']").props("selected")).toBe(true);
     });
 
     it("should not select a clue cell", async () => {
@@ -27,21 +27,19 @@ describe("Game", () => {
         const wrapper = mount(Game);
 
         // (0, 0) 是 clue 格子（值為 5）
-        const cell = wrapper.find("[data-testid='cell-0-0']");
-        await cell.trigger("click");
+        await wrapper.find("[data-testid='cell-0-0']").trigger("click");
 
-        expect(cell.classes()).not.toContain("selected");
+        expect(wrapper.findComponent<typeof Cell>("[data-testid='cell-0-0']").props("selected")).toBeFalsy();
     });
 
     it("should deselect when clicking the same cell again", async () => {
         spyGeneratePuzzle();
         const wrapper = mount(Game);
 
-        const cell = wrapper.find("[data-testid='cell-0-0']");
-        await cell.trigger("click");
-        await cell.trigger("click");
+        await wrapper.find("[data-testid='cell-0-2']").trigger("click");
+        await wrapper.find("[data-testid='cell-0-2']").trigger("click");
 
-        expect(cell.classes()).not.toContain("selected");
+        expect(wrapper.findComponent<typeof Cell>("[data-testid='cell-0-2']").props("selected")).toBeFalsy();
     });
 
     it("should display number in slot cell after clicking number button", async () => {
@@ -90,10 +88,9 @@ describe("Game", () => {
         spyGeneratePuzzle();
         const wrapper = mount(Game);
 
-        const numberButton = wrapper.find("[data-testid='number-4']");
-        await numberButton.trigger("click");
+        await wrapper.find("[data-testid='number-4']").trigger("click");
 
-        expect(numberButton.classes()).toContain("bg-sky-50");
+        expect(wrapper.findComponent<typeof Button>("[data-testid='number-4']").props("selected")).toBe(true);
     });
 
     it("should fill slot cell when number is selected first then cell is clicked", async () => {
@@ -148,11 +145,10 @@ describe("Game", () => {
         spyGeneratePuzzle();
         const wrapper = mount(Game);
 
-        const numberButton = wrapper.find("[data-testid='number-4']");
-        await numberButton.trigger("click");
-        await numberButton.trigger("click");
+        await wrapper.find("[data-testid='number-4']").trigger("click");
+        await wrapper.find("[data-testid='number-4']").trigger("click");
 
-        expect(numberButton.classes()).not.toContain("bg-sky-50");
+        expect(wrapper.findComponent<typeof Button>("[data-testid='number-4']").props("selected")).toBeFalsy();
     });
 
     it("should clear cell when clicking a cell that already has the selected number", async () => {
@@ -200,10 +196,9 @@ describe("Game", () => {
         spyGeneratePuzzle();
         const wrapper = mount(Game);
 
-        const noteButton = wrapper.find("[data-testid='note-button']");
-        await noteButton.trigger("click");
+        await wrapper.find("[data-testid='note-button']").trigger("click");
 
-        expect(noteButton.classes()).toContain("bg-sky-50");
+        expect(wrapper.findComponent<typeof Button>("[data-testid='note-button']").props("selected")).toBe(true);
     });
 
     it("should add note to slot cell in note mode", async () => {
@@ -305,10 +300,9 @@ describe("Game", () => {
         spyGeneratePuzzle();
         const wrapper = mount(Game);
 
-        const eraseButton = wrapper.find("[data-testid='erase-button']");
-        await eraseButton.trigger("click");
+        await wrapper.find("[data-testid='erase-button']").trigger("click");
 
-        expect(eraseButton.classes()).toContain("bg-sky-50");
+        expect(wrapper.findComponent<typeof Button>("[data-testid='erase-button']").props("selected")).toBe(true);
     });
 
     it("should clear input when clicking a filled slot cell in erase mode", async () => {
