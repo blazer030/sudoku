@@ -29,9 +29,8 @@ describe("GameStorage", () => {
 
             saveGame(state);
 
-            const stored = localStorage.getItem("sudoku-save") ?? "";
-            const parsed: unknown = JSON.parse(stored);
-            expect(parsed).toEqual(state);
+            const stored = localStorage.getItem("sudoku-save");
+            expect(stored).toBe(JSON.stringify(state));
         });
     });
 
