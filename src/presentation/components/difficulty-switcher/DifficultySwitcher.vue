@@ -13,17 +13,16 @@
             class="flex-1 h-full rounded-[10px] flex items-center justify-center text-sm transition-all cursor-pointer"
             @click="$emit('update:modelValue', difficulty)"
         >
-            {{ labels[difficulty] }}
+            {{ DifficultyLabels[difficulty] }}
         </button>
     </div>
 </template>
 
 <script lang="ts" setup>
-import type { Difficulty } from "@/domain/SudokuGenerator";
+import { DifficultyLabels, type Difficulty } from "@/domain/SudokuGenerator";
 
 defineProps<{ modelValue: Difficulty }>();
 defineEmits<{ "update:modelValue": [value: Difficulty] }>();
 
 const difficulties: Difficulty[] = ["easy", "medium", "hard"];
-const labels: Record<Difficulty, string> = { easy: "Easy", medium: "Medium", hard: "Hard" };
 </script>

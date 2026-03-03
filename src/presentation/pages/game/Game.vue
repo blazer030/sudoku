@@ -1,37 +1,7 @@
 <template>
     <div class="flex flex-col gap-6 h-dvh py-6 px-5">
         <!-- Header -->
-        <div class="flex items-center justify-between">
-            <button
-                class="flex items-center gap-2 cursor-pointer"
-                @click="goBack"
-            >
-                <ChevronLeft
-                    :size="24"
-                    class="text-foreground"
-                />
-                <span class="text-foreground text-base font-medium">
-                    Back
-                </span>
-            </button>
-            <div class="flex items-center gap-1.5">
-                <Timer
-                    :size="18"
-                    class="text-foreground-secondary"
-                />
-                <span
-                    class="text-foreground text-lg font-semibold"
-                    data-testid="timer"
-                >
-                    {{ formattedTime }}
-                </span>
-            </div>
-            <div class="flex items-center bg-primary-light rounded-full px-3 py-1.5">
-                <span class="text-primary text-xs font-semibold leading-none">
-                    {{ difficultyLabel }}
-                </span>
-            </div>
-        </div>
+        <GameHeader :elapsed-seconds="elapsedSeconds" />
 
         <!-- Spacer -->
         <div class="flex-1" />
@@ -187,7 +157,8 @@
 <script lang="ts" setup>
 import { computed, onBeforeUnmount, reactive, ref } from "vue";
 import { useRouter } from "vue-router";
-import { ChevronLeft, Eraser, Pencil, Sparkles, Timer, Undo2 } from "lucide-vue-next";
+import { Eraser, Pencil, Sparkles, Undo2 } from "lucide-vue-next";
+import GameHeader from "@/presentation/components/game-header/GameHeader.vue";
 import Sudoku from "@/domain/Sudoku";
 import CellHighlight from "@/domain/CellHighlight";
 import Cell from "@/presentation/components/cell/Cell.vue";
@@ -196,7 +167,6 @@ import { ROUTER_PATH } from "@/router";
 import { loadGame, saveGame } from "@/application/GameStorage";
 import { GameStateConverter } from "@/application/GameState";
 import type { Difficulty } from "@/domain/SudokuGenerator";
-import { formatTime } from "@/utils/formatTime";
 
 const router = useRouter();
 const gameStore = useGameStore();
@@ -228,9 +198,6 @@ const completed = ref(false);
 const inputMode = ref(InputMode.Normal);
 const elapsedSeconds = ref(restoredSeconds);
 
-const difficultyLabels: Record<Difficulty, string> = { easy: "Easy", medium: "Medium", hard: "Hard" };
-const difficultyLabel = difficultyLabels[gameStore.difficulty ?? "easy"];
-
 const timerInterval = setInterval(() => {
     if (!completed.value) {
         elapsedSeconds.value++;
@@ -248,12 +215,6 @@ onBeforeUnmount(() => {
         saveGame(state);
     }
 });
-
-const formattedTime = computed(() => formatTime(elapsedSeconds.value));
-
-function goBack() {
-    void router.push(ROUTER_PATH.home);
-}
 
 function clickCell(row: number, column: number) {
     if (inputMode.value === InputMode.Erase) {

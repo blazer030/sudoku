@@ -1,6 +1,7 @@
 import { SudokuSolver } from "@/domain/SudokuSolver";
 
 export type Difficulty = "easy" | "medium" | "hard";
+export const DifficultyLabels: Record<Difficulty, string> = { easy: "Easy", medium: "Medium", hard: "Hard" };
 
 export class SudokuGenerator {
     private solver = new SudokuSolver();
