@@ -26,7 +26,7 @@ export const knownPuzzle = [
 ];
 
 export function spyGeneratePuzzle() {
-    vi.spyOn(SudokuGenerator.prototype, "generatePuzzle").mockReturnValue({
+    return vi.spyOn(SudokuGenerator.prototype, "generatePuzzle").mockReturnValue({
         puzzle: knownPuzzle.map(row => [...row]),
         answer: knownAnswer.map(row => [...row]),
     });

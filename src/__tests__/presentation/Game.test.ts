@@ -605,6 +605,13 @@ describe("Game", () => {
         expect(wrapper.findComponent<typeof Button>("[data-testid='note-button']").props("selected")).toBe(true);
     });
 
+    it("should automatically initialize a new puzzle on mount", () => {
+        const spy = spyGeneratePuzzle();
+        mount(Game);
+
+        expect(spy).toHaveBeenCalledOnce();
+    });
+
     it("should render 9x9 grid with clue cells showing their numbers", () => {
         spyGeneratePuzzle();
         const wrapper = mount(Game);
