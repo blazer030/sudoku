@@ -314,8 +314,8 @@
 
 > `src/__tests__/presentation/Home.test.ts` + `src/presentation/pages/home/Home.vue`
 
-- [ ] **UI 測試**：有存檔時顯示 Continue 按鈕，點擊導航到 Game 頁
-- [ ] **行為**：New Game 點擊時清除舊存檔
+- [x] **UI 測試**：有存檔時顯示 Continue 按鈕，點擊導航到 Game 頁
+- [x] **行為**：New Game 點擊時清除舊存檔
 
 ### 4.2 統計追蹤
 

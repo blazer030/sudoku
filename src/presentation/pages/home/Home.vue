@@ -28,6 +28,16 @@
         </div>
 
         <Button
+            v-if="showContinue"
+            data-testid="continue-button"
+            variant="outline"
+            class="rounded-full w-full text-gray-500"
+            @click="continueGame"
+        >
+            Continue
+        </Button>
+
+        <Button
             data-testid="new-game-button"
             variant="outline"
             class="rounded-full w-full text-gray-500"
@@ -45,6 +55,7 @@ import Button from "@/presentation/components/ui/button/Button.vue";
 import { ROUTER_PATH } from "@/router";
 import type { Difficulty } from "@/domain/SudokuGenerator";
 import { useGameStore } from "@/stores/gameStore";
+import { hasSavedGame, deleteSavedGame } from "@/application/GameStorage";
 
 const router = useRouter();
 const gameStore = useGameStore();
@@ -54,6 +65,7 @@ const labels: Record<Difficulty, string> = { easy: "Easy", medium: "Medium", har
 const difficultyIndex = ref(0);
 
 const difficultyLabel = computed(() => labels[difficulties[difficultyIndex.value]]);
+const showContinue = hasSavedGame();
 
 function nextDifficulty() {
     difficultyIndex.value = (difficultyIndex.value + 1) % difficulties.length;
@@ -64,6 +76,13 @@ function prevDifficulty() {
 }
 
 function startGame() {
+    deleteSavedGame();
+    gameStore.setDifficulty(difficulties[difficultyIndex.value]);
+    void router.push(ROUTER_PATH.game);
+}
+
+function continueGame() {
+    gameStore.continueGame = true;
     gameStore.setDifficulty(difficulties[difficultyIndex.value]);
     void router.push(ROUTER_PATH.game);
 }

@@ -1,10 +1,12 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 import { flushPromises, mount } from "@vue/test-utils";
 import { createPinia } from "pinia";
 import { createRouter, createMemoryHistory } from "vue-router";
 import Home from "@/presentation/pages/home/Home.vue";
 import { ROUTER_PATH } from "@/router";
 import { useGameStore } from "@/stores/gameStore";
+import { hasSavedGame, saveGame } from "@/application/GameStorage";
+import type { GameState } from "@/application/GameState";
 
 function createTestRouter() {
     return createRouter({
@@ -24,6 +26,20 @@ function mountHome() {
     });
     return { wrapper, router, pinia };
 }
+
+const dummySave: GameState = {
+    difficulty: "easy",
+    answer: Array.from({ length: 9 }, () => Array(9).fill(0) as number[]),
+    cells: Array.from({ length: 9 }, () =>
+        Array.from({ length: 9 }, () => ({ value: 0, input: 0, notes: [] as number[] }))
+    ),
+    elapsedSeconds: 30,
+    completed: false,
+};
+
+afterEach(() => {
+    localStorage.clear();
+});
 
 describe("Home", () => {
     it("should navigate to game page when clicking New Game button", async () => {
@@ -61,6 +77,45 @@ describe("Home", () => {
 
         await wrapper.find("[data-testid='difficulty-prev']").trigger("click");
         expect(wrapper.find("[data-testid='difficulty-label']").text()).toBe("Hard");
+    });
+
+    it("should show Continue button when saved game exists", () => {
+        saveGame(dummySave);
+        const { wrapper } = mountHome();
+
+        expect(wrapper.find("[data-testid='continue-button']").exists()).toBe(true);
+    });
+
+    it("should not show Continue button when no saved game exists", () => {
+        const { wrapper } = mountHome();
+
+        expect(wrapper.find("[data-testid='continue-button']").exists()).toBe(false);
+    });
+
+    it("should navigate to game page with continueGame flag when clicking Continue", async () => {
+        saveGame(dummySave);
+        const { wrapper, router, pinia } = mountHome();
+        await router.push("/");
+        await router.isReady();
+
+        await wrapper.find("[data-testid='continue-button']").trigger("click");
+        await flushPromises();
+
+        const gameStore = useGameStore(pinia);
+        expect(gameStore.continueGame).toBe(true);
+        expect(router.currentRoute.value.path).toBe(ROUTER_PATH.game);
+    });
+
+    it("should clear saved game when clicking New Game", async () => {
+        saveGame(dummySave);
+        const { wrapper, router } = mountHome();
+        await router.push("/");
+        await router.isReady();
+
+        await wrapper.find("[data-testid='new-game-button']").trigger("click");
+        await flushPromises();
+
+        expect(hasSavedGame()).toBe(false);
     });
 
     it("should set difficulty in store when starting game", async () => {
