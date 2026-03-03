@@ -326,9 +326,9 @@
 
 ### 5.1 全域樣式 + 依賴
 
-- [ ] 安裝 `lucide-vue-next`、引入 Outfit 字體
-- [ ] 定義 CSS 變數（primary、background、card、border、highlight 等）
-- [ ] Tailwind v4 `@theme` 整合
+- [x] 安裝 `lucide-vue-next`、引入 Outfit 字體
+- [x] 定義 CSS 變數（primary、background、card、border、highlight 等）
+- [x] Tailwind v4 `@theme` 整合
 
 ### 5.2 Home 頁 UI
 
