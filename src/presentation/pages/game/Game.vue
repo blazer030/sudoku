@@ -42,85 +42,32 @@
 
         <!-- Controls -->
         <div class="flex items-center justify-between">
-            <button
-                class="flex flex-col items-center gap-1 w-14 cursor-pointer"
+            <ControlButton
+                :icon="Undo2"
                 data-testid="undo-button"
+                label="Undo"
                 @click="sudoku.undo()"
-            >
-                <div class="w-11 h-11 rounded-xl bg-card shadow-[0_1px_4px_#1A191808] flex items-center justify-center">
-                    <Undo2
-                        :size="22"
-                        class="text-foreground"
-                    />
-                </div>
-                <span class="text-foreground-secondary text-[11px] font-medium">
-                    Undo
-                </span>
-            </button>
-
-            <button
-                class="flex flex-col items-center gap-1 w-14 cursor-pointer"
+            />
+            <ControlButton
+                :active="inputMode === InputMode.Erase"
+                :icon="Eraser"
                 data-testid="erase-button"
+                label="Erase"
                 @click="toggleEraseMode"
-            >
-                <div
-                    :class="inputMode === InputMode.Erase
-                        ? 'bg-primary-light border-2 border-primary'
-                        : 'bg-card shadow-[0_1px_4px_#1A191808]'"
-                    class="w-11 h-11 rounded-xl flex items-center justify-center"
-                >
-                    <Eraser
-                        :class="inputMode === InputMode.Erase ? 'text-primary' : 'text-foreground'"
-                        :size="22"
-                    />
-                </div>
-                <span
-                    :class="inputMode === InputMode.Erase ? 'text-primary font-semibold' : 'text-foreground-secondary font-medium'"
-                    class="text-[11px]"
-                >
-                    Erase
-                </span>
-            </button>
-
-            <button
-                class="flex flex-col items-center gap-1 w-14 cursor-pointer"
+            />
+            <ControlButton
+                :active="inputMode === InputMode.Note"
+                :icon="Pencil"
                 data-testid="note-button"
+                label="Notes"
                 @click="toggleNoteMode"
-            >
-                <div
-                    :class="inputMode === InputMode.Note
-                        ? 'bg-primary-light border-2 border-primary'
-                        : 'bg-card shadow-[0_1px_4px_#1A191808]'"
-                    class="w-11 h-11 rounded-xl flex items-center justify-center"
-                >
-                    <Pencil
-                        :class="inputMode === InputMode.Note ? 'text-primary' : 'text-foreground'"
-                        :size="22"
-                    />
-                </div>
-                <span
-                    :class="inputMode === InputMode.Note ? 'text-primary font-semibold' : 'text-foreground-secondary font-medium'"
-                    class="text-[11px]"
-                >
-                    Notes
-                </span>
-            </button>
-
-            <button
-                class="flex flex-col items-center gap-1 w-14 cursor-pointer"
+            />
+            <ControlButton
+                :icon="Sparkles"
                 data-testid="auto-notes-button"
+                label="Auto"
                 @click="sudoku.autoNotes()"
-            >
-                <div class="w-11 h-11 rounded-xl bg-card shadow-[0_1px_4px_#1A191808] flex items-center justify-center">
-                    <Sparkles
-                        :size="22"
-                        class="text-foreground"
-                    />
-                </div>
-                <span class="text-foreground-secondary text-[11px] font-medium">
-                    Auto
-                </span>
-            </button>
+            />
         </div>
 
         <!-- Digit Pad -->
@@ -159,6 +106,7 @@ import { computed, onBeforeUnmount, reactive, ref } from "vue";
 import { useRouter } from "vue-router";
 import { Eraser, Pencil, Sparkles, Undo2 } from "lucide-vue-next";
 import GameHeader from "@/presentation/components/game-header/GameHeader.vue";
+import ControlButton from "@/presentation/components/game-controls/ControlButton.vue";
 import Sudoku from "@/domain/Sudoku";
 import CellHighlight from "@/domain/CellHighlight";
 import Cell from "@/presentation/components/cell/Cell.vue";
@@ -166,7 +114,6 @@ import { useGameStore } from "@/stores/gameStore";
 import { ROUTER_PATH } from "@/router";
 import { loadGame, saveGame } from "@/application/GameStorage";
 import { GameStateConverter } from "@/application/GameState";
-import type { Difficulty } from "@/domain/SudokuGenerator";
 
 const router = useRouter();
 const gameStore = useGameStore();
