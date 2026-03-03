@@ -524,6 +524,21 @@ describe("Game", () => {
         expect(wrapper.findComponent<typeof Cell>("[data-testid='cell-0-2']").props("highlight")).toBe(CellHighlight.None);
     });
 
+    it("should disable number button when all 9 instances are correctly filled", async () => {
+        spyGeneratePuzzle();
+        const wrapper = mount(Game);
+
+        // 數字 8 有 5 個 clue，再填入 4 個正確位置湊滿 9 次
+        // (0,5)=8, (1,8)=8, (5,6)=8, (7,1)=8
+        const cellsToFill = [[0, 5], [1, 8], [5, 6], [7, 1]];
+        await wrapper.find("[data-testid='number-8']").trigger("click");
+        for (const [row, col] of cellsToFill) {
+            await wrapper.find(`[data-testid='cell-${row}-${col}']`).trigger("click");
+        }
+
+        expect(wrapper.findComponent<typeof Button>("[data-testid='number-8']").props("disabled")).toBe(true);
+    });
+
     it("should render 9x9 grid with clue cells showing their numbers", () => {
         spyGeneratePuzzle();
         const wrapper = mount(Game);

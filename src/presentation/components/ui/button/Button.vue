@@ -1,5 +1,8 @@
 <template>
-  <button :class="cn(buttonVariants({ variant, size, selected }))">
+  <button
+    :class="cn(buttonVariants({ variant, size, selected }))"
+    :disabled="disabled"
+  >
     <slot />
   </button>
 </template>
@@ -13,5 +16,6 @@ defineProps<{
     variant?: VariantProps<typeof buttonVariants>["variant"];
     size?: VariantProps<typeof buttonVariants>["size"];
     selected?: VariantProps<typeof buttonVariants>["selected"];
+    disabled?: boolean;
 }>();
 </script>

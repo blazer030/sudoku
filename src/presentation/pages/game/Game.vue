@@ -79,6 +79,7 @@
       >
         <Button
           :data-testid="`number-${number}`"
+          :disabled="isNumberCompleted(number)"
           :selected="selectedNumber === number"
           class="w-full h-full text-2xl rounded-full"
           variant="outline"
@@ -183,6 +184,17 @@ function getCellHighlight(row: number, column: number): CellHighlight {
     && Math.floor(column / 3) === Math.floor(selectedColumn / 3);
   if (sameBox) return CellHighlight.Peer;
   return CellHighlight.None;
+}
+
+function isNumberCompleted(value: number): boolean {
+  let count = 0;
+  for (let row = 0; row < 9; row++) {
+    for (let col = 0; col < 9; col++) {
+      const cell = puzzle[row][col];
+      if (cell.value === value || cell.input === value) count++;
+    }
+  }
+  return count >= 9;
 }
 
 function eraseCell(row: number, column: number) {
