@@ -1,3 +1,5 @@
+import Sudoku from "@/domain/Sudoku";
+import PuzzleCell from "@/domain/PuzzleCell";
 import type { Difficulty } from "@/domain/SudokuGenerator";
 
 export interface CellState {
@@ -13,3 +15,37 @@ export interface GameState {
     elapsedSeconds: number;
     completed: boolean;
 }
+
+interface GameMeta {
+    difficulty: Difficulty;
+    elapsedSeconds: number;
+    completed: boolean;
+}
+
+export const GameStateConverter = {
+    toSudoku(state: GameState): Sudoku {
+        const answer = state.answer.map(row => [...row]);
+        const puzzle = state.cells.map(row =>
+            row.map(cell => {
+                const puzzleCell = new PuzzleCell(cell.value);
+                puzzleCell.restore(cell.input, cell.notes);
+                return puzzleCell;
+            })
+        );
+        return Sudoku.restoreSave(answer, puzzle);
+    },
+
+    fromSudoku(sudoku: Sudoku, meta: GameMeta): GameState {
+        return {
+            ...meta,
+            answer: sudoku.answer.map(row => [...row]),
+            cells: sudoku.puzzle.map(row =>
+                row.map(cell => ({
+                    value: cell.value,
+                    input: cell.input,
+                    notes: [...cell.notes],
+                }))
+            ),
+        };
+    },
+};

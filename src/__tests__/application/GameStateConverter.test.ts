@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import Sudoku from "@/domain/Sudoku";
-import { toGameState, toSudoku } from "@/application/GameStateConverter";
+import { GameStateConverter } from "@/application/GameState";
 import { knownAnswer, knownPuzzle, spyGeneratePuzzle } from "@/__tests__/fixtures/knownPuzzle";
 
 afterEach(() => {
@@ -8,13 +8,13 @@ afterEach(() => {
 });
 
 describe("GameStateConverter", () => {
-    describe("toGameState", () => {
+    describe("fromSudoku", () => {
         it("should convert Sudoku to GameState with answer and cells", () => {
             spyGeneratePuzzle();
             const sudoku = new Sudoku();
             sudoku.generate("easy");
 
-            const state = toGameState(sudoku, {
+            const state = GameStateConverter.fromSudoku(sudoku, {
                 difficulty: "easy",
                 elapsedSeconds: 30,
                 completed: false,
@@ -40,7 +40,7 @@ describe("GameStateConverter", () => {
             sudoku.toggleNote(0, 3, 1);
             sudoku.toggleNote(0, 3, 6);
 
-            const state = toGameState(sudoku, {
+            const state = GameStateConverter.fromSudoku(sudoku, {
                 difficulty: "easy",
                 elapsedSeconds: 0,
                 completed: false,
@@ -67,7 +67,7 @@ describe("GameStateConverter", () => {
                 completed: false,
             };
 
-            const sudoku = toSudoku(state);
+            const sudoku = GameStateConverter.toSudoku(state);
 
             // clue 還原
             expect(sudoku.puzzle[0][0].value).toBe(5);
