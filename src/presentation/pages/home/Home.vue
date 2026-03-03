@@ -2,17 +2,19 @@
     <div class="flex flex-col h-full items-center pt-20 pb-15 px-6">
         <!-- Logo -->
         <div class="flex flex-col items-center gap-2">
-            <div class="w-20 h-20 bg-primary rounded-[20px] flex items-center justify-center shadow-[0_4px_16px_#3D8A5A30]">
+            <div
+                class="w-20 h-20 bg-primary rounded-[20px] flex items-center justify-center shadow-[0_4px_16px_#3D8A5A30]"
+            >
                 <div class="grid grid-cols-3 gap-1 w-12 h-12">
-                    <div class="rounded-[4px] bg-white/40" />
-                    <div class="rounded-[4px] bg-white" />
-                    <div class="rounded-[4px] bg-white/40" />
-                    <div class="rounded-[4px] bg-white" />
-                    <div class="rounded-[4px] bg-white/40" />
-                    <div class="rounded-[4px] bg-white" />
-                    <div class="rounded-[4px] bg-white/40" />
-                    <div class="rounded-[4px] bg-white" />
-                    <div class="rounded-[4px] bg-white/40" />
+                    <div class="rounded-sm bg-white/40" />
+                    <div class="rounded-sm bg-white" />
+                    <div class="rounded-sm bg-white/40" />
+                    <div class="rounded-sm bg-white" />
+                    <div class="rounded-sm bg-white/40" />
+                    <div class="rounded-sm bg-white" />
+                    <div class="rounded-sm bg-white/40" />
+                    <div class="rounded-sm bg-white" />
+                    <div class="rounded-sm bg-white/40" />
                 </div>
             </div>
             <h1 class="text-foreground text-4xl font-bold tracking-[-1px]">
@@ -30,8 +32,8 @@
             <!-- Continue Game -->
             <button
                 v-if="showContinue"
-                data-testid="continue-button"
                 class="flex items-center justify-center gap-2.5 h-14 w-full bg-primary rounded-2xl text-white shadow-[0_4px_12px_#3D8A5A30] cursor-pointer"
+                data-testid="continue-button"
                 @click="continueGame"
             >
                 <Play :size="20" />
@@ -43,27 +45,27 @@
 
             <!-- Difficulty Switcher -->
             <div
-                data-testid="difficulty-switcher"
                 class="flex h-12 w-full bg-card rounded-[14px] shadow-[0_2px_8px_#1A191808] p-1"
+                data-testid="difficulty-switcher"
             >
                 <button
-                    v-for="(d, i) in difficulties"
-                    :key="d"
-                    :data-testid="`difficulty-${d}`"
-                    class="flex-1 h-full rounded-[10px] flex items-center justify-center text-sm transition-all cursor-pointer"
-                    :class="difficultyIndex === i
+                    v-for="(difficulty, index) in difficulties"
+                    :key="difficulty"
+                    :class="difficultyIndex === index
                         ? 'bg-primary text-white font-semibold shadow-[0_2px_6px_#3D8A5A30]'
                         : 'text-foreground-secondary font-medium'"
-                    @click="difficultyIndex = i"
+                    :data-testid="`difficulty-${difficulty}`"
+                    class="flex-1 h-full rounded-[10px] flex items-center justify-center text-sm transition-all cursor-pointer"
+                    @click="difficultyIndex = index"
                 >
-                    {{ labels[d] }}
+                    {{ labels[difficulty] }}
                 </button>
             </div>
 
             <!-- New Game -->
             <button
-                data-testid="new-game-button"
                 class="flex items-center justify-center gap-2.5 h-14 w-full bg-card rounded-2xl shadow-[0_2px_8px_#1A191808] cursor-pointer"
+                data-testid="new-game-button"
                 @click="startGame"
             >
                 <Plus
@@ -96,14 +98,14 @@
     </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import { ref } from "vue";
 import { useRouter } from "vue-router";
-import { Play, Plus, Settings, ChartBar } from "lucide-vue-next";
+import { ChartBar, Play, Plus, Settings } from "lucide-vue-next";
 import { ROUTER_PATH } from "@/router";
 import type { Difficulty } from "@/domain/SudokuGenerator";
 import { useGameStore } from "@/stores/gameStore";
-import { hasSavedGame, loadGame, deleteSavedGame } from "@/application/GameStorage";
+import { deleteSavedGame, hasSavedGame, loadGame } from "@/application/GameStorage";
 
 const router = useRouter();
 const gameStore = useGameStore();
