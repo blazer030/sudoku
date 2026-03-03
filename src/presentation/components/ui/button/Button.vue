@@ -1,10 +1,10 @@
 <template>
-  <button
-    :class="cn(buttonVariants({ variant, size, selected }))"
-    :disabled="disabled"
-  >
-    <slot />
-  </button>
+    <button
+        :class="cn(buttonVariants({ variant, size, selected }))"
+        :disabled="disabled"
+    >
+        <slot />
+    </button>
 </template>
 
 <script setup lang="ts">

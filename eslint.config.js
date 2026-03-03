@@ -39,6 +39,8 @@ export default tseslint.config(
         },
         rules: {
             "vue/multi-word-component-names": "off",
+            "vue/html-indent": ["warn", 4],
+            "vue/script-indent": ["warn", 4],
         },
     },
 );

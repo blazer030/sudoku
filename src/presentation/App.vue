@@ -1,7 +1,7 @@
 <template>
-  <div class="max-w-screen-sm h-dvh mx-auto">
-    <RouterView />
-  </div>
+    <div class="max-w-screen-sm h-dvh mx-auto">
+        <RouterView />
+    </div>
 </template>
 
 <script setup lang="ts">
