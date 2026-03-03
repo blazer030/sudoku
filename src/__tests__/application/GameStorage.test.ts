@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { loadGame, saveGame, type GameState } from "@/application/GameStorage";
+import { deleteSavedGame, hasSavedGame, loadGame, saveGame, type GameState } from "@/application/GameStorage";
 import type { Difficulty } from "@/domain/SudokuGenerator";
 
 function createGameState(overrides: Partial<GameState> = {}): GameState {
@@ -50,6 +50,25 @@ describe("GameStorage", () => {
         });
 
         it("should return null when no save exists", () => {
+            expect(loadGame()).toBeNull();
+        });
+    });
+
+    describe("hasSavedGame", () => {
+        it("should return true when save exists", () => {
+            saveGame(createGameState());
+            expect(hasSavedGame()).toBe(true);
+        });
+
+        it("should return false when no save exists", () => {
+            expect(hasSavedGame()).toBe(false);
+        });
+    });
+
+    describe("deleteSavedGame", () => {
+        it("should remove saved game from localStorage", () => {
+            saveGame(createGameState());
+            deleteSavedGame();
             expect(loadGame()).toBeNull();
         });
     });

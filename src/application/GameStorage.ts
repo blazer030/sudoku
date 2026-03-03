@@ -25,3 +25,11 @@ export function loadGame(): GameState | null {
     if (stored === null) return null;
     return JSON.parse(stored) as GameState;
 }
+
+export function hasSavedGame(): boolean {
+    return localStorage.getItem(STORAGE_KEY) !== null;
+}
+
+export function deleteSavedGame(): void {
+    localStorage.removeItem(STORAGE_KEY);
+}

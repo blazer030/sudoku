@@ -283,15 +283,39 @@
 
 ### 4.1 遊戲存檔/讀檔
 
+> 儲存用 localStorage，還原邏輯放 domain 層（Sudoku.getState / restoreState）
+> GameStorage 只負責存取 plain object，不認識 domain class
+
+#### 4.1.1 GameStorage CRUD
+
 > `src/__tests__/application/GameStorage.test.ts` + `src/application/GameStorage.ts`
 
-- [ ] **測試**：`saveGame(state)` — 序列化並存入 localStorage
-- [ ] **測試**：`loadGame()` — 反序列化遊戲狀態
-- [ ] **測試**：`loadGame()` — 無存檔時回傳 null
-- [ ] **測試**：`hasSavedGame()` — 檢查是否有存檔
-- [ ] **測試**：`deleteSavedGame()` — 刪除存檔
-- [ ] **測試**：自動存檔 — 每次 state 變更時自動儲存
-- [ ] **UI 測試**：Home 頁有存檔時顯示 Continue 按鈕
+- [x] **測試**：`saveGame(state)` — 序列化並存入 localStorage
+- [x] **測試**：`loadGame()` — 反序列化遊戲狀態
+- [x] **測試**：`loadGame()` — 無存檔時回傳 null
+- [x] **測試**：`hasSavedGame()` — 檢查是否有存檔
+- [x] **測試**：`deleteSavedGame()` — 刪除存檔
+
+#### 4.1.2 Domain 層序列化/還原
+
+> `src/__tests__/domain/Sudoku.test.ts` + `src/domain/Sudoku.ts`
+
+- [ ] **測試**：`getState()` — generate 後回傳 `{ answer, cells: { value, input, notes }[][] }`
+- [ ] **測試**：`restoreState(state)` — 從 plain object 還原 puzzle，可繼續操作
+
+#### 4.1.3 Game.vue 整合
+
+> `src/__tests__/presentation/Game.test.ts` + `src/presentation/pages/game/Game.vue`
+
+- [ ] **測試**：自動存檔 — 輸入數字後 localStorage 有存檔資料
+- [ ] **測試**：Continue 流程 — 有存檔時還原棋盤狀態和計時器
+
+#### 4.1.4 Home.vue Continue 按鈕
+
+> `src/__tests__/presentation/Home.test.ts` + `src/presentation/pages/home/Home.vue`
+
+- [ ] **UI 測試**：有存檔時顯示 Continue 按鈕，點擊導航到 Game 頁
+- [ ] **行為**：New Game 點擊時清除舊存檔
 
 ### 4.2 統計追蹤
 
