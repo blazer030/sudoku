@@ -19,3 +19,9 @@ const STORAGE_KEY = "sudoku-save";
 export function saveGame(state: GameState): void {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
+
+export function loadGame(): GameState | null {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored === null) return null;
+    return JSON.parse(stored) as GameState;
+}

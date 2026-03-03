@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { saveGame, type GameState } from "@/application/GameStorage";
+import { loadGame, saveGame, type GameState } from "@/application/GameStorage";
 import type { Difficulty } from "@/domain/SudokuGenerator";
 
 function createGameState(overrides: Partial<GameState> = {}): GameState {
@@ -33,6 +33,24 @@ describe("GameStorage", () => {
             expect(stored).not.toBeNull();
             const parsed: unknown = JSON.parse(stored!);
             expect(parsed).toEqual(state);
+        });
+    });
+
+    describe("loadGame", () => {
+        it("should deserialize game state from localStorage", () => {
+            const state = createGameState({
+                difficulty: "medium",
+                elapsedSeconds: 60,
+            });
+            saveGame(state);
+
+            const loaded = loadGame();
+
+            expect(loaded).toEqual(state);
+        });
+
+        it("should return null when no save exists", () => {
+            expect(loadGame()).toBeNull();
         });
     });
 });
