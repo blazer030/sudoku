@@ -30,18 +30,7 @@
         <!-- Menu -->
         <div class="flex flex-col gap-3 w-full">
             <!-- Continue Game -->
-            <button
-                v-if="showContinue"
-                class="flex items-center justify-center gap-2.5 h-14 w-full bg-primary rounded-2xl text-white shadow-[0_4px_12px_#3D8A5A30] cursor-pointer"
-                data-testid="continue-button"
-                @click="continueGame"
-            >
-                <Play :size="20" />
-                <span class="text-base font-semibold">Continue Game</span>
-                <span class="bg-white/20 rounded-full px-2.5 py-1 text-xs font-medium">
-                    {{ savedTimeLabel }}
-                </span>
-            </button>
+            <ContinueButton @continue="continueGame" />
 
             <!-- Difficulty Switcher -->
             <div
@@ -101,12 +90,12 @@
 <script lang="ts" setup>
 import { ref } from "vue";
 import { useRouter } from "vue-router";
-import { ChartBar, Play, Plus, Settings } from "lucide-vue-next";
+import { ChartBar, Plus, Settings } from "lucide-vue-next";
 import { ROUTER_PATH } from "@/router";
 import type { Difficulty } from "@/domain/SudokuGenerator";
 import { useGameStore } from "@/stores/gameStore";
-import { deleteSavedGame, hasSavedGame, loadGame } from "@/application/GameStorage";
-import { formatTime } from "@/utils/formatTime";
+import { deleteSavedGame } from "@/application/GameStorage";
+import ContinueButton from "@/presentation/components/continue-button/ContinueButton.vue";
 
 const router = useRouter();
 const gameStore = useGameStore();
@@ -114,14 +103,6 @@ const gameStore = useGameStore();
 const difficulties: Difficulty[] = ["easy", "medium", "hard"];
 const labels: Record<Difficulty, string> = { easy: "Easy", medium: "Medium", hard: "Hard" };
 const difficultyIndex = ref(0);
-
-const showContinue = hasSavedGame();
-const savedTimeLabel = (() => {
-    if (!showContinue) return "";
-    const saved = loadGame();
-    if (!saved) return "00:00";
-    return formatTime(saved.elapsedSeconds);
-})();
 
 function startGame() {
     deleteSavedGame();
