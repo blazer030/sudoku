@@ -6,7 +6,7 @@ describe("PuzzleCell", () => {
         it("should correctly initialize clue cells (non-empty)", () => {
             const cell = new PuzzleCell(5);
 
-            expect(cell.value).toBe(5);
+            expect(cell.clue).toBe(5);
             expect(cell.entry).toBe(0);
             expect(cell.isClue).toBe(true);
             expect(cell.isSlot).toBe(false);
@@ -16,7 +16,7 @@ describe("PuzzleCell", () => {
         it("should correctly initialize empty cells", () => {
             const cell = new PuzzleCell(0);
 
-            expect(cell.value).toBe(0);
+            expect(cell.clue).toBe(0);
             expect(cell.entry).toBe(0);
             expect(cell.isClue).toBe(false);
             expect(cell.isSlot).toBe(true);

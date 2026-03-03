@@ -310,7 +310,7 @@ const highlightGrid = computed(() => {
         grid[row] = [];
         for (let column = 0; column < 9; column++) {
             const cell = sudoku.puzzle[row][column];
-            const cellValue = cell.isClue ? cell.value : cell.entry;
+            const cellValue = cell.isClue ? cell.clue : cell.entry;
             if (selectedDigit.value && cellValue === selectedDigit.value) {
                 grid[row][column] = CellHighlight.SameDigit;
                 continue;
@@ -341,8 +341,8 @@ const digitCounts = computed(() => {
     for (let row = 0; row < 9; row++) {
         for (let column = 0; column < 9; column++) {
             const cell = sudoku.puzzle[row][column];
-            // 明確存取兩個屬性，確保 Vue 追蹤 _value 和 _entry
-            const v = cell.value;
+            // 明確存取兩個屬性，確保 Vue 追蹤 _clue 和 _entry
+            const v = cell.clue;
             const i = cell.entry;
             if (v > 0) counts[v]++;
             else if (i > 0) counts[i]++;

@@ -27,9 +27,9 @@ describe("GameStateConverter", () => {
             expect(state.cells).toHaveLength(9);
             expect(state.cells[0]).toHaveLength(9);
             // clue cell
-            expect(state.cells[0][0]).toEqual({ value: 5, entry: 0, notes: [] });
+            expect(state.cells[0][0]).toEqual({ clue: 5, entry: 0, notes: [] });
             // slot cell
-            expect(state.cells[0][2]).toEqual({ value: 0, entry: 0, notes: [] });
+            expect(state.cells[0][2]).toEqual({ clue: 0, entry: 0, notes: [] });
         });
 
         it("should include player input and notes", () => {
@@ -46,8 +46,8 @@ describe("GameStateConverter", () => {
                 completed: false,
             });
 
-            expect(state.cells[0][2]).toEqual({ value: 0, entry: 4, notes: [] });
-            expect(state.cells[0][3]).toEqual({ value: 0, entry: 0, notes: [1, 6] });
+            expect(state.cells[0][2]).toEqual({ clue: 0, entry: 4, notes: [] });
+            expect(state.cells[0][3]).toEqual({ clue: 0, entry: 0, notes: [1, 6] });
         });
     });
 
@@ -57,8 +57,8 @@ describe("GameStateConverter", () => {
                 difficulty: "easy" as const,
                 answer: knownAnswer.map(row => [...row]),
                 cells: knownPuzzle.map((row, rowIndex) =>
-                    row.map((value, colIndex) => ({
-                        value,
+                    row.map((puzzleValue, colIndex) => ({
+                        clue: puzzleValue,
                         entry: rowIndex === 0 && colIndex === 2 ? 4 : 0,
                         notes: rowIndex === 0 && colIndex === 3 ? [1, 6] : [],
                     }))
@@ -70,7 +70,7 @@ describe("GameStateConverter", () => {
             const sudoku = GameStateConverter.toSudoku(state);
 
             // clue 還原
-            expect(sudoku.puzzle[0][0].value).toBe(5);
+            expect(sudoku.puzzle[0][0].clue).toBe(5);
             expect(sudoku.puzzle[0][0].isClue).toBe(true);
             // entry 還原
             expect(sudoku.puzzle[0][2].entry).toBe(4);

@@ -46,8 +46,8 @@ class Sudoku {
         this._answer = answer;
 
         this._puzzle = puzzle.map((row) => {
-            return row.map((value) => {
-                return new PuzzleCell(value);
+            return row.map((puzzleValue) => {
+                return new PuzzleCell(puzzleValue);
             });
         });
     }
@@ -55,7 +55,7 @@ class Sudoku {
     public isCompleted(): boolean {
         return this._puzzle.every((puzzleRow, rowIndex) =>
             puzzleRow.every((cell, columnIndex) => {
-                const value = cell.isClue ? cell.value : cell.entry;
+                const value = cell.isClue ? cell.clue : cell.entry;
                 return value === this._answer[rowIndex][columnIndex];
             })
         );
@@ -151,7 +151,7 @@ class Sudoku {
 
     private getCurrentBoard(): number[][] {
         return this._puzzle.map(puzzleRow =>
-            puzzleRow.map(cell => cell.isClue ? cell.value : cell.entry)
+            puzzleRow.map(cell => cell.isClue ? cell.clue : cell.entry)
         );
     }
 }

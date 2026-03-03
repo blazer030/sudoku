@@ -31,7 +31,7 @@ const dummySave: GameState = {
     difficulty: "easy",
     answer: Array.from({ length: 9 }, () => Array(9).fill(0) as number[]),
     cells: Array.from({ length: 9 }, () =>
-        Array.from({ length: 9 }, () => ({ value: 0, input: 0, notes: [] as number[] }))
+        Array.from({ length: 9 }, () => ({ clue: 0, entry: 0, notes: [] as number[] }))
     ),
     elapsedSeconds: 204,
     completed: false,

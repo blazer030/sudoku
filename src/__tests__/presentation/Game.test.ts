@@ -670,8 +670,8 @@ describe("Game", () => {
             difficulty: "medium",
             answer: knownAnswer.map(row => [...row]),
             cells: knownPuzzle.map((row, rowIndex) =>
-                row.map((value, colIndex) => ({
-                    value,
+                row.map((puzzleValue, colIndex) => ({
+                    clue: puzzleValue,
                     entry: rowIndex === 0 && colIndex === 2 ? 4 : 0,
                     notes: [],
                 }))
@@ -693,8 +693,8 @@ describe("Game", () => {
             difficulty: "medium",
             answer: knownAnswer.map(row => [...row]),
             cells: knownPuzzle.map(row =>
-                row.map(value => ({
-                    value,
+                row.map(puzzleValue => ({
+                    clue: puzzleValue,
                     entry: 0,
                     notes: [],
                 }))

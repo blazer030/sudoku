@@ -11,7 +11,7 @@
             v-if="puzzleCell.isClue"
             class="text-foreground text-[22px] font-semibold"
         >
-            {{ puzzleCell.value }}
+            {{ puzzleCell.clue }}
         </div>
         <div
             v-else-if="puzzleCell.hasEntry"

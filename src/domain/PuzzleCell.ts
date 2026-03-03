@@ -1,5 +1,5 @@
 class PuzzleCell {
-    private readonly _value: number;
+    private readonly _clue: number;
     private _entry: number;
     private _notes: number[];
 
@@ -17,19 +17,19 @@ class PuzzleCell {
     }
 
     get isClue(): boolean {
-        return this._value > 0;
+        return this._clue > 0;
     }
 
     get isSlot(): boolean {
-        return this._value === 0;
+        return this._clue === 0;
     }
 
     get hasEntry(): boolean {
         return this._entry > 0;
     }
 
-    get value(): number {
-        return this._value;
+    get clue(): number {
+        return this._clue;
     }
 
     get notes(): number[] {
@@ -40,8 +40,8 @@ class PuzzleCell {
         return this._notes.length > 0;
     }
 
-    constructor(answer: number) {
-        this._value = answer;
+    constructor(clue: number) {
+        this._clue = clue;
         this._entry = 0;
         this._notes = [];
     }

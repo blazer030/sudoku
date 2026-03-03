@@ -8,7 +8,7 @@ function createGameState(overrides: Partial<GameState> = {}): GameState {
         difficulty: "easy" as Difficulty,
         answer: Array.from({ length: 9 }, () => Array.from({ length: 9 }, () => 0)),
         cells: Array.from({ length: 9 }, () =>
-            Array.from({ length: 9 }, () => ({ value: 0, input: 0, notes: [] as number[] }))
+            Array.from({ length: 9 }, () => ({ clue: 0, entry: 0, notes: [] as number[] }))
         ),
         elapsedSeconds: 0,
         completed: false,
