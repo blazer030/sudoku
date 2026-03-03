@@ -332,11 +332,11 @@
 
 ### 5.2 Home 頁 UI
 
-- [ ] Logo 區（green grid icon + 標題 + 副標題）
-- [ ] Continue Game 按鈕（primary、play icon、時間 badge）
-- [ ] 難度選擇器（三個 pill 按鈕）
-- [ ] New Game 按鈕（secondary、plus icon）
-- [ ] 底部導航（Settings + Statistics，暫無功能）
+- [x] Logo 區（green grid icon + 標題 + 副標題）
+- [x] Continue Game 按鈕（primary、play icon、時間 badge）
+- [x] 難度選擇器（三個 pill 按鈕）
+- [x] New Game 按鈕（secondary、plus icon）
+- [x] 底部導航（Settings + Statistics，暫無功能）
 
 ### 5.3 Cell 元件更新
 
