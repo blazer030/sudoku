@@ -4,7 +4,7 @@ export interface Conflict {
 }
 
 export class ConflictDetector {
-    findConflicts(board: number[][], row: number, column: number, value: number): Conflict[] {
+    public findConflicts(board: number[][], row: number, column: number, value: number): Conflict[] {
         const conflicts: Conflict[] = [];
 
         for (let currentColumn = 0; currentColumn < 9; currentColumn++) {

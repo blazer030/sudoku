@@ -1,11 +1,11 @@
 export class SudokuBoard {
-    isValidPlacement(board: number[][], row: number, column: number, digit: number): boolean {
+    public isValidPlacement(board: number[][], row: number, column: number, digit: number): boolean {
         return this.isValidInRow(board, row, digit)
             && this.isValidInColumn(board, column, digit)
             && this.isValidInBox(board, row, column, digit);
     }
 
-    isValidSolution(board: number[][]): boolean {
+    public isValidSolution(board: number[][]): boolean {
         for (let index = 0; index < 9; index++) {
             const row = board[index];
             const column = board.map(row => row[index]);

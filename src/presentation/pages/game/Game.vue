@@ -50,7 +50,7 @@
                         :column="columnIndex"
                         :data-testid="`cell-${rowIndex}-${columnIndex}`"
                         :highlight="highlightGrid[rowIndex][columnIndex]"
-                        :puzzle-cell="puzzleCell"
+                        :puzzle-cell="puzzleCell.raw()"
                         :row="rowIndex"
                         :selected="isSelected(rowIndex, columnIndex)"
                         @click="clickCell(rowIndex, columnIndex)"

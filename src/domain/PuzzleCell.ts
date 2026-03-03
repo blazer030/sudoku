@@ -3,11 +3,11 @@ class PuzzleCell {
     private _entry: number;
     private _notes: number[];
 
-    get entry(): number {
+    public get entry(): number {
         return this._entry;
     }
 
-    set entry(value: number) {
+    public set entry(value: number) {
         if (this.isClue) return;
 
         this._entry = value;
@@ -16,37 +16,41 @@ class PuzzleCell {
         }
     }
 
-    get isClue(): boolean {
+    public get isClue(): boolean {
         return this._clue > 0;
     }
 
-    get isSlot(): boolean {
+    public get isSlot(): boolean {
         return this._clue === 0;
     }
 
-    get hasEntry(): boolean {
+    public get hasEntry(): boolean {
         return this._entry > 0;
     }
 
-    get clue(): number {
+    public get clue(): number {
         return this._clue;
     }
 
-    get notes(): number[] {
+    public get notes(): number[] {
         return this._notes;
     }
 
-    get hasNotes(): boolean {
+    public get hasNotes(): boolean {
         return this._notes.length > 0;
     }
 
-    constructor(clue: number) {
+    public constructor(clue: number) {
         this._clue = clue;
         this._entry = 0;
         this._notes = [];
     }
 
-    toggleNote(value: number): void {
+    public raw(): this {
+        return this;
+    }
+
+    public toggleNote(value: number): void {
         if (this.isClue || this.hasEntry) return;
 
         if (this._notes.includes(value)) {
@@ -56,15 +60,15 @@ class PuzzleCell {
         }
     }
 
-    clearNotes(): void {
+    public clearNotes(): void {
         this._notes = [];
     }
 
-    removeNote(value: number): void {
+    public removeNote(value: number): void {
         this._notes = this._notes.filter((note) => note !== value);
     }
 
-    restore(entry: number, notes: number[]): void {
+    public restore(entry: number, notes: number[]): void {
         this._entry = entry;
         this._notes = [...notes];
     }

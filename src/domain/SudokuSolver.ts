@@ -5,7 +5,7 @@ export type DigitsProvider = () => number[];
 export class SudokuSolver {
     private board = new SudokuBoard();
 
-    solve(board: number[][], digitsProvider?: DigitsProvider): number[][] | null {
+    public solve(board: number[][], digitsProvider?: DigitsProvider): number[][] | null {
         const puzzle = board.map(row => [...row]);
 
         if (this.fillBoard(puzzle, digitsProvider)) {
