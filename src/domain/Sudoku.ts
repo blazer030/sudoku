@@ -27,6 +27,19 @@ class Sudoku {
         return this._puzzle;
     }
 
+    public getState(): { answer: number[][]; cells: { value: number; input: number; notes: number[] }[][] } {
+        return {
+            answer: this._answer.map(row => [...row]),
+            cells: this._puzzle.map(row =>
+                row.map(cell => ({
+                    value: cell.value,
+                    input: cell.input,
+                    notes: [...cell.notes],
+                }))
+            ),
+        };
+    }
+
     public isCompleted(): boolean {
         return this._puzzle.every((puzzleRow, rowIndex) =>
             puzzleRow.every((cell, columnIndex) => {

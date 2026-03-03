@@ -300,7 +300,7 @@
 
 > `src/__tests__/domain/Sudoku.test.ts` + `src/domain/Sudoku.ts`
 
-- [ ] **測試**：`getState()` — generate 後回傳 `{ answer, cells: { value, input, notes }[][] }`
+- [x] **測試**：`getState()` — generate 後回傳 `{ answer, cells: { value, input, notes }[][] }`
 - [ ] **測試**：`restoreState(state)` — 從 plain object 還原 puzzle，可繼續操作
 
 #### 4.1.3 Game.vue 整合
