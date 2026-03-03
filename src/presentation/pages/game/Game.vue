@@ -153,31 +153,31 @@
             </button>
         </div>
 
-        <!-- Number Pad -->
+        <!-- Digit Pad -->
         <div class="flex gap-1.5">
             <div
-                v-for="number in 9"
-                :key="`num-${number}`"
+                v-for="digit in 9"
+                :key="`num-${digit}`"
                 class="relative flex-1 min-w-0"
             >
                 <button
-                    :class="numberButtonClasses(number)"
-                    :data-testid="`number-${number}`"
-                    :disabled="isNumberCompleted(number)"
+                    :class="digitButtonClasses(digit)"
+                    :data-testid="`number-${digit}`"
+                    :disabled="isDigitCompleted(digit)"
                     class="w-full h-12 rounded-xl flex items-center justify-center text-2xl font-semibold transition-all cursor-pointer disabled:cursor-default"
-                    @click="inputNumber(number)"
+                    @click="selectDigit(digit)"
                 >
-                    {{ number }}
+                    {{ digit }}
                 </button>
                 <span
-                    v-if="!isNumberCompleted(number)"
-                    :class="selectedNumber === number
+                    v-if="!isDigitCompleted(digit)"
+                    :class="selectedDigit === digit
                         ? 'bg-white text-primary'
                         : 'bg-foreground-secondary text-white'"
-                    :data-testid="`badge-${number}`"
+                    :data-testid="`badge-${digit}`"
                     class="absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-semibold"
                 >
-                    {{ getRemainingCount(number) }}
+                    {{ getRemainingCount(digit) }}
                 </span>
             </div>
         </div>
@@ -222,7 +222,7 @@ const { sudoku, restoredSeconds } = (() => {
 enum InputMode { Normal, Note, Erase }
 
 const selectedCell = ref<{ row: number; column: number } | null>(null);
-const selectedNumber = ref<number | null>(null);
+const selectedDigit = ref<number | null>(null);
 const completed = ref(false);
 const inputMode = ref(InputMode.Normal);
 const elapsedSeconds = ref(restoredSeconds);
@@ -263,11 +263,11 @@ function clickCell(row: number, column: number) {
         eraseCell(row, column);
         return;
     }
-    if (selectedNumber.value !== null) {
+    if (selectedDigit.value !== null) {
         if (inputMode.value === InputMode.Note) {
-            noteToCell(row, column, selectedNumber.value);
+            noteToCell(row, column, selectedDigit.value);
         } else {
-            inputToCell(row, column, selectedNumber.value);
+            inputToCell(row, column, selectedDigit.value);
         }
         return;
     }
@@ -286,7 +286,7 @@ function inputToCell(row: number, column: number, value: number) {
     }
     sudoku.fill(row, column, value);
     if (sudoku.isCompleted()) completed.value = true;
-    if (isNumberCompleted(value)) selectedNumber.value = null;
+    if (isDigitCompleted(value)) selectedDigit.value = null;
 }
 
 function toggleSelectCell(row: number, column: number) {
@@ -311,8 +311,8 @@ const highlightGrid = computed(() => {
         for (let column = 0; column < 9; column++) {
             const cell = sudoku.puzzle[row][column];
             const cellValue = cell.isClue ? cell.value : cell.entry;
-            if (selectedNumber.value && cellValue === selectedNumber.value) {
-                grid[row][column] = CellHighlight.SameNumber;
+            if (selectedDigit.value && cellValue === selectedDigit.value) {
+                grid[row][column] = CellHighlight.SameDigit;
                 continue;
             }
             if (!selectedCell.value) {
@@ -336,7 +336,7 @@ const highlightGrid = computed(() => {
     return grid;
 });
 
-const numberCounts = computed(() => {
+const digitCounts = computed(() => {
     const counts = Array.from<number, number>({ length: 10 }, () => 0);
     for (let row = 0; row < 9; row++) {
         for (let column = 0; column < 9; column++) {
@@ -351,12 +351,12 @@ const numberCounts = computed(() => {
     return counts;
 });
 
-function isNumberCompleted(value: number): boolean {
-    return numberCounts.value[value] >= 9;
+function isDigitCompleted(digit: number): boolean {
+    return digitCounts.value[digit] >= 9;
 }
 
-function getRemainingCount(value: number): number {
-    return 9 - numberCounts.value[value];
+function getRemainingCount(digit: number): number {
+    return 9 - digitCounts.value[digit];
 }
 
 function eraseCell(row: number, column: number) {
@@ -371,27 +371,27 @@ function toggleEraseMode() {
     inputMode.value = inputMode.value === InputMode.Erase ? InputMode.Normal : InputMode.Erase;
     if (inputMode.value === InputMode.Erase) {
         selectedCell.value = null;
-        selectedNumber.value = null;
+        selectedDigit.value = null;
     }
 }
 
-function inputNumber(value: number) {
+function selectDigit(digit: number) {
     if (inputMode.value === InputMode.Erase) inputMode.value = InputMode.Normal;
     if (selectedCell.value) {
         const { row, column } = selectedCell.value;
         if (inputMode.value === InputMode.Note) {
-            sudoku.toggleNote(row, column, value);
+            sudoku.toggleNote(row, column, digit);
             return;
         }
-        inputToCell(row, column, value);
+        inputToCell(row, column, digit);
         return;
     }
-    selectedNumber.value = selectedNumber.value === value ? null : value;
+    selectedDigit.value = selectedDigit.value === digit ? null : digit;
 }
 
-function numberButtonClasses(number: number): string {
-    if (isNumberCompleted(number)) return "bg-card opacity-50 text-foreground-muted";
-    if (selectedNumber.value === number) return "bg-primary text-white shadow-[0_2px_8px_#3D8A5A40]";
+function digitButtonClasses(digit: number): string {
+    if (isDigitCompleted(digit)) return "bg-card opacity-50 text-foreground-muted";
+    if (selectedDigit.value === digit) return "bg-primary text-white shadow-[0_2px_8px_#3D8A5A40]";
     return "bg-card text-foreground shadow-[0_1px_4px_#1A191808]";
 }
 </script>

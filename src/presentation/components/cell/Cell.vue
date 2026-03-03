@@ -50,7 +50,7 @@ const props = defineProps<{
 const cellBg = computed(() => {
     if (props.selected) return "bg-primary-light";
     if (props.highlight === CellHighlight.Peer) return "bg-highlight";
-    if (props.highlight === CellHighlight.SameNumber) return "bg-highlight";
+    if (props.highlight === CellHighlight.SameDigit) return "bg-highlight";
     if (props.puzzleCell.isClue) return "bg-cell-clue";
     return "bg-card";
 });

@@ -24,9 +24,9 @@ export class SudokuBoard {
         return true;
     }
 
-    private hasAllDigits(numbers: number[]): boolean {
-        return new Set(numbers).size === 9
-            && numbers.every(number => number >= 1 && number <= 9);
+    private hasAllDigits(digits: number[]): boolean {
+        return new Set(digits).size === 9
+            && digits.every(digit => digit >= 1 && digit <= 9);
     }
 
     private isValidInRow(board: number[][], row: number, digit: number): boolean {

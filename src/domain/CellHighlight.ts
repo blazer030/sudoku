@@ -1,7 +1,7 @@
 enum CellHighlight {
   None = "none",
   Peer = "peer",
-  SameNumber = "sameNumber",
+  SameDigit = "sameDigit",
 }
 
 export default CellHighlight;
