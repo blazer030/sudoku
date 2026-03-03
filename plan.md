@@ -269,7 +269,13 @@
 - [x] **測試**：Home 頁點擊 New Game 導航到 Game 頁
 - [x] **測試**：Game 頁載入時自動初始化新 puzzle
 - [x] **測試**：難度選擇 UI — 可選 Easy/Medium/Hard
-- [ ] **測試**：Game 頁讀取 route query 的 difficulty 參數，以對應難度生成 puzzle
+### 3.13 引入 Pinia 狀態管理
+
+- [x] 安裝 Pinia，註冊到 main.ts
+- [x] **測試**：gameStore 預設 difficulty 為 null
+- [x] **測試**：setDifficulty 可更新難度
+- [x] **重構**：Home.vue 改用 store 傳遞 difficulty
+- [x] **重構**：Game.vue 改用 store 讀取 difficulty，無 difficulty 時導回首頁
 
 ---
 
