@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import Sudoku from "@/domain/Sudoku";
-import { toGameState } from "@/application/GameStateConverter";
-import { knownAnswer, spyGeneratePuzzle } from "@/__tests__/fixtures/knownPuzzle";
+import { toGameState, toSudoku } from "@/application/GameStateConverter";
+import { knownAnswer, knownPuzzle, spyGeneratePuzzle } from "@/__tests__/fixtures/knownPuzzle";
 
 afterEach(() => {
     vi.restoreAllMocks();
@@ -48,6 +48,37 @@ describe("GameStateConverter", () => {
 
             expect(state.cells[0][2]).toEqual({ value: 0, input: 4, notes: [] });
             expect(state.cells[0][3]).toEqual({ value: 0, input: 0, notes: [1, 6] });
+        });
+    });
+
+    describe("toSudoku", () => {
+        it("should restore Sudoku from GameState and allow continued play", () => {
+            const state = {
+                difficulty: "easy" as const,
+                answer: knownAnswer.map(row => [...row]),
+                cells: knownPuzzle.map((row, rowIndex) =>
+                    row.map((value, colIndex) => ({
+                        value,
+                        input: rowIndex === 0 && colIndex === 2 ? 4 : 0,
+                        notes: rowIndex === 0 && colIndex === 3 ? [1, 6] : [],
+                    }))
+                ),
+                elapsedSeconds: 60,
+                completed: false,
+            };
+
+            const sudoku = toSudoku(state);
+
+            // clue 還原
+            expect(sudoku.puzzle[0][0].value).toBe(5);
+            expect(sudoku.puzzle[0][0].isClue).toBe(true);
+            // input 還原
+            expect(sudoku.puzzle[0][2].input).toBe(4);
+            // notes 還原
+            expect(sudoku.puzzle[0][3].notes).toEqual([1, 6]);
+            // 可繼續操作
+            expect(sudoku.check(0, 2, 4)).toBe(true);
+            expect(sudoku.isCompleted()).toBe(false);
         });
     });
 });

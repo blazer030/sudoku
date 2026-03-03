@@ -22,6 +22,13 @@ class Sudoku {
         return this._puzzle;
     }
 
+    public static restoreSave(answer: number[][], puzzle: PuzzleCell[][]): Sudoku {
+        const instance = new Sudoku();
+        instance._answer = answer;
+        instance._puzzle = puzzle;
+        return instance;
+    }
+
     public generate(difficulty: Difficulty = "easy") {
         const { puzzle, answer } = this.generator.generatePuzzle(difficulty);
         this._answer = answer;
