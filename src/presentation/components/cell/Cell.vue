@@ -3,7 +3,8 @@
     :class="[
       selected ? 'selected bg-sky-100' : '',
       conflict ? 'conflict bg-red-100' : '',
-      highlighted ? 'bg-sky-50' : '',
+      highlight === CellHighlight.Peer ? 'bg-sky-50' : '',
+      highlight === CellHighlight.SameNumber ? 'bg-sky-100' : '',
       !puzzleCell.isClue ? 'cursor-pointer' : '',
     ]"
     class="flex justify-center items-center flex-1 aspect-square"
@@ -37,11 +38,12 @@
 
 <script setup lang="ts">
 import PuzzleCell from "@/domain/PuzzleCell";
+import CellHighlight from "@/domain/CellHighlight";
 
 defineProps<{
     puzzleCell: PuzzleCell;
     selected?: boolean;
     conflict?: boolean;
-    highlighted?: boolean;
+    highlight?: CellHighlight;
 }>();
 </script>

@@ -3,6 +3,7 @@ import { mount } from "@vue/test-utils";
 import Game from "@/presentation/pages/game/Game.vue";
 import { knownAnswer, knownPuzzle, spyGeneratePuzzle } from "@/__tests__/fixtures/knownPuzzle";
 import Cell from "@/presentation/components/cell/Cell.vue";
+import CellHighlight from "@/domain/CellHighlight";
 
 afterEach(() => {
     vi.restoreAllMocks();
@@ -513,15 +514,15 @@ describe("Game", () => {
         await wrapper.find("[data-testid='cell-0-2']").trigger("click");
 
         // 同行
-        expect(wrapper.findComponent<typeof Cell>("[data-testid='cell-0-5']").props("highlighted")).toBe(true);
+        expect(wrapper.findComponent<typeof Cell>("[data-testid='cell-0-5']").props("highlight")).toBe(CellHighlight.Peer);
         // 同列
-        expect(wrapper.findComponent<typeof Cell>("[data-testid='cell-3-2']").props("highlighted")).toBe(true);
+        expect(wrapper.findComponent<typeof Cell>("[data-testid='cell-3-2']").props("highlight")).toBe(CellHighlight.Peer);
         // 同宮
-        expect(wrapper.findComponent<typeof Cell>("[data-testid='cell-1-0']").props("highlighted")).toBe(true);
+        expect(wrapper.findComponent<typeof Cell>("[data-testid='cell-1-0']").props("highlight")).toBe(CellHighlight.Peer);
         // 不相關
-        expect(wrapper.findComponent<typeof Cell>("[data-testid='cell-5-5']").props("highlighted")).toBe(false);
-        // 自身不傳 highlighted
-        expect(wrapper.findComponent<typeof Cell>("[data-testid='cell-0-2']").props("highlighted")).toBe(false);
+        expect(wrapper.findComponent<typeof Cell>("[data-testid='cell-5-5']").props("highlight")).toBe(CellHighlight.None);
+        // 自身不傳 highlight
+        expect(wrapper.findComponent<typeof Cell>("[data-testid='cell-0-2']").props("highlight")).toBe(CellHighlight.None);
     });
 
     it("should render 9x9 grid with clue cells showing their numbers", () => {

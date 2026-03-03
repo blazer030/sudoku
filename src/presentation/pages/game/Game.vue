@@ -26,7 +26,7 @@
           ]"
           :conflict="isConflict(rowIndex, columnIndex)"
           :data-testid="`cell-${rowIndex}-${columnIndex}`"
-          :highlighted="isHighlighted(rowIndex, columnIndex)"
+          :highlight="getCellHighlight(rowIndex, columnIndex)"
           :puzzle-cell="puzzleCell"
           :selected="isSelected(rowIndex, columnIndex)"
           class="border-sky-200"
@@ -95,6 +95,7 @@
 <script lang="ts" setup>
 import { computed, onBeforeUnmount, reactive, ref } from "vue";
 import Sudoku from "@/domain/Sudoku";
+import CellHighlight from "@/domain/CellHighlight";
 import Button from "@/presentation/components/ui/button/Button.vue";
 import Cell from "@/presentation/components/cell/Cell.vue";
 
@@ -172,15 +173,16 @@ function isSelected(row: number, column: number) {
   return selectedCell.value.column === column;
 }
 
-function isHighlighted(row: number, column: number) {
-  if (!selectedCell.value) return false;
+function getCellHighlight(row: number, column: number): CellHighlight {
+  if (!selectedCell.value) return CellHighlight.None;
   const selectedRow = selectedCell.value.row;
   const selectedColumn = selectedCell.value.column;
-  if (row === selectedRow && column === selectedColumn) return false;
-  if (row === selectedRow || column === selectedColumn) return true;
+  if (row === selectedRow && column === selectedColumn) return CellHighlight.None;
+  if (row === selectedRow || column === selectedColumn) return CellHighlight.Peer;
   const sameBox = Math.floor(row / 3) === Math.floor(selectedRow / 3)
     && Math.floor(column / 3) === Math.floor(selectedColumn / 3);
-  return sameBox;
+  if (sameBox) return CellHighlight.Peer;
+  return CellHighlight.None;
 }
 
 function isConflict(row: number, column: number) {
