@@ -82,9 +82,9 @@ describe("Sudoku", () => {
         const puzzle = sudoku.puzzle;
 
         // (0, 2) 是空格，填入 4
-        sudoku.input(0, 2, 4);
+        sudoku.fill(0, 2, 4);
 
-        expect(puzzle[0][2].input).toBe(4);
+        expect(puzzle[0][2].entry).toBe(4);
     });
 
     it("should return true when all cells are correctly filled", () => {
@@ -95,7 +95,7 @@ describe("Sudoku", () => {
         for (let row = 0; row < 9; row++) {
             for (let column = 0; column < 9; column++) {
                 if (knownPuzzle[row][column] === 0) {
-                    sudoku.input(row, column, knownAnswer[row][column]);
+                    sudoku.fill(row, column, knownAnswer[row][column]);
                 }
             }
         }
@@ -154,7 +154,7 @@ describe("Sudoku", () => {
 
         // (0, 2) 候選 [1, 2, 4]，(0, 3) 候選包含某些數字
         // 填入 4 到 (0, 2)，同行同宮的空白格中的 4 應被移除
-        sudoku.input(0, 2, 4);
+        sudoku.fill(0, 2, 4);
 
         // (0, 3) 在同一行，其 notes 不應再包含 4
         expect(puzzle[0][3].notes).not.toContain(4);
@@ -169,12 +169,12 @@ describe("Sudoku", () => {
         const puzzle = sudoku.puzzle;
 
         // 先填入一個數字
-        sudoku.input(0, 2, 4);
+        sudoku.fill(0, 2, 4);
 
         sudoku.autoNotes();
 
         // 已填入的格子不應被覆蓋
-        expect(puzzle[0][2].input).toBe(4);
+        expect(puzzle[0][2].entry).toBe(4);
         expect(puzzle[0][2].hasNotes).toBe(false);
     });
 
@@ -184,12 +184,12 @@ describe("Sudoku", () => {
         sudoku.generate("easy");
         const puzzle = sudoku.puzzle;
 
-        sudoku.input(0, 2, 4);
-        expect(puzzle[0][2].input).toBe(4);
+        sudoku.fill(0, 2, 4);
+        expect(puzzle[0][2].entry).toBe(4);
 
         sudoku.undo();
 
-        expect(puzzle[0][2].input).toBe(0);
+        expect(puzzle[0][2].entry).toBe(0);
     });
 
     it("should restore peer notes removed by input after undo", () => {
@@ -201,7 +201,7 @@ describe("Sudoku", () => {
         sudoku.autoNotes();
         const notesBefore03 = [...puzzle[0][3].notes];
 
-        sudoku.input(0, 2, 4);
+        sudoku.fill(0, 2, 4);
         // peer (0, 3) 的 note 4 應被移除
         expect(puzzle[0][3].notes).not.toContain(4);
 
@@ -216,14 +216,14 @@ describe("Sudoku", () => {
         sudoku.generate("easy");
         const puzzle = sudoku.puzzle;
 
-        sudoku.input(0, 2, 4);
-        expect(puzzle[0][2].input).toBe(4);
+        sudoku.fill(0, 2, 4);
+        expect(puzzle[0][2].entry).toBe(4);
 
         sudoku.erase(0, 2);
-        expect(puzzle[0][2].input).toBe(0);
+        expect(puzzle[0][2].entry).toBe(0);
 
         sudoku.undo();
-        expect(puzzle[0][2].input).toBe(4);
+        expect(puzzle[0][2].entry).toBe(4);
     });
 
     it("should undo toggleNote and restore notes", () => {
@@ -273,12 +273,12 @@ describe("Sudoku", () => {
         for (let row = 0; row < 9; row++) {
             for (let column = 0; column < 9; column++) {
                 if (knownPuzzle[row][column] === 0) {
-                    sudoku.input(row, column, knownAnswer[row][column]);
+                    sudoku.fill(row, column, knownAnswer[row][column]);
                 }
             }
         }
         // 把 (0, 2) 填入錯誤值（正確是 4，填 1）
-        sudoku.input(0, 2, 1);
+        sudoku.fill(0, 2, 1);
 
         expect(sudoku.isCompleted()).toBe(false);
     });

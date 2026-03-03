@@ -672,7 +672,7 @@ describe("Game", () => {
             cells: knownPuzzle.map((row, rowIndex) =>
                 row.map((value, colIndex) => ({
                     value,
-                    input: rowIndex === 0 && colIndex === 2 ? 4 : 0,
+                    entry: rowIndex === 0 && colIndex === 2 ? 4 : 0,
                     notes: [],
                 }))
             ),
@@ -682,7 +682,7 @@ describe("Game", () => {
 
         const wrapper = mountContinueGame(savedState);
 
-        // 已填入的 input 應還原
+        // 已填入的 entry 應還原
         expect(wrapper.find("[data-testid='cell-0-2']").text()).toBe("4");
         // 計時器應還原
         expect(wrapper.find("[data-testid='timer']").text()).toBe("00:45");
@@ -695,7 +695,7 @@ describe("Game", () => {
             cells: knownPuzzle.map(row =>
                 row.map(value => ({
                     value,
-                    input: 0,
+                    entry: 0,
                     notes: [],
                 }))
             ),
@@ -731,7 +731,7 @@ describe("Game", () => {
         const saved = loadGame();
         expect(saved).not.toBeNull();
         expect(saved?.difficulty).toBe("easy");
-        expect(saved?.cells[0][2].input).toBe(4);
+        expect(saved?.cells[0][2].entry).toBe(4);
     });
 
     it("should render 9x9 grid with clue cells showing their numbers", () => {

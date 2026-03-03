@@ -4,7 +4,7 @@ import type { Difficulty } from "@/domain/SudokuGenerator";
 
 export interface CellState {
     value: number;
-    input: number;
+    entry: number;
     notes: number[];
 }
 
@@ -28,7 +28,7 @@ export const GameStateConverter = {
         const puzzle = state.cells.map(row =>
             row.map(cell => {
                 const puzzleCell = new PuzzleCell(cell.value);
-                puzzleCell.restore(cell.input, cell.notes);
+                puzzleCell.restore(cell.entry, cell.notes);
                 return puzzleCell;
             })
         );
@@ -42,7 +42,7 @@ export const GameStateConverter = {
             cells: sudoku.puzzle.map(row =>
                 row.map(cell => ({
                     value: cell.value,
-                    input: cell.input,
+                    entry: cell.entry,
                     notes: [...cell.notes],
                 }))
             ),

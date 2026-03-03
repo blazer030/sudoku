@@ -4,7 +4,7 @@ import { SudokuBoard } from "@/domain/SudokuBoard";
 import { Difficulty, SudokuGenerator } from "@/domain/SudokuGenerator";
 
 interface CellSnapshot {
-    input: number;
+    entry: number;
     notes: number[]
 }
 
@@ -55,7 +55,7 @@ class Sudoku {
     public isCompleted(): boolean {
         return this._puzzle.every((puzzleRow, rowIndex) =>
             puzzleRow.every((cell, columnIndex) => {
-                const value = cell.isClue ? cell.value : cell.input;
+                const value = cell.isClue ? cell.value : cell.entry;
                 return value === this._answer[rowIndex][columnIndex];
             })
         );
@@ -66,7 +66,7 @@ class Sudoku {
         if (!snapshot) return;
         for (let row = 0; row < 9; row++) {
             for (let col = 0; col < 9; col++) {
-                this._puzzle[row][col].restore(snapshot[row][col].input, snapshot[row][col].notes);
+                this._puzzle[row][col].restore(snapshot[row][col].entry, snapshot[row][col].notes);
             }
         }
     }
@@ -75,8 +75,8 @@ class Sudoku {
         const cell = this._puzzle[row][column];
         if (cell.isClue) return;
         this.snapshot();
-        if (cell.isEntered) {
-            cell.input = 0;
+        if (cell.hasEntry) {
+            cell.entry = 0;
         } else if (cell.hasNotes) {
             cell.clearNotes();
         }
@@ -84,14 +84,14 @@ class Sudoku {
 
     public toggleNote(row: number, column: number, value: number): void {
         const cell = this._puzzle[row][column];
-        if (cell.isClue || cell.isEntered) return;
+        if (cell.isClue || cell.hasEntry) return;
         this.snapshot();
         cell.toggleNote(value);
     }
 
-    public input(row: number, column: number, value: number): void {
+    public fill(row: number, column: number, value: number): void {
         this.snapshot();
-        this._puzzle[row][column].input = value;
+        this._puzzle[row][column].entry = value;
         if (value > 0) {
             this.removeNoteFromPeers(row, column, value);
         }
@@ -107,7 +107,7 @@ class Sudoku {
         for (let row = 0; row < 9; row++) {
             for (let col = 0; col < 9; col++) {
                 const cell = this._puzzle[row][col];
-                if (cell.isClue || cell.isEntered) continue;
+                if (cell.isClue || cell.hasEntry) continue;
                 cell.clearNotes();
                 for (let digit = 1; digit <= 9; digit++) {
                     if (this.board.isValidPlacement(currentBoard, row, col, digit)) {
@@ -125,7 +125,7 @@ class Sudoku {
     private snapshot(): void {
         this._history.push(
             this._puzzle.map(row =>
-                row.map(cell => ({ input: cell.input, notes: [...cell.notes] }))
+                row.map(cell => ({ entry: cell.entry, notes: [...cell.notes] }))
             )
         );
     }
@@ -151,7 +151,7 @@ class Sudoku {
 
     private getCurrentBoard(): number[][] {
         return this._puzzle.map(puzzleRow =>
-            puzzleRow.map(cell => cell.isClue ? cell.value : cell.input)
+            puzzleRow.map(cell => cell.isClue ? cell.value : cell.entry)
         );
     }
 }

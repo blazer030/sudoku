@@ -1,26 +1,16 @@
-export interface IPuzzleCell {
-    readonly value: number;
-    readonly input: number;
-    readonly isClue: boolean;
-    readonly isSlot: boolean;
-    readonly isEntered: boolean;
-    readonly notes: number[];
-    readonly hasNotes: boolean;
-}
-
-class PuzzleCell implements IPuzzleCell {
+class PuzzleCell {
     private readonly _value: number;
-    private _input: number;
+    private _entry: number;
     private _notes: number[];
 
-    get input(): number {
-        return this._input;
+    get entry(): number {
+        return this._entry;
     }
 
-    set input(value: number) {
+    set entry(value: number) {
         if (this.isClue) return;
-        
-        this._input = value;
+
+        this._entry = value;
         if (value > 0) {
             this._notes = [];
         }
@@ -34,8 +24,8 @@ class PuzzleCell implements IPuzzleCell {
         return this._value === 0;
     }
 
-    get isEntered(): boolean {
-        return this._input > 0;
+    get hasEntry(): boolean {
+        return this._entry > 0;
     }
 
     get value(): number {
@@ -46,8 +36,18 @@ class PuzzleCell implements IPuzzleCell {
         return this._notes;
     }
 
+    get hasNotes(): boolean {
+        return this._notes.length > 0;
+    }
+
+    constructor(answer: number) {
+        this._value = answer;
+        this._entry = 0;
+        this._notes = [];
+    }
+
     toggleNote(value: number): void {
-        if (this.isClue || this.isEntered) return;
+        if (this.isClue || this.hasEntry) return;
 
         if (this._notes.includes(value)) {
             this._notes = this._notes.filter((note) => note !== value);
@@ -64,19 +64,9 @@ class PuzzleCell implements IPuzzleCell {
         this._notes = this._notes.filter((note) => note !== value);
     }
 
-    restore(input: number, notes: number[]): void {
-        this._input = input;
+    restore(entry: number, notes: number[]): void {
+        this._entry = entry;
         this._notes = [...notes];
-    }
-
-    get hasNotes(): boolean {
-        return this._notes.length > 0;
-    }
-
-    constructor(answer: number) {
-        this._value = answer;
-        this._input = 0;
-        this._notes = [];
     }
 }
 

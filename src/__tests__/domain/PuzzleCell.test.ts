@@ -7,20 +7,20 @@ describe("PuzzleCell", () => {
             const cell = new PuzzleCell(5);
 
             expect(cell.value).toBe(5);
-            expect(cell.input).toBe(0);
+            expect(cell.entry).toBe(0);
             expect(cell.isClue).toBe(true);
             expect(cell.isSlot).toBe(false);
-            expect(cell.isEntered).toBe(false);
+            expect(cell.hasEntry).toBe(false);
         });
 
         it("should correctly initialize empty cells", () => {
             const cell = new PuzzleCell(0);
 
             expect(cell.value).toBe(0);
-            expect(cell.input).toBe(0);
+            expect(cell.entry).toBe(0);
             expect(cell.isClue).toBe(false);
             expect(cell.isSlot).toBe(true);
-            expect(cell.isEntered).toBe(false);
+            expect(cell.hasEntry).toBe(false);
         });
 
     });
@@ -28,10 +28,10 @@ describe("PuzzleCell", () => {
     describe("Number input functionality", () => {
         it("should allow inputting numbers in empty cells", () => {
             const cell = new PuzzleCell(0);
-            cell.input = 3;
+            cell.entry = 3;
 
-            expect(cell.input).toBe(3);
-            expect(cell.isEntered).toBe(true);
+            expect(cell.entry).toBe(3);
+            expect(cell.hasEntry).toBe(true);
             expect(cell.isSlot).toBe(true);
         });
 
@@ -41,7 +41,7 @@ describe("PuzzleCell", () => {
             cell.toggleNote(2);
             expect(cell.hasNotes).toBe(true);
 
-            cell.input = 5;
+            cell.entry = 5;
 
             expect(cell.hasNotes).toBe(false);
             expect(cell.notes).toEqual([]);
@@ -49,21 +49,21 @@ describe("PuzzleCell", () => {
 
         it("should allow clearing inputted numbers", () => {
             const cell = new PuzzleCell(0);
-            cell.input = 7;
-            expect(cell.isEntered).toBe(true);
+            cell.entry = 7;
+            expect(cell.hasEntry).toBe(true);
 
-            cell.input = 0;
+            cell.entry = 0;
 
-            expect(cell.input).toBe(0);
-            expect(cell.isEntered).toBe(false);
+            expect(cell.entry).toBe(0);
+            expect(cell.hasEntry).toBe(false);
         });
 
         it("should not allow inputting numbers in clue cells", () => {
             const cell = new PuzzleCell(4);
 
-            cell.input = 9;
+            cell.entry = 9;
 
-            expect(cell.input).toBe(0);
+            expect(cell.entry).toBe(0);
         });
     });
 
@@ -97,7 +97,7 @@ describe("PuzzleCell", () => {
 
         it("should not allow setting notes in cells with inputted numbers", () => {
             const cell = new PuzzleCell(0);
-            cell.input = 8;
+            cell.entry = 8;
 
             cell.toggleNote(3);
 
@@ -140,11 +140,11 @@ describe("PuzzleCell", () => {
     describe("Restore", () => {
         it("should restore input and notes to specified state", () => {
             const cell = new PuzzleCell(0);
-            cell.input = 5;
+            cell.entry = 5;
 
             cell.restore(3, [1, 2, 4]);
 
-            expect(cell.input).toBe(3);
+            expect(cell.entry).toBe(3);
             expect(cell.notes).toEqual([1, 2, 4]);
         });
     });

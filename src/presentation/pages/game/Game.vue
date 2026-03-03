@@ -280,11 +280,11 @@ function noteToCell(row: number, column: number, value: number) {
 
 function inputToCell(row: number, column: number, value: number) {
     if (sudoku.puzzle[row][column].isClue) return;
-    if (sudoku.puzzle[row][column].input === value) {
-        sudoku.input(row, column, 0);
+    if (sudoku.puzzle[row][column].entry === value) {
+        sudoku.fill(row, column, 0);
         return;
     }
-    sudoku.input(row, column, value);
+    sudoku.fill(row, column, value);
     if (sudoku.isCompleted()) completed.value = true;
     if (isNumberCompleted(value)) selectedNumber.value = null;
 }
@@ -310,7 +310,7 @@ const highlightGrid = computed(() => {
         grid[row] = [];
         for (let column = 0; column < 9; column++) {
             const cell = sudoku.puzzle[row][column];
-            const cellValue = cell.isClue ? cell.value : cell.input;
+            const cellValue = cell.isClue ? cell.value : cell.entry;
             if (selectedNumber.value && cellValue === selectedNumber.value) {
                 grid[row][column] = CellHighlight.SameNumber;
                 continue;
@@ -341,9 +341,9 @@ const numberCounts = computed(() => {
     for (let row = 0; row < 9; row++) {
         for (let column = 0; column < 9; column++) {
             const cell = sudoku.puzzle[row][column];
-            // 明確存取兩個屬性，確保 Vue 追蹤 _value 和 _input
+            // 明確存取兩個屬性，確保 Vue 追蹤 _value 和 _entry
             const v = cell.value;
-            const i = cell.input;
+            const i = cell.entry;
             if (v > 0) counts[v]++;
             else if (i > 0) counts[i]++;
         }

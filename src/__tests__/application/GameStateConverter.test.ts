@@ -27,16 +27,16 @@ describe("GameStateConverter", () => {
             expect(state.cells).toHaveLength(9);
             expect(state.cells[0]).toHaveLength(9);
             // clue cell
-            expect(state.cells[0][0]).toEqual({ value: 5, input: 0, notes: [] });
+            expect(state.cells[0][0]).toEqual({ value: 5, entry: 0, notes: [] });
             // slot cell
-            expect(state.cells[0][2]).toEqual({ value: 0, input: 0, notes: [] });
+            expect(state.cells[0][2]).toEqual({ value: 0, entry: 0, notes: [] });
         });
 
         it("should include player input and notes", () => {
             spyGeneratePuzzle();
             const sudoku = new Sudoku();
             sudoku.generate("easy");
-            sudoku.input(0, 2, 4);
+            sudoku.fill(0, 2, 4);
             sudoku.toggleNote(0, 3, 1);
             sudoku.toggleNote(0, 3, 6);
 
@@ -46,8 +46,8 @@ describe("GameStateConverter", () => {
                 completed: false,
             });
 
-            expect(state.cells[0][2]).toEqual({ value: 0, input: 4, notes: [] });
-            expect(state.cells[0][3]).toEqual({ value: 0, input: 0, notes: [1, 6] });
+            expect(state.cells[0][2]).toEqual({ value: 0, entry: 4, notes: [] });
+            expect(state.cells[0][3]).toEqual({ value: 0, entry: 0, notes: [1, 6] });
         });
     });
 
@@ -59,7 +59,7 @@ describe("GameStateConverter", () => {
                 cells: knownPuzzle.map((row, rowIndex) =>
                     row.map((value, colIndex) => ({
                         value,
-                        input: rowIndex === 0 && colIndex === 2 ? 4 : 0,
+                        entry: rowIndex === 0 && colIndex === 2 ? 4 : 0,
                         notes: rowIndex === 0 && colIndex === 3 ? [1, 6] : [],
                     }))
                 ),
@@ -72,8 +72,8 @@ describe("GameStateConverter", () => {
             // clue 還原
             expect(sudoku.puzzle[0][0].value).toBe(5);
             expect(sudoku.puzzle[0][0].isClue).toBe(true);
-            // input 還原
-            expect(sudoku.puzzle[0][2].input).toBe(4);
+            // entry 還原
+            expect(sudoku.puzzle[0][2].entry).toBe(4);
             // notes 還原
             expect(sudoku.puzzle[0][3].notes).toEqual([1, 6]);
             // 可繼續操作

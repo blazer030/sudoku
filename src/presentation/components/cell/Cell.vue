@@ -14,10 +14,10 @@
             {{ puzzleCell.value }}
         </div>
         <div
-            v-else-if="puzzleCell.isEntered"
+            v-else-if="puzzleCell.hasEntry"
             class="text-primary text-[22px] font-medium"
         >
-            {{ puzzleCell.input }}
+            {{ puzzleCell.entry }}
         </div>
         <div
             v-else-if="puzzleCell.hasNotes"
@@ -28,19 +28,19 @@
                 :key="`note-${n}`"
                 class="flex justify-center items-center text-[10px] text-foreground-secondary leading-none"
             >
-                {{ puzzleCell.notes.includes(n) ? n : '' }}
+                {{ puzzleCell.notes.includes(n) ? n : "" }}
             </div>
         </div>
     </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import { computed } from "vue";
-import type { IPuzzleCell } from "@/domain/PuzzleCell";
+import PuzzleCell from "@/domain/PuzzleCell";
 import CellHighlight from "@/domain/CellHighlight";
 
 const props = defineProps<{
-    puzzleCell: IPuzzleCell;
+    puzzleCell: PuzzleCell;
     row: number;
     column: number;
     selected?: boolean;
