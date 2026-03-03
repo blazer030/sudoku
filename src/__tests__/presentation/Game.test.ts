@@ -4,20 +4,35 @@ import { createPinia } from "pinia";
 import { createRouter, createMemoryHistory } from "vue-router";
 import Game from "@/presentation/pages/game/Game.vue";
 import { knownAnswer, knownPuzzle, spyGeneratePuzzle } from "@/__tests__/fixtures/knownPuzzle";
-import { loadGame } from "@/application/GameStorage";
+import { loadGame, saveGame } from "@/application/GameStorage";
+import type { GameState } from "@/application/GameState";
 import Cell from "@/presentation/components/cell/Cell.vue";
 import Button from "@/presentation/components/ui/button/Button.vue";
 import CellHighlight from "@/domain/CellHighlight";
 import { useGameStore } from "@/stores/gameStore";
 
-function mountGame(difficulty = "easy") {
-    const pinia = createPinia();
-    const router = createRouter({
+function createTestRouter() {
+    return createRouter({
         history: createMemoryHistory(),
         routes: [{ path: "/game", component: Game }, { path: "/", component: { template: "<div/>" } }],
     });
+}
+
+function mountGame(difficulty = "easy") {
+    const pinia = createPinia();
+    const router = createTestRouter();
     const gameStore = useGameStore(pinia);
     gameStore.setDifficulty(difficulty as "easy" | "medium" | "hard");
+    return mount(Game, { global: { plugins: [pinia, router] } });
+}
+
+function mountContinueGame(savedState: GameState) {
+    saveGame(savedState);
+    const pinia = createPinia();
+    const router = createTestRouter();
+    const gameStore = useGameStore(pinia);
+    gameStore.setDifficulty(savedState.difficulty);
+    gameStore.continueGame = true;
     return mount(Game, { global: { plugins: [pinia, router] } });
 }
 
@@ -634,6 +649,29 @@ describe("Game", () => {
         mountGame("hard");
 
         expect(spy).toHaveBeenCalledWith("hard");
+    });
+
+    it("should restore saved game state when continueGame is true", () => {
+        const savedState: GameState = {
+            difficulty: "medium",
+            answer: knownAnswer.map(row => [...row]),
+            cells: knownPuzzle.map((row, rowIndex) =>
+                row.map((value, colIndex) => ({
+                    value,
+                    input: rowIndex === 0 && colIndex === 2 ? 4 : 0,
+                    notes: [],
+                }))
+            ),
+            elapsedSeconds: 45,
+            completed: false,
+        };
+
+        const wrapper = mountContinueGame(savedState);
+
+        // 已填入的 input 應還原
+        expect(wrapper.find("[data-testid='cell-0-2']").text()).toBe("4");
+        // 計時器應還原
+        expect(wrapper.find("[data-testid='timer']").text()).toBe("00:45");
     });
 
     it("should save game to localStorage when unmounting", async () => {

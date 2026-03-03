@@ -101,7 +101,7 @@ import Button from "@/presentation/components/ui/button/Button.vue";
 import Cell from "@/presentation/components/cell/Cell.vue";
 import { useGameStore } from "@/stores/gameStore";
 import { ROUTER_PATH } from "@/router";
-import { saveGame } from "@/application/GameStorage";
+import { loadGame, saveGame } from "@/application/GameStorage";
 import { GameStateConverter } from "@/application/GameState";
 
 const router = useRouter();
@@ -111,8 +111,25 @@ if (!gameStore.difficulty) {
     void router.replace(ROUTER_PATH.home);
 }
 
-const sudoku = reactive(new Sudoku());
-const puzzle = gameStore.difficulty ? sudoku.generate(gameStore.difficulty) : sudoku.generate("easy");
+const { sudoku, puzzle, restoredSeconds } = (() => {
+    if (gameStore.continueGame) {
+        const saved = loadGame();
+        if (saved) {
+            const restored = GameStateConverter.toSudoku(saved);
+            return {
+                sudoku: reactive(restored),
+                puzzle: restored.puzzle,
+                restoredSeconds: saved.elapsedSeconds,
+            };
+        }
+    }
+    const instance = reactive(new Sudoku());
+    return {
+        sudoku: instance,
+        puzzle: instance.generate(gameStore.difficulty ?? "easy"),
+        restoredSeconds: 0,
+    };
+})();
 
 enum InputMode { Normal, Note, Erase }
 
@@ -120,7 +137,7 @@ const selectedCell = ref<{ row: number; column: number } | null>(null);
 const selectedNumber = ref<number | null>(null);
 const completed = ref(false);
 const inputMode = ref(InputMode.Normal);
-const elapsedSeconds = ref(0);
+const elapsedSeconds = ref(restoredSeconds);
 
 const timerInterval = setInterval(() => {
     if (!completed.value) {
