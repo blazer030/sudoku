@@ -4,6 +4,7 @@ import { createPinia } from "pinia";
 import { createRouter, createMemoryHistory } from "vue-router";
 import Game from "@/presentation/pages/game/Game.vue";
 import { knownAnswer, knownPuzzle, spyGeneratePuzzle } from "@/__tests__/fixtures/knownPuzzle";
+import { loadGame } from "@/application/GameStorage";
 import Cell from "@/presentation/components/cell/Cell.vue";
 import Button from "@/presentation/components/ui/button/Button.vue";
 import CellHighlight from "@/domain/CellHighlight";
@@ -23,6 +24,7 @@ function mountGame(difficulty = "easy") {
 afterEach(() => {
     vi.restoreAllMocks();
     vi.useRealTimers();
+    localStorage.clear();
 });
 
 describe("Game", () => {
@@ -632,6 +634,24 @@ describe("Game", () => {
         mountGame("hard");
 
         expect(spy).toHaveBeenCalledWith("hard");
+    });
+
+    it("should save game to localStorage when unmounting", async () => {
+        spyGeneratePuzzle();
+        const wrapper = mountGame();
+
+        // 填入一個數字
+        const cell = wrapper.find("[data-testid='cell-0-2']");
+        await cell.trigger("click");
+        await wrapper.find("[data-testid='number-4']").trigger("click");
+
+        // unmount 觸發存檔
+        wrapper.unmount();
+
+        const saved = loadGame();
+        expect(saved).not.toBeNull();
+        expect(saved?.difficulty).toBe("easy");
+        expect(saved?.cells[0][2].input).toBe(4);
     });
 
     it("should render 9x9 grid with clue cells showing their numbers", () => {

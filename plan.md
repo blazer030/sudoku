@@ -307,7 +307,7 @@
 
 > `src/__tests__/presentation/Game.test.ts` + `src/presentation/pages/game/Game.vue`
 
-- [ ] **測試**：自動存檔 — 輸入數字後 localStorage 有存檔資料
+- [x] **測試**：自動存檔 — 離開頁面時 localStorage 有存檔資料
 - [ ] **測試**：Continue 流程 — 有存檔時還原棋盤狀態和計時器
 
 #### 4.1.4 Home.vue Continue 按鈕

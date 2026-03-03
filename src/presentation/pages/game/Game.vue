@@ -101,6 +101,8 @@ import Button from "@/presentation/components/ui/button/Button.vue";
 import Cell from "@/presentation/components/cell/Cell.vue";
 import { useGameStore } from "@/stores/gameStore";
 import { ROUTER_PATH } from "@/router";
+import { saveGame } from "@/application/GameStorage";
+import { GameStateConverter } from "@/application/GameState";
 
 const router = useRouter();
 const gameStore = useGameStore();
@@ -128,6 +130,14 @@ const timerInterval = setInterval(() => {
 
 onBeforeUnmount(() => {
     clearInterval(timerInterval);
+    if (!completed.value) {
+        const state = GameStateConverter.fromSudoku(sudoku, {
+            difficulty: gameStore.difficulty ?? "easy",
+            elapsedSeconds: elapsedSeconds.value,
+            completed: completed.value,
+        });
+        saveGame(state);
+    }
 });
 
 const formattedTime = computed(() => {
