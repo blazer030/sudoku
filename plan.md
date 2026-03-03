@@ -266,9 +266,10 @@
 
 ### 3.12 新遊戲流程
 
-- [ ] **測試**：Home 頁點擊 New Game 導航到 Game 頁
-- [ ] **測試**：Game 頁載入時自動初始化新 puzzle
-- [ ] **測試**：難度選擇 UI — 可選 Easy/Medium/Hard
+- [x] **測試**：Home 頁點擊 New Game 導航到 Game 頁
+- [x] **測試**：Game 頁載入時自動初始化新 puzzle
+- [x] **測試**：難度選擇 UI — 可選 Easy/Medium/Hard
+- [ ] **測試**：Game 頁讀取 route query 的 difficulty 參數，以對應難度生成 puzzle
 
 ---
 
