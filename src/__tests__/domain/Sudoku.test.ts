@@ -254,38 +254,6 @@ describe("Sudoku", () => {
         expect(() => { sudoku.undo(); }).not.toThrow();
     });
 
-    it("should return game state with answer and cells after generate", () => {
-        spyGeneratePuzzle();
-        const sudoku = new Sudoku();
-        sudoku.generate("easy");
-
-        const state = sudoku.getState();
-
-        expect(state.answer).toEqual(knownAnswer);
-        expect(state.cells).toHaveLength(9);
-        expect(state.cells[0]).toHaveLength(9);
-
-        // clue cell (0, 0) = 5
-        expect(state.cells[0][0]).toEqual({ value: 5, input: 0, notes: [] });
-        // slot cell (0, 2) = 0
-        expect(state.cells[0][2]).toEqual({ value: 0, input: 0, notes: [] });
-    });
-
-    it("should include player input and notes in getState", () => {
-        spyGeneratePuzzle();
-        const sudoku = new Sudoku();
-        sudoku.generate("easy");
-
-        sudoku.input(0, 2, 4);
-        sudoku.toggleNote(0, 3, 1);
-        sudoku.toggleNote(0, 3, 6);
-
-        const state = sudoku.getState();
-
-        expect(state.cells[0][2]).toEqual({ value: 0, input: 4, notes: [] });
-        expect(state.cells[0][3]).toEqual({ value: 0, input: 0, notes: [1, 6] });
-    });
-
     it("should return false when a cell has wrong input", () => {
         spyGeneratePuzzle();
         const sudoku = new Sudoku();

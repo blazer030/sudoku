@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { deleteSavedGame, hasSavedGame, loadGame, saveGame, type GameState } from "@/application/GameStorage";
+import { deleteSavedGame, hasSavedGame, loadGame, saveGame } from "@/application/GameStorage";
+import type { GameState } from "@/application/GameState";
 import type { Difficulty } from "@/domain/SudokuGenerator";
 
 function createGameState(overrides: Partial<GameState> = {}): GameState {
