@@ -2,12 +2,10 @@
     <div
         :class="[
             cellBg,
-            selected
-                ? 'border-2 border-primary'
-                : 'border border-border',
+            cellBorder,
             !puzzleCell.isClue ? 'cursor-pointer' : '',
         ]"
-        class="flex justify-center items-center flex-1 aspect-square rounded-[4px]"
+        class="flex justify-center items-center flex-1 aspect-square"
     >
         <div
             v-if="puzzleCell.isClue"
@@ -43,6 +41,8 @@ import CellHighlight from "@/domain/CellHighlight";
 
 const props = defineProps<{
     puzzleCell: PuzzleCell;
+    row: number;
+    column: number;
     selected?: boolean;
     highlight?: CellHighlight;
 }>();
@@ -53,5 +53,13 @@ const cellBg = computed(() => {
     if (props.highlight === CellHighlight.SameNumber) return "bg-highlight";
     if (props.puzzleCell.isClue) return "bg-cell-tip";
     return "bg-card";
+});
+
+const cellBorder = computed(() => {
+    if (props.selected) return "border-2 border-primary";
+
+    const bottom = props.row % 3 === 2 && props.row < 8 ? "border-b-2" : "border-b";
+    const right = props.column % 3 === 2 && props.column < 8 ? "border-r-2" : "border-r";
+    return `border-t border-l ${bottom} ${right} border-border`;
 });
 </script>

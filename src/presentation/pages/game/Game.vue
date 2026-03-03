@@ -1,92 +1,177 @@
 <template>
-    <div>
-        <div class="p-4 text-center">
-            <span data-testid="timer">{{ formattedTime }}</span>
-        </div>
-        <div class="my-9">
-            <div
-                v-for="(row, rowIndex) in puzzle"
-                :key="rowIndex"
-                :class="[
-                    rowIndex % 3 !== 0 ? 'border-t-2' : '',
-                    rowIndex === 8 ? 'border-b-2' : '',
-                    rowIndex === 0 ? 'border-t-4' : '',
-                    rowIndex % 3 === 2 ? 'border-b-4' : '',
-                ]"
-                class="flex border-sky-200"
+    <div class="flex flex-col gap-6 pt-6 pb-5 px-5">
+        <!-- Header -->
+        <div class="flex items-center justify-between">
+            <button
+                class="flex items-center gap-2"
+                @click="goBack"
             >
-                <Cell
-                    v-for="(puzzleCell, columnIndex) in row"
-                    :key="`cell-${rowIndex}-${columnIndex}`"
-                    :class="[
-                        columnIndex % 3 !== 0 ? 'border-l-2' : '',
-                        columnIndex === 8 ? 'border-r-2' : '',
-                        columnIndex === 0 ? 'border-l-4' : '',
-                        columnIndex % 3 === 2 ? 'border-r-4' : '',
-                    ]"
-                    :data-testid="`cell-${rowIndex}-${columnIndex}`"
-                    :highlight="getCellHighlight(rowIndex, columnIndex)"
-                    :puzzle-cell="puzzleCell"
-                    :selected="isSelected(rowIndex, columnIndex)"
-                    class="border-sky-200"
-                    @click="clickCell(rowIndex, columnIndex)"
+                <ChevronLeft
+                    :size="24"
+                    class="text-foreground"
                 />
+                <span class="text-foreground text-base font-medium">
+                    Back
+                </span>
+            </button>
+            <div class="flex items-center gap-1.5">
+                <Timer
+                    :size="18"
+                    class="text-foreground-secondary"
+                />
+                <span
+                    data-testid="timer"
+                    class="text-foreground text-lg font-semibold"
+                >
+                    {{ formattedTime }}
+                </span>
+            </div>
+            <div class="bg-primary-light rounded-full px-3 py-1.5">
+                <span class="text-primary text-xs font-semibold">
+                    {{ difficultyLabel }}
+                </span>
             </div>
         </div>
+
+        <!-- Board Container -->
+        <div class="bg-card rounded-2xl shadow-[0_2px_12px_#1A191808] p-2">
+            <div class="flex flex-col">
+                <div
+                    v-for="(row, rowIndex) in puzzle"
+                    :key="rowIndex"
+                    class="flex"
+                >
+                    <Cell
+                        v-for="(puzzleCell, columnIndex) in row"
+                        :key="`cell-${rowIndex}-${columnIndex}`"
+                        :data-testid="`cell-${rowIndex}-${columnIndex}`"
+                        :puzzle-cell="puzzleCell"
+                        :row="rowIndex"
+                        :column="columnIndex"
+                        :selected="isSelected(rowIndex, columnIndex)"
+                        :highlight="getCellHighlight(rowIndex, columnIndex)"
+                        @click="clickCell(rowIndex, columnIndex)"
+                    />
+                </div>
+            </div>
+        </div>
+
+        <!-- Completed (placeholder, Step 5.5 will replace with modal) -->
         <div
             v-if="completed"
-            class="text-center text-2xl font-bold text-green-600 my-4"
+            class="text-center text-2xl font-bold text-primary my-4"
         >
             Completed
         </div>
-        <div class="flex justify-center px-4 gap-2 mb-4">
-            <Button
+
+        <!-- Controls -->
+        <div class="flex items-center justify-between">
+            <button
                 data-testid="undo-button"
-                variant="outline"
+                class="flex flex-col items-center gap-1 w-14"
                 @click="sudoku.undo()"
             >
-                Undo
-            </Button>
-            <Button
-                :selected="inputMode === InputMode.Erase"
+                <div class="w-11 h-11 rounded-xl bg-card shadow-[0_1px_4px_#1A191808] flex items-center justify-center">
+                    <Undo2
+                        :size="22"
+                        class="text-foreground"
+                    />
+                </div>
+                <span class="text-foreground-secondary text-[11px] font-medium">
+                    Undo
+                </span>
+            </button>
+
+            <button
                 data-testid="erase-button"
-                variant="outline"
+                class="flex flex-col items-center gap-1 w-14"
                 @click="toggleEraseMode"
             >
-                Erase
-            </Button>
-            <Button
-                :selected="inputMode === InputMode.Note"
+                <div
+                    :class="inputMode === InputMode.Erase
+                        ? 'bg-primary-light border-2 border-primary'
+                        : 'bg-card shadow-[0_1px_4px_#1A191808]'"
+                    class="w-11 h-11 rounded-xl flex items-center justify-center"
+                >
+                    <Eraser
+                        :size="22"
+                        :class="inputMode === InputMode.Erase ? 'text-primary' : 'text-foreground'"
+                    />
+                </div>
+                <span
+                    :class="inputMode === InputMode.Erase ? 'text-primary font-semibold' : 'text-foreground-secondary font-medium'"
+                    class="text-[11px]"
+                >
+                    Erase
+                </span>
+            </button>
+
+            <button
                 data-testid="note-button"
-                variant="outline"
+                class="flex flex-col items-center gap-1 w-14"
                 @click="toggleNoteMode"
             >
-                Note
-            </Button>
-            <Button
+                <div
+                    :class="inputMode === InputMode.Note
+                        ? 'bg-primary-light border-2 border-primary'
+                        : 'bg-card shadow-[0_1px_4px_#1A191808]'"
+                    class="w-11 h-11 rounded-xl flex items-center justify-center"
+                >
+                    <Pencil
+                        :size="22"
+                        :class="inputMode === InputMode.Note ? 'text-primary' : 'text-foreground'"
+                    />
+                </div>
+                <span
+                    :class="inputMode === InputMode.Note ? 'text-primary font-semibold' : 'text-foreground-secondary font-medium'"
+                    class="text-[11px]"
+                >
+                    Notes
+                </span>
+            </button>
+
+            <button
                 data-testid="auto-notes-button"
-                variant="outline"
+                class="flex flex-col items-center gap-1 w-14"
                 @click="sudoku.autoNotes()"
             >
-                Auto
-            </Button>
+                <div class="w-11 h-11 rounded-xl bg-card shadow-[0_1px_4px_#1A191808] flex items-center justify-center">
+                    <Sparkles
+                        :size="22"
+                        class="text-foreground"
+                    />
+                </div>
+                <span class="text-foreground-secondary text-[11px] font-medium">
+                    Auto
+                </span>
+            </button>
         </div>
-        <div class="flex px-4 gap-2">
+
+        <!-- Number Pad -->
+        <div class="flex justify-center gap-2">
             <div
                 v-for="number in 9"
                 :key="`num-${number}`"
-                class="flex-1 aspect-square"
+                class="relative"
             >
-                <Button
+                <button
                     :data-testid="`number-${number}`"
                     :disabled="isNumberCompleted(number)"
-                    :selected="selectedNumber === number"
-                    class="w-full h-full text-2xl rounded-full"
-                    variant="outline"
+                    :class="numberButtonClasses(number)"
+                    class="w-9 h-12 rounded-xl flex items-center justify-center text-2xl font-semibold transition-all"
                     @click="inputNumber(number)"
                 >
                     {{ number }}
-                </Button>
+                </button>
+                <span
+                    v-if="!isNumberCompleted(number)"
+                    :class="selectedNumber === number
+                        ? 'bg-white text-primary'
+                        : 'bg-foreground-secondary text-white'"
+                    class="absolute -top-1 right-[-4px] w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-semibold"
+                >
+                    {{ getRemainingCount(number) }}
+                </span>
             </div>
         </div>
     </div>
@@ -95,14 +180,15 @@
 <script lang="ts" setup>
 import { computed, onBeforeUnmount, reactive, ref } from "vue";
 import { useRouter } from "vue-router";
+import { ChevronLeft, Timer, Undo2, Eraser, Pencil, Sparkles } from "lucide-vue-next";
 import Sudoku from "@/domain/Sudoku";
 import CellHighlight from "@/domain/CellHighlight";
-import Button from "@/presentation/components/ui/button/Button.vue";
 import Cell from "@/presentation/components/cell/Cell.vue";
 import { useGameStore } from "@/stores/gameStore";
 import { ROUTER_PATH } from "@/router";
 import { loadGame, saveGame } from "@/application/GameStorage";
 import { GameStateConverter } from "@/application/GameState";
+import type { Difficulty } from "@/domain/SudokuGenerator";
 
 const router = useRouter();
 const gameStore = useGameStore();
@@ -139,6 +225,9 @@ const completed = ref(false);
 const inputMode = ref(InputMode.Normal);
 const elapsedSeconds = ref(restoredSeconds);
 
+const difficultyLabels: Record<Difficulty, string> = { easy: "Easy", medium: "Medium", hard: "Hard" };
+const difficultyLabel = difficultyLabels[gameStore.difficulty ?? "easy"];
+
 const timerInterval = setInterval(() => {
     if (!completed.value) {
         elapsedSeconds.value++;
@@ -162,6 +251,10 @@ const formattedTime = computed(() => {
     const seconds = elapsedSeconds.value % 60;
     return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
 });
+
+function goBack() {
+    void router.push(ROUTER_PATH.home);
+}
 
 function clickCell(row: number, column: number) {
     if (inputMode.value === InputMode.Erase) {
@@ -228,12 +321,23 @@ function getCellHighlight(row: number, column: number): CellHighlight {
 function isNumberCompleted(value: number): boolean {
     let count = 0;
     for (let row = 0; row < 9; row++) {
-        for (let col = 0; col < 9; col++) {
-            const cell = puzzle[row][col];
+        for (let column = 0; column < 9; column++) {
+            const cell = puzzle[row][column];
             if (cell.value === value || cell.input === value) count++;
         }
     }
     return count >= 9;
+}
+
+function getRemainingCount(value: number): number {
+    let count = 0;
+    for (let row = 0; row < 9; row++) {
+        for (let column = 0; column < 9; column++) {
+            const cell = puzzle[row][column];
+            if (cell.value === value || cell.input === value) count++;
+        }
+    }
+    return 9 - count;
 }
 
 function eraseCell(row: number, column: number) {
@@ -264,5 +368,11 @@ function inputNumber(value: number) {
         return;
     }
     selectedNumber.value = selectedNumber.value === value ? null : value;
+}
+
+function numberButtonClasses(number: number): string {
+    if (isNumberCompleted(number)) return "bg-card opacity-50 text-foreground-muted";
+    if (selectedNumber.value === number) return "bg-primary text-white shadow-[0_2px_8px_#3D8A5A40]";
+    return "bg-card text-foreground shadow-[0_1px_4px_#1A191808]";
 }
 </script>

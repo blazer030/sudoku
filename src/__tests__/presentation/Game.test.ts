@@ -7,7 +7,6 @@ import { knownAnswer, knownPuzzle, spyGeneratePuzzle } from "@/__tests__/fixture
 import { loadGame, saveGame } from "@/application/GameStorage";
 import type { GameState } from "@/application/GameState";
 import Cell from "@/presentation/components/cell/Cell.vue";
-import Button from "@/presentation/components/ui/button/Button.vue";
 import CellHighlight from "@/domain/CellHighlight";
 import { useGameStore } from "@/stores/gameStore";
 
@@ -121,7 +120,7 @@ describe("Game", () => {
 
         await wrapper.find("[data-testid='number-4']").trigger("click");
 
-        expect(wrapper.findComponent<typeof Button>("[data-testid='number-4']").props("selected")).toBe(true);
+        expect(wrapper.find("[data-testid='number-4']").classes()).toContain("bg-primary");
     });
 
     it("should fill slot cell when number is selected first then cell is clicked", async () => {
@@ -179,7 +178,7 @@ describe("Game", () => {
         await wrapper.find("[data-testid='number-4']").trigger("click");
         await wrapper.find("[data-testid='number-4']").trigger("click");
 
-        expect(wrapper.findComponent<typeof Button>("[data-testid='number-4']").props("selected")).toBeFalsy();
+        expect(wrapper.find("[data-testid='number-4']").classes()).not.toContain("bg-primary");
     });
 
     it("should clear cell when clicking a cell that already has the selected number", async () => {
@@ -229,7 +228,7 @@ describe("Game", () => {
 
         await wrapper.find("[data-testid='note-button']").trigger("click");
 
-        expect(wrapper.findComponent<typeof Button>("[data-testid='note-button']").props("selected")).toBe(true);
+        expect(wrapper.find("[data-testid='note-button']").find(".bg-primary-light").exists()).toBe(true);
     });
 
     it("should add note to slot cell in note mode", async () => {
@@ -333,7 +332,7 @@ describe("Game", () => {
 
         await wrapper.find("[data-testid='erase-button']").trigger("click");
 
-        expect(wrapper.findComponent<typeof Button>("[data-testid='erase-button']").props("selected")).toBe(true);
+        expect(wrapper.find("[data-testid='erase-button']").find(".bg-primary-light").exists()).toBe(true);
     });
 
     it("should clear input when clicking a filled slot cell in erase mode", async () => {
@@ -567,7 +566,7 @@ describe("Game", () => {
             await wrapper.find(`[data-testid='cell-${row}-${col}']`).trigger("click");
         }
 
-        expect(wrapper.findComponent<typeof Button>("[data-testid='number-8']").props("disabled")).toBe(true);
+        expect(wrapper.find("[data-testid='number-8']").attributes("disabled")).toBeDefined();
     });
 
     it("should deselect number when all 9 instances are filled in number-first mode", async () => {
@@ -582,7 +581,7 @@ describe("Game", () => {
         }
 
         // 填滿 9 個後，數字按鈕不再是 selected
-        expect(wrapper.findComponent<typeof Button>("[data-testid='number-8']").props("selected")).toBe(false);
+        expect(wrapper.find("[data-testid='number-8']").classes()).not.toContain("bg-primary");
     });
 
     it("should cancel erase mode when selecting a number", async () => {
@@ -591,15 +590,15 @@ describe("Game", () => {
 
         // 進入 erase mode
         await wrapper.find("[data-testid='erase-button']").trigger("click");
-        expect(wrapper.findComponent<typeof Button>("[data-testid='erase-button']").props("selected")).toBe(true);
+        expect(wrapper.find("[data-testid='erase-button']").find(".bg-primary-light").exists()).toBe(true);
 
         // 選擇數字
         await wrapper.find("[data-testid='number-4']").trigger("click");
 
         // erase mode 取消
-        expect(wrapper.findComponent<typeof Button>("[data-testid='erase-button']").props("selected")).toBe(false);
+        expect(wrapper.find("[data-testid='erase-button']").find(".bg-primary-light").exists()).toBe(false);
         // 數字被選取
-        expect(wrapper.findComponent<typeof Button>("[data-testid='number-4']").props("selected")).toBe(true);
+        expect(wrapper.find("[data-testid='number-4']").classes()).toContain("bg-primary");
     });
 
     it("should deselect number when entering erase mode", async () => {
@@ -608,15 +607,15 @@ describe("Game", () => {
 
         // 先選擇數字
         await wrapper.find("[data-testid='number-4']").trigger("click");
-        expect(wrapper.findComponent<typeof Button>("[data-testid='number-4']").props("selected")).toBe(true);
+        expect(wrapper.find("[data-testid='number-4']").classes()).toContain("bg-primary");
 
         // 進入 erase mode
         await wrapper.find("[data-testid='erase-button']").trigger("click");
 
         // 數字選取取消
-        expect(wrapper.findComponent<typeof Button>("[data-testid='number-4']").props("selected")).toBe(false);
+        expect(wrapper.find("[data-testid='number-4']").classes()).not.toContain("bg-primary");
         // erase mode 啟用
-        expect(wrapper.findComponent<typeof Button>("[data-testid='erase-button']").props("selected")).toBe(true);
+        expect(wrapper.find("[data-testid='erase-button']").find(".bg-primary-light").exists()).toBe(true);
     });
 
     it("should cancel erase mode when entering note mode", async () => {
@@ -625,15 +624,15 @@ describe("Game", () => {
 
         // 進入 erase mode
         await wrapper.find("[data-testid='erase-button']").trigger("click");
-        expect(wrapper.findComponent<typeof Button>("[data-testid='erase-button']").props("selected")).toBe(true);
+        expect(wrapper.find("[data-testid='erase-button']").find(".bg-primary-light").exists()).toBe(true);
 
         // 進入 note mode
         await wrapper.find("[data-testid='note-button']").trigger("click");
 
         // erase mode 取消
-        expect(wrapper.findComponent<typeof Button>("[data-testid='erase-button']").props("selected")).toBe(false);
+        expect(wrapper.find("[data-testid='erase-button']").find(".bg-primary-light").exists()).toBe(false);
         // note mode 啟用
-        expect(wrapper.findComponent<typeof Button>("[data-testid='note-button']").props("selected")).toBe(true);
+        expect(wrapper.find("[data-testid='note-button']").find(".bg-primary-light").exists()).toBe(true);
     });
 
     it("should automatically initialize a new puzzle on mount", () => {
