@@ -4,4 +4,25 @@
 
 @theme {
   --container-2xl: 1400px;
+  --font-sans: "Outfit", sans-serif;
+
+  --color-primary: #3D8A5A;
+  --color-primary-light: #C8F0D8;
+  --color-foreground: #1A1918;
+  --color-foreground-secondary: #6D6C6A;
+  --color-foreground-muted: #9C9B99;
+  --color-background: #F5F4F1;
+  --color-card: #FFFFFF;
+  --color-border: #E5E4E1;
+  --color-highlight: #FFF8E7;
+  --color-highlight-strong: #FFE4B5;
+  --color-cell-tip: #F0EDE8;
+  --color-accent: #D89575;
+  --color-error: #D08068;
+}
+
+@layer base {
+  body {
+    @apply bg-background text-foreground;
+  }
 }
