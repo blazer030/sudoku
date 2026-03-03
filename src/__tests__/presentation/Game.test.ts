@@ -539,6 +539,72 @@ describe("Game", () => {
         expect(wrapper.findComponent<typeof Button>("[data-testid='number-8']").props("disabled")).toBe(true);
     });
 
+    it("should deselect number when all 9 instances are filled in number-first mode", async () => {
+        spyGeneratePuzzle();
+        const wrapper = mount(Game);
+
+        // 數字 8 有 5 個 clue，再填入 4 個正確位置湊滿 9 次
+        const cellsToFill = [[0, 5], [1, 8], [5, 6], [7, 1]];
+        await wrapper.find("[data-testid='number-8']").trigger("click");
+        for (const [row, col] of cellsToFill) {
+            await wrapper.find(`[data-testid='cell-${row}-${col}']`).trigger("click");
+        }
+
+        // 填滿 9 個後，數字按鈕不再是 selected
+        expect(wrapper.findComponent<typeof Button>("[data-testid='number-8']").props("selected")).toBe(false);
+    });
+
+    it("should cancel erase mode when selecting a number", async () => {
+        spyGeneratePuzzle();
+        const wrapper = mount(Game);
+
+        // 進入 erase mode
+        await wrapper.find("[data-testid='erase-button']").trigger("click");
+        expect(wrapper.findComponent<typeof Button>("[data-testid='erase-button']").props("selected")).toBe(true);
+
+        // 選擇數字
+        await wrapper.find("[data-testid='number-4']").trigger("click");
+
+        // erase mode 取消
+        expect(wrapper.findComponent<typeof Button>("[data-testid='erase-button']").props("selected")).toBe(false);
+        // 數字被選取
+        expect(wrapper.findComponent<typeof Button>("[data-testid='number-4']").props("selected")).toBe(true);
+    });
+
+    it("should deselect number when entering erase mode", async () => {
+        spyGeneratePuzzle();
+        const wrapper = mount(Game);
+
+        // 先選擇數字
+        await wrapper.find("[data-testid='number-4']").trigger("click");
+        expect(wrapper.findComponent<typeof Button>("[data-testid='number-4']").props("selected")).toBe(true);
+
+        // 進入 erase mode
+        await wrapper.find("[data-testid='erase-button']").trigger("click");
+
+        // 數字選取取消
+        expect(wrapper.findComponent<typeof Button>("[data-testid='number-4']").props("selected")).toBe(false);
+        // erase mode 啟用
+        expect(wrapper.findComponent<typeof Button>("[data-testid='erase-button']").props("selected")).toBe(true);
+    });
+
+    it("should cancel erase mode when entering note mode", async () => {
+        spyGeneratePuzzle();
+        const wrapper = mount(Game);
+
+        // 進入 erase mode
+        await wrapper.find("[data-testid='erase-button']").trigger("click");
+        expect(wrapper.findComponent<typeof Button>("[data-testid='erase-button']").props("selected")).toBe(true);
+
+        // 進入 note mode
+        await wrapper.find("[data-testid='note-button']").trigger("click");
+
+        // erase mode 取消
+        expect(wrapper.findComponent<typeof Button>("[data-testid='erase-button']").props("selected")).toBe(false);
+        // note mode 啟用
+        expect(wrapper.findComponent<typeof Button>("[data-testid='note-button']").props("selected")).toBe(true);
+    });
+
     it("should render 9x9 grid with clue cells showing their numbers", () => {
         spyGeneratePuzzle();
         const wrapper = mount(Game);

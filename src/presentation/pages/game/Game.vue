@@ -48,7 +48,7 @@
         Undo
       </Button>
       <Button
-        :selected="eraseMode"
+        :selected="inputMode === InputMode.Erase"
         data-testid="erase-button"
         variant="outline"
         @click="toggleEraseMode"
@@ -56,10 +56,10 @@
         Erase
       </Button>
       <Button
-        :selected="noteMode"
+        :selected="inputMode === InputMode.Note"
         data-testid="note-button"
         variant="outline"
-        @click="noteMode = !noteMode"
+        @click="toggleNoteMode"
       >
         Note
       </Button>
@@ -102,11 +102,12 @@ import Cell from "@/presentation/components/cell/Cell.vue";
 const sudoku = reactive(new Sudoku());
 const puzzle = sudoku.generate();
 
+enum InputMode { Normal, Note, Erase }
+
 const selectedCell = ref<{ row: number; column: number } | null>(null);
 const selectedNumber = ref<number | null>(null);
 const completed = ref(false);
-const noteMode = ref(false);
-const eraseMode = ref(false);
+const inputMode = ref(InputMode.Normal);
 const elapsedSeconds = ref(0);
 
 const timerInterval = setInterval(() => {
@@ -126,12 +127,12 @@ const formattedTime = computed(() => {
 });
 
 function clickCell(row: number, column: number) {
-  if (eraseMode.value) {
+  if (inputMode.value === InputMode.Erase) {
     eraseCell(row, column);
     return;
   }
   if (selectedNumber.value !== null) {
-    if (noteMode.value) {
+    if (inputMode.value === InputMode.Note) {
       noteToCell(row, column, selectedNumber.value);
     } else {
       inputToCell(row, column, selectedNumber.value);
@@ -153,6 +154,7 @@ function inputToCell(row: number, column: number, value: number) {
   }
   sudoku.input(row, column, value);
   if (sudoku.isCompleted()) completed.value = true;
+  if (isNumberCompleted(value)) selectedNumber.value = null;
 }
 
 function toggleSelectCell(row: number, column: number) {
@@ -201,18 +203,23 @@ function eraseCell(row: number, column: number) {
   sudoku.erase(row, column);
 }
 
+function toggleNoteMode() {
+  inputMode.value = inputMode.value === InputMode.Note ? InputMode.Normal : InputMode.Note;
+}
+
 function toggleEraseMode() {
-  eraseMode.value = !eraseMode.value;
-  if (eraseMode.value) {
+  inputMode.value = inputMode.value === InputMode.Erase ? InputMode.Normal : InputMode.Erase;
+  if (inputMode.value === InputMode.Erase) {
     selectedCell.value = null;
-    noteMode.value = false;
+    selectedNumber.value = null;
   }
 }
 
 function inputNumber(value: number) {
+  if (inputMode.value === InputMode.Erase) inputMode.value = InputMode.Normal;
   if (selectedCell.value) {
     const { row, column } = selectedCell.value;
-    if (noteMode.value) {
+    if (inputMode.value === InputMode.Note) {
       sudoku.toggleNote(row, column, value);
       return;
     }
