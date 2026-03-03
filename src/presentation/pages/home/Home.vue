@@ -106,6 +106,7 @@ import { ROUTER_PATH } from "@/router";
 import type { Difficulty } from "@/domain/SudokuGenerator";
 import { useGameStore } from "@/stores/gameStore";
 import { deleteSavedGame, hasSavedGame, loadGame } from "@/application/GameStorage";
+import { formatTime } from "@/utils/formatTime";
 
 const router = useRouter();
 const gameStore = useGameStore();
@@ -119,9 +120,7 @@ const savedTimeLabel = (() => {
     if (!showContinue) return "";
     const saved = loadGame();
     if (!saved) return "00:00";
-    const mins = Math.floor(saved.elapsedSeconds / 60);
-    const secs = saved.elapsedSeconds % 60;
-    return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+    return formatTime(saved.elapsedSeconds);
 })();
 
 function startGame() {

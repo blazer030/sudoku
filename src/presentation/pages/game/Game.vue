@@ -196,6 +196,7 @@ import { ROUTER_PATH } from "@/router";
 import { loadGame, saveGame } from "@/application/GameStorage";
 import { GameStateConverter } from "@/application/GameState";
 import type { Difficulty } from "@/domain/SudokuGenerator";
+import { formatTime } from "@/utils/formatTime";
 
 const router = useRouter();
 const gameStore = useGameStore();
@@ -248,11 +249,7 @@ onBeforeUnmount(() => {
     }
 });
 
-const formattedTime = computed(() => {
-    const minutes = Math.floor(elapsedSeconds.value / 60);
-    const seconds = elapsedSeconds.value % 60;
-    return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
-});
+const formattedTime = computed(() => formatTime(elapsedSeconds.value));
 
 function goBack() {
     void router.push(ROUTER_PATH.home);
