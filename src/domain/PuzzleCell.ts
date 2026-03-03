@@ -1,4 +1,14 @@
-class PuzzleCell {
+export interface IPuzzleCell {
+    readonly value: number;
+    readonly input: number;
+    readonly isClue: boolean;
+    readonly isSlot: boolean;
+    readonly isEntered: boolean;
+    readonly notes: number[];
+    readonly hasNotes: boolean;
+}
+
+class PuzzleCell implements IPuzzleCell {
     private readonly _value: number;
     private _input: number;
     private _notes: number[];

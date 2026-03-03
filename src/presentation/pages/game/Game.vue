@@ -20,8 +20,8 @@
                     class="text-foreground-secondary"
                 />
                 <span
-                    data-testid="timer"
                     class="text-foreground text-lg font-semibold"
+                    data-testid="timer"
                 >
                     {{ formattedTime }}
                 </span>
@@ -37,19 +37,19 @@
         <div class="bg-card rounded-2xl shadow-[0_2px_12px_#1A191808] p-2">
             <div class="flex flex-col border-3 border-foreground/20 rounded-xl">
                 <div
-                    v-for="(row, rowIndex) in puzzle"
+                    v-for="(row, rowIndex) in sudoku.puzzle"
                     :key="rowIndex"
                     class="flex"
                 >
                     <Cell
                         v-for="(puzzleCell, columnIndex) in row"
                         :key="`cell-${rowIndex}-${columnIndex}`"
+                        :column="columnIndex"
                         :data-testid="`cell-${rowIndex}-${columnIndex}`"
+                        :highlight="highlightGrid[rowIndex][columnIndex]"
                         :puzzle-cell="puzzleCell"
                         :row="rowIndex"
-                        :column="columnIndex"
                         :selected="isSelected(rowIndex, columnIndex)"
-                        :highlight="getCellHighlight(rowIndex, columnIndex)"
                         @click="clickCell(rowIndex, columnIndex)"
                     />
                 </div>
@@ -67,8 +67,8 @@
         <!-- Controls -->
         <div class="flex items-center justify-between">
             <button
-                data-testid="undo-button"
                 class="flex flex-col items-center gap-1 w-14"
+                data-testid="undo-button"
                 @click="sudoku.undo()"
             >
                 <div class="w-11 h-11 rounded-xl bg-card shadow-[0_1px_4px_#1A191808] flex items-center justify-center">
@@ -83,8 +83,8 @@
             </button>
 
             <button
-                data-testid="erase-button"
                 class="flex flex-col items-center gap-1 w-14"
+                data-testid="erase-button"
                 @click="toggleEraseMode"
             >
                 <div
@@ -94,8 +94,8 @@
                     class="w-11 h-11 rounded-xl flex items-center justify-center"
                 >
                     <Eraser
-                        :size="22"
                         :class="inputMode === InputMode.Erase ? 'text-primary' : 'text-foreground'"
+                        :size="22"
                     />
                 </div>
                 <span
@@ -107,8 +107,8 @@
             </button>
 
             <button
-                data-testid="note-button"
                 class="flex flex-col items-center gap-1 w-14"
+                data-testid="note-button"
                 @click="toggleNoteMode"
             >
                 <div
@@ -118,8 +118,8 @@
                     class="w-11 h-11 rounded-xl flex items-center justify-center"
                 >
                     <Pencil
-                        :size="22"
                         :class="inputMode === InputMode.Note ? 'text-primary' : 'text-foreground'"
+                        :size="22"
                     />
                 </div>
                 <span
@@ -131,8 +131,8 @@
             </button>
 
             <button
-                data-testid="auto-notes-button"
                 class="flex flex-col items-center gap-1 w-14"
+                data-testid="auto-notes-button"
                 @click="sudoku.autoNotes()"
             >
                 <div class="w-11 h-11 rounded-xl bg-card shadow-[0_1px_4px_#1A191808] flex items-center justify-center">
@@ -155,9 +155,9 @@
                 class="relative flex-1 min-w-0"
             >
                 <button
+                    :class="numberButtonClasses(number)"
                     :data-testid="`number-${number}`"
                     :disabled="isNumberCompleted(number)"
-                    :class="numberButtonClasses(number)"
                     class="w-full h-12 rounded-xl flex items-center justify-center text-2xl font-semibold transition-all"
                     @click="inputNumber(number)"
                 >
@@ -168,6 +168,7 @@
                     :class="selectedNumber === number
                         ? 'bg-white text-primary'
                         : 'bg-foreground-secondary text-white'"
+                    :data-testid="`badge-${number}`"
                     class="absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-semibold"
                 >
                     {{ getRemainingCount(number) }}
@@ -180,7 +181,7 @@
 <script lang="ts" setup>
 import { computed, onBeforeUnmount, reactive, ref } from "vue";
 import { useRouter } from "vue-router";
-import { ChevronLeft, Timer, Undo2, Eraser, Pencil, Sparkles } from "lucide-vue-next";
+import { ChevronLeft, Eraser, Pencil, Sparkles, Timer, Undo2 } from "lucide-vue-next";
 import Sudoku from "@/domain/Sudoku";
 import CellHighlight from "@/domain/CellHighlight";
 import Cell from "@/presentation/components/cell/Cell.vue";
@@ -197,24 +198,19 @@ if (!gameStore.difficulty) {
     void router.replace(ROUTER_PATH.home);
 }
 
-const { sudoku, puzzle, restoredSeconds } = (() => {
+const { sudoku, restoredSeconds } = (() => {
     if (gameStore.continueGame) {
         const saved = loadGame();
         if (saved) {
-            const restored = GameStateConverter.toSudoku(saved);
-            return {
-                sudoku: reactive(restored),
-                puzzle: restored.puzzle,
-                restoredSeconds: saved.elapsedSeconds,
-            };
+            const raw = GameStateConverter.toSudoku(saved);
+            const instance = reactive(new Sudoku());
+            instance.restore(raw.answer, raw.puzzle);
+            return { sudoku: instance, restoredSeconds: saved.elapsedSeconds };
         }
     }
     const instance = reactive(new Sudoku());
-    return {
-        sudoku: instance,
-        puzzle: instance.generate(gameStore.difficulty ?? "easy"),
-        restoredSeconds: 0,
-    };
+    instance.generate(gameStore.difficulty ?? "easy");
+    return { sudoku: instance, restoredSeconds: 0 };
 })();
 
 enum InputMode { Normal, Note, Erase }
@@ -277,8 +273,8 @@ function noteToCell(row: number, column: number, value: number) {
 }
 
 function inputToCell(row: number, column: number, value: number) {
-    if (puzzle[row][column].isClue) return;
-    if (puzzle[row][column].input === value) {
+    if (sudoku.puzzle[row][column].isClue) return;
+    if (sudoku.puzzle[row][column].input === value) {
         sudoku.input(row, column, 0);
         return;
     }
@@ -288,7 +284,7 @@ function inputToCell(row: number, column: number, value: number) {
 }
 
 function toggleSelectCell(row: number, column: number) {
-    if (puzzle[row][column].isClue) return;
+    if (sudoku.puzzle[row][column].isClue) return;
     if (isSelected(row, column)) {
         selectedCell.value = null;
         return;
@@ -302,42 +298,59 @@ function isSelected(row: number, column: number) {
     return selectedCell.value.column === column;
 }
 
-function getCellHighlight(row: number, column: number): CellHighlight {
-    const cell = puzzle[row][column];
-    const cellValue = cell.isClue ? cell.value : cell.input;
-    if (selectedNumber.value && cellValue === selectedNumber.value) return CellHighlight.SameNumber;
-
-    if (!selectedCell.value) return CellHighlight.None;
-    const selectedRow = selectedCell.value.row;
-    const selectedColumn = selectedCell.value.column;
-    if (row === selectedRow && column === selectedColumn) return CellHighlight.None;
-    if (row === selectedRow || column === selectedColumn) return CellHighlight.Peer;
-    const sameBox = Math.floor(row / 3) === Math.floor(selectedRow / 3)
-        && Math.floor(column / 3) === Math.floor(selectedColumn / 3);
-    if (sameBox) return CellHighlight.Peer;
-    return CellHighlight.None;
-}
-
-function isNumberCompleted(value: number): boolean {
-    let count = 0;
+const highlightGrid = computed(() => {
+    const grid: CellHighlight[][] = [];
     for (let row = 0; row < 9; row++) {
+        grid[row] = [];
         for (let column = 0; column < 9; column++) {
-            const cell = puzzle[row][column];
-            if (cell.value === value || cell.input === value) count++;
+            const cell = sudoku.puzzle[row][column];
+            const cellValue = cell.isClue ? cell.value : cell.input;
+            if (selectedNumber.value && cellValue === selectedNumber.value) {
+                grid[row][column] = CellHighlight.SameNumber;
+                continue;
+            }
+            if (!selectedCell.value) {
+                grid[row][column] = CellHighlight.None;
+                continue;
+            }
+            const sr = selectedCell.value.row;
+            const sc = selectedCell.value.column;
+            if (row === sr && column === sc) {
+                grid[row][column] = CellHighlight.None;
+            } else if (row === sr || column === sc) {
+                grid[row][column] = CellHighlight.Peer;
+            } else if (Math.floor(row / 3) === Math.floor(sr / 3)
+                && Math.floor(column / 3) === Math.floor(sc / 3)) {
+                grid[row][column] = CellHighlight.Peer;
+            } else {
+                grid[row][column] = CellHighlight.None;
+            }
         }
     }
-    return count >= 9;
+    return grid;
+});
+
+const numberCounts = computed(() => {
+    const counts = Array.from<number>({ length: 10 }, () => 0);
+    for (let row = 0; row < 9; row++) {
+        for (let column = 0; column < 9; column++) {
+            const cell = sudoku.puzzle[row][column];
+            // 明確存取兩個屬性，確保 Vue 追蹤 _value 和 _input
+            const v = cell.value;
+            const i = cell.input;
+            if (v > 0) counts[v]++;
+            else if (i > 0) counts[i]++;
+        }
+    }
+    return counts;
+});
+
+function isNumberCompleted(value: number): boolean {
+    return numberCounts.value[value] >= 9;
 }
 
 function getRemainingCount(value: number): number {
-    let count = 0;
-    for (let row = 0; row < 9; row++) {
-        for (let column = 0; column < 9; column++) {
-            const cell = puzzle[row][column];
-            if (cell.value === value || cell.input === value) count++;
-        }
-    }
-    return 9 - count;
+    return 9 - numberCounts.value[value];
 }
 
 function eraseCell(row: number, column: number) {

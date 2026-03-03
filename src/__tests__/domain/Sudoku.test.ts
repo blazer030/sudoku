@@ -78,7 +78,8 @@ describe("Sudoku", () => {
     it("should allow inputting a number into a slot cell", () => {
         spyGeneratePuzzle();
         const sudoku = new Sudoku();
-        const puzzle = sudoku.generate("easy");
+        sudoku.generate("easy");
+        const puzzle = sudoku.puzzle;
 
         // (0, 2) 是空格，填入 4
         sudoku.input(0, 2, 4);
@@ -114,7 +115,8 @@ describe("Sudoku", () => {
     it("should fill candidate notes for all empty cells with autoNotes", () => {
         spyGeneratePuzzle();
         const sudoku = new Sudoku();
-        const puzzle = sudoku.generate("easy");
+        sudoku.generate("easy");
+        const puzzle = sudoku.puzzle;
 
         sudoku.autoNotes();
 
@@ -130,7 +132,8 @@ describe("Sudoku", () => {
     it("should not clear existing notes when calling autoNotes again", () => {
         spyGeneratePuzzle();
         const sudoku = new Sudoku();
-        const puzzle = sudoku.generate("easy");
+        sudoku.generate("easy");
+        const puzzle = sudoku.puzzle;
 
         sudoku.autoNotes();
         const notesBefore = [...puzzle[0][2].notes];
@@ -143,7 +146,8 @@ describe("Sudoku", () => {
     it("should remove note from peers when inputting a number", () => {
         spyGeneratePuzzle();
         const sudoku = new Sudoku();
-        const puzzle = sudoku.generate("easy");
+        sudoku.generate("easy");
+        const puzzle = sudoku.puzzle;
 
         // 先 autoNotes 填入候選筆記
         sudoku.autoNotes();
@@ -161,7 +165,8 @@ describe("Sudoku", () => {
     it("should not overwrite existing notes or inputs with autoNotes", () => {
         spyGeneratePuzzle();
         const sudoku = new Sudoku();
-        const puzzle = sudoku.generate("easy");
+        sudoku.generate("easy");
+        const puzzle = sudoku.puzzle;
 
         // 先填入一個數字
         sudoku.input(0, 2, 4);
@@ -176,7 +181,8 @@ describe("Sudoku", () => {
     it("should undo input and restore cell to empty", () => {
         spyGeneratePuzzle();
         const sudoku = new Sudoku();
-        const puzzle = sudoku.generate("easy");
+        sudoku.generate("easy");
+        const puzzle = sudoku.puzzle;
 
         sudoku.input(0, 2, 4);
         expect(puzzle[0][2].input).toBe(4);
@@ -189,7 +195,8 @@ describe("Sudoku", () => {
     it("should restore peer notes removed by input after undo", () => {
         spyGeneratePuzzle();
         const sudoku = new Sudoku();
-        const puzzle = sudoku.generate("easy");
+        sudoku.generate("easy");
+        const puzzle = sudoku.puzzle;
 
         sudoku.autoNotes();
         const notesBefore03 = [...puzzle[0][3].notes];
@@ -206,7 +213,8 @@ describe("Sudoku", () => {
     it("should undo erase and restore input", () => {
         spyGeneratePuzzle();
         const sudoku = new Sudoku();
-        const puzzle = sudoku.generate("easy");
+        sudoku.generate("easy");
+        const puzzle = sudoku.puzzle;
 
         sudoku.input(0, 2, 4);
         expect(puzzle[0][2].input).toBe(4);
@@ -221,7 +229,8 @@ describe("Sudoku", () => {
     it("should undo toggleNote and restore notes", () => {
         spyGeneratePuzzle();
         const sudoku = new Sudoku();
-        const puzzle = sudoku.generate("easy");
+        sudoku.generate("easy");
+        const puzzle = sudoku.puzzle;
 
         sudoku.toggleNote(0, 2, 4);
         expect(puzzle[0][2].notes).toContain(4);
@@ -233,7 +242,8 @@ describe("Sudoku", () => {
     it("should undo autoNotes and restore all cells to previous state", () => {
         spyGeneratePuzzle();
         const sudoku = new Sudoku();
-        const puzzle = sudoku.generate("easy");
+        sudoku.generate("easy");
+        const puzzle = sudoku.puzzle;
 
         // 確認 autoNotes 前所有 slot 都沒有 notes
         expect(puzzle[0][2].hasNotes).toBe(false);

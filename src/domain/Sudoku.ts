@@ -26,10 +26,14 @@ class Sudoku {
         return this._puzzle;
     }
 
+    public restore(answer: number[][], puzzle: PuzzleCell[][]): void {
+        this._answer = answer;
+        this._puzzle = puzzle;
+    }
+
     public static restoreSave(answer: number[][], puzzle: PuzzleCell[][]): Sudoku {
         const instance = new Sudoku();
-        instance._answer = answer;
-        instance._puzzle = puzzle;
+        instance.restore(answer, puzzle);
         return instance;
     }
 
@@ -37,7 +41,7 @@ class Sudoku {
         return this;
     }
 
-    public generate(difficulty: Difficulty = "easy") {
+    public generate(difficulty: Difficulty = "easy"): void {
         const { puzzle, answer } = this.generator.generatePuzzle(difficulty);
         this._answer = answer;
 
@@ -46,8 +50,6 @@ class Sudoku {
                 return new PuzzleCell(value);
             });
         });
-
-        return this._puzzle;
     }
 
     public isCompleted(): boolean {

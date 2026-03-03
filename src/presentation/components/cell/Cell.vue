@@ -2,7 +2,8 @@
     <div
         :class="[
             cellBg,
-            cellBorder,
+            positionClasses,
+            selectionClasses,
             !puzzleCell.isClue ? 'cursor-pointer' : '',
         ]"
         class="flex justify-center items-center flex-1 aspect-square"
@@ -36,11 +37,11 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import PuzzleCell from "@/domain/PuzzleCell";
+import type { IPuzzleCell } from "@/domain/PuzzleCell";
 import CellHighlight from "@/domain/CellHighlight";
 
 const props = defineProps<{
-    puzzleCell: PuzzleCell;
+    puzzleCell: IPuzzleCell;
     row: number;
     column: number;
     selected?: boolean;
@@ -55,13 +56,9 @@ const cellBg = computed(() => {
     return "bg-card";
 });
 
-const cellBorder = computed(() => {
+// 只依賴 row/column，永遠不變
+const positionClasses = computed(() => {
     const classes: string[] = [];
-
-    // 選取高亮用 ring，不影響 layout
-    if (props.selected) {
-        classes.push("ring-2 ring-inset ring-primary");
-    }
 
     // 四角圓角
     if (props.row === 0 && props.column === 0) classes.push("rounded-tl-lg");
@@ -84,5 +81,10 @@ const cellBorder = computed(() => {
     }
 
     return classes.join(" ");
+});
+
+// 只依賴 selected
+const selectionClasses = computed(() => {
+    return props.selected ? "ring-2 ring-inset ring-primary" : "";
 });
 </script>

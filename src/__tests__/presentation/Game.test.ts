@@ -554,6 +554,21 @@ describe("Game", () => {
         expect(wrapper.findComponent<typeof Cell>("[data-testid='cell-0-2']").props("highlight")).toBe(CellHighlight.None);
     });
 
+    it("should update remaining count badge after inputting a number", async () => {
+        spyGeneratePuzzle();
+        const wrapper = mountGame();
+
+        // 數字 8 有 5 個 clue → 初始剩餘 = 4
+        expect(wrapper.find("[data-testid='badge-8']").text()).toBe("4");
+
+        // 填入 1 個 8 → (0,5) 的答案是 8
+        await wrapper.find("[data-testid='number-8']").trigger("click");
+        await wrapper.find("[data-testid='cell-0-5']").trigger("click");
+
+        // 剩餘應該降為 3
+        expect(wrapper.find("[data-testid='badge-8']").text()).toBe("3");
+    });
+
     it("should disable number button when all 9 instances are correctly filled", async () => {
         spyGeneratePuzzle();
         const wrapper = mountGame();
@@ -671,6 +686,34 @@ describe("Game", () => {
         expect(wrapper.find("[data-testid='cell-0-2']").text()).toBe("4");
         // 計時器應還原
         expect(wrapper.find("[data-testid='timer']").text()).toBe("00:45");
+    });
+
+    it("should update remaining count badge after inputting a number in continued game", async () => {
+        const savedState: GameState = {
+            difficulty: "medium",
+            answer: knownAnswer.map(row => [...row]),
+            cells: knownPuzzle.map(row =>
+                row.map(value => ({
+                    value,
+                    input: 0,
+                    notes: [],
+                }))
+            ),
+            elapsedSeconds: 10,
+            completed: false,
+        };
+
+        const wrapper = mountContinueGame(savedState);
+
+        // 數字 8 有 5 個 clue → 初始剩餘 = 4
+        expect(wrapper.find("[data-testid='badge-8']").text()).toBe("4");
+
+        // 填入 1 個 8 → (0,5) 的答案是 8
+        await wrapper.find("[data-testid='number-8']").trigger("click");
+        await wrapper.find("[data-testid='cell-0-5']").trigger("click");
+
+        // 剩餘應該降為 3
+        expect(wrapper.find("[data-testid='badge-8']").text()).toBe("3");
     });
 
     it("should save game to localStorage when unmounting", async () => {
