@@ -1,5 +1,5 @@
 <template>
-    <div class="flex flex-col gap-6 pt-6 pb-5 px-5">
+    <div class="flex flex-col gap-6 h-dvh py-6 px-5">
         <!-- Header -->
         <div class="flex items-center justify-between">
             <button
@@ -33,6 +33,9 @@
             </div>
         </div>
 
+        <!-- Spacer -->
+        <div class="flex-1" />
+
         <!-- Board Container -->
         <div class="bg-card rounded-2xl shadow-[0_2px_12px_#1A191808] p-2">
             <div class="flex flex-col border-3 border-foreground/20 rounded-xl">
@@ -63,6 +66,9 @@
         >
             Completed
         </div>
+
+        <!-- Spacer -->
+        <div class="flex-1" />
 
         <!-- Controls -->
         <div class="flex items-center justify-between">
