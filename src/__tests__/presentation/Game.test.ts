@@ -525,6 +525,25 @@ describe("Game", () => {
         expect(wrapper.findComponent<typeof Cell>("[data-testid='cell-0-2']").props("highlight")).toBe(CellHighlight.None);
     });
 
+    it("should highlight cells with same number as SameNumber when a number button is selected", async () => {
+        spyGeneratePuzzle();
+        const wrapper = mount(Game);
+
+        // 選擇數字 5
+        await wrapper.find("[data-testid='number-5']").trigger("click");
+
+        // (0, 0) 是 clue=5 → SameNumber
+        expect(wrapper.findComponent<typeof Cell>("[data-testid='cell-0-0']").props("highlight")).toBe(CellHighlight.SameNumber);
+        // (1, 5) 是 clue=5 → SameNumber
+        expect(wrapper.findComponent<typeof Cell>("[data-testid='cell-1-5']").props("highlight")).toBe(CellHighlight.SameNumber);
+        // (7, 8) 是 clue=5 → SameNumber
+        expect(wrapper.findComponent<typeof Cell>("[data-testid='cell-7-8']").props("highlight")).toBe(CellHighlight.SameNumber);
+        // (0, 1) 是 clue=3，不同數字 → None
+        expect(wrapper.findComponent<typeof Cell>("[data-testid='cell-0-1']").props("highlight")).toBe(CellHighlight.None);
+        // (0, 2) 是空 slot → None
+        expect(wrapper.findComponent<typeof Cell>("[data-testid='cell-0-2']").props("highlight")).toBe(CellHighlight.None);
+    });
+
     it("should render 9x9 grid with clue cells showing their numbers", () => {
         spyGeneratePuzzle();
         const wrapper = mount(Game);

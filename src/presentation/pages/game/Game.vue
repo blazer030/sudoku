@@ -174,6 +174,10 @@ function isSelected(row: number, column: number) {
 }
 
 function getCellHighlight(row: number, column: number): CellHighlight {
+  const cell = puzzle[row][column];
+  const cellValue = cell.isClue ? cell.value : cell.input;
+  if (selectedNumber.value && cellValue === selectedNumber.value) return CellHighlight.SameNumber;
+
   if (!selectedCell.value) return CellHighlight.None;
   const selectedRow = selectedCell.value.row;
   const selectedColumn = selectedCell.value.column;
