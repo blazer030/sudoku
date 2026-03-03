@@ -1,5 +1,5 @@
 {
-  "version": "2.6",
+  "version": "2.8",
   "children": [
     {
       "type": "frame",
@@ -112,8 +112,9 @@
           "id": "qLtVQ",
           "name": "Board Container",
           "width": "fill_container",
+          "height": 358,
           "fill": "$card",
-          "cornerRadius": 16,
+          "cornerRadius": 6,
           "effect": {
             "type": "shadow",
             "shadowType": "outer",
@@ -124,14 +125,20 @@
             },
             "blur": 12
           },
-          "layout": "vertical",
-          "padding": 8,
+          "layout": "none",
           "children": [
             {
               "type": "frame",
               "id": "XVjmU",
+              "x": 8,
+              "y": 8,
               "name": "Board",
-              "width": "fill_container",
+              "width": 346,
+              "height": 342,
+              "cornerRadius": 2,
+              "stroke": {
+                "thickness": 0
+              },
               "layout": "vertical",
               "children": [
                 {
@@ -144,7 +151,7 @@
                       "type": "frame",
                       "id": "4T6Sr",
                       "name": "c00",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$cell-tip",
                       "stroke": {
@@ -171,7 +178,7 @@
                       "type": "frame",
                       "id": "66rVG",
                       "name": "c01",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$cell-tip",
                       "stroke": {
@@ -198,7 +205,7 @@
                       "type": "frame",
                       "id": "lSnl4",
                       "name": "c02",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$card",
                       "stroke": {
@@ -218,7 +225,7 @@
                       "type": "frame",
                       "id": "xmjO5",
                       "name": "c03",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$card",
                       "stroke": {
@@ -233,7 +240,7 @@
                       "type": "frame",
                       "id": "N7QtS",
                       "name": "c04",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$cell-tip",
                       "stroke": {
@@ -260,7 +267,7 @@
                       "type": "frame",
                       "id": "Pw0MS",
                       "name": "c05",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$card",
                       "stroke": {
@@ -280,7 +287,7 @@
                       "type": "frame",
                       "id": "CLMTJ",
                       "name": "c06",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$card",
                       "stroke": {
@@ -295,7 +302,7 @@
                       "type": "frame",
                       "id": "Ou1Z8",
                       "name": "c07",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$card",
                       "stroke": {
@@ -310,7 +317,7 @@
                       "type": "frame",
                       "id": "ZPxYh",
                       "name": "c08",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$card",
                       "stroke": {
@@ -333,7 +340,7 @@
                       "type": "frame",
                       "id": "kGROK",
                       "name": "c10",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$cell-tip",
                       "stroke": {
@@ -360,7 +367,7 @@
                       "type": "frame",
                       "id": "oy4Ow",
                       "name": "c11",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$card",
                       "stroke": {
@@ -552,7 +559,7 @@
                       "type": "frame",
                       "id": "ynLVT",
                       "name": "c12",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$card",
                       "stroke": {
@@ -572,7 +579,7 @@
                       "type": "frame",
                       "id": "C3YHq",
                       "name": "c13",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$cell-tip",
                       "stroke": {
@@ -599,7 +606,7 @@
                       "type": "frame",
                       "id": "BrZ0m",
                       "name": "c14",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$cell-tip",
                       "stroke": {
@@ -626,7 +633,7 @@
                       "type": "frame",
                       "id": "BRCAI",
                       "name": "c15",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$cell-tip",
                       "stroke": {
@@ -658,7 +665,7 @@
                       "type": "frame",
                       "id": "O8EzQ",
                       "name": "c16",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$card",
                       "stroke": {
@@ -673,7 +680,7 @@
                       "type": "frame",
                       "id": "6NBRs",
                       "name": "c17",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$card",
                       "stroke": {
@@ -688,7 +695,7 @@
                       "type": "frame",
                       "id": "9CvAY",
                       "name": "c18",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$card",
                       "stroke": {
@@ -711,7 +718,7 @@
                       "type": "frame",
                       "id": "lqJx6",
                       "name": "c20",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$card",
                       "stroke": {
@@ -731,7 +738,7 @@
                       "type": "frame",
                       "id": "LlJ9S",
                       "name": "c21",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$cell-tip",
                       "stroke": {
@@ -763,7 +770,7 @@
                       "type": "frame",
                       "id": "R7Pc8",
                       "name": "c22",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$cell-tip",
                       "stroke": {
@@ -795,7 +802,7 @@
                       "type": "frame",
                       "id": "tZGmQ",
                       "name": "c23",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$card",
                       "stroke": {
@@ -815,7 +822,7 @@
                       "type": "frame",
                       "id": "NCNRA",
                       "name": "c24",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$card",
                       "stroke": {
@@ -835,7 +842,7 @@
                       "type": "frame",
                       "id": "9mgyl",
                       "name": "c25",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$card",
                       "stroke": {
@@ -855,7 +862,7 @@
                       "type": "frame",
                       "id": "VgNDY",
                       "name": "c26",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$card",
                       "stroke": {
@@ -875,7 +882,7 @@
                       "type": "frame",
                       "id": "5XNVS",
                       "name": "c27",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$cell-tip",
                       "stroke": {
@@ -907,7 +914,7 @@
                       "type": "frame",
                       "id": "4DRok",
                       "name": "c28",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$card",
                       "stroke": {
@@ -935,7 +942,7 @@
                       "type": "frame",
                       "id": "F06aQ",
                       "name": "c30",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$cell-tip",
                       "stroke": {
@@ -962,7 +969,7 @@
                       "type": "frame",
                       "id": "ViC9V",
                       "name": "c31",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$card",
                       "stroke": {
@@ -977,7 +984,7 @@
                       "type": "frame",
                       "id": "vCzO6",
                       "name": "c32",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$card",
                       "stroke": {
@@ -997,7 +1004,7 @@
                       "type": "frame",
                       "id": "OrbzI",
                       "name": "c33",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$card",
                       "stroke": {
@@ -1012,7 +1019,7 @@
                       "type": "frame",
                       "id": "lVJbR",
                       "name": "c34",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$highlight",
                       "stroke": {
@@ -1039,7 +1046,7 @@
                       "type": "frame",
                       "id": "AE97F",
                       "name": "c35",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$card",
                       "stroke": {
@@ -1059,7 +1066,7 @@
                       "type": "frame",
                       "id": "RZF2Z",
                       "name": "c36",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$card",
                       "stroke": {
@@ -1074,7 +1081,7 @@
                       "type": "frame",
                       "id": "jEgxe",
                       "name": "c37",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$card",
                       "stroke": {
@@ -1089,7 +1096,7 @@
                       "type": "frame",
                       "id": "kHP8o",
                       "name": "c38",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$cell-tip",
                       "stroke": {
@@ -1124,7 +1131,7 @@
                       "type": "frame",
                       "id": "pOpYy",
                       "name": "c40",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$cell-tip",
                       "stroke": {
@@ -1151,7 +1158,7 @@
                       "type": "frame",
                       "id": "8sjSI",
                       "name": "c41",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$highlight",
                       "stroke": {
@@ -1166,7 +1173,7 @@
                       "type": "frame",
                       "id": "LNqYU",
                       "name": "c42",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$card",
                       "stroke": {
@@ -1186,7 +1193,7 @@
                       "type": "frame",
                       "id": "WzdjD",
                       "name": "c43",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$highlight",
                       "stroke": {
@@ -1201,7 +1208,7 @@
                       "type": "frame",
                       "id": "CwwgP",
                       "name": "c44",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$highlight-strong",
                       "stroke": {
@@ -1228,7 +1235,7 @@
                       "type": "frame",
                       "id": "lzz27",
                       "name": "c45",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$highlight",
                       "stroke": {
@@ -1248,7 +1255,7 @@
                       "type": "frame",
                       "id": "ez01Z",
                       "name": "c46",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$card",
                       "stroke": {
@@ -1263,7 +1270,7 @@
                       "type": "frame",
                       "id": "oOKMt",
                       "name": "c47",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$highlight",
                       "stroke": {
@@ -1278,7 +1285,7 @@
                       "type": "frame",
                       "id": "I6rkJ",
                       "name": "c48",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$cell-tip",
                       "stroke": {
@@ -1313,7 +1320,7 @@
                       "type": "frame",
                       "id": "6TiD1",
                       "name": "c50",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$cell-tip",
                       "stroke": {
@@ -1345,7 +1352,7 @@
                       "type": "frame",
                       "id": "Sjy5I",
                       "name": "c51",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$highlight",
                       "stroke": {
@@ -1365,7 +1372,7 @@
                       "type": "frame",
                       "id": "GvFH7",
                       "name": "c52",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$card",
                       "stroke": {
@@ -1385,7 +1392,7 @@
                       "type": "frame",
                       "id": "1ulS2",
                       "name": "c53",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$highlight",
                       "stroke": {
@@ -1405,7 +1412,7 @@
                       "type": "frame",
                       "id": "iHAqE",
                       "name": "c54",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$highlight",
                       "stroke": {
@@ -1437,7 +1444,7 @@
                       "type": "frame",
                       "id": "g2oY1",
                       "name": "c55",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$highlight",
                       "stroke": {
@@ -1457,7 +1464,7 @@
                       "type": "frame",
                       "id": "mTuhd",
                       "name": "c56",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$card",
                       "stroke": {
@@ -1477,7 +1484,7 @@
                       "type": "frame",
                       "id": "3i4Ai",
                       "name": "c57",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$highlight",
                       "stroke": {
@@ -1509,7 +1516,7 @@
                       "type": "frame",
                       "id": "85dy9",
                       "name": "c58",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$cell-tip",
                       "stroke": {
@@ -1549,7 +1556,7 @@
                       "type": "frame",
                       "id": "hACDN",
                       "name": "c60",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$card",
                       "stroke": {
@@ -1564,7 +1571,7 @@
                       "type": "frame",
                       "id": "byOz6",
                       "name": "c61",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$cell-tip",
                       "stroke": {
@@ -1591,7 +1598,7 @@
                       "type": "frame",
                       "id": "Pe4jq",
                       "name": "c62",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$card",
                       "stroke": {
@@ -1611,7 +1618,7 @@
                       "type": "frame",
                       "id": "XJie1",
                       "name": "c63",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$card",
                       "stroke": {
@@ -1626,7 +1633,7 @@
                       "type": "frame",
                       "id": "pq9CY",
                       "name": "c64",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$highlight",
                       "stroke": {
@@ -1641,7 +1648,7 @@
                       "type": "frame",
                       "id": "Was5V",
                       "name": "c65",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$card",
                       "stroke": {
@@ -1661,7 +1668,7 @@
                       "type": "frame",
                       "id": "CnprS",
                       "name": "c66",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$cell-tip",
                       "stroke": {
@@ -1688,7 +1695,7 @@
                       "type": "frame",
                       "id": "NRton",
                       "name": "c67",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$cell-tip",
                       "stroke": {
@@ -1715,7 +1722,7 @@
                       "type": "frame",
                       "id": "aNumZ",
                       "name": "c68",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$card",
                       "stroke": {
@@ -1738,7 +1745,7 @@
                       "type": "frame",
                       "id": "TxLrz",
                       "name": "c70",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$card",
                       "stroke": {
@@ -1753,7 +1760,7 @@
                       "type": "frame",
                       "id": "4uBg5",
                       "name": "c71",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$card",
                       "stroke": {
@@ -1768,7 +1775,7 @@
                       "type": "frame",
                       "id": "WbYIm",
                       "name": "c72",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$card",
                       "stroke": {
@@ -1788,7 +1795,7 @@
                       "type": "frame",
                       "id": "JR4Cv",
                       "name": "c73",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$cell-tip",
                       "stroke": {
@@ -1815,7 +1822,7 @@
                       "type": "frame",
                       "id": "k6QRF",
                       "name": "c74",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$cell-tip",
                       "stroke": {
@@ -1842,7 +1849,7 @@
                       "type": "frame",
                       "id": "oNQMh",
                       "name": "c75",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$cell-tip",
                       "stroke": {
@@ -1874,7 +1881,7 @@
                       "type": "frame",
                       "id": "xsgaj",
                       "name": "c76",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$card",
                       "stroke": {
@@ -1889,7 +1896,7 @@
                       "type": "frame",
                       "id": "Mfq5I",
                       "name": "c77",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$cell-tip",
                       "stroke": {
@@ -1916,7 +1923,7 @@
                       "type": "frame",
                       "id": "0iULE",
                       "name": "c78",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$card",
                       "stroke": {
@@ -1939,7 +1946,7 @@
                       "type": "frame",
                       "id": "5r5oh",
                       "name": "c80",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$card",
                       "stroke": {
@@ -1954,7 +1961,7 @@
                       "type": "frame",
                       "id": "IhFsI",
                       "name": "c81",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$card",
                       "stroke": {
@@ -1969,7 +1976,7 @@
                       "type": "frame",
                       "id": "BrRNM",
                       "name": "c82",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$card",
                       "stroke": {
@@ -1989,7 +1996,7 @@
                       "type": "frame",
                       "id": "HXF6K",
                       "name": "c83",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$card",
                       "stroke": {
@@ -2004,7 +2011,7 @@
                       "type": "frame",
                       "id": "fWYuX",
                       "name": "c84",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$cell-tip",
                       "stroke": {
@@ -2031,7 +2038,7 @@
                       "type": "frame",
                       "id": "jlw7D",
                       "name": "c85",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$card",
                       "stroke": {
@@ -2051,7 +2058,7 @@
                       "type": "frame",
                       "id": "N2eCA",
                       "name": "c86",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$card",
                       "stroke": {
@@ -2066,7 +2073,7 @@
                       "type": "frame",
                       "id": "Ui6Ss",
                       "name": "c87",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$cell-tip",
                       "stroke": {
@@ -2093,7 +2100,7 @@
                       "type": "frame",
                       "id": "Bz9QR",
                       "name": "c88",
-                      "width": 38,
+                      "width": "fill_container",
                       "height": 38,
                       "fill": "$cell-tip",
                       "stroke": {
@@ -2119,6 +2126,61 @@
                   ]
                 }
               ]
+            },
+            {
+              "type": "rectangle",
+              "id": "73O05",
+              "x": 8,
+              "y": 121,
+              "name": "BoxDividerH1",
+              "fill": "$border-box",
+              "width": 346,
+              "height": 2
+            },
+            {
+              "type": "rectangle",
+              "id": "YKa2x",
+              "x": 8,
+              "y": 235,
+              "name": "BoxDividerH2",
+              "fill": "$border-box",
+              "width": 346,
+              "height": 2
+            },
+            {
+              "type": "rectangle",
+              "id": "QSYdX",
+              "x": 122,
+              "y": 8,
+              "name": "BoxDividerV1",
+              "fill": "$border-box",
+              "width": 2,
+              "height": 342
+            },
+            {
+              "type": "rectangle",
+              "id": "faazf",
+              "x": 237,
+              "y": 8,
+              "name": "BoxDividerV2",
+              "fill": "$border-box",
+              "width": 2,
+              "height": 342
+            },
+            {
+              "type": "rectangle",
+              "cornerRadius": 2,
+              "id": "XGKTO",
+              "x": 7,
+              "y": 7,
+              "name": "BoardOuterBorder",
+              "width": 348,
+              "height": 344,
+              "stroke": {
+                "align": "inside",
+                "thickness": 2,
+                "fill": "$border-box"
+              }
             }
           ]
         },
@@ -3139,7 +3201,8 @@
               "fill": "$foreground-secondary",
               "content": "Train your brain",
               "fontFamily": "Outfit",
-              "fontSize": 14
+              "fontSize": 14,
+              "fontWeight": "normal"
             }
           ]
         },
@@ -3540,7 +3603,8 @@
                   "fill": "$foreground-secondary",
                   "content": "You solved the puzzle!",
                   "fontFamily": "Outfit",
-                  "fontSize": 16
+                  "fontSize": 16,
+                  "fontWeight": "normal"
                 }
               ]
             },
@@ -4753,7 +4817,8 @@
                               "fill": "$foreground-muted",
                               "content": "Today, 2:30 PM",
                               "fontFamily": "Outfit",
-                              "fontSize": 11
+                              "fontSize": 11,
+                              "fontWeight": "normal"
                             }
                           ]
                         }
@@ -4849,7 +4914,8 @@
                               "fill": "$foreground-muted",
                               "content": "Today, 10:15 AM",
                               "fontFamily": "Outfit",
-                              "fontSize": 11
+                              "fontSize": 11,
+                              "fontWeight": "normal"
                             }
                           ]
                         }
@@ -4945,7 +5011,8 @@
                               "fill": "$foreground-muted",
                               "content": "Yesterday, 8:45 PM",
                               "fontFamily": "Outfit",
-                              "fontSize": 11
+                              "fontSize": 11,
+                              "fontWeight": "normal"
                             }
                           ]
                         }
@@ -5041,7 +5108,8 @@
                               "fill": "$foreground-muted",
                               "content": "Yesterday, 3:20 PM",
                               "fontFamily": "Outfit",
-                              "fontSize": 11
+                              "fontSize": 11,
+                              "fontWeight": "normal"
                             }
                           ]
                         }
@@ -5137,7 +5205,8 @@
                               "fill": "$foreground-muted",
                               "content": "Mar 1, 7:00 PM",
                               "fontFamily": "Outfit",
-                              "fontSize": 11
+                              "fontSize": 11,
+                              "fontWeight": "normal"
                             }
                           ]
                         }
@@ -5351,7 +5420,8 @@
               "fill": "$foreground-secondary",
               "content": "Train your brain",
               "fontFamily": "Outfit",
-              "fontSize": 14
+              "fontSize": 14,
+              "fontWeight": "normal"
             }
           ]
         },
@@ -5630,7 +5700,14 @@
     },
     "cell-tip": {
       "type": "color",
-      "value": "#F0EDE8"
+      "value": [
+        {
+          "value": "#F0EDE8"
+        },
+        {
+          "value": "#F7F6F3"
+        }
+      ]
     },
     "error": {
       "type": "color",
@@ -5667,6 +5744,17 @@
     "primary-light": {
       "type": "color",
       "value": "#C8F0D8"
+    },
+    "border-box": {
+      "type": "color",
+      "value": [
+        {
+          "value": "#1A191833"
+        },
+        {
+          "value": "#1A191860"
+        }
+      ]
     }
   }
 }
