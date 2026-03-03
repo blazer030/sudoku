@@ -317,7 +317,52 @@
 - [x] **UI 測試**：有存檔時顯示 Continue 按鈕，點擊導航到 Game 頁
 - [x] **行為**：New Game 點擊時清除舊存檔
 
-### 4.2 統計追蹤
+---
+
+## Phase 5: UI 更新 — 對齊設計稿
+
+> 根據 `design/sudoku.pen` 設計稿更新 UI。
+> 順序：全域樣式 → Home → Cell → Game → Complete 彈窗。
+
+### 5.1 全域樣式 + 依賴
+
+- [ ] 安裝 `lucide-vue-next`、引入 Outfit 字體
+- [ ] 定義 CSS 變數（primary、background、card、border、highlight 等）
+- [ ] Tailwind v4 `@theme` 整合
+
+### 5.2 Home 頁 UI
+
+- [ ] Logo 區（green grid icon + 標題 + 副標題）
+- [ ] Continue Game 按鈕（primary、play icon、時間 badge）
+- [ ] 難度選擇器（三個 pill 按鈕）
+- [ ] New Game 按鈕（secondary、plus icon）
+- [ ] 底部導航（Settings + Statistics，暫無功能）
+
+### 5.3 Cell 元件更新
+
+- [ ] 對齊設計稿色系（cell-tip、highlight、highlight-strong、primary 邊框）
+- [ ] 筆記模式小字排列
+
+### 5.4 Game 頁 UI
+
+- [ ] Header（Back + 計時器 + 難度 badge）
+- [ ] Board Container（card 背景、圓角、陰影）
+- [ ] Controls（icon + label 垂直排列、active 狀態）
+- [ ] Number Pad（圓角 12、badge 顯示剩餘數量、selected/disabled 狀態）
+
+### 5.5 Game Complete 彈窗
+
+- [ ] Overlay + Modal（獎盃 icon、統計列、Back to Home 按鈕）
+
+### 5.6 測試修正
+
+- [ ] 確保 data-testid 不變、所有測試通過
+
+---
+
+## Phase 6: Production Quality
+
+### 6.1 統計追蹤
 
 > `src/__tests__/application/Statistics.test.ts` + `src/application/Statistics.ts`
 
@@ -326,7 +371,7 @@
 - [ ] **測試**：統計資料持久化到 localforage
 - [ ] **UI 測試**：統計頁面顯示各難度成績
 
-### 4.3 深色模式
+### 6.2 深色模式
 
 - [ ] 定義 CSS 變數系統（light/dark theme）
 - [ ] 將所有硬編碼顏色替換為 CSS 變數
@@ -334,7 +379,7 @@
 - [ ] **測試**：dark mode 偏好持久化到 localStorage
 - [ ] **測試**：首次載入時偵測系統偏好
 
-### 4.4 動畫與轉場
+### 6.3 動畫與轉場
 
 - [ ] 格子選取 scale/highlight transition
 - [ ] 數字輸入淡入動畫
@@ -342,22 +387,14 @@
 - [ ] 遊戲完成慶祝動畫
 - [ ] 頁面轉場動畫
 
-### 4.5 視覺風格打磨（暖色柔和風格）
-
-- [ ] 定義暖色調色盤（cream 背景、soft coral 強調、warm gray 文字）
-- [ ] 棋盤樣式優化（圓角、柔和邊框、陰影）
-- [ ] 按鈕和控制區樣式統一
-- [ ] Google Fonts 整合（Nunito 或 Quicksand）
-- [ ] 響應式微調
-
-### 4.6 PWA 設定
+### 6.4 PWA 設定
 
 - [ ] 安裝 `vite-plugin-pwa`，設定 service worker 和 manifest
 - [ ] 設定 app icon（多尺寸）
 - [ ] 設定 offline fallback
 - [ ] 測試離線功能
 
-### 4.7 最終整合與清理
+### 6.5 最終整合與清理
 
 - [ ] 移除未使用的依賴和代碼
 - [ ] lint 零警告
