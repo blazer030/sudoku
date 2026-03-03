@@ -8,6 +8,7 @@
       "y": 23,
       "name": "Game Screen",
       "width": 402,
+      "height": 868,
       "fill": "$background",
       "layout": "vertical",
       "gap": 24,
@@ -106,6 +107,13 @@
               ]
             }
           ]
+        },
+        {
+          "type": "frame",
+          "id": "soxqf",
+          "name": "Spacer",
+          "width": "fill_container",
+          "height": "fill_container"
         },
         {
           "type": "frame",
@@ -2186,6 +2194,13 @@
         },
         {
           "type": "frame",
+          "id": "hGa3V",
+          "name": "Spacer",
+          "width": "fill_container",
+          "height": "fill_container"
+        },
+        {
+          "type": "frame",
           "id": "Ru1ul",
           "name": "Controls",
           "width": "fill_container",
@@ -3015,10 +3030,10 @@
       "type": "frame",
       "id": "kafqS",
       "x": 1352,
-      "y": 832,
+      "y": 931,
       "name": "Home Screen",
       "width": 402,
-      "height": 700,
+      "height": 868,
       "fill": "$background",
       "layout": "vertical",
       "padding": [
@@ -3526,7 +3541,7 @@
       "y": 0,
       "name": "Game Complete",
       "width": 402,
-      "height": 700,
+      "height": 868,
       "fill": "#00000080",
       "layout": "none",
       "children": [
@@ -3534,7 +3549,7 @@
           "type": "frame",
           "id": "clptT",
           "x": 24,
-          "y": 150,
+          "y": 234,
           "name": "Modal",
           "width": 354,
           "fill": "$card",
@@ -4351,7 +4366,7 @@
       "y": 0,
       "name": "Statistics Screen",
       "width": 402,
-      "height": 750,
+      "height": 868,
       "fill": "$background",
       "layout": "vertical",
       "gap": 24,
@@ -5234,10 +5249,10 @@
       "type": "frame",
       "id": "fagfq",
       "x": 1803,
-      "y": 832,
+      "y": 941,
       "name": "Home Screen (No Save)",
       "width": 402,
-      "height": 700,
+      "height": 868,
       "fill": "$background",
       "layout": "vertical",
       "padding": [
