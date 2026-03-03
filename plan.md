@@ -345,10 +345,10 @@
 
 ### 5.4 Game 頁 UI
 
-- [ ] Header（Back + 計時器 + 難度 badge）
-- [ ] Board Container（card 背景、圓角、陰影）
-- [ ] Controls（icon + label 垂直排列、active 狀態）
-- [ ] Number Pad（圓角 12、badge 顯示剩餘數量、selected/disabled 狀態）
+- [x] Header（Back + 計時器 + 難度 badge）
+- [x] Board Container（card 背景、圓角、陰影）
+- [x] Controls（icon + label 垂直排列、active 狀態）
+- [x] Number Pad（圓角 12、badge 顯示剩餘數量、selected/disabled 狀態）
 
 ### 5.5 Game Complete 彈窗
 
