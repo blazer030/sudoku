@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### Development
 
 - `npm run start` - Start development server with Vite
-- `npm run build` - Build production version (TypeScript compile + Vite build)
+- `npm run build` - Build production version (vue-tsc + Vite build)
 - `npm run preview` - Preview production build locally
 
 ### Code Quality
@@ -17,7 +17,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Architecture
 
-This is a React + TypeScript Sudoku game following Domain-Driven Design principles:
+This is a Vue 3 + TypeScript Sudoku game following Domain-Driven Design principles:
 
 ### Project Structure
 
@@ -25,12 +25,22 @@ This is a React + TypeScript Sudoku game following Domain-Driven Design principl
 src/
 ├── domain/           # Core business logic
 │   ├── Sudoku.ts    # Main game engine with puzzle generation and validation
-│   └── PuzzleCell.ts # Cell model with value, input, and notes management
+│   ├── SudokuBoard.ts # Board model and operations
+│   ├── SudokuGenerator.ts # Puzzle generation logic
+│   ├── SudokuSolver.ts # Puzzle solving algorithm
+│   ├── PuzzleCell.ts # Cell model with value, input, and notes management
+│   ├── CellHighlight.ts # Cell highlight logic
+│   └── ConflictDetector.ts # Conflict detection for validation
 ├── presentation/     # UI layer
-│   ├── App.tsx      # Root component with responsive layout
-│   ├── components/  # Reusable UI components (Button, Icon, etc.)
+│   ├── App.vue      # Root component with responsive layout
+│   ├── components/  # Reusable UI components (Button, Cell, Icon, etc.)
 │   └── pages/       # Route-based page components (Home, Game)
-├── application/     # Application services (currently empty)
+├── application/     # Application services
+│   ├── GameStorage.ts # Game persistence with localforage
+│   └── GameState.ts # Game state model
+├── stores/          # Pinia stores
+│   └── gameStore.ts # Game state management
+├── router.ts        # Vue Router configuration
 └── style/           # Global SCSS styles
 ```
 
@@ -38,21 +48,24 @@ src/
 
 - **Domain Models**: Core game logic separated from UI concerns
 - **Path Aliases**: `@/` maps to `src/` directory
-- **Component Structure**: Uses Radix UI primitives with class-variance-authority for styling
-- **Routing**: React Router with nested routes under responsive App container
+- **Composition API**: Uses `<script setup>` with arrow functions as preferred style
+- **State Management**: Pinia stores for reactive game state
+- **Routing**: Vue Router for page navigation
 
 ### Tech Stack
 
-- **Framework**: React 18 with TypeScript
+- **Framework**: Vue 3 with TypeScript
 - **Build Tool**: Vite with ESLint integration
-- **Styling**: Tailwind CSS + SCSS
-- **Testing**: Vitest with globals enabled
-- **UI Components**: Radix UI + Lucide React icons
+- **Styling**: Tailwind CSS v4 + SCSS
+- **Testing**: Vitest with @vue/test-utils
+- **State Management**: Pinia
+- **UI Components**: Lucide Vue Next icons + class-variance-authority for styling
 
 ## Git Commit 規則
 
 ### Commit Message 格式
 
+- **一律使用英文**：Commit message 必須全部使用英文撰寫
 - **簡潔明確**：表達意圖即可，避免過多細節
 - **不包含作者資訊**：不要加入 Claude Code 或 Co-Authored-By 等標記
 - **遵循專案風格**：參考現有 commit 的格式和用詞
