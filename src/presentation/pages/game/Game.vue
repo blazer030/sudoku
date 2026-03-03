@@ -3,7 +3,7 @@
         <!-- Header -->
         <div class="flex items-center justify-between">
             <button
-                class="flex items-center gap-2"
+                class="flex items-center gap-2 cursor-pointer"
                 @click="goBack"
             >
                 <ChevronLeft
@@ -67,7 +67,7 @@
         <!-- Controls -->
         <div class="flex items-center justify-between">
             <button
-                class="flex flex-col items-center gap-1 w-14"
+                class="flex flex-col items-center gap-1 w-14 cursor-pointer"
                 data-testid="undo-button"
                 @click="sudoku.undo()"
             >
@@ -83,7 +83,7 @@
             </button>
 
             <button
-                class="flex flex-col items-center gap-1 w-14"
+                class="flex flex-col items-center gap-1 w-14 cursor-pointer"
                 data-testid="erase-button"
                 @click="toggleEraseMode"
             >
@@ -107,7 +107,7 @@
             </button>
 
             <button
-                class="flex flex-col items-center gap-1 w-14"
+                class="flex flex-col items-center gap-1 w-14 cursor-pointer"
                 data-testid="note-button"
                 @click="toggleNoteMode"
             >
@@ -131,7 +131,7 @@
             </button>
 
             <button
-                class="flex flex-col items-center gap-1 w-14"
+                class="flex flex-col items-center gap-1 w-14 cursor-pointer"
                 data-testid="auto-notes-button"
                 @click="sudoku.autoNotes()"
             >
@@ -158,7 +158,7 @@
                     :class="numberButtonClasses(number)"
                     :data-testid="`number-${number}`"
                     :disabled="isNumberCompleted(number)"
-                    class="w-full h-12 rounded-xl flex items-center justify-center text-2xl font-semibold transition-all"
+                    class="w-full h-12 rounded-xl flex items-center justify-center text-2xl font-semibold transition-all cursor-pointer disabled:cursor-default"
                     @click="inputNumber(number)"
                 >
                     {{ number }}

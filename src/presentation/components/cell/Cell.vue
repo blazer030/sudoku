@@ -3,7 +3,6 @@
         :class="[
             cellBg,
             positionClasses,
-            selectionClasses,
             !puzzleCell.isClue ? 'cursor-pointer' : '',
         ]"
         class="flex justify-center items-center flex-1 aspect-square"
@@ -49,7 +48,7 @@ const props = defineProps<{
 }>();
 
 const cellBg = computed(() => {
-    if (props.selected) return "bg-highlight-strong";
+    if (props.selected) return "bg-primary-light";
     if (props.highlight === CellHighlight.Peer) return "bg-highlight";
     if (props.highlight === CellHighlight.SameNumber) return "bg-highlight";
     if (props.puzzleCell.isClue) return "bg-cell-clue";
@@ -81,10 +80,5 @@ const positionClasses = computed(() => {
     }
 
     return classes.join(" ");
-});
-
-// 只依賴 selected
-const selectionClasses = computed(() => {
-    return props.selected ? "ring-2 ring-inset ring-primary" : "";
 });
 </script>

@@ -31,7 +31,7 @@
             <button
                 v-if="showContinue"
                 data-testid="continue-button"
-                class="flex items-center justify-center gap-2.5 h-14 w-full bg-primary rounded-2xl text-white shadow-[0_4px_12px_#3D8A5A30]"
+                class="flex items-center justify-center gap-2.5 h-14 w-full bg-primary rounded-2xl text-white shadow-[0_4px_12px_#3D8A5A30] cursor-pointer"
                 @click="continueGame"
             >
                 <Play :size="20" />
@@ -50,7 +50,7 @@
                     v-for="(d, i) in difficulties"
                     :key="d"
                     :data-testid="`difficulty-${d}`"
-                    class="flex-1 h-full rounded-[10px] flex items-center justify-center text-sm transition-all"
+                    class="flex-1 h-full rounded-[10px] flex items-center justify-center text-sm transition-all cursor-pointer"
                     :class="difficultyIndex === i
                         ? 'bg-primary text-white font-semibold shadow-[0_2px_6px_#3D8A5A30]'
                         : 'text-foreground-secondary font-medium'"
@@ -63,7 +63,7 @@
             <!-- New Game -->
             <button
                 data-testid="new-game-button"
-                class="flex items-center justify-center gap-2.5 h-14 w-full bg-card rounded-2xl shadow-[0_2px_8px_#1A191808]"
+                class="flex items-center justify-center gap-2.5 h-14 w-full bg-card rounded-2xl shadow-[0_2px_8px_#1A191808] cursor-pointer"
                 @click="startGame"
             >
                 <Plus
@@ -78,14 +78,14 @@
 
         <!-- Bottom Nav -->
         <div class="flex items-center justify-center gap-10">
-            <button class="flex flex-col items-center gap-1">
+            <button class="flex flex-col items-center gap-1 cursor-pointer">
                 <Settings
                     :size="24"
                     class="text-foreground-muted"
                 />
                 <span class="text-foreground-muted text-[11px] font-medium">Settings</span>
             </button>
-            <button class="flex flex-col items-center gap-1">
+            <button class="flex flex-col items-center gap-1 cursor-pointer">
                 <ChartBar
                     :size="24"
                     class="text-foreground-muted"
