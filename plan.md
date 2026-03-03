@@ -340,8 +340,8 @@
 
 ### 5.3 Cell 元件更新
 
-- [ ] 對齊設計稿色系（cell-tip、highlight、highlight-strong、primary 邊框）
-- [ ] 筆記模式小字排列
+- [x] 對齊設計稿色系（cell-tip、highlight、highlight-strong、primary 邊框）
+- [x] 筆記模式小字排列
 
 ### 5.4 Game 頁 UI
 
