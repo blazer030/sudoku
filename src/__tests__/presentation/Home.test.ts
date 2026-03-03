@@ -33,7 +33,7 @@ const dummySave: GameState = {
     cells: Array.from({ length: 9 }, () =>
         Array.from({ length: 9 }, () => ({ value: 0, input: 0, notes: [] as number[] }))
     ),
-    elapsedSeconds: 30,
+    elapsedSeconds: 204,
     completed: false,
 };
 
@@ -53,30 +53,23 @@ describe("Home", () => {
         expect(router.currentRoute.value.path).toBe(ROUTER_PATH.game);
     });
 
-    it("should show Easy as default difficulty", () => {
+    it("should show Easy as default selected difficulty", () => {
         const { wrapper } = mountHome();
+        const easyBtn = wrapper.find("[data-testid='difficulty-easy']");
 
-        expect(wrapper.find("[data-testid='difficulty-label']").text()).toBe("Easy");
+        expect(easyBtn.classes()).toContain("bg-primary");
     });
 
-    it("should cycle difficulty forward when clicking next button", async () => {
+    it("should select difficulty when clicking pill", async () => {
         const { wrapper } = mountHome();
 
-        await wrapper.find("[data-testid='difficulty-next']").trigger("click");
-        expect(wrapper.find("[data-testid='difficulty-label']").text()).toBe("Medium");
+        await wrapper.find("[data-testid='difficulty-medium']").trigger("click");
+        expect(wrapper.find("[data-testid='difficulty-medium']").classes()).toContain("bg-primary");
+        expect(wrapper.find("[data-testid='difficulty-easy']").classes()).not.toContain("bg-primary");
 
-        await wrapper.find("[data-testid='difficulty-next']").trigger("click");
-        expect(wrapper.find("[data-testid='difficulty-label']").text()).toBe("Hard");
-
-        await wrapper.find("[data-testid='difficulty-next']").trigger("click");
-        expect(wrapper.find("[data-testid='difficulty-label']").text()).toBe("Easy");
-    });
-
-    it("should cycle difficulty backward when clicking prev button", async () => {
-        const { wrapper } = mountHome();
-
-        await wrapper.find("[data-testid='difficulty-prev']").trigger("click");
-        expect(wrapper.find("[data-testid='difficulty-label']").text()).toBe("Hard");
+        await wrapper.find("[data-testid='difficulty-hard']").trigger("click");
+        expect(wrapper.find("[data-testid='difficulty-hard']").classes()).toContain("bg-primary");
+        expect(wrapper.find("[data-testid='difficulty-medium']").classes()).not.toContain("bg-primary");
     });
 
     it("should show Continue button when saved game exists", () => {
@@ -90,6 +83,13 @@ describe("Home", () => {
         const { wrapper } = mountHome();
 
         expect(wrapper.find("[data-testid='continue-button']").exists()).toBe(false);
+    });
+
+    it("should display saved elapsed time on Continue button", () => {
+        saveGame(dummySave);
+        const { wrapper } = mountHome();
+
+        expect(wrapper.find("[data-testid='continue-button']").text()).toContain("03:24");
     });
 
     it("should navigate to game page with continueGame flag when clicking Continue", async () => {
@@ -123,7 +123,7 @@ describe("Home", () => {
         await router.push("/");
         await router.isReady();
 
-        await wrapper.find("[data-testid='difficulty-next']").trigger("click");
+        await wrapper.find("[data-testid='difficulty-medium']").trigger("click");
         await wrapper.find("[data-testid='new-game-button']").trigger("click");
         await flushPromises();
 
