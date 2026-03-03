@@ -331,7 +331,7 @@ const highlightGrid = computed(() => {
 });
 
 const numberCounts = computed(() => {
-    const counts = Array.from<number>({ length: 10 }, () => 0);
+    const counts = Array.from<number, number>({ length: 10 }, () => 0);
     for (let row = 0; row < 9; row++) {
         for (let column = 0; column < 9; column++) {
             const cell = sudoku.puzzle[row][column];
