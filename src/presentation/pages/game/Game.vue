@@ -161,7 +161,7 @@ const inputMode = ref(InputMode.Normal);
 const elapsedSeconds = ref(restoredSeconds);
 
 const timerInterval = setInterval(() => {
-    if (!completed.value) {
+    if (!completed.value && !showLeave.value) {
         elapsedSeconds.value++;
     }
 }, 1000);

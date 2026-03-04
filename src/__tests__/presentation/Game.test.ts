@@ -494,6 +494,27 @@ describe("Game", () => {
         expect(timer.text()).toBe("00:03");
     });
 
+    it("should pause timer when leave dialog is shown", async () => {
+        vi.useFakeTimers();
+        spyGeneratePuzzle();
+        const wrapper = mountGame();
+
+        await vi.advanceTimersByTimeAsync(3000);
+        expect(wrapper.find("[data-testid='timer']").text()).toBe("00:03");
+
+        // 打開離開彈窗
+        await wrapper.find("[data-testid='back-button']").trigger("click");
+
+        // 彈窗顯示期間計時器不應遞增
+        await vi.advanceTimersByTimeAsync(5000);
+        expect(wrapper.find("[data-testid='timer']").text()).toBe("00:03");
+
+        // 關閉彈窗後計時器恢復
+        await wrapper.find("[data-testid='leave-cancel-button']").trigger("click");
+        await vi.advanceTimersByTimeAsync(2000);
+        expect(wrapper.find("[data-testid='timer']").text()).toBe("00:05");
+    });
+
     it("should stop timer when game is completed", async () => {
         vi.useFakeTimers();
         spyGeneratePuzzle();
