@@ -352,11 +352,11 @@
 
 ### 5.5 Game Complete 彈窗
 
-- [ ] Overlay + Modal（獎盃 icon、統計列、Back to Home 按鈕）
+- [x] Overlay + Modal（獎盃 icon、統計列、Back to Home 按鈕）
 
 ### 5.6 測試修正
 
-- [ ] 確保 data-testid 不變、所有測試通過
+- [x] 確保 data-testid 不變、所有測試通過
 
 ---
 
