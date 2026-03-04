@@ -15,6 +15,27 @@ interface GameResultInput {
     completed: boolean;
 }
 
+export interface DifficultyStats {
+    gamesWon: number;
+    gamesPlayed: number;
+    bestTime: number | null;
+    averageTime: number | null;
+}
+
+export interface OverallStats {
+    gamesWon: number;
+    gamesPlayed: number;
+    winRate: number;
+}
+
+export interface Statistics {
+    easy: DifficultyStats;
+    medium: DifficultyStats;
+    hard: DifficultyStats;
+    overall: OverallStats;
+    recentGames: GameResult[];
+}
+
 function loadHistory(): GameResult[] {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored === null) return [];
@@ -36,4 +57,39 @@ export function recordGameResult(input: GameResultInput): void {
 
 export function getGameHistory(): GameResult[] {
     return loadHistory();
+}
+
+function computeDifficultyStats(games: GameResult[]): DifficultyStats {
+    const wonGames = games.filter(game => game.completed);
+    return {
+        gamesWon: wonGames.length,
+        gamesPlayed: games.length,
+        bestTime: wonGames.length > 0
+            ? Math.min(...wonGames.map(game => game.elapsedSeconds))
+            : null,
+        averageTime: wonGames.length > 0
+            ? wonGames.reduce((sum, game) => sum + game.elapsedSeconds, 0) / wonGames.length
+            : null,
+    };
+}
+
+export function getStatistics(): Statistics {
+    const history = loadHistory();
+
+    const byDifficulty = (difficulty: Difficulty) =>
+        history.filter(game => game.difficulty === difficulty);
+
+    const totalWon = history.filter(game => game.completed).length;
+
+    return {
+        easy: computeDifficultyStats(byDifficulty("easy")),
+        medium: computeDifficultyStats(byDifficulty("medium")),
+        hard: computeDifficultyStats(byDifficulty("hard")),
+        overall: {
+            gamesWon: totalWon,
+            gamesPlayed: history.length,
+            winRate: history.length > 0 ? totalWon / history.length : 0,
+        },
+        recentGames: [...history].reverse(),
+    };
 }
