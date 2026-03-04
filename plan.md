@@ -366,10 +366,12 @@
 
 > `src/__tests__/application/Statistics.test.ts` + `src/application/Statistics.ts`
 
-- [ ] **測試**：`recordGameResult` — 記錄完成時間、難度、是否成功
-- [ ] **測試**：`getStatistics` — 回傳各難度的完成次數、最佳時間、平均時間
-- [ ] **測試**：統計資料持久化到 localforage
-- [ ] **UI 測試**：統計頁面顯示各難度成績
+- [x] **測試**：`recordGameResult` — 記錄完成時間、難度、是否成功
+- [x] **測試**：`getStatistics` — 回傳各難度的完成次數、最佳時間、平均時間
+- [x] **測試**：統計資料持久化到 localStorage
+- [x] **UI 測試**：統計頁面顯示各難度成績
+- [x] **UI 測試**：Leave Game 確認彈窗（Save & Leave / Give Up & Leave / Cancel）
+- [x] **UI 測試**：New Game 確認彈窗（Give Up & Start New / Cancel）
 
 ### 6.2 深色模式
 
