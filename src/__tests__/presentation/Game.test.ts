@@ -202,7 +202,7 @@ describe("Game", () => {
         expect(cell.text()).toBe("");
     });
 
-    it("should show completion message when all cells are correctly filled", async () => {
+    it("should show game complete modal when all cells are correctly filled", async () => {
         spyGeneratePuzzle();
         const wrapper = mountGame();
 
@@ -219,7 +219,13 @@ describe("Game", () => {
             }
         }
 
-        expect(wrapper.text()).toContain("Completed");
+        const modal = wrapper.find("[data-testid='game-complete-modal']");
+        expect(modal.exists()).toBe(true);
+        expect(modal.text()).toContain("Congratulations!");
+        expect(modal.text()).toContain("You solved the puzzle!");
+        expect(modal.text()).toContain("00:00");
+        expect(modal.text()).toContain("Easy");
+        expect(modal.find("[data-testid='back-to-home-button']").exists()).toBe(true);
     });
 
     it("should toggle note mode when clicking Note button", async () => {
@@ -508,7 +514,7 @@ describe("Game", () => {
             }
         }
 
-        expect(wrapper.text()).toContain("Completed");
+        expect(wrapper.find("[data-testid='game-complete-modal']").exists()).toBe(true);
         expect(wrapper.find("[data-testid='timer']").text()).toBe("00:05");
 
         // 完成後計時器不再遞增

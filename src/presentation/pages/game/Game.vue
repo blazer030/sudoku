@@ -29,13 +29,12 @@
             </div>
         </div>
 
-        <!-- Completed (placeholder, Step 5.5 will replace with modal) -->
-        <div
+        <!-- Game Complete Modal -->
+        <GameCompleteModal
             v-if="completed"
-            class="text-center text-2xl font-bold text-primary my-4"
-        >
-            Completed
-        </div>
+            :difficulty="gameStore.difficulty ?? 'easy'"
+            :elapsed-seconds="elapsedSeconds"
+        />
 
         <!-- Spacer -->
         <div class="flex-1" />
@@ -106,6 +105,7 @@ import { computed, onBeforeUnmount, reactive, ref } from "vue";
 import { useRouter } from "vue-router";
 import { Eraser, Pencil, Sparkles, Undo2 } from "lucide-vue-next";
 import GameHeader from "@/presentation/components/game-header/GameHeader.vue";
+import GameCompleteModal from "@/presentation/components/game-complete-modal/GameCompleteModal.vue";
 import ControlButton from "@/presentation/components/game-controls/ControlButton.vue";
 import Sudoku from "@/domain/Sudoku";
 import CellHighlight from "@/domain/CellHighlight";
