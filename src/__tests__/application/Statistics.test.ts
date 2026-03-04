@@ -71,6 +71,18 @@ describe("Statistics", () => {
             expect(stats.overall.winRate).toBe(0.5);
         });
 
+        it("should persist statistics across reloads", () => {
+            recordGameResult({ difficulty: "easy", elapsedSeconds: 120, completed: true });
+            recordGameResult({ difficulty: "medium", elapsedSeconds: 300, completed: false });
+
+            // 重新讀取（模擬重新載入）
+            const stats = getStatistics();
+
+            expect(stats.easy.gamesWon).toBe(1);
+            expect(stats.medium.gamesPlayed).toBe(1);
+            expect(stats.overall.gamesPlayed).toBe(2);
+        });
+
         it("should return recent games in reverse chronological order", () => {
             recordGameResult({ difficulty: "easy", elapsedSeconds: 120, completed: true });
             recordGameResult({ difficulty: "medium", elapsedSeconds: 200, completed: false });
