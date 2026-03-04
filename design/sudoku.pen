@@ -5690,6 +5690,673 @@
           ]
         }
       ]
+    },
+    {
+      "type": "frame",
+      "id": "crBRF",
+      "x": 2255,
+      "y": 931,
+      "name": "New Game Confirm",
+      "width": 402,
+      "height": 868,
+      "fill": "$background",
+      "layout": "none",
+      "children": [
+        {
+          "type": "frame",
+          "id": "5YVQO",
+          "x": 143.5,
+          "y": 80,
+          "name": "logo",
+          "height": 160,
+          "layout": "vertical",
+          "gap": 8,
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "2bxZC",
+              "name": "logoIcon",
+              "width": 80,
+              "height": 80,
+              "fill": "$primary",
+              "cornerRadius": 20,
+              "effect": {
+                "type": "shadow",
+                "shadowType": "outer",
+                "color": "#3D8A5A30",
+                "offset": {
+                  "x": 0,
+                  "y": 4
+                },
+                "blur": 16
+              },
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "H3zFq",
+                  "name": "logoGrid",
+                  "width": 48,
+                  "height": 48,
+                  "layout": "vertical",
+                  "gap": 4,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "PCcWb",
+                      "name": "logoRow1",
+                      "width": "fill_container",
+                      "height": "fill_container",
+                      "gap": 4,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "n1XTn",
+                          "name": "logoCell1",
+                          "width": "fill_container",
+                          "height": "fill_container",
+                          "fill": "#FFFFFF40",
+                          "cornerRadius": 4
+                        },
+                        {
+                          "type": "frame",
+                          "id": "LRMDV",
+                          "name": "logoCell2",
+                          "width": "fill_container",
+                          "height": "fill_container",
+                          "fill": "#FFFFFF",
+                          "cornerRadius": 4
+                        },
+                        {
+                          "type": "frame",
+                          "id": "wK5Up",
+                          "name": "logoCell3",
+                          "width": "fill_container",
+                          "height": "fill_container",
+                          "fill": "#FFFFFF40",
+                          "cornerRadius": 4
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "EoYbN",
+                      "name": "logoRow2",
+                      "width": "fill_container",
+                      "height": "fill_container",
+                      "gap": 4,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "q3u3A",
+                          "name": "logoCell4",
+                          "width": "fill_container",
+                          "height": "fill_container",
+                          "fill": "#FFFFFF",
+                          "cornerRadius": 4
+                        },
+                        {
+                          "type": "frame",
+                          "id": "zVgpq",
+                          "name": "logoCell5",
+                          "width": "fill_container",
+                          "height": "fill_container",
+                          "fill": "#FFFFFF40",
+                          "cornerRadius": 4
+                        },
+                        {
+                          "type": "frame",
+                          "id": "uc4m2",
+                          "name": "logoCell6",
+                          "width": "fill_container",
+                          "height": "fill_container",
+                          "fill": "#FFFFFF",
+                          "cornerRadius": 4
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "Yqr4B",
+                      "name": "logoRow3",
+                      "width": "fill_container",
+                      "height": "fill_container",
+                      "gap": 4,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "dWjvv",
+                          "name": "logoCell7",
+                          "width": "fill_container",
+                          "height": "fill_container",
+                          "fill": "#FFFFFF40",
+                          "cornerRadius": 4
+                        },
+                        {
+                          "type": "frame",
+                          "id": "f33eN",
+                          "name": "logoCell8",
+                          "width": "fill_container",
+                          "height": "fill_container",
+                          "fill": "#FFFFFF",
+                          "cornerRadius": 4
+                        },
+                        {
+                          "type": "frame",
+                          "id": "UIFvo",
+                          "name": "logoCell9",
+                          "width": "fill_container",
+                          "height": "fill_container",
+                          "fill": "#FFFFFF40",
+                          "cornerRadius": 4
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "ztaB7",
+              "name": "logoTitle",
+              "fill": "$foreground",
+              "content": "Sudoku",
+              "fontFamily": "Outfit",
+              "fontSize": 36,
+              "fontWeight": "700",
+              "letterSpacing": -1
+            },
+            {
+              "type": "text",
+              "id": "0YErD",
+              "name": "logoSubtitle",
+              "fill": "$foreground-secondary",
+              "content": "Train your brain",
+              "fontFamily": "Outfit",
+              "fontSize": 14,
+              "fontWeight": "normal"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "QnkLG",
+          "x": 24,
+          "y": 240,
+          "name": "Spacer",
+          "width": "fill_container(354)",
+          "height": "fill_container(144)"
+        },
+        {
+          "type": "frame",
+          "id": "inNtn",
+          "x": 24,
+          "y": 384,
+          "name": "Menu",
+          "width": "fill_container(354)",
+          "height": 200,
+          "layout": "vertical",
+          "gap": 12,
+          "justifyContent": "end",
+          "children": [
+            {
+              "type": "frame",
+              "id": "qYr9m",
+              "name": "Continue Button",
+              "width": "fill_container",
+              "height": 56,
+              "fill": "$primary",
+              "cornerRadius": 16,
+              "effect": {
+                "type": "shadow",
+                "shadowType": "outer",
+                "color": "#3D8A5A30",
+                "offset": {
+                  "x": 0,
+                  "y": 4
+                },
+                "blur": 12
+              },
+              "gap": 10,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon_font",
+                  "id": "rJaqa",
+                  "name": "continueIcon",
+                  "width": 20,
+                  "height": 20,
+                  "iconFontName": "play",
+                  "iconFontFamily": "lucide",
+                  "fill": "#FFFFFF"
+                },
+                {
+                  "type": "text",
+                  "id": "skt9O",
+                  "name": "continueText",
+                  "fill": "#FFFFFF",
+                  "content": "Continue Game",
+                  "fontFamily": "Outfit",
+                  "fontSize": 16,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "frame",
+                  "id": "1BXC9",
+                  "name": "continueTime",
+                  "fill": "#FFFFFF20",
+                  "cornerRadius": 100,
+                  "gap": 4,
+                  "padding": [
+                    4,
+                    10
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "bBvf1",
+                      "name": "continueTimeText",
+                      "fill": "#FFFFFF",
+                      "content": "03:24",
+                      "fontFamily": "Outfit",
+                      "fontSize": 12,
+                      "fontWeight": "500"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "Mm1EG",
+              "name": "Difficulty Switcher",
+              "width": "fill_container",
+              "height": 48,
+              "fill": "$card",
+              "cornerRadius": 14,
+              "effect": {
+                "type": "shadow",
+                "shadowType": "outer",
+                "color": "#1A191808",
+                "offset": {
+                  "x": 0,
+                  "y": 2
+                },
+                "blur": 8
+              },
+              "padding": 4,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "oJ7Q0",
+                  "name": "diffEasy",
+                  "width": "fill_container",
+                  "height": "fill_container",
+                  "cornerRadius": 10,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "GJEun",
+                      "name": "diffEasyText",
+                      "fill": "$foreground-secondary",
+                      "content": "Easy",
+                      "fontFamily": "Outfit",
+                      "fontSize": 14,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "Vmyfk",
+                  "name": "diffMedium",
+                  "width": "fill_container",
+                  "height": "fill_container",
+                  "fill": "$primary",
+                  "cornerRadius": 10,
+                  "effect": {
+                    "type": "shadow",
+                    "shadowType": "outer",
+                    "color": "#3D8A5A30",
+                    "offset": {
+                      "x": 0,
+                      "y": 2
+                    },
+                    "blur": 6
+                  },
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "bUsBM",
+                      "name": "diffMediumText",
+                      "fill": "#FFFFFF",
+                      "content": "Medium",
+                      "fontFamily": "Outfit",
+                      "fontSize": 14,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "nDsBz",
+                  "name": "diffHard",
+                  "width": "fill_container",
+                  "height": "fill_container",
+                  "cornerRadius": 10,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "PKfFf",
+                      "name": "diffHardText",
+                      "fill": "$foreground-secondary",
+                      "content": "Hard",
+                      "fontFamily": "Outfit",
+                      "fontSize": 14,
+                      "fontWeight": "500"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "Zamby",
+              "name": "New Game Button",
+              "width": "fill_container",
+              "height": 56,
+              "fill": "$card",
+              "cornerRadius": 16,
+              "effect": {
+                "type": "shadow",
+                "shadowType": "outer",
+                "color": "#1A191808",
+                "offset": {
+                  "x": 0,
+                  "y": 2
+                },
+                "blur": 8
+              },
+              "gap": 10,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon_font",
+                  "id": "zanUz",
+                  "name": "newGameIcon",
+                  "width": 20,
+                  "height": 20,
+                  "iconFontName": "plus",
+                  "iconFontFamily": "lucide",
+                  "fill": "$foreground"
+                },
+                {
+                  "type": "text",
+                  "id": "VHiNs",
+                  "name": "newGameText",
+                  "fill": "$foreground",
+                  "content": "New Game",
+                  "fontFamily": "Outfit",
+                  "fontSize": 16,
+                  "fontWeight": "600"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "SoQao",
+          "x": 24,
+          "y": 584,
+          "name": "Spacer",
+          "width": "fill_container(354)",
+          "height": "fill_container(144)"
+        },
+        {
+          "type": "frame",
+          "id": "ZtbfQ",
+          "x": 24,
+          "y": 728,
+          "name": "Bottom Nav",
+          "width": "fill_container(354)",
+          "height": 80,
+          "gap": 40,
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "OwEU0",
+              "name": "settingsBtn",
+              "layout": "vertical",
+              "gap": 4,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon_font",
+                  "id": "lvUVa",
+                  "name": "settingsIcon",
+                  "width": 24,
+                  "height": 24,
+                  "iconFontName": "settings",
+                  "iconFontFamily": "lucide",
+                  "fill": "$foreground-muted"
+                },
+                {
+                  "type": "text",
+                  "id": "SYlRL",
+                  "name": "settingsLabel",
+                  "fill": "$foreground-muted",
+                  "content": "Settings",
+                  "fontFamily": "Outfit",
+                  "fontSize": 11,
+                  "fontWeight": "500"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "rjcKN",
+              "name": "statsNavBtn",
+              "layout": "vertical",
+              "gap": 4,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon_font",
+                  "id": "VO4n7",
+                  "name": "statsNavIcon",
+                  "width": 24,
+                  "height": 24,
+                  "iconFontName": "chart-bar",
+                  "iconFontFamily": "lucide",
+                  "fill": "$foreground-muted"
+                },
+                {
+                  "type": "text",
+                  "id": "iSmBm",
+                  "name": "statsNavLabel",
+                  "fill": "$foreground-muted",
+                  "content": "Statistics",
+                  "fontFamily": "Outfit",
+                  "fontSize": 11,
+                  "fontWeight": "500"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "YBAMU",
+          "x": 0,
+          "y": 0,
+          "name": "Overlay",
+          "width": 402,
+          "height": 868,
+          "fill": "#00000066",
+          "layout": "none"
+        },
+        {
+          "type": "frame",
+          "id": "Smawe",
+          "x": 27,
+          "y": 304,
+          "name": "Dialog",
+          "width": 348,
+          "fill": "$card",
+          "cornerRadius": 24,
+          "effect": {
+            "type": "shadow",
+            "shadowType": "outer",
+            "color": "#00000020",
+            "offset": {
+              "x": 0,
+              "y": 8
+            },
+            "blur": 32
+          },
+          "layout": "vertical",
+          "gap": 20,
+          "padding": [
+            32,
+            24,
+            24,
+            24
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "gvFMD",
+              "name": "Warning Icon BG",
+              "width": 56,
+              "height": 56,
+              "fill": "#FFF3E0",
+              "cornerRadius": 100,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon_font",
+                  "id": "HLntG",
+                  "name": "warningIcon",
+                  "width": 28,
+                  "height": 28,
+                  "iconFontName": "triangle-alert",
+                  "iconFontFamily": "lucide",
+                  "fill": "#E6A23C"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "Up2fz",
+              "name": "Dialog Text",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 8,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "Hr1Kr",
+                  "name": "Dialog Title",
+                  "fill": "$foreground",
+                  "content": "Start New Game?",
+                  "fontFamily": "Outfit",
+                  "fontSize": 20,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "sN0vu",
+                  "name": "Dialog Desc",
+                  "fill": "$foreground-secondary",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Your current game progress will be lost. This action cannot be undone.",
+                  "lineHeight": 1.5,
+                  "textAlign": "center",
+                  "fontFamily": "Outfit",
+                  "fontSize": 14,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "u83Dd",
+              "name": "Dialog Buttons",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 10,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "kL15f",
+                  "name": "Confirm Button",
+                  "width": "fill_container",
+                  "height": 50,
+                  "fill": "$error",
+                  "cornerRadius": 14,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "qk36r",
+                      "name": "confirmText",
+                      "fill": "#FFFFFF",
+                      "content": "Start New Game",
+                      "fontFamily": "Outfit",
+                      "fontSize": 16,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "SHRGN",
+                  "name": "Cancel Button",
+                  "width": "fill_container",
+                  "height": 50,
+                  "fill": "$background",
+                  "cornerRadius": 14,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "95cEx",
+                      "name": "cancelText",
+                      "fill": "$foreground",
+                      "content": "Cancel",
+                      "fontFamily": "Outfit",
+                      "fontSize": 16,
+                      "fontWeight": "600"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
     }
   ],
   "variables": {
