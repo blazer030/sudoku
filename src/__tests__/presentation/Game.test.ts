@@ -1,16 +1,15 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { flushPromises, mount } from "@vue/test-utils";
 import { createPinia } from "pinia";
-import { createRouter, createMemoryHistory } from "vue-router";
+import { createMemoryHistory, createRouter } from "vue-router";
 import Game from "@/presentation/pages/game/Game.vue";
 import { knownAnswer, knownPuzzle, spyGeneratePuzzle } from "@/__tests__/fixtures/knownPuzzle";
-import { loadGame, saveGame } from "@/application/GameStorage";
 import type { GameState } from "@/application/GameState";
 import Cell from "@/presentation/components/cell/Cell.vue";
 import CellHighlight from "@/domain/CellHighlight";
 import { useGameStore } from "@/stores/gameStore";
 import { getGameHistory } from "@/application/Statistics";
-import { hasSavedGame, loadGame } from "@/application/GameStorage";
+import { hasSavedGame, loadGame, saveGame } from "@/application/GameStorage";
 
 function createTestRouter() {
     return createRouter({
