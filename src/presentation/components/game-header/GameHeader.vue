@@ -2,7 +2,8 @@
     <div class="flex items-center justify-between">
         <button
             class="flex items-center gap-2 cursor-pointer"
-            @click="goBack"
+            data-testid="back-button"
+            @click="emit('back')"
         >
             <ChevronLeft
                 :size="24"
@@ -34,20 +35,14 @@
 
 <script lang="ts" setup>
 import { ChevronLeft, Timer } from "lucide-vue-next";
-import { useRouter } from "vue-router";
-import { ROUTER_PATH } from "@/router";
 import { useGameStore } from "@/stores/gameStore";
 import { formatTime } from "@/utils/formatTime";
 import { DifficultyLabels } from "@/domain/SudokuGenerator";
 
 defineProps<{ elapsedSeconds: number }>();
+const emit = defineEmits<{ back: [] }>();
 
-const router = useRouter();
 const gameStore = useGameStore();
 
 const difficultyLabel = DifficultyLabels[gameStore.difficulty ?? "easy"];
-
-const goBack = () => {
-    void router.push(ROUTER_PATH.home);
-};
 </script>

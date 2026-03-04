@@ -1,7 +1,10 @@
 <template>
     <div class="flex flex-col gap-6 h-dvh py-6 px-5">
         <!-- Header -->
-        <GameHeader :elapsed-seconds="elapsedSeconds" />
+        <GameHeader
+            :elapsed-seconds="elapsedSeconds"
+            @back="showLeaveDialog"
+        />
 
         <!-- Spacer -->
         <div class="flex-1" />
@@ -34,6 +37,14 @@
             v-if="completed"
             :difficulty="gameStore.difficulty ?? 'easy'"
             :elapsed-seconds="elapsedSeconds"
+        />
+
+        <!-- Leave Game Dialog -->
+        <LeaveGameDialog
+            v-if="showLeave"
+            @save-and-leave="handleSaveAndLeave"
+            @give-up-and-leave="handleGiveUpAndLeave"
+            @cancel="showLeave = false"
         />
 
         <!-- Spacer -->
@@ -102,17 +113,19 @@
 
 <script lang="ts" setup>
 import { computed, onBeforeUnmount, reactive, ref } from "vue";
+
 import { useRouter } from "vue-router";
 import { Eraser, Pencil, Sparkles, Undo2 } from "lucide-vue-next";
 import GameHeader from "@/presentation/components/game-header/GameHeader.vue";
 import GameCompleteModal from "@/presentation/components/game-complete-modal/GameCompleteModal.vue";
+import LeaveGameDialog from "@/presentation/components/leave-game-dialog/LeaveGameDialog.vue";
 import ControlButton from "@/presentation/components/game-controls/ControlButton.vue";
 import Sudoku from "@/domain/Sudoku";
 import CellHighlight from "@/domain/CellHighlight";
 import Cell from "@/presentation/components/cell/Cell.vue";
 import { useGameStore } from "@/stores/gameStore";
 import { ROUTER_PATH } from "@/router";
-import { loadGame, saveGame } from "@/application/GameStorage";
+import { deleteSavedGame, loadGame, saveGame } from "@/application/GameStorage";
 import { GameStateConverter } from "@/application/GameState";
 import { recordGameResult } from "@/application/Statistics";
 
@@ -143,6 +156,7 @@ enum InputMode { Normal, Note, Erase }
 const selectedCell = ref<{ row: number; column: number } | null>(null);
 const selectedDigit = ref<number | null>(null);
 const completed = ref(false);
+const showLeave = ref(false);
 const inputMode = ref(InputMode.Normal);
 const elapsedSeconds = ref(restoredSeconds);
 
@@ -154,15 +168,31 @@ const timerInterval = setInterval(() => {
 
 onBeforeUnmount(() => {
     clearInterval(timerInterval);
-    if (!completed.value) {
-        const state = GameStateConverter.fromSudoku(sudoku.raw(), {
-            difficulty: gameStore.difficulty ?? "easy",
-            elapsedSeconds: elapsedSeconds.value,
-            completed: completed.value,
-        });
-        saveGame(state);
-    }
 });
+
+function showLeaveDialog() {
+    showLeave.value = true;
+}
+
+function handleSaveAndLeave() {
+    const state = GameStateConverter.fromSudoku(sudoku.raw(), {
+        difficulty: gameStore.difficulty ?? "easy",
+        elapsedSeconds: elapsedSeconds.value,
+        completed: completed.value,
+    });
+    saveGame(state);
+    void router.push(ROUTER_PATH.home);
+}
+
+function handleGiveUpAndLeave() {
+    recordGameResult({
+        difficulty: gameStore.difficulty ?? "easy",
+        elapsedSeconds: elapsedSeconds.value,
+        completed: false,
+    });
+    deleteSavedGame();
+    void router.push(ROUTER_PATH.home);
+}
 
 function clickCell(row: number, column: number) {
     if (inputMode.value === InputMode.Erase) {
