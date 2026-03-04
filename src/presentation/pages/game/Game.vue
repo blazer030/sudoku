@@ -114,6 +114,7 @@ import { useGameStore } from "@/stores/gameStore";
 import { ROUTER_PATH } from "@/router";
 import { loadGame, saveGame } from "@/application/GameStorage";
 import { GameStateConverter } from "@/application/GameState";
+import { recordGameResult } from "@/application/Statistics";
 
 const router = useRouter();
 const gameStore = useGameStore();
@@ -190,7 +191,14 @@ function inputToCell(row: number, column: number, value: number) {
         return;
     }
     sudoku.fill(row, column, value);
-    if (sudoku.isCompleted()) completed.value = true;
+    if (sudoku.isCompleted()) {
+        completed.value = true;
+        recordGameResult({
+            difficulty: gameStore.difficulty ?? "easy",
+            elapsedSeconds: elapsedSeconds.value,
+            completed: true,
+        });
+    }
     if (isDigitCompleted(value)) selectedDigit.value = null;
 }
 

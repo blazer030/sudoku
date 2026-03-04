@@ -9,6 +9,7 @@ import type { GameState } from "@/application/GameState";
 import Cell from "@/presentation/components/cell/Cell.vue";
 import CellHighlight from "@/domain/CellHighlight";
 import { useGameStore } from "@/stores/gameStore";
+import { getGameHistory } from "@/application/Statistics";
 
 function createTestRouter() {
     return createRouter({
@@ -738,6 +739,28 @@ describe("Game", () => {
         expect(saved).not.toBeNull();
         expect(saved?.difficulty).toBe("easy");
         expect(saved?.cells[0][2].entry).toBe(4);
+    });
+
+    it("should record game result when game is completed", async () => {
+        spyGeneratePuzzle();
+        const wrapper = mountGame();
+
+        for (let row = 0; row < 9; row++) {
+            for (let column = 0; column < 9; column++) {
+                if (knownPuzzle[row][column] === 0) {
+                    const value = knownAnswer[row][column];
+                    const numberButton = wrapper.find(`[data-testid='number-${value}']`);
+                    await numberButton.trigger("click");
+                    await wrapper.find(`[data-testid='cell-${row}-${column}']`).trigger("click");
+                    await numberButton.trigger("click");
+                }
+            }
+        }
+
+        const history = getGameHistory();
+        expect(history).toHaveLength(1);
+        expect(history[0].completed).toBe(true);
+        expect(history[0].difficulty).toBe("easy");
     });
 
     it("should render 9x9 grid with clue cells showing their numbers", () => {
