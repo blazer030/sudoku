@@ -39,7 +39,7 @@
             <button
                 class="flex items-center justify-center gap-2.5 h-14 w-full bg-card rounded-2xl shadow-[0_2px_8px_#1A191808] cursor-pointer"
                 data-testid="new-game-button"
-                @click="startGame"
+                @click="handleNewGame"
             >
                 <Plus
                     :size="20"
@@ -68,6 +68,13 @@
                 <span class="text-foreground-muted text-[11px] font-medium">Statistics</span>
             </button>
         </div>
+
+        <!-- New Game Confirm Dialog -->
+        <NewGameDialog
+            v-if="showNewGameConfirm"
+            @give-up-and-start-new="handleGiveUpAndStartNew"
+            @cancel="showNewGameConfirm = false"
+        />
     </div>
 </template>
 
@@ -78,17 +85,40 @@ import { ChartBar, Plus, Settings } from "lucide-vue-next";
 import { ROUTER_PATH } from "@/router";
 import type { Difficulty } from "@/domain/SudokuGenerator";
 import { useGameStore } from "@/stores/gameStore";
-import { deleteSavedGame } from "@/application/GameStorage";
+import { deleteSavedGame, hasSavedGame, loadGame } from "@/application/GameStorage";
+import { recordGameResult } from "@/application/Statistics";
 import ContinueButton from "@/presentation/components/continue-button/ContinueButton.vue";
 import DifficultySwitcher from "@/presentation/components/difficulty-switcher/DifficultySwitcher.vue";
+import NewGameDialog from "@/presentation/components/new-game-dialog/NewGameDialog.vue";
 
 const router = useRouter();
 const gameStore = useGameStore();
 
 const difficulty = ref<Difficulty>("easy");
+const showNewGameConfirm = ref(false);
+
+function handleNewGame() {
+    if (hasSavedGame()) {
+        showNewGameConfirm.value = true;
+        return;
+    }
+    startGame();
+}
+
+function handleGiveUpAndStartNew() {
+    const saved = loadGame();
+    if (saved) {
+        recordGameResult({
+            difficulty: saved.difficulty,
+            elapsedSeconds: saved.elapsedSeconds,
+            completed: false,
+        });
+    }
+    deleteSavedGame();
+    startGame();
+}
 
 function startGame() {
-    deleteSavedGame();
     gameStore.setDifficulty(difficulty.value);
     void router.push(ROUTER_PATH.game);
 }

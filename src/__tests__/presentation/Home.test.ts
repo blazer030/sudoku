@@ -6,6 +6,7 @@ import Home from "@/presentation/pages/home/Home.vue";
 import { ROUTER_PATH } from "@/router";
 import { useGameStore } from "@/stores/gameStore";
 import { hasSavedGame, saveGame } from "@/application/GameStorage";
+import { getGameHistory } from "@/application/Statistics";
 import type { GameState } from "@/application/GameState";
 
 function createTestRouter() {
@@ -42,7 +43,7 @@ afterEach(() => {
 });
 
 describe("Home", () => {
-    it("should navigate to game page when clicking New Game button", async () => {
+    it("should navigate to game page when clicking New Game button without saved game", async () => {
         const { wrapper, router } = mountHome();
         await router.push("/");
         await router.isReady();
@@ -106,18 +107,6 @@ describe("Home", () => {
         expect(router.currentRoute.value.path).toBe(ROUTER_PATH.game);
     });
 
-    it("should clear saved game when clicking New Game", async () => {
-        saveGame(dummySave);
-        const { wrapper, router } = mountHome();
-        await router.push("/");
-        await router.isReady();
-
-        await wrapper.find("[data-testid='new-game-button']").trigger("click");
-        await flushPromises();
-
-        expect(hasSavedGame()).toBe(false);
-    });
-
     it("should set difficulty in store when starting game", async () => {
         const { wrapper, router, pinia } = mountHome();
         await router.push("/");
@@ -130,5 +119,59 @@ describe("Home", () => {
         const gameStore = useGameStore(pinia);
         expect(gameStore.difficulty).toBe("medium");
         expect(router.currentRoute.value.path).toBe(ROUTER_PATH.game);
+    });
+
+    describe("New Game Confirm Dialog", () => {
+        it("should show confirm dialog when clicking New Game with saved game", async () => {
+            saveGame(dummySave);
+            const { wrapper } = mountHome();
+
+            await wrapper.find("[data-testid='new-game-button']").trigger("click");
+
+            expect(wrapper.find("[data-testid='new-game-confirm-dialog']").exists()).toBe(true);
+            expect(wrapper.find("[data-testid='new-game-confirm-dialog']").text()).toContain("Give Up Current Game?");
+        });
+
+        it("should record gave up and start new game when clicking Give Up & Start New", async () => {
+            saveGame(dummySave);
+            const { wrapper, router } = mountHome();
+            await router.push("/");
+            await router.isReady();
+
+            await wrapper.find("[data-testid='new-game-button']").trigger("click");
+            await wrapper.find("[data-testid='give-up-and-start-new-button']").trigger("click");
+            await flushPromises();
+
+            const history = getGameHistory();
+            expect(history).toHaveLength(1);
+            expect(history[0].completed).toBe(false);
+            expect(history[0].difficulty).toBe("easy");
+            expect(hasSavedGame()).toBe(false);
+            expect(router.currentRoute.value.path).toBe(ROUTER_PATH.game);
+        });
+
+        it("should close dialog when clicking Cancel", async () => {
+            saveGame(dummySave);
+            const { wrapper } = mountHome();
+
+            await wrapper.find("[data-testid='new-game-button']").trigger("click");
+            expect(wrapper.find("[data-testid='new-game-confirm-dialog']").exists()).toBe(true);
+
+            await wrapper.find("[data-testid='new-game-cancel-button']").trigger("click");
+
+            expect(wrapper.find("[data-testid='new-game-confirm-dialog']").exists()).toBe(false);
+        });
+
+        it("should start game directly when no saved game exists", async () => {
+            const { wrapper, router } = mountHome();
+            await router.push("/");
+            await router.isReady();
+
+            await wrapper.find("[data-testid='new-game-button']").trigger("click");
+            await flushPromises();
+
+            expect(wrapper.find("[data-testid='new-game-confirm-dialog']").exists()).toBe(false);
+            expect(router.currentRoute.value.path).toBe(ROUTER_PATH.game);
+        });
     });
 });
