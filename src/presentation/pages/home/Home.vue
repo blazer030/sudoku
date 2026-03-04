@@ -60,7 +60,11 @@
                 />
                 <span class="text-foreground-muted text-[11px] font-medium">Settings</span>
             </button>
-            <button class="flex flex-col items-center gap-1 cursor-pointer">
+            <button
+                class="flex flex-col items-center gap-1 cursor-pointer"
+                data-testid="statistics-button"
+                @click="goToStatistics"
+            >
                 <ChartBar
                     :size="24"
                     class="text-foreground-muted"
@@ -121,6 +125,10 @@ function handleGiveUpAndStartNew() {
 function startGame() {
     gameStore.setDifficulty(difficulty.value);
     void router.push(ROUTER_PATH.game);
+}
+
+function goToStatistics() {
+    void router.push(ROUTER_PATH.statistics);
 }
 
 function continueGame() {
