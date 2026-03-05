@@ -14,6 +14,31 @@ export class SudokuSolver {
         return null;
     }
 
+    public countSolutions(board: number[][], limit: number = 2): number {
+        const puzzle = board.map(row => [...row]);
+        return this.countSolutionsRecursive(puzzle, limit);
+    }
+
+    private countSolutionsRecursive(puzzle: number[][], limit: number): number {
+        for (let row = 0; row < 9; row++) {
+            for (let column = 0; column < 9; column++) {
+                if (puzzle[row][column] === 0) {
+                    let count = 0;
+                    for (let digit = 1; digit <= 9; digit++) {
+                        if (this.board.isValidPlacement(puzzle, row, column, digit)) {
+                            puzzle[row][column] = digit;
+                            count += this.countSolutionsRecursive(puzzle, limit - count);
+                            puzzle[row][column] = 0;
+                            if (count >= limit) return count;
+                        }
+                    }
+                    return count;
+                }
+            }
+        }
+        return 1;
+    }
+
     private fillBoard(board: number[][], digitsProvider?: DigitsProvider): boolean {
         for (let row = 0; row < 9; row++) {
             for (let column = 0; column < 9; column++) {

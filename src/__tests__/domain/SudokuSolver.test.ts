@@ -24,6 +24,22 @@ describe("SudokuSolver", () => {
         expect(result).toBeNull();
     });
 
+    it("countSolutions should return 1 for a puzzle with a unique solution", () => {
+        const board = [
+            [1, 2, 3, 4, 5, 6, 7, 8, 9],
+            [4, 5, 6, 7, 8, 9, 1, 2, 3],
+            [7, 8, 9, 1, 2, 3, 4, 5, 6],
+            [2, 3, 1, 5, 6, 4, 8, 9, 7],
+            [5, 6, 4, 8, 9, 7, 2, 3, 1],
+            [8, 9, 7, 2, 3, 1, 5, 6, 4],
+            [3, 1, 2, 6, 4, 5, 9, 7, 8],
+            [6, 4, 5, 9, 7, 8, 3, 1, 2],
+            [9, 7, 8, 3, 1, 2, 6, 4, 0],
+        ];
+
+        expect(solver.countSolutions(board)).toBe(1);
+    });
+
     it("should solve a standard difficulty puzzle", () => {
         const board = [
             [4, 9, 0, 0, 0, 0, 8, 0, 0],
