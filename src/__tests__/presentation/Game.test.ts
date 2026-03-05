@@ -361,7 +361,7 @@ describe("Game", () => {
 
         await wrapper.find("[data-testid='erase-button']").trigger("click");
 
-        expect(wrapper.find("[data-testid='erase-button']").find(".bg-primary-light").exists()).toBe(true);
+        expect(wrapper.find("[data-testid='erase-button']").classes()).toContain("bg-primary");
     });
 
     it("should clear input when clicking a filled slot cell in erase mode", async () => {
@@ -637,13 +637,13 @@ describe("Game", () => {
 
         // 進入 erase mode
         await wrapper.find("[data-testid='erase-button']").trigger("click");
-        expect(wrapper.find("[data-testid='erase-button']").find(".bg-primary-light").exists()).toBe(true);
+        expect(wrapper.find("[data-testid='erase-button']").classes()).toContain("bg-primary");
 
         // 選擇數字
         await wrapper.find("[data-testid='number-4']").trigger("click");
 
         // erase mode 取消
-        expect(wrapper.find("[data-testid='erase-button']").find(".bg-primary-light").exists()).toBe(false);
+        expect(wrapper.find("[data-testid='erase-button']").classes()).not.toContain("bg-primary");
         // 數字被選取
         expect(wrapper.find("[data-testid='number-4']").classes()).toContain("bg-primary");
     });
@@ -661,7 +661,7 @@ describe("Game", () => {
         // 數字選取取消
         expect(wrapper.find("[data-testid='number-4']").classes()).not.toContain("bg-primary");
         // erase mode 啟用
-        expect(wrapper.find("[data-testid='erase-button']").find(".bg-primary-light").exists()).toBe(true);
+        expect(wrapper.find("[data-testid='erase-button']").classes()).toContain("bg-primary");
     });
 
     it("should cancel erase mode when entering note mode", async () => {
@@ -669,13 +669,13 @@ describe("Game", () => {
 
         // 進入 erase mode
         await wrapper.find("[data-testid='erase-button']").trigger("click");
-        expect(wrapper.find("[data-testid='erase-button']").find(".bg-primary-light").exists()).toBe(true);
+        expect(wrapper.find("[data-testid='erase-button']").classes()).toContain("bg-primary");
 
         // 進入 note mode
         await wrapper.find("[data-testid='note-button']").trigger("click");
 
         // erase mode 取消
-        expect(wrapper.find("[data-testid='erase-button']").find(".bg-primary-light").exists()).toBe(false);
+        expect(wrapper.find("[data-testid='erase-button']").classes()).not.toContain("bg-primary");
         // note mode 啟用
         expect(wrapper.find("[data-testid='note-button']").find(".bg-primary-light").exists()).toBe(true);
     });

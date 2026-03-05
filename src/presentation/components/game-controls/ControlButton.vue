@@ -1,6 +1,6 @@
 <template>
     <button
-        class="flex flex-col items-center gap-1 w-14 cursor-pointer"
+        class="flex items-center justify-center cursor-pointer"
         @click="$emit('click')"
     >
         <span
@@ -15,12 +15,6 @@
                 :size="22"
             />
         </span>
-        <span
-            :class="active ? 'text-primary font-semibold' : 'text-foreground-secondary font-medium'"
-            class="text-[11px]"
-        >
-            {{ label }}
-        </span>
     </button>
 </template>
 
@@ -28,7 +22,6 @@
 import type { Component } from "vue";
 
 withDefaults(defineProps<{
-    label: string;
     icon: Component;
     active?: boolean;
 }>(), { active: false });

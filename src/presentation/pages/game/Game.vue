@@ -54,61 +54,92 @@
         <div class="flex-1" />
 
         <!-- Controls -->
-        <div class="flex items-center justify-between">
+        <div class="flex justify-center gap-6">
             <ControlButton
                 :icon="Undo2"
                 data-testid="undo-button"
-                label="Undo"
                 @click="sudoku.undo()"
-            />
-            <ControlButton
-                :active="inputMode === InputMode.Erase"
-                :icon="Eraser"
-                data-testid="erase-button"
-                label="Erase"
-                @click="toggleEraseMode"
             />
             <ControlButton
                 :active="inputMode === InputMode.Note"
                 :icon="Pencil"
                 data-testid="note-button"
-                label="Notes"
                 @click="toggleNoteMode"
             />
             <ControlButton
                 :icon="Sparkles"
                 data-testid="auto-notes-button"
-                label="Auto"
                 @click="sudoku.autoNotes()"
             />
         </div>
 
         <!-- Digit Pad -->
-        <div class="flex gap-1.5">
-            <div
-                v-for="digit in 9"
-                :key="`num-${digit}`"
-                class="relative flex-1 min-w-0"
-            >
+        <div class="flex flex-col gap-3">
+            <!-- Row 1: digits 1-5 -->
+            <div class="flex justify-center gap-2">
+                <div
+                    v-for="digit in 5"
+                    :key="`num-${digit}`"
+                    class="relative"
+                >
+                    <button
+                        :class="digitButtonClasses(digit)"
+                        :data-testid="`number-${digit}`"
+                        :disabled="isDigitCompleted(digit)"
+                        class="w-14 h-14 rounded-xl flex items-center justify-center text-2xl font-semibold transition-all cursor-pointer disabled:cursor-default"
+                        @click="selectDigit(digit)"
+                    >
+                        {{ digit }}
+                    </button>
+                    <span
+                        v-if="!isDigitCompleted(digit)"
+                        :class="selectedDigit === digit
+                            ? 'bg-white text-primary'
+                            : 'bg-foreground-secondary text-white'"
+                        :data-testid="`badge-${digit}`"
+                        class="absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-semibold"
+                    >
+                        {{ getRemainingCount(digit) }}
+                    </span>
+                </div>
+            </div>
+            <!-- Row 2: digits 6-9 + Erase -->
+            <div class="flex justify-center gap-2">
+                <div
+                    v-for="digit in 4"
+                    :key="`num-${digit + 5}`"
+                    class="relative"
+                >
+                    <button
+                        :class="digitButtonClasses(digit + 5)"
+                        :data-testid="`number-${digit + 5}`"
+                        :disabled="isDigitCompleted(digit + 5)"
+                        class="w-14 h-14 rounded-xl flex items-center justify-center text-2xl font-semibold transition-all cursor-pointer disabled:cursor-default"
+                        @click="selectDigit(digit + 5)"
+                    >
+                        {{ digit + 5 }}
+                    </button>
+                    <span
+                        v-if="!isDigitCompleted(digit + 5)"
+                        :class="selectedDigit === (digit + 5)
+                            ? 'bg-white text-primary'
+                            : 'bg-foreground-secondary text-white'"
+                        :data-testid="`badge-${digit + 5}`"
+                        class="absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-semibold"
+                    >
+                        {{ getRemainingCount(digit + 5) }}
+                    </span>
+                </div>
                 <button
-                    :class="digitButtonClasses(digit)"
-                    :data-testid="`number-${digit}`"
-                    :disabled="isDigitCompleted(digit)"
-                    class="w-full h-12 rounded-xl flex items-center justify-center text-2xl font-semibold transition-all cursor-pointer disabled:cursor-default"
-                    @click="selectDigit(digit)"
+                    :class="inputMode === InputMode.Erase
+                        ? 'bg-primary text-white shadow-[0_2px_8px_#3D8A5A40]'
+                        : 'bg-card text-foreground shadow-[0_1px_4px_#1A191808]'"
+                    class="w-14 h-14 rounded-xl flex items-center justify-center transition-all cursor-pointer"
+                    data-testid="erase-button"
+                    @click="toggleEraseMode"
                 >
-                    {{ digit }}
+                    <Eraser :size="22" />
                 </button>
-                <span
-                    v-if="!isDigitCompleted(digit)"
-                    :class="selectedDigit === digit
-                        ? 'bg-white text-primary'
-                        : 'bg-foreground-secondary text-white'"
-                    :data-testid="`badge-${digit}`"
-                    class="absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-semibold"
-                >
-                    {{ getRemainingCount(digit) }}
-                </span>
             </div>
         </div>
     </div>
