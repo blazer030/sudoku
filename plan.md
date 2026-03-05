@@ -379,18 +379,18 @@
 
 ### 6.4 PWA 設定
 
-- [ ] 安裝 `vite-plugin-pwa`，設定 service worker 和 manifest
-- [ ] 設定 app icon（多尺寸）
-- [ ] 設定 offline fallback
-- [ ] 測試離線功能
+- [x] 安裝 `vite-plugin-pwa`，設定 service worker 和 manifest
+- [x] 設定 app icon（多尺寸）
+- [x] 設定 offline fallback
+- [x] 測試離線功能
 
 ### 6.5 最終整合與清理
 
-- [ ] 移除未使用的依賴和代碼
-- [ ] lint 零警告
+- [x] 移除未使用的依賴和代碼
+- [x] lint 零警告
 - [ ] 更新 README.md
-- [ ] 所有測試通過，build 無錯誤
-- [ ] production build 測試
+- [x] 所有測試通過，build 無錯誤
+- [x] production build 測試
 
 ---
 
