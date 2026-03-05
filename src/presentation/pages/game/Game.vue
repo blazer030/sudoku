@@ -1,7 +1,7 @@
 <template>
     <div
         v-if="gameStore.hasActiveGame"
-        class="flex flex-col gap-6 h-dvh py-6 px-5"
+        class="flex flex-col gap-2 h-dvh py-6 px-5"
     >
         <!-- Header -->
         <GameHeader
@@ -13,7 +13,7 @@
         <div class="flex-1" />
 
         <!-- Game Area -->
-        <div class="flex flex-col items-center gap-8">
+        <div class="flex flex-col items-center gap-6">
             <!-- Board Container -->
             <div class="bg-card rounded-2xl shadow-[0_2px_12px_#1A191808] p-2 w-full">
                 <div class="flex flex-col border-3 border-foreground/20 rounded-xl">
@@ -141,9 +141,9 @@
         <!-- Leave Game Dialog -->
         <LeaveGameDialog
             v-if="showLeave"
+            @cancel="showLeave = false"
             @save-and-leave="handleSaveAndLeave"
             @give-up-and-leave="handleGiveUpAndLeave"
-            @cancel="showLeave = false"
         />
     </div>
 </template>
