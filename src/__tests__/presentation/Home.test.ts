@@ -121,6 +121,20 @@ describe("Home", () => {
         expect(router.currentRoute.value.path).toBe(ROUTER_PATH.game);
     });
 
+    it("should create game in store before navigating on New Game click", async () => {
+        const { wrapper, router, pinia } = mountHome();
+        await router.push("/");
+        await router.isReady();
+
+        await wrapper.find("[data-testid='new-game-button']").trigger("click");
+        await flushPromises();
+
+        const gameStore = useGameStore(pinia);
+        expect(gameStore.hasActiveGame).toBe(true);
+        expect(gameStore.sudoku).not.toBeNull();
+        expect(router.currentRoute.value.path).toBe(ROUTER_PATH.game);
+    });
+
     describe("New Game Confirm Dialog", () => {
         it("should show confirm dialog when clicking New Game with saved game", async () => {
             saveGame(dummySave);

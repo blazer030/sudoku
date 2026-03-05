@@ -123,7 +123,7 @@ function handleGiveUpAndStartNew() {
 }
 
 function startGame() {
-    gameStore.setDifficulty(difficulty.value);
+    gameStore.startNewGame(difficulty.value);
     void router.push(ROUTER_PATH.game);
 }
 
