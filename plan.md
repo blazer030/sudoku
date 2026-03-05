@@ -107,7 +107,7 @@
 ### 2.7 Generator — 挖空產生謎題
 
 - [x] **測試**：`generatePuzzle(clueCount)` — 非零格子數量等於 clueCount
-- [ ] **測試**：`generatePuzzle` — 回傳的 board 只有一個合法解（暫時跳過）
+- [x] **測試**：`generatePuzzle` — 回傳的 board 只有一個合法解（暫時跳過）
 - [x] **測試**：`generatePuzzle` — 保留的格子值與完整 board 一致
 
 ### 2.8 難度等級
@@ -373,21 +373,9 @@
 - [x] **UI 測試**：Leave Game 確認彈窗（Save & Leave / Give Up & Leave / Cancel）
 - [x] **UI 測試**：New Game 確認彈窗（Give Up & Start New / Cancel）
 
-### 6.2 深色模式
+### 6.2 深色模式（暫時跳過）
 
-- [ ] 定義 CSS 變數系統（light/dark theme）
-- [ ] 將所有硬編碼顏色替換為 CSS 變數
-- [ ] **測試**：切換 dark mode 時 document 加上 `dark` class
-- [ ] **測試**：dark mode 偏好持久化到 localStorage
-- [ ] **測試**：首次載入時偵測系統偏好
-
-### 6.3 動畫與轉場
-
-- [ ] 格子選取 scale/highlight transition
-- [ ] 數字輸入淡入動畫
-- [ ] 錯誤格子抖動動畫
-- [ ] 遊戲完成慶祝動畫
-- [ ] 頁面轉場動畫
+### 6.3 動畫與轉場（暫時跳過）
 
 ### 6.4 PWA 設定
 
@@ -403,3 +391,73 @@
 - [ ] 更新 README.md
 - [ ] 所有測試通過，build 無錯誤
 - [ ] production build 測試
+
+---
+
+## Phase 7: 題目產生優化（Domain-Only）
+
+> 確保每個題目有唯一解，提升題目品質。
+> 逐格挖空驗證取代隨機挖洞，保留對唯一性至關重要的格子。
+
+### 7.1 SudokuSolver — countSolutions
+
+> `src/__tests__/domain/SudokuSolver.test.ts` + `src/domain/SudokuSolver.ts`
+
+- [x] **測試**：`countSolutions` — 對唯一解的 puzzle 回傳 1
+- [x] **測試**：`countSolutions` — 對多解的 puzzle 回傳 2（limit=2 時停止計數）
+- [x] **測試**：`countSolutions` — 對無解的 board 回傳 0
+
+### 7.2 SudokuGenerator — 唯一解保證
+
+> `src/__tests__/domain/SudokuGenerator.test.ts` + `src/domain/SudokuGenerator.ts`
+
+- [x] **測試**：`generatePuzzle` — 產生的 puzzle 只有一個合法解
+- [x] **測試**：各難度仍在 clue count 範圍內且有唯一解
+- [x] **啟用**：`Sudoku.test.ts` 中之前跳過的唯一解測試（2.7）
+
+---
+
+## Phase 8: 遊戲狀態流程重構
+
+> Home 頁負責產生/載入遊戲，Pinia 作為遊戲狀態唯一來源。
+> Game 頁只從 Pinia 讀取，無遊戲時導回首頁。
+
+### 8.1 Pinia Store — 持有活躍遊戲
+
+> `src/__tests__/stores/gameStore.test.ts` + `src/stores/gameStore.ts`
+
+- [x] **測試**：預設無活躍遊戲（`sudoku` 為 null）
+- [x] **測試**：`startNewGame(difficulty)` — 產生新遊戲並存入 store
+- [x] **測試**：`loadSavedGame(state)` — 從 GameState 還原遊戲到 store
+- [x] **測試**：`hasActiveGame` — 有遊戲時回傳 true，無時回傳 false
+
+### 8.2 Fixture Helper（結構性重構）
+
+> `src/__tests__/fixtures/knownPuzzle.ts`
+
+- [x] **重構**：新增 `createKnownSudoku()` — 回傳已載入 knownPuzzle 的 Sudoku 實例
+
+### 8.3 Home.vue — 產生/載入遊戲後再導航
+
+> `src/__tests__/presentation/Home.test.ts` + `src/presentation/pages/home/Home.vue`
+
+- [x] **測試**：New Game 點擊後，Pinia 有遊戲且導航到 /game
+- [x] **測試**：Continue 點擊後，Pinia 有已還原的遊戲且導航到 /game
+- [x] **測試**：New Game 使用所選難度
+- [x] **測試**：Give Up & Start New 建立新遊戲到 store
+
+### 8.4 Game.vue — 簡化為只讀 Pinia
+
+> `src/__tests__/presentation/Game.test.ts` + `src/presentation/pages/game/Game.vue`
+
+- [x] **測試**：store 無遊戲時導回首頁
+- [x] **測試**：從 store 的 Sudoku 實例渲染棋盤
+- [x] **測試**：計時器從 store 的 elapsedSeconds 開始
+
+### 8.5 既有測試更新（結構性重構）
+
+- [x] **重構**：Game.test.ts `mountGame()` 改為填入 store（不再 mock generator）
+- [x] **重構**：Game.test.ts `mountContinueGame()` 改為填入 store
+- [x] **重構**：移除 store 中的 `continueGame` flag
+- [x] **重構**：更新 Home.test.ts 驗證 store 狀態
+- [x] **重構**：清理未使用的 import 和 dead code
