@@ -12,6 +12,12 @@ describe("gameStore", () => {
         expect(store.difficulty).toBeNull();
     });
 
+    it("should have no active game by default", () => {
+        const store = useGameStore();
+        expect(store.sudoku).toBeNull();
+        expect(store.hasActiveGame).toBe(false);
+    });
+
     it("should update difficulty via setDifficulty", () => {
         const store = useGameStore();
         store.setDifficulty("hard");
