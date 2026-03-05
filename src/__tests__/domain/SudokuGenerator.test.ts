@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { SudokuBoard } from "@/domain/SudokuBoard";
 import { SudokuGenerator } from "@/domain/SudokuGenerator";
+import { SudokuSolver } from "@/domain/SudokuSolver";
 
 const sudokuBoard = new SudokuBoard();
 const generator = new SudokuGenerator();
+const solver = new SudokuSolver();
 
 describe("SudokuGenerator", () => {
     it("should generate different boards on multiple calls", () => {
@@ -49,6 +51,12 @@ describe("SudokuGenerator", () => {
 
         expect(filledCells).toBeGreaterThanOrEqual(22);
         expect(filledCells).toBeLessThanOrEqual(26);
+    });
+
+    it("should generate a puzzle with a unique solution", () => {
+        const { puzzle } = generator.generatePuzzle("easy");
+
+        expect(solver.countSolutions(puzzle)).toBe(1);
     });
 
     it("should generate a valid 9x9 board that satisfies all sudoku rules", () => {

@@ -14,23 +14,36 @@ export class SudokuGenerator {
     }
 
     public generatePuzzle(difficulty: Difficulty): { puzzle: number[][], answer: number[][] } {
-        const answer = this.generateFullBoard();
-        const puzzle = answer.map(row => [...row]);
-        const clueCount = this.clueCountForDifficulty(difficulty);
-        this.removeClues(puzzle, 81 - clueCount);
-        return { puzzle, answer };
+        for (;;) {
+            const answer = this.generateFullBoard();
+            const puzzle = answer.map(row => [...row]);
+            const clueCount = this.clueCountForDifficulty(difficulty);
+            if (this.removeClues(puzzle, 81 - clueCount)) {
+                return { puzzle, answer };
+            }
+        }
     }
 
-    private removeClues(board: number[][], count: number): void {
+    private removeClues(board: number[][], count: number): boolean {
         const positions = this.shuffle(
             Array.from({ length: 81 }, (_, index) => index)
         );
 
-        for (let index = 0; index < count; index++) {
-            const row = Math.floor(positions[index] / 9);
-            const column = positions[index] % 9;
+        let removed = 0;
+        for (const position of positions) {
+            if (removed >= count) break;
+            const row = Math.floor(position / 9);
+            const column = position % 9;
+            const backup = board[row][column];
             board[row][column] = 0;
+
+            if (this.solver.countSolutions(board, 2) !== 1) {
+                board[row][column] = backup;
+            } else {
+                removed++;
+            }
         }
+        return removed >= count;
     }
 
     private clueCountForDifficulty(difficulty: Difficulty): number {
