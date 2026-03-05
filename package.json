@@ -11,12 +11,8 @@
     "test": "vitest"
   },
   "dependencies": {
-    "class-variance-authority": "^0.7.0",
-    "clsx": "^2.1.0",
-    "localforage": "^1.10.0",
     "lucide-vue-next": "^0.576.0",
     "pinia": "^3.0.4",
-    "tailwind-merge": "^3.5.0",
     "vue": "^3.5.29",
     "vue-router": "^5.0.3"
   },
@@ -34,6 +30,7 @@
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.56.1",
     "vite": "^7.0.0",
+    "vite-plugin-pwa": "^1.2.0",
     "vitest": "^3.2.4",
     "vue-eslint-parser": "^10.4.0",
     "vue-tsc": "^3.2.5"
