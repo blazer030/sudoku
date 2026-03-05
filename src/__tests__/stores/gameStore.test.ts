@@ -1,6 +1,8 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { createPinia, setActivePinia } from "pinia";
 import { useGameStore } from "@/stores/gameStore";
+import type { GameState } from "@/application/GameState";
+import { knownPuzzle, knownAnswer } from "@/__tests__/fixtures/knownPuzzle";
 
 describe("gameStore", () => {
     beforeEach(() => {
@@ -24,6 +26,26 @@ describe("gameStore", () => {
 
         expect(store.sudoku).not.toBeNull();
         expect(store.difficulty).toBe("medium");
+        expect(store.hasActiveGame).toBe(true);
+    });
+
+    it("loadSavedGame should restore a game from GameState", () => {
+        const store = useGameStore();
+        const state: GameState = {
+            difficulty: "hard",
+            answer: knownAnswer.map(row => [...row]),
+            cells: knownPuzzle.map(row =>
+                row.map(value => ({ clue: value, entry: 0, notes: [] }))
+            ),
+            elapsedSeconds: 120,
+            completed: false,
+        };
+
+        store.loadSavedGame(state);
+
+        expect(store.sudoku).not.toBeNull();
+        expect(store.difficulty).toBe("hard");
+        expect(store.elapsedSeconds).toBe(120);
         expect(store.hasActiveGame).toBe(true);
     });
 

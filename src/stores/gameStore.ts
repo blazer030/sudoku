@@ -2,11 +2,13 @@ import { defineStore } from "pinia";
 import { computed, ref, shallowRef } from "vue";
 import type { Difficulty } from "@/domain/SudokuGenerator";
 import Sudoku from "@/domain/Sudoku";
+import { GameStateConverter, type GameState } from "@/application/GameState";
 
 export const useGameStore = defineStore("game", () => {
     const difficulty = ref<Difficulty | null>(null);
     const continueGame = ref(false);
     const sudoku = shallowRef<Sudoku | null>(null);
+    const elapsedSeconds = ref(0);
     const hasActiveGame = computed(() => sudoku.value !== null);
 
     function setDifficulty(value: Difficulty) {
@@ -18,7 +20,14 @@ export const useGameStore = defineStore("game", () => {
         game.generate(diff);
         sudoku.value = game;
         difficulty.value = diff;
+        elapsedSeconds.value = 0;
     }
 
-    return { difficulty, continueGame, setDifficulty, sudoku, hasActiveGame, startNewGame };
+    function loadSavedGame(state: GameState) {
+        sudoku.value = GameStateConverter.toSudoku(state);
+        difficulty.value = state.difficulty;
+        elapsedSeconds.value = state.elapsedSeconds;
+    }
+
+    return { difficulty, continueGame, setDifficulty, sudoku, hasActiveGame, startNewGame, loadSavedGame, elapsedSeconds };
 });
