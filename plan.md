@@ -388,7 +388,7 @@
 
 - [x] 移除未使用的依賴和代碼
 - [x] lint 零警告
-- [ ] 更新 README.md
+- [x] 更新 README.md
 - [x] 所有測試通過，build 無錯誤
 - [x] production build 測試
 
