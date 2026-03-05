@@ -18,6 +18,15 @@ describe("gameStore", () => {
         expect(store.hasActiveGame).toBe(false);
     });
 
+    it("startNewGame should create a new game in store", () => {
+        const store = useGameStore();
+        store.startNewGame("medium");
+
+        expect(store.sudoku).not.toBeNull();
+        expect(store.difficulty).toBe("medium");
+        expect(store.hasActiveGame).toBe(true);
+    });
+
     it("should update difficulty via setDifficulty", () => {
         const store = useGameStore();
         store.setDifficulty("hard");
