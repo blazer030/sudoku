@@ -6,7 +6,6 @@ import { GameStateConverter, type GameState } from "@/application/GameState";
 
 export const useGameStore = defineStore("game", () => {
     const difficulty = ref<Difficulty | null>(null);
-    const continueGame = ref(false);
     const sudoku = shallowRef<Sudoku | null>(null);
     const elapsedSeconds = ref(0);
     const hasActiveGame = computed(() => sudoku.value !== null);
@@ -29,5 +28,5 @@ export const useGameStore = defineStore("game", () => {
         elapsedSeconds.value = state.elapsedSeconds;
     }
 
-    return { difficulty, continueGame, setDifficulty, sudoku, hasActiveGame, startNewGame, loadSavedGame, elapsedSeconds };
+    return { difficulty, setDifficulty, sudoku, hasActiveGame, startNewGame, loadSavedGame, elapsedSeconds };
 });

@@ -136,7 +136,6 @@ function continueGame() {
     if (saved) {
         gameStore.loadSavedGame(saved);
     }
-    gameStore.continueGame = true;
     void router.push(ROUTER_PATH.game);
 }
 </script>

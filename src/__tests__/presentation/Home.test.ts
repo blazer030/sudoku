@@ -93,17 +93,15 @@ describe("Home", () => {
         expect(wrapper.find("[data-testid='continue-button']").text()).toContain("03:24");
     });
 
-    it("should navigate to game page with continueGame flag when clicking Continue", async () => {
+    it("should navigate to game page when clicking Continue", async () => {
         saveGame(dummySave);
-        const { wrapper, router, pinia } = mountHome();
+        const { wrapper, router } = mountHome();
         await router.push("/");
         await router.isReady();
 
         await wrapper.find("[data-testid='continue-button']").trigger("click");
         await flushPromises();
 
-        const gameStore = useGameStore(pinia);
-        expect(gameStore.continueGame).toBe(true);
         expect(router.currentRoute.value.path).toBe(ROUTER_PATH.game);
     });
 

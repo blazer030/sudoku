@@ -1,5 +1,8 @@
 <template>
-    <div class="flex flex-col gap-6 h-dvh py-6 px-5">
+    <div
+        v-if="gameStore.hasActiveGame"
+        class="flex flex-col gap-6 h-dvh py-6 px-5"
+    >
         <!-- Header -->
         <GameHeader
             :elapsed-seconds="elapsedSeconds"
@@ -125,7 +128,7 @@ import CellHighlight from "@/domain/CellHighlight";
 import Cell from "@/presentation/components/cell/Cell.vue";
 import { useGameStore } from "@/stores/gameStore";
 import { ROUTER_PATH } from "@/router";
-import { deleteSavedGame, loadGame, saveGame } from "@/application/GameStorage";
+import { deleteSavedGame, saveGame } from "@/application/GameStorage";
 import { GameStateConverter } from "@/application/GameState";
 import { recordGameResult } from "@/application/Statistics";
 
@@ -142,18 +145,7 @@ const sudoku = (() => {
         instance.restore(gameStore.sudoku.answer, gameStore.sudoku.puzzle);
         return instance;
     }
-    if (gameStore.continueGame) {
-        const saved = loadGame();
-        if (saved) {
-            const raw = GameStateConverter.toSudoku(saved);
-            const instance = reactive(new Sudoku());
-            instance.restore(raw.answer, raw.puzzle);
-            return instance;
-        }
-    }
-    const instance = reactive(new Sudoku());
-    instance.generate(gameStore.difficulty ?? "easy");
-    return instance;
+    return reactive(new Sudoku());
 })();
 
 enum InputMode { Normal, Note, Erase }

@@ -33,7 +33,6 @@ function mountContinueGame(savedState: GameState) {
     const router = createTestRouter();
     const gameStore = useGameStore(pinia);
     gameStore.loadSavedGame(savedState);
-    gameStore.continueGame = true;
     return mount(Game, { global: { plugins: [pinia, router] } });
 }
 
@@ -681,7 +680,7 @@ describe("Game", () => {
         expect(wrapper.find("[data-testid='note-button']").find(".bg-primary-light").exists()).toBe(true);
     });
 
-    it("should restore saved game state when continueGame is true", () => {
+    it("should restore saved game state from store", () => {
         const savedState: GameState = {
             difficulty: "medium",
             answer: knownAnswer.map(row => [...row]),
