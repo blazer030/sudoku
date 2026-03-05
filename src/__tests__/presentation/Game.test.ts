@@ -3,7 +3,7 @@ import { flushPromises, mount } from "@vue/test-utils";
 import { createPinia } from "pinia";
 import { createMemoryHistory, createRouter } from "vue-router";
 import Game from "@/presentation/pages/game/Game.vue";
-import { knownAnswer, knownPuzzle, createKnownSudoku, spyGeneratePuzzle } from "@/__tests__/fixtures/knownPuzzle";
+import { knownAnswer, knownPuzzle, createKnownSudoku } from "@/__tests__/fixtures/knownPuzzle";
 import type { GameState } from "@/application/GameState";
 import Cell from "@/presentation/components/cell/Cell.vue";
 import CellHighlight from "@/domain/CellHighlight";
@@ -22,6 +22,7 @@ function mountGame(difficulty = "easy") {
     const pinia = createPinia();
     const router = createTestRouter();
     const gameStore = useGameStore(pinia);
+    gameStore.sudoku = createKnownSudoku();
     gameStore.setDifficulty(difficulty as "easy" | "medium" | "hard");
     return mount(Game, { global: { plugins: [pinia, router] } });
 }
@@ -86,7 +87,6 @@ describe("Game", () => {
     });
 
     it("should highlight the selected cell when clicked", async () => {
-        spyGeneratePuzzle();
         const wrapper = mountGame();
 
         // (0, 2) 是 slot 格子
@@ -96,7 +96,6 @@ describe("Game", () => {
     });
 
     it("should not select a clue cell", async () => {
-        spyGeneratePuzzle();
         const wrapper = mountGame();
 
         // (0, 0) 是 clue 格子（值為 5）
@@ -106,7 +105,6 @@ describe("Game", () => {
     });
 
     it("should deselect when clicking the same cell again", async () => {
-        spyGeneratePuzzle();
         const wrapper = mountGame();
 
         await wrapper.find("[data-testid='cell-0-2']").trigger("click");
@@ -116,7 +114,6 @@ describe("Game", () => {
     });
 
     it("should display number in slot cell after clicking number button", async () => {
-        spyGeneratePuzzle();
         const wrapper = mountGame();
 
         // (0, 2) 是 slot 格子，選取後按數字 4
@@ -130,7 +127,6 @@ describe("Game", () => {
     });
 
     it("should ignore number button when no cell is selected", async () => {
-        spyGeneratePuzzle();
         const wrapper = mountGame();
 
         // 不選取格子，直接按數字
@@ -143,7 +139,6 @@ describe("Game", () => {
     });
 
     it("should ignore number button when clue cell is selected", async () => {
-        spyGeneratePuzzle();
         const wrapper = mountGame();
 
         // 選取 (0, 0) clue 格子（值為 5），按數字 4
@@ -158,7 +153,6 @@ describe("Game", () => {
     });
 
     it("should select number button when clicked without cell selected", async () => {
-        spyGeneratePuzzle();
         const wrapper = mountGame();
 
         await wrapper.find("[data-testid='number-4']").trigger("click");
@@ -167,7 +161,6 @@ describe("Game", () => {
     });
 
     it("should fill slot cell when number is selected first then cell is clicked", async () => {
-        spyGeneratePuzzle();
         const wrapper = mountGame();
 
         // 先選數字 4
@@ -182,7 +175,6 @@ describe("Game", () => {
     });
 
     it("should fill multiple slot cells consecutively in number-first mode", async () => {
-        spyGeneratePuzzle();
         const wrapper = mountGame();
 
         // 選數字 1
@@ -200,7 +192,6 @@ describe("Game", () => {
     });
 
     it("should not fill clue cell in number-first mode", async () => {
-        spyGeneratePuzzle();
         const wrapper = mountGame();
 
         // 選數字 4，點 clue 格子 (0, 0)
@@ -215,7 +206,6 @@ describe("Game", () => {
     });
 
     it("should deselect number when clicking the same number button again", async () => {
-        spyGeneratePuzzle();
         const wrapper = mountGame();
 
         await wrapper.find("[data-testid='number-4']").trigger("click");
@@ -225,7 +215,6 @@ describe("Game", () => {
     });
 
     it("should clear cell when clicking a cell that already has the selected number", async () => {
-        spyGeneratePuzzle();
         const wrapper = mountGame();
 
         // 先用格子優先模式填入 4 到 (0, 2)
@@ -246,7 +235,6 @@ describe("Game", () => {
     });
 
     it("should show game complete modal when all cells are correctly filled", async () => {
-        spyGeneratePuzzle();
         const wrapper = mountGame();
 
         for (let row = 0; row < 9; row++) {
@@ -272,7 +260,6 @@ describe("Game", () => {
     });
 
     it("should toggle note mode when clicking Note button", async () => {
-        spyGeneratePuzzle();
         const wrapper = mountGame();
 
         await wrapper.find("[data-testid='note-button']").trigger("click");
@@ -281,7 +268,6 @@ describe("Game", () => {
     });
 
     it("should add note to slot cell in note mode", async () => {
-        spyGeneratePuzzle();
         const wrapper = mountGame();
 
         // 開啟筆記模式
@@ -298,7 +284,6 @@ describe("Game", () => {
     });
 
     it("should remove note when clicking the same number again in note mode", async () => {
-        spyGeneratePuzzle();
         const wrapper = mountGame();
 
         const noteButton = wrapper.find("[data-testid='note-button']");
@@ -314,7 +299,6 @@ describe("Game", () => {
     });
 
     it("should add note instead of input in number-first mode with note mode on", async () => {
-        spyGeneratePuzzle();
         const wrapper = mountGame();
 
         // 開啟筆記模式
@@ -337,7 +321,6 @@ describe("Game", () => {
     });
 
     it("should fill candidate notes for empty cells when clicking auto-notes button", async () => {
-        spyGeneratePuzzle();
         const wrapper = mountGame();
 
         const autoNotesButton = wrapper.find("[data-testid='auto-notes-button']");
@@ -351,7 +334,6 @@ describe("Game", () => {
     });
 
     it("should auto-remove peer notes when inputting a number", async () => {
-        spyGeneratePuzzle();
         const wrapper = mountGame();
 
         // 先填入 auto-notes
@@ -376,7 +358,6 @@ describe("Game", () => {
     });
 
     it("should enter erase mode when clicking Erase button", async () => {
-        spyGeneratePuzzle();
         const wrapper = mountGame();
 
         await wrapper.find("[data-testid='erase-button']").trigger("click");
@@ -385,7 +366,6 @@ describe("Game", () => {
     });
 
     it("should clear input when clicking a filled slot cell in erase mode", async () => {
-        spyGeneratePuzzle();
         const wrapper = mountGame();
 
         // 填入 4 到 (0, 2)
@@ -406,7 +386,6 @@ describe("Game", () => {
     });
 
     it("should clear notes when clicking a noted slot cell in erase mode", async () => {
-        spyGeneratePuzzle();
         const wrapper = mountGame();
 
         // 用 auto-notes 填入筆記
@@ -427,7 +406,6 @@ describe("Game", () => {
     });
 
     it("should not affect clue cell in erase mode", async () => {
-        spyGeneratePuzzle();
         const wrapper = mountGame();
 
         const eraseButton = wrapper.find("[data-testid='erase-button']");
@@ -440,7 +418,6 @@ describe("Game", () => {
     });
 
     it("should undo the last input when clicking Undo button", async () => {
-        spyGeneratePuzzle();
         const wrapper = mountGame();
 
         // 填入 4 到 (0, 2)
@@ -457,7 +434,6 @@ describe("Game", () => {
     });
 
     it("should undo the last erase when clicking Undo button", async () => {
-        spyGeneratePuzzle();
         const wrapper = mountGame();
 
         // 填入 4 到 (0, 2)
@@ -480,7 +456,6 @@ describe("Game", () => {
     });
 
     it("should do nothing when clicking Undo with no history", async () => {
-        spyGeneratePuzzle();
         const wrapper = mountGame();
 
         const undoButton = wrapper.find("[data-testid='undo-button']");
@@ -492,7 +467,6 @@ describe("Game", () => {
     });
 
     it("should show cursor-pointer on slot cells", () => {
-        spyGeneratePuzzle();
         const wrapper = mountGame();
 
         // (0, 2) 是 slot 格子
@@ -501,7 +475,6 @@ describe("Game", () => {
     });
 
     it("should not show cursor-pointer on clue cells", () => {
-        spyGeneratePuzzle();
         const wrapper = mountGame();
 
         // (0, 0) 是 clue 格子
@@ -510,7 +483,6 @@ describe("Game", () => {
     });
 
     it("should render slot cells as empty", () => {
-        spyGeneratePuzzle();
         const wrapper = mountGame();
 
         for (let row = 0; row < 9; row++) {
@@ -525,7 +497,6 @@ describe("Game", () => {
 
     it("should increment timer every second after game starts", async () => {
         vi.useFakeTimers();
-        spyGeneratePuzzle();
         const wrapper = mountGame();
 
         const timer = wrapper.find("[data-testid='timer']");
@@ -538,7 +509,6 @@ describe("Game", () => {
 
     it("should pause timer when leave dialog is shown", async () => {
         vi.useFakeTimers();
-        spyGeneratePuzzle();
         const wrapper = mountGame();
 
         await vi.advanceTimersByTimeAsync(3000);
@@ -559,7 +529,6 @@ describe("Game", () => {
 
     it("should stop timer when game is completed", async () => {
         vi.useFakeTimers();
-        spyGeneratePuzzle();
         const wrapper = mountGame();
 
         await vi.advanceTimersByTimeAsync(5000);
@@ -587,7 +556,6 @@ describe("Game", () => {
     });
 
     it("should highlight cells in same row, column, and box when a cell is selected", async () => {
-        spyGeneratePuzzle();
         const wrapper = mountGame();
 
         // 選取 (0, 2) slot 格子
@@ -606,7 +574,6 @@ describe("Game", () => {
     });
 
     it("should highlight cells with same digit as SameDigit when a digit button is selected", async () => {
-        spyGeneratePuzzle();
         const wrapper = mountGame();
 
         // 選擇數字 5
@@ -625,7 +592,6 @@ describe("Game", () => {
     });
 
     it("should update remaining count badge after inputting a number", async () => {
-        spyGeneratePuzzle();
         const wrapper = mountGame();
 
         // 數字 8 有 5 個 clue → 初始剩餘 = 4
@@ -640,7 +606,6 @@ describe("Game", () => {
     });
 
     it("should disable number button when all 9 instances are correctly filled", async () => {
-        spyGeneratePuzzle();
         const wrapper = mountGame();
 
         // 數字 8 有 5 個 clue，再填入 4 個正確位置湊滿 9 次
@@ -655,7 +620,6 @@ describe("Game", () => {
     });
 
     it("should deselect number when all 9 instances are filled in number-first mode", async () => {
-        spyGeneratePuzzle();
         const wrapper = mountGame();
 
         // 數字 8 有 5 個 clue，再填入 4 個正確位置湊滿 9 次
@@ -670,7 +634,6 @@ describe("Game", () => {
     });
 
     it("should cancel erase mode when selecting a number", async () => {
-        spyGeneratePuzzle();
         const wrapper = mountGame();
 
         // 進入 erase mode
@@ -687,7 +650,6 @@ describe("Game", () => {
     });
 
     it("should deselect number when entering erase mode", async () => {
-        spyGeneratePuzzle();
         const wrapper = mountGame();
 
         // 先選擇數字
@@ -704,7 +666,6 @@ describe("Game", () => {
     });
 
     it("should cancel erase mode when entering note mode", async () => {
-        spyGeneratePuzzle();
         const wrapper = mountGame();
 
         // 進入 erase mode
@@ -718,21 +679,6 @@ describe("Game", () => {
         expect(wrapper.find("[data-testid='erase-button']").find(".bg-primary-light").exists()).toBe(false);
         // note mode 啟用
         expect(wrapper.find("[data-testid='note-button']").find(".bg-primary-light").exists()).toBe(true);
-    });
-
-    it("should automatically initialize a new puzzle on mount", () => {
-        const spy = spyGeneratePuzzle();
-        mountGame();
-
-        expect(spy).toHaveBeenCalledOnce();
-    });
-
-    it("should generate puzzle with difficulty from store", () => {
-        const spy = spyGeneratePuzzle();
-
-        mountGame("hard");
-
-        expect(spy).toHaveBeenCalledWith("hard");
     });
 
     it("should restore saved game state when continueGame is true", () => {
@@ -787,7 +733,6 @@ describe("Game", () => {
     });
 
     it("should record game result when game is completed", async () => {
-        spyGeneratePuzzle();
         const wrapper = mountGame();
 
         for (let row = 0; row < 9; row++) {
@@ -809,7 +754,6 @@ describe("Game", () => {
     });
 
     it("should render 9x9 grid with clue cells showing their numbers", () => {
-        spyGeneratePuzzle();
         const wrapper = mountGame();
 
         const cells = wrapper.findAll("[data-testid^='cell-']");
@@ -827,7 +771,6 @@ describe("Game", () => {
 
     describe("Leave Game Dialog", () => {
         it("should show leave game dialog when clicking Back button", async () => {
-            spyGeneratePuzzle();
             const wrapper = mountGame();
 
             await wrapper.find("[data-testid='back-button']").trigger("click");
@@ -837,10 +780,10 @@ describe("Game", () => {
         });
 
         it("should save game and navigate home when clicking Save & Leave", async () => {
-            spyGeneratePuzzle();
             const pinia = createPinia();
             const router = createTestRouter();
             const gameStore = useGameStore(pinia);
+            gameStore.sudoku = createKnownSudoku();
             gameStore.setDifficulty("easy");
             const wrapper = mount(Game, { global: { plugins: [pinia, router] } });
 
@@ -859,10 +802,10 @@ describe("Game", () => {
         });
 
         it("should record gave up and delete save when clicking Give Up & Leave", async () => {
-            spyGeneratePuzzle();
             const pinia = createPinia();
             const router = createTestRouter();
             const gameStore = useGameStore(pinia);
+            gameStore.sudoku = createKnownSudoku();
             gameStore.setDifficulty("easy");
             const wrapper = mount(Game, { global: { plugins: [pinia, router] } });
 
@@ -880,7 +823,6 @@ describe("Game", () => {
         });
 
         it("should close dialog when clicking Cancel", async () => {
-            spyGeneratePuzzle();
             const wrapper = mountGame();
 
             await wrapper.find("[data-testid='back-button']").trigger("click");
