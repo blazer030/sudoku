@@ -1,7 +1,7 @@
 <template>
-    <div class="flex flex-col gap-6 h-dvh py-6 px-5 overflow-y-auto">
+    <div class="flex flex-col gap-6 h-dvh pb-6 px-5 overflow-y-auto">
         <!-- Header -->
-        <div class="flex items-center justify-between">
+        <div class="flex items-center justify-between sticky top-0 bg-background pt-6 pb-2 z-10">
             <button
                 class="flex items-center gap-2 cursor-pointer"
                 data-testid="stats-back-button"
