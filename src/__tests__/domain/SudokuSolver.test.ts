@@ -40,6 +40,22 @@ describe("SudokuSolver", () => {
         expect(solver.countSolutions(board)).toBe(1);
     });
 
+    it("countSolutions should return 2 for a puzzle with multiple solutions (limit=2)", () => {
+        const board = [
+            [4, 9, 0, 0, 0, 0, 8, 0, 0],
+            [2, 0, 0, 0, 9, 0, 0, 0, 4],
+            [0, 0, 3, 0, 0, 2, 0, 6, 0],
+            [0, 0, 5, 3, 0, 0, 0, 0, 2],
+            [0, 0, 0, 5, 0, 4, 0, 0, 0],
+            [3, 0, 4, 0, 0, 9, 5, 0, 0],
+            [5, 0, 0, 0, 7, 0, 9, 0, 8],
+            [0, 0, 9, 0, 0, 8, 0, 0, 5],
+            [8, 0, 0, 0, 0, 0, 0, 3, 1],
+        ];
+
+        expect(solver.countSolutions(board, 2)).toBe(2);
+    });
+
     it("should solve a standard difficulty puzzle", () => {
         const board = [
             [4, 9, 0, 0, 0, 0, 8, 0, 0],
