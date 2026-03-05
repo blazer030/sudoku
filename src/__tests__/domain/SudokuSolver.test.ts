@@ -56,6 +56,22 @@ describe("SudokuSolver", () => {
         expect(solver.countSolutions(board, 2)).toBe(2);
     });
 
+    it("countSolutions should return 0 for an unsolvable board", () => {
+        const board = [
+            [1, 2, 3, 4, 5, 6, 7, 8, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 9],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 9],
+        ];
+
+        expect(solver.countSolutions(board)).toBe(0);
+    });
+
     it("should solve a standard difficulty puzzle", () => {
         const board = [
             [4, 9, 0, 0, 0, 0, 8, 0, 0],
