@@ -132,8 +132,11 @@ function goToStatistics() {
 }
 
 function continueGame() {
+    const saved = loadGame();
+    if (saved) {
+        gameStore.loadSavedGame(saved);
+    }
     gameStore.continueGame = true;
-    gameStore.setDifficulty(difficulty.value);
     void router.push(ROUTER_PATH.game);
 }
 </script>

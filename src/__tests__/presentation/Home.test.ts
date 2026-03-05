@@ -121,6 +121,21 @@ describe("Home", () => {
         expect(router.currentRoute.value.path).toBe(ROUTER_PATH.game);
     });
 
+    it("should load saved game into store before navigating on Continue click", async () => {
+        saveGame(dummySave);
+        const { wrapper, router, pinia } = mountHome();
+        await router.push("/");
+        await router.isReady();
+
+        await wrapper.find("[data-testid='continue-button']").trigger("click");
+        await flushPromises();
+
+        const gameStore = useGameStore(pinia);
+        expect(gameStore.hasActiveGame).toBe(true);
+        expect(gameStore.elapsedSeconds).toBe(204);
+        expect(router.currentRoute.value.path).toBe(ROUTER_PATH.game);
+    });
+
     it("should create game in store before navigating on New Game click", async () => {
         const { wrapper, router, pinia } = mountHome();
         await router.push("/");
