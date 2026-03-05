@@ -132,23 +132,28 @@ import { recordGameResult } from "@/application/Statistics";
 const router = useRouter();
 const gameStore = useGameStore();
 
-if (!gameStore.difficulty) {
+if (!gameStore.hasActiveGame) {
     void router.replace(ROUTER_PATH.home);
 }
 
-const { sudoku, restoredSeconds } = (() => {
+const sudoku = (() => {
+    if (gameStore.sudoku) {
+        const instance = reactive(new Sudoku());
+        instance.restore(gameStore.sudoku.answer, gameStore.sudoku.puzzle);
+        return instance;
+    }
     if (gameStore.continueGame) {
         const saved = loadGame();
         if (saved) {
             const raw = GameStateConverter.toSudoku(saved);
             const instance = reactive(new Sudoku());
             instance.restore(raw.answer, raw.puzzle);
-            return { sudoku: instance, restoredSeconds: saved.elapsedSeconds };
+            return instance;
         }
     }
     const instance = reactive(new Sudoku());
     instance.generate(gameStore.difficulty ?? "easy");
-    return { sudoku: instance, restoredSeconds: 0 };
+    return instance;
 })();
 
 enum InputMode { Normal, Note, Erase }
@@ -158,7 +163,7 @@ const selectedDigit = ref<number | null>(null);
 const completed = ref(false);
 const showLeave = ref(false);
 const inputMode = ref(InputMode.Normal);
-const elapsedSeconds = ref(restoredSeconds);
+const elapsedSeconds = ref(gameStore.elapsedSeconds);
 
 const timerInterval = setInterval(() => {
     if (!completed.value && !showLeave.value) {

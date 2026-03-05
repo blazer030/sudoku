@@ -3,7 +3,7 @@ import { flushPromises, mount } from "@vue/test-utils";
 import { createPinia } from "pinia";
 import { createMemoryHistory, createRouter } from "vue-router";
 import Game from "@/presentation/pages/game/Game.vue";
-import { knownAnswer, knownPuzzle, spyGeneratePuzzle } from "@/__tests__/fixtures/knownPuzzle";
+import { knownAnswer, knownPuzzle, createKnownSudoku, spyGeneratePuzzle } from "@/__tests__/fixtures/knownPuzzle";
 import type { GameState } from "@/application/GameState";
 import Cell from "@/presentation/components/cell/Cell.vue";
 import CellHighlight from "@/domain/CellHighlight";
@@ -31,7 +31,7 @@ function mountContinueGame(savedState: GameState) {
     const pinia = createPinia();
     const router = createTestRouter();
     const gameStore = useGameStore(pinia);
-    gameStore.setDifficulty(savedState.difficulty);
+    gameStore.loadSavedGame(savedState);
     gameStore.continueGame = true;
     return mount(Game, { global: { plugins: [pinia, router] } });
 }
@@ -43,6 +43,48 @@ afterEach(() => {
 });
 
 describe("Game", () => {
+    it("should redirect to home when store has no active game", async () => {
+        const pinia = createPinia();
+        const router = createTestRouter();
+        await router.push("/game");
+        await router.isReady();
+        mount(Game, { global: { plugins: [pinia, router] } });
+        await flushPromises();
+
+        expect(router.currentRoute.value.path).toBe("/");
+    });
+
+    it("should render board from store sudoku instance", () => {
+        const pinia = createPinia();
+        const router = createTestRouter();
+        const gameStore = useGameStore(pinia);
+        gameStore.sudoku = createKnownSudoku();
+        gameStore.setDifficulty("easy");
+        const wrapper = mount(Game, { global: { plugins: [pinia, router] } });
+
+        // clue cells should show their numbers
+        expect(wrapper.find("[data-testid='cell-0-0']").text()).toBe("5");
+        expect(wrapper.find("[data-testid='cell-0-1']").text()).toBe("3");
+        // slot cells should be empty
+        expect(wrapper.find("[data-testid='cell-0-2']").text()).toBe("");
+    });
+
+    it("should start timer from store elapsedSeconds", async () => {
+        vi.useFakeTimers();
+        const pinia = createPinia();
+        const router = createTestRouter();
+        const gameStore = useGameStore(pinia);
+        gameStore.sudoku = createKnownSudoku();
+        gameStore.setDifficulty("easy");
+        gameStore.elapsedSeconds = 60;
+        const wrapper = mount(Game, { global: { plugins: [pinia, router] } });
+
+        expect(wrapper.find("[data-testid='timer']").text()).toBe("01:00");
+
+        await vi.advanceTimersByTimeAsync(3000);
+        expect(wrapper.find("[data-testid='timer']").text()).toBe("01:03");
+    });
+
     it("should highlight the selected cell when clicked", async () => {
         spyGeneratePuzzle();
         const wrapper = mountGame();
