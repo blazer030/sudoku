@@ -59,6 +59,17 @@ describe("SudokuGenerator", () => {
         expect(solver.countSolutions(puzzle)).toBe(1);
     });
 
+    it.each(["easy", "medium", "hard"] as const)("should generate a %s puzzle with unique solution and valid clue count", (difficulty) => {
+        const { puzzle } = generator.generatePuzzle(difficulty);
+        const clueCount = puzzle.flat().filter(cell => cell !== 0).length;
+        const ranges = { easy: [36, 45], medium: [27, 35], hard: [22, 26] };
+        const [min, max] = ranges[difficulty];
+
+        expect(clueCount).toBeGreaterThanOrEqual(min);
+        expect(clueCount).toBeLessThanOrEqual(max);
+        expect(solver.countSolutions(puzzle)).toBe(1);
+    });
+
     it("should generate a valid 9x9 board that satisfies all sudoku rules", () => {
         const board = generator.generateFullBoard();
 
