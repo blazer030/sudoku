@@ -163,7 +163,7 @@ describe("Home", () => {
 
         it("should record gave up and start new game when clicking Give Up & Start New", async () => {
             saveGame(dummySave);
-            const { wrapper, router } = mountHome();
+            const { wrapper, router, pinia } = mountHome();
             await router.push("/");
             await router.isReady();
 
@@ -171,6 +171,8 @@ describe("Home", () => {
             await wrapper.find("[data-testid='give-up-and-start-new-button']").trigger("click");
             await flushPromises();
 
+            const gameStore = useGameStore(pinia);
+            expect(gameStore.hasActiveGame).toBe(true);
             const history = getGameHistory();
             expect(history).toHaveLength(1);
             expect(history[0].completed).toBe(false);
