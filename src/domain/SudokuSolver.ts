@@ -14,7 +14,7 @@ export class SudokuSolver {
         return null;
     }
 
-    public countSolutions(board: number[][], limit: number = 2): number {
+    public countSolutions(board: number[][], limit = 2): number {
         const puzzle = board.map(row => [...row]);
         return this.countSolutionsRecursive(puzzle, limit);
     }
