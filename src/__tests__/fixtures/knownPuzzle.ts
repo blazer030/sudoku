@@ -1,5 +1,7 @@
 import { vi } from "vitest";
 import { SudokuGenerator } from "@/domain/SudokuGenerator";
+import Sudoku from "@/domain/Sudoku";
+import PuzzleCell from "@/domain/PuzzleCell";
 
 export const knownAnswer = [
     [5, 3, 4, 6, 7, 8, 9, 1, 2],
@@ -24,6 +26,14 @@ export const knownPuzzle = [
     [0, 0, 0, 4, 1, 9, 0, 0, 5],
     [0, 0, 0, 0, 8, 0, 0, 7, 9],
 ];
+
+export function createKnownSudoku(): Sudoku {
+    const answer = knownAnswer.map(row => [...row]);
+    const puzzle = knownPuzzle.map(row =>
+        row.map(value => new PuzzleCell(value))
+    );
+    return Sudoku.restoreSave(answer, puzzle);
+}
 
 export function spyGeneratePuzzle() {
     return vi.spyOn(SudokuGenerator.prototype, "generatePuzzle").mockReturnValue({
