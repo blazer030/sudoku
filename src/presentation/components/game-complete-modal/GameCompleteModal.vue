@@ -61,7 +61,6 @@ import { Trophy, Home } from "lucide-vue-next";
 import { useRouter } from "vue-router";
 import { formatTime } from "@/utils/formatTime";
 import { DifficultyLabels, type Difficulty } from "@/domain/SudokuGenerator";
-import { ROUTER_PATH } from "@/router";
 import { computed } from "vue";
 
 const props = defineProps<{
@@ -74,6 +73,6 @@ const router = useRouter();
 const difficultyLabel = computed(() => DifficultyLabels[props.difficulty]);
 
 const goHome = () => {
-    void router.replace(ROUTER_PATH.home);
+    void router.back();
 };
 </script>

@@ -220,7 +220,7 @@ function handleSaveAndLeave() {
     });
     saveGame(state);
     leavingConfirmed.value = true;
-    void router.replace(ROUTER_PATH.home);
+    void router.back();
 }
 
 function handleGiveUpAndLeave() {
@@ -231,7 +231,7 @@ function handleGiveUpAndLeave() {
     });
     deleteSavedGame();
     leavingConfirmed.value = true;
-    void router.replace(ROUTER_PATH.home);
+    void router.back();
 }
 
 function clickCell(row: number, column: number) {

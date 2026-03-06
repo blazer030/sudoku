@@ -124,7 +124,7 @@ function handleGiveUpAndStartNew() {
 
 function startGame() {
     gameStore.startNewGame(difficulty.value);
-    void router.replace(ROUTER_PATH.game);
+    void router.push(ROUTER_PATH.game);
 }
 
 function goToStatistics() {
@@ -136,6 +136,6 @@ function continueGame() {
     if (saved) {
         gameStore.loadSavedGame(saved);
     }
-    void router.replace(ROUTER_PATH.game);
+    void router.push(ROUTER_PATH.game);
 }
 </script>
