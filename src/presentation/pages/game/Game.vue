@@ -151,7 +151,7 @@
 <script lang="ts" setup>
 import { computed, onBeforeUnmount, reactive, ref } from "vue";
 
-import { useRouter } from "vue-router";
+import { onBeforeRouteLeave, useRouter } from "vue-router";
 import { Eraser, Pencil, Sparkles, Undo2 } from "lucide-vue-next";
 import GameHeader from "@/presentation/components/game-header/GameHeader.vue";
 import GameCompleteModal from "@/presentation/components/game-complete-modal/GameCompleteModal.vue";
@@ -188,6 +188,7 @@ const selectedCell = ref<{ row: number; column: number } | null>(null);
 const selectedDigit = ref<number | null>(null);
 const completed = ref(false);
 const showLeave = ref(false);
+const leavingConfirmed = ref(false);
 const inputMode = ref(InputMode.Normal);
 const elapsedSeconds = ref(gameStore.elapsedSeconds);
 
@@ -201,6 +202,12 @@ onBeforeUnmount(() => {
     clearInterval(timerInterval);
 });
 
+onBeforeRouteLeave(() => {
+    if (completed.value || leavingConfirmed.value) return true;
+    showLeave.value = true;
+    return false;
+});
+
 function showLeaveDialog() {
     showLeave.value = true;
 }
@@ -212,7 +219,8 @@ function handleSaveAndLeave() {
         completed: completed.value,
     });
     saveGame(state);
-    void router.push(ROUTER_PATH.home);
+    leavingConfirmed.value = true;
+    void router.replace(ROUTER_PATH.home);
 }
 
 function handleGiveUpAndLeave() {
@@ -222,7 +230,8 @@ function handleGiveUpAndLeave() {
         completed: false,
     });
     deleteSavedGame();
-    void router.push(ROUTER_PATH.home);
+    leavingConfirmed.value = true;
+    void router.replace(ROUTER_PATH.home);
 }
 
 function clickCell(row: number, column: number) {
@@ -254,6 +263,7 @@ function inputToCell(row: number, column: number, value: number) {
     sudoku.fill(row, column, value);
     if (sudoku.isCompleted()) {
         completed.value = true;
+        deleteSavedGame();
         recordGameResult({
             difficulty: gameStore.difficulty ?? "easy",
             elapsedSeconds: elapsedSeconds.value,

@@ -752,6 +752,39 @@ describe("Game", () => {
         expect(history[0].difficulty).toBe("easy");
     });
 
+    it("should delete saved game when game is completed", async () => {
+        const savedState: GameState = {
+            difficulty: "easy",
+            answer: knownAnswer.map(row => [...row]),
+            cells: knownPuzzle.map(row =>
+                row.map(puzzleValue => ({
+                    clue: puzzleValue,
+                    entry: 0,
+                    notes: [],
+                }))
+            ),
+            elapsedSeconds: 10,
+            completed: false,
+        };
+        const wrapper = mountContinueGame(savedState);
+        expect(hasSavedGame()).toBe(true);
+
+        for (let row = 0; row < 9; row++) {
+            for (let column = 0; column < 9; column++) {
+                if (knownPuzzle[row][column] === 0) {
+                    const value = knownAnswer[row][column];
+                    const numberButton = wrapper.find(`[data-testid='number-${value}']`);
+                    await numberButton.trigger("click");
+                    await wrapper.find(`[data-testid='cell-${row}-${column}']`).trigger("click");
+                    await numberButton.trigger("click");
+                }
+            }
+        }
+
+        expect(wrapper.find("[data-testid='game-complete-modal']").exists()).toBe(true);
+        expect(hasSavedGame()).toBe(false);
+    });
+
     it("should render 9x9 grid with clue cells showing their numbers", () => {
         const wrapper = mountGame();
 
@@ -766,6 +799,70 @@ describe("Game", () => {
                 }
             }
         }
+    });
+
+    describe("Route Leave Guard", () => {
+        function createRouterViewApp() {
+            const pinia = createPinia();
+            const router = createRouter({
+                history: createMemoryHistory(),
+                routes: [
+                    { path: "/game", component: Game },
+                    { path: "/", component: { template: "<div>Home</div>" } },
+                ],
+            });
+            const gameStore = useGameStore(pinia);
+            gameStore.sudoku = createKnownSudoku();
+            gameStore.setDifficulty("easy");
+            return { pinia, router, gameStore };
+        }
+
+        async function mountWithRouterView() {
+            const { pinia, router, gameStore } = createRouterViewApp();
+            await router.push("/game");
+            await router.isReady();
+            const wrapper = mount(
+                { template: "<router-view />" },
+                { global: { plugins: [pinia, router] } },
+            );
+            await flushPromises();
+            return { wrapper, router, gameStore };
+        }
+
+        it("should block route leave and show LeaveGameDialog when game is in progress", async () => {
+            const { wrapper, router } = await mountWithRouterView();
+
+            await router.push("/");
+            await flushPromises();
+
+            // 導航應被阻止
+            expect(router.currentRoute.value.path).toBe("/game");
+            // LeaveGameDialog 應顯示
+            expect(wrapper.find("[data-testid='leave-game-dialog']").exists()).toBe(true);
+        });
+
+        it("should allow route leave when game is completed", async () => {
+            const { wrapper, router } = await mountWithRouterView();
+
+            // 填入所有正確答案
+            for (let row = 0; row < 9; row++) {
+                for (let column = 0; column < 9; column++) {
+                    if (knownPuzzle[row][column] === 0) {
+                        const value = knownAnswer[row][column];
+                        const numberButton = wrapper.find(`[data-testid='number-${value}']`);
+                        await numberButton.trigger("click");
+                        await wrapper.find(`[data-testid='cell-${row}-${column}']`).trigger("click");
+                        await numberButton.trigger("click");
+                    }
+                }
+            }
+            expect(wrapper.find("[data-testid='game-complete-modal']").exists()).toBe(true);
+
+            await router.push("/");
+            await flushPromises();
+
+            expect(router.currentRoute.value.path).toBe("/");
+        });
     });
 
     describe("Leave Game Dialog", () => {

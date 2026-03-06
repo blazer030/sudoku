@@ -74,6 +74,6 @@ const router = useRouter();
 const difficultyLabel = computed(() => DifficultyLabels[props.difficulty]);
 
 const goHome = () => {
-    void router.push(ROUTER_PATH.home);
+    void router.replace(ROUTER_PATH.home);
 };
 </script>
