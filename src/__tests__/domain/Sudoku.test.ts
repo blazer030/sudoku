@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import Sudoku from "@/domain/Sudoku";
-import { knownAnswer, knownPuzzle, spyGeneratePuzzle } from "@/__tests__/fixtures/knownPuzzle";
+import { createKnownSudoku, knownAnswer, knownPuzzle, spyGeneratePuzzle } from "@/__tests__/fixtures/knownPuzzle";
 
 afterEach(() => {
     vi.restoreAllMocks();
@@ -281,5 +281,68 @@ describe("Sudoku", () => {
         sudoku.fill(0, 2, 1);
 
         expect(sudoku.isCompleted()).toBe(false);
+    });
+
+    describe('checkAllConflicts', () => {
+        it('無衝突時回傳空陣列', () => {
+            const sudoku = createKnownSudoku();
+
+            // 填入正確答案，不會有衝突
+            sudoku.fill(0, 2, 4);
+            sudoku.fill(0, 3, 6);
+
+            const conflicts = sudoku.checkAllConflicts();
+
+            expect(conflicts).toEqual([]);
+        });
+
+        it('行內重複時回傳衝突格座標', () => {
+            const sudoku = createKnownSudoku();
+
+            // (0,0) clue=5，在 (0,2) 填入 5 → 行衝突
+            sudoku.fill(0, 2, 5);
+
+            const conflicts = sudoku.checkAllConflicts();
+
+            expect(conflicts).toContainEqual({ row: 0, column: 0 });
+            expect(conflicts).toContainEqual({ row: 0, column: 2 });
+        });
+
+        it('列和宮重複也回傳', () => {
+            const sudoku = createKnownSudoku();
+
+            // (2,1) clue=9，在 (1,1) 填入 9 → 列衝突 + (1,4) clue=9 行衝突
+            sudoku.fill(1, 1, 9);
+
+            const conflicts = sudoku.checkAllConflicts();
+
+            expect(conflicts).toContainEqual({ row: 1, column: 1 });
+            expect(conflicts).toContainEqual({ row: 2, column: 1 });
+            expect(conflicts).toContainEqual({ row: 1, column: 4 });
+        });
+    });
+
+    describe('checkErrors', () => {
+        it('所有正確時回傳空陣列', () => {
+            const sudoku = createKnownSudoku();
+
+            sudoku.fill(0, 2, 4); // 正確答案
+            sudoku.fill(0, 3, 6); // 正確答案
+
+            const errors = sudoku.checkErrors();
+
+            expect(errors).toEqual([]);
+        });
+
+        it('填錯的格回傳其座標', () => {
+            const sudoku = createKnownSudoku();
+
+            sudoku.fill(0, 2, 5); // 錯誤，正確是 4
+            sudoku.fill(0, 3, 6); // 正確
+
+            const errors = sudoku.checkErrors();
+
+            expect(errors).toEqual([{ row: 0, column: 2 }]);
+        });
     });
 });

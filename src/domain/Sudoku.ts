@@ -118,6 +118,50 @@ class Sudoku {
         }
     }
 
+    public checkAllConflicts(): Conflict[] {
+        const board = this.getCurrentBoard();
+        const conflicts: Conflict[] = [];
+        const seen = new Set<string>();
+
+        for (let row = 0; row < 9; row++) {
+            for (let col = 0; col < 9; col++) {
+                const cell = this._puzzle[row][col];
+                if (cell.isClue || !cell.hasEntry) continue;
+                const value = cell.entry;
+                const cellConflicts = this.conflictDetector.findConflicts(board, row, col, value);
+                for (const c of cellConflicts) {
+                    const key = `${c.row},${c.column}`;
+                    if (!seen.has(key)) {
+                        seen.add(key);
+                        conflicts.push(c);
+                    }
+                }
+                if (cellConflicts.length > 0) {
+                    const selfKey = `${row},${col}`;
+                    if (!seen.has(selfKey)) {
+                        seen.add(selfKey);
+                        conflicts.push({ row, column: col });
+                    }
+                }
+            }
+        }
+        return conflicts;
+    }
+
+    public checkErrors(): Conflict[] {
+        const errors: Conflict[] = [];
+        for (let row = 0; row < 9; row++) {
+            for (let col = 0; col < 9; col++) {
+                const cell = this._puzzle[row][col];
+                if (cell.isClue || !cell.hasEntry) continue;
+                if (cell.entry !== this._answer[row][col]) {
+                    errors.push({ row, column: col });
+                }
+            }
+        }
+        return errors;
+    }
+
     public findConflicts(row: number, column: number, value: number): Conflict[] {
         return this.conflictDetector.findConflicts(this.getCurrentBoard(), row, column, value);
     }
