@@ -819,6 +819,118 @@ describe("Game", () => {
 
             expect(wrapper.find("[data-testid='hint-auto-notes']").exists()).toBe(true);
         });
+
+        it("should consume 1 hint when using Auto Notes", async () => {
+            const wrapper = mountGame();
+
+            await wrapper.find("[data-testid='hint-button']").trigger("click");
+            await wrapper.find("[data-testid='hint-auto-notes']").trigger("click");
+
+            // 候選數字應該填入
+            expect(wrapper.find("[data-testid='cell-0-2']").text()).toContain("4");
+
+            // 再開 hint menu 檢查用量
+            await wrapper.find("[data-testid='hint-button']").trigger("click");
+            const dots = wrapper.findAll("[data-testid='hint-light']");
+            // recordedUsed=0（第一次免費），所以 3 個都亮
+            expect(dots.filter(d => d.classes().some(c => c.includes("opacity")))).toHaveLength(0);
+        });
+
+        it("should show error style on conflict cells after Check Conflicts", async () => {
+            const wrapper = mountGame();
+
+            // 填入衝突數字: (0,0) clue=5，在 (0,2) 填 5
+            await wrapper.find("[data-testid='number-5']").trigger("click");
+            await wrapper.find("[data-testid='cell-0-2']").trigger("click");
+            await wrapper.find("[data-testid='number-5']").trigger("click"); // deselect
+
+            await wrapper.find("[data-testid='hint-button']").trigger("click");
+            await wrapper.find("[data-testid='hint-check-conflicts']").trigger("click");
+
+            expect(wrapper.find("[data-testid='cell-0-2']").classes()).toContain("bg-error-light");
+        });
+
+        it("should show error style on wrong cells after Check Errors", async () => {
+            const wrapper = mountGame();
+
+            // 填錯: (0,2) 答案是 4，填 5
+            await wrapper.find("[data-testid='number-5']").trigger("click");
+            await wrapper.find("[data-testid='cell-0-2']").trigger("click");
+            await wrapper.find("[data-testid='number-5']").trigger("click"); // deselect
+
+            await wrapper.find("[data-testid='hint-button']").trigger("click");
+            await wrapper.find("[data-testid='hint-check-errors']").trigger("click");
+
+            expect(wrapper.find("[data-testid='cell-0-2']").classes()).toContain("bg-error-light");
+        });
+
+        it("should clear error marks on next interaction", async () => {
+            const wrapper = mountGame();
+
+            // 填錯並 check errors
+            await wrapper.find("[data-testid='number-5']").trigger("click");
+            await wrapper.find("[data-testid='cell-0-2']").trigger("click");
+            await wrapper.find("[data-testid='number-5']").trigger("click");
+
+            await wrapper.find("[data-testid='hint-button']").trigger("click");
+            await wrapper.find("[data-testid='hint-check-errors']").trigger("click");
+            expect(wrapper.find("[data-testid='cell-0-2']").classes()).toContain("bg-error-light");
+
+            // 點擊格子，error 應清除
+            await wrapper.find("[data-testid='cell-0-3']").trigger("click");
+
+            expect(wrapper.find("[data-testid='cell-0-2']").classes()).not.toContain("bg-error-light");
+        });
+
+        it("should reveal a random cell with correct answer", async () => {
+            const wrapper = mountGame();
+
+            await wrapper.find("[data-testid='hint-button']").trigger("click");
+            await wrapper.find("[data-testid='hint-reveal-cell']").trigger("click");
+
+            // 至少有一個 slot 被正確填入
+            let filledCorrectly = false;
+            for (let r = 0; r < 9; r++) {
+                for (let c = 0; c < 9; c++) {
+                    if (knownPuzzle[r][c] === 0) {
+                        const cellText = wrapper.find(`[data-testid='cell-${r}-${c}']`).text();
+                        if (cellText === String(knownAnswer[r][c])) {
+                            filledCorrectly = true;
+                            break;
+                        }
+                    }
+                }
+                if (filledCorrectly) break;
+            }
+            expect(filledCorrectly).toBe(true);
+        });
+
+        it("should check completion after Reveal Cell", async () => {
+            const wrapper = mountGame();
+
+            // 填入除一格外所有正確答案
+            const emptyCells: [number, number][] = [];
+            for (let r = 0; r < 9; r++) {
+                for (let c = 0; c < 9; c++) {
+                    if (knownPuzzle[r][c] === 0) emptyCells.push([r, c]);
+                }
+            }
+            // 留最後一個空格
+            for (let i = 0; i < emptyCells.length - 1; i++) {
+                const [r, c] = emptyCells[i];
+                const value = knownAnswer[r][c];
+                const numBtn = wrapper.find(`[data-testid='number-${value}']`);
+                await numBtn.trigger("click");
+                await wrapper.find(`[data-testid='cell-${r}-${c}']`).trigger("click");
+                await numBtn.trigger("click");
+            }
+
+            // Reveal Cell 填入最後一格
+            await wrapper.find("[data-testid='hint-button']").trigger("click");
+            await wrapper.find("[data-testid='hint-reveal-cell']").trigger("click");
+
+            expect(wrapper.find("[data-testid='game-complete-modal']").exists()).toBe(true);
+        });
     });
 
     describe("Route Leave Guard", () => {
