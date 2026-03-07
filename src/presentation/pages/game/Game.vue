@@ -137,6 +137,7 @@
             v-if="completed"
             :difficulty="gameStore.difficulty ?? 'easy'"
             :elapsed-seconds="elapsedSeconds"
+            :hints-used="sudoku.hintTracker.recordedUsed"
         />
 
         <!-- Hint Menu Popup -->

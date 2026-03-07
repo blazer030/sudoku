@@ -37,6 +37,17 @@
                         Difficulty
                     </span>
                 </div>
+                <div class="flex flex-col items-center gap-1">
+                    <span
+                        class="text-[32px] font-bold text-foreground-secondary tracking-tighter"
+                        data-testid="hints-count"
+                    >
+                        {{ hintsUsed }}
+                    </span>
+                    <span class="text-[13px] font-medium text-foreground-secondary">
+                        Hints
+                    </span>
+                </div>
             </div>
 
             <button
@@ -66,6 +77,7 @@ import { computed } from "vue";
 const props = defineProps<{
     elapsedSeconds: number;
     difficulty: Difficulty;
+    hintsUsed: number;
 }>();
 
 const router = useRouter();
