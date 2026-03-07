@@ -130,7 +130,6 @@
                             {{ game.completed ? formatTime(game.elapsedSeconds) : "Gave up" }}
                         </span>
                         <span
-                            v-if="game.completed"
                             class="flex items-center gap-[3px] text-[11px] font-medium text-foreground-muted"
                             data-testid="hints-used"
                         >
