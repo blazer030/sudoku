@@ -345,4 +345,53 @@ describe("Sudoku", () => {
             expect(errors).toEqual([{ row: 0, column: 2 }]);
         });
     });
+
+    describe('revealRandomCell', () => {
+        it('揭露空白格，填入正確答案', () => {
+            const sudoku = createKnownSudoku();
+
+            const result = sudoku.revealRandomCell();
+
+            expect(result).not.toBeNull();
+            const { row, column } = result!;
+            expect(sudoku.puzzle[row][column].entry).toBe(knownAnswer[row][column]);
+        });
+
+        it('揭露填錯的格，修正為正確答案', () => {
+            const sudoku = createKnownSudoku();
+
+            // 把所有空格都填錯
+            for (let r = 0; r < 9; r++) {
+                for (let c = 0; c < 9; c++) {
+                    if (knownPuzzle[r][c] === 0) {
+                        const wrong = (knownAnswer[r][c] % 9) + 1;
+                        sudoku.fill(r, c, wrong);
+                    }
+                }
+            }
+
+            const result = sudoku.revealRandomCell();
+
+            expect(result).not.toBeNull();
+            const { row, column } = result!;
+            expect(sudoku.puzzle[row][column].entry).toBe(knownAnswer[row][column]);
+        });
+
+        it('全部正確或 clue 時回傳 null', () => {
+            const sudoku = createKnownSudoku();
+
+            // 填入所有正確答案
+            for (let r = 0; r < 9; r++) {
+                for (let c = 0; c < 9; c++) {
+                    if (knownPuzzle[r][c] === 0) {
+                        sudoku.fill(r, c, knownAnswer[r][c]);
+                    }
+                }
+            }
+
+            const result = sudoku.revealRandomCell();
+
+            expect(result).toBeNull();
+        });
+    });
 });

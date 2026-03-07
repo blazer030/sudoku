@@ -148,6 +148,24 @@ class Sudoku {
         return conflicts;
     }
 
+    public revealRandomCell(): Conflict | null {
+        const candidates: Conflict[] = [];
+        for (let row = 0; row < 9; row++) {
+            for (let col = 0; col < 9; col++) {
+                const cell = this._puzzle[row][col];
+                if (cell.isClue) continue;
+                if (!cell.hasEntry || cell.entry !== this._answer[row][col]) {
+                    candidates.push({ row, column: col });
+                }
+            }
+        }
+        if (candidates.length === 0) return null;
+        const target = candidates[Math.floor(Math.random() * candidates.length)];
+        this.snapshot();
+        this._puzzle[target.row][target.column].entry = this._answer[target.row][target.column];
+        return target;
+    }
+
     public checkErrors(): Conflict[] {
         const errors: Conflict[] = [];
         for (let row = 0; row < 9; row++) {
