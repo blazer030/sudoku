@@ -76,6 +76,27 @@ describe("Statistics", () => {
         expect(router.currentRoute.value.path).toBe("/");
     });
 
+    it("should display hintsUsed in recent games", () => {
+        recordGameResult({ difficulty: "easy", elapsedSeconds: 120, completed: true, hintsUsed: 2 });
+
+        const { wrapper } = mountStatistics();
+
+        const games = wrapper.findAll("[data-testid='recent-game']");
+        expect(games[0].find("[data-testid='hints-used']").text()).toContain("2");
+    });
+
+    it("should display 0 hints for old records without hintsUsed", () => {
+        // 模擬舊資料
+        localStorage.setItem("sudoku-statistics", JSON.stringify([
+            { difficulty: "easy", elapsedSeconds: 100, completed: true, date: "2024-01-01" },
+        ]));
+
+        const { wrapper } = mountStatistics();
+
+        const games = wrapper.findAll("[data-testid='recent-game']");
+        expect(games[0].find("[data-testid='hints-used']").text()).toContain("0");
+    });
+
     it("should show empty state when no games played", () => {
         const { wrapper } = mountStatistics();
 

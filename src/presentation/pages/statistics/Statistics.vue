@@ -122,12 +122,22 @@
                             <span class="text-xs text-foreground-muted">{{ formatDate(game.date) }}</span>
                         </div>
                     </div>
-                    <span
-                        :class="game.completed ? 'text-foreground' : 'text-accent'"
-                        class="text-sm font-semibold"
-                    >
-                        {{ game.completed ? formatTime(game.elapsedSeconds) : "Gave up" }}
-                    </span>
+                    <div class="flex items-center gap-3">
+                        <span
+                            v-if="game.completed"
+                            class="flex items-center gap-1 text-xs text-foreground-muted"
+                            data-testid="hints-used"
+                        >
+                            <Lightbulb :size="14" />
+                            {{ game.hintsUsed }}
+                        </span>
+                        <span
+                            :class="game.completed ? 'text-foreground' : 'text-accent'"
+                            class="text-sm font-semibold"
+                        >
+                            {{ game.completed ? formatTime(game.elapsedSeconds) : "Gave up" }}
+                        </span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -137,7 +147,7 @@
 <script lang="ts" setup>
 import { computed } from "vue";
 import { useRouter } from "vue-router";
-import { ChevronLeft, Trophy, X } from "lucide-vue-next";
+import { ChevronLeft, Lightbulb, Trophy, X } from "lucide-vue-next";
 import { ROUTER_PATH } from "@/router";
 import { getStatistics } from "@/application/Statistics";
 import { formatTime } from "@/utils/formatTime";
