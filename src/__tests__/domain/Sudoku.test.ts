@@ -394,4 +394,12 @@ describe("Sudoku", () => {
             expect(result).toBeNull();
         });
     });
+
+    it('Sudoku 實例包含 hintTracker', () => {
+        const sudoku = createKnownSudoku();
+
+        expect(sudoku.hintTracker).toBeDefined();
+        expect(sudoku.hintTracker.totalUsed).toBe(0);
+        expect(sudoku.hintTracker.canUseHint).toBe(true);
+    });
 });

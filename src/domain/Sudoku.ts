@@ -1,4 +1,5 @@
 import { Conflict, ConflictDetector } from "@/domain/ConflictDetector";
+import { HintTracker } from "@/domain/HintTracker";
 import PuzzleCell from "@/domain/PuzzleCell";
 import { SudokuBoard } from "@/domain/SudokuBoard";
 import { Difficulty, SudokuGenerator } from "@/domain/SudokuGenerator";
@@ -17,6 +18,11 @@ class Sudoku {
     private generator = new SudokuGenerator();
     private conflictDetector = new ConflictDetector();
     private board = new SudokuBoard();
+    private _hintTracker = new HintTracker();
+
+    public get hintTracker(): HintTracker {
+        return this._hintTracker;
+    }
 
     public get answer(): number[][] {
         return this._answer;
