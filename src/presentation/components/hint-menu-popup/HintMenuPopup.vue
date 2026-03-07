@@ -5,58 +5,93 @@
             class="absolute inset-0 bg-black/30"
             @click="$emit('close')"
         />
-        <div class="absolute bottom-24 left-1/2 -translate-x-1/2 bg-card rounded-2xl shadow-lg p-4 w-64 z-10">
-            <div class="flex justify-center gap-2 mb-3">
-                <div
-                    v-for="i in 3"
-                    :key="i"
-                    data-testid="hint-light"
-                    :class="[
-                        'w-2.5 h-2.5 rounded-full',
-                        i <= recordedUsed ? 'bg-accent opacity-30' : 'bg-accent',
-                    ]"
+        <div class="absolute bottom-24 left-1/2 -translate-x-1/2 bg-card rounded-[20px] shadow-[0_-4px_24px_#00000020] w-[220px] z-10 flex flex-col gap-1 py-4 px-3">
+            <!-- Header: Title + Hint Lights -->
+            <div class="flex items-center justify-between px-3 pb-1">
+                <span class="text-foreground text-sm font-bold">Hints</span>
+                <div class="flex items-center gap-1">
+                    <div
+                        v-for="i in 3"
+                        :key="i"
+                        data-testid="hint-light"
+                        :class="[
+                            'w-2 h-2 rounded-full',
+                            i <= remaining ? 'bg-primary' : 'border-[1.5px] border-border',
+                        ]"
+                    />
+                </div>
+            </div>
+
+            <!-- Subtitle -->
+            <span class="text-foreground-muted text-[11px] px-3 mb-1">First use is free and won't be recorded.</span>
+
+            <!-- Auto Notes -->
+            <button
+                data-testid="hint-auto-notes"
+                :disabled="!canUseHint"
+                class="hint-option"
+                @click="$emit('autoNotes')"
+            >
+                <Sparkles
+                    :size="20"
+                    class="text-foreground shrink-0"
                 />
-            </div>
-            <div class="flex flex-col gap-1">
-                <button
-                    data-testid="hint-auto-notes"
-                    :disabled="!canUseHint"
-                    class="hint-option"
-                    @click="$emit('autoNotes')"
-                >
-                    Auto Notes
-                </button>
-                <button
-                    data-testid="hint-check-conflicts"
-                    :disabled="!canUseHint"
-                    class="hint-option"
-                    @click="$emit('checkConflicts')"
-                >
-                    Check Conflicts
-                </button>
-                <button
-                    data-testid="hint-check-errors"
-                    :disabled="!canUseHint"
-                    class="hint-option"
-                    @click="$emit('checkErrors')"
-                >
-                    Check Errors
-                </button>
-                <button
-                    data-testid="hint-reveal-cell"
-                    :disabled="!canUseHint"
-                    class="hint-option"
-                    @click="$emit('revealCell')"
-                >
-                    Reveal Cell
-                </button>
-            </div>
+                <span>Auto Notes</span>
+            </button>
+
+            <!-- Check Conflicts -->
+            <button
+                data-testid="hint-check-conflicts"
+                :disabled="!canUseHint"
+                class="hint-option"
+                @click="$emit('checkConflicts')"
+            >
+                <ScanSearch
+                    :size="20"
+                    class="text-foreground shrink-0"
+                />
+                <span>Check Conflicts</span>
+            </button>
+
+            <!-- Check Errors -->
+            <button
+                data-testid="hint-check-errors"
+                :disabled="!canUseHint"
+                class="hint-option"
+                @click="$emit('checkErrors')"
+            >
+                <CircleAlert
+                    :size="20"
+                    class="text-foreground shrink-0"
+                />
+                <span>Check Errors</span>
+            </button>
+
+            <!-- Divider -->
+            <div class="h-px bg-border mx-3" />
+
+            <!-- Reveal Cell -->
+            <button
+                data-testid="hint-reveal-cell"
+                :disabled="!canUseHint"
+                class="hint-option"
+                @click="$emit('revealCell')"
+            >
+                <Eye
+                    :size="20"
+                    class="text-primary shrink-0"
+                />
+                <span class="text-primary font-semibold">Reveal Cell</span>
+            </button>
         </div>
     </div>
 </template>
 
 <script lang="ts" setup>
-defineProps<{
+import { computed } from "vue";
+import { CircleAlert, Eye, ScanSearch, Sparkles } from "lucide-vue-next";
+
+const props = defineProps<{
     recordedUsed: number;
     canUseHint: boolean;
 }>();
@@ -68,12 +103,14 @@ defineEmits<{
     checkErrors: [];
     revealCell: [];
 }>();
+
+const remaining = computed(() => 3 - props.recordedUsed);
 </script>
 
 <style scoped>
 @reference "../../../style/index.css";
 
 .hint-option {
-    @apply w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-foreground hover:bg-highlight disabled:opacity-40 disabled:cursor-not-allowed;
+    @apply w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[15px] font-medium text-foreground cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed;
 }
 </style>

@@ -950,8 +950,8 @@ describe("Game", () => {
 
             const dots = wrapper.findAll("[data-testid='hint-light']");
             expect(dots).toHaveLength(3);
-            const dimmed = dots.filter(d => d.classes().some(c => c.includes("opacity")));
-            expect(dimmed).toHaveLength(2);
+            const outlined = dots.filter(d => d.classes().some(c => c.includes("border")));
+            expect(outlined).toHaveLength(2);
         });
 
         it("should check completion after Reveal Cell", async () => {

@@ -23,9 +23,11 @@ describe("HintMenuPopup", () => {
         const dots = wrapper.findAll("[data-testid='hint-light']");
         expect(dots).toHaveLength(3);
 
-        // 2 個已用（暗），1 個剩餘（亮）
-        const usedDots = dots.filter(d => d.classes().some(c => c.includes("opacity")));
-        expect(usedDots).toHaveLength(2);
+        // 1 個剩餘（填色），2 個已用（邊框）
+        const filledDots = dots.filter(d => d.classes().some(c => c.includes("bg-primary")));
+        expect(filledDots).toHaveLength(1);
+        const outlinedDots = dots.filter(d => d.classes().some(c => c.includes("border")));
+        expect(outlinedDots).toHaveLength(2);
     });
 
     it("點擊遮罩觸發 close 事件", async () => {
