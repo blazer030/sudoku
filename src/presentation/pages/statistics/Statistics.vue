@@ -104,38 +104,38 @@
                     <div class="flex items-center gap-3">
                         <div
                             :class="game.completed
-                                ? 'text-primary'
-                                : 'text-accent'"
-                            class="w-8 h-8 rounded-lg flex items-center justify-center"
+                                ? 'bg-primary-light text-primary'
+                                : 'bg-accent/10 text-accent'"
+                            class="w-9 h-9 rounded-[10px] flex items-center justify-center"
                         >
                             <Trophy
                                 v-if="game.completed"
-                                :size="20"
+                                :size="18"
                             />
                             <X
                                 v-else
-                                :size="20"
+                                :size="18"
                             />
                         </div>
-                        <div class="flex flex-col">
+                        <div class="flex flex-col gap-0.5">
                             <span class="text-sm font-semibold text-foreground">{{ difficultyLabel(game.difficulty) }}</span>
-                            <span class="text-xs text-foreground-muted">{{ formatDate(game.date) }}</span>
+                            <span class="text-[11px] text-foreground-muted">{{ formatDate(game.date) }}</span>
                         </div>
                     </div>
-                    <div class="flex items-center gap-3">
+                    <div class="flex flex-col items-end gap-0.5">
                         <span
-                            v-if="game.completed"
-                            class="flex items-center gap-1 text-xs text-foreground-muted"
-                            data-testid="hints-used"
-                        >
-                            <Lightbulb :size="14" />
-                            {{ game.hintsUsed }}
-                        </span>
-                        <span
-                            :class="game.completed ? 'text-foreground' : 'text-accent'"
-                            class="text-sm font-semibold"
+                            :class="game.completed ? 'text-primary' : 'text-accent'"
+                            class="text-base font-semibold"
                         >
                             {{ game.completed ? formatTime(game.elapsedSeconds) : "Gave up" }}
+                        </span>
+                        <span
+                            v-if="game.completed"
+                            class="flex items-center gap-[3px] text-[11px] font-medium text-foreground-muted"
+                            data-testid="hints-used"
+                        >
+                            <Lightbulb :size="11" />
+                            {{ game.hintsUsed }}
                         </span>
                     </div>
                 </div>
