@@ -7,12 +7,14 @@ export interface GameResult {
     elapsedSeconds: number;
     completed: boolean;
     date: string;
+    hintsUsed: number;
 }
 
 interface GameResultInput {
     difficulty: Difficulty;
     elapsedSeconds: number;
     completed: boolean;
+    hintsUsed?: number;
 }
 
 export interface DifficultyStats {
@@ -39,7 +41,11 @@ export interface Statistics {
 function loadHistory(): GameResult[] {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored === null) return [];
-    return JSON.parse(stored) as GameResult[];
+    const raw = JSON.parse(stored) as GameResult[];
+    return raw.map(game => ({
+        ...game,
+        hintsUsed: game.hintsUsed ?? 0,
+    }));
 }
 
 function saveHistory(history: GameResult[]): void {
@@ -50,6 +56,7 @@ export function recordGameResult(input: GameResultInput): void {
     const history = loadHistory();
     history.push({
         ...input,
+        hintsUsed: input.hintsUsed ?? 0,
         date: new Date().toISOString(),
     });
     saveHistory(history);

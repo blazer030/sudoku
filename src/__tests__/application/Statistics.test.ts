@@ -96,4 +96,39 @@ describe("Statistics", () => {
             expect(stats.recentGames[2].difficulty).toBe("easy");
         });
     });
+
+    describe("hintsUsed tracking", () => {
+        it("recordGameResult should accept hintsUsed field", () => {
+            recordGameResult({
+                difficulty: "easy",
+                elapsedSeconds: 120,
+                completed: true,
+                hintsUsed: 2,
+            });
+
+            const history = getGameHistory();
+            expect(history[0].hintsUsed).toBe(2);
+        });
+
+        it("recentGames should include hintsUsed", () => {
+            recordGameResult({ difficulty: "easy", elapsedSeconds: 120, completed: true, hintsUsed: 1 });
+            recordGameResult({ difficulty: "medium", elapsedSeconds: 200, completed: true, hintsUsed: 3 });
+
+            const stats = getStatistics();
+
+            expect(stats.recentGames[0].hintsUsed).toBe(3);
+            expect(stats.recentGames[1].hintsUsed).toBe(1);
+        });
+
+        it("old data without hintsUsed should default to 0", () => {
+            // 模擬舊資料（沒有 hintsUsed）
+            localStorage.setItem("sudoku-statistics", JSON.stringify([
+                { difficulty: "easy", elapsedSeconds: 100, completed: true, date: "2024-01-01" },
+            ]));
+
+            const stats = getStatistics();
+
+            expect(stats.recentGames[0].hintsUsed).toBe(0);
+        });
+    });
 });
