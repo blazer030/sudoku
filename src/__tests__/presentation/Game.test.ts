@@ -319,11 +319,11 @@ describe("Game", () => {
         expect(noteContainer.exists()).toBe(true);
     });
 
-    it("should fill candidate notes for empty cells when clicking auto-notes button", async () => {
+    it("should fill candidate notes for empty cells when using auto-notes hint", async () => {
         const wrapper = mountGame();
 
-        const autoNotesButton = wrapper.find("[data-testid='auto-notes-button']");
-        await autoNotesButton.trigger("click");
+        await wrapper.find("[data-testid='hint-button']").trigger("click");
+        await wrapper.find("[data-testid='hint-auto-notes']").trigger("click");
 
         // (0, 2) 是空格，候選 [1, 2, 4]
         const cell = wrapper.find("[data-testid='cell-0-2']");
@@ -335,9 +335,9 @@ describe("Game", () => {
     it("should auto-remove peer notes when inputting a number", async () => {
         const wrapper = mountGame();
 
-        // 先填入 auto-notes
-        const autoNotesButton = wrapper.find("[data-testid='auto-notes-button']");
-        await autoNotesButton.trigger("click");
+        // 先填入 auto-notes via hint
+        await wrapper.find("[data-testid='hint-button']").trigger("click");
+        await wrapper.find("[data-testid='hint-auto-notes']").trigger("click");
 
         // (0, 5) 和 (0, 6) 同行，候選包含 4
         const cell05 = wrapper.find("[data-testid='cell-0-5']");
@@ -387,9 +387,9 @@ describe("Game", () => {
     it("should clear notes when clicking a noted slot cell in erase mode", async () => {
         const wrapper = mountGame();
 
-        // 用 auto-notes 填入筆記
-        const autoNotesButton = wrapper.find("[data-testid='auto-notes-button']");
-        await autoNotesButton.trigger("click");
+        // 用 auto-notes hint 填入筆記
+        await wrapper.find("[data-testid='hint-button']").trigger("click");
+        await wrapper.find("[data-testid='hint-auto-notes']").trigger("click");
 
         const cell = wrapper.find("[data-testid='cell-0-2']");
         expect(cell.text()).toContain("1");
@@ -693,6 +693,7 @@ describe("Game", () => {
             ),
             elapsedSeconds: 45,
             completed: false,
+            hintsUsed: 0,
         };
 
         const wrapper = mountContinueGame(savedState);
@@ -716,6 +717,7 @@ describe("Game", () => {
             ),
             elapsedSeconds: 10,
             completed: false,
+            hintsUsed: 0,
         };
 
         const wrapper = mountContinueGame(savedState);
@@ -765,6 +767,7 @@ describe("Game", () => {
             ),
             elapsedSeconds: 10,
             completed: false,
+            hintsUsed: 0,
         };
         const wrapper = mountContinueGame(savedState);
         expect(hasSavedGame()).toBe(true);
@@ -799,6 +802,23 @@ describe("Game", () => {
                 }
             }
         }
+    });
+
+    describe("Hint System", () => {
+        it("should show Hint button in controls (replacing Auto-Notes)", () => {
+            const wrapper = mountGame();
+
+            expect(wrapper.find("[data-testid='hint-button']").exists()).toBe(true);
+            expect(wrapper.find("[data-testid='auto-notes-button']").exists()).toBe(false);
+        });
+
+        it("should show HintMenuPopup when clicking Hint button", async () => {
+            const wrapper = mountGame();
+
+            await wrapper.find("[data-testid='hint-button']").trigger("click");
+
+            expect(wrapper.find("[data-testid='hint-auto-notes']").exists()).toBe(true);
+        });
     });
 
     describe("Route Leave Guard", () => {

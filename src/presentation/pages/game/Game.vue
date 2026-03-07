@@ -30,6 +30,7 @@
                             :highlight="highlightGrid[rowIndex][columnIndex]"
                             :puzzle-cell="puzzleCell.raw()"
                             :row="rowIndex"
+                            :error="isError(rowIndex, columnIndex)"
                             :selected="isSelected(rowIndex, columnIndex)"
                             @click="clickCell(rowIndex, columnIndex)"
                         />
@@ -51,9 +52,9 @@
                     @click="toggleNoteMode"
                 />
                 <ControlButton
-                    :icon="Sparkles"
-                    data-testid="auto-notes-button"
-                    @click="sudoku.autoNotes()"
+                    :icon="Lightbulb"
+                    data-testid="hint-button"
+                    @click="showHintMenu = true"
                 />
             </div>
 
@@ -138,6 +139,18 @@
             :elapsed-seconds="elapsedSeconds"
         />
 
+        <!-- Hint Menu Popup -->
+        <HintMenuPopup
+            v-if="showHintMenu"
+            :can-use-hint="sudoku.hintTracker.canUseHint"
+            :recorded-used="sudoku.hintTracker.recordedUsed"
+            @close="showHintMenu = false"
+            @auto-notes="handleAutoNotes"
+            @check-conflicts="handleCheckConflicts"
+            @check-errors="handleCheckErrors"
+            @reveal-cell="handleRevealCell"
+        />
+
         <!-- Leave Game Dialog -->
         <LeaveGameDialog
             v-if="showLeave"
@@ -152,11 +165,12 @@
 import { computed, onBeforeUnmount, reactive, ref } from "vue";
 
 import { onBeforeRouteLeave, useRouter } from "vue-router";
-import { Eraser, Pencil, Sparkles, Undo2 } from "lucide-vue-next";
+import { Eraser, Lightbulb, Pencil, Undo2 } from "lucide-vue-next";
 import GameHeader from "@/presentation/components/game-header/GameHeader.vue";
 import GameCompleteModal from "@/presentation/components/game-complete-modal/GameCompleteModal.vue";
 import LeaveGameDialog from "@/presentation/components/leave-game-dialog/LeaveGameDialog.vue";
 import ControlButton from "@/presentation/components/game-controls/ControlButton.vue";
+import HintMenuPopup from "@/presentation/components/hint-menu-popup/HintMenuPopup.vue";
 import Sudoku from "@/domain/Sudoku";
 import CellHighlight from "@/domain/CellHighlight";
 import Cell from "@/presentation/components/cell/Cell.vue";
@@ -190,6 +204,8 @@ const completed = ref(false);
 const showLeave = ref(false);
 const leavingConfirmed = ref(false);
 const inputMode = ref(InputMode.Normal);
+const showHintMenu = ref(false);
+const errorCells = ref<{ row: number; column: number }[]>([]);
 const elapsedSeconds = ref(gameStore.elapsedSeconds);
 
 const timerInterval = setInterval(() => {
@@ -228,6 +244,7 @@ function handleGiveUpAndLeave() {
         difficulty: gameStore.difficulty ?? "easy",
         elapsedSeconds: elapsedSeconds.value,
         completed: false,
+        hintsUsed: sudoku.hintTracker.recordedUsed,
     });
     deleteSavedGame();
     leavingConfirmed.value = true;
@@ -235,6 +252,7 @@ function handleGiveUpAndLeave() {
 }
 
 function clickCell(row: number, column: number) {
+    clearErrors();
     if (inputMode.value === InputMode.Erase) {
         eraseCell(row, column);
         return;
@@ -268,6 +286,7 @@ function inputToCell(row: number, column: number, value: number) {
             difficulty: gameStore.difficulty ?? "easy",
             elapsedSeconds: elapsedSeconds.value,
             completed: true,
+            hintsUsed: sudoku.hintTracker.recordedUsed,
         });
     }
     if (isDigitCompleted(value)) selectedDigit.value = null;
@@ -360,6 +379,7 @@ function toggleEraseMode() {
 }
 
 function selectDigit(digit: number) {
+    clearErrors();
     if (inputMode.value === InputMode.Erase) inputMode.value = InputMode.Normal;
     if (selectedCell.value) {
         const { row, column } = selectedCell.value;
@@ -371,6 +391,50 @@ function selectDigit(digit: number) {
         return;
     }
     selectedDigit.value = selectedDigit.value === digit ? null : digit;
+}
+
+function isError(row: number, column: number): boolean {
+    return errorCells.value.some(c => c.row === row && c.column === column);
+}
+
+function clearErrors() {
+    errorCells.value = [];
+}
+
+function handleAutoNotes() {
+    sudoku.autoNotes();
+    sudoku.hintTracker.useHint();
+    showHintMenu.value = false;
+}
+
+function handleCheckConflicts() {
+    const conflicts = sudoku.checkAllConflicts();
+    errorCells.value = conflicts;
+    sudoku.hintTracker.useHint();
+    showHintMenu.value = false;
+}
+
+function handleCheckErrors() {
+    const errors = sudoku.checkErrors();
+    errorCells.value = errors;
+    sudoku.hintTracker.useHint();
+    showHintMenu.value = false;
+}
+
+function handleRevealCell() {
+    sudoku.revealRandomCell();
+    sudoku.hintTracker.useHint();
+    showHintMenu.value = false;
+    if (sudoku.isCompleted()) {
+        completed.value = true;
+        deleteSavedGame();
+        recordGameResult({
+            difficulty: gameStore.difficulty ?? "easy",
+            elapsedSeconds: elapsedSeconds.value,
+            completed: true,
+            hintsUsed: sudoku.hintTracker.recordedUsed,
+        });
+    }
 }
 
 function digitButtonClasses(digit: number): string {
