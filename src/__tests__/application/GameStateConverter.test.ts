@@ -49,6 +49,22 @@ describe("GameStateConverter", () => {
             expect(state.cells[0][2]).toEqual({ clue: 0, entry: 4, notes: [] });
             expect(state.cells[0][3]).toEqual({ clue: 0, entry: 0, notes: [1, 6] });
         });
+
+        it("should include hintsUsed from hintTracker", () => {
+            spyGeneratePuzzle();
+            const sudoku = new Sudoku();
+            sudoku.generate("easy");
+            sudoku.hintTracker.useHint();
+            sudoku.hintTracker.useHint();
+
+            const state = GameStateConverter.fromSudoku(sudoku, {
+                difficulty: "easy",
+                elapsedSeconds: 0,
+                completed: false,
+            });
+
+            expect(state.hintsUsed).toBe(2);
+        });
     });
 
     describe("toSudoku", () => {
@@ -79,6 +95,28 @@ describe("GameStateConverter", () => {
             // 可繼續操作
             expect(sudoku.check(0, 2, 4)).toBe(true);
             expect(sudoku.isCompleted()).toBe(false);
+        });
+
+        it("should restore hintTracker totalUsed from hintsUsed", () => {
+            const state = {
+                difficulty: "easy" as const,
+                answer: knownAnswer.map(row => [...row]),
+                cells: knownPuzzle.map(row =>
+                    row.map(puzzleValue => ({
+                        clue: puzzleValue,
+                        entry: 0,
+                        notes: [] as number[],
+                    }))
+                ),
+                elapsedSeconds: 60,
+                completed: false,
+                hintsUsed: 3,
+            };
+
+            const sudoku = GameStateConverter.toSudoku(state);
+
+            expect(sudoku.hintTracker.totalUsed).toBe(3);
+            expect(sudoku.hintTracker.recordedUsed).toBe(2);
         });
     });
 });

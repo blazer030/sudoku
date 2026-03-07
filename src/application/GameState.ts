@@ -14,6 +14,7 @@ export interface GameState {
     cells: CellState[][];
     elapsedSeconds: number;
     completed: boolean;
+    hintsUsed: number;
 }
 
 interface GameMeta {
@@ -32,7 +33,11 @@ export const GameStateConverter = {
                 return puzzleCell;
             })
         );
-        return Sudoku.restoreSave(answer, puzzle);
+        const sudoku = Sudoku.restoreSave(answer, puzzle);
+        if (state.hintsUsed) {
+            sudoku.hintTracker.restore(state.hintsUsed);
+        }
+        return sudoku;
     },
 
     fromSudoku(sudoku: Sudoku, meta: GameMeta): GameState {
@@ -46,6 +51,7 @@ export const GameStateConverter = {
                     notes: [...cell.notes],
                 }))
             ),
+            hintsUsed: sudoku.hintTracker.totalUsed,
         };
     },
 };
