@@ -474,84 +474,84 @@
 
 > `src/__tests__/domain/HintTracker.test.ts` + `src/domain/HintTracker.ts`
 
-- [ ] **測試**：初始狀態 — totalUsed=0, recordedUsed=0, remainingHints=4, canUseHint=true
-- [ ] **測試**：使用第 1 次（免費）— totalUsed=1, recordedUsed=0
-- [ ] **測試**：使用第 2 次 — totalUsed=2, recordedUsed=1
-- [ ] **測試**：使用第 4 次後 — canUseHint=false, recordedUsed=3
-- [ ] **測試**：超過上限時 useHint 不增加計數
-- [ ] **測試**：restore(totalUsed) 可恢復狀態
+- [x] **測試**：初始狀態 — totalUsed=0, recordedUsed=0, remainingHints=4, canUseHint=true
+- [x] **測試**：使用第 1 次（免費）— totalUsed=1, recordedUsed=0
+- [x] **測試**：使用第 2 次 — totalUsed=2, recordedUsed=1
+- [x] **測試**：使用第 4 次後 — canUseHint=false, recordedUsed=3
+- [x] **測試**：超過上限時 useHint 不增加計數
+- [x] **測試**：restore(totalUsed) 可恢復狀態
 
 ### 9.2 Sudoku — 提示方法
 
 > `src/__tests__/domain/Sudoku.test.ts`（擴充）+ `src/domain/Sudoku.ts`
 
-- [ ] **測試**：`checkAllConflicts()` — 無衝突時回傳空陣列
-- [ ] **測試**：`checkAllConflicts()` — 行內重複時回傳衝突格座標
-- [ ] **測試**：`checkAllConflicts()` — 列/宮重複也回傳
-- [ ] **測試**：`checkErrors()` — 所有正確時回傳空陣列
-- [ ] **測試**：`checkErrors()` — 填錯的格回傳其座標
-- [ ] **測試**：`revealRandomCell()` — 揭露空白格，填入正確答案
-- [ ] **測試**：`revealRandomCell()` — 揭露填錯的格，修正為正確答案
-- [ ] **測試**：`revealRandomCell()` — 全部正確或 clue 時回傳 null
-- [ ] **測試**：Sudoku 實例包含 hintTracker
+- [x] **測試**：`checkAllConflicts()` — 無衝突時回傳空陣列
+- [x] **測試**：`checkAllConflicts()` — 行內重複時回傳衝突格座標
+- [x] **測試**：`checkAllConflicts()` — 列/宮重複也回傳
+- [x] **測試**：`checkErrors()` — 所有正確時回傳空陣列
+- [x] **測試**：`checkErrors()` — 填錯的格回傳其座標
+- [x] **測試**：`revealRandomCell()` — 揭露空白格，填入正確答案
+- [x] **測試**：`revealRandomCell()` — 揭露填錯的格，修正為正確答案
+- [x] **測試**：`revealRandomCell()` — 全部正確或 clue 時回傳 null
+- [x] **測試**：Sudoku 實例包含 hintTracker
 
 ### 9.3 GameState — 序列化 hintsUsed
 
 > `src/__tests__/application/GameState.test.ts`（擴充）+ `src/application/GameState.ts`
 
-- [ ] **測試**：`fromSudoku` 序列化包含 hintsUsed 欄位
-- [ ] **測試**：`toSudoku` 還原 hintTracker 的 totalUsed
+- [x] **測試**：`fromSudoku` 序列化包含 hintsUsed 欄位
+- [x] **測試**：`toSudoku` 還原 hintTracker 的 totalUsed
 
 ### 9.4 Statistics — 記錄提示次數
 
 > `src/__tests__/application/Statistics.test.ts`（擴充）+ `src/application/Statistics.ts`
 
-- [ ] **測試**：`recordGameResult` 包含 hintsUsed 欄位
-- [ ] **測試**：`getStatistics` recentGames 包含 hintsUsed
-- [ ] **測試**：舊資料（無 hintsUsed）預設為 0
+- [x] **測試**：`recordGameResult` 包含 hintsUsed 欄位
+- [x] **測試**：`getStatistics` recentGames 包含 hintsUsed
+- [x] **測試**：舊資料（無 hintsUsed）預設為 0
 
 ### 9.5 Cell — Error 狀態
 
 > `src/__tests__/presentation/Cell.test.ts` + `src/presentation/components/cell/Cell.vue`
 
-- [ ] **測試**：error=true 時顯示紅色背景/文字/邊框
-- [ ] **測試**：error=false 時正常顯示
+- [x] **測試**：error=true 時顯示紅色背景/文字/邊框
+- [x] **測試**：error=false 時正常顯示
 
 ### 9.6 HintMenuPopup 元件
 
 > `src/__tests__/presentation/HintMenuPopup.test.ts` + `src/presentation/components/hint-menu-popup/HintMenuPopup.vue`
 
-- [ ] **測試**：渲染 4 個選項（Auto Notes、Check Conflicts、Check Errors、Reveal Cell）
-- [ ] **測試**：顯示 HintLights — 3 個圓點對應已用次數
-- [ ] **測試**：點擊遮罩觸發 close 事件
-- [ ] **測試**：點擊各選項觸發對應 emit（autoNotes / checkConflicts / checkErrors / revealCell）
-- [ ] **測試**：提示全部用完時選項 disabled
+- [x] **測試**：渲染 4 個選項（Auto Notes、Check Conflicts、Check Errors、Reveal Cell）
+- [x] **測試**：顯示 HintLights — 3 個圓點對應已用次數
+- [x] **測試**：點擊遮罩觸發 close 事件
+- [x] **測試**：點擊各選項觸發對應 emit（autoNotes / checkConflicts / checkErrors / revealCell）
+- [x] **測試**：提示全部用完時選項 disabled
 
 ### 9.7 Game.vue — 整合 Hint 系統
 
 > `src/__tests__/presentation/Game.test.ts`（擴充）+ `src/presentation/pages/game/Game.vue`
 
-- [ ] **測試**：控制列顯示 Hint 按鈕（Lightbulb 圖示，取代 Auto-Notes）
-- [ ] **測試**：點擊 Hint 按鈕顯示 HintMenuPopup
-- [ ] **測試**：選擇 Auto Notes 後格子填入候選數字，消耗 1 次提示
-- [ ] **測試**：選擇 Check Conflicts 後衝突格顯示 error 樣式
-- [ ] **測試**：選擇 Check Errors 後填錯格顯示 error 樣式
-- [ ] **測試**：error 標記在下次互動（點擊格子/數字）後清除
-- [ ] **測試**：選擇 Reveal Cell 後隨機格填入正確答案
-- [ ] **測試**：Reveal Cell 後檢查完成狀態
-- [ ] **測試**：存檔包含 hintsUsed（Save & Leave）
-- [ ] **測試**：載入存檔後 hint 次數正確還原
+- [x] **測試**：控制列顯示 Hint 按鈕（Lightbulb 圖示，取代 Auto-Notes）
+- [x] **測試**：點擊 Hint 按鈕顯示 HintMenuPopup
+- [x] **測試**：選擇 Auto Notes 後格子填入候選數字，消耗 1 次提示
+- [x] **測試**：選擇 Check Conflicts 後衝突格顯示 error 樣式
+- [x] **測試**：選擇 Check Errors 後填錯格顯示 error 樣式
+- [x] **測試**：error 標記在下次互動（點擊格子/數字）後清除
+- [x] **測試**：選擇 Reveal Cell 後隨機格填入正確答案
+- [x] **測試**：Reveal Cell 後檢查完成狀態
+- [x] **測試**：存檔包含 hintsUsed（Save & Leave）
+- [x] **測試**：載入存檔後 hint 次數正確還原
 
 ### 9.8 GameCompleteModal — 顯示提示次數
 
 > `src/__tests__/presentation/GameCompleteModal.test.ts` + `src/presentation/components/game-complete-modal/GameCompleteModal.vue`
 
-- [ ] **測試**：顯示 Hints 統計欄位（recordedUsed 次數）
-- [ ] **測試**：完成時 recordGameResult 包含 hintsUsed
+- [x] **測試**：顯示 Hints 統計欄位（recordedUsed 次數）
+- [x] **測試**：完成時 recordGameResult 包含 hintsUsed
 
 ### 9.9 Statistics 頁 — 歷史記錄顯示提示
 
 > `src/__tests__/presentation/Statistics.test.ts` + `src/presentation/pages/statistics/Statistics.vue`
 
-- [ ] **測試**：Recent Games 每筆顯示 lightbulb 圖示 + hintsUsed 數字
-- [ ] **測試**：舊紀錄（無 hintsUsed）顯示 0
+- [x] **測試**：Recent Games 每筆顯示 lightbulb 圖示 + hintsUsed 數字
+- [x] **測試**：舊紀錄（無 hintsUsed）顯示 0
