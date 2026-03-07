@@ -15,7 +15,8 @@
         </div>
         <div
             v-else-if="puzzleCell.hasEntry"
-            class="text-primary text-[22px] font-medium"
+            data-testid="cell-entry"
+            :class="[error ? 'text-error' : 'text-primary', 'text-[22px] font-medium']"
         >
             {{ puzzleCell.entry }}
         </div>
@@ -45,9 +46,11 @@ const props = defineProps<{
     column: number;
     selected?: boolean;
     highlight?: CellHighlight;
+    error?: boolean;
 }>();
 
 const cellBg = computed(() => {
+    if (props.error) return "bg-error-light";
     if (props.selected) return "bg-primary-light";
     if (props.highlight === CellHighlight.Peer) return "bg-highlight";
     if (props.highlight === CellHighlight.SameDigit) return "bg-highlight";

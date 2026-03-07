@@ -19,6 +19,7 @@
   --color-cell-clue: #F7F6F3;
   --color-accent: #D89575;
   --color-error: #D08068;
+  --color-error-light: #FDEAE6;
 }
 
 @layer base {
