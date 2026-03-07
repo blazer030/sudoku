@@ -928,7 +928,7 @@ describe("Game", () => {
             expect(saved?.hintsUsed).toBe(2);
         });
 
-        it("should restore hint count from saved game", () => {
+        it("should restore hint count from saved game", async () => {
             const savedState: GameState = {
                 difficulty: "easy",
                 answer: knownAnswer.map(row => [...row]),
@@ -945,8 +945,13 @@ describe("Game", () => {
             };
             const wrapper = mountContinueGame(savedState);
 
-            // 打開 hint menu，檢查 dot 狀態 (recordedUsed=2, 3 dots, 2 dimmed)
-            wrapper.find("[data-testid='hint-button']").trigger("click");
+            // 打開 hint menu，檢查 dot 狀態 (totalUsed=3, recordedUsed=2, 2 dots dimmed)
+            await wrapper.find("[data-testid='hint-button']").trigger("click");
+
+            const dots = wrapper.findAll("[data-testid='hint-light']");
+            expect(dots).toHaveLength(3);
+            const dimmed = dots.filter(d => d.classes().some(c => c.includes("opacity")));
+            expect(dimmed).toHaveLength(2);
         });
 
         it("should check completion after Reveal Cell", async () => {

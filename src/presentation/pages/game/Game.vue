@@ -191,6 +191,7 @@ const sudoku = (() => {
     if (gameStore.sudoku) {
         const instance = reactive(new Sudoku());
         instance.restore(gameStore.sudoku.answer, gameStore.sudoku.puzzle);
+        instance.hintTracker.restore(gameStore.sudoku.hintTracker.totalUsed);
         return instance;
     }
     return reactive(new Sudoku());
