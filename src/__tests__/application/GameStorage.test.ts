@@ -12,6 +12,7 @@ function createGameState(overrides: Partial<GameState> = {}): GameState {
         ),
         elapsedSeconds: 0,
         completed: false,
+        hintsUsed: 0,
         ...overrides,
     };
 }

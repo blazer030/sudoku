@@ -71,6 +71,8 @@ defineEmits<{
 </script>
 
 <style scoped>
+@reference "../../../style/index.css";
+
 .hint-option {
     @apply w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-foreground hover:bg-highlight disabled:opacity-40 disabled:cursor-not-allowed;
 }

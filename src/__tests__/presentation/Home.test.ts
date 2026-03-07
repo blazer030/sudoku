@@ -36,6 +36,7 @@ const dummySave: GameState = {
     ),
     elapsedSeconds: 204,
     completed: false,
+    hintsUsed: 0,
 };
 
 afterEach(() => {

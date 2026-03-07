@@ -905,6 +905,50 @@ describe("Game", () => {
             expect(filledCorrectly).toBe(true);
         });
 
+        it("should include hintsUsed in save (Save & Leave)", async () => {
+            const pinia = createPinia();
+            const router = createTestRouter();
+            const gameStore = useGameStore(pinia);
+            gameStore.sudoku = createKnownSudoku();
+            gameStore.setDifficulty("easy");
+            const wrapper = mount(Game, { global: { plugins: [pinia, router] } });
+
+            // 用 2 次 hint
+            await wrapper.find("[data-testid='hint-button']").trigger("click");
+            await wrapper.find("[data-testid='hint-auto-notes']").trigger("click");
+            await wrapper.find("[data-testid='hint-button']").trigger("click");
+            await wrapper.find("[data-testid='hint-reveal-cell']").trigger("click");
+
+            // Save & Leave
+            await wrapper.find("[data-testid='back-button']").trigger("click");
+            await wrapper.find("[data-testid='save-and-leave-button']").trigger("click");
+            await flushPromises();
+
+            const saved = loadGame();
+            expect(saved?.hintsUsed).toBe(2);
+        });
+
+        it("should restore hint count from saved game", () => {
+            const savedState: GameState = {
+                difficulty: "easy",
+                answer: knownAnswer.map(row => [...row]),
+                cells: knownPuzzle.map(row =>
+                    row.map(puzzleValue => ({
+                        clue: puzzleValue,
+                        entry: 0,
+                        notes: [],
+                    }))
+                ),
+                elapsedSeconds: 10,
+                completed: false,
+                hintsUsed: 3,
+            };
+            const wrapper = mountContinueGame(savedState);
+
+            // 打開 hint menu，檢查 dot 狀態 (recordedUsed=2, 3 dots, 2 dimmed)
+            wrapper.find("[data-testid='hint-button']").trigger("click");
+        });
+
         it("should check completion after Reveal Cell", async () => {
             const wrapper = mountGame();
 

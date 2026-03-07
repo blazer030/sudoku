@@ -81,6 +81,7 @@ describe("GameStateConverter", () => {
                 ),
                 elapsedSeconds: 60,
                 completed: false,
+                hintsUsed: 0,
             };
 
             const sudoku = GameStateConverter.toSudoku(state);

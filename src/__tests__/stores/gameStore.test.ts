@@ -39,6 +39,7 @@ describe("gameStore", () => {
             ),
             elapsedSeconds: 120,
             completed: false,
+            hintsUsed: 0,
         };
 
         store.loadSavedGame(state);

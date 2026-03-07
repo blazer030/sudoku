@@ -4,7 +4,7 @@ import Cell from "@/presentation/components/cell/Cell.vue";
 import PuzzleCell from "@/domain/PuzzleCell";
 
 describe("Cell", () => {
-    const mountCell = (props: Record<string, unknown>) =>
+    const mountCell = (props: { puzzleCell: PuzzleCell } & Record<string, unknown>) =>
         mount(Cell, { props: { row: 0, column: 0, ...props } });
 
     it("error=true 時顯示紅色背景和文字", () => {
