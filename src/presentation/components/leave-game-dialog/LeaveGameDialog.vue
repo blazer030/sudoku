@@ -1,5 +1,6 @@
 <template>
     <div
+        v-if="visible"
         class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
         data-testid="leave-game-dialog"
     >
@@ -24,7 +25,7 @@
                 <button
                     class="w-full h-[52px] rounded-button bg-primary flex items-center justify-center gap-2 shadow-primary cursor-pointer"
                     data-testid="save-and-leave-button"
-                    @click="emit('saveAndLeave')"
+                    @click="close('save')"
                 >
                     <Save
                         :size="20"
@@ -36,7 +37,7 @@
                 <button
                     class="w-full h-[52px] rounded-button bg-accent flex items-center justify-center gap-2 shadow-accent cursor-pointer"
                     data-testid="give-up-and-leave-button"
-                    @click="emit('giveUpAndLeave')"
+                    @click="close('giveUp')"
                 >
                     <span class="text-base font-semibold text-white">Give Up & Leave</span>
                 </button>
@@ -44,7 +45,7 @@
                 <button
                     class="w-full h-[44px] flex items-center justify-center cursor-pointer"
                     data-testid="leave-cancel-button"
-                    @click="emit('cancel')"
+                    @click="close('cancel')"
                 >
                     <span class="text-base font-semibold text-foreground">Cancel</span>
                 </button>
@@ -55,10 +56,7 @@
 
 <script lang="ts" setup>
 import { Save } from "lucide-vue-next";
+import { useLeaveDialog } from "./useLeaveDialog";
 
-const emit = defineEmits<{
-    saveAndLeave: [];
-    giveUpAndLeave: [];
-    cancel: [];
-}>();
+const { visible, close } = useLeaveDialog();
 </script>

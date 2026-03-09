@@ -153,12 +153,7 @@
         />
 
         <!-- Leave Game Dialog -->
-        <LeaveGameDialog
-            v-if="showLeave"
-            @cancel="showLeave = false"
-            @save-and-leave="handleSaveAndLeave"
-            @give-up-and-leave="handleGiveUpAndLeave"
-        />
+        <LeaveGameDialog />
     </div>
 </template>
 
@@ -170,6 +165,7 @@ import { Eraser, Lightbulb, Pencil, Undo2 } from "lucide-vue-next";
 import GameHeader from "@/presentation/components/game-header/GameHeader.vue";
 import GameCompleteModal from "@/presentation/components/game-complete-modal/GameCompleteModal.vue";
 import LeaveGameDialog from "@/presentation/components/leave-game-dialog/LeaveGameDialog.vue";
+import { provideLeaveDialog } from "@/presentation/components/leave-game-dialog/useLeaveDialog";
 import ControlButton from "@/presentation/components/game-controls/ControlButton.vue";
 import HintMenuPopup from "@/presentation/components/hint-menu-popup/HintMenuPopup.vue";
 import Sudoku from "@/domain/Sudoku";
@@ -201,10 +197,11 @@ const sudoku = (() => {
 
 enum InputMode { Normal, Note, Erase }
 
+const leaveDialog = provideLeaveDialog();
+
 const selectedCell = ref<{ row: number; column: number } | null>(null);
 const selectedDigit = ref<number | null>(null);
 const completed = ref(false);
-const showLeave = ref(false);
 const leavingConfirmed = ref(false);
 const inputMode = ref(InputMode.Normal);
 const showHintMenu = ref(false);
@@ -212,7 +209,7 @@ const errorCells = ref<{ row: number; column: number }[]>([]);
 const elapsedSeconds = ref(gameStore.elapsedSeconds);
 
 const timerInterval = setInterval(() => {
-    if (!completed.value && !showLeave.value) {
+    if (!completed.value && !leaveDialog.visible.value) {
         elapsedSeconds.value++;
     }
 }, 1000);
@@ -223,35 +220,32 @@ onBeforeUnmount(() => {
 
 onBeforeRouteLeave(() => {
     if (completed.value || leavingConfirmed.value) return true;
-    showLeave.value = true;
+    void showLeaveDialog();
     return false;
 });
 
-function showLeaveDialog() {
-    showLeave.value = true;
-}
-
-function handleSaveAndLeave() {
-    const state = GameStateConverter.fromSudoku(sudoku.raw(), {
-        difficulty: gameStore.difficulty ?? "easy",
-        elapsedSeconds: elapsedSeconds.value,
-        completed: completed.value,
-    });
-    saveGame(state);
-    leavingConfirmed.value = true;
-    router.back();
-}
-
-function handleGiveUpAndLeave() {
-    recordGameResult({
-        difficulty: gameStore.difficulty ?? "easy",
-        elapsedSeconds: elapsedSeconds.value,
-        completed: false,
-        hintsUsed: sudoku.hintTracker.recordedUsed,
-    });
-    deleteSavedGame();
-    leavingConfirmed.value = true;
-    router.back();
+async function showLeaveDialog() {
+    const result = await leaveDialog.open(undefined);
+    if (result === "save") {
+        const state = GameStateConverter.fromSudoku(sudoku.raw(), {
+            difficulty: gameStore.difficulty ?? "easy",
+            elapsedSeconds: elapsedSeconds.value,
+            completed: completed.value,
+        });
+        saveGame(state);
+        leavingConfirmed.value = true;
+        router.back();
+    } else if (result === "giveUp") {
+        recordGameResult({
+            difficulty: gameStore.difficulty ?? "easy",
+            elapsedSeconds: elapsedSeconds.value,
+            completed: false,
+            hintsUsed: sudoku.hintTracker.recordedUsed,
+        });
+        deleteSavedGame();
+        leavingConfirmed.value = true;
+        router.back();
+    }
 }
 
 function clickCell(row: number, column: number) {
