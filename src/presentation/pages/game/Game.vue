@@ -27,10 +27,10 @@
                             :key="`cell-${rowIndex}-${columnIndex}`"
                             :column="columnIndex"
                             :data-testid="`cell-${rowIndex}-${columnIndex}`"
+                            :error="isError(rowIndex, columnIndex)"
                             :highlight="highlightGrid[rowIndex][columnIndex]"
                             :puzzle-cell="puzzleCell.raw()"
                             :row="rowIndex"
-                            :error="isError(rowIndex, columnIndex)"
                             :selected="isSelected(rowIndex, columnIndex)"
                             @click="clickCell(rowIndex, columnIndex)"
                         />
@@ -48,9 +48,9 @@
 
             <!-- Digit Pad -->
             <DigitPad
-                :selected-digit="selectedDigit"
-                :erase-active="inputMode === InputMode.Erase"
                 :digit-counts="digitCounts"
+                :erase-active="inputMode === InputMode.Erase"
+                :selected-digit="selectedDigit"
                 @select-digit="selectDigit"
                 @toggle-erase-mode="toggleEraseMode"
             />
@@ -118,7 +118,7 @@ const selectedDigit = ref<number | null>(null);
 const inputMode = ref(InputMode.Normal);
 
 const { completed, checkAndComplete } = useGameCompletion({
-    sudoku,
+    sudoku: sudoku.raw(),
     difficulty,
     getElapsedSeconds: () => elapsedSeconds.value,
     onCompleted: () => {
@@ -131,12 +131,12 @@ const { completed, checkAndComplete } = useGameCompletion({
 });
 
 const { clearErrors, isError, openHintMenu } = useHintActions({
-    sudoku,
+    sudoku: sudoku.raw(),
     onRevealComplete: checkAndComplete,
 });
 
 const { leaveDialog, showLeaveDialog } = useLeaveGame({
-    sudoku,
+    sudoku: sudoku.raw(),
     difficulty,
     completed,
     getElapsedSeconds: () => elapsedSeconds.value,
@@ -211,14 +211,14 @@ const highlightGrid = computed(() => {
                 grid[row][column] = CellHighlight.None;
                 continue;
             }
-            const sr = selectedCell.value.row;
-            const sc = selectedCell.value.column;
-            if (row === sr && column === sc) {
+            const selectedRow = selectedCell.value.row;
+            const selectedColumn = selectedCell.value.column;
+            if (row === selectedRow && column === selectedColumn) {
                 grid[row][column] = CellHighlight.None;
-            } else if (row === sr || column === sc) {
+            } else if (row === selectedRow || column === selectedColumn) {
                 grid[row][column] = CellHighlight.Peer;
-            } else if (Math.floor(row / BOX_SIZE) === Math.floor(sr / BOX_SIZE)
-                && Math.floor(column / BOX_SIZE) === Math.floor(sc / BOX_SIZE)) {
+            } else if (Math.floor(row / BOX_SIZE) === Math.floor(selectedRow / BOX_SIZE)
+                && Math.floor(column / BOX_SIZE) === Math.floor(selectedColumn / BOX_SIZE)) {
                 grid[row][column] = CellHighlight.Peer;
             } else {
                 grid[row][column] = CellHighlight.None;
@@ -234,10 +234,10 @@ const digitCounts = computed(() => {
         for (let column = 0; column < BOARD_SIZE; column++) {
             const cell = sudoku.puzzle[row][column];
             // 明確存取兩個屬性，確保 Vue 追蹤 _clue 和 _entry
-            const v = cell.clue;
-            const i = cell.entry;
-            if (v > 0) counts[v]++;
-            else if (i > 0) counts[i]++;
+            const clue = cell.clue;
+            const entry = cell.entry;
+            if (clue > 0) counts[clue]++;
+            else if (entry > 0) counts[entry]++;
         }
     }
     return counts;

@@ -16,12 +16,12 @@ export const createDialog = <TParams = undefined, TResult = undefined>() => {
     const provideDialog = () => {
         const visible = ref(false);
         const params = shallowRef<TParams>();
-        let resolve: ((v: TResult) => void) | null = null;
+        let resolve: ((result: TResult) => void) | null = null;
 
-        const open = (p: TParams): Promise<TResult> => {
-            params.value = p;
+        const open = (dialogParams: TParams): Promise<TResult> => {
+            params.value = dialogParams;
             visible.value = true;
-            return new Promise(r => { resolve = r; });
+            return new Promise(resolvePromise => { resolve = resolvePromise; });
         };
 
         const close: CloseFn<TResult> = ((result?: TResult) => {

@@ -72,8 +72,8 @@ class Sudoku {
         const snapshot = this._history.pop();
         if (!snapshot) return;
         for (let row = 0; row < BOARD_SIZE; row++) {
-            for (let col = 0; col < BOARD_SIZE; col++) {
-                this._puzzle[row][col].restore(snapshot[row][col].entry, snapshot[row][col].notes);
+            for (let column = 0; column < BOARD_SIZE; column++) {
+                this._puzzle[row][column].restore(snapshot[row][column].entry, snapshot[row][column].notes);
             }
         }
     }
@@ -112,12 +112,12 @@ class Sudoku {
         this.snapshot();
         const currentBoard = this.getCurrentBoard();
         for (let row = 0; row < BOARD_SIZE; row++) {
-            for (let col = 0; col < BOARD_SIZE; col++) {
-                const cell = this._puzzle[row][col];
+            for (let column = 0; column < BOARD_SIZE; column++) {
+                const cell = this._puzzle[row][column];
                 if (cell.isClue || cell.hasEntry) continue;
                 cell.clearNotes();
                 for (let digit = 1; digit <= BOARD_SIZE; digit++) {
-                    if (this.board.isValidPlacement(currentBoard, row, col, digit)) {
+                    if (this.board.isValidPlacement(currentBoard, row, column, digit)) {
                         cell.toggleNote(digit);
                     }
                 }
@@ -131,23 +131,23 @@ class Sudoku {
         const seen = new Set<string>();
 
         for (let row = 0; row < BOARD_SIZE; row++) {
-            for (let col = 0; col < BOARD_SIZE; col++) {
-                const cell = this._puzzle[row][col];
+            for (let column = 0; column < BOARD_SIZE; column++) {
+                const cell = this._puzzle[row][column];
                 if (cell.isClue || !cell.hasEntry) continue;
                 const value = cell.entry;
-                const cellConflicts = this.conflictDetector.findConflicts(board, row, col, value);
-                for (const c of cellConflicts) {
-                    const key = `${c.row},${c.column}`;
+                const cellConflicts = this.conflictDetector.findConflicts(board, row, column, value);
+                for (const conflict of cellConflicts) {
+                    const key = `${conflict.row},${conflict.column}`;
                     if (!seen.has(key)) {
                         seen.add(key);
-                        conflicts.push(c);
+                        conflicts.push(conflict);
                     }
                 }
                 if (cellConflicts.length > 0) {
-                    const selfKey = `${row},${col}`;
+                    const selfKey = `${row},${column}`;
                     if (!seen.has(selfKey)) {
                         seen.add(selfKey);
-                        conflicts.push({ row, column: col });
+                        conflicts.push({ row, column });
                     }
                 }
             }
@@ -158,11 +158,11 @@ class Sudoku {
     public revealRandomCell(): Conflict | null {
         const candidates: Conflict[] = [];
         for (let row = 0; row < BOARD_SIZE; row++) {
-            for (let col = 0; col < BOARD_SIZE; col++) {
-                const cell = this._puzzle[row][col];
+            for (let column = 0; column < BOARD_SIZE; column++) {
+                const cell = this._puzzle[row][column];
                 if (cell.isClue) continue;
-                if (!cell.hasEntry || cell.entry !== this._answer[row][col]) {
-                    candidates.push({ row, column: col });
+                if (!cell.hasEntry || cell.entry !== this._answer[row][column]) {
+                    candidates.push({ row, column });
                 }
             }
         }
@@ -176,11 +176,11 @@ class Sudoku {
     public checkErrors(): Conflict[] {
         const errors: Conflict[] = [];
         for (let row = 0; row < BOARD_SIZE; row++) {
-            for (let col = 0; col < BOARD_SIZE; col++) {
-                const cell = this._puzzle[row][col];
+            for (let column = 0; column < BOARD_SIZE; column++) {
+                const cell = this._puzzle[row][column];
                 if (cell.isClue || !cell.hasEntry) continue;
-                if (cell.entry !== this._answer[row][col]) {
-                    errors.push({ row, column: col });
+                if (cell.entry !== this._answer[row][column]) {
+                    errors.push({ row, column });
                 }
             }
         }
@@ -201,19 +201,19 @@ class Sudoku {
 
     private removeNoteFromPeers(row: number, column: number, value: number): void {
         // 同行
-        for (let col = 0; col < BOARD_SIZE; col++) {
-            if (col !== column) this._puzzle[row][col].removeNote(value);
+        for (let peerColumn = 0; peerColumn < BOARD_SIZE; peerColumn++) {
+            if (peerColumn !== column) this._puzzle[row][peerColumn].removeNote(value);
         }
         // 同列
-        for (let r = 0; r < BOARD_SIZE; r++) {
-            if (r !== row) this._puzzle[r][column].removeNote(value);
+        for (let peerRow = 0; peerRow < BOARD_SIZE; peerRow++) {
+            if (peerRow !== row) this._puzzle[peerRow][column].removeNote(value);
         }
         // 同宮
         const boxRowStart = Math.floor(row / BOX_SIZE) * BOX_SIZE;
         const boxColStart = Math.floor(column / BOX_SIZE) * BOX_SIZE;
-        for (let r = boxRowStart; r < boxRowStart + BOX_SIZE; r++) {
-            for (let c = boxColStart; c < boxColStart + BOX_SIZE; c++) {
-                if (r !== row || c !== column) this._puzzle[r][c].removeNote(value);
+        for (let boxRow = boxRowStart; boxRow < boxRowStart + BOX_SIZE; boxRow++) {
+            for (let boxColumn = boxColStart; boxColumn < boxColStart + BOX_SIZE; boxColumn++) {
+                if (boxRow !== row || boxColumn !== column) this._puzzle[boxRow][boxColumn].removeNote(value);
             }
         }
     }

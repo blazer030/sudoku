@@ -177,7 +177,7 @@ const dayStreak = computed(() => {
         })
     );
 
-    const sortedDates = [...playedDates].sort((a, b) => b - a);
+    const sortedDates = [...playedDates].sort((dateA, dateB) => dateB - dateA);
     if (sortedDates.length === 0) return 0;
 
     const msPerDay = 86400000;

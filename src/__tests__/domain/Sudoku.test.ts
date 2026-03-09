@@ -362,11 +362,11 @@ describe("Sudoku", () => {
             const sudoku = createKnownSudoku();
 
             // 把所有空格都填錯
-            for (let r = 0; r < 9; r++) {
-                for (let c = 0; c < 9; c++) {
-                    if (knownPuzzle[r][c] === 0) {
-                        const wrong = (knownAnswer[r][c] % 9) + 1;
-                        sudoku.fill(r, c, wrong);
+            for (let row = 0; row < 9; row++) {
+                for (let column = 0; column < 9; column++) {
+                    if (knownPuzzle[row][column] === 0) {
+                        const wrong = (knownAnswer[row][column] % 9) + 1;
+                        sudoku.fill(row, column, wrong);
                     }
                 }
             }
@@ -383,10 +383,10 @@ describe("Sudoku", () => {
             const sudoku = createKnownSudoku();
 
             // 填入所有正確答案
-            for (let r = 0; r < 9; r++) {
-                for (let c = 0; c < 9; c++) {
-                    if (knownPuzzle[r][c] === 0) {
-                        sudoku.fill(r, c, knownAnswer[r][c]);
+            for (let row = 0; row < 9; row++) {
+                for (let column = 0; column < 9; column++) {
+                    if (knownPuzzle[row][column] === 0) {
+                        sudoku.fill(row, column, knownAnswer[row][column]);
                     }
                 }
             }

@@ -44,7 +44,7 @@ export class SudokuSolver {
         for (let row = 0; row < BOARD_SIZE; row++) {
             for (let column = 0; column < BOARD_SIZE; column++) {
                 if (board[row][column] === 0) {
-                    const digits = digitsProvider ? digitsProvider() : Array.from({ length: BOARD_SIZE }, (_, i) => i + 1);
+                    const digits = digitsProvider ? digitsProvider() : Array.from({ length: BOARD_SIZE }, (_, index) => index + 1);
                     for (const digit of digits) {
                         if (this.board.isValidPlacement(board, row, column, digit)) {
                             board[row][column] = digit;

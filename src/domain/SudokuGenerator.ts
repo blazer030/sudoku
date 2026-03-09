@@ -9,7 +9,7 @@ export class SudokuGenerator {
 
     public generateFullBoard(): number[][] {
         const emptyBoard = Array.from({ length: BOARD_SIZE }, () => Array.from({ length: BOARD_SIZE }, () => 0));
-        const board = this.solver.solve(emptyBoard, () => this.shuffle(Array.from({ length: BOARD_SIZE }, (_, i) => i + 1)));
+        const board = this.solver.solve(emptyBoard, () => this.shuffle(Array.from({ length: BOARD_SIZE }, (_, index) => index + 1)));
         if (!board) throw new Error("Failed to generate a full board");
         return board;
     }

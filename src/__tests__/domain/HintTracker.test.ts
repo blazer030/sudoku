@@ -51,7 +51,7 @@ describe('HintTracker', () => {
   it('超過上限時 useHint 不增加計數', () => {
     const tracker = new HintTracker()
 
-    for (let i = 0; i < 5; i++) tracker.useHint()
+    for (let count = 0; count < 5; count++) tracker.useHint()
 
     expect(tracker.totalUsed).toBe(4)
     expect(tracker.recordedUsed).toBe(3)

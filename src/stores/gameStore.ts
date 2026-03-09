@@ -14,11 +14,11 @@ export const useGameStore = defineStore("game", () => {
         difficulty.value = value;
     }
 
-    function startNewGame(diff: Difficulty) {
+    function startNewGame(newDifficulty: Difficulty) {
         const game = new Sudoku();
-        game.generate(diff);
+        game.generate(newDifficulty);
         sudoku.value = game;
-        difficulty.value = diff;
+        difficulty.value = newDifficulty;
         elapsedSeconds.value = 0;
     }
 

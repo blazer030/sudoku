@@ -611,8 +611,8 @@ describe("Game", () => {
         // (0,5)=8, (1,8)=8, (5,6)=8, (7,1)=8
         const cellsToFill = [[0, 5], [1, 8], [5, 6], [7, 1]];
         await wrapper.find("[data-testid='number-8']").trigger("click");
-        for (const [row, col] of cellsToFill) {
-            await wrapper.find(`[data-testid='cell-${row}-${col}']`).trigger("click");
+        for (const [row, column] of cellsToFill) {
+            await wrapper.find(`[data-testid='cell-${row}-${column}']`).trigger("click");
         }
 
         expect(wrapper.find("[data-testid='number-8']").attributes("disabled")).toBeDefined();
@@ -624,8 +624,8 @@ describe("Game", () => {
         // 數字 8 有 5 個 clue，再填入 4 個正確位置湊滿 9 次
         const cellsToFill = [[0, 5], [1, 8], [5, 6], [7, 1]];
         await wrapper.find("[data-testid='number-8']").trigger("click");
-        for (const [row, col] of cellsToFill) {
-            await wrapper.find(`[data-testid='cell-${row}-${col}']`).trigger("click");
+        for (const [row, column] of cellsToFill) {
+            await wrapper.find(`[data-testid='cell-${row}-${column}']`).trigger("click");
         }
 
         // 填滿 9 個後，數字按鈕不再是 selected
@@ -833,7 +833,7 @@ describe("Game", () => {
             await wrapper.find("[data-testid='hint-button']").trigger("click");
             const dots = wrapper.findAll("[data-testid='hint-light']");
             // recordedUsed=0（第一次免費），所以 3 個都亮
-            expect(dots.filter(d => d.classes().some(c => c.includes("opacity")))).toHaveLength(0);
+            expect(dots.filter(dot => dot.classes().some(cssClass => cssClass.includes("opacity")))).toHaveLength(0);
         });
 
         it("should show error style on conflict cells after Check Conflicts", async () => {
@@ -890,11 +890,11 @@ describe("Game", () => {
 
             // 至少有一個 slot 被正確填入
             let filledCorrectly = false;
-            for (let r = 0; r < 9; r++) {
-                for (let c = 0; c < 9; c++) {
-                    if (knownPuzzle[r][c] === 0) {
-                        const cellText = wrapper.find(`[data-testid='cell-${r}-${c}']`).text();
-                        if (cellText === String(knownAnswer[r][c])) {
+            for (let row = 0; row < 9; row++) {
+                for (let column = 0; column < 9; column++) {
+                    if (knownPuzzle[row][column] === 0) {
+                        const cellText = wrapper.find(`[data-testid='cell-${row}-${column}']`).text();
+                        if (cellText === String(knownAnswer[row][column])) {
                             filledCorrectly = true;
                             break;
                         }
@@ -950,7 +950,7 @@ describe("Game", () => {
 
             const dots = wrapper.findAll("[data-testid='hint-light']");
             expect(dots).toHaveLength(3);
-            const outlined = dots.filter(d => d.classes().some(c => c.includes("border")));
+            const outlined = dots.filter(dot => dot.classes().some(cssClass => cssClass.includes("border")));
             expect(outlined).toHaveLength(2);
         });
 
@@ -959,18 +959,18 @@ describe("Game", () => {
 
             // 填入除一格外所有正確答案
             const emptyCells: [number, number][] = [];
-            for (let r = 0; r < 9; r++) {
-                for (let c = 0; c < 9; c++) {
-                    if (knownPuzzle[r][c] === 0) emptyCells.push([r, c]);
+            for (let row = 0; row < 9; row++) {
+                for (let column = 0; column < 9; column++) {
+                    if (knownPuzzle[row][column] === 0) emptyCells.push([row, column]);
                 }
             }
             // 留最後一個空格
-            for (let i = 0; i < emptyCells.length - 1; i++) {
-                const [r, c] = emptyCells[i];
-                const value = knownAnswer[r][c];
+            for (let index = 0; index < emptyCells.length - 1; index++) {
+                const [row, column] = emptyCells[index];
+                const value = knownAnswer[row][column];
                 const numBtn = wrapper.find(`[data-testid='number-${value}']`);
                 await numBtn.trigger("click");
-                await wrapper.find(`[data-testid='cell-${r}-${c}']`).trigger("click");
+                await wrapper.find(`[data-testid='cell-${row}-${column}']`).trigger("click");
                 await numBtn.trigger("click");
             }
 

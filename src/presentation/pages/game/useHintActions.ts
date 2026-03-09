@@ -16,7 +16,7 @@ export const useHintActions = ({ sudoku, onRevealComplete }: HintActionsOptions)
     };
 
     const isError = (row: number, column: number): boolean =>
-        errorCells.value.some(c => c.row === row && c.column === column);
+        errorCells.value.some(cell => cell.row === row && cell.column === column);
 
     const openHintMenu = async () => {
         const action = await hintMenu.open({
