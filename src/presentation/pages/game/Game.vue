@@ -144,7 +144,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onBeforeUnmount, reactive, ref } from "vue";
+import { computed, reactive, ref } from "vue";
 
 import { onBeforeRouteLeave, useRouter } from "vue-router";
 import { Eraser, Lightbulb, Pencil, Undo2 } from "lucide-vue-next";
@@ -166,6 +166,7 @@ import { deleteSavedGame, saveGame } from "@/application/GameStorage";
 import { GameStateConverter } from "@/application/GameState";
 import { recordGameResult } from "@/application/Statistics";
 import InputMode from "./InputMode";
+import { useGameTimer } from "./useGameTimer";
 
 const router = useRouter();
 const gameStore = useGameStore();
@@ -194,16 +195,10 @@ const completed = ref(false);
 const leavingConfirmed = ref(false);
 const inputMode = ref(InputMode.Normal);
 const errorCells = ref<{ row: number; column: number }[]>([]);
-const elapsedSeconds = ref(gameStore.elapsedSeconds);
-
-const timerInterval = setInterval(() => {
-    if (!completed.value && !leaveDialog.visible.value) {
-        elapsedSeconds.value++;
-    }
-}, 1000);
-
-onBeforeUnmount(() => {
-    clearInterval(timerInterval);
+const timerPaused = computed(() => completed.value || leaveDialog.visible.value);
+const { elapsedSeconds } = useGameTimer({
+    initialSeconds: gameStore.elapsedSeconds,
+    paused: timerPaused,
 });
 
 onBeforeRouteLeave(() => {
