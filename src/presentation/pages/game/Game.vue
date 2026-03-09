@@ -165,6 +165,7 @@ import { ROUTER_PATH } from "@/router";
 import { deleteSavedGame, saveGame } from "@/application/GameStorage";
 import { GameStateConverter } from "@/application/GameState";
 import { recordGameResult } from "@/application/Statistics";
+import InputMode from "./InputMode";
 
 const router = useRouter();
 const gameStore = useGameStore();
@@ -182,8 +183,6 @@ const sudoku = (() => {
     }
     return reactive(new Sudoku());
 })();
-
-enum InputMode { Normal, Note, Erase }
 
 const leaveDialog = provideLeaveDialog();
 const hintMenu = provideHintMenu();
