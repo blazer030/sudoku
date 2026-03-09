@@ -10,23 +10,23 @@ export const useGameStore = defineStore("game", () => {
     const elapsedSeconds = ref(0);
     const hasActiveGame = computed(() => sudoku.value !== null);
 
-    function setDifficulty(value: Difficulty) {
+    const setDifficulty = (value: Difficulty) => {
         difficulty.value = value;
-    }
+    };
 
-    function startNewGame(newDifficulty: Difficulty) {
+    const startNewGame = (newDifficulty: Difficulty) => {
         const game = new Sudoku();
         game.generate(newDifficulty);
         sudoku.value = game;
         difficulty.value = newDifficulty;
         elapsedSeconds.value = 0;
-    }
+    };
 
-    function loadSavedGame(state: GameState) {
+    const loadSavedGame = (state: GameState) => {
         sudoku.value = GameStateConverter.toSudoku(state);
         difficulty.value = state.difficulty;
         elapsedSeconds.value = state.elapsedSeconds;
-    }
+    };
 
     return { difficulty, setDifficulty, sudoku, hasActiveGame, startNewGame, loadSavedGame, elapsedSeconds };
 });

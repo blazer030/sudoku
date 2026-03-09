@@ -195,14 +195,14 @@ const dayStreak = computed(() => {
     return streak;
 });
 
-function formatBestTime(seconds: number | null): string {
+const formatBestTime = (seconds: number | null): string => {
     if (seconds === null) return "--:--";
     return formatTime(seconds);
-}
+};
 
-function difficultyLabel(difficulty: Difficulty): string {
+const difficultyLabel = (difficulty: Difficulty): string => {
     return DifficultyLabels[difficulty];
-}
+};
 
 const goBack = () => {
     void router.push(ROUTER_PATH.home);

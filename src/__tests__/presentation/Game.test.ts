@@ -12,30 +12,30 @@ import type { Difficulty } from "@/domain/SudokuGenerator";
 import { getGameHistory } from "@/application/Statistics";
 import { hasSavedGame, loadGame, saveGame } from "@/application/GameStorage";
 
-function createTestRouter() {
+const createTestRouter = () => {
     return createRouter({
         history: createMemoryHistory(),
         routes: [{ path: "/game", component: Game }, { path: "/", component: { template: "<div/>" } }],
     });
-}
+};
 
-function mountGame(difficulty: Difficulty = "easy") {
+const mountGame = (difficulty: Difficulty = "easy") => {
     const pinia = createPinia();
     const router = createTestRouter();
     const gameStore = useGameStore(pinia);
     gameStore.sudoku = createKnownSudoku();
     gameStore.setDifficulty(difficulty);
     return mount(Game, { global: { plugins: [pinia, router] } });
-}
+};
 
-function mountContinueGame(savedState: GameState) {
+const mountContinueGame = (savedState: GameState) => {
     saveGame(savedState);
     const pinia = createPinia();
     const router = createTestRouter();
     const gameStore = useGameStore(pinia);
     gameStore.loadSavedGame(savedState);
     return mount(Game, { global: { plugins: [pinia, router] } });
-}
+};
 
 afterEach(() => {
     vi.restoreAllMocks();
@@ -984,7 +984,7 @@ describe("Game", () => {
     });
 
     describe("Route Leave Guard", () => {
-        function createRouterViewApp() {
+        const createRouterViewApp = () => {
             const pinia = createPinia();
             const router = createRouter({
                 history: createMemoryHistory(),
@@ -997,9 +997,9 @@ describe("Game", () => {
             gameStore.sudoku = createKnownSudoku();
             gameStore.setDifficulty("easy");
             return { pinia, router, gameStore };
-        }
+        };
 
-        async function mountWithRouterView() {
+        const mountWithRouterView = async () => {
             const { pinia, router, gameStore } = createRouterViewApp();
             await router.push("/game");
             await router.isReady();
@@ -1009,7 +1009,7 @@ describe("Game", () => {
             );
             await flushPromises();
             return { wrapper, router, gameStore };
-        }
+        };
 
         it("should block route leave and show LeaveGameDialog when game is in progress", async () => {
             const { wrapper, router } = await mountWithRouterView();

@@ -38,7 +38,7 @@ export interface Statistics {
     recentGames: GameResult[];
 }
 
-function loadHistory(): GameResult[] {
+const loadHistory = (): GameResult[] => {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored === null) return [];
     type StoredGameResult = Omit<GameResult, 'hintsUsed'> & { hintsUsed?: number };
@@ -47,13 +47,13 @@ function loadHistory(): GameResult[] {
         ...game,
         hintsUsed: game.hintsUsed ?? 0,
     }));
-}
+};
 
-function saveHistory(history: GameResult[]): void {
+const saveHistory = (history: GameResult[]): void => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
-}
+};
 
-export function recordGameResult(input: GameResultInput): void {
+export const recordGameResult = (input: GameResultInput): void => {
     const history = loadHistory();
     history.push({
         ...input,
@@ -61,13 +61,13 @@ export function recordGameResult(input: GameResultInput): void {
         date: new Date().toISOString(),
     });
     saveHistory(history);
-}
+};
 
-export function getGameHistory(): GameResult[] {
+export const getGameHistory = (): GameResult[] => {
     return loadHistory();
-}
+};
 
-function computeDifficultyStats(games: GameResult[]): DifficultyStats {
+const computeDifficultyStats = (games: GameResult[]): DifficultyStats => {
     const wonGames = games.filter(game => game.completed);
     return {
         gamesWon: wonGames.length,
@@ -79,9 +79,9 @@ function computeDifficultyStats(games: GameResult[]): DifficultyStats {
             ? wonGames.reduce((sum, game) => sum + game.elapsedSeconds, 0) / wonGames.length
             : null,
     };
-}
+};
 
-export function getStatistics(): Statistics {
+export const getStatistics = (): Statistics => {
     const history = loadHistory();
 
     const byDifficulty = (difficulty: Difficulty) =>
@@ -100,4 +100,4 @@ export function getStatistics(): Statistics {
         },
         recentGames: [...history].reverse(),
     };
-}
+};

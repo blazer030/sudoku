@@ -149,7 +149,7 @@ const { elapsedSeconds } = useGameTimer({
 });
 
 
-function clickCell(row: number, column: number) {
+const clickCell = (row: number, column: number) => {
     clearErrors();
     if (inputMode.value === InputMode.Erase) {
         eraseCell(row, column);
@@ -164,13 +164,13 @@ function clickCell(row: number, column: number) {
         return;
     }
     toggleSelectCell(row, column);
-}
+};
 
-function noteToCell(row: number, column: number, value: number) {
+const noteToCell = (row: number, column: number, value: number) => {
     sudoku.toggleNote(row, column, value);
-}
+};
 
-function inputToCell(row: number, column: number, value: number) {
+const inputToCell = (row: number, column: number, value: number) => {
     if (sudoku.puzzle[row][column].isClue) return;
     if (sudoku.puzzle[row][column].entry === value) {
         sudoku.fill(row, column, 0);
@@ -179,22 +179,22 @@ function inputToCell(row: number, column: number, value: number) {
     sudoku.fill(row, column, value);
     checkAndComplete();
     if (isDigitCompleted(value)) selectedDigit.value = null;
-}
+};
 
-function toggleSelectCell(row: number, column: number) {
+const toggleSelectCell = (row: number, column: number) => {
     if (sudoku.puzzle[row][column].isClue) return;
     if (isSelected(row, column)) {
         selectedCell.value = null;
         return;
     }
     selectedCell.value = { row, column };
-}
+};
 
-function isSelected(row: number, column: number) {
+const isSelected = (row: number, column: number) => {
     if (selectedCell.value === null) return false;
     if (selectedCell.value.row !== row) return false;
     return selectedCell.value.column === column;
-}
+};
 
 const highlightGrid = computed(() => {
     const grid: CellHighlight[][] = [];
@@ -243,27 +243,27 @@ const digitCounts = computed(() => {
     return counts;
 });
 
-function isDigitCompleted(digit: number): boolean {
+const isDigitCompleted = (digit: number): boolean => {
     return digitCounts.value[digit] >= 9;
-}
+};
 
-function eraseCell(row: number, column: number) {
+const eraseCell = (row: number, column: number) => {
     sudoku.erase(row, column);
-}
+};
 
-function toggleNoteMode() {
+const toggleNoteMode = () => {
     inputMode.value = inputMode.value === InputMode.Note ? InputMode.Normal : InputMode.Note;
-}
+};
 
-function toggleEraseMode() {
+const toggleEraseMode = () => {
     inputMode.value = inputMode.value === InputMode.Erase ? InputMode.Normal : InputMode.Erase;
     if (inputMode.value === InputMode.Erase) {
         selectedCell.value = null;
         selectedDigit.value = null;
     }
-}
+};
 
-function selectDigit(digit: number) {
+const selectDigit = (digit: number) => {
     clearErrors();
     if (inputMode.value === InputMode.Erase) inputMode.value = InputMode.Normal;
     if (selectedCell.value) {
@@ -276,5 +276,5 @@ function selectDigit(digit: number) {
         return;
     }
     selectedDigit.value = selectedDigit.value === digit ? null : digit;
-}
+};
 </script>

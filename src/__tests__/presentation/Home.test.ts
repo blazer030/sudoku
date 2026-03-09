@@ -9,7 +9,7 @@ import { hasSavedGame, saveGame } from "@/application/GameStorage";
 import { getGameHistory } from "@/application/Statistics";
 import type { CellState, GameState } from "@/application/GameState";
 
-function createTestRouter() {
+const createTestRouter = () => {
     return createRouter({
         history: createMemoryHistory(),
         routes: [
@@ -17,16 +17,16 @@ function createTestRouter() {
             { path: "/game", component: { template: "<div>Game</div>" } },
         ],
     });
-}
+};
 
-function mountHome() {
+const mountHome = () => {
     const router = createTestRouter();
     const pinia = createPinia();
     const wrapper = mount(Home, {
         global: { plugins: [router, pinia] },
     });
     return { wrapper, router, pinia };
-}
+};
 
 const dummySave: GameState = {
     difficulty: "easy",

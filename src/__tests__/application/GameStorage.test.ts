@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { deleteSavedGame, hasSavedGame, loadGame, saveGame } from "@/application/GameStorage";
 import type { CellState, GameState } from "@/application/GameState";
 
-function createGameState(overrides: Partial<GameState> = {}): GameState {
+const createGameState = (overrides: Partial<GameState> = {}): GameState => {
     return {
         difficulty: "easy",
         answer: Array.from({ length: 9 }, () => Array.from({ length: 9 }, () => 0)),
@@ -14,7 +14,7 @@ function createGameState(overrides: Partial<GameState> = {}): GameState {
         hintsUsed: 0,
         ...overrides,
     };
-}
+};
 
 describe("GameStorage", () => {
     beforeEach(() => {

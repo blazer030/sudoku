@@ -5,7 +5,7 @@ import { createRouter, createMemoryHistory } from "vue-router";
 import Statistics from "@/presentation/pages/statistics/Statistics.vue";
 import { recordGameResult } from "@/application/Statistics";
 
-function createTestRouter() {
+const createTestRouter = () => {
     return createRouter({
         history: createMemoryHistory(),
         routes: [
@@ -13,16 +13,16 @@ function createTestRouter() {
             { path: "/", component: { template: "<div>Home</div>" } },
         ],
     });
-}
+};
 
-function mountStatistics() {
+const mountStatistics = () => {
     const router = createTestRouter();
     const pinia = createPinia();
     const wrapper = mount(Statistics, {
         global: { plugins: [router, pinia] },
     });
     return { wrapper, router };
-}
+};
 
 afterEach(() => {
     localStorage.clear();

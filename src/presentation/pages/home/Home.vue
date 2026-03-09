@@ -98,7 +98,7 @@ const newGameDialog = provideNewGameDialog();
 
 const difficulty = ref<Difficulty>("easy");
 
-async function handleNewGame() {
+const handleNewGame = async () => {
     if (hasSavedGame()) {
         const result = await newGameDialog.open(undefined);
         if (result === "cancel") return;
@@ -113,22 +113,22 @@ async function handleNewGame() {
         deleteSavedGame();
     }
     startGame();
-}
+};
 
-function startGame() {
+const startGame = () => {
     gameStore.startNewGame(difficulty.value);
     void router.push(ROUTER_PATH.game);
-}
+};
 
-function goToStatistics() {
+const goToStatistics = () => {
     void router.push(ROUTER_PATH.statistics);
-}
+};
 
-function continueGame() {
+const continueGame = () => {
     const saved = loadGame();
     if (saved) {
         gameStore.loadSavedGame(saved);
     }
     void router.push(ROUTER_PATH.game);
-}
+};
 </script>

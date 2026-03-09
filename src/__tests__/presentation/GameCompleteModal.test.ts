@@ -6,7 +6,7 @@ import GameCompleteModal from "@/presentation/components/game-complete-modal/Gam
 import { provideGameCompleteModal } from "@/presentation/components/game-complete-modal/useGameCompleteModal";
 import type { GameCompleteParams } from "@/presentation/components/game-complete-modal/useGameCompleteModal";
 
-function mountModal(overrides: Partial<GameCompleteParams> = {}) {
+const mountModal = (overrides: Partial<GameCompleteParams> = {}) => {
     const router = createRouter({
         history: createMemoryHistory(),
         routes: [{ path: "/", component: { template: "<div/>" } }],
@@ -21,7 +21,7 @@ function mountModal(overrides: Partial<GameCompleteParams> = {}) {
         template: "<GameCompleteModal />",
     });
     return mount(Host, { global: { plugins: [router] } });
-}
+};
 
 describe("GameCompleteModal", () => {
     it("should display Hints stat with recordedUsed count", () => {

@@ -2,20 +2,20 @@ import type { GameState } from "@/application/GameState";
 
 const STORAGE_KEY = "sudoku-save";
 
-export function saveGame(state: GameState): void {
+export const saveGame = (state: GameState): void => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-}
+};
 
-export function loadGame(): GameState | null {
+export const loadGame = (): GameState | null => {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored === null) return null;
     return JSON.parse(stored) as GameState;
-}
+};
 
-export function hasSavedGame(): boolean {
+export const hasSavedGame = (): boolean => {
     return localStorage.getItem(STORAGE_KEY) !== null;
-}
+};
 
-export function deleteSavedGame(): void {
+export const deleteSavedGame = (): void => {
     localStorage.removeItem(STORAGE_KEY);
-}
+};
