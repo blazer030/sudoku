@@ -133,12 +133,7 @@
         <div class="flex-1" />
 
         <!-- Game Complete Modal -->
-        <GameCompleteModal
-            v-if="completed"
-            :difficulty="gameStore.difficulty ?? 'easy'"
-            :elapsed-seconds="elapsedSeconds"
-            :hints-used="sudoku.hintTracker.recordedUsed"
-        />
+        <GameCompleteModal />
 
         <!-- Hint Menu Popup -->
         <HintMenuPopup />
@@ -155,6 +150,7 @@ import { onBeforeRouteLeave, useRouter } from "vue-router";
 import { Eraser, Lightbulb, Pencil, Undo2 } from "lucide-vue-next";
 import GameHeader from "@/presentation/components/game-header/GameHeader.vue";
 import GameCompleteModal from "@/presentation/components/game-complete-modal/GameCompleteModal.vue";
+import { provideGameCompleteModal } from "@/presentation/components/game-complete-modal/useGameCompleteModal";
 import LeaveGameDialog from "@/presentation/components/leave-game-dialog/LeaveGameDialog.vue";
 import { provideLeaveDialog } from "@/presentation/components/leave-game-dialog/useLeaveDialog";
 import ControlButton from "@/presentation/components/game-controls/ControlButton.vue";
@@ -191,6 +187,7 @@ enum InputMode { Normal, Note, Erase }
 
 const leaveDialog = provideLeaveDialog();
 const hintMenu = provideHintMenu();
+const gameCompleteModal = provideGameCompleteModal();
 
 const selectedCell = ref<{ row: number; column: number } | null>(null);
 const selectedDigit = ref<number | null>(null);
@@ -240,6 +237,22 @@ async function showLeaveDialog() {
     }
 }
 
+function markCompleted() {
+    completed.value = true;
+    deleteSavedGame();
+    recordGameResult({
+        difficulty: gameStore.difficulty ?? "easy",
+        elapsedSeconds: elapsedSeconds.value,
+        completed: true,
+        hintsUsed: sudoku.hintTracker.recordedUsed,
+    });
+    void gameCompleteModal.open({
+        elapsedSeconds: elapsedSeconds.value,
+        difficulty: gameStore.difficulty ?? "easy",
+        hintsUsed: sudoku.hintTracker.recordedUsed,
+    });
+}
+
 function clickCell(row: number, column: number) {
     clearErrors();
     if (inputMode.value === InputMode.Erase) {
@@ -268,16 +281,7 @@ function inputToCell(row: number, column: number, value: number) {
         return;
     }
     sudoku.fill(row, column, value);
-    if (sudoku.isCompleted()) {
-        completed.value = true;
-        deleteSavedGame();
-        recordGameResult({
-            difficulty: gameStore.difficulty ?? "easy",
-            elapsedSeconds: elapsedSeconds.value,
-            completed: true,
-            hintsUsed: sudoku.hintTracker.recordedUsed,
-        });
-    }
+    if (sudoku.isCompleted()) markCompleted();
     if (isDigitCompleted(value)) selectedDigit.value = null;
 }
 
@@ -409,16 +413,7 @@ async function openHintMenu() {
         break;
     case "revealCell":
         sudoku.revealRandomCell();
-        if (sudoku.isCompleted()) {
-            completed.value = true;
-            deleteSavedGame();
-            recordGameResult({
-                difficulty: gameStore.difficulty ?? "easy",
-                elapsedSeconds: elapsedSeconds.value,
-                completed: true,
-                hintsUsed: sudoku.hintTracker.recordedUsed,
-            });
-        }
+        if (sudoku.isCompleted()) markCompleted();
         break;
     }
 }

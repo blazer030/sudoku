@@ -1,9 +1,13 @@
 import { type InjectionKey, type Ref, type ShallowRef, provide, inject, ref, shallowRef, readonly } from "vue";
 
+type CloseFn<TResult> = undefined extends TResult
+    ? (result?: TResult) => void
+    : (result: TResult) => void;
+
 interface DialogState<TParams, TResult> {
     visible: Readonly<Ref<boolean>>;
     params: Readonly<ShallowRef<TParams | undefined>>;
-    close: (result: TResult) => void;
+    close: CloseFn<TResult>;
 }
 
 export const createDialog = <TParams = undefined, TResult = undefined>() => {
@@ -20,11 +24,11 @@ export const createDialog = <TParams = undefined, TResult = undefined>() => {
             return new Promise(r => { resolve = r; });
         };
 
-        const close = (result: TResult) => {
+        const close: CloseFn<TResult> = ((result?: TResult) => {
             visible.value = false;
-            resolve?.(result);
+            resolve?.(result as TResult);
             resolve = null;
-        };
+        }) as CloseFn<TResult>;
 
         provide(key, { visible: readonly(visible), params: readonly(params), close });
         return { open, visible: readonly(visible) };

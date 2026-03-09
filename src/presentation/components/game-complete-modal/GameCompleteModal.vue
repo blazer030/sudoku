@@ -1,5 +1,6 @@
 <template>
     <div
+        v-if="visible"
         class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
         data-testid="game-complete-modal"
     >
@@ -23,7 +24,7 @@
             <div class="flex justify-center gap-8 w-full">
                 <div class="flex flex-col items-center gap-1">
                     <span class="text-[32px] font-bold text-primary tracking-tighter">
-                        {{ formatTime(elapsedSeconds) }}
+                        {{ formatTime(params?.elapsedSeconds ?? 0) }}
                     </span>
                     <span class="text-[13px] font-medium text-foreground-secondary">
                         Time
@@ -42,7 +43,7 @@
                         class="text-[32px] font-bold text-foreground-secondary tracking-tighter"
                         data-testid="hints-count"
                     >
-                        {{ hintsUsed }}
+                        {{ params?.hintsUsed ?? 0 }}
                     </span>
                     <span class="text-[13px] font-medium text-foreground-secondary">
                         Hints
@@ -71,20 +72,17 @@
 import { Trophy, Home } from "lucide-vue-next";
 import { useRouter } from "vue-router";
 import { formatTime } from "@/utils/formatTime";
-import { DifficultyLabels, type Difficulty } from "@/domain/SudokuGenerator";
+import { DifficultyLabels } from "@/domain/SudokuGenerator";
 import { computed } from "vue";
-
-const props = defineProps<{
-    elapsedSeconds: number;
-    difficulty: Difficulty;
-    hintsUsed: number;
-}>();
+import { useGameCompleteModal } from "./useGameCompleteModal";
 
 const router = useRouter();
+const { visible, params, close } = useGameCompleteModal();
 
-const difficultyLabel = computed(() => DifficultyLabels[props.difficulty]);
+const difficultyLabel = computed(() => DifficultyLabels[params.value?.difficulty ?? "easy"]);
 
 const goHome = () => {
     router.back();
+    close();
 };
 </script>

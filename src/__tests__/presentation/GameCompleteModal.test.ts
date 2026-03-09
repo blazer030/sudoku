@@ -1,17 +1,26 @@
 import { describe, expect, it } from "vitest";
 import { mount } from "@vue/test-utils";
+import { defineComponent } from "vue";
 import { createMemoryHistory, createRouter } from "vue-router";
 import GameCompleteModal from "@/presentation/components/game-complete-modal/GameCompleteModal.vue";
+import { provideGameCompleteModal } from "@/presentation/components/game-complete-modal/useGameCompleteModal";
+import type { GameCompleteParams } from "@/presentation/components/game-complete-modal/useGameCompleteModal";
 
-function mountModal(props: Record<string, unknown> = {}) {
+function mountModal(overrides: Partial<GameCompleteParams> = {}) {
     const router = createRouter({
         history: createMemoryHistory(),
         routes: [{ path: "/", component: { template: "<div/>" } }],
     });
-    return mount(GameCompleteModal, {
-        props: { elapsedSeconds: 120, difficulty: "easy", hintsUsed: 0, ...props },
-        global: { plugins: [router] },
+    const Host = defineComponent({
+        components: { GameCompleteModal },
+        setup() {
+            const modal = provideGameCompleteModal();
+            void modal.open({ elapsedSeconds: 120, difficulty: "easy", hintsUsed: 0, ...overrides });
+            return {};
+        },
+        template: "<GameCompleteModal />",
     });
+    return mount(Host, { global: { plugins: [router] } });
 }
 
 describe("GameCompleteModal", () => {
@@ -28,6 +37,3 @@ describe("GameCompleteModal", () => {
         expect(wrapper.find("[data-testid='hints-count']").text()).toBe("0");
     });
 });
-
-// 完成時 recordGameResult 包含 hintsUsed 的測試在 Game.test.ts 中已覆蓋
-
