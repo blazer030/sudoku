@@ -54,7 +54,7 @@
                 <ControlButton
                     :icon="Lightbulb"
                     data-testid="hint-button"
-                    @click="showHintMenu = true"
+                    @click="openHintMenu"
                 />
             </div>
 
@@ -141,16 +141,7 @@
         />
 
         <!-- Hint Menu Popup -->
-        <HintMenuPopup
-            v-if="showHintMenu"
-            :can-use-hint="sudoku.hintTracker.canUseHint"
-            :recorded-used="sudoku.hintTracker.recordedUsed"
-            @close="showHintMenu = false"
-            @auto-notes="handleAutoNotes"
-            @check-conflicts="handleCheckConflicts"
-            @check-errors="handleCheckErrors"
-            @reveal-cell="handleRevealCell"
-        />
+        <HintMenuPopup />
 
         <!-- Leave Game Dialog -->
         <LeaveGameDialog />
@@ -168,6 +159,7 @@ import LeaveGameDialog from "@/presentation/components/leave-game-dialog/LeaveGa
 import { provideLeaveDialog } from "@/presentation/components/leave-game-dialog/useLeaveDialog";
 import ControlButton from "@/presentation/components/game-controls/ControlButton.vue";
 import HintMenuPopup from "@/presentation/components/hint-menu-popup/HintMenuPopup.vue";
+import { provideHintMenu } from "@/presentation/components/hint-menu-popup/useHintMenu";
 import Sudoku from "@/domain/Sudoku";
 import { BOARD_SIZE, BOX_SIZE } from "@/domain/constants";
 import CellHighlight from "@/domain/CellHighlight";
@@ -198,13 +190,13 @@ const sudoku = (() => {
 enum InputMode { Normal, Note, Erase }
 
 const leaveDialog = provideLeaveDialog();
+const hintMenu = provideHintMenu();
 
 const selectedCell = ref<{ row: number; column: number } | null>(null);
 const selectedDigit = ref<number | null>(null);
 const completed = ref(false);
 const leavingConfirmed = ref(false);
 const inputMode = ref(InputMode.Normal);
-const showHintMenu = ref(false);
 const errorCells = ref<{ row: number; column: number }[]>([]);
 const elapsedSeconds = ref(gameStore.elapsedSeconds);
 
@@ -398,39 +390,36 @@ function clearErrors() {
     errorCells.value = [];
 }
 
-function handleAutoNotes() {
-    sudoku.autoNotes();
+async function openHintMenu() {
+    const action = await hintMenu.open({
+        recordedUsed: sudoku.hintTracker.recordedUsed,
+        canUseHint: sudoku.hintTracker.canUseHint,
+    });
+    if (action === "close") return;
     sudoku.hintTracker.useHint();
-    showHintMenu.value = false;
-}
-
-function handleCheckConflicts() {
-    const conflicts = sudoku.checkAllConflicts();
-    errorCells.value = conflicts;
-    sudoku.hintTracker.useHint();
-    showHintMenu.value = false;
-}
-
-function handleCheckErrors() {
-    const errors = sudoku.checkErrors();
-    errorCells.value = errors;
-    sudoku.hintTracker.useHint();
-    showHintMenu.value = false;
-}
-
-function handleRevealCell() {
-    sudoku.revealRandomCell();
-    sudoku.hintTracker.useHint();
-    showHintMenu.value = false;
-    if (sudoku.isCompleted()) {
-        completed.value = true;
-        deleteSavedGame();
-        recordGameResult({
-            difficulty: gameStore.difficulty ?? "easy",
-            elapsedSeconds: elapsedSeconds.value,
-            completed: true,
-            hintsUsed: sudoku.hintTracker.recordedUsed,
-        });
+    switch (action) {
+    case "autoNotes":
+        sudoku.autoNotes();
+        break;
+    case "checkConflicts":
+        errorCells.value = sudoku.checkAllConflicts();
+        break;
+    case "checkErrors":
+        errorCells.value = sudoku.checkErrors();
+        break;
+    case "revealCell":
+        sudoku.revealRandomCell();
+        if (sudoku.isCompleted()) {
+            completed.value = true;
+            deleteSavedGame();
+            recordGameResult({
+                difficulty: gameStore.difficulty ?? "easy",
+                elapsedSeconds: elapsedSeconds.value,
+                completed: true,
+                hintsUsed: sudoku.hintTracker.recordedUsed,
+            });
+        }
+        break;
     }
 }
 

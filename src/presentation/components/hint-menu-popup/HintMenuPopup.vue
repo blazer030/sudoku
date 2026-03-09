@@ -1,9 +1,12 @@
 <template>
-    <div class="fixed inset-0 z-50">
+    <div
+        v-if="visible"
+        class="fixed inset-0 z-50"
+    >
         <div
             data-testid="hint-overlay"
             class="absolute inset-0 bg-black/30"
-            @click="$emit('close')"
+            @click="close('close')"
         />
         <div class="absolute bottom-24 left-1/2 -translate-x-1/2 bg-card rounded-popup shadow-popup w-[220px] z-10 flex flex-col gap-1 py-4 px-3">
             <!-- Header: Title + Hint Lights -->
@@ -28,9 +31,9 @@
             <!-- Auto Notes -->
             <button
                 data-testid="hint-auto-notes"
-                :disabled="!canUseHint"
+                :disabled="!params?.canUseHint"
                 class="hint-option"
-                @click="$emit('autoNotes')"
+                @click="close('autoNotes')"
             >
                 <Sparkles
                     :size="20"
@@ -42,9 +45,9 @@
             <!-- Check Conflicts -->
             <button
                 data-testid="hint-check-conflicts"
-                :disabled="!canUseHint"
+                :disabled="!params?.canUseHint"
                 class="hint-option"
-                @click="$emit('checkConflicts')"
+                @click="close('checkConflicts')"
             >
                 <ScanSearch
                     :size="20"
@@ -56,9 +59,9 @@
             <!-- Check Errors -->
             <button
                 data-testid="hint-check-errors"
-                :disabled="!canUseHint"
+                :disabled="!params?.canUseHint"
                 class="hint-option"
-                @click="$emit('checkErrors')"
+                @click="close('checkErrors')"
             >
                 <CircleAlert
                     :size="20"
@@ -73,9 +76,9 @@
             <!-- Reveal Cell -->
             <button
                 data-testid="hint-reveal-cell"
-                :disabled="!canUseHint"
+                :disabled="!params?.canUseHint"
                 class="hint-option"
-                @click="$emit('revealCell')"
+                @click="close('revealCell')"
             >
                 <Eye
                     :size="20"
@@ -90,21 +93,11 @@
 <script lang="ts" setup>
 import { computed } from "vue";
 import { CircleAlert, Eye, ScanSearch, Sparkles } from "lucide-vue-next";
+import { useHintMenu } from "./useHintMenu";
 
-const props = defineProps<{
-    recordedUsed: number;
-    canUseHint: boolean;
-}>();
+const { visible, params, close } = useHintMenu();
 
-defineEmits<{
-    close: [];
-    autoNotes: [];
-    checkConflicts: [];
-    checkErrors: [];
-    revealCell: [];
-}>();
-
-const remaining = computed(() => 3 - props.recordedUsed);
+const remaining = computed(() => 3 - (params.value?.recordedUsed ?? 0));
 </script>
 
 <style scoped>

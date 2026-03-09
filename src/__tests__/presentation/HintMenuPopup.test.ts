@@ -1,12 +1,23 @@
 import { describe, expect, it } from "vitest";
 import { mount } from "@vue/test-utils";
+import { defineComponent } from "vue";
 import HintMenuPopup from "@/presentation/components/hint-menu-popup/HintMenuPopup.vue";
+import { provideHintMenu } from "@/presentation/components/hint-menu-popup/useHintMenu";
+import type { HintParams } from "@/presentation/components/hint-menu-popup/useHintMenu";
 
 describe("HintMenuPopup", () => {
-    const mountPopup = (props: Record<string, unknown> = {}) =>
-        mount(HintMenuPopup, {
-            props: { recordedUsed: 0, canUseHint: true, ...props },
+    const mountPopup = (params: Partial<HintParams> = {}) => {
+        const Host = defineComponent({
+            components: { HintMenuPopup },
+            setup() {
+                const hintMenu = provideHintMenu();
+                void hintMenu.open({ recordedUsed: 0, canUseHint: true, ...params });
+                return {};
+            },
+            template: "<HintMenuPopup />",
         });
+        return mount(Host);
+    };
 
     it("渲染 4 個選項", () => {
         const wrapper = mountPopup();
@@ -30,28 +41,21 @@ describe("HintMenuPopup", () => {
         expect(outlinedDots).toHaveLength(2);
     });
 
-    it("點擊遮罩觸發 close 事件", async () => {
+    it("點擊遮罩觸發 close", async () => {
         const wrapper = mountPopup();
 
         await wrapper.find("[data-testid='hint-overlay']").trigger("click");
 
-        expect(wrapper.emitted("close")).toHaveLength(1);
+        expect(wrapper.find("[data-testid='hint-overlay']").exists()).toBe(false);
     });
 
-    it("點擊各選項觸發對應 emit", async () => {
-        const wrapper = mountPopup();
-
-        await wrapper.find("[data-testid='hint-auto-notes']").trigger("click");
-        expect(wrapper.emitted("autoNotes")).toHaveLength(1);
-
-        await wrapper.find("[data-testid='hint-check-conflicts']").trigger("click");
-        expect(wrapper.emitted("checkConflicts")).toHaveLength(1);
-
-        await wrapper.find("[data-testid='hint-check-errors']").trigger("click");
-        expect(wrapper.emitted("checkErrors")).toHaveLength(1);
-
-        await wrapper.find("[data-testid='hint-reveal-cell']").trigger("click");
-        expect(wrapper.emitted("revealCell")).toHaveLength(1);
+    it("點擊各選項關閉彈窗", async () => {
+        const testCases = ["hint-auto-notes", "hint-check-conflicts", "hint-check-errors", "hint-reveal-cell"];
+        for (const testId of testCases) {
+            const wrapper = mountPopup();
+            await wrapper.find(`[data-testid='${testId}']`).trigger("click");
+            expect(wrapper.find(`[data-testid='${testId}']`).exists()).toBe(false);
+        }
     });
 
     it("提示全部用完時選項 disabled", () => {
