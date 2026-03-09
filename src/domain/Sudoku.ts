@@ -1,4 +1,5 @@
 import { Conflict, ConflictDetector } from "@/domain/ConflictDetector";
+import { BOARD_SIZE, BOX_SIZE } from "@/domain/constants";
 import { HintTracker } from "@/domain/HintTracker";
 import PuzzleCell from "@/domain/PuzzleCell";
 import { SudokuBoard } from "@/domain/SudokuBoard";
@@ -70,8 +71,8 @@ class Sudoku {
     public undo(): void {
         const snapshot = this._history.pop();
         if (!snapshot) return;
-        for (let row = 0; row < 9; row++) {
-            for (let col = 0; col < 9; col++) {
+        for (let row = 0; row < BOARD_SIZE; row++) {
+            for (let col = 0; col < BOARD_SIZE; col++) {
                 this._puzzle[row][col].restore(snapshot[row][col].entry, snapshot[row][col].notes);
             }
         }
@@ -110,12 +111,12 @@ class Sudoku {
     public autoNotes(): void {
         this.snapshot();
         const currentBoard = this.getCurrentBoard();
-        for (let row = 0; row < 9; row++) {
-            for (let col = 0; col < 9; col++) {
+        for (let row = 0; row < BOARD_SIZE; row++) {
+            for (let col = 0; col < BOARD_SIZE; col++) {
                 const cell = this._puzzle[row][col];
                 if (cell.isClue || cell.hasEntry) continue;
                 cell.clearNotes();
-                for (let digit = 1; digit <= 9; digit++) {
+                for (let digit = 1; digit <= BOARD_SIZE; digit++) {
                     if (this.board.isValidPlacement(currentBoard, row, col, digit)) {
                         cell.toggleNote(digit);
                     }
@@ -129,8 +130,8 @@ class Sudoku {
         const conflicts: Conflict[] = [];
         const seen = new Set<string>();
 
-        for (let row = 0; row < 9; row++) {
-            for (let col = 0; col < 9; col++) {
+        for (let row = 0; row < BOARD_SIZE; row++) {
+            for (let col = 0; col < BOARD_SIZE; col++) {
                 const cell = this._puzzle[row][col];
                 if (cell.isClue || !cell.hasEntry) continue;
                 const value = cell.entry;
@@ -156,8 +157,8 @@ class Sudoku {
 
     public revealRandomCell(): Conflict | null {
         const candidates: Conflict[] = [];
-        for (let row = 0; row < 9; row++) {
-            for (let col = 0; col < 9; col++) {
+        for (let row = 0; row < BOARD_SIZE; row++) {
+            for (let col = 0; col < BOARD_SIZE; col++) {
                 const cell = this._puzzle[row][col];
                 if (cell.isClue) continue;
                 if (!cell.hasEntry || cell.entry !== this._answer[row][col]) {
@@ -174,8 +175,8 @@ class Sudoku {
 
     public checkErrors(): Conflict[] {
         const errors: Conflict[] = [];
-        for (let row = 0; row < 9; row++) {
-            for (let col = 0; col < 9; col++) {
+        for (let row = 0; row < BOARD_SIZE; row++) {
+            for (let col = 0; col < BOARD_SIZE; col++) {
                 const cell = this._puzzle[row][col];
                 if (cell.isClue || !cell.hasEntry) continue;
                 if (cell.entry !== this._answer[row][col]) {
@@ -200,18 +201,18 @@ class Sudoku {
 
     private removeNoteFromPeers(row: number, column: number, value: number): void {
         // 同行
-        for (let col = 0; col < 9; col++) {
+        for (let col = 0; col < BOARD_SIZE; col++) {
             if (col !== column) this._puzzle[row][col].removeNote(value);
         }
         // 同列
-        for (let r = 0; r < 9; r++) {
+        for (let r = 0; r < BOARD_SIZE; r++) {
             if (r !== row) this._puzzle[r][column].removeNote(value);
         }
         // 同宮
-        const boxRowStart = Math.floor(row / 3) * 3;
-        const boxColStart = Math.floor(column / 3) * 3;
-        for (let r = boxRowStart; r < boxRowStart + 3; r++) {
-            for (let c = boxColStart; c < boxColStart + 3; c++) {
+        const boxRowStart = Math.floor(row / BOX_SIZE) * BOX_SIZE;
+        const boxColStart = Math.floor(column / BOX_SIZE) * BOX_SIZE;
+        for (let r = boxRowStart; r < boxRowStart + BOX_SIZE; r++) {
+            for (let c = boxColStart; c < boxColStart + BOX_SIZE; c++) {
                 if (r !== row || c !== column) this._puzzle[r][c].removeNote(value);
             }
         }

@@ -1,3 +1,4 @@
+import { BOARD_SIZE } from "@/domain/constants";
 import { SudokuBoard } from "@/domain/SudokuBoard";
 
 export type DigitsProvider = () => number[];
@@ -20,11 +21,11 @@ export class SudokuSolver {
     }
 
     private countSolutionsRecursive(puzzle: number[][], limit: number): number {
-        for (let row = 0; row < 9; row++) {
-            for (let column = 0; column < 9; column++) {
+        for (let row = 0; row < BOARD_SIZE; row++) {
+            for (let column = 0; column < BOARD_SIZE; column++) {
                 if (puzzle[row][column] === 0) {
                     let count = 0;
-                    for (let digit = 1; digit <= 9; digit++) {
+                    for (let digit = 1; digit <= BOARD_SIZE; digit++) {
                         if (this.board.isValidPlacement(puzzle, row, column, digit)) {
                             puzzle[row][column] = digit;
                             count += this.countSolutionsRecursive(puzzle, limit - count);
@@ -40,10 +41,10 @@ export class SudokuSolver {
     }
 
     private fillBoard(board: number[][], digitsProvider?: DigitsProvider): boolean {
-        for (let row = 0; row < 9; row++) {
-            for (let column = 0; column < 9; column++) {
+        for (let row = 0; row < BOARD_SIZE; row++) {
+            for (let column = 0; column < BOARD_SIZE; column++) {
                 if (board[row][column] === 0) {
-                    const digits = digitsProvider ? digitsProvider() : [1, 2, 3, 4, 5, 6, 7, 8, 9];
+                    const digits = digitsProvider ? digitsProvider() : Array.from({ length: BOARD_SIZE }, (_, i) => i + 1);
                     for (const digit of digits) {
                         if (this.board.isValidPlacement(board, row, column, digit)) {
                             board[row][column] = digit;

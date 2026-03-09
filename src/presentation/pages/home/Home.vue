@@ -3,7 +3,7 @@
         <!-- Logo -->
         <div class="flex flex-col items-center gap-2">
             <div
-                class="w-20 h-20 bg-primary rounded-[20px] flex items-center justify-center shadow-[0_4px_16px_#3D8A5A30]"
+                class="w-20 h-20 bg-primary rounded-popup flex items-center justify-center shadow-primary-lg"
             >
                 <div class="grid grid-cols-3 gap-1 w-12 h-12">
                     <div class="rounded-sm bg-white/40" />
@@ -37,7 +37,7 @@
 
             <!-- New Game -->
             <button
-                class="flex items-center justify-center gap-2.5 h-14 w-full bg-card rounded-2xl shadow-[0_2px_8px_#1A191808] cursor-pointer"
+                class="flex items-center justify-center gap-2.5 h-14 w-full bg-card rounded-2xl shadow-card cursor-pointer"
                 data-testid="new-game-button"
                 @click="handleNewGame"
             >

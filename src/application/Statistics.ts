@@ -41,7 +41,8 @@ export interface Statistics {
 function loadHistory(): GameResult[] {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored === null) return [];
-    const raw = JSON.parse(stored) as GameResult[];
+    type StoredGameResult = Omit<GameResult, 'hintsUsed'> & { hintsUsed?: number };
+    const raw = JSON.parse(stored) as StoredGameResult[];
     return raw.map(game => ({
         ...game,
         hintsUsed: game.hintsUsed ?? 0,

@@ -6,7 +6,7 @@
         <span
             :class="active
                 ? 'bg-primary-light border-2 border-primary'
-                : 'bg-card shadow-[0_1px_4px_#1A191808]'"
+                : 'bg-card shadow-card-sm'"
             class="w-11 h-11 rounded-xl flex items-center justify-center"
         >
             <component

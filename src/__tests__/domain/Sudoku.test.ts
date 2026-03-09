@@ -353,7 +353,8 @@ describe("Sudoku", () => {
             const result = sudoku.revealRandomCell();
 
             expect(result).not.toBeNull();
-            const { row, column } = result!;
+            if (!result) return;
+            const { row, column } = result;
             expect(sudoku.puzzle[row][column].entry).toBe(knownAnswer[row][column]);
         });
 
@@ -373,7 +374,8 @@ describe("Sudoku", () => {
             const result = sudoku.revealRandomCell();
 
             expect(result).not.toBeNull();
-            const { row, column } = result!;
+            if (!result) return;
+            const { row, column } = result;
             expect(sudoku.puzzle[row][column].entry).toBe(knownAnswer[row][column]);
         });
 

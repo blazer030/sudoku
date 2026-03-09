@@ -22,21 +22,21 @@
             <span class="text-foreground-secondary text-sm font-semibold">Overview</span>
             <div class="flex gap-3">
                 <div
-                    class="flex-1 flex flex-col items-center gap-1 bg-card rounded-2xl p-4 shadow-[0_2px_8px_#1A191808]"
+                    class="flex-1 flex flex-col items-center gap-1 bg-card rounded-2xl p-4 shadow-card"
                     data-testid="games-won"
                 >
                     <span class="text-3xl font-bold text-primary">{{ stats.overall.gamesWon }}</span>
                     <span class="text-xs font-medium text-foreground-secondary">Games Won</span>
                 </div>
                 <div
-                    class="flex-1 flex flex-col items-center gap-1 bg-card rounded-2xl p-4 shadow-[0_2px_8px_#1A191808]"
+                    class="flex-1 flex flex-col items-center gap-1 bg-card rounded-2xl p-4 shadow-card"
                     data-testid="win-rate"
                 >
                     <span class="text-3xl font-bold text-primary">{{ winRateDisplay }}</span>
                     <span class="text-xs font-medium text-foreground-secondary">Win Rate</span>
                 </div>
                 <div
-                    class="flex-1 flex flex-col items-center gap-1 bg-card rounded-2xl p-4 shadow-[0_2px_8px_#1A191808]"
+                    class="flex-1 flex flex-col items-center gap-1 bg-card rounded-2xl p-4 shadow-card"
                     data-testid="day-streak"
                 >
                     <span class="text-3xl font-bold text-foreground">{{ dayStreak }}</span>
@@ -48,7 +48,7 @@
         <!-- Best Times -->
         <div class="flex flex-col gap-3">
             <span class="text-foreground-secondary text-sm font-semibold">Best Times</span>
-            <div class="bg-card rounded-2xl p-4 shadow-[0_2px_8px_#1A191808] flex flex-col gap-3">
+            <div class="bg-card rounded-2xl p-4 shadow-card flex flex-col gap-3">
                 <div
                     class="flex items-center justify-between"
                     data-testid="best-time-easy"
@@ -98,7 +98,7 @@
                 <div
                     v-for="(game, index) in stats.recentGames"
                     :key="index"
-                    class="flex items-center justify-between bg-card rounded-xl py-3 px-4 shadow-[0_1px_4px_#1A191808]"
+                    class="flex items-center justify-between bg-card rounded-xl py-3 px-4 shadow-card-sm"
                     data-testid="recent-game"
                 >
                     <div class="flex items-center gap-3">
@@ -106,7 +106,7 @@
                             :class="game.completed
                                 ? 'bg-primary-light text-primary'
                                 : 'bg-accent/10 text-accent'"
-                            class="w-9 h-9 rounded-[10px] flex items-center justify-center"
+                            class="w-9 h-9 rounded-icon flex items-center justify-center"
                         >
                             <Trophy
                                 v-if="game.completed"

@@ -15,7 +15,7 @@
         <!-- Game Area -->
         <div class="flex flex-col items-center gap-6">
             <!-- Board Container -->
-            <div class="bg-card rounded-2xl shadow-[0_2px_12px_#1A191808] p-2 w-full">
+            <div class="bg-card rounded-2xl shadow-card-lg p-2 w-full">
                 <div class="flex flex-col border-3 border-foreground/20 rounded-xl">
                     <div
                         v-for="(row, rowIndex) in sudoku.puzzle"
@@ -117,8 +117,8 @@
                     </div>
                     <button
                         :class="inputMode === InputMode.Erase
-                            ? 'bg-primary text-white shadow-[0_2px_8px_#3D8A5A40]'
-                            : 'bg-card text-foreground shadow-[0_1px_4px_#1A191808]'"
+                            ? 'bg-primary text-white shadow-primary-active'
+                            : 'bg-card text-foreground shadow-card-sm'"
                         class="w-14 h-14 rounded-xl flex items-center justify-center transition-all cursor-pointer"
                         data-testid="erase-button"
                         @click="toggleEraseMode"
@@ -173,6 +173,7 @@ import LeaveGameDialog from "@/presentation/components/leave-game-dialog/LeaveGa
 import ControlButton from "@/presentation/components/game-controls/ControlButton.vue";
 import HintMenuPopup from "@/presentation/components/hint-menu-popup/HintMenuPopup.vue";
 import Sudoku from "@/domain/Sudoku";
+import { BOARD_SIZE, BOX_SIZE } from "@/domain/constants";
 import CellHighlight from "@/domain/CellHighlight";
 import Cell from "@/presentation/components/cell/Cell.vue";
 import { useGameStore } from "@/stores/gameStore";
@@ -238,7 +239,7 @@ function handleSaveAndLeave() {
     });
     saveGame(state);
     leavingConfirmed.value = true;
-    void router.back();
+    router.back();
 }
 
 function handleGiveUpAndLeave() {
@@ -250,7 +251,7 @@ function handleGiveUpAndLeave() {
     });
     deleteSavedGame();
     leavingConfirmed.value = true;
-    void router.back();
+    router.back();
 }
 
 function clickCell(row: number, column: number) {
@@ -311,9 +312,9 @@ function isSelected(row: number, column: number) {
 
 const highlightGrid = computed(() => {
     const grid: CellHighlight[][] = [];
-    for (let row = 0; row < 9; row++) {
+    for (let row = 0; row < BOARD_SIZE; row++) {
         grid[row] = [];
-        for (let column = 0; column < 9; column++) {
+        for (let column = 0; column < BOARD_SIZE; column++) {
             const cell = sudoku.puzzle[row][column];
             const cellValue = cell.isClue ? cell.clue : cell.entry;
             if (selectedDigit.value && cellValue === selectedDigit.value) {
@@ -330,8 +331,8 @@ const highlightGrid = computed(() => {
                 grid[row][column] = CellHighlight.None;
             } else if (row === sr || column === sc) {
                 grid[row][column] = CellHighlight.Peer;
-            } else if (Math.floor(row / 3) === Math.floor(sr / 3)
-                && Math.floor(column / 3) === Math.floor(sc / 3)) {
+            } else if (Math.floor(row / BOX_SIZE) === Math.floor(sr / BOX_SIZE)
+                && Math.floor(column / BOX_SIZE) === Math.floor(sc / BOX_SIZE)) {
                 grid[row][column] = CellHighlight.Peer;
             } else {
                 grid[row][column] = CellHighlight.None;
@@ -343,8 +344,8 @@ const highlightGrid = computed(() => {
 
 const digitCounts = computed(() => {
     const counts = Array.from<number, number>({ length: 10 }, () => 0);
-    for (let row = 0; row < 9; row++) {
-        for (let column = 0; column < 9; column++) {
+    for (let row = 0; row < BOARD_SIZE; row++) {
+        for (let column = 0; column < BOARD_SIZE; column++) {
             const cell = sudoku.puzzle[row][column];
             // 明確存取兩個屬性，確保 Vue 追蹤 _clue 和 _entry
             const v = cell.clue;
@@ -441,7 +442,7 @@ function handleRevealCell() {
 
 function digitButtonClasses(digit: number): string {
     if (isDigitCompleted(digit)) return "bg-card opacity-50 text-foreground-muted";
-    if (selectedDigit.value === digit) return "bg-primary text-white shadow-[0_2px_8px_#3D8A5A40]";
-    return "bg-card text-foreground shadow-[0_1px_4px_#1A191808]";
+    if (selectedDigit.value === digit) return "bg-primary text-white shadow-primary-active";
+    return "bg-card text-foreground shadow-card-sm";
 }
 </script>

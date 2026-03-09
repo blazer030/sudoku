@@ -1,3 +1,5 @@
+import { BOARD_SIZE, BOX_SIZE } from "@/domain/constants";
+
 export class SudokuBoard {
     public isValidPlacement(board: number[][], row: number, column: number, digit: number): boolean {
         return this.isValidInRow(board, row, digit)
@@ -6,14 +8,14 @@ export class SudokuBoard {
     }
 
     public isValidSolution(board: number[][]): boolean {
-        for (let index = 0; index < 9; index++) {
+        for (let index = 0; index < BOARD_SIZE; index++) {
             const row = board[index];
             const column = board.map(row => row[index]);
-            const boxRowStart = Math.floor(index / 3) * 3;
-            const boxColumnStart = (index % 3) * 3;
+            const boxRowStart = Math.floor(index / BOX_SIZE) * BOX_SIZE;
+            const boxColumnStart = (index % BOX_SIZE) * BOX_SIZE;
             const box = [];
-            for (let currentRow = boxRowStart; currentRow < boxRowStart + 3; currentRow++) {
-                for (let currentColumn = boxColumnStart; currentColumn < boxColumnStart + 3; currentColumn++) {
+            for (let currentRow = boxRowStart; currentRow < boxRowStart + BOX_SIZE; currentRow++) {
+                for (let currentColumn = boxColumnStart; currentColumn < boxColumnStart + BOX_SIZE; currentColumn++) {
                     box.push(board[currentRow][currentColumn]);
                 }
             }
@@ -25,8 +27,8 @@ export class SudokuBoard {
     }
 
     private hasAllDigits(digits: number[]): boolean {
-        return new Set(digits).size === 9
-            && digits.every(digit => digit >= 1 && digit <= 9);
+        return new Set(digits).size === BOARD_SIZE
+            && digits.every(digit => digit >= 1 && digit <= BOARD_SIZE);
     }
 
     private isValidInRow(board: number[][], row: number, digit: number): boolean {
@@ -38,10 +40,10 @@ export class SudokuBoard {
     }
 
     private isValidInBox(board: number[][], row: number, column: number, digit: number): boolean {
-        const boxRowStart = Math.floor(row / 3) * 3;
-        const boxColumnStart = Math.floor(column / 3) * 3;
-        for (let currentRow = boxRowStart; currentRow < boxRowStart + 3; currentRow++) {
-            for (let currentColumn = boxColumnStart; currentColumn < boxColumnStart + 3; currentColumn++) {
+        const boxRowStart = Math.floor(row / BOX_SIZE) * BOX_SIZE;
+        const boxColumnStart = Math.floor(column / BOX_SIZE) * BOX_SIZE;
+        for (let currentRow = boxRowStart; currentRow < boxRowStart + BOX_SIZE; currentRow++) {
+            for (let currentColumn = boxColumnStart; currentColumn < boxColumnStart + BOX_SIZE; currentColumn++) {
                 if (board[currentRow][currentColumn] === digit) return false;
             }
         }

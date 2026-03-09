@@ -3,7 +3,7 @@
         class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
         data-testid="leave-game-dialog"
     >
-        <div class="bg-card rounded-3xl p-8 mx-6 w-full max-w-[354px] flex flex-col items-center gap-6 shadow-[0_8px_32px_#00000020]">
+        <div class="bg-card rounded-3xl p-8 mx-6 w-full max-w-[354px] flex flex-col items-center gap-6 shadow-modal">
             <div class="w-16 h-16 rounded-2xl bg-primary-light flex items-center justify-center">
                 <Save
                     :size="32"
@@ -22,7 +22,7 @@
 
             <div class="flex flex-col gap-3 w-full">
                 <button
-                    class="w-full h-[52px] rounded-[14px] bg-primary flex items-center justify-center gap-2 shadow-[0_4px_12px_#3D8A5A30] cursor-pointer"
+                    class="w-full h-[52px] rounded-button bg-primary flex items-center justify-center gap-2 shadow-primary cursor-pointer"
                     data-testid="save-and-leave-button"
                     @click="emit('saveAndLeave')"
                 >
@@ -34,7 +34,7 @@
                 </button>
 
                 <button
-                    class="w-full h-[52px] rounded-[14px] bg-accent flex items-center justify-center gap-2 shadow-[0_4px_12px_#D4845030] cursor-pointer"
+                    class="w-full h-[52px] rounded-button bg-accent flex items-center justify-center gap-2 shadow-accent cursor-pointer"
                     data-testid="give-up-and-leave-button"
                     @click="emit('giveUpAndLeave')"
                 >

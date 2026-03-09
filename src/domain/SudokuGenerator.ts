@@ -1,3 +1,4 @@
+import { BOARD_SIZE, TOTAL_CELLS } from "@/domain/constants";
 import { SudokuSolver } from "@/domain/SudokuSolver";
 
 export type Difficulty = "easy" | "medium" | "hard";
@@ -7,8 +8,8 @@ export class SudokuGenerator {
     private solver = new SudokuSolver();
 
     public generateFullBoard(): number[][] {
-        const emptyBoard = Array.from({ length: 9 }, () => Array.from({ length: 9 }, () => 0));
-        const board = this.solver.solve(emptyBoard, () => this.shuffle([1, 2, 3, 4, 5, 6, 7, 8, 9]));
+        const emptyBoard = Array.from({ length: BOARD_SIZE }, () => Array.from({ length: BOARD_SIZE }, () => 0));
+        const board = this.solver.solve(emptyBoard, () => this.shuffle(Array.from({ length: BOARD_SIZE }, (_, i) => i + 1)));
         if (!board) throw new Error("Failed to generate a full board");
         return board;
     }
@@ -18,7 +19,7 @@ export class SudokuGenerator {
             const answer = this.generateFullBoard();
             const puzzle = answer.map(row => [...row]);
             const clueCount = this.clueCountForDifficulty(difficulty);
-            if (this.removeClues(puzzle, 81 - clueCount)) {
+            if (this.removeClues(puzzle, TOTAL_CELLS - clueCount)) {
                 return { puzzle, answer };
             }
         }
@@ -26,14 +27,14 @@ export class SudokuGenerator {
 
     private removeClues(board: number[][], count: number): boolean {
         const positions = this.shuffle(
-            Array.from({ length: 81 }, (_, index) => index)
+            Array.from({ length: TOTAL_CELLS }, (_, index) => index)
         );
 
         let removed = 0;
         for (const position of positions) {
             if (removed >= count) break;
-            const row = Math.floor(position / 9);
-            const column = position % 9;
+            const row = Math.floor(position / BOARD_SIZE);
+            const column = position % BOARD_SIZE;
             const backup = board[row][column];
             board[row][column] = 0;
 
