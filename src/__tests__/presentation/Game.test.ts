@@ -8,6 +8,7 @@ import type { GameState } from "@/application/GameState";
 import Cell from "@/presentation/components/cell/Cell.vue";
 import CellHighlight from "@/domain/CellHighlight";
 import { useGameStore } from "@/stores/gameStore";
+import type { Difficulty } from "@/domain/SudokuGenerator";
 import { getGameHistory } from "@/application/Statistics";
 import { hasSavedGame, loadGame, saveGame } from "@/application/GameStorage";
 
@@ -18,12 +19,12 @@ function createTestRouter() {
     });
 }
 
-function mountGame(difficulty = "easy") {
+function mountGame(difficulty: Difficulty = "easy") {
     const pinia = createPinia();
     const router = createTestRouter();
     const gameStore = useGameStore(pinia);
     gameStore.sudoku = createKnownSudoku();
-    gameStore.setDifficulty(difficulty as "easy" | "medium" | "hard");
+    gameStore.setDifficulty(difficulty);
     return mount(Game, { global: { plugins: [pinia, router] } });
 }
 

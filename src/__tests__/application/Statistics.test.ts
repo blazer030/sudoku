@@ -1,6 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { recordGameResult, getGameHistory, getStatistics } from "@/application/Statistics";
-import type { Difficulty } from "@/domain/SudokuGenerator";
 
 describe("Statistics", () => {
     beforeEach(() => {
@@ -10,7 +9,7 @@ describe("Statistics", () => {
     describe("recordGameResult", () => {
         it("should record completion time, difficulty, and success", () => {
             recordGameResult({
-                difficulty: "easy" as Difficulty,
+                difficulty: "easy",
                 elapsedSeconds: 120,
                 completed: true,
             });

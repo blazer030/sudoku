@@ -1,14 +1,13 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { deleteSavedGame, hasSavedGame, loadGame, saveGame } from "@/application/GameStorage";
-import type { GameState } from "@/application/GameState";
-import type { Difficulty } from "@/domain/SudokuGenerator";
+import type { CellState, GameState } from "@/application/GameState";
 
 function createGameState(overrides: Partial<GameState> = {}): GameState {
     return {
-        difficulty: "easy" as Difficulty,
+        difficulty: "easy",
         answer: Array.from({ length: 9 }, () => Array.from({ length: 9 }, () => 0)),
         cells: Array.from({ length: 9 }, () =>
-            Array.from({ length: 9 }, () => ({ clue: 0, entry: 0, notes: [] as number[] }))
+            Array.from({ length: 9 }, (): CellState => ({ clue: 0, entry: 0, notes: [] }))
         ),
         elapsedSeconds: 0,
         completed: false,

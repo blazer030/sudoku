@@ -7,7 +7,7 @@ import { ROUTER_PATH } from "@/router";
 import { useGameStore } from "@/stores/gameStore";
 import { hasSavedGame, saveGame } from "@/application/GameStorage";
 import { getGameHistory } from "@/application/Statistics";
-import type { GameState } from "@/application/GameState";
+import type { CellState, GameState } from "@/application/GameState";
 
 function createTestRouter() {
     return createRouter({
@@ -30,9 +30,9 @@ function mountHome() {
 
 const dummySave: GameState = {
     difficulty: "easy",
-    answer: Array.from({ length: 9 }, () => Array(9).fill(0) as number[]),
+    answer: Array.from({ length: 9 }, () => Array.from({ length: 9 }, () => 0)),
     cells: Array.from({ length: 9 }, () =>
-        Array.from({ length: 9 }, () => ({ clue: 0, entry: 0, notes: [] as number[] }))
+        Array.from({ length: 9 }, (): CellState => ({ clue: 0, entry: 0, notes: [] }))
     ),
     elapsedSeconds: 204,
     completed: false,

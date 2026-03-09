@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import Sudoku from "@/domain/Sudoku";
-import { GameStateConverter } from "@/application/GameState";
+import { GameStateConverter, type CellState } from "@/application/GameState";
 import { knownAnswer, knownPuzzle, spyGeneratePuzzle } from "@/__tests__/fixtures/knownPuzzle";
 
 afterEach(() => {
@@ -103,10 +103,10 @@ describe("GameStateConverter", () => {
                 difficulty: "easy" as const,
                 answer: knownAnswer.map(row => [...row]),
                 cells: knownPuzzle.map(row =>
-                    row.map(puzzleValue => ({
+                    row.map((puzzleValue): CellState => ({
                         clue: puzzleValue,
                         entry: 0,
-                        notes: [] as number[],
+                        notes: [],
                     }))
                 ),
                 elapsedSeconds: 60,
