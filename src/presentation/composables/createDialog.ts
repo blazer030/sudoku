@@ -30,7 +30,11 @@ export const createDialog = <TParams = undefined, TResult = undefined>() => {
             resolve = null;
         }) as CloseFn<TResult>;
 
-        provide(key, { visible: readonly(visible), params: readonly(params), close });
+        provide(key, {
+            visible: readonly(visible),
+            params: params as Readonly<ShallowRef<TParams | undefined>>,
+            close,
+        });
         return { open, visible: readonly(visible) };
     };
 
