@@ -59,74 +59,13 @@
             </div>
 
             <!-- Digit Pad -->
-            <div class="flex flex-col gap-3">
-                <!-- Row 1: digits 1-5 -->
-                <div class="flex justify-center gap-2">
-                    <div
-                        v-for="digit in 5"
-                        :key="`num-${digit}`"
-                        class="relative"
-                    >
-                        <button
-                            :class="digitButtonClasses(digit)"
-                            :data-testid="`number-${digit}`"
-                            :disabled="isDigitCompleted(digit)"
-                            class="w-14 h-14 rounded-xl flex items-center justify-center text-2xl font-semibold transition-all cursor-pointer disabled:cursor-default"
-                            @click="selectDigit(digit)"
-                        >
-                            {{ digit }}
-                        </button>
-                        <span
-                            v-if="!isDigitCompleted(digit)"
-                            :class="selectedDigit === digit
-                                ? 'bg-white text-primary'
-                                : 'bg-foreground-secondary text-white'"
-                            :data-testid="`badge-${digit}`"
-                            class="absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-semibold"
-                        >
-                            {{ getRemainingCount(digit) }}
-                        </span>
-                    </div>
-                </div>
-                <!-- Row 2: digits 6-9 + Erase -->
-                <div class="flex justify-center gap-2">
-                    <div
-                        v-for="digit in 4"
-                        :key="`num-${digit + 5}`"
-                        class="relative"
-                    >
-                        <button
-                            :class="digitButtonClasses(digit + 5)"
-                            :data-testid="`number-${digit + 5}`"
-                            :disabled="isDigitCompleted(digit + 5)"
-                            class="w-14 h-14 rounded-xl flex items-center justify-center text-2xl font-semibold transition-all cursor-pointer disabled:cursor-default"
-                            @click="selectDigit(digit + 5)"
-                        >
-                            {{ digit + 5 }}
-                        </button>
-                        <span
-                            v-if="!isDigitCompleted(digit + 5)"
-                            :class="selectedDigit === (digit + 5)
-                                ? 'bg-white text-primary'
-                                : 'bg-foreground-secondary text-white'"
-                            :data-testid="`badge-${digit + 5}`"
-                            class="absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-semibold"
-                        >
-                            {{ getRemainingCount(digit + 5) }}
-                        </span>
-                    </div>
-                    <button
-                        :class="inputMode === InputMode.Erase
-                            ? 'bg-primary text-white shadow-primary-active'
-                            : 'bg-card text-foreground shadow-card-sm'"
-                        class="w-14 h-14 rounded-xl flex items-center justify-center transition-all cursor-pointer"
-                        data-testid="erase-button"
-                        @click="toggleEraseMode"
-                    >
-                        <Eraser :size="22" />
-                    </button>
-                </div>
-            </div>
+            <DigitPad
+                :selected-digit="selectedDigit"
+                :erase-active="inputMode === InputMode.Erase"
+                :digit-counts="digitCounts"
+                @select-digit="selectDigit"
+                @toggle-erase-mode="toggleEraseMode"
+            />
         </div>
 
         <!-- Spacer -->
@@ -147,13 +86,14 @@
 import { computed, reactive, ref } from "vue";
 
 import { useRouter } from "vue-router";
-import { Eraser, Lightbulb, Pencil, Undo2 } from "lucide-vue-next";
+import { Lightbulb, Pencil, Undo2 } from "lucide-vue-next";
 import GameHeader from "@/presentation/components/game-header/GameHeader.vue";
 import GameCompleteModal from "@/presentation/components/game-complete-modal/GameCompleteModal.vue";
 import { provideGameCompleteModal } from "@/presentation/components/game-complete-modal/useGameCompleteModal";
 import LeaveGameDialog from "@/presentation/components/leave-game-dialog/LeaveGameDialog.vue";
 import ControlButton from "@/presentation/components/game-controls/ControlButton.vue";
 import HintMenuPopup from "@/presentation/components/hint-menu-popup/HintMenuPopup.vue";
+import DigitPad from "@/presentation/components/digit-pad/DigitPad.vue";
 import Sudoku from "@/domain/Sudoku";
 import { BOARD_SIZE, BOX_SIZE } from "@/domain/constants";
 import CellHighlight from "@/domain/CellHighlight";
@@ -320,10 +260,6 @@ function isDigitCompleted(digit: number): boolean {
     return digitCounts.value[digit] >= 9;
 }
 
-function getRemainingCount(digit: number): number {
-    return 9 - digitCounts.value[digit];
-}
-
 function eraseCell(row: number, column: number) {
     sudoku.erase(row, column);
 }
@@ -353,12 +289,5 @@ function selectDigit(digit: number) {
         return;
     }
     selectedDigit.value = selectedDigit.value === digit ? null : digit;
-}
-
-
-function digitButtonClasses(digit: number): string {
-    if (isDigitCompleted(digit)) return "bg-card opacity-50 text-foreground-muted";
-    if (selectedDigit.value === digit) return "bg-primary text-white shadow-primary-active";
-    return "bg-card text-foreground shadow-card-sm";
 }
 </script>
