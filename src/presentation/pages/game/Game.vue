@@ -146,13 +146,12 @@
 <script lang="ts" setup>
 import { computed, reactive, ref } from "vue";
 
-import { onBeforeRouteLeave, useRouter } from "vue-router";
+import { useRouter } from "vue-router";
 import { Eraser, Lightbulb, Pencil, Undo2 } from "lucide-vue-next";
 import GameHeader from "@/presentation/components/game-header/GameHeader.vue";
 import GameCompleteModal from "@/presentation/components/game-complete-modal/GameCompleteModal.vue";
 import { provideGameCompleteModal } from "@/presentation/components/game-complete-modal/useGameCompleteModal";
 import LeaveGameDialog from "@/presentation/components/leave-game-dialog/LeaveGameDialog.vue";
-import { provideLeaveDialog } from "@/presentation/components/leave-game-dialog/useLeaveDialog";
 import ControlButton from "@/presentation/components/game-controls/ControlButton.vue";
 import HintMenuPopup from "@/presentation/components/hint-menu-popup/HintMenuPopup.vue";
 import { provideHintMenu } from "@/presentation/components/hint-menu-popup/useHintMenu";
@@ -162,12 +161,10 @@ import CellHighlight from "@/domain/CellHighlight";
 import Cell from "@/presentation/components/cell/Cell.vue";
 import { useGameStore } from "@/stores/gameStore";
 import { ROUTER_PATH } from "@/router";
-import { deleteSavedGame, saveGame } from "@/application/GameStorage";
-import { recordGameResult } from "@/application/Statistics";
-import { GameStateConverter } from "@/application/GameState";
 import InputMode from "./InputMode";
 import { useGameTimer } from "./useGameTimer";
 import { useGameCompletion } from "./useGameCompletion";
+import { useLeaveGame } from "./useLeaveGame";
 
 const router = useRouter();
 const gameStore = useGameStore();
@@ -186,14 +183,12 @@ const sudoku = (() => {
     return reactive(new Sudoku());
 })();
 
-const leaveDialog = provideLeaveDialog();
 const hintMenu = provideHintMenu();
 const gameCompleteModal = provideGameCompleteModal();
 
 const difficulty = computed(() => gameStore.difficulty ?? "easy");
 const selectedCell = ref<{ row: number; column: number } | null>(null);
 const selectedDigit = ref<number | null>(null);
-const leavingConfirmed = ref(false);
 const inputMode = ref(InputMode.Normal);
 const errorCells = ref<{ row: number; column: number }[]>([]);
 
@@ -210,41 +205,18 @@ const { completed, checkAndComplete } = useGameCompletion({
     },
 });
 
+const { leaveDialog, showLeaveDialog } = useLeaveGame({
+    sudoku,
+    difficulty,
+    completed,
+    getElapsedSeconds: () => elapsedSeconds.value,
+});
+
 const timerPaused = computed(() => completed.value || leaveDialog.visible.value);
 const { elapsedSeconds } = useGameTimer({
     initialSeconds: gameStore.elapsedSeconds,
     paused: timerPaused,
 });
-
-onBeforeRouteLeave(() => {
-    if (completed.value || leavingConfirmed.value) return true;
-    void showLeaveDialog();
-    return false;
-});
-
-async function showLeaveDialog() {
-    const result = await leaveDialog.open(undefined);
-    if (result === "save") {
-        const state = GameStateConverter.fromSudoku(sudoku.raw(), {
-            difficulty: gameStore.difficulty ?? "easy",
-            elapsedSeconds: elapsedSeconds.value,
-            completed: completed.value,
-        });
-        saveGame(state);
-        leavingConfirmed.value = true;
-        router.back();
-    } else if (result === "giveUp") {
-        recordGameResult({
-            difficulty: gameStore.difficulty ?? "easy",
-            elapsedSeconds: elapsedSeconds.value,
-            completed: false,
-            hintsUsed: sudoku.hintTracker.recordedUsed,
-        });
-        deleteSavedGame();
-        leavingConfirmed.value = true;
-        router.back();
-    }
-}
 
 
 function clickCell(row: number, column: number) {
