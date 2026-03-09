@@ -154,7 +154,6 @@ import { provideGameCompleteModal } from "@/presentation/components/game-complet
 import LeaveGameDialog from "@/presentation/components/leave-game-dialog/LeaveGameDialog.vue";
 import ControlButton from "@/presentation/components/game-controls/ControlButton.vue";
 import HintMenuPopup from "@/presentation/components/hint-menu-popup/HintMenuPopup.vue";
-import { provideHintMenu } from "@/presentation/components/hint-menu-popup/useHintMenu";
 import Sudoku from "@/domain/Sudoku";
 import { BOARD_SIZE, BOX_SIZE } from "@/domain/constants";
 import CellHighlight from "@/domain/CellHighlight";
@@ -165,6 +164,7 @@ import InputMode from "./InputMode";
 import { useGameTimer } from "./useGameTimer";
 import { useGameCompletion } from "./useGameCompletion";
 import { useLeaveGame } from "./useLeaveGame";
+import { useHintActions } from "./useHintActions";
 
 const router = useRouter();
 const gameStore = useGameStore();
@@ -183,14 +183,12 @@ const sudoku = (() => {
     return reactive(new Sudoku());
 })();
 
-const hintMenu = provideHintMenu();
 const gameCompleteModal = provideGameCompleteModal();
 
 const difficulty = computed(() => gameStore.difficulty ?? "easy");
 const selectedCell = ref<{ row: number; column: number } | null>(null);
 const selectedDigit = ref<number | null>(null);
 const inputMode = ref(InputMode.Normal);
-const errorCells = ref<{ row: number; column: number }[]>([]);
 
 const { completed, checkAndComplete } = useGameCompletion({
     sudoku,
@@ -203,6 +201,11 @@ const { completed, checkAndComplete } = useGameCompletion({
             hintsUsed: sudoku.hintTracker.recordedUsed,
         });
     },
+});
+
+const { clearErrors, isError, openHintMenu } = useHintActions({
+    sudoku,
+    onRevealComplete: checkAndComplete,
 });
 
 const { leaveDialog, showLeaveDialog } = useLeaveGame({
@@ -352,37 +355,6 @@ function selectDigit(digit: number) {
     selectedDigit.value = selectedDigit.value === digit ? null : digit;
 }
 
-function isError(row: number, column: number): boolean {
-    return errorCells.value.some(c => c.row === row && c.column === column);
-}
-
-function clearErrors() {
-    errorCells.value = [];
-}
-
-async function openHintMenu() {
-    const action = await hintMenu.open({
-        recordedUsed: sudoku.hintTracker.recordedUsed,
-        canUseHint: sudoku.hintTracker.canUseHint,
-    });
-    if (action === "close") return;
-    sudoku.hintTracker.useHint();
-    switch (action) {
-    case "autoNotes":
-        sudoku.autoNotes();
-        break;
-    case "checkConflicts":
-        errorCells.value = sudoku.checkAllConflicts();
-        break;
-    case "checkErrors":
-        errorCells.value = sudoku.checkErrors();
-        break;
-    case "revealCell":
-        sudoku.revealRandomCell();
-        checkAndComplete();
-        break;
-    }
-}
 
 function digitButtonClasses(digit: number): string {
     if (isDigitCompleted(digit)) return "bg-card opacity-50 text-foreground-muted";
