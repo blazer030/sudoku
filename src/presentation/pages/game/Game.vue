@@ -163,10 +163,11 @@ import Cell from "@/presentation/components/cell/Cell.vue";
 import { useGameStore } from "@/stores/gameStore";
 import { ROUTER_PATH } from "@/router";
 import { deleteSavedGame, saveGame } from "@/application/GameStorage";
-import { GameStateConverter } from "@/application/GameState";
 import { recordGameResult } from "@/application/Statistics";
+import { GameStateConverter } from "@/application/GameState";
 import InputMode from "./InputMode";
 import { useGameTimer } from "./useGameTimer";
+import { useGameCompletion } from "./useGameCompletion";
 
 const router = useRouter();
 const gameStore = useGameStore();
@@ -189,12 +190,26 @@ const leaveDialog = provideLeaveDialog();
 const hintMenu = provideHintMenu();
 const gameCompleteModal = provideGameCompleteModal();
 
+const difficulty = computed(() => gameStore.difficulty ?? "easy");
 const selectedCell = ref<{ row: number; column: number } | null>(null);
 const selectedDigit = ref<number | null>(null);
-const completed = ref(false);
 const leavingConfirmed = ref(false);
 const inputMode = ref(InputMode.Normal);
 const errorCells = ref<{ row: number; column: number }[]>([]);
+
+const { completed, checkAndComplete } = useGameCompletion({
+    sudoku,
+    difficulty,
+    getElapsedSeconds: () => elapsedSeconds.value,
+    onCompleted: () => {
+        void gameCompleteModal.open({
+            elapsedSeconds: elapsedSeconds.value,
+            difficulty: difficulty.value,
+            hintsUsed: sudoku.hintTracker.recordedUsed,
+        });
+    },
+});
+
 const timerPaused = computed(() => completed.value || leaveDialog.visible.value);
 const { elapsedSeconds } = useGameTimer({
     initialSeconds: gameStore.elapsedSeconds,
@@ -231,21 +246,6 @@ async function showLeaveDialog() {
     }
 }
 
-function markCompleted() {
-    completed.value = true;
-    deleteSavedGame();
-    recordGameResult({
-        difficulty: gameStore.difficulty ?? "easy",
-        elapsedSeconds: elapsedSeconds.value,
-        completed: true,
-        hintsUsed: sudoku.hintTracker.recordedUsed,
-    });
-    void gameCompleteModal.open({
-        elapsedSeconds: elapsedSeconds.value,
-        difficulty: gameStore.difficulty ?? "easy",
-        hintsUsed: sudoku.hintTracker.recordedUsed,
-    });
-}
 
 function clickCell(row: number, column: number) {
     clearErrors();
@@ -275,7 +275,7 @@ function inputToCell(row: number, column: number, value: number) {
         return;
     }
     sudoku.fill(row, column, value);
-    if (sudoku.isCompleted()) markCompleted();
+    checkAndComplete();
     if (isDigitCompleted(value)) selectedDigit.value = null;
 }
 
@@ -407,7 +407,7 @@ async function openHintMenu() {
         break;
     case "revealCell":
         sudoku.revealRandomCell();
-        if (sudoku.isCompleted()) markCompleted();
+        checkAndComplete();
         break;
     }
 }
