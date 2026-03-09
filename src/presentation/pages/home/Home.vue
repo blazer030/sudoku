@@ -74,11 +74,7 @@
         </div>
 
         <!-- New Game Confirm Dialog -->
-        <NewGameDialog
-            v-if="showNewGameConfirm"
-            @give-up-and-start-new="handleGiveUpAndStartNew"
-            @cancel="showNewGameConfirm = false"
-        />
+        <NewGameDialog />
     </div>
 </template>
 
@@ -94,31 +90,28 @@ import { recordGameResult } from "@/application/Statistics";
 import ContinueButton from "@/presentation/components/continue-button/ContinueButton.vue";
 import DifficultySwitcher from "@/presentation/components/difficulty-switcher/DifficultySwitcher.vue";
 import NewGameDialog from "@/presentation/components/new-game-dialog/NewGameDialog.vue";
+import { provideNewGameDialog } from "@/presentation/components/new-game-dialog/useNewGameDialog";
 
 const router = useRouter();
 const gameStore = useGameStore();
+const newGameDialog = provideNewGameDialog();
 
 const difficulty = ref<Difficulty>("easy");
-const showNewGameConfirm = ref(false);
 
-function handleNewGame() {
+async function handleNewGame() {
     if (hasSavedGame()) {
-        showNewGameConfirm.value = true;
-        return;
+        const result = await newGameDialog.open(undefined);
+        if (result === "cancel") return;
+        const saved = loadGame();
+        if (saved) {
+            recordGameResult({
+                difficulty: saved.difficulty,
+                elapsedSeconds: saved.elapsedSeconds,
+                completed: false,
+            });
+        }
+        deleteSavedGame();
     }
-    startGame();
-}
-
-function handleGiveUpAndStartNew() {
-    const saved = loadGame();
-    if (saved) {
-        recordGameResult({
-            difficulty: saved.difficulty,
-            elapsedSeconds: saved.elapsedSeconds,
-            completed: false,
-        });
-    }
-    deleteSavedGame();
     startGame();
 }
 

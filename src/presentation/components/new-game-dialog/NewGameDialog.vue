@@ -1,5 +1,6 @@
 <template>
     <div
+        v-if="visible"
         class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
         data-testid="new-game-confirm-dialog"
     >
@@ -24,7 +25,7 @@
                 <button
                     class="w-full h-[52px] rounded-button bg-accent flex items-center justify-center gap-2 shadow-accent cursor-pointer"
                     data-testid="give-up-and-start-new-button"
-                    @click="emit('giveUpAndStartNew')"
+                    @click="close('giveUp')"
                 >
                     <span class="text-base font-semibold text-white">Give Up & Start New</span>
                 </button>
@@ -32,7 +33,7 @@
                 <button
                     class="w-full h-[44px] flex items-center justify-center cursor-pointer"
                     data-testid="new-game-cancel-button"
-                    @click="emit('cancel')"
+                    @click="close('cancel')"
                 >
                     <span class="text-base font-semibold text-foreground">Cancel</span>
                 </button>
@@ -43,9 +44,7 @@
 
 <script lang="ts" setup>
 import { TriangleAlert } from "lucide-vue-next";
+import { useNewGameDialog } from "./useNewGameDialog";
 
-const emit = defineEmits<{
-    giveUpAndStartNew: [];
-    cancel: [];
-}>();
+const { visible, close } = useNewGameDialog();
 </script>
