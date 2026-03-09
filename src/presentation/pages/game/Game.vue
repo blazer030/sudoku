@@ -39,24 +39,12 @@
             </div>
 
             <!-- Controls -->
-            <div class="flex justify-center gap-6">
-                <ControlButton
-                    :icon="Undo2"
-                    data-testid="undo-button"
-                    @click="sudoku.undo()"
-                />
-                <ControlButton
-                    :active="inputMode === InputMode.Note"
-                    :icon="Pencil"
-                    data-testid="note-button"
-                    @click="toggleNoteMode"
-                />
-                <ControlButton
-                    :icon="Lightbulb"
-                    data-testid="hint-button"
-                    @click="openHintMenu"
-                />
-            </div>
+            <GameControls
+                :note-active="inputMode === InputMode.Note"
+                @undo="sudoku.undo()"
+                @toggle-note-mode="toggleNoteMode"
+                @show-hint-menu="openHintMenu"
+            />
 
             <!-- Digit Pad -->
             <DigitPad
@@ -86,12 +74,11 @@
 import { computed, reactive, ref } from "vue";
 
 import { useRouter } from "vue-router";
-import { Lightbulb, Pencil, Undo2 } from "lucide-vue-next";
 import GameHeader from "@/presentation/components/game-header/GameHeader.vue";
 import GameCompleteModal from "@/presentation/components/game-complete-modal/GameCompleteModal.vue";
 import { provideGameCompleteModal } from "@/presentation/components/game-complete-modal/useGameCompleteModal";
 import LeaveGameDialog from "@/presentation/components/leave-game-dialog/LeaveGameDialog.vue";
-import ControlButton from "@/presentation/components/game-controls/ControlButton.vue";
+import GameControls from "@/presentation/components/game-controls/GameControls.vue";
 import HintMenuPopup from "@/presentation/components/hint-menu-popup/HintMenuPopup.vue";
 import DigitPad from "@/presentation/components/digit-pad/DigitPad.vue";
 import Sudoku from "@/domain/Sudoku";
