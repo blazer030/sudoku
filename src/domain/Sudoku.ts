@@ -1,3 +1,4 @@
+import { BoardHistory } from "@/domain/BoardHistory";
 import { Conflict, ConflictDetector } from "@/domain/ConflictDetector";
 import { BOARD_SIZE, BOX_SIZE } from "@/domain/constants";
 import { HintTracker } from "@/domain/HintTracker";
@@ -5,17 +6,10 @@ import PuzzleCell from "@/domain/PuzzleCell";
 import { SudokuBoard } from "@/domain/SudokuBoard";
 import { Difficulty, SudokuGenerator } from "@/domain/SudokuGenerator";
 
-interface CellSnapshot {
-    entry: number;
-    notes: number[]
-}
-
-type BoardSnapshot = CellSnapshot[][]
-
 class Sudoku {
     private _answer: number[][] = [];
     private _puzzle: PuzzleCell[][] = [];
-    private _history: BoardSnapshot[] = [];
+    private history = new BoardHistory();
     private generator = new SudokuGenerator();
     private conflictDetector = new ConflictDetector();
     private board = new SudokuBoard();
@@ -69,13 +63,7 @@ class Sudoku {
     }
 
     public undo(): void {
-        const snapshot = this._history.pop();
-        if (!snapshot) return;
-        for (let row = 0; row < BOARD_SIZE; row++) {
-            for (let column = 0; column < BOARD_SIZE; column++) {
-                this._puzzle[row][column].restore(snapshot[row][column].entry, snapshot[row][column].notes);
-            }
-        }
+        this.history.restore(this._puzzle);
     }
 
     public erase(row: number, column: number): void {
@@ -192,11 +180,7 @@ class Sudoku {
     }
 
     private snapshot(): void {
-        this._history.push(
-            this._puzzle.map(row =>
-                row.map(cell => ({ entry: cell.entry, notes: [...cell.notes] }))
-            )
-        );
+        this.history.save(this._puzzle);
     }
 
     private removeNoteFromPeers(row: number, column: number, value: number): void {
