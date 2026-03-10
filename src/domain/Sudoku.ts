@@ -114,33 +114,7 @@ class Sudoku {
     }
 
     public checkAllConflicts(): Conflict[] {
-        const board = this.getCurrentBoard();
-        const conflicts: Conflict[] = [];
-        const seen = new Set<string>();
-
-        for (let row = 0; row < BOARD_SIZE; row++) {
-            for (let column = 0; column < BOARD_SIZE; column++) {
-                const cell = this._puzzle[row][column];
-                if (cell.isClue || !cell.hasEntry) continue;
-                const value = cell.entry;
-                const cellConflicts = this.conflictDetector.findConflicts(board, row, column, value);
-                for (const conflict of cellConflicts) {
-                    const key = `${conflict.row},${conflict.column}`;
-                    if (!seen.has(key)) {
-                        seen.add(key);
-                        conflicts.push(conflict);
-                    }
-                }
-                if (cellConflicts.length > 0) {
-                    const selfKey = `${row},${column}`;
-                    if (!seen.has(selfKey)) {
-                        seen.add(selfKey);
-                        conflicts.push({ row, column });
-                    }
-                }
-            }
-        }
-        return conflicts;
+        return this.conflictDetector.findAllConflicts(this._puzzle, this.getCurrentBoard());
     }
 
     public revealRandomCell(): Conflict | null {
@@ -162,17 +136,7 @@ class Sudoku {
     }
 
     public checkErrors(): Conflict[] {
-        const errors: Conflict[] = [];
-        for (let row = 0; row < BOARD_SIZE; row++) {
-            for (let column = 0; column < BOARD_SIZE; column++) {
-                const cell = this._puzzle[row][column];
-                if (cell.isClue || !cell.hasEntry) continue;
-                if (cell.entry !== this._answer[row][column]) {
-                    errors.push({ row, column });
-                }
-            }
-        }
-        return errors;
+        return this.conflictDetector.findErrors(this._puzzle, this._answer);
     }
 
     public findConflicts(row: number, column: number, value: number): Conflict[] {
