@@ -4543,7 +4543,7 @@
                       "name": "card1Value",
                       "fill": "$primary",
                       "content": "42",
-                      "fontFamily": "Outfit",
+                      "fontFamily": "Roboto Mono",
                       "fontSize": 32,
                       "fontWeight": "700",
                       "letterSpacing": -1
@@ -4588,7 +4588,7 @@
                       "name": "card2Value",
                       "fill": "$accent",
                       "content": "87%",
-                      "fontFamily": "Outfit",
+                      "fontFamily": "Roboto Mono",
                       "fontSize": 32,
                       "fontWeight": "700",
                       "letterSpacing": -1
@@ -4633,7 +4633,7 @@
                       "name": "card3Value",
                       "fill": "$foreground",
                       "content": "7",
-                      "fontFamily": "Outfit",
+                      "fontFamily": "Roboto Mono",
                       "fontSize": 32,
                       "fontWeight": "700",
                       "letterSpacing": -1
@@ -4717,7 +4717,7 @@
                       "name": "btEasyValue",
                       "fill": "$primary",
                       "content": "04:23",
-                      "fontFamily": "Outfit",
+                      "fontFamily": "Roboto Mono",
                       "fontSize": 16,
                       "fontWeight": "600"
                     }
@@ -4747,7 +4747,7 @@
                       "name": "btMediumValue",
                       "fill": "$primary",
                       "content": "08:32",
-                      "fontFamily": "Outfit",
+                      "fontFamily": "Roboto Mono",
                       "fontSize": 16,
                       "fontWeight": "600"
                     }
@@ -4777,7 +4777,7 @@
                       "name": "btHardValue",
                       "fill": "$primary",
                       "content": "15:47",
-                      "fontFamily": "Outfit",
+                      "fontFamily": "Roboto Mono",
                       "fontSize": 16,
                       "fontWeight": "600"
                     }
@@ -4912,7 +4912,7 @@
                           "name": "game1Time",
                           "fill": "$primary",
                           "content": "12:45",
-                          "fontFamily": "Outfit",
+                          "fontFamily": "Roboto Mono",
                           "fontSize": 16,
                           "fontWeight": "600"
                         },
@@ -4939,7 +4939,7 @@
                               "name": "hintText1",
                               "fill": "$foreground-muted",
                               "content": "2",
-                              "fontFamily": "Outfit",
+                              "fontFamily": "Roboto Mono",
                               "fontSize": 11,
                               "fontWeight": "500"
                             }
@@ -5048,7 +5048,7 @@
                           "name": "game2Time",
                           "fill": "$primary",
                           "content": "05:32",
-                          "fontFamily": "Outfit",
+                          "fontFamily": "Roboto Mono",
                           "fontSize": 16,
                           "fontWeight": "600"
                         },
@@ -5075,7 +5075,7 @@
                               "name": "hintText2",
                               "fill": "$foreground-muted",
                               "content": "0",
-                              "fontFamily": "Outfit",
+                              "fontFamily": "Roboto Mono",
                               "fontSize": 11,
                               "fontWeight": "500"
                             }
@@ -5211,7 +5211,7 @@
                               "name": "hintText3",
                               "fill": "$foreground-muted",
                               "content": "3",
-                              "fontFamily": "Outfit",
+                              "fontFamily": "Roboto Mono",
                               "fontSize": 11,
                               "fontWeight": "500"
                             }
@@ -5320,7 +5320,7 @@
                           "name": "game4Time",
                           "fill": "$primary",
                           "content": "09:18",
-                          "fontFamily": "Outfit",
+                          "fontFamily": "Roboto Mono",
                           "fontSize": 16,
                           "fontWeight": "600"
                         },
@@ -5347,7 +5347,7 @@
                               "name": "hintText4",
                               "fill": "$foreground-muted",
                               "content": "1",
-                              "fontFamily": "Outfit",
+                              "fontFamily": "Roboto Mono",
                               "fontSize": 11,
                               "fontWeight": "500"
                             }
@@ -5456,7 +5456,7 @@
                           "name": "game5Time",
                           "fill": "$primary",
                           "content": "18:42",
-                          "fontFamily": "Outfit",
+                          "fontFamily": "Roboto Mono",
                           "fontSize": 16,
                           "fontWeight": "600"
                         },
@@ -5483,7 +5483,7 @@
                               "name": "hintText5",
                               "fill": "$foreground-muted",
                               "content": "3",
-                              "fontFamily": "Outfit",
+                              "fontFamily": "Roboto Mono",
                               "fontSize": 11,
                               "fontWeight": "500"
                             }
@@ -13317,7 +13317,8 @@
                           "fill": "$foreground-secondary",
                           "content": "Pure, focused, and timeless.",
                           "fontFamily": "Outfit",
-                          "fontSize": 13
+                          "fontSize": 13,
+                          "fontWeight": "normal"
                         }
                       ]
                     },
@@ -13440,7 +13441,8 @@
                           "fill": "$foreground-secondary",
                           "content": "Suddenly, it's 1998 again.",
                           "fontFamily": "Outfit",
-                          "fontSize": 13
+                          "fontSize": 13,
+                          "fontWeight": "normal"
                         }
                       ]
                     }
@@ -16012,59 +16014,6 @@
                               "fontWeight": "600"
                             }
                           ]
-                        },
-                        {
-                          "type": "frame",
-                          "id": "aji9S",
-                          "x": 46,
-                          "y": 25,
-                          "name": "Clear",
-                          "width": 44,
-                          "height": 44,
-                          "fill": "$card",
-                          "cornerRadius": 20,
-                          "stroke": {
-                            "align": "inside",
-                            "thickness": 1,
-                            "fill": "$border"
-                          },
-                          "layout": "none",
-                          "children": [
-                            {
-                              "type": "icon_font",
-                              "id": "s0o7Y",
-                              "x": 11,
-                              "y": 11,
-                              "name": "clearIcon",
-                              "width": 22,
-                              "height": 22,
-                              "iconFontName": "eraser",
-                              "iconFontFamily": "lucide",
-                              "fill": "$foreground-secondary"
-                            }
-                          ]
-                        },
-                        {
-                          "type": "rectangle",
-                          "cornerRadius": 2,
-                          "id": "1tvAv",
-                          "x": 126,
-                          "y": 118,
-                          "name": "Pointer Bar",
-                          "rotation": -20,
-                          "fill": "$primary",
-                          "width": 70,
-                          "height": 3
-                        },
-                        {
-                          "type": "ellipse",
-                          "id": "wm3tI",
-                          "x": 114,
-                          "y": 114,
-                          "name": "Center Dot",
-                          "fill": "$primary",
-                          "width": 12,
-                          "height": 12
                         }
                       ]
                     }

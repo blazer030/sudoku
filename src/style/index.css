@@ -5,6 +5,7 @@
 @theme {
   --container-2xl: 1400px;
   --font-sans: "Outfit", sans-serif;
+  --font-mono: "Roboto Mono", monospace;
 
   --color-primary: #3D8A5A;
   --color-primary-light: #C8F0D8;

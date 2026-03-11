@@ -25,21 +25,21 @@
                     class="flex-1 flex flex-col items-center gap-1 bg-card rounded-2xl p-4 shadow-card"
                     data-testid="games-won"
                 >
-                    <span class="text-3xl font-bold text-primary">{{ stats.overall.gamesWon }}</span>
+                    <span class="text-3xl font-bold text-primary font-mono">{{ stats.overall.gamesWon }}</span>
                     <span class="text-xs font-medium text-foreground-secondary">Games Won</span>
                 </div>
                 <div
                     class="flex-1 flex flex-col items-center gap-1 bg-card rounded-2xl p-4 shadow-card"
                     data-testid="win-rate"
                 >
-                    <span class="text-3xl font-bold text-primary">{{ winRateDisplay }}</span>
+                    <span class="text-3xl font-bold text-primary font-mono">{{ winRateDisplay }}</span>
                     <span class="text-xs font-medium text-foreground-secondary">Win Rate</span>
                 </div>
                 <div
                     class="flex-1 flex flex-col items-center gap-1 bg-card rounded-2xl p-4 shadow-card"
                     data-testid="day-streak"
                 >
-                    <span class="text-3xl font-bold text-foreground">{{ dayStreak }}</span>
+                    <span class="text-3xl font-bold text-foreground font-mono">{{ dayStreak }}</span>
                     <span class="text-xs font-medium text-foreground-secondary">Day Streak</span>
                 </div>
             </div>
@@ -60,7 +60,7 @@
                         />
                         <span class="text-base font-medium text-foreground">Easy</span>
                     </div>
-                    <span class="text-base font-semibold text-primary">{{ formatBestTime(stats.easy.bestTime) }}</span>
+                    <span class="text-base font-semibold text-primary font-mono">{{ formatBestTime(stats.easy.bestTime) }}</span>
                 </div>
                 <div
                     class="flex items-center justify-between"
@@ -73,7 +73,7 @@
                         />
                         <span class="text-base font-medium text-foreground">Medium</span>
                     </div>
-                    <span class="text-base font-semibold text-primary">{{ formatBestTime(stats.medium.bestTime) }}</span>
+                    <span class="text-base font-semibold text-primary font-mono">{{ formatBestTime(stats.medium.bestTime) }}</span>
                 </div>
                 <div
                     class="flex items-center justify-between"
@@ -86,7 +86,7 @@
                         />
                         <span class="text-base font-medium text-foreground">Hard</span>
                     </div>
-                    <span class="text-base font-semibold text-primary">{{ formatBestTime(stats.hard.bestTime) }}</span>
+                    <span class="text-base font-semibold text-primary font-mono">{{ formatBestTime(stats.hard.bestTime) }}</span>
                 </div>
             </div>
         </div>
@@ -125,12 +125,12 @@
                     <div class="flex flex-col items-end gap-0.5">
                         <span
                             :class="game.completed ? 'text-primary' : 'text-accent'"
-                            class="text-base font-semibold"
+                            class="text-base font-semibold font-mono"
                         >
                             {{ game.completed ? formatTime(game.elapsedSeconds) : "Gave up" }}
                         </span>
                         <span
-                            class="flex items-center gap-[3px] text-[11px] font-medium text-foreground-muted"
+                            class="flex items-center gap-[3px] text-[11px] font-medium text-foreground-muted font-mono"
                             data-testid="hints-used"
                         >
                             <Lightbulb :size="11" />
