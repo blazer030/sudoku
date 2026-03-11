@@ -1,5 +1,5 @@
-import { BOARD_SIZE } from "@/domain/constants";
-import { SudokuBoard } from "@/domain/SudokuBoard";
+import { BOARD_SIZE } from "@/domain/board/constants";
+import { SudokuBoard } from "@/domain/board/SudokuBoard";
 
 export type DigitsProvider = () => number[];
 

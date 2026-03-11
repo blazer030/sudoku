@@ -1,5 +1,5 @@
-import { BOARD_SIZE } from "@/domain/constants";
-import PuzzleCell from "@/domain/PuzzleCell";
+import { BOARD_SIZE } from "@/domain/board/constants";
+import PuzzleCell from "@/domain/board/PuzzleCell";
 
 interface CellSnapshot {
     entry: number;

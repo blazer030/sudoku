@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { SudokuBoard } from "@/domain/SudokuBoard";
-import { SudokuSolver } from "@/domain/SudokuSolver";
+import { SudokuBoard } from "@/domain/board/SudokuBoard";
+import { SudokuSolver } from "@/domain/generator/SudokuSolver";
 
 const sudokuBoard = new SudokuBoard();
 const solver = new SudokuSolver();

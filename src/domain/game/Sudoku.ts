@@ -1,10 +1,10 @@
-import { BoardHistory } from "@/domain/BoardHistory";
-import { Conflict, ConflictDetector } from "@/domain/ConflictDetector";
-import { BOARD_SIZE, BOX_SIZE } from "@/domain/constants";
-import { HintTracker } from "@/domain/HintTracker";
-import PuzzleCell from "@/domain/PuzzleCell";
-import { SudokuBoard } from "@/domain/SudokuBoard";
-import { Difficulty, SudokuGenerator } from "@/domain/SudokuGenerator";
+import { BOARD_SIZE, BOX_SIZE } from "@/domain/board/constants";
+import PuzzleCell from "@/domain/board/PuzzleCell";
+import { SudokuBoard } from "@/domain/board/SudokuBoard";
+import { BoardHistory } from "@/domain/game/BoardHistory";
+import { Conflict, ConflictDetector } from "@/domain/game/ConflictDetector";
+import { HintTracker } from "@/domain/game/HintTracker";
+import { Difficulty, SudokuGenerator } from "@/domain/generator/SudokuGenerator";
 
 class Sudoku {
     private _answer: number[][] = [];

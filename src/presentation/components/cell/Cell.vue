@@ -37,8 +37,7 @@
 
 <script lang="ts" setup>
 import { computed } from "vue";
-import PuzzleCell from "@/domain/PuzzleCell";
-import CellHighlight from "@/domain/CellHighlight";
+import { PuzzleCell, CellHighlight } from "@/domain";
 
 const props = defineProps<{
     puzzleCell: PuzzleCell;

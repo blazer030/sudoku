@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { HintTracker } from '@/domain/HintTracker'
+import { HintTracker } from '@/domain/game/HintTracker'
 
 describe('HintTracker', () => {
   it('初始狀態 — totalUsed=0, recordedUsed=0, remainingHints=4, canUseHint=true', () => {

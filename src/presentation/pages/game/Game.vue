@@ -81,9 +81,7 @@ import LeaveGameDialog from "@/presentation/components/leave-game-dialog/LeaveGa
 import GameControls from "@/presentation/components/game-controls/GameControls.vue";
 import HintMenuPopup from "@/presentation/components/hint-menu-popup/HintMenuPopup.vue";
 import DigitPad from "@/presentation/components/digit-pad/DigitPad.vue";
-import Sudoku from "@/domain/Sudoku";
-import { BOARD_SIZE, BOX_SIZE } from "@/domain/constants";
-import CellHighlight from "@/domain/CellHighlight";
+import { Sudoku, BOARD_SIZE, BOX_SIZE, CellHighlight } from "@/domain";
 import Cell from "@/presentation/components/cell/Cell.vue";
 import { useGameStore } from "@/stores/gameStore";
 import { ROUTER_PATH } from "@/router";

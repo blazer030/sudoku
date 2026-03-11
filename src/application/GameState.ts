@@ -1,6 +1,5 @@
-import Sudoku from "@/domain/Sudoku";
-import PuzzleCell from "@/domain/PuzzleCell";
-import type { Difficulty } from "@/domain/SudokuGenerator";
+import { Sudoku, PuzzleCell } from "@/domain";
+import type { Difficulty } from "@/domain";
 
 export interface CellState {
     clue: number;

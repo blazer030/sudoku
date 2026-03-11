@@ -19,7 +19,7 @@
 </template>
 
 <script lang="ts" setup>
-import { DifficultyLabels, type Difficulty } from "@/domain/SudokuGenerator";
+import { DifficultyLabels, type Difficulty } from "@/domain";
 
 defineProps<{ modelValue: Difficulty }>();
 defineEmits<{ "update:modelValue": [value: Difficulty] }>();

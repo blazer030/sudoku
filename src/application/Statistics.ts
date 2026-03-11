@@ -1,4 +1,4 @@
-import type { Difficulty } from "@/domain/SudokuGenerator";
+import type { Difficulty } from "@/domain";
 
 const STORAGE_KEY = "sudoku-statistics";
 

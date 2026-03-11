@@ -151,7 +151,7 @@ import { ROUTER_PATH } from "@/router";
 import { getStatistics } from "@/application/Statistics";
 import { formatTime } from "@/utils/formatTime";
 import { formatDate } from "@/utils/formatDate";
-import { DifficultyLabels, type Difficulty } from "@/domain/SudokuGenerator";
+import { DifficultyLabels, type Difficulty } from "@/domain";
 
 const router = useRouter();
 

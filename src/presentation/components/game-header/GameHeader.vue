@@ -37,7 +37,7 @@
 import { ChevronLeft, Timer } from "lucide-vue-next";
 import { useGameStore } from "@/stores/gameStore";
 import { formatTime } from "@/utils/formatTime";
-import { DifficultyLabels } from "@/domain/SudokuGenerator";
+import { DifficultyLabels } from "@/domain";
 
 defineProps<{ elapsedSeconds: number }>();
 const emit = defineEmits<{ back: [] }>();

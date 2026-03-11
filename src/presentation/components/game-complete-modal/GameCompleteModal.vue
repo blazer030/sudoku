@@ -72,7 +72,7 @@
 import { Trophy, Home } from "lucide-vue-next";
 import { useRouter } from "vue-router";
 import { formatTime } from "@/utils/formatTime";
-import { DifficultyLabels } from "@/domain/SudokuGenerator";
+import { DifficultyLabels } from "@/domain";
 import { computed } from "vue";
 import { useGameCompleteModal } from "./useGameCompleteModal";
 

@@ -83,7 +83,7 @@ import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { ChartBar, Plus, Settings } from "lucide-vue-next";
 import { ROUTER_PATH } from "@/router";
-import type { Difficulty } from "@/domain/SudokuGenerator";
+import type { Difficulty } from "@/domain";
 import { useGameStore } from "@/stores/gameStore";
 import { deleteSavedGame, hasSavedGame, loadGame } from "@/application/GameStorage";
 import { recordGameResult } from "@/application/Statistics";

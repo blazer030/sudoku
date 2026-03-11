@@ -1,5 +1,5 @@
 import { createDialog } from "@/presentation/composables/createDialog";
-import type { Difficulty } from "@/domain/SudokuGenerator";
+import type { Difficulty } from "@/domain";
 
 export interface GameCompleteParams {
     elapsedSeconds: number;

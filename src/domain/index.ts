@@ -1,0 +1,12 @@
+export { BOARD_SIZE, BOX_SIZE, TOTAL_CELLS } from "@/domain/board/constants";
+export { default as PuzzleCell } from "@/domain/board/PuzzleCell";
+export { SudokuBoard } from "@/domain/board/SudokuBoard";
+export { default as CellHighlight } from "@/domain/board/CellHighlight";
+export { SudokuGenerator, DifficultyLabels } from "@/domain/generator/SudokuGenerator";
+export type { Difficulty } from "@/domain/generator/SudokuGenerator";
+export { SudokuSolver } from "@/domain/generator/SudokuSolver";
+export { default as Sudoku } from "@/domain/game/Sudoku";
+export { ConflictDetector } from "@/domain/game/ConflictDetector";
+export type { Conflict } from "@/domain/game/ConflictDetector";
+export { HintTracker } from "@/domain/game/HintTracker";
+export { BoardHistory } from "@/domain/game/BoardHistory";

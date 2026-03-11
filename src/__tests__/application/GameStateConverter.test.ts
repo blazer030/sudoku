@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import Sudoku from "@/domain/Sudoku";
+import Sudoku from "@/domain/game/Sudoku";
 import { GameStateConverter, type CellState } from "@/application/GameState";
 import { knownAnswer, knownPuzzle, spyGeneratePuzzle } from "@/__tests__/fixtures/knownPuzzle";
 

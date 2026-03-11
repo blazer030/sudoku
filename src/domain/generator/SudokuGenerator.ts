@@ -1,5 +1,5 @@
-import { BOARD_SIZE, TOTAL_CELLS } from "@/domain/constants";
-import { SudokuSolver } from "@/domain/SudokuSolver";
+import { BOARD_SIZE, TOTAL_CELLS } from "@/domain/board/constants";
+import { SudokuSolver } from "@/domain/generator/SudokuSolver";
 
 export type Difficulty = "easy" | "medium" | "hard";
 export const DifficultyLabels: Record<Difficulty, string> = { easy: "Easy", medium: "Medium", hard: "Hard" };

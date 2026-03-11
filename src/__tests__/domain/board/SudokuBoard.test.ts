@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { SudokuBoard } from "@/domain/SudokuBoard";
+import { SudokuBoard } from "@/domain/board/SudokuBoard";
 
 const sudokuBoard = new SudokuBoard();
 

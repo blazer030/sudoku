@@ -1,7 +1,7 @@
 import { type Ref, ref } from "vue";
 import { onBeforeRouteLeave, useRouter } from "vue-router";
-import type Sudoku from "@/domain/Sudoku";
-import type { Difficulty } from "@/domain/SudokuGenerator";
+import type { Difficulty } from "@/domain";
+import type Sudoku from "@/domain/game/Sudoku";
 import { deleteSavedGame, saveGame } from "@/application/GameStorage";
 import { GameStateConverter } from "@/application/GameState";
 import { recordGameResult } from "@/application/Statistics";

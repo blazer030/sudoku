@@ -1,5 +1,5 @@
 import { ref } from "vue";
-import type Sudoku from "@/domain/Sudoku";
+import type Sudoku from "@/domain/game/Sudoku";
 import { provideHintMenu } from "@/presentation/components/hint-menu-popup/useHintMenu";
 
 interface HintActionsOptions {

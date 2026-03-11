@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { SudokuBoard } from "@/domain/SudokuBoard";
-import { SudokuGenerator } from "@/domain/SudokuGenerator";
-import { SudokuSolver } from "@/domain/SudokuSolver";
+import { SudokuBoard } from "@/domain/board/SudokuBoard";
+import { SudokuGenerator } from "@/domain/generator/SudokuGenerator";
+import { SudokuSolver } from "@/domain/generator/SudokuSolver";
 
 const sudokuBoard = new SudokuBoard();
 const generator = new SudokuGenerator();

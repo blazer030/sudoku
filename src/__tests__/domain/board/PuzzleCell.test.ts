@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import PuzzleCell from "@/domain/PuzzleCell";
+import PuzzleCell from "@/domain/board/PuzzleCell";
 
 describe("PuzzleCell", () => {
     describe("Constructor and basic properties", () => {

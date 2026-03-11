@@ -1,4 +1,4 @@
-import { BOARD_SIZE, BOX_SIZE } from "@/domain/constants";
+import { BOARD_SIZE, BOX_SIZE } from "@/domain/board/constants";
 
 export class SudokuBoard {
     public isValidPlacement(board: number[][], row: number, column: number, digit: number): boolean {

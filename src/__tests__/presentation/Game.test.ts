@@ -6,9 +6,9 @@ import Game from "@/presentation/pages/game/Game.vue";
 import { knownAnswer, knownPuzzle, createKnownSudoku } from "@/__tests__/fixtures/knownPuzzle";
 import type { GameState } from "@/application/GameState";
 import Cell from "@/presentation/components/cell/Cell.vue";
-import CellHighlight from "@/domain/CellHighlight";
+import CellHighlight from "@/domain/board/CellHighlight";
 import { useGameStore } from "@/stores/gameStore";
-import type { Difficulty } from "@/domain/SudokuGenerator";
+import type { Difficulty } from "@/domain/generator/SudokuGenerator";
 import { getGameHistory } from "@/application/Statistics";
 import { hasSavedGame, loadGame, saveGame } from "@/application/GameStorage";
 
