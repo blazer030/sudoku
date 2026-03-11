@@ -1,12 +1,12 @@
 import { BOARD_SIZE, BOX_SIZE } from "@/domain/board/constants";
-import PuzzleCell from "@/domain/board/PuzzleCell";
+import { PuzzleCell } from "@/domain/board/PuzzleCell";
 import { SudokuBoard } from "@/domain/board/SudokuBoard";
 import { BoardHistory } from "@/domain/game/BoardHistory";
 import { Conflict, ConflictDetector } from "@/domain/game/ConflictDetector";
 import { HintTracker } from "@/domain/game/HintTracker";
 import { Difficulty, SudokuGenerator } from "@/domain/generator/SudokuGenerator";
 
-class Sudoku {
+export class Sudoku {
     private _answer: number[][] = [];
     private _puzzle: PuzzleCell[][] = [];
     private history = new BoardHistory();
@@ -173,4 +173,3 @@ class Sudoku {
     }
 }
 
-export default Sudoku;

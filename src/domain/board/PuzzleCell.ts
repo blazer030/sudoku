@@ -1,4 +1,4 @@
-class PuzzleCell {
+export class PuzzleCell {
     private readonly _clue: number;
     private _entry: number;
     private _notes: number[];
@@ -74,4 +74,3 @@ class PuzzleCell {
     }
 }
 
-export default PuzzleCell;

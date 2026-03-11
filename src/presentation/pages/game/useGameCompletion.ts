@@ -1,6 +1,6 @@
 import { type Ref, ref } from "vue";
 import type { Difficulty } from "@/domain";
-import type Sudoku from "@/domain/game/Sudoku";
+import type { Sudoku } from "@/domain/game/Sudoku";
 import { deleteSavedGame } from "@/application/GameStorage";
 import { recordGameResult } from "@/application/Statistics";
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { BoardHistory } from "@/domain/game/BoardHistory";
-import PuzzleCell from "@/domain/board/PuzzleCell";
+import { PuzzleCell } from "@/domain/board/PuzzleCell";
 
 const createPuzzle = (): PuzzleCell[][] => {
     return Array.from({ length: 9 }, () =>

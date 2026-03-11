@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import { computed, ref, shallowRef } from "vue";
 import type { Difficulty } from "@/domain";
-import Sudoku from "@/domain/game/Sudoku";
+import { Sudoku } from "@/domain/game/Sudoku";
 import { GameStateConverter, type GameState } from "@/application/GameState";
 
 export const useGameStore = defineStore("game", () => {

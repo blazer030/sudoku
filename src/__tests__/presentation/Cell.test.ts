@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { mount } from "@vue/test-utils";
 import Cell from "@/presentation/components/cell/Cell.vue";
-import PuzzleCell from "@/domain/board/PuzzleCell";
+import { PuzzleCell } from "@/domain/board/PuzzleCell";
 
 describe("Cell", () => {
     const mountCell = (props: { puzzleCell: PuzzleCell } & Record<string, unknown>) =>
