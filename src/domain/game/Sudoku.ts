@@ -131,7 +131,9 @@ export class Sudoku {
         if (candidates.length === 0) return null;
         const target = candidates[Math.floor(Math.random() * candidates.length)];
         this.snapshot();
-        this._puzzle[target.row][target.column].entry = this._answer[target.row][target.column];
+        const value = this._answer[target.row][target.column];
+        this._puzzle[target.row][target.column].entry = value;
+        this.removeNoteFromPeers(target.row, target.column, value);
         return target;
     }
 

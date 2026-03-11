@@ -379,6 +379,28 @@ describe("Sudoku", () => {
             expect(sudoku.puzzle[row][column].entry).toBe(knownAnswer[row][column]);
         });
 
+        it('揭露格子時，清除同行/列/宮 peer cells 的對應 note', () => {
+            const sudoku = createKnownSudoku();
+
+            // (0,2) 是空格，答案是 4
+            // 在同行的 (0,3) 和同列的 (1,2) 加上 note 4
+            sudoku.toggleNote(0, 3, 4);
+            sudoku.toggleNote(0, 3, 7);
+            sudoku.toggleNote(1, 2, 4);
+            sudoku.toggleNote(1, 2, 9);
+
+            // 控制 Math.random 讓 reveal 選中 (0,2)（第一個候選格）
+            vi.spyOn(Math, 'random').mockReturnValue(0);
+
+            sudoku.revealRandomCell();
+
+            // peer cells 的 note 4 應被移除，其他 notes 保留
+            expect(sudoku.puzzle[0][3].notes).not.toContain(4);
+            expect(sudoku.puzzle[0][3].notes).toContain(7);
+            expect(sudoku.puzzle[1][2].notes).not.toContain(4);
+            expect(sudoku.puzzle[1][2].notes).toContain(9);
+        });
+
         it('全部正確或 clue 時回傳 null', () => {
             const sudoku = createKnownSudoku();
 
