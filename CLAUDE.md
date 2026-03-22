@@ -1,106 +1,54 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
-
 ## Commands
 
-### Development
-
-- `npm run start` - Start development server with Vite
-- `npm run build` - Build production version (vue-tsc + Vite build)
-- `npm run preview` - Preview production build locally
-
-### Code Quality
-
-- `npm run lint` - Run ESLint with TypeScript support
-- `npm test` - Run tests with Vitest
+```bash
+npm run start          # Dev server (Vite)
+npm run build          # Production build (vue-tsc + Vite)
+npm run lint           # ESLint (--max-warnings 0, must pass before commit)
+npm test               # Run all tests (Vitest, watch mode)
+npx vitest run         # Run all tests once (CI mode)
+npx vitest run src/__tests__/domain/game/Sudoku.test.ts  # Run single test file
+```
 
 ## Architecture
 
-This is a Vue 3 + TypeScript Sudoku game following Domain-Driven Design principles:
+Vue 3 + TypeScript Sudoku game following **Domain-Driven Design (DDD)**:
 
-### Project Structure
+- **`src/domain/`** — Pure business logic, zero framework dependencies. Subdivided into `board/`, `game/`, `generator/`.
+- **`src/application/`** — Serialization (`GameState`, `GameStateConverter`), persistence (`GameStorage`), and `Statistics`.
+- **`src/presentation/`** — Vue components, pages, and composables. Pages: `home/`, `game/`, `statistics/`.
+- **`src/stores/`** — Pinia store (`gameStore.ts`) as single source of truth for active game state.
 
-```
-src/
-├── domain/           # Core business logic
-│   ├── Sudoku.ts    # Main game engine with puzzle generation and validation
-│   ├── SudokuBoard.ts # Board model and operations
-│   ├── SudokuGenerator.ts # Puzzle generation logic
-│   ├── SudokuSolver.ts # Puzzle solving algorithm
-│   ├── PuzzleCell.ts # Cell model with value, input, and notes management
-│   ├── CellHighlight.ts # Cell highlight logic
-│   └── ConflictDetector.ts # Conflict detection for validation
-├── presentation/     # UI layer
-│   ├── App.vue      # Root component with responsive layout
-│   ├── components/  # Reusable UI components (Button, Cell, Icon, etc.)
-│   └── pages/       # Route-based page components (Home, Game)
-├── application/     # Application services
-│   ├── GameStorage.ts # Game persistence with localforage
-│   └── GameState.ts # Game state model
-├── stores/          # Pinia stores
-│   └── gameStore.ts # Game state management
-├── router.ts        # Vue Router configuration
-└── style/           # Global SCSS styles
-```
+IMPORTANT: Domain layer must never import from `presentation/`, `stores/`, or `application/`. Dependencies flow inward only.
 
-### Key Patterns
+## Code Style
 
-- **Domain Models**: Core game logic separated from UI concerns
-- **Path Aliases**: `@/` maps to `src/` directory
-- **Composition API**: Uses `<script setup>` with arrow functions as preferred style
-- **State Management**: Pinia stores for reactive game state
-- **Routing**: Vue Router for page navigation
+- **Composition API** with `<script setup>` and arrow functions — no Options API
+- **Named exports** only — no default exports
+- **Path alias**: `@/` maps to `src/`
+- **Vue components**: Single-word names allowed (ESLint `multi-word-component-names` disabled)
+- **Indentation**: 4 spaces in Vue templates and TypeScript
+- **Strict TypeScript**: `noUnusedLocals`, `noUnusedParameters` enabled
 
-### Tech Stack
+## Testing Conventions
 
-- **Framework**: Vue 3 with TypeScript
-- **Build Tool**: Vite with ESLint integration
-- **Styling**: Tailwind CSS v4 + SCSS
-- **Testing**: Vitest with @vue/test-utils
-- **State Management**: Pinia
-- **UI Components**: Lucide Vue Next icons + class-variance-authority for styling
+- **Test location**: `src/__tests__/` mirroring `src/` structure (e.g., `src/__tests__/domain/game/Sudoku.test.ts`)
+- **Framework**: Vitest with `globals: true` (no need to import `describe`/`it`/`expect`)
+- **Component tests**: `@vue/test-utils` `mount()` with `jsdom` environment
+- **Mocking**: Use `vi.mocked()` and `vi.restoreAllMocks()` in `afterEach`
+- **Test selectors**: Use `[data-testid="..."]` for querying DOM elements
+- **Fixtures**: Known puzzle data in `src/__tests__/fixtures/knownPuzzle.ts` — use `spyGeneratePuzzle()` to mock puzzle generation for deterministic tests
 
-## Git Commit 規則
+## Key Domain Concepts
 
-### Commit Message 格式
+- **`PuzzleCell`**: Has `clue` (given), `entry` (player input), `notes` (candidates). `isClue` cells cannot be modified.
+- **`Sudoku`**: Main game engine — `generate()`, `fill()`, `erase()`, `toggleNote()`, `undo()`, `isCompleted()`, `revealRandomCell()`.
+- **`HintTracker`**: Max 4 hints per game, 1st hint is free. Tracked in game state and statistics.
+- **`BoardHistory`**: Stores snapshots for undo. Records state before each `fill`/`erase`/`toggleNote`.
+- **Difficulty levels**: `easy`, `medium`, `hard` — controls number of clues removed during generation.
 
-- **一律使用英文**：Commit message 必須全部使用英文撰寫
-- **簡潔明確**：表達意圖即可，避免過多細節
-- **不包含作者資訊**：不要加入 Claude Code 或 Co-Authored-By 等標記
-- **遵循專案風格**：參考現有 commit 的格式和用詞
-- **使用 Emoji**：在 commit type 前加上對應的 emoji
+## Environment
 
-### Emoji Usage Guide
-
-- 🐛 fix: For bug fixes
-- ✨ feat: For new features
-- 📄 docs: For documentation changes
-- ♻️ refactor: For code refactoring without changing functionality
-- 🚀 perf: For performance improvements
-- 🔒 security: For security-related fixes
-- 🚧 chore: For maintenance tasks
-- 🧪 test: For tests
-
-### 範例格式
-
-```
-♻️ refactor: migrate [ComponentName] from styled components to functional components
-
-- Convert styled components to functional components with TypeScript interfaces
-- Apply Bootstrap to Tailwind spacing migration
-- Maintain component interfaces and functionality
-```
-
-### 避免的內容
-
-- ❌ 過度詳細的技術細節
-- ❌ Claude Code 生成標記
-- ❌ Co-Authored-By 資訊
-- ❌ 每個小改動的列舉
-
-### 推薦的內容
-
-- ✅ 主要變更的目的和範圍
-- ✅ 關鍵的架構性改動
-- ✅ 對功能的影響概述
+- `.env` — `VITE_BASE_URL=/` (dev)
+- `.env.production` — `VITE_BASE_URL=/sudoku/` (deployed to subdirectory)
