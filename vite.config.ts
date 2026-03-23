@@ -1,8 +1,11 @@
+import { readFileSync } from "fs";
 import { loadEnv } from "vite";
 import vue from "@vitejs/plugin-vue";
 import { VitePWA } from "vite-plugin-pwa";
 import path from "path";
 import { defineConfig } from "vitest/config";
+
+const { version } = JSON.parse(readFileSync("./package.json", "utf-8")) as { version: string };
 
 // https://vitejs.dev/config/
 export default ({ mode }: { mode: string }) => {
@@ -10,6 +13,9 @@ export default ({ mode }: { mode: string }) => {
 
     return defineConfig({
         base: process.env.VITE_BASE_URL,
+        define: {
+            __APP_VERSION__: JSON.stringify(version),
+        },
         plugins: [
             vue(),
             VitePWA({
