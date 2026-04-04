@@ -53,7 +53,12 @@
 
         <!-- Bottom Nav -->
         <div class="flex items-center justify-center gap-10">
-            <button class="flex flex-col items-center gap-1 cursor-pointer">
+            <button
+                v-if="showSettings"
+                class="flex flex-col items-center gap-1 cursor-pointer"
+                data-testid="settings-button"
+                @click="goToSettings"
+            >
                 <Settings
                     :size="24"
                     class="text-foreground-muted"
@@ -87,6 +92,7 @@ import type { Difficulty } from "@/domain";
 import { useGameStore } from "@/stores/gameStore";
 import { deleteSavedGame, hasSavedGame, loadGame } from "@/application/GameStorage";
 import { recordGameResult } from "@/application/Statistics";
+import { isFeatureEnabled } from "@/utils/featureToggle";
 import ContinueButton from "@/presentation/components/continue-button/ContinueButton.vue";
 import DifficultySwitcher from "@/presentation/components/difficulty-switcher/DifficultySwitcher.vue";
 import NewGameDialog from "@/presentation/components/new-game-dialog/NewGameDialog.vue";
@@ -96,6 +102,7 @@ const router = useRouter();
 const gameStore = useGameStore();
 const newGameDialog = provideNewGameDialog();
 
+const showSettings = isFeatureEnabled("settings");
 const difficulty = ref<Difficulty>("easy");
 
 const handleNewGame = async () => {
@@ -118,6 +125,10 @@ const handleNewGame = async () => {
 const startGame = () => {
     gameStore.startNewGame(difficulty.value);
     void router.push(ROUTER_PATH.game);
+};
+
+const goToSettings = () => {
+    void router.push(ROUTER_PATH.settings);
 };
 
 const goToStatistics = () => {

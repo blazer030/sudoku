@@ -1,3 +1,1 @@
-enum InputMode { Normal, Note, Erase }
-
-export default InputMode;
+export enum InputMode { Normal, Note, Erase }

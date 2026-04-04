@@ -1,8 +1,7 @@
 type FeatureEnvironment = 'all' | 'develop'
 
 const features: Partial<Record<string, FeatureEnvironment>> = {
-    // 'featureName': 'develop',  // develop 環境才有
-    // 'featureName': 'all',      // 所有環境都有
+    'settings': 'develop',
 }
 
 export const isDevelop = (): boolean =>
