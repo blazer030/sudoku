@@ -58,6 +58,11 @@
                 </button>
             </div>
         </div>
+
+        <div class="flex-1" />
+
+        <!-- Version -->
+        <span class="text-foreground-muted text-[11px] text-center">v{{ appVersion }}</span>
     </div>
 </template>
 
@@ -65,6 +70,7 @@
 import { useRouter } from "vue-router";
 import { ChevronLeft, Check } from "lucide-vue-next";
 import { useSettingsStore } from "@/stores/settingsStore";
+import { appVersion } from "@/utils/appVersion";
 import type { ThemeId } from "@/application/SettingsStorage";
 
 const router = useRouter();
