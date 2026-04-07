@@ -101,7 +101,7 @@ const remaining = computed(() => 3 - (params.value?.recordedUsed ?? 0));
 </script>
 
 <style scoped>
-@reference "../../../style/index.css";
+@reference "../../../../style/index.css";
 
 .hint-option {
     @apply w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[15px] font-medium text-foreground cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed;
