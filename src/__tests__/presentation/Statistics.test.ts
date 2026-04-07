@@ -3,7 +3,7 @@ import { flushPromises, mount } from "@vue/test-utils";
 import { createPinia } from "pinia";
 import { createRouter, createMemoryHistory } from "vue-router";
 import Statistics from "@/presentation/pages/statistics/Statistics.vue";
-import { recordGameResult } from "@/application/Statistics";
+import { recordGameResult, getGameHistory } from "@/application/Statistics";
 
 const createTestRouter = () => {
     return createRouter({
@@ -104,5 +104,37 @@ describe("Statistics", () => {
         expect(wrapper.find("[data-testid='win-rate']").text()).toContain("0%");
         expect(wrapper.find("[data-testid='best-time-easy']").text()).toContain("--:--");
         expect(wrapper.findAll("[data-testid='recent-game']")).toHaveLength(0);
+    });
+
+    it("should show clear records dialog when clicking Clear All Records button", async () => {
+        const { wrapper } = mountStatistics();
+
+        await wrapper.find("[data-testid='clear-records-button']").trigger("click");
+
+        expect(wrapper.find("[data-testid='clear-records-dialog']").exists()).toBe(true);
+    });
+
+    it("should clear all records when confirming in dialog", async () => {
+        recordGameResult({ difficulty: "easy", elapsedSeconds: 120, completed: true });
+
+        const { wrapper } = mountStatistics();
+
+        await wrapper.find("[data-testid='clear-records-button']").trigger("click");
+        await wrapper.find("[data-testid='clear-records-confirm-button']").trigger("click");
+        await flushPromises();
+
+        expect(getGameHistory()).toHaveLength(0);
+    });
+
+    it("should keep records when cancelling in dialog", async () => {
+        recordGameResult({ difficulty: "easy", elapsedSeconds: 120, completed: true });
+
+        const { wrapper } = mountStatistics();
+
+        await wrapper.find("[data-testid='clear-records-button']").trigger("click");
+        await wrapper.find("[data-testid='clear-records-cancel-button']").trigger("click");
+        await flushPromises();
+
+        expect(getGameHistory()).toHaveLength(1);
     });
 });
