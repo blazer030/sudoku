@@ -44,3 +44,40 @@
     overscroll-behavior-y: contain;
   }
 }
+
+/* Modal transition: overlay fades, card scales+fades */
+.modal-enter-active,
+.modal-leave-active {
+  transition: opacity 200ms ease;
+}
+.modal-enter-active > *:last-child,
+.modal-leave-active > *:last-child {
+  transition: transform 200ms ease, opacity 200ms ease;
+}
+.modal-enter-from,
+.modal-leave-to {
+  opacity: 0;
+}
+.modal-enter-from > *:last-child,
+.modal-leave-to > *:last-child {
+  transform: scale(0.95);
+}
+
+/* Hint popup transition: overlay fades, card slides up */
+.hint-popup-enter-active,
+.hint-popup-leave-active {
+  transition: opacity 150ms ease;
+}
+.hint-popup-enter-active > *:last-child,
+.hint-popup-leave-active > *:last-child {
+  transition: transform 200ms ease, opacity 150ms ease;
+}
+.hint-popup-enter-from,
+.hint-popup-leave-to {
+  opacity: 0;
+}
+.hint-popup-enter-from > *:last-child,
+.hint-popup-leave-to > *:last-child {
+  transform: translateY(16px);
+  opacity: 0;
+}
