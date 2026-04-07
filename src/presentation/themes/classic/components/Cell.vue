@@ -4,6 +4,7 @@
             cellBg,
             positionClasses,
             !puzzleCell.isClue ? 'cursor-pointer' : '',
+            flashing ? 'animate-completion-flash' : '',
         ]"
         class="flex justify-center items-center flex-1 aspect-square"
     >
@@ -53,6 +54,7 @@ const props = defineProps<{
     selected?: boolean;
     selectedDigit?: number | null;
     error?: boolean;
+    flashing?: boolean;
 }>();
 
 const isSameDigit = computed(() => {

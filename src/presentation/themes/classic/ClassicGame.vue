@@ -28,6 +28,7 @@
                             :column="columnIndex"
                             :data-testid="`cell-${rowIndex}-${columnIndex}`"
                             :error="isError(rowIndex, columnIndex)"
+                            :flashing="isFlashing(rowIndex, columnIndex)"
                             :puzzle-cell="puzzleCell.raw()"
                             :selected-digit="selectedDigit"
                             :row="rowIndex"
@@ -91,6 +92,8 @@ const {
     openHintMenu,
     showLeaveDialog,
     checkAndComplete,
+    triggerFlash,
+    isFlashing,
 } = useGameSession();
 
 const {
@@ -106,5 +109,6 @@ const {
     sudoku: sudoku.raw(),
     clearErrors,
     checkAndComplete,
+    onGroupCompleted: triggerFlash,
 });
 </script>

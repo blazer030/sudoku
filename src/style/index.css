@@ -81,3 +81,14 @@
   transform: translateY(16px);
   opacity: 0;
 }
+
+/* Completion flash animation */
+@keyframes completion-flash {
+  0% { background-color: var(--color-card); }
+  50% { background-color: var(--color-highlight); }
+  100% { background-color: var(--color-card); }
+}
+
+.animate-completion-flash {
+  animation: completion-flash 500ms ease-in-out;
+}

@@ -8,6 +8,7 @@ import { useGameTimer } from "@/presentation/pages/game/useGameTimer";
 import { useGameCompletion } from "@/presentation/pages/game/useGameCompletion";
 import { useLeaveGame } from "./useLeaveGame";
 import { useHintActions } from "./useHintActions";
+import { useCompletionFlash } from "./useCompletionFlash";
 
 export const useGameSession = () => {
     const router = useRouter();
@@ -44,9 +45,12 @@ export const useGameSession = () => {
         },
     });
 
+    const { triggerFlash, isFlashing } = useCompletionFlash();
+
     const { clearErrors, isError, openHintMenu } = useHintActions({
         sudoku: sudoku.raw(),
         onRevealComplete: checkAndComplete,
+        onGroupCompleted: triggerFlash,
     });
 
     const { leaveDialog, showLeaveDialog } = useLeaveGame({
@@ -73,5 +77,7 @@ export const useGameSession = () => {
         isError,
         openHintMenu,
         showLeaveDialog,
+        triggerFlash,
+        isFlashing,
     };
 };
