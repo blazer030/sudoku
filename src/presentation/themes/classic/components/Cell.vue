@@ -27,9 +27,16 @@
             <div
                 v-for="n in 9"
                 :key="`note-${n}`"
-                class="flex justify-center items-center text-[10px] text-foreground-secondary leading-none"
+                class="flex justify-center items-center leading-none"
             >
-                {{ puzzleCell.notes.includes(n) ? n : "" }}
+                <span
+                    v-if="puzzleCell.notes.includes(n)"
+                    :class="selectedDigit === n
+                        ? 'w-5 h-5 rounded-full bg-primary text-white font-semibold flex items-center justify-center text-[10px]'
+                        : 'text-[10px] text-foreground-secondary'"
+                >
+                    {{ n }}
+                </span>
             </div>
         </div>
     </div>
@@ -37,22 +44,27 @@
 
 <script lang="ts" setup>
 import { computed } from "vue";
-import { PuzzleCell, CellHighlight } from "@/domain";
+import { PuzzleCell } from "@/domain";
 
 const props = defineProps<{
     puzzleCell: PuzzleCell;
     row: number;
     column: number;
     selected?: boolean;
-    highlight?: CellHighlight;
+    selectedDigit?: number | null;
     error?: boolean;
 }>();
+
+const isSameDigit = computed(() => {
+    if (!props.selectedDigit) return false;
+    const cellValue = props.puzzleCell.isClue ? props.puzzleCell.clue : props.puzzleCell.entry;
+    return cellValue === props.selectedDigit;
+});
 
 const cellBg = computed(() => {
     if (props.error) return "bg-error-light";
     if (props.selected) return "bg-primary-light";
-    if (props.highlight === CellHighlight.Peer) return "bg-highlight";
-    if (props.highlight === CellHighlight.SameDigit) return "bg-highlight";
+    if (isSameDigit.value) return "bg-highlight";
     if (props.puzzleCell.isClue) return "bg-cell-clue";
     return "bg-card";
 });

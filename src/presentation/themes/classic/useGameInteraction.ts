@@ -1,5 +1,5 @@
 import { computed, ref } from "vue";
-import { BOARD_SIZE, BOX_SIZE, CellHighlight } from "@/domain";
+import { BOARD_SIZE } from "@/domain";
 import type { Sudoku } from "@/domain";
 import { InputMode } from "@/presentation/pages/game/InputMode";
 
@@ -61,38 +61,6 @@ export const useGameInteraction = ({ sudoku, clearErrors, checkAndComplete }: Ga
         return selectedCell.value.column === column;
     };
 
-    const highlightGrid = computed(() => {
-        const grid: CellHighlight[][] = [];
-        for (let row = 0; row < BOARD_SIZE; row++) {
-            grid[row] = [];
-            for (let column = 0; column < BOARD_SIZE; column++) {
-                const cell = sudoku.puzzle[row][column];
-                const cellValue = cell.isClue ? cell.clue : cell.entry;
-                if (selectedDigit.value && cellValue === selectedDigit.value) {
-                    grid[row][column] = CellHighlight.SameDigit;
-                    continue;
-                }
-                if (!selectedCell.value) {
-                    grid[row][column] = CellHighlight.None;
-                    continue;
-                }
-                const selectedRow = selectedCell.value.row;
-                const selectedColumn = selectedCell.value.column;
-                if (row === selectedRow && column === selectedColumn) {
-                    grid[row][column] = CellHighlight.None;
-                } else if (row === selectedRow || column === selectedColumn) {
-                    grid[row][column] = CellHighlight.Peer;
-                } else if (Math.floor(row / BOX_SIZE) === Math.floor(selectedRow / BOX_SIZE)
-                    && Math.floor(column / BOX_SIZE) === Math.floor(selectedColumn / BOX_SIZE)) {
-                    grid[row][column] = CellHighlight.Peer;
-                } else {
-                    grid[row][column] = CellHighlight.None;
-                }
-            }
-        }
-        return grid;
-    });
-
     const digitCounts = computed(() => {
         const counts = Array.from<number, number>({ length: 10 }, () => 0);
         for (let row = 0; row < BOARD_SIZE; row++) {
@@ -152,7 +120,6 @@ export const useGameInteraction = ({ sudoku, clearErrors, checkAndComplete }: Ga
         toggleNoteMode,
         toggleEraseMode,
         isSelected,
-        highlightGrid,
         digitCounts,
     };
 };

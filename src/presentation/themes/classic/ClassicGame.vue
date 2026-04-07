@@ -28,8 +28,8 @@
                             :column="columnIndex"
                             :data-testid="`cell-${rowIndex}-${columnIndex}`"
                             :error="isError(rowIndex, columnIndex)"
-                            :highlight="highlightGrid[rowIndex][columnIndex]"
                             :puzzle-cell="puzzleCell.raw()"
+                            :selected-digit="selectedDigit"
                             :row="rowIndex"
                             :selected="isSelected(rowIndex, columnIndex)"
                             @click="clickCell(rowIndex, columnIndex)"
@@ -101,7 +101,6 @@ const {
     toggleNoteMode,
     toggleEraseMode,
     isSelected,
-    highlightGrid,
     digitCounts,
 } = useGameInteraction({
     sudoku: sudoku.raw(),

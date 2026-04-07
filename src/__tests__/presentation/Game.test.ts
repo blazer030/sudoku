@@ -6,7 +6,6 @@ import Game from "@/presentation/pages/game/Game.vue";
 import { knownAnswer, knownPuzzle, createKnownSudoku } from "@/__tests__/fixtures/knownPuzzle";
 import type { GameState } from "@/application/GameState";
 import Cell from "@/presentation/themes/classic/components/Cell.vue";
-import { CellHighlight } from "@/domain/board/CellHighlight";
 import { useGameStore } from "@/stores/gameStore";
 import type { Difficulty } from "@/domain/generator/SudokuGenerator";
 import { getGameHistory } from "@/application/Statistics";
@@ -555,40 +554,16 @@ describe("Game", () => {
         expect(wrapper.find("[data-testid='timer']").text()).toBe("00:05");
     });
 
-    it("should highlight cells in same row, column, and box when a cell is selected", async () => {
-        const wrapper = mountGame();
-
-        // 選取 (0, 2) slot 格子
-        await wrapper.find("[data-testid='cell-0-2']").trigger("click");
-
-        // 同行
-        expect(wrapper.findComponent<typeof Cell>("[data-testid='cell-0-5']").props("highlight")).toBe(CellHighlight.Peer);
-        // 同列
-        expect(wrapper.findComponent<typeof Cell>("[data-testid='cell-3-2']").props("highlight")).toBe(CellHighlight.Peer);
-        // 同宮
-        expect(wrapper.findComponent<typeof Cell>("[data-testid='cell-1-0']").props("highlight")).toBe(CellHighlight.Peer);
-        // 不相關
-        expect(wrapper.findComponent<typeof Cell>("[data-testid='cell-5-5']").props("highlight")).toBe(CellHighlight.None);
-        // 自身不傳 highlight
-        expect(wrapper.findComponent<typeof Cell>("[data-testid='cell-0-2']").props("highlight")).toBe(CellHighlight.None);
-    });
-
-    it("should highlight cells with same digit as SameDigit when a digit button is selected", async () => {
+    it("should pass selectedDigit to all cells when a digit button is selected", async () => {
         const wrapper = mountGame();
 
         // 選擇數字 5
         await wrapper.find("[data-testid='number-5']").trigger("click");
 
-        // (0, 0) 是 clue=5 → SameDigit
-        expect(wrapper.findComponent<typeof Cell>("[data-testid='cell-0-0']").props("highlight")).toBe(CellHighlight.SameDigit);
-        // (1, 5) 是 clue=5 → SameDigit
-        expect(wrapper.findComponent<typeof Cell>("[data-testid='cell-1-5']").props("highlight")).toBe(CellHighlight.SameDigit);
-        // (7, 8) 是 clue=5 → SameDigit
-        expect(wrapper.findComponent<typeof Cell>("[data-testid='cell-7-8']").props("highlight")).toBe(CellHighlight.SameDigit);
-        // (0, 1) 是 clue=3，不同數字 → None
-        expect(wrapper.findComponent<typeof Cell>("[data-testid='cell-0-1']").props("highlight")).toBe(CellHighlight.None);
-        // (0, 2) 是空 slot → None
-        expect(wrapper.findComponent<typeof Cell>("[data-testid='cell-0-2']").props("highlight")).toBe(CellHighlight.None);
+        // 所有 Cell 都收到 selectedDigit=5
+        expect(wrapper.findComponent<typeof Cell>("[data-testid='cell-0-0']").props("selectedDigit")).toBe(5);
+        expect(wrapper.findComponent<typeof Cell>("[data-testid='cell-0-1']").props("selectedDigit")).toBe(5);
+        expect(wrapper.findComponent<typeof Cell>("[data-testid='cell-0-2']").props("selectedDigit")).toBe(5);
     });
 
     it("should update remaining count badge after inputting a number", async () => {
