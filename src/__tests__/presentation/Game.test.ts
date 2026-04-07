@@ -125,6 +125,29 @@ describe("Game", () => {
         expect(cell.text()).toBe("4");
     });
 
+    it("should deselect cell after filling a digit via digit pad", async () => {
+        const wrapper = mountGame();
+
+        // 選取 (0, 2) slot 格子，按數字 4 填入
+        await wrapper.find("[data-testid='cell-0-2']").trigger("click");
+        await wrapper.find("[data-testid='number-4']").trigger("click");
+
+        // 填入後格子應自動取消選擇
+        expect(wrapper.findComponent<typeof Cell>("[data-testid='cell-0-2']").props("selected")).toBeFalsy();
+    });
+
+    it("should keep cell selected after toggling note via digit pad", async () => {
+        const wrapper = mountGame();
+
+        // 選取 (0, 2) slot 格子，切換到 Note 模式，按數字 4
+        await wrapper.find("[data-testid='cell-0-2']").trigger("click");
+        await wrapper.find("[data-testid='note-button']").trigger("click");
+        await wrapper.find("[data-testid='number-4']").trigger("click");
+
+        // Note 模式下格子應維持選擇
+        expect(wrapper.findComponent<typeof Cell>("[data-testid='cell-0-2']").props("selected")).toBe(true);
+    });
+
     it("should ignore number button when no cell is selected", async () => {
         const wrapper = mountGame();
 

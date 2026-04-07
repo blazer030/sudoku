@@ -106,6 +106,7 @@ export const useGameInteraction = ({ sudoku, clearErrors, checkAndComplete }: Ga
                 return;
             }
             inputToCell(row, column, digit);
+            selectedCell.value = null;
             return;
         }
         selectedDigit.value = selectedDigit.value === digit ? null : digit;
