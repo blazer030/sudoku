@@ -5,7 +5,7 @@
 
 <script lang="ts" setup>
 import { useSettingsStore } from "@/stores/settingsStore";
-import ClassicGame from "./ClassicGame.vue";
+import ClassicGame from "@/presentation/themes/classic/ClassicGame.vue";
 
 const settingsStore = useSettingsStore();
 </script>

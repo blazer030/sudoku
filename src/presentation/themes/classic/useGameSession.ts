@@ -4,8 +4,8 @@ import { provideGameCompleteModal } from "@/presentation/themes/classic/componen
 import { Sudoku } from "@/domain";
 import { useGameStore } from "@/stores/gameStore";
 import { ROUTER_PATH } from "@/router";
-import { useGameTimer } from "./useGameTimer";
-import { useGameCompletion } from "./useGameCompletion";
+import { useGameTimer } from "@/presentation/pages/game/useGameTimer";
+import { useGameCompletion } from "@/presentation/pages/game/useGameCompletion";
 import { useLeaveGame } from "./useLeaveGame";
 import { useHintActions } from "./useHintActions";
 

@@ -1,7 +1,7 @@
 import { computed, ref } from "vue";
 import { BOARD_SIZE, BOX_SIZE, CellHighlight } from "@/domain";
 import type { Sudoku } from "@/domain";
-import { InputMode } from "./InputMode";
+import { InputMode } from "@/presentation/pages/game/InputMode";
 
 interface GameInteractionOptions {
     sudoku: Sudoku;

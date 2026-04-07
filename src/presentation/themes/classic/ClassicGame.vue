@@ -78,7 +78,7 @@ import GameControls from "@/presentation/themes/classic/components/GameControls.
 import HintMenuPopup from "@/presentation/themes/classic/components/HintMenuPopup.vue";
 import DigitPad from "@/presentation/themes/classic/components/DigitPad.vue";
 import Cell from "@/presentation/themes/classic/components/Cell.vue";
-import { InputMode } from "./InputMode";
+import { InputMode } from "@/presentation/pages/game/InputMode";
 import { useGameInteraction } from "./useGameInteraction";
 import { useGameSession } from "./useGameSession";
 
