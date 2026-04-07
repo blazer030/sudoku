@@ -32,7 +32,7 @@
                 <span
                     v-if="puzzleCell.notes.includes(n)"
                     :class="selectedDigit === n
-                        ? 'w-5 h-5 rounded-full bg-primary text-white font-semibold flex items-center justify-center text-[10px]'
+                        ? 'aspect-square max-w-5 max-h-5 w-full rounded-full bg-primary text-white font-semibold flex items-center justify-center text-[10px]'
                         : 'text-[10px] text-foreground-secondary'"
                 >
                     {{ n }}
