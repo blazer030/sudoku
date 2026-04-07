@@ -94,7 +94,10 @@
         <!-- Recent Games -->
         <div class="flex flex-col gap-3 mt-6">
             <span class="text-foreground-secondary text-sm font-semibold">Recent Games</span>
-            <div class="flex flex-col gap-2">
+            <div
+                v-if="hasRecords"
+                class="flex flex-col gap-2"
+            >
                 <div
                     v-for="(game, index) in stats.recentGames"
                     :key="index"
@@ -138,6 +141,22 @@
                         </span>
                     </div>
                 </div>
+            </div>
+
+            <!-- Empty State -->
+            <div
+                v-if="!hasRecords"
+                class="flex flex-col items-center gap-2"
+                data-testid="empty-state"
+            >
+                <div class="w-16 h-16 rounded-full bg-card shadow-card flex items-center justify-center mb-2">
+                    <Trophy
+                        :size="28"
+                        class="text-foreground-muted"
+                    />
+                </div>
+                <span class="text-base font-semibold text-foreground">No games played yet</span>
+                <span class="text-sm text-foreground-muted">Your game history will appear here</span>
             </div>
         </div>
 
