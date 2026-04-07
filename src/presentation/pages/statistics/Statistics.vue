@@ -1,5 +1,5 @@
 <template>
-    <div class="flex flex-col gap-6 h-dvh pb-6 px-5 overflow-y-auto">
+    <div class="flex flex-col h-dvh px-5 overflow-y-auto">
         <!-- Header -->
         <div class="flex items-center justify-between sticky top-0 bg-background pt-6 pb-2 z-10">
             <button
@@ -18,7 +18,7 @@
         </div>
 
         <!-- Overview -->
-        <div class="flex flex-col gap-3">
+        <div class="flex flex-col gap-3 mt-6">
             <span class="text-foreground-secondary text-sm font-semibold">Overview</span>
             <div class="flex gap-3">
                 <div
@@ -46,7 +46,7 @@
         </div>
 
         <!-- Best Times -->
-        <div class="flex flex-col gap-3">
+        <div class="flex flex-col gap-3 mt-6">
             <span class="text-foreground-secondary text-sm font-semibold">Best Times</span>
             <div class="bg-card rounded-2xl p-4 shadow-card flex flex-col gap-3">
                 <div
@@ -92,7 +92,7 @@
         </div>
 
         <!-- Recent Games -->
-        <div class="flex flex-col gap-3">
+        <div class="flex flex-col gap-3 mt-6">
             <span class="text-foreground-secondary text-sm font-semibold">Recent Games</span>
             <div class="flex flex-col gap-2">
                 <div
@@ -142,17 +142,19 @@
         </div>
 
         <!-- Clear All Records -->
-        <button
-            class="w-full h-[52px] rounded-button border-2 border-accent flex items-center justify-center gap-2 cursor-pointer mb-2"
-            data-testid="clear-records-button"
-            @click="handleClearRecords"
-        >
-            <Trash2
-                :size="18"
-                class="text-accent"
-            />
-            <span class="text-base font-semibold text-accent">Clear All Records</span>
-        </button>
+        <div class="sticky bottom-0 bg-background py-4">
+            <button
+                class="w-full h-[52px] rounded-xl border-2 border-accent bg-background flex items-center justify-center gap-2 cursor-pointer"
+                data-testid="clear-records-button"
+                @click="handleClearRecords"
+            >
+                <Trash2
+                    :size="18"
+                    class="text-accent"
+                />
+                <span class="text-base font-semibold text-accent">Clear All Records</span>
+            </button>
+        </div>
 
         <!-- Clear Records Dialog -->
         <ClearRecordsDialog />
