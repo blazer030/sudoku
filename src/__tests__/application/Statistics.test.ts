@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { recordGameResult, getGameHistory, getStatistics } from "@/application/Statistics";
+import { recordGameResult, getGameHistory, getStatistics, clearAllRecords } from "@/application/Statistics";
 
 describe("Statistics", () => {
     beforeEach(() => {
@@ -93,6 +93,18 @@ describe("Statistics", () => {
             expect(stats.recentGames[0].difficulty).toBe("hard");
             expect(stats.recentGames[1].difficulty).toBe("medium");
             expect(stats.recentGames[2].difficulty).toBe("easy");
+        });
+    });
+
+    describe("clearAllRecords", () => {
+        it("should remove all game history from localStorage", () => {
+            recordGameResult({ difficulty: "easy", elapsedSeconds: 120, completed: true });
+            recordGameResult({ difficulty: "medium", elapsedSeconds: 200, completed: false });
+
+            clearAllRecords();
+
+            expect(getGameHistory()).toHaveLength(0);
+            expect(getStatistics().overall.gamesPlayed).toBe(0);
         });
     });
 

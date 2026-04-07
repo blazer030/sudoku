@@ -67,6 +67,10 @@ export const getGameHistory = (): GameResult[] => {
     return loadHistory();
 };
 
+export const clearAllRecords = (): void => {
+    localStorage.removeItem(STORAGE_KEY);
+};
+
 const computeDifficultyStats = (games: GameResult[]): DifficultyStats => {
     const wonGames = games.filter(game => game.completed);
     return {
