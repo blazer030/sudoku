@@ -140,20 +140,46 @@
                 </div>
             </div>
         </div>
+
+        <!-- Clear All Records -->
+        <button
+            class="w-full h-[52px] rounded-button border-2 border-accent flex items-center justify-center gap-2 cursor-pointer mb-2"
+            data-testid="clear-records-button"
+            @click="handleClearRecords"
+        >
+            <Trash2
+                :size="18"
+                class="text-accent"
+            />
+            <span class="text-base font-semibold text-accent">Clear All Records</span>
+        </button>
+
+        <!-- Clear Records Dialog -->
+        <ClearRecordsDialog />
     </div>
 </template>
 
 <script lang="ts" setup>
 import { computed } from "vue";
 import { useRouter } from "vue-router";
-import { ChevronLeft, Lightbulb, Trophy, X } from "lucide-vue-next";
+import { ChevronLeft, Lightbulb, Trash2, Trophy, X } from "lucide-vue-next";
 import { ROUTER_PATH } from "@/router";
-import { getStatistics } from "@/application/Statistics";
+import { getStatistics, clearAllRecords } from "@/application/Statistics";
 import { formatTime } from "@/utils/formatTime";
 import { formatDate } from "@/utils/formatDate";
 import { DifficultyLabels, type Difficulty } from "@/domain";
+import ClearRecordsDialog from "./ClearRecordsDialog.vue";
+import { provideClearRecordsDialog } from "./useClearRecordsDialog";
 
 const router = useRouter();
+const { open: openClearRecordsDialog } = provideClearRecordsDialog();
+
+const handleClearRecords = async () => {
+    const result = await openClearRecordsDialog(undefined);
+    if (result === "confirm") {
+        clearAllRecords();
+    }
+};
 
 const stats = computed(() => getStatistics());
 
