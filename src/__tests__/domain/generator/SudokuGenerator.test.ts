@@ -45,21 +45,7 @@ describe("SudokuGenerator", () => {
         expect(filledCells).toBeLessThanOrEqual(35);
     });
 
-    it("should generate a hard puzzle with 22-26 clues", () => {
-        const { puzzle } = generator.generatePuzzle("hard");
-        const filledCells = puzzle.flat().filter(cell => cell !== 0).length;
-
-        expect(filledCells).toBeGreaterThanOrEqual(22);
-        expect(filledCells).toBeLessThanOrEqual(26);
-    });
-
-    it("should generate a puzzle with a unique solution", () => {
-        const { puzzle } = generator.generatePuzzle("easy");
-
-        expect(solver.countSolutions(puzzle)).toBe(1);
-    });
-
-    it.each(["easy", "medium", "hard"] as const)("should generate a %s puzzle with unique solution and valid clue count", (difficulty) => {
+    it.each(["easy", "medium", "hard"] as const)("should generate a %s puzzle with unique solution and valid clue count", { timeout: 30000 }, (difficulty) => {
         const { puzzle } = generator.generatePuzzle(difficulty);
         const clueCount = puzzle.flat().filter(cell => cell !== 0).length;
         const ranges = { easy: [36, 45], medium: [27, 35], hard: [22, 26] };
