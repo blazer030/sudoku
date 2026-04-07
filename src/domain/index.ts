@@ -5,6 +5,7 @@ export { SudokuGenerator, DifficultyLabels } from "@/domain/generator/SudokuGene
 export type { Difficulty } from "@/domain/generator/SudokuGenerator";
 export { SudokuSolver } from "@/domain/generator/SudokuSolver";
 export { Sudoku } from "@/domain/game/Sudoku";
+export type { CompletedCells } from "@/domain/game/Sudoku";
 export { ConflictDetector } from "@/domain/game/ConflictDetector";
 export type { Conflict } from "@/domain/game/ConflictDetector";
 export { HintTracker } from "@/domain/game/HintTracker";

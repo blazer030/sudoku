@@ -419,6 +419,104 @@ describe("Sudoku", () => {
         });
     });
 
+    describe("findCompletedGroups", () => {
+        it("should return empty cells when row is not complete", () => {
+            const sudoku = createKnownSudoku();
+            sudoku.fill(0, 2, 4);
+            const result = sudoku.findCompletedGroups(0, 2);
+            expect(result.cells).toEqual([]);
+        });
+
+        it("should return row cells when row is fully correct", () => {
+            const sudoku = createKnownSudoku();
+            // Row 0 empty: 2→4, 3→6, 5→8, 6→9, 7→1, 8→2
+            sudoku.fill(0, 2, 4);
+            sudoku.fill(0, 3, 6);
+            sudoku.fill(0, 5, 8);
+            sudoku.fill(0, 6, 9);
+            sudoku.fill(0, 7, 1);
+            sudoku.fill(0, 8, 2);
+
+            const result = sudoku.findCompletedGroups(0, 8);
+
+            expect(result.cells).toEqual(expect.arrayContaining([
+                { row: 0, column: 0 }, { row: 0, column: 1 }, { row: 0, column: 2 },
+                { row: 0, column: 3 }, { row: 0, column: 4 }, { row: 0, column: 5 },
+                { row: 0, column: 6 }, { row: 0, column: 7 }, { row: 0, column: 8 },
+            ]));
+            expect(result.cells.filter(c => c.row === 0)).toHaveLength(9);
+        });
+
+        it("should return column cells when column is fully correct", () => {
+            const sudoku = createKnownSudoku();
+            // Column 4 empty: row2→4, row4→5, row6→3
+            sudoku.fill(2, 4, 4);
+            sudoku.fill(4, 4, 5);
+            sudoku.fill(6, 4, 3);
+
+            const result = sudoku.findCompletedGroups(6, 4);
+
+            expect(result.cells).toEqual(expect.arrayContaining([
+                { row: 0, column: 4 }, { row: 1, column: 4 }, { row: 2, column: 4 },
+                { row: 3, column: 4 }, { row: 4, column: 4 }, { row: 5, column: 4 },
+                { row: 6, column: 4 }, { row: 7, column: 4 }, { row: 8, column: 4 },
+            ]));
+            expect(result.cells.filter(c => c.column === 4)).toHaveLength(9);
+        });
+
+        it("should return box cells when box is fully correct", () => {
+            const sudoku = createKnownSudoku();
+            // Box (0,0): (0,2)→4, (1,1)→7, (1,2)→2, (2,0)→1
+            sudoku.fill(0, 2, 4);
+            sudoku.fill(1, 1, 7);
+            sudoku.fill(1, 2, 2);
+            sudoku.fill(2, 0, 1);
+
+            const result = sudoku.findCompletedGroups(2, 0);
+
+            expect(result.cells).toEqual(expect.arrayContaining([
+                { row: 0, column: 0 }, { row: 0, column: 1 }, { row: 0, column: 2 },
+                { row: 1, column: 0 }, { row: 1, column: 1 }, { row: 1, column: 2 },
+                { row: 2, column: 0 }, { row: 2, column: 1 }, { row: 2, column: 2 },
+            ]));
+        });
+
+        it("should deduplicate cells when row and column complete simultaneously", () => {
+            const sudoku = createKnownSudoku();
+            // Fill row 0 (except (0,8)) and column 8 (except (0,8))
+            sudoku.fill(0, 2, 4);
+            sudoku.fill(0, 3, 6);
+            sudoku.fill(0, 5, 8);
+            sudoku.fill(0, 6, 9);
+            sudoku.fill(0, 7, 1);
+            sudoku.fill(1, 8, 8);
+            sudoku.fill(2, 8, 7);
+            sudoku.fill(6, 8, 4);
+            // (0,8)→2 completes both row 0 and column 8
+            sudoku.fill(0, 8, 2);
+
+            const result = sudoku.findCompletedGroups(0, 8);
+
+            const uniqueKeys = new Set(result.cells.map(c => `${c.row},${c.column}`));
+            expect(uniqueKeys.size).toBe(17); // 9 + 9 - 1 shared
+        });
+
+        it("should return empty when cell has wrong value even if all filled", () => {
+            const sudoku = createKnownSudoku();
+            // Fill row 0 but with wrong value at (0,8)
+            sudoku.fill(0, 2, 4);
+            sudoku.fill(0, 3, 6);
+            sudoku.fill(0, 5, 8);
+            sudoku.fill(0, 6, 9);
+            sudoku.fill(0, 7, 1);
+            sudoku.fill(0, 8, 3); // Wrong! Should be 2
+
+            const result = sudoku.findCompletedGroups(0, 8);
+
+            expect(result.cells).toEqual([]);
+        });
+    });
+
     it('should include hintTracker in Sudoku instance', () => {
         const sudoku = createKnownSudoku();
 
