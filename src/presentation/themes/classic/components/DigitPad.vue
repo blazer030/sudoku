@@ -58,7 +58,7 @@
             <button
                 :class="eraseActive
                     ? 'bg-primary text-white shadow-primary-active'
-                    : 'bg-card text-foreground shadow-card-sm'"
+                    : 'bg-card text-foreground shadow-card-sm hover:bg-foreground/5'"
                 class="w-14 h-14 rounded-xl flex items-center justify-center transition-all cursor-pointer"
                 data-testid="erase-button"
                 @click="emit('toggleEraseMode')"
@@ -89,6 +89,6 @@ const getRemainingCount = (digit: number): number => 9 - props.digitCounts[digit
 const digitButtonClasses = (digit: number): string => {
     if (isDigitCompleted(digit)) return "bg-card opacity-50 text-foreground-muted";
     if (props.selectedDigit === digit) return "bg-primary text-white shadow-primary-active";
-    return "bg-card text-foreground shadow-card-sm";
+    return "bg-card text-foreground shadow-card-sm hover:bg-foreground/5";
 };
 </script>

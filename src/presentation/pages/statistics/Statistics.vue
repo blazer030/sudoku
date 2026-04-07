@@ -166,7 +166,7 @@
             class="sticky bottom-0 bg-background py-4"
         >
             <button
-                class="w-full h-[52px] rounded-xl border-2 border-accent bg-background flex items-center justify-center gap-2 cursor-pointer"
+                class="w-full h-[52px] rounded-xl border-2 border-accent bg-background flex items-center justify-center gap-2 cursor-pointer transition-all duration-200 hover:bg-accent/10"
                 data-testid="clear-records-button"
                 @click="handleClearRecords"
             >

@@ -37,7 +37,7 @@
 
             <!-- New Game -->
             <button
-                class="flex items-center justify-center gap-2.5 h-14 w-full bg-card rounded-2xl shadow-card cursor-pointer"
+                class="flex items-center justify-center gap-2.5 h-14 w-full bg-card rounded-2xl shadow-card cursor-pointer transition-all duration-200 hover:bg-foreground/3 hover:shadow-card-lg"
                 data-testid="new-game-button"
                 @click="handleNewGame"
             >

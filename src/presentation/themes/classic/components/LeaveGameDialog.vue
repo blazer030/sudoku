@@ -23,7 +23,7 @@
 
             <div class="flex flex-col gap-3 w-full">
                 <button
-                    class="w-full h-[52px] rounded-button bg-primary flex items-center justify-center gap-2 shadow-primary cursor-pointer"
+                    class="w-full h-[52px] rounded-button bg-primary flex items-center justify-center gap-2 shadow-primary cursor-pointer transition-all duration-200 hover:bg-[#347A4E] hover:shadow-primary-lg"
                     data-testid="save-and-leave-button"
                     @click="close('save')"
                 >
@@ -35,7 +35,7 @@
                 </button>
 
                 <button
-                    class="w-full h-[52px] rounded-button bg-accent flex items-center justify-center gap-2 shadow-accent cursor-pointer"
+                    class="w-full h-[52px] rounded-button bg-accent flex items-center justify-center gap-2 shadow-accent cursor-pointer transition-all duration-200 hover:bg-[#C88565] hover:shadow-[0_4px_16px_#D4845040]"
                     data-testid="give-up-and-leave-button"
                     @click="close('giveUp')"
                 >
@@ -43,7 +43,7 @@
                 </button>
 
                 <button
-                    class="w-full h-[44px] flex items-center justify-center cursor-pointer"
+                    class="w-full h-[44px] flex items-center justify-center cursor-pointer rounded-button transition-all duration-200 hover:bg-foreground/5"
                     data-testid="leave-cancel-button"
                     @click="close('cancel')"
                 >

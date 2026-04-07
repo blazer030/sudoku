@@ -1,7 +1,7 @@
 <template>
     <button
         v-if="showContinue"
-        class="flex items-center justify-center gap-2.5 h-14 w-full bg-primary rounded-2xl text-white shadow-primary cursor-pointer"
+        class="flex items-center justify-center gap-2.5 h-14 w-full bg-primary rounded-2xl text-white shadow-primary cursor-pointer transition-all duration-200 hover:bg-[#347A4E] hover:shadow-primary-lg"
         data-testid="continue-button"
         @click="$emit('continue')"
     >
