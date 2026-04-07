@@ -21667,6 +21667,517 @@
           ]
         }
       ]
+    },
+    {
+      "type": "frame",
+      "id": "QdD0c",
+      "x": 5561,
+      "y": 0,
+      "name": "Statistics Screen (Empty)",
+      "width": 402,
+      "height": 868,
+      "fill": "$background",
+      "layout": "vertical",
+      "gap": 24,
+      "padding": [
+        24,
+        20
+      ],
+      "children": [
+        {
+          "type": "frame",
+          "id": "xYPKb",
+          "name": "Header",
+          "width": "fill_container",
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "hS0tg",
+              "name": "backBtn",
+              "gap": 8,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon_font",
+                  "id": "SNZm6",
+                  "name": "backIcon",
+                  "width": 24,
+                  "height": 24,
+                  "iconFontName": "chevron-left",
+                  "iconFontFamily": "lucide",
+                  "fill": "$foreground"
+                },
+                {
+                  "type": "text",
+                  "id": "yt8sv",
+                  "name": "backText",
+                  "fill": "$foreground",
+                  "content": "Back",
+                  "fontFamily": "Outfit",
+                  "fontSize": 16,
+                  "fontWeight": "500"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "Nxzv8",
+              "name": "statsTitle",
+              "fill": "$foreground",
+              "content": "Statistics",
+              "fontFamily": "Outfit",
+              "fontSize": 18,
+              "fontWeight": "600"
+            },
+            {
+              "type": "frame",
+              "id": "IZVaX",
+              "name": "spacer",
+              "width": 60,
+              "height": 24
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "tpqOp",
+          "name": "Summary",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 12,
+          "children": [
+            {
+              "type": "text",
+              "id": "gEMml",
+              "name": "summaryLabel",
+              "fill": "$foreground-secondary",
+              "content": "Overview",
+              "fontFamily": "Outfit",
+              "fontSize": 14,
+              "fontWeight": "600"
+            },
+            {
+              "type": "frame",
+              "id": "TIx79",
+              "name": "summaryCards",
+              "width": "fill_container",
+              "gap": 12,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "59MtT",
+                  "name": "card1",
+                  "width": "fill_container",
+                  "fill": "$card",
+                  "cornerRadius": 16,
+                  "effect": {
+                    "type": "shadow",
+                    "shadowType": "outer",
+                    "color": "#1A191808",
+                    "offset": {
+                      "x": 0,
+                      "y": 2
+                    },
+                    "blur": 8
+                  },
+                  "layout": "vertical",
+                  "gap": 4,
+                  "padding": 16,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "XJ6ld",
+                      "name": "card1Value",
+                      "fill": "$foreground-muted",
+                      "content": "0",
+                      "fontFamily": "Roboto Mono",
+                      "fontSize": 32,
+                      "fontWeight": "700",
+                      "letterSpacing": -1
+                    },
+                    {
+                      "type": "text",
+                      "id": "OtVTH",
+                      "name": "card1Label",
+                      "fill": "$foreground-secondary",
+                      "content": "Games Won",
+                      "fontFamily": "Outfit",
+                      "fontSize": 12,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "6DO63",
+                  "name": "card2",
+                  "width": "fill_container",
+                  "fill": "$card",
+                  "cornerRadius": 16,
+                  "effect": {
+                    "type": "shadow",
+                    "shadowType": "outer",
+                    "color": "#1A191808",
+                    "offset": {
+                      "x": 0,
+                      "y": 2
+                    },
+                    "blur": 8
+                  },
+                  "layout": "vertical",
+                  "gap": 4,
+                  "padding": 16,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "xC5K7",
+                      "name": "card2Value",
+                      "fill": "$foreground-muted",
+                      "content": "0%",
+                      "fontFamily": "Roboto Mono",
+                      "fontSize": 32,
+                      "fontWeight": "700",
+                      "letterSpacing": -1
+                    },
+                    {
+                      "type": "text",
+                      "id": "Ri5Ja",
+                      "name": "card2Label",
+                      "fill": "$foreground-secondary",
+                      "content": "Win Rate",
+                      "fontFamily": "Outfit",
+                      "fontSize": 12,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "W67n6",
+                  "name": "card3",
+                  "width": "fill_container",
+                  "fill": "$card",
+                  "cornerRadius": 16,
+                  "effect": {
+                    "type": "shadow",
+                    "shadowType": "outer",
+                    "color": "#1A191808",
+                    "offset": {
+                      "x": 0,
+                      "y": 2
+                    },
+                    "blur": 8
+                  },
+                  "layout": "vertical",
+                  "gap": 4,
+                  "padding": 16,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "qTmyr",
+                      "name": "card3Value",
+                      "fill": "$foreground-muted",
+                      "content": "0",
+                      "fontFamily": "Roboto Mono",
+                      "fontSize": 32,
+                      "fontWeight": "700",
+                      "letterSpacing": -1
+                    },
+                    {
+                      "type": "text",
+                      "id": "Z0EV5",
+                      "name": "card3Label",
+                      "fill": "$foreground-secondary",
+                      "content": "Day Streak",
+                      "fontFamily": "Outfit",
+                      "fontSize": 12,
+                      "fontWeight": "500"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "ik7HJ",
+          "name": "Best Times",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 12,
+          "children": [
+            {
+              "type": "text",
+              "id": "08ZGi",
+              "name": "bestTimesLabel",
+              "fill": "$foreground-secondary",
+              "content": "Best Times",
+              "fontFamily": "Outfit",
+              "fontSize": 14,
+              "fontWeight": "600"
+            },
+            {
+              "type": "frame",
+              "id": "C0MRr",
+              "name": "bestTimesCard",
+              "width": "fill_container",
+              "fill": "$card",
+              "cornerRadius": 16,
+              "effect": {
+                "type": "shadow",
+                "shadowType": "outer",
+                "color": "#1A191808",
+                "offset": {
+                  "x": 0,
+                  "y": 2
+                },
+                "blur": 8
+              },
+              "layout": "vertical",
+              "gap": 12,
+              "padding": 16,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "jwf53",
+                  "name": "btEasy",
+                  "width": "fill_container",
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "ZEeLC",
+                      "name": "btEasyLabel",
+                      "fill": "$foreground",
+                      "content": "Easy",
+                      "fontFamily": "Outfit",
+                      "fontSize": 14,
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "text",
+                      "id": "IgwmQ",
+                      "name": "btEasyValue",
+                      "fill": "$foreground-muted",
+                      "content": "--:--",
+                      "fontFamily": "Roboto Mono",
+                      "fontSize": 16,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "57kAA",
+                  "name": "btMedium",
+                  "width": "fill_container",
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "OVk4A",
+                      "name": "btMediumLabel",
+                      "fill": "$foreground",
+                      "content": "Medium",
+                      "fontFamily": "Outfit",
+                      "fontSize": 14,
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "text",
+                      "id": "4i1b7",
+                      "name": "btMediumValue",
+                      "fill": "$foreground-muted",
+                      "content": "--:--",
+                      "fontFamily": "Roboto Mono",
+                      "fontSize": 16,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "cyRiq",
+                  "name": "btHard",
+                  "width": "fill_container",
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "2NhFP",
+                      "name": "btHardLabel",
+                      "fill": "$foreground",
+                      "content": "Hard",
+                      "fontFamily": "Outfit",
+                      "fontSize": 14,
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "text",
+                      "id": "rMGtz",
+                      "name": "btHardValue",
+                      "fill": "$foreground-muted",
+                      "content": "--:--",
+                      "fontFamily": "Roboto Mono",
+                      "fontSize": 16,
+                      "fontWeight": "600"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "Cy7tK",
+          "name": "Game History",
+          "width": "fill_container",
+          "height": "fill_container",
+          "layout": "vertical",
+          "gap": 12,
+          "children": [
+            {
+              "type": "text",
+              "id": "NXhCO",
+              "name": "historyLabel",
+              "fill": "$foreground-secondary",
+              "content": "Recent Games",
+              "fontFamily": "Outfit",
+              "fontSize": 14,
+              "fontWeight": "600"
+            },
+            {
+              "type": "frame",
+              "id": "JTN6W",
+              "name": "historyList",
+              "width": "fill_container",
+              "height": "fill_container",
+              "layout": "vertical",
+              "gap": 16,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "X1wEU",
+                  "name": "emptyIconBg",
+                  "width": 64,
+                  "height": 64,
+                  "fill": "$card",
+                  "cornerRadius": 100,
+                  "effect": {
+                    "type": "shadow",
+                    "shadowType": "outer",
+                    "color": "#1A191808",
+                    "offset": {
+                      "x": 0,
+                      "y": 2
+                    },
+                    "blur": 8
+                  },
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon_font",
+                      "id": "CZ5wy",
+                      "width": 28,
+                      "height": 28,
+                      "iconFontName": "trophy",
+                      "iconFontFamily": "lucide",
+                      "fill": "$foreground-muted"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "0wFS2",
+                  "name": "emptyTextGroup",
+                  "layout": "vertical",
+                  "gap": 6,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "IlYod",
+                      "fill": "$foreground-secondary",
+                      "content": "No games played yet",
+                      "fontFamily": "Outfit",
+                      "fontSize": 15,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "Pa4R2",
+                      "fill": "$foreground-muted",
+                      "content": "Your game history will appear here",
+                      "fontFamily": "Outfit",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "HqGwX",
+          "x": 20,
+          "y": 796,
+          "name": "Clear Records Button",
+          "enabled": false,
+          "width": "fill_container(362)",
+          "height": 48,
+          "fill": "#FFFFFF00",
+          "cornerRadius": 12,
+          "stroke": {
+            "align": "inside",
+            "thickness": 1.5,
+            "fill": "$error"
+          },
+          "gap": 8,
+          "padding": [
+            0,
+            16
+          ],
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "icon_font",
+              "id": "Qad0B",
+              "name": "trashIcon",
+              "width": 18,
+              "height": 18,
+              "iconFontName": "trash-2",
+              "iconFontFamily": "lucide",
+              "fill": "$error"
+            },
+            {
+              "type": "text",
+              "id": "nXXt7",
+              "name": "clearText",
+              "fill": "$error",
+              "content": "Clear All Records",
+              "fontFamily": "Outfit",
+              "fontSize": 15,
+              "fontWeight": "500"
+            }
+          ]
+        }
+      ]
     }
   ],
   "variables": {
