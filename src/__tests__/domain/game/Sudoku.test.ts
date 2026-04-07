@@ -284,7 +284,7 @@ describe("Sudoku", () => {
     });
 
     describe('checkAllConflicts', () => {
-        it('無衝突時回傳空陣列', () => {
+        it('should return empty array when no conflicts', () => {
             const sudoku = createKnownSudoku();
 
             // 填入正確答案，不會有衝突
@@ -296,7 +296,7 @@ describe("Sudoku", () => {
             expect(conflicts).toEqual([]);
         });
 
-        it('行內重複時回傳衝突格座標', () => {
+        it('should return conflict coordinates for row duplicates', () => {
             const sudoku = createKnownSudoku();
 
             // (0,0) clue=5，在 (0,2) 填入 5 → 行衝突
@@ -308,7 +308,7 @@ describe("Sudoku", () => {
             expect(conflicts).toContainEqual({ row: 0, column: 2 });
         });
 
-        it('列和宮重複也回傳', () => {
+        it('should return conflicts for column and box duplicates', () => {
             const sudoku = createKnownSudoku();
 
             // (2,1) clue=9，在 (1,1) 填入 9 → 列衝突 + (1,4) clue=9 行衝突
@@ -323,7 +323,7 @@ describe("Sudoku", () => {
     });
 
     describe('checkErrors', () => {
-        it('所有正確時回傳空陣列', () => {
+        it('should return empty array when all entries are correct', () => {
             const sudoku = createKnownSudoku();
 
             sudoku.fill(0, 2, 4); // 正確答案
@@ -334,7 +334,7 @@ describe("Sudoku", () => {
             expect(errors).toEqual([]);
         });
 
-        it('填錯的格回傳其座標', () => {
+        it('should return coordinates of incorrectly filled cells', () => {
             const sudoku = createKnownSudoku();
 
             sudoku.fill(0, 2, 5); // 錯誤，正確是 4
@@ -347,7 +347,7 @@ describe("Sudoku", () => {
     });
 
     describe('revealRandomCell', () => {
-        it('揭露空白格，填入正確答案', () => {
+        it('should reveal empty cell with correct answer', () => {
             const sudoku = createKnownSudoku();
 
             const result = sudoku.revealRandomCell();
@@ -358,7 +358,7 @@ describe("Sudoku", () => {
             expect(sudoku.puzzle[row][column].entry).toBe(knownAnswer[row][column]);
         });
 
-        it('揭露填錯的格，修正為正確答案', () => {
+        it('should correct wrongly filled cell when revealed', () => {
             const sudoku = createKnownSudoku();
 
             // 把所有空格都填錯
@@ -379,7 +379,7 @@ describe("Sudoku", () => {
             expect(sudoku.puzzle[row][column].entry).toBe(knownAnswer[row][column]);
         });
 
-        it('揭露格子時，清除同行/列/宮 peer cells 的對應 note', () => {
+        it('should clear matching notes in peer cells when revealing', () => {
             const sudoku = createKnownSudoku();
 
             // (0,2) 是空格，答案是 4
@@ -401,7 +401,7 @@ describe("Sudoku", () => {
             expect(sudoku.puzzle[1][2].notes).toContain(9);
         });
 
-        it('全部正確或 clue 時回傳 null', () => {
+        it('should return null when all cells are correct or clues', () => {
             const sudoku = createKnownSudoku();
 
             // 填入所有正確答案
@@ -419,7 +419,7 @@ describe("Sudoku", () => {
         });
     });
 
-    it('Sudoku 實例包含 hintTracker', () => {
+    it('should include hintTracker in Sudoku instance', () => {
         const sudoku = createKnownSudoku();
 
         expect(sudoku.hintTracker).toBeDefined();
