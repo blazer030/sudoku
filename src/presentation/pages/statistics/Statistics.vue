@@ -142,7 +142,10 @@
         </div>
 
         <!-- Clear All Records -->
-        <div class="sticky bottom-0 bg-background py-4">
+        <div
+            v-if="hasRecords"
+            class="sticky bottom-0 bg-background py-4"
+        >
             <button
                 class="w-full h-[52px] rounded-xl border-2 border-accent bg-background flex items-center justify-center gap-2 cursor-pointer"
                 data-testid="clear-records-button"
@@ -162,7 +165,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
 import { ChevronLeft, Lightbulb, Trash2, Trophy, X } from "lucide-vue-next";
 import { ROUTER_PATH } from "@/router";
@@ -176,14 +179,22 @@ import { provideClearRecordsDialog } from "./useClearRecordsDialog";
 const router = useRouter();
 const { open: openClearRecordsDialog } = provideClearRecordsDialog();
 
+const version = ref(0);
+
 const handleClearRecords = async () => {
     const result = await openClearRecordsDialog(undefined);
     if (result === "confirm") {
         clearAllRecords();
+        version.value++;
     }
 };
 
-const stats = computed(() => getStatistics());
+const stats = computed(() => {
+    void version.value;
+    return getStatistics();
+});
+
+const hasRecords = computed(() => stats.value.overall.gamesPlayed > 0);
 
 const winRateDisplay = computed(() =>
     `${Math.round(stats.value.overall.winRate * 100)}%`

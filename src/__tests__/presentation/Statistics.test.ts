@@ -106,7 +106,14 @@ describe("Statistics", () => {
         expect(wrapper.findAll("[data-testid='recent-game']")).toHaveLength(0);
     });
 
+    it("should hide clear records button when no records exist", () => {
+        const { wrapper } = mountStatistics();
+
+        expect(wrapper.find("[data-testid='clear-records-button']").exists()).toBe(false);
+    });
+
     it("should show clear records dialog when clicking Clear All Records button", async () => {
+        recordGameResult({ difficulty: "easy", elapsedSeconds: 120, completed: true });
         const { wrapper } = mountStatistics();
 
         await wrapper.find("[data-testid='clear-records-button']").trigger("click");
