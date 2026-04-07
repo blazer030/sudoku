@@ -1,6 +1,6 @@
 import { computed, reactive } from "vue";
 import { useRouter } from "vue-router";
-import { provideGameCompleteModal } from "@/presentation/components/game-complete-modal/useGameCompleteModal";
+import { provideGameCompleteModal } from "@/presentation/themes/classic/components/useGameCompleteModal";
 import { Sudoku } from "@/domain";
 import { useGameStore } from "@/stores/gameStore";
 import { ROUTER_PATH } from "@/router";

@@ -71,13 +71,13 @@
 </template>
 
 <script lang="ts" setup>
-import GameHeader from "@/presentation/components/game-header/GameHeader.vue";
-import GameCompleteModal from "@/presentation/components/game-complete-modal/GameCompleteModal.vue";
-import LeaveGameDialog from "@/presentation/components/leave-game-dialog/LeaveGameDialog.vue";
-import GameControls from "@/presentation/components/game-controls/GameControls.vue";
-import HintMenuPopup from "@/presentation/components/hint-menu-popup/HintMenuPopup.vue";
-import DigitPad from "@/presentation/components/digit-pad/DigitPad.vue";
-import Cell from "@/presentation/components/cell/Cell.vue";
+import GameHeader from "@/presentation/themes/classic/components/GameHeader.vue";
+import GameCompleteModal from "@/presentation/themes/classic/components/GameCompleteModal.vue";
+import LeaveGameDialog from "@/presentation/themes/classic/components/LeaveGameDialog.vue";
+import GameControls from "@/presentation/themes/classic/components/GameControls.vue";
+import HintMenuPopup from "@/presentation/themes/classic/components/HintMenuPopup.vue";
+import DigitPad from "@/presentation/themes/classic/components/DigitPad.vue";
+import Cell from "@/presentation/themes/classic/components/Cell.vue";
 import { InputMode } from "./InputMode";
 import { useGameInteraction } from "./useGameInteraction";
 import { useGameSession } from "./useGameSession";

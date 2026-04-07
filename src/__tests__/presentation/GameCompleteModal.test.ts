@@ -2,9 +2,9 @@ import { describe, expect, it } from "vitest";
 import { mount } from "@vue/test-utils";
 import { defineComponent } from "vue";
 import { createMemoryHistory, createRouter } from "vue-router";
-import GameCompleteModal from "@/presentation/components/game-complete-modal/GameCompleteModal.vue";
-import { provideGameCompleteModal } from "@/presentation/components/game-complete-modal/useGameCompleteModal";
-import type { GameCompleteParams } from "@/presentation/components/game-complete-modal/useGameCompleteModal";
+import GameCompleteModal from "@/presentation/themes/classic/components/GameCompleteModal.vue";
+import { provideGameCompleteModal } from "@/presentation/themes/classic/components/useGameCompleteModal";
+import type { GameCompleteParams } from "@/presentation/themes/classic/components/useGameCompleteModal";
 
 const mountModal = (overrides: Partial<GameCompleteParams> = {}) => {
     const router = createRouter({
