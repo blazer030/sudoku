@@ -291,7 +291,7 @@ describe("Game", () => {
 
         await wrapper.find("[data-testid='note-button']").trigger("click");
 
-        expect(wrapper.find("[data-testid='note-button']").find(".bg-primary-light").exists()).toBe(true);
+        expect(wrapper.find("[data-testid='note-button']").find(".border-accent").exists()).toBe(true);
     });
 
     it("should add note to slot cell in note mode", async () => {
@@ -681,7 +681,7 @@ describe("Game", () => {
         // erase mode 取消
         expect(wrapper.find("[data-testid='erase-button']").classes()).not.toContain("bg-primary");
         // note mode 啟用
-        expect(wrapper.find("[data-testid='note-button']").find(".bg-primary-light").exists()).toBe(true);
+        expect(wrapper.find("[data-testid='note-button']").find(".border-accent").exists()).toBe(true);
     });
 
     it("should restore saved game state from store", () => {
