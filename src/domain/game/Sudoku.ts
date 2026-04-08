@@ -149,10 +149,10 @@ export class Sudoku {
         cell.toggleNote(value);
     }
 
-    public fill(row: number, column: number, value: number): void {
+    public fill(row: number, column: number, value: number, options?: { autoRemoveNotes?: boolean }): void {
         this.snapshot();
         this._puzzle[row][column].entry = value;
-        if (value > 0) {
+        if (value > 0 && (options?.autoRemoveNotes ?? true)) {
             this.removeNoteFromPeers(row, column, value);
         }
     }

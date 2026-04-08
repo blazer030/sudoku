@@ -162,6 +162,23 @@ describe("Sudoku", () => {
         expect(puzzle[0][5].notes).not.toContain(4);
     });
 
+    it("should keep peer notes when autoRemoveNotes is false", () => {
+        spyGeneratePuzzle();
+        const sudoku = new Sudoku();
+        sudoku.generate("easy");
+        const puzzle = sudoku.puzzle;
+
+        sudoku.autoNotes();
+
+        // (0, 5) 在同一行，autoNotes 後其 notes 應包含 4
+        expect(puzzle[0][5].notes).toContain(4);
+
+        sudoku.fill(0, 2, 4, { autoRemoveNotes: false });
+
+        // autoRemoveNotes 為 false 時，peer 的 notes 不應被移除
+        expect(puzzle[0][5].notes).toContain(4);
+    });
+
     it("should not overwrite existing notes or inputs with autoNotes", () => {
         spyGeneratePuzzle();
         const sudoku = new Sudoku();

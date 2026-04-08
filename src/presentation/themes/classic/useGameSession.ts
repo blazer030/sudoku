@@ -9,6 +9,7 @@ import { useGameCompletion } from "@/presentation/pages/game/useGameCompletion";
 import { useLeaveGame } from "./useLeaveGame";
 import { useHintActions } from "./useHintActions";
 import { useCompletionFlash } from "./useCompletionFlash";
+import { useSettingsStore } from "@/stores/settingsStore";
 
 export const useGameSession = () => {
     const router = useRouter();
@@ -45,7 +46,8 @@ export const useGameSession = () => {
         },
     });
 
-    const { triggerFlash, isFlashing } = useCompletionFlash();
+    const settingsStore = useSettingsStore();
+    const { triggerFlash, isFlashing } = useCompletionFlash(() => settingsStore.completionFlash);
 
     const { clearErrors, isError, openHintMenu } = useHintActions({
         sudoku: sudoku.raw(),

@@ -3,13 +3,14 @@ import { ref } from "vue";
 const FLASH_DURATION = 500;
 const RIPPLE_DELAY = 60;
 
-export const useCompletionFlash = () => {
+export const useCompletionFlash = (enabled: () => boolean = () => true) => {
     const flashingCells = ref(new Set<string>());
 
     const triggerFlash = (
         cells: { row: number; column: number }[],
         origin: { row: number; column: number },
     ) => {
+        if (!enabled()) return;
         if (cells.length === 0) return;
 
         for (const cell of cells) {

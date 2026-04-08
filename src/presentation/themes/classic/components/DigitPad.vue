@@ -17,7 +17,7 @@
                     {{ digit }}
                 </button>
                 <span
-                    v-if="!isDigitCompleted(digit)"
+                    v-if="showRemainingCount && !isDigitCompleted(digit)"
                     :class="selectedDigit === digit
                         ? 'bg-white text-primary'
                         : 'bg-foreground-secondary text-white'"
@@ -72,11 +72,14 @@
 <script lang="ts" setup>
 import { Eraser } from "lucide-vue-next";
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
     selectedDigit: number | null;
     eraseActive: boolean;
     digitCounts: number[];
-}>();
+    showRemainingCount?: boolean;
+}>(), {
+    showRemainingCount: true,
+});
 
 const emit = defineEmits<{
     selectDigit: [digit: number];

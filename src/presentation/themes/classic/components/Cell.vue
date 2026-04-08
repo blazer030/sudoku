@@ -47,7 +47,7 @@
 import { computed } from "vue";
 import { PuzzleCell } from "@/domain";
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
     puzzleCell: PuzzleCell;
     row: number;
     column: number;
@@ -55,9 +55,13 @@ const props = defineProps<{
     selectedDigit?: number | null;
     error?: boolean;
     flashing?: boolean;
-}>();
+    highlightSameDigit?: boolean;
+}>(), {
+    highlightSameDigit: true,
+});
 
 const isSameDigit = computed(() => {
+    if (!props.highlightSameDigit) return false;
     if (!props.selectedDigit) return false;
     const cellValue = props.puzzleCell.isClue ? props.puzzleCell.clue : props.puzzleCell.entry;
     return cellValue === props.selectedDigit;

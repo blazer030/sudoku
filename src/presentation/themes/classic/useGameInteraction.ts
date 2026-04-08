@@ -8,9 +8,10 @@ interface GameInteractionOptions {
     clearErrors: () => void;
     checkAndComplete: () => void;
     onGroupCompleted?: (cells: { row: number; column: number }[], origin: { row: number; column: number }) => void;
+    autoRemoveNotes: () => boolean;
 }
 
-export const useGameInteraction = ({ sudoku, clearErrors, checkAndComplete, onGroupCompleted }: GameInteractionOptions) => {
+export const useGameInteraction = ({ sudoku, clearErrors, checkAndComplete, onGroupCompleted, autoRemoveNotes }: GameInteractionOptions) => {
     const selectedCell = ref<{ row: number; column: number } | null>(null);
     const selectedDigit = ref<number | null>(null);
     const inputMode = ref(InputMode.Normal);
@@ -42,7 +43,7 @@ export const useGameInteraction = ({ sudoku, clearErrors, checkAndComplete, onGr
             sudoku.fill(row, column, 0);
             return;
         }
-        sudoku.fill(row, column, value);
+        sudoku.fill(row, column, value, { autoRemoveNotes: autoRemoveNotes() });
         const completed = sudoku.findCompletedGroups(row, column);
         if (completed.cells.length > 0) onGroupCompleted?.(completed.cells, { row, column });
         checkAndComplete();
