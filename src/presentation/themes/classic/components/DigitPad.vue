@@ -20,7 +20,7 @@
                     v-if="showRemainingCount && !isDigitCompleted(digit)"
                     :class="selectedDigit === digit
                         ? 'bg-white text-primary'
-                        : 'bg-accent text-white'"
+                        : 'bg-foreground-secondary text-white'"
                     :data-testid="`badge-${digit}`"
                     class="absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-semibold"
                 >
@@ -48,7 +48,7 @@
                     v-if="showRemainingCount && !isDigitCompleted(digit + 5)"
                     :class="selectedDigit === (digit + 5)
                         ? 'bg-white text-primary'
-                        : 'bg-accent text-white'"
+                        : 'bg-foreground-secondary text-white'"
                     :data-testid="`badge-${digit + 5}`"
                     class="absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-semibold"
                 >
