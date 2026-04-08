@@ -1,13 +1,21 @@
-export type ThemeId = "classic" | "gbc";
+export type ColorThemeId = "green" | "blue" | "purple" | "orange" | "pink" | "teal";
 
 export interface Settings {
-    theme: ThemeId;
+    colorTheme: ColorThemeId;
+    highlightSameDigit: boolean;
+    completionFlash: boolean;
+    autoRemoveNotes: boolean;
+    showRemainingCount: boolean;
 }
 
 const STORAGE_KEY = "sudoku-settings";
 
 const DEFAULT_SETTINGS: Settings = {
-    theme: "classic",
+    colorTheme: "green",
+    highlightSameDigit: true,
+    completionFlash: true,
+    autoRemoveNotes: true,
+    showRemainingCount: true,
 };
 
 export const loadSettings = (): Settings => {
