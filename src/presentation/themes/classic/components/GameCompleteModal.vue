@@ -53,7 +53,7 @@
                 </div>
 
                 <button
-                    class="w-full h-[52px] rounded-button bg-primary flex items-center justify-center gap-2 shadow-primary cursor-pointer transition-all duration-200 hover:bg-[#347A4E] hover:shadow-primary-lg"
+                    class="w-full h-[52px] rounded-button bg-primary flex items-center justify-center gap-2 shadow-primary cursor-pointer transition-all duration-200 hover:bg-primary-hover hover:shadow-primary-lg"
                     data-testid="back-to-home-button"
                     @click="goHome"
                 >

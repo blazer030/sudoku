@@ -24,7 +24,7 @@
 
                 <div class="flex flex-col gap-3 w-full">
                     <button
-                        class="w-full h-[52px] rounded-button bg-accent flex items-center justify-center gap-2 shadow-accent cursor-pointer transition-all duration-200 hover:bg-[#C88565] hover:shadow-[0_4px_16px_#D4845040]"
+                        class="w-full h-[52px] rounded-button bg-accent flex items-center justify-center gap-2 shadow-accent cursor-pointer transition-all duration-200 hover:bg-accent-hover hover:shadow-primary-lg"
                         data-testid="clear-records-confirm-button"
                         @click="close('confirm')"
                     >
