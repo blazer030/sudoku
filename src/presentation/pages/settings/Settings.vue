@@ -24,16 +24,25 @@
                 <button
                     v-for="color in colorThemes"
                     :key="color.id"
-                    class="relative w-10 h-10 rounded-full cursor-pointer transition-all duration-200"
+                    class="relative w-10 h-10 rounded-full cursor-pointer transition-all duration-200 overflow-hidden"
                     :class="[
                         color.id === settingsStore.colorTheme
                             ? 'ring-2 ring-offset-2 ring-primary scale-110'
                             : 'hover:scale-105',
                     ]"
-                    :style="{ backgroundColor: color.hex }"
                     :data-testid="`color-theme-${color.id}`"
                     @click="settingsStore.setColorTheme(color.id)"
                 >
+                    <div class="absolute inset-0 flex">
+                        <div
+                            class="w-1/2 h-full"
+                            :style="{ backgroundColor: color.hex }"
+                        />
+                        <div
+                            class="w-1/2 h-full"
+                            :style="{ backgroundColor: color.accentHex }"
+                        />
+                    </div>
                     <div
                         v-if="color.id === settingsStore.colorTheme"
                         data-testid="color-theme-check"
@@ -97,15 +106,16 @@ const settingsStore = useSettingsStore();
 interface ColorThemeOption {
     id: ColorThemeId;
     hex: string;
+    accentHex: string;
 }
 
 const colorThemes: ColorThemeOption[] = [
-    { id: "green", hex: "#3D8A5A" },
-    { id: "blue", hex: "#4A7AB5" },
-    { id: "purple", hex: "#7B5EA7" },
-    { id: "orange", hex: "#C08040" },
-    { id: "pink", hex: "#B5607A" },
-    { id: "teal", hex: "#4A9A9A" },
+    { id: "green", hex: "#3D8A5A", accentHex: "#D89575" },
+    { id: "blue", hex: "#4A7AB5", accentHex: "#C49A5C" },
+    { id: "purple", hex: "#7B5EA7", accentHex: "#5A9E8F" },
+    { id: "orange", hex: "#C08040", accentHex: "#6888A5" },
+    { id: "pink", hex: "#B5607A", accentHex: "#5A9A8A" },
+    { id: "teal", hex: "#4A9A9A", accentHex: "#C07A6A" },
 ];
 
 const toggles = computed(() => [

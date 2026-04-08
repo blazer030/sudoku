@@ -9,7 +9,7 @@
                 <div class="w-16 h-16 rounded-2xl bg-[#FFF3E0] flex items-center justify-center">
                     <TriangleAlert
                         :size="32"
-                        class="text-accent"
+                        class="text-danger"
                     />
                 </div>
 
@@ -24,7 +24,7 @@
 
                 <div class="flex flex-col gap-3 w-full">
                     <button
-                        class="w-full h-[52px] rounded-button bg-accent flex items-center justify-center gap-2 shadow-accent cursor-pointer transition-all duration-200 hover:bg-accent-hover hover:shadow-primary-lg"
+                        class="w-full h-[52px] rounded-button bg-danger flex items-center justify-center gap-2 shadow-danger cursor-pointer transition-all duration-200 hover:bg-danger-hover hover:shadow-primary-lg"
                         data-testid="give-up-and-start-new-button"
                         @click="close('giveUp')"
                     >

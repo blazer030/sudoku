@@ -21,6 +21,8 @@
   --color-cell-clue: #F7F6F3;
   --color-accent: #D89575;
   --color-accent-hover: #C88565;
+  --color-danger: #C75A4A;
+  --color-danger-hover: #B34E40;
   --color-error: #D08068;
   --color-error-light: #FDEAE6;
 
@@ -32,6 +34,7 @@
   --shadow-primary-lg: 0 4px 16px #3D8A5A30;
   --shadow-primary-active: 0 2px 8px #3D8A5A40;
   --shadow-accent: 0 4px 12px #D4845030;
+  --shadow-danger: 0 4px 12px #C75A4A30;
   --shadow-popup: 0 -4px 24px #00000020;
   --shadow-modal: 0 8px 32px #00000020;
 
