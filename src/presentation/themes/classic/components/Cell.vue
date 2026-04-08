@@ -35,7 +35,7 @@
                     :class="selectedDigit === n
                         ? 'aspect-square max-w-5 max-h-5 w-full rounded-full bg-primary text-white font-semibold flex items-center justify-center'
                         : 'text-foreground-secondary'"
-                    style="font-size: clamp(8px, -0.49px + 2.26vw, 14px)"
+                    class="text-[clamp(8px,-0.49px+2.26vw,14px)]"
                 >
                     {{ n }}
                 </span>
