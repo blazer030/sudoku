@@ -5,9 +5,10 @@ import { provideHintMenu } from "@/presentation/themes/classic/components/useHin
 interface HintActionsOptions {
     sudoku: Sudoku;
     onRevealComplete: () => void;
+    onGroupCompleted?: (cells: { row: number; column: number }[], origin: { row: number; column: number }) => void;
 }
 
-export const useHintActions = ({ sudoku, onRevealComplete }: HintActionsOptions) => {
+export const useHintActions = ({ sudoku, onRevealComplete, onGroupCompleted }: HintActionsOptions) => {
     const hintMenu = provideHintMenu();
     const errorCells = ref<{ row: number; column: number }[]>([]);
 
@@ -35,10 +36,15 @@ export const useHintActions = ({ sudoku, onRevealComplete }: HintActionsOptions)
         case "checkErrors":
             errorCells.value = sudoku.checkErrors();
             break;
-        case "revealCell":
-            sudoku.revealRandomCell();
+        case "revealCell": {
+            const target = sudoku.revealRandomCell();
+            if (target) {
+                const completed = sudoku.findCompletedGroups(target.row, target.column);
+                if (completed.cells.length > 0) onGroupCompleted?.(completed.cells, target);
+            }
             onRevealComplete();
             break;
+        }
         }
     };
 

@@ -6,6 +6,10 @@ import { Conflict, ConflictDetector } from "@/domain/game/ConflictDetector";
 import { HintTracker } from "@/domain/game/HintTracker";
 import { Difficulty, SudokuGenerator } from "@/domain/generator/SudokuGenerator";
 
+export interface CompletedCells {
+    cells: { row: number; column: number }[];
+}
+
 export class Sudoku {
     private _answer: number[][] = [];
     private _puzzle: PuzzleCell[][] = [];
@@ -62,6 +66,67 @@ export class Sudoku {
         );
     }
 
+    public findCompletedGroups(row: number, column: number): CompletedCells {
+        const cells: { row: number; column: number }[] = [];
+        const seen = new Set<string>();
+
+        const addCell = (cellRow: number, cellColumn: number) => {
+            const key = `${cellRow},${cellColumn}`;
+            if (!seen.has(key)) {
+                seen.add(key);
+                cells.push({ row: cellRow, column: cellColumn });
+            }
+        };
+
+        if (this.isRowComplete(row)) {
+            for (let columnIndex = 0; columnIndex < BOARD_SIZE; columnIndex++) addCell(row, columnIndex);
+        }
+
+        if (this.isColumnComplete(column)) {
+            for (let rowIndex = 0; rowIndex < BOARD_SIZE; rowIndex++) addCell(rowIndex, column);
+        }
+
+        if (this.isBoxComplete(row, column)) {
+            const boxRowStart = Math.floor(row / BOX_SIZE) * BOX_SIZE;
+            const boxColStart = Math.floor(column / BOX_SIZE) * BOX_SIZE;
+            for (let boxRow = boxRowStart; boxRow < boxRowStart + BOX_SIZE; boxRow++) {
+                for (let boxColumn = boxColStart; boxColumn < boxColStart + BOX_SIZE; boxColumn++) {
+                    addCell(boxRow, boxColumn);
+                }
+            }
+        }
+
+        return { cells };
+    }
+
+    private isRowComplete(row: number): boolean {
+        return this._puzzle[row].every((cell, columnIndex) => {
+            const value = cell.isClue ? cell.clue : cell.entry;
+            return value === this._answer[row][columnIndex];
+        });
+    }
+
+    private isColumnComplete(column: number): boolean {
+        return this._puzzle.every((puzzleRow, rowIndex) => {
+            const cell = puzzleRow[column];
+            const value = cell.isClue ? cell.clue : cell.entry;
+            return value === this._answer[rowIndex][column];
+        });
+    }
+
+    private isBoxComplete(row: number, column: number): boolean {
+        const boxRowStart = Math.floor(row / BOX_SIZE) * BOX_SIZE;
+        const boxColStart = Math.floor(column / BOX_SIZE) * BOX_SIZE;
+        for (let boxRow = boxRowStart; boxRow < boxRowStart + BOX_SIZE; boxRow++) {
+            for (let boxColumn = boxColStart; boxColumn < boxColStart + BOX_SIZE; boxColumn++) {
+                const cell = this._puzzle[boxRow][boxColumn];
+                const value = cell.isClue ? cell.clue : cell.entry;
+                if (value !== this._answer[boxRow][boxColumn]) return false;
+            }
+        }
+        return true;
+    }
+
     public undo(): void {
         this.history.restore(this._puzzle);
     }
@@ -84,10 +149,10 @@ export class Sudoku {
         cell.toggleNote(value);
     }
 
-    public fill(row: number, column: number, value: number): void {
+    public fill(row: number, column: number, value: number, options?: { autoRemoveNotes?: boolean }): void {
         this.snapshot();
         this._puzzle[row][column].entry = value;
-        if (value > 0) {
+        if (value > 0 && (options?.autoRemoveNotes ?? true)) {
             this.removeNoteFromPeers(row, column, value);
         }
     }

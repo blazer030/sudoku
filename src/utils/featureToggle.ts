@@ -1,7 +1,6 @@
 type FeatureEnvironment = 'all' | 'develop'
 
 const features: Partial<Record<string, FeatureEnvironment>> = {
-    'settings': 'develop',
 }
 
 export const isDevelop = (): boolean =>

@@ -28,6 +28,8 @@
                             :column="columnIndex"
                             :data-testid="`cell-${rowIndex}-${columnIndex}`"
                             :error="isError(rowIndex, columnIndex)"
+                            :flashing="isFlashing(rowIndex, columnIndex)"
+                            :highlight-same-digit="settingsStore.highlightSameDigit"
                             :puzzle-cell="puzzleCell.raw()"
                             :selected-digit="selectedDigit"
                             :row="rowIndex"
@@ -51,6 +53,7 @@
                 :digit-counts="digitCounts"
                 :erase-active="inputMode === InputMode.Erase"
                 :selected-digit="selectedDigit"
+                :show-remaining-count="settingsStore.showRemainingCount"
                 @select-digit="selectDigit"
                 @toggle-erase-mode="toggleEraseMode"
             />
@@ -81,6 +84,7 @@ import Cell from "@/presentation/themes/classic/components/Cell.vue";
 import { InputMode } from "@/presentation/pages/game/InputMode";
 import { useGameInteraction } from "./useGameInteraction";
 import { useGameSession } from "./useGameSession";
+import { useSettingsStore } from "@/stores/settingsStore";
 
 const {
     gameStore,
@@ -91,7 +95,11 @@ const {
     openHintMenu,
     showLeaveDialog,
     checkAndComplete,
+    triggerFlash,
+    isFlashing,
 } = useGameSession();
+
+const settingsStore = useSettingsStore();
 
 const {
     selectedDigit,
@@ -106,5 +114,7 @@ const {
     sudoku: sudoku.raw(),
     clearErrors,
     checkAndComplete,
+    onGroupCompleted: triggerFlash,
+    autoRemoveNotes: () => settingsStore.autoRemoveNotes,
 });
 </script>

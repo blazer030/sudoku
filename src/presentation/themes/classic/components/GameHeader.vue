@@ -25,8 +25,8 @@
                 {{ formatTime(elapsedSeconds) }}
             </span>
         </div>
-        <div class="flex items-center bg-primary-light rounded-full px-3 py-1.5">
-            <span class="text-primary text-xs font-semibold leading-none">
+        <div class="flex items-center bg-accent/15 rounded-full px-3 py-1.5">
+            <span class="text-accent text-xs font-semibold leading-none">
                 {{ difficultyLabel }}
             </span>
         </div>

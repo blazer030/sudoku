@@ -17,7 +17,7 @@
                     {{ digit }}
                 </button>
                 <span
-                    v-if="!isDigitCompleted(digit)"
+                    v-if="showRemainingCount && !isDigitCompleted(digit)"
                     :class="selectedDigit === digit
                         ? 'bg-white text-primary'
                         : 'bg-foreground-secondary text-white'"
@@ -45,7 +45,7 @@
                     {{ digit + 5 }}
                 </button>
                 <span
-                    v-if="!isDigitCompleted(digit + 5)"
+                    v-if="showRemainingCount && !isDigitCompleted(digit + 5)"
                     :class="selectedDigit === (digit + 5)
                         ? 'bg-white text-primary'
                         : 'bg-foreground-secondary text-white'"
@@ -58,7 +58,7 @@
             <button
                 :class="eraseActive
                     ? 'bg-primary text-white shadow-primary-active'
-                    : 'bg-card text-foreground shadow-card-sm'"
+                    : 'bg-card text-foreground shadow-card-sm hover:bg-foreground/5'"
                 class="w-14 h-14 rounded-xl flex items-center justify-center transition-all cursor-pointer"
                 data-testid="erase-button"
                 @click="emit('toggleEraseMode')"
@@ -72,11 +72,14 @@
 <script lang="ts" setup>
 import { Eraser } from "lucide-vue-next";
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
     selectedDigit: number | null;
     eraseActive: boolean;
     digitCounts: number[];
-}>();
+    showRemainingCount?: boolean;
+}>(), {
+    showRemainingCount: true,
+});
 
 const emit = defineEmits<{
     selectDigit: [digit: number];
@@ -89,6 +92,6 @@ const getRemainingCount = (digit: number): number => 9 - props.digitCounts[digit
 const digitButtonClasses = (digit: number): string => {
     if (isDigitCompleted(digit)) return "bg-card opacity-50 text-foreground-muted";
     if (props.selectedDigit === digit) return "bg-primary text-white shadow-primary-active";
-    return "bg-card text-foreground shadow-card-sm";
+    return "bg-card text-foreground shadow-card-sm hover:bg-foreground/5";
 };
 </script>

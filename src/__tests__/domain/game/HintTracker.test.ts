@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { HintTracker } from '@/domain/game/HintTracker'
 
 describe('HintTracker', () => {
-  it('初始狀態 — totalUsed=0, recordedUsed=0, remainingHints=4, canUseHint=true', () => {
+  it('should have correct initial state', () => {
     const tracker = new HintTracker()
 
     expect(tracker.totalUsed).toBe(0)
@@ -11,7 +11,7 @@ describe('HintTracker', () => {
     expect(tracker.canUseHint).toBe(true)
   })
 
-  it('使用第 1 次（免費）— totalUsed=1, recordedUsed=0', () => {
+  it('should not count first hint as recorded (free hint)', () => {
     const tracker = new HintTracker()
 
     tracker.useHint()
@@ -22,7 +22,7 @@ describe('HintTracker', () => {
     expect(tracker.canUseHint).toBe(true)
   })
 
-  it('使用第 2 次 — totalUsed=2, recordedUsed=1', () => {
+  it('should record second hint usage', () => {
     const tracker = new HintTracker()
 
     tracker.useHint()
@@ -34,7 +34,7 @@ describe('HintTracker', () => {
     expect(tracker.canUseHint).toBe(true)
   })
 
-  it('使用第 4 次後 — canUseHint=false, recordedUsed=3', () => {
+  it('should disallow hints after using all 4', () => {
     const tracker = new HintTracker()
 
     tracker.useHint()
@@ -48,7 +48,7 @@ describe('HintTracker', () => {
     expect(tracker.canUseHint).toBe(false)
   })
 
-  it('超過上限時 useHint 不增加計數', () => {
+  it('should not increment count beyond max limit', () => {
     const tracker = new HintTracker()
 
     for (let count = 0; count < 5; count++) tracker.useHint()
@@ -57,7 +57,7 @@ describe('HintTracker', () => {
     expect(tracker.recordedUsed).toBe(3)
   })
 
-  it('restore(totalUsed) 可恢復狀態', () => {
+  it('should restore state from totalUsed', () => {
     const tracker = new HintTracker()
 
     tracker.restore(3)

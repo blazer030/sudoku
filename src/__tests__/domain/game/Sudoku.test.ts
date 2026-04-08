@@ -162,6 +162,23 @@ describe("Sudoku", () => {
         expect(puzzle[0][5].notes).not.toContain(4);
     });
 
+    it("should keep peer notes when autoRemoveNotes is false", () => {
+        spyGeneratePuzzle();
+        const sudoku = new Sudoku();
+        sudoku.generate("easy");
+        const puzzle = sudoku.puzzle;
+
+        sudoku.autoNotes();
+
+        // (0, 5) 在同一行，autoNotes 後其 notes 應包含 4
+        expect(puzzle[0][5].notes).toContain(4);
+
+        sudoku.fill(0, 2, 4, { autoRemoveNotes: false });
+
+        // autoRemoveNotes 為 false 時，peer 的 notes 不應被移除
+        expect(puzzle[0][5].notes).toContain(4);
+    });
+
     it("should not overwrite existing notes or inputs with autoNotes", () => {
         spyGeneratePuzzle();
         const sudoku = new Sudoku();
@@ -284,7 +301,7 @@ describe("Sudoku", () => {
     });
 
     describe('checkAllConflicts', () => {
-        it('無衝突時回傳空陣列', () => {
+        it('should return empty array when no conflicts', () => {
             const sudoku = createKnownSudoku();
 
             // 填入正確答案，不會有衝突
@@ -296,7 +313,7 @@ describe("Sudoku", () => {
             expect(conflicts).toEqual([]);
         });
 
-        it('行內重複時回傳衝突格座標', () => {
+        it('should return conflict coordinates for row duplicates', () => {
             const sudoku = createKnownSudoku();
 
             // (0,0) clue=5，在 (0,2) 填入 5 → 行衝突
@@ -308,7 +325,7 @@ describe("Sudoku", () => {
             expect(conflicts).toContainEqual({ row: 0, column: 2 });
         });
 
-        it('列和宮重複也回傳', () => {
+        it('should return conflicts for column and box duplicates', () => {
             const sudoku = createKnownSudoku();
 
             // (2,1) clue=9，在 (1,1) 填入 9 → 列衝突 + (1,4) clue=9 行衝突
@@ -323,7 +340,7 @@ describe("Sudoku", () => {
     });
 
     describe('checkErrors', () => {
-        it('所有正確時回傳空陣列', () => {
+        it('should return empty array when all entries are correct', () => {
             const sudoku = createKnownSudoku();
 
             sudoku.fill(0, 2, 4); // 正確答案
@@ -334,7 +351,7 @@ describe("Sudoku", () => {
             expect(errors).toEqual([]);
         });
 
-        it('填錯的格回傳其座標', () => {
+        it('should return coordinates of incorrectly filled cells', () => {
             const sudoku = createKnownSudoku();
 
             sudoku.fill(0, 2, 5); // 錯誤，正確是 4
@@ -347,7 +364,7 @@ describe("Sudoku", () => {
     });
 
     describe('revealRandomCell', () => {
-        it('揭露空白格，填入正確答案', () => {
+        it('should reveal empty cell with correct answer', () => {
             const sudoku = createKnownSudoku();
 
             const result = sudoku.revealRandomCell();
@@ -358,7 +375,7 @@ describe("Sudoku", () => {
             expect(sudoku.puzzle[row][column].entry).toBe(knownAnswer[row][column]);
         });
 
-        it('揭露填錯的格，修正為正確答案', () => {
+        it('should correct wrongly filled cell when revealed', () => {
             const sudoku = createKnownSudoku();
 
             // 把所有空格都填錯
@@ -379,7 +396,7 @@ describe("Sudoku", () => {
             expect(sudoku.puzzle[row][column].entry).toBe(knownAnswer[row][column]);
         });
 
-        it('揭露格子時，清除同行/列/宮 peer cells 的對應 note', () => {
+        it('should clear matching notes in peer cells when revealing', () => {
             const sudoku = createKnownSudoku();
 
             // (0,2) 是空格，答案是 4
@@ -401,7 +418,7 @@ describe("Sudoku", () => {
             expect(sudoku.puzzle[1][2].notes).toContain(9);
         });
 
-        it('全部正確或 clue 時回傳 null', () => {
+        it('should return null when all cells are correct or clues', () => {
             const sudoku = createKnownSudoku();
 
             // 填入所有正確答案
@@ -419,7 +436,105 @@ describe("Sudoku", () => {
         });
     });
 
-    it('Sudoku 實例包含 hintTracker', () => {
+    describe("findCompletedGroups", () => {
+        it("should return empty cells when row is not complete", () => {
+            const sudoku = createKnownSudoku();
+            sudoku.fill(0, 2, 4);
+            const result = sudoku.findCompletedGroups(0, 2);
+            expect(result.cells).toEqual([]);
+        });
+
+        it("should return row cells when row is fully correct", () => {
+            const sudoku = createKnownSudoku();
+            // Row 0 empty: 2→4, 3→6, 5→8, 6→9, 7→1, 8→2
+            sudoku.fill(0, 2, 4);
+            sudoku.fill(0, 3, 6);
+            sudoku.fill(0, 5, 8);
+            sudoku.fill(0, 6, 9);
+            sudoku.fill(0, 7, 1);
+            sudoku.fill(0, 8, 2);
+
+            const result = sudoku.findCompletedGroups(0, 8);
+
+            expect(result.cells).toEqual(expect.arrayContaining([
+                { row: 0, column: 0 }, { row: 0, column: 1 }, { row: 0, column: 2 },
+                { row: 0, column: 3 }, { row: 0, column: 4 }, { row: 0, column: 5 },
+                { row: 0, column: 6 }, { row: 0, column: 7 }, { row: 0, column: 8 },
+            ]));
+            expect(result.cells.filter(c => c.row === 0)).toHaveLength(9);
+        });
+
+        it("should return column cells when column is fully correct", () => {
+            const sudoku = createKnownSudoku();
+            // Column 4 empty: row2→4, row4→5, row6→3
+            sudoku.fill(2, 4, 4);
+            sudoku.fill(4, 4, 5);
+            sudoku.fill(6, 4, 3);
+
+            const result = sudoku.findCompletedGroups(6, 4);
+
+            expect(result.cells).toEqual(expect.arrayContaining([
+                { row: 0, column: 4 }, { row: 1, column: 4 }, { row: 2, column: 4 },
+                { row: 3, column: 4 }, { row: 4, column: 4 }, { row: 5, column: 4 },
+                { row: 6, column: 4 }, { row: 7, column: 4 }, { row: 8, column: 4 },
+            ]));
+            expect(result.cells.filter(c => c.column === 4)).toHaveLength(9);
+        });
+
+        it("should return box cells when box is fully correct", () => {
+            const sudoku = createKnownSudoku();
+            // Box (0,0): (0,2)→4, (1,1)→7, (1,2)→2, (2,0)→1
+            sudoku.fill(0, 2, 4);
+            sudoku.fill(1, 1, 7);
+            sudoku.fill(1, 2, 2);
+            sudoku.fill(2, 0, 1);
+
+            const result = sudoku.findCompletedGroups(2, 0);
+
+            expect(result.cells).toEqual(expect.arrayContaining([
+                { row: 0, column: 0 }, { row: 0, column: 1 }, { row: 0, column: 2 },
+                { row: 1, column: 0 }, { row: 1, column: 1 }, { row: 1, column: 2 },
+                { row: 2, column: 0 }, { row: 2, column: 1 }, { row: 2, column: 2 },
+            ]));
+        });
+
+        it("should deduplicate cells when row and column complete simultaneously", () => {
+            const sudoku = createKnownSudoku();
+            // Fill row 0 (except (0,8)) and column 8 (except (0,8))
+            sudoku.fill(0, 2, 4);
+            sudoku.fill(0, 3, 6);
+            sudoku.fill(0, 5, 8);
+            sudoku.fill(0, 6, 9);
+            sudoku.fill(0, 7, 1);
+            sudoku.fill(1, 8, 8);
+            sudoku.fill(2, 8, 7);
+            sudoku.fill(6, 8, 4);
+            // (0,8)→2 completes both row 0 and column 8
+            sudoku.fill(0, 8, 2);
+
+            const result = sudoku.findCompletedGroups(0, 8);
+
+            const uniqueKeys = new Set(result.cells.map(c => `${c.row},${c.column}`));
+            expect(uniqueKeys.size).toBe(17); // 9 + 9 - 1 shared
+        });
+
+        it("should return empty when cell has wrong value even if all filled", () => {
+            const sudoku = createKnownSudoku();
+            // Fill row 0 but with wrong value at (0,8)
+            sudoku.fill(0, 2, 4);
+            sudoku.fill(0, 3, 6);
+            sudoku.fill(0, 5, 8);
+            sudoku.fill(0, 6, 9);
+            sudoku.fill(0, 7, 1);
+            sudoku.fill(0, 8, 3); // Wrong! Should be 2
+
+            const result = sudoku.findCompletedGroups(0, 8);
+
+            expect(result.cells).toEqual([]);
+        });
+    });
+
+    it('should include hintTracker in Sudoku instance', () => {
         const sudoku = createKnownSudoku();
 
         expect(sudoku.hintTracker).toBeDefined();

@@ -7,7 +7,7 @@ describe("Cell", () => {
     const mountCell = (props: { puzzleCell: PuzzleCell } & Record<string, unknown>) =>
         mount(Cell, { props: { row: 0, column: 0, ...props } });
 
-    it("error=true 時顯示紅色背景和文字", () => {
+    it("should show red background and text when error=true", () => {
         const puzzleCell = new PuzzleCell(0);
         puzzleCell.entry = 5;
 
@@ -17,7 +17,7 @@ describe("Cell", () => {
         expect(wrapper.find("[data-testid='cell-entry']").classes()).toContain("text-error");
     });
 
-    it("error=false 時正常顯示", () => {
+    it("should display normally when error=false", () => {
         const puzzleCell = new PuzzleCell(0);
         puzzleCell.entry = 5;
 

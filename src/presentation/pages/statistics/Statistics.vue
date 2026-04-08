@@ -166,15 +166,15 @@
             class="sticky bottom-0 bg-background py-4"
         >
             <button
-                class="w-full h-[52px] rounded-xl border-2 border-accent bg-background flex items-center justify-center gap-2 cursor-pointer"
+                class="w-full h-[52px] rounded-xl border-2 border-danger bg-background flex items-center justify-center gap-2 cursor-pointer transition-all duration-200 hover:bg-danger/10"
                 data-testid="clear-records-button"
                 @click="handleClearRecords"
             >
                 <Trash2
                     :size="18"
-                    class="text-accent"
+                    class="text-danger"
                 />
-                <span class="text-base font-semibold text-accent">Clear All Records</span>
+                <span class="text-base font-semibold text-danger">Clear All Records</span>
             </button>
         </div>
 

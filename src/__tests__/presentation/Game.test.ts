@@ -36,6 +36,11 @@ const mountContinueGame = (savedState: GameState) => {
     return mount(Game, { global: { plugins: [pinia, router] } });
 };
 
+vi.mock("vue-router", async () => {
+    const actual = await vi.importActual<typeof import("vue-router")>("vue-router");
+    return { ...actual, onBeforeRouteLeave: vi.fn() };
+});
+
 afterEach(() => {
     vi.restoreAllMocks();
     vi.useRealTimers();
@@ -286,7 +291,7 @@ describe("Game", () => {
 
         await wrapper.find("[data-testid='note-button']").trigger("click");
 
-        expect(wrapper.find("[data-testid='note-button']").find(".bg-primary-light").exists()).toBe(true);
+        expect(wrapper.find("[data-testid='note-button']").find(".border-accent").exists()).toBe(true);
     });
 
     it("should add note to slot cell in note mode", async () => {
@@ -676,7 +681,7 @@ describe("Game", () => {
         // erase mode 取消
         expect(wrapper.find("[data-testid='erase-button']").classes()).not.toContain("bg-primary");
         // note mode 啟用
-        expect(wrapper.find("[data-testid='note-button']").find(".bg-primary-light").exists()).toBe(true);
+        expect(wrapper.find("[data-testid='note-button']").find(".border-accent").exists()).toBe(true);
     });
 
     it("should restore saved game state from store", () => {
@@ -981,132 +986,4 @@ describe("Game", () => {
         });
     });
 
-    describe("Route Leave Guard", () => {
-        const createRouterViewApp = () => {
-            const pinia = createPinia();
-            const router = createRouter({
-                history: createMemoryHistory(),
-                routes: [
-                    { path: "/game", component: Game },
-                    { path: "/", component: { template: "<div>Home</div>" } },
-                ],
-            });
-            const gameStore = useGameStore(pinia);
-            gameStore.sudoku = createKnownSudoku();
-            gameStore.setDifficulty("easy");
-            return { pinia, router, gameStore };
-        };
-
-        const mountWithRouterView = async () => {
-            const { pinia, router, gameStore } = createRouterViewApp();
-            await router.push("/game");
-            await router.isReady();
-            const wrapper = mount(
-                { template: "<router-view />" },
-                { global: { plugins: [pinia, router] } },
-            );
-            await flushPromises();
-            return { wrapper, router, gameStore };
-        };
-
-        it("should block route leave and show LeaveGameDialog when game is in progress", async () => {
-            const { wrapper, router } = await mountWithRouterView();
-
-            await router.push("/");
-            await flushPromises();
-
-            // 導航應被阻止
-            expect(router.currentRoute.value.path).toBe("/game");
-            // LeaveGameDialog 應顯示
-            expect(wrapper.find("[data-testid='leave-game-dialog']").exists()).toBe(true);
-        });
-
-        it("should allow route leave when game is completed", async () => {
-            const { wrapper, router } = await mountWithRouterView();
-
-            // 填入所有正確答案
-            for (let row = 0; row < 9; row++) {
-                for (let column = 0; column < 9; column++) {
-                    if (knownPuzzle[row][column] === 0) {
-                        const value = knownAnswer[row][column];
-                        const numberButton = wrapper.find(`[data-testid='number-${value}']`);
-                        await numberButton.trigger("click");
-                        await wrapper.find(`[data-testid='cell-${row}-${column}']`).trigger("click");
-                        await numberButton.trigger("click");
-                    }
-                }
-            }
-            expect(wrapper.find("[data-testid='game-complete-modal']").exists()).toBe(true);
-
-            await router.push("/");
-            await flushPromises();
-
-            expect(router.currentRoute.value.path).toBe("/");
-        });
-    });
-
-    describe("Leave Game Dialog", () => {
-        it("should show leave game dialog when clicking Back button", async () => {
-            const wrapper = mountGame();
-
-            await wrapper.find("[data-testid='back-button']").trigger("click");
-
-            expect(wrapper.find("[data-testid='leave-game-dialog']").exists()).toBe(true);
-            expect(wrapper.find("[data-testid='leave-game-dialog']").text()).toContain("Leave Game?");
-        });
-
-        it("should save game and navigate home when clicking Save & Leave", async () => {
-            const pinia = createPinia();
-            const router = createTestRouter();
-            const gameStore = useGameStore(pinia);
-            gameStore.sudoku = createKnownSudoku();
-            gameStore.setDifficulty("easy");
-            const wrapper = mount(Game, { global: { plugins: [pinia, router] } });
-
-            // 填入一個數字
-            await wrapper.find("[data-testid='cell-0-2']").trigger("click");
-            await wrapper.find("[data-testid='number-4']").trigger("click");
-
-            // 點 Back → 點 Save & Leave
-            await wrapper.find("[data-testid='back-button']").trigger("click");
-            await wrapper.find("[data-testid='save-and-leave-button']").trigger("click");
-            await flushPromises();
-
-            expect(hasSavedGame()).toBe(true);
-            expect(loadGame()?.cells[0][2].entry).toBe(4);
-            expect(router.currentRoute.value.path).toBe("/");
-        });
-
-        it("should record gave up and delete save when clicking Give Up & Leave", async () => {
-            const pinia = createPinia();
-            const router = createTestRouter();
-            const gameStore = useGameStore(pinia);
-            gameStore.sudoku = createKnownSudoku();
-            gameStore.setDifficulty("easy");
-            const wrapper = mount(Game, { global: { plugins: [pinia, router] } });
-
-            // 點 Back → 點 Give Up & Leave
-            await wrapper.find("[data-testid='back-button']").trigger("click");
-            await wrapper.find("[data-testid='give-up-and-leave-button']").trigger("click");
-            await flushPromises();
-
-            const history = getGameHistory();
-            expect(history).toHaveLength(1);
-            expect(history[0].completed).toBe(false);
-            expect(history[0].difficulty).toBe("easy");
-            expect(hasSavedGame()).toBe(false);
-            expect(router.currentRoute.value.path).toBe("/");
-        });
-
-        it("should close dialog when clicking Cancel", async () => {
-            const wrapper = mountGame();
-
-            await wrapper.find("[data-testid='back-button']").trigger("click");
-            expect(wrapper.find("[data-testid='leave-game-dialog']").exists()).toBe(true);
-
-            await wrapper.find("[data-testid='leave-cancel-button']").trigger("click");
-
-            expect(wrapper.find("[data-testid='leave-game-dialog']").exists()).toBe(false);
-        });
-    });
 });

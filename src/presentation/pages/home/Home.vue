@@ -37,7 +37,7 @@
 
             <!-- New Game -->
             <button
-                class="flex items-center justify-center gap-2.5 h-14 w-full bg-card rounded-2xl shadow-card cursor-pointer"
+                class="flex items-center justify-center gap-2.5 h-14 w-full bg-card rounded-2xl shadow-card cursor-pointer transition-all duration-200 hover:bg-foreground/3 hover:shadow-card-lg"
                 data-testid="new-game-button"
                 @click="handleNewGame"
             >
@@ -54,7 +54,6 @@
         <!-- Bottom Nav -->
         <div class="flex items-center justify-center gap-10">
             <button
-                v-if="showSettings"
                 class="flex flex-col items-center gap-1 cursor-pointer"
                 data-testid="settings-button"
                 @click="goToSettings"
@@ -92,7 +91,7 @@ import type { Difficulty } from "@/domain";
 import { useGameStore } from "@/stores/gameStore";
 import { deleteSavedGame, hasSavedGame, loadGame } from "@/application/GameStorage";
 import { recordGameResult } from "@/application/Statistics";
-import { isFeatureEnabled } from "@/utils/featureToggle";
+
 import ContinueButton from "@/presentation/components/continue-button/ContinueButton.vue";
 import DifficultySwitcher from "@/presentation/components/difficulty-switcher/DifficultySwitcher.vue";
 import NewGameDialog from "@/presentation/components/new-game-dialog/NewGameDialog.vue";
@@ -102,7 +101,6 @@ const router = useRouter();
 const gameStore = useGameStore();
 const newGameDialog = provideNewGameDialog();
 
-const showSettings = isFeatureEnabled("settings");
 const difficulty = ref<Difficulty>("easy");
 
 const handleNewGame = async () => {

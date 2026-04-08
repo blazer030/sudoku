@@ -4,6 +4,7 @@
             cellBg,
             positionClasses,
             !puzzleCell.isClue ? 'cursor-pointer' : '',
+            flashing ? 'animate-completion-flash' : '',
         ]"
         class="flex justify-center items-center flex-1 aspect-square"
     >
@@ -32,8 +33,9 @@
                 <span
                     v-if="puzzleCell.notes.includes(n)"
                     :class="selectedDigit === n
-                        ? 'aspect-square max-w-5 max-h-5 w-full rounded-full bg-primary text-white font-semibold flex items-center justify-center text-[10px]'
-                        : 'text-[10px] text-foreground-secondary'"
+                        ? 'aspect-square max-w-5 max-h-5 w-full rounded-full bg-primary text-white font-semibold flex items-center justify-center'
+                        : 'text-foreground-muted'"
+                    class="text-[clamp(8px,-0.49px+2.26vw,14px)]"
                 >
                     {{ n }}
                 </span>
@@ -46,16 +48,22 @@
 import { computed } from "vue";
 import { PuzzleCell } from "@/domain";
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
     puzzleCell: PuzzleCell;
     row: number;
     column: number;
     selected?: boolean;
     selectedDigit?: number | null;
     error?: boolean;
-}>();
+    flashing?: boolean;
+    highlightSameDigit?: boolean;
+}>(), {
+    selectedDigit: null,
+    highlightSameDigit: true,
+});
 
 const isSameDigit = computed(() => {
+    if (!props.highlightSameDigit) return false;
     if (!props.selectedDigit) return false;
     const cellValue = props.puzzleCell.isClue ? props.puzzleCell.clue : props.puzzleCell.entry;
     return cellValue === props.selectedDigit;

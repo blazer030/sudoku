@@ -19,7 +19,7 @@ describe("HintMenuPopup", () => {
         return mount(Host);
     };
 
-    it("渲染 4 個選項", () => {
+    it("should render 4 hint options", () => {
         const wrapper = mountPopup();
 
         expect(wrapper.find("[data-testid='hint-auto-notes']").exists()).toBe(true);
@@ -28,7 +28,7 @@ describe("HintMenuPopup", () => {
         expect(wrapper.find("[data-testid='hint-reveal-cell']").exists()).toBe(true);
     });
 
-    it("顯示 HintLights — 3 個圓點對應已用次數", () => {
+    it("should display 3 hint lights matching usage count", () => {
         const wrapper = mountPopup({ recordedUsed: 2 });
 
         const dots = wrapper.findAll("[data-testid='hint-light']");
@@ -41,7 +41,7 @@ describe("HintMenuPopup", () => {
         expect(outlinedDots).toHaveLength(2);
     });
 
-    it("點擊遮罩觸發 close", async () => {
+    it("should close when clicking overlay", async () => {
         const wrapper = mountPopup();
 
         await wrapper.find("[data-testid='hint-overlay']").trigger("click");
@@ -49,7 +49,7 @@ describe("HintMenuPopup", () => {
         expect(wrapper.find("[data-testid='hint-overlay']").exists()).toBe(false);
     });
 
-    it("點擊各選項關閉彈窗", async () => {
+    it("should close popup when clicking each option", async () => {
         const testCases = ["hint-auto-notes", "hint-check-conflicts", "hint-check-errors", "hint-reveal-cell"];
         for (const testId of testCases) {
             const wrapper = mountPopup();
@@ -58,7 +58,7 @@ describe("HintMenuPopup", () => {
         }
     });
 
-    it("提示全部用完時選項 disabled", () => {
+    it("should disable options when all hints are used", () => {
         const wrapper = mountPopup({ canUseHint: false });
 
         const buttons = wrapper.findAll("button[data-testid^='hint-']");
