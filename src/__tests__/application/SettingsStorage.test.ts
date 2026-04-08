@@ -1,4 +1,4 @@
-import { loadSettings, saveSettings, type ColorThemeId } from "@/application/SettingsStorage";
+import { loadSettings, saveSettings } from "@/application/SettingsStorage";
 
 describe("SettingsStorage", () => {
     beforeEach(() => {

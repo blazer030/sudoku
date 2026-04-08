@@ -57,6 +57,7 @@ const props = withDefaults(defineProps<{
     flashing?: boolean;
     highlightSameDigit?: boolean;
 }>(), {
+    selectedDigit: null,
     highlightSameDigit: true,
 });
 

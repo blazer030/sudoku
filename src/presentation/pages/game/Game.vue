@@ -1,11 +1,7 @@
 <template>
-    <ClassicGame v-if="settingsStore.theme === 'classic'" />
-    <ClassicGame v-else />
+    <ClassicGame />
 </template>
 
 <script lang="ts" setup>
-import { useSettingsStore } from "@/stores/settingsStore";
 import ClassicGame from "@/presentation/themes/classic/ClassicGame.vue";
-
-const settingsStore = useSettingsStore();
 </script>

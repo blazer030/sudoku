@@ -23,7 +23,7 @@ describe("settingsStore", () => {
         store.setColorTheme("blue");
 
         expect(store.colorTheme).toBe("blue");
-        const stored = JSON.parse(localStorage.getItem("sudoku-settings")!);
+        const stored = JSON.parse(localStorage.getItem("sudoku-settings") ?? "{}") as Record<string, unknown>;
         expect(stored.colorTheme).toBe("blue");
     });
 
@@ -40,13 +40,13 @@ describe("settingsStore", () => {
         expect(store.autoRemoveNotes).toBe(false);
         expect(store.showRemainingCount).toBe(false);
 
-        const stored = JSON.parse(localStorage.getItem("sudoku-settings")!);
+        const stored = JSON.parse(localStorage.getItem("sudoku-settings") ?? "{}") as Record<string, unknown>;
         expect(stored.highlightSameDigit).toBe(false);
         expect(stored.completionFlash).toBe(false);
     });
 
     it("should set data-color-theme on document element on init", () => {
-        const store = useSettingsStore();
+        useSettingsStore();
 
         expect(document.documentElement.dataset.colorTheme).toBe("green");
     });
