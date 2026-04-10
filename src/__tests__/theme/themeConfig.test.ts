@@ -9,4 +9,12 @@ describe("themeConfig", () => {
         expect(ids).toEqual(expect.arrayContaining(ALL_THEME_IDS));
         expect(ids).toHaveLength(ALL_THEME_IDS.length);
     });
+
+    it("should have valid hex color format for primary and accent", () => {
+        const hexPattern = /^#[0-9A-Fa-f]{6}$/;
+        for (const theme of THEMES) {
+            expect(theme.primary).toMatch(hexPattern);
+            expect(theme.accent).toMatch(hexPattern);
+        }
+    });
 });
