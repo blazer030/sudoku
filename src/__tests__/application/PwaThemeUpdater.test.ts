@@ -16,5 +16,9 @@ describe("PwaThemeUpdater", () => {
 
             expect(meta.content).toBe("#4A7AB5");
         });
+
+        it("should not throw when meta theme-color element is missing", () => {
+            expect(() => updateMetaThemeColor("blue")).not.toThrow();
+        });
     });
 });
