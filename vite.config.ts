@@ -55,6 +55,13 @@ export default ({ mode }: { mode: string }) => {
             globals: true,
             environment: "jsdom",
             exclude: ["**/node_modules/**", "**/dist/**", "**/.worktrees/**"],
+            setupFiles: ["src/__tests__/setup.ts"],
+            pool: "forks",
+            poolOptions: {
+                forks: {
+                    execArgv: ["--disable-warning=ExperimentalWarning"],
+                },
+            },
         },
     });
 }
