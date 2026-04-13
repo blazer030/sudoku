@@ -18,7 +18,7 @@ describe("PwaThemeUpdater", () => {
         });
 
         it("should not throw when meta theme-color element is missing", () => {
-            expect(() => updateMetaThemeColor("blue")).not.toThrow();
+            expect(() => { updateMetaThemeColor("blue"); }).not.toThrow();
         });
     });
 
@@ -39,7 +39,7 @@ describe("PwaThemeUpdater", () => {
         });
 
         it("should not throw when icon link is missing", () => {
-            expect(() => updateFavicon("blue")).not.toThrow();
+            expect(() => { updateFavicon("blue"); }).not.toThrow();
         });
     });
 
@@ -60,7 +60,7 @@ describe("PwaThemeUpdater", () => {
         });
 
         it("should not throw when manifest link is missing", () => {
-            expect(() => updateManifestLink("blue")).not.toThrow();
+            expect(() => { updateManifestLink("blue"); }).not.toThrow();
         });
     });
 
@@ -81,7 +81,7 @@ describe("PwaThemeUpdater", () => {
         });
 
         it("should not throw when apple-touch-icon link is missing", () => {
-            expect(() => updateAppleTouchIcon("blue")).not.toThrow();
+            expect(() => { updateAppleTouchIcon("blue"); }).not.toThrow();
         });
     });
 });

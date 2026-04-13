@@ -21,7 +21,7 @@ export default ({ mode }: { mode: string }) => {
             VitePWA({
                 registerType: "autoUpdate",
                 workbox: {
-                    globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
+                    globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2,webmanifest}"],
                     runtimeCaching: [
                         {
                             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
@@ -43,19 +43,7 @@ export default ({ mode }: { mode: string }) => {
                         },
                     ],
                 },
-                manifest: {
-                    name: "Sudoku",
-                    short_name: "Sudoku",
-                    description: "Train your brain with Sudoku puzzles",
-                    theme_color: "#3D8A5A",
-                    background_color: "#F5F5F0",
-                    display: "standalone",
-                    icons: [
-                        { src: "pwa-192x192.png", sizes: "192x192", type: "image/png" },
-                        { src: "pwa-512x512.png", sizes: "512x512", type: "image/png" },
-                        { src: "pwa-512x512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
-                    ],
-                },
+                manifest: false,
             }),
         ],
         resolve: {
