@@ -83,4 +83,45 @@ describe("useCompletionFlash", () => {
 
         expect(isFlashing(0, 0)).toBe(false);
     });
+
+    it("should call onComplete after last cell flash finishes", () => {
+        vi.useFakeTimers();
+        const { triggerFlash } = useCompletionFlash();
+        const onComplete = vi.fn();
+
+        triggerFlash(
+            [{ row: 0, column: 0 }, { row: 0, column: 1 }, { row: 0, column: 2 }],
+            { row: 0, column: 0 },
+            onComplete,
+        );
+
+        // max distance = 2, delay = 2 * 60 = 120, total = 120 + 500 = 620
+        vi.advanceTimersByTime(619);
+        expect(onComplete).not.toHaveBeenCalled();
+
+        vi.advanceTimersByTime(1);
+        expect(onComplete).toHaveBeenCalledOnce();
+    });
+
+    it("should call onComplete immediately when cells array is empty", () => {
+        const { triggerFlash } = useCompletionFlash();
+        const onComplete = vi.fn();
+
+        triggerFlash([], { row: 0, column: 0 }, onComplete);
+
+        expect(onComplete).toHaveBeenCalledOnce();
+    });
+
+    it("should call onComplete immediately when disabled", () => {
+        const { triggerFlash } = useCompletionFlash(() => false);
+        const onComplete = vi.fn();
+
+        triggerFlash(
+            [{ row: 0, column: 0 }],
+            { row: 0, column: 0 },
+            onComplete,
+        );
+
+        expect(onComplete).toHaveBeenCalledOnce();
+    });
 });
