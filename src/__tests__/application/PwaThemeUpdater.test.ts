@@ -79,5 +79,9 @@ describe("PwaThemeUpdater", () => {
 
             expect(link.href).toContain("apple-touch-icon-teal.png");
         });
+
+        it("should not throw when apple-touch-icon link is missing", () => {
+            expect(() => updateAppleTouchIcon("blue")).not.toThrow();
+        });
     });
 });
