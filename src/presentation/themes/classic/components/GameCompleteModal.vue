@@ -1,8 +1,9 @@
 <template>
+    <FireworkCanvas v-if="visible" />
     <Transition name="modal">
         <div
             v-if="visible"
-            class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+            class="fixed inset-0 bg-black/60 flex items-center justify-center z-50"
             data-testid="game-complete-modal"
         >
             <div class="bg-card rounded-3xl p-8 mx-6 w-full max-w-[354px] flex flex-col items-center gap-6 shadow-modal">
@@ -77,6 +78,7 @@ import { formatTime } from "@/utils/formatTime";
 import { DifficultyLabels } from "@/domain";
 import { computed } from "vue";
 import { useGameCompleteModal } from "./useGameCompleteModal";
+import FireworkCanvas from "./FireworkCanvas.vue";
 
 const router = useRouter();
 const { visible, params, close } = useGameCompleteModal();
