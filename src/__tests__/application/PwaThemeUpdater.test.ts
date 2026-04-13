@@ -1,4 +1,4 @@
-import { updateMetaThemeColor, updateFavicon } from "@/application/PwaThemeUpdater";
+import { updateMetaThemeColor, updateFavicon, updateManifestLink } from "@/application/PwaThemeUpdater";
 
 describe("PwaThemeUpdater", () => {
     describe("updateMetaThemeColor", () => {
@@ -40,6 +40,23 @@ describe("PwaThemeUpdater", () => {
 
         it("should not throw when icon link is missing", () => {
             expect(() => updateFavicon("blue")).not.toThrow();
+        });
+    });
+
+    describe("updateManifestLink", () => {
+        afterEach(() => {
+            document.head.innerHTML = "";
+        });
+
+        it("should set manifest link href to themed webmanifest path", () => {
+            const link = document.createElement("link");
+            link.rel = "manifest";
+            link.href = "/manifest-green.webmanifest";
+            document.head.appendChild(link);
+
+            updateManifestLink("orange");
+
+            expect(link.href).toContain("manifest-orange.webmanifest");
         });
     });
 });

@@ -13,3 +13,8 @@ export const updateFavicon = (id: ColorThemeId): void => {
     const link = document.querySelector<HTMLLinkElement>('link[rel="icon"]');
     if (link) link.href = `${import.meta.env.BASE_URL}sudoku-${id}.svg`;
 };
+
+export const updateManifestLink = (id: ColorThemeId): void => {
+    const link = document.querySelector<HTMLLinkElement>('link[rel="manifest"]');
+    if (link) link.href = `${import.meta.env.BASE_URL}manifest-${id}.webmanifest`;
+};
