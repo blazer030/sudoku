@@ -262,6 +262,7 @@ describe("Game", () => {
     });
 
     it("should show game complete modal when all cells are correctly filled", async () => {
+        localStorage.setItem("sudoku-settings", JSON.stringify({ completionFlash: false }));
         const wrapper = mountGame();
 
         for (let row = 0; row < 9; row++) {
@@ -555,6 +556,7 @@ describe("Game", () => {
     });
 
     it("should stop timer when game is completed", async () => {
+        localStorage.setItem("sudoku-settings", JSON.stringify({ completionFlash: false }));
         vi.useFakeTimers();
         const wrapper = mountGame();
 
@@ -738,6 +740,7 @@ describe("Game", () => {
     });
 
     it("should record game result when game is completed", async () => {
+        localStorage.setItem("sudoku-settings", JSON.stringify({ completionFlash: false }));
         const wrapper = mountGame();
 
         for (let row = 0; row < 9; row++) {
@@ -759,6 +762,7 @@ describe("Game", () => {
     });
 
     it("should delete saved game when game is completed", async () => {
+        localStorage.setItem("sudoku-settings", JSON.stringify({ completionFlash: false }));
         const savedState: GameState = {
             difficulty: "easy",
             answer: knownAnswer.map(row => [...row]),
@@ -959,6 +963,7 @@ describe("Game", () => {
         });
 
         it("should check completion after Reveal Cell", async () => {
+            localStorage.setItem("sudoku-settings", JSON.stringify({ completionFlash: false }));
             const wrapper = mountGame();
 
             // 填入除一格外所有正確答案

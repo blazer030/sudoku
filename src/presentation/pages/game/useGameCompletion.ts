@@ -8,13 +8,13 @@ interface GameCompletionOptions {
     sudoku: Sudoku;
     difficulty: Ref<Difficulty>;
     getElapsedSeconds: () => number;
-    onCompleted: () => void;
+    onCompleted: (origin: { row: number; column: number }) => void;
 }
 
 export const useGameCompletion = ({ sudoku, difficulty, getElapsedSeconds, onCompleted }: GameCompletionOptions) => {
     const completed = ref(false);
 
-    const checkAndComplete = () => {
+    const checkAndComplete = (origin: { row: number; column: number }) => {
         if (!sudoku.isCompleted()) return;
         completed.value = true;
         deleteSavedGame();
@@ -24,7 +24,7 @@ export const useGameCompletion = ({ sudoku, difficulty, getElapsedSeconds, onCom
             completed: true,
             hintsUsed: sudoku.hintTracker.recordedUsed,
         });
-        onCompleted();
+        onCompleted(origin);
     };
 
     return { completed, checkAndComplete };
