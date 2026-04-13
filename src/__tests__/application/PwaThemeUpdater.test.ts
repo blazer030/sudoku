@@ -1,4 +1,4 @@
-import { updateMetaThemeColor } from "@/application/PwaThemeUpdater";
+import { updateMetaThemeColor, updateFavicon } from "@/application/PwaThemeUpdater";
 
 describe("PwaThemeUpdater", () => {
     describe("updateMetaThemeColor", () => {
@@ -19,6 +19,23 @@ describe("PwaThemeUpdater", () => {
 
         it("should not throw when meta theme-color element is missing", () => {
             expect(() => updateMetaThemeColor("blue")).not.toThrow();
+        });
+    });
+
+    describe("updateFavicon", () => {
+        afterEach(() => {
+            document.head.innerHTML = "";
+        });
+
+        it("should set icon link href to themed svg path", () => {
+            const link = document.createElement("link");
+            link.rel = "icon";
+            link.href = "/sudoku-green.svg";
+            document.head.appendChild(link);
+
+            updateFavicon("purple");
+
+            expect(link.href).toContain("sudoku-purple.svg");
         });
     });
 });

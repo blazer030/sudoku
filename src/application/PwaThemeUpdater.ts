@@ -8,3 +8,8 @@ export const updateMetaThemeColor = (id: ColorThemeId): void => {
     const meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
     if (meta) meta.content = getPrimary(id);
 };
+
+export const updateFavicon = (id: ColorThemeId): void => {
+    const link = document.querySelector<HTMLLinkElement>('link[rel="icon"]');
+    if (link) link.href = `${import.meta.env.BASE_URL}sudoku-${id}.svg`;
+};
