@@ -1,9 +1,11 @@
 import { THEMES } from "@/theme/themeConfig";
 import type { ColorThemeId } from "@/application/SettingsStorage";
 
+const DEFAULT_PRIMARY = "#3D8A5A";
+
 const getPrimary = (id: ColorThemeId): string => {
     const theme = THEMES.find((t) => t.id === id);
-    return theme ? theme.primary : "";
+    return theme ? theme.primary : DEFAULT_PRIMARY;
 };
 
 export const updateMetaThemeColor = (id: ColorThemeId): void => {

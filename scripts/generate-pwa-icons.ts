@@ -11,6 +11,10 @@ interface ThemeDef {
     primary: string;
 }
 
+// IMPORTANT: When adding a new theme, also update:
+//   1. ColorThemeId in src/application/SettingsStorage.ts
+//   2. THEMES in src/theme/themeConfig.ts
+// The themeConfig.test.ts will catch mismatches between (1) and (2).
 const THEMES: ThemeDef[] = [
     { id: "green",  primary: "#3D8A5A" },
     { id: "blue",   primary: "#4A7AB5" },
@@ -85,7 +89,7 @@ const main = async () => {
     console.log("Done! All themed PWA assets generated.");
 };
 
-main().catch((err) => {
+main().catch((err: unknown) => {
     console.error(err);
     process.exit(1);
 });
