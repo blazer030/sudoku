@@ -37,5 +37,9 @@ describe("PwaThemeUpdater", () => {
 
             expect(link.href).toContain("sudoku-purple.svg");
         });
+
+        it("should not throw when icon link is missing", () => {
+            expect(() => updateFavicon("blue")).not.toThrow();
+        });
     });
 });
