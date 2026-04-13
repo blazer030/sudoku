@@ -18,3 +18,8 @@ export const updateManifestLink = (id: ColorThemeId): void => {
     const link = document.querySelector<HTMLLinkElement>('link[rel="manifest"]');
     if (link) link.href = `${import.meta.env.BASE_URL}manifest-${id}.webmanifest`;
 };
+
+export const updateAppleTouchIcon = (id: ColorThemeId): void => {
+    const link = document.querySelector<HTMLLinkElement>('link[rel="apple-touch-icon"]');
+    if (link) link.href = `${import.meta.env.BASE_URL}apple-touch-icon-${id}.png`;
+};

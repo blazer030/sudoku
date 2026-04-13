@@ -1,4 +1,4 @@
-import { updateMetaThemeColor, updateFavicon, updateManifestLink } from "@/application/PwaThemeUpdater";
+import { updateMetaThemeColor, updateFavicon, updateManifestLink, updateAppleTouchIcon } from "@/application/PwaThemeUpdater";
 
 describe("PwaThemeUpdater", () => {
     describe("updateMetaThemeColor", () => {
@@ -61,6 +61,23 @@ describe("PwaThemeUpdater", () => {
 
         it("should not throw when manifest link is missing", () => {
             expect(() => updateManifestLink("blue")).not.toThrow();
+        });
+    });
+
+    describe("updateAppleTouchIcon", () => {
+        afterEach(() => {
+            document.head.innerHTML = "";
+        });
+
+        it("should set apple-touch-icon link href to themed png path", () => {
+            const link = document.createElement("link");
+            link.rel = "apple-touch-icon";
+            link.href = "/apple-touch-icon-green.png";
+            document.head.appendChild(link);
+
+            updateAppleTouchIcon("teal");
+
+            expect(link.href).toContain("apple-touch-icon-teal.png");
         });
     });
 });
