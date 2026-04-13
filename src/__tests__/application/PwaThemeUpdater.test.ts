@@ -58,5 +58,9 @@ describe("PwaThemeUpdater", () => {
 
             expect(link.href).toContain("manifest-orange.webmanifest");
         });
+
+        it("should not throw when manifest link is missing", () => {
+            expect(() => updateManifestLink("blue")).not.toThrow();
+        });
     });
 });
