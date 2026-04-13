@@ -22,7 +22,7 @@
             <span class="text-foreground-secondary text-sm font-semibold">Color Theme</span>
             <div class="flex items-center gap-3">
                 <button
-                    v-for="color in colorThemes"
+                    v-for="color in THEMES"
                     :key="color.id"
                     class="relative w-10 h-10 rounded-full cursor-pointer transition-all duration-200 overflow-hidden"
                     :class="[
@@ -36,11 +36,11 @@
                     <div class="absolute inset-0 flex">
                         <div
                             class="w-1/2 h-full"
-                            :style="{ backgroundColor: color.hex }"
+                            :style="{ backgroundColor: color.primary }"
                         />
                         <div
                             class="w-1/2 h-full"
-                            :style="{ backgroundColor: color.accentHex }"
+                            :style="{ backgroundColor: color.accent }"
                         />
                     </div>
                     <div
@@ -98,25 +98,10 @@ import { useRouter } from "vue-router";
 import { ChevronLeft, Check } from "lucide-vue-next";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { appVersion } from "@/utils/appVersion";
-import type { ColorThemeId } from "@/application/SettingsStorage";
+import { THEMES } from "@/theme/themeConfig";
 
 const router = useRouter();
 const settingsStore = useSettingsStore();
-
-interface ColorThemeOption {
-    id: ColorThemeId;
-    hex: string;
-    accentHex: string;
-}
-
-const colorThemes: ColorThemeOption[] = [
-    { id: "green", hex: "#3D8A5A", accentHex: "#D89575" },
-    { id: "blue", hex: "#4A7AB5", accentHex: "#C49A5C" },
-    { id: "purple", hex: "#7B5EA7", accentHex: "#5A9E8F" },
-    { id: "orange", hex: "#C08040", accentHex: "#6888A5" },
-    { id: "pink", hex: "#B5607A", accentHex: "#5A9A8A" },
-    { id: "teal", hex: "#4A9A9A", accentHex: "#C07A6A" },
-];
 
 const toggles = computed(() => [
     {

@@ -1,6 +1,7 @@
 import { ref } from "vue";
 import { defineStore } from "pinia";
 import { loadSettings, saveSettings, type ColorThemeId } from "@/application/SettingsStorage";
+import { updateMetaThemeColor, updateFavicon, updateManifestLink, updateAppleTouchIcon } from "@/application/PwaThemeUpdater";
 
 export const useSettingsStore = defineStore("settings", () => {
     const settings = loadSettings();
@@ -11,7 +12,12 @@ export const useSettingsStore = defineStore("settings", () => {
     const showRemainingCount = ref(settings.showRemainingCount);
 
     const applyColorTheme = () => {
-        document.documentElement.dataset.colorTheme = colorTheme.value;
+        const id = colorTheme.value;
+        document.documentElement.dataset.colorTheme = id;
+        updateMetaThemeColor(id);
+        updateFavicon(id);
+        updateManifestLink(id);
+        updateAppleTouchIcon(id);
     };
 
     const persistAll = () => {
