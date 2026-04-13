@@ -6,7 +6,7 @@ import { InputMode } from "@/presentation/pages/game/InputMode";
 interface GameInteractionOptions {
     sudoku: Sudoku;
     clearErrors: () => void;
-    checkAndComplete: () => void;
+    checkAndComplete: (origin: { row: number; column: number }) => void;
     onGroupCompleted?: (cells: { row: number; column: number }[], origin: { row: number; column: number }) => void;
     autoRemoveNotes: () => boolean;
 }
