@@ -1,5 +1,5 @@
 <template>
-    <div class="flex flex-col gap-6 h-dvh py-6 px-5">
+    <div class="flex flex-col gap-5 h-dvh py-6 px-5 bg-background">
         <!-- Header -->
         <div class="flex items-center justify-between">
             <button
@@ -17,78 +17,90 @@
             <div class="w-15" />
         </div>
 
-        <!-- Color Theme Section -->
-        <div class="flex flex-col gap-3">
-            <span class="text-foreground-secondary text-sm font-semibold">Color Theme</span>
-            <div class="flex items-center gap-3">
+        <!-- Appearance Section -->
+        <div class="flex flex-col gap-2">
+            <span class="text-foreground-muted text-xs font-semibold tracking-wider uppercase px-1">Appearance</span>
+            <div class="bg-card rounded-2xl px-4 py-4 shadow-card-sm">
+                <span class="text-foreground text-[15px] font-medium">Color theme</span>
+                <div class="grid grid-cols-6 gap-3 mt-3">
+                    <button
+                        v-for="color in THEMES"
+                        :key="color.id"
+                        class="relative aspect-square rounded-full cursor-pointer transition-all duration-200 overflow-hidden"
+                        :class="[
+                            color.id === settingsStore.colorTheme
+                                ? 'ring-2 ring-offset-2 ring-primary scale-110'
+                                : 'hover:scale-105',
+                        ]"
+                        :data-testid="`color-theme-${color.id}`"
+                        @click="settingsStore.setColorTheme(color.id)"
+                    >
+                        <div class="absolute inset-0 flex">
+                            <div
+                                class="w-1/2 h-full"
+                                :style="{ backgroundColor: color.primary }"
+                            />
+                            <div
+                                class="w-1/2 h-full"
+                                :style="{ backgroundColor: color.accent }"
+                            />
+                        </div>
+                        <div
+                            v-if="color.id === settingsStore.colorTheme"
+                            data-testid="color-theme-check"
+                            class="absolute inset-0 flex items-center justify-center"
+                        >
+                            <Check
+                                :size="18"
+                                class="text-white"
+                                :stroke-width="3"
+                            />
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gameplay Section -->
+        <div class="flex flex-col gap-2">
+            <span class="text-foreground-muted text-xs font-semibold tracking-wider uppercase px-1">Gameplay</span>
+            <div class="bg-card rounded-2xl px-4 shadow-card-sm divide-y divide-border">
                 <button
-                    v-for="color in THEMES"
-                    :key="color.id"
-                    class="relative w-10 h-10 rounded-full cursor-pointer transition-all duration-200 overflow-hidden"
-                    :class="[
-                        color.id === settingsStore.colorTheme
-                            ? 'ring-2 ring-offset-2 ring-primary scale-110'
-                            : 'hover:scale-105',
-                    ]"
-                    :data-testid="`color-theme-${color.id}`"
-                    @click="settingsStore.setColorTheme(color.id)"
+                    v-for="toggle in toggles"
+                    :key="toggle.key"
+                    class="flex items-center justify-between py-3.5 cursor-pointer w-full"
+                    :data-testid="`toggle-${toggle.key}`"
+                    @click="toggle.setter(!toggle.value)"
                 >
-                    <div class="absolute inset-0 flex">
-                        <div
-                            class="w-1/2 h-full"
-                            :style="{ backgroundColor: color.primary }"
-                        />
-                        <div
-                            class="w-1/2 h-full"
-                            :style="{ backgroundColor: color.accent }"
-                        />
+                    <div class="flex flex-col gap-0.5">
+                        <span class="text-foreground text-[15px] font-medium text-left">{{ toggle.label }}</span>
+                        <span class="text-foreground-muted text-[13px] text-left">{{ toggle.description }}</span>
                     </div>
                     <div
-                        v-if="color.id === settingsStore.colorTheme"
-                        data-testid="color-theme-check"
-                        class="absolute inset-0 flex items-center justify-center"
+                        class="relative w-11 h-6 rounded-full transition-colors duration-200 shrink-0 ml-4"
+                        :class="toggle.value ? 'bg-primary' : 'bg-foreground-muted'"
                     >
-                        <Check
-                            :size="18"
-                            class="text-white"
-                            :stroke-width="3"
+                        <div
+                            class="absolute top-0.5 w-5 h-5 bg-white rounded-full shadow-card-sm transition-transform duration-200"
+                            :class="toggle.value ? 'translate-x-5.5' : 'translate-x-0.5'"
                         />
                     </div>
                 </button>
             </div>
         </div>
 
-        <!-- Game Section -->
-        <div class="flex flex-col gap-1">
-            <span class="text-foreground-secondary text-sm font-semibold mb-2">Game</span>
-
-            <button
-                v-for="toggle in toggles"
-                :key="toggle.key"
-                class="flex items-center justify-between py-3 cursor-pointer"
-                :data-testid="`toggle-${toggle.key}`"
-                @click="toggle.setter(!toggle.value)"
-            >
-                <div class="flex flex-col gap-0.5">
-                    <span class="text-foreground text-[15px] font-medium text-left">{{ toggle.label }}</span>
-                    <span class="text-foreground-muted text-[13px] text-left">{{ toggle.description }}</span>
+        <!-- About Section -->
+        <div class="flex flex-col gap-2">
+            <span class="text-foreground-muted text-xs font-semibold tracking-wider uppercase px-1">About</span>
+            <div class="bg-card rounded-2xl px-4 shadow-card-sm">
+                <div class="flex items-center justify-between py-3.5">
+                    <span class="text-foreground text-[15px] font-medium">Version</span>
+                    <span class="text-foreground-muted text-[15px]">{{ appVersion }}</span>
                 </div>
-                <div
-                    class="relative w-11 h-6 rounded-full transition-colors duration-200 shrink-0 ml-4"
-                    :class="toggle.value ? 'bg-primary' : 'bg-foreground-muted'"
-                >
-                    <div
-                        class="absolute top-0.5 w-5 h-5 bg-white rounded-full shadow-card-sm transition-transform duration-200"
-                        :class="toggle.value ? 'translate-x-5.5' : 'translate-x-0.5'"
-                    />
-                </div>
-            </button>
+            </div>
         </div>
 
         <div class="flex-1" />
-
-        <!-- Version -->
-        <span class="text-foreground-muted text-[11px] text-center">v{{ appVersion }}</span>
     </div>
 </template>
 
