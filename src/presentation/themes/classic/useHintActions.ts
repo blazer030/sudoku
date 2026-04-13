@@ -4,7 +4,7 @@ import { provideHintMenu } from "@/presentation/themes/classic/components/useHin
 
 interface HintActionsOptions {
     sudoku: Sudoku;
-    onRevealComplete: () => void;
+    onRevealComplete: (origin: { row: number; column: number }) => void;
     onGroupCompleted?: (cells: { row: number; column: number }[], origin: { row: number; column: number }) => void;
 }
 
@@ -38,11 +38,11 @@ export const useHintActions = ({ sudoku, onRevealComplete, onGroupCompleted }: H
             break;
         case "revealCell": {
             const target = sudoku.revealRandomCell();
-            if (target) {
+            if (target && !sudoku.isCompleted()) {
                 const completed = sudoku.findCompletedGroups(target.row, target.column);
                 if (completed.cells.length > 0) onGroupCompleted?.(completed.cells, target);
             }
-            onRevealComplete();
+            onRevealComplete(target ?? { row: 4, column: 4 });
             break;
         }
         }

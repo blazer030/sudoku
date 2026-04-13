@@ -13570,241 +13570,466 @@
         },
         {
           "type": "frame",
-          "id": "kHpze",
-          "name": "Theme Section",
+          "id": "D9oox",
+          "name": "Appearance Section",
           "width": "fill_container",
           "layout": "vertical",
           "gap": 12,
           "children": [
             {
               "type": "text",
-              "id": "9vTl6",
-              "name": "themeLabel",
-              "fill": "$foreground-secondary",
-              "content": "Theme",
+              "id": "9Gxap",
+              "name": "sectionLabel",
+              "fill": "$foreground-muted",
+              "content": "APPEARANCE",
               "fontFamily": "Outfit",
-              "fontSize": 14,
-              "fontWeight": "600"
+              "fontSize": 12,
+              "fontWeight": "500",
+              "letterSpacing": 1.2
             },
             {
               "type": "frame",
-              "id": "0KQhN",
-              "name": "Theme List",
+              "id": "OnRJD",
+              "name": "themeCard",
               "width": "fill_container",
+              "fill": "#EDEAE4",
+              "cornerRadius": 14,
               "layout": "vertical",
-              "gap": 12,
+              "gap": 14,
+              "padding": [
+                16,
+                18
+              ],
               "children": [
                 {
+                  "type": "text",
+                  "id": "fv82S",
+                  "name": "aTitle",
+                  "fill": "$foreground",
+                  "content": "Color theme",
+                  "fontFamily": "Outfit",
+                  "fontSize": 14,
+                  "fontWeight": "500"
+                },
+                {
                   "type": "frame",
-                  "id": "ApZwa",
-                  "name": "Classic Card",
-                  "width": "fill_container",
-                  "height": 120,
-                  "fill": "$card",
-                  "cornerRadius": 16,
-                  "stroke": {
-                    "align": "inside",
-                    "thickness": 2,
-                    "fill": "$primary"
-                  },
-                  "effect": {
-                    "type": "shadow",
-                    "shadowType": "outer",
-                    "color": "#1A191808",
-                    "offset": {
-                      "x": 0,
-                      "y": 2
-                    },
-                    "blur": 8
-                  },
-                  "gap": 8,
-                  "padding": 4,
+                  "id": "xOrKO",
+                  "name": "swatchRow",
+                  "gap": 7,
                   "children": [
                     {
                       "type": "frame",
-                      "id": "qMdqk",
-                      "name": "Classic Thumbnail",
+                      "id": "8pkjZ",
+                      "name": "swatch1",
                       "clip": true,
-                      "width": 90,
-                      "height": 112,
-                      "fill": {
-                        "type": "image",
-                        "enabled": true,
-                        "url": "./images/Game Screen.png",
-                        "mode": "fill"
-                      },
-                      "cornerRadius": [
-                        12,
-                        0,
-                        0,
-                        12
-                      ],
+                      "width": 48,
+                      "height": 48,
+                      "cornerRadius": 12,
                       "stroke": {
-                        "align": "inside",
-                        "thickness": 0,
-                        "fill": "#00000000"
+                        "align": "outside",
+                        "thickness": 2.5,
+                        "fill": "$foreground"
                       },
-                      "layout": "none"
-                    },
-                    {
-                      "type": "frame",
-                      "id": "BLjLr",
-                      "name": "Classic Info",
-                      "width": "fill_container",
-                      "height": "fill_container",
-                      "layout": "vertical",
-                      "gap": 4,
-                      "padding": [
-                        12,
-                        16
-                      ],
-                      "justifyContent": "center",
                       "children": [
                         {
-                          "type": "text",
-                          "id": "kL9nK",
-                          "name": "classicName",
-                          "fill": "$foreground",
-                          "content": "Classic",
-                          "fontFamily": "Outfit",
-                          "fontSize": 16,
-                          "fontWeight": "600"
+                          "type": "rectangle",
+                          "id": "Rx29e",
+                          "name": "s1l",
+                          "fill": "#5B8C6F",
+                          "width": "fill_container",
+                          "height": "fill_container"
                         },
                         {
-                          "type": "text",
-                          "id": "sPcqd",
-                          "name": "classicDesc",
-                          "fill": "$foreground-secondary",
-                          "content": "Pure, focused, and timeless.",
-                          "fontFamily": "Outfit",
-                          "fontSize": 13,
-                          "fontWeight": "normal"
+                          "type": "rectangle",
+                          "id": "jSREj",
+                          "name": "s1r",
+                          "fill": "#C49A6C",
+                          "width": "fill_container",
+                          "height": "fill_container"
                         }
                       ]
                     },
                     {
                       "type": "frame",
-                      "id": "9LEDH",
-                      "name": "Check Area",
-                      "width": 40,
-                      "height": "fill_container",
-                      "justifyContent": "center",
-                      "alignItems": "center",
+                      "id": "fWklg",
+                      "name": "swatch2",
+                      "clip": true,
+                      "width": 48,
+                      "height": 48,
+                      "cornerRadius": 12,
                       "children": [
                         {
-                          "type": "frame",
-                          "id": "esIzL",
-                          "name": "Check Badge",
-                          "width": 24,
-                          "height": 24,
-                          "fill": "$primary",
-                          "cornerRadius": 12,
-                          "justifyContent": "center",
-                          "alignItems": "center",
-                          "children": [
-                            {
-                              "type": "icon_font",
-                              "id": "VM2nd",
-                              "name": "checkIcon",
-                              "width": 14,
-                              "height": 14,
-                              "iconFontName": "check",
-                              "iconFontFamily": "lucide",
-                              "fill": "#FFFFFF"
-                            }
-                          ]
+                          "type": "rectangle",
+                          "id": "OKiWf",
+                          "name": "s2l",
+                          "fill": "#4A7FA5",
+                          "width": "fill_container",
+                          "height": "fill_container"
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "ibCCy",
+                          "name": "s2r",
+                          "fill": "#8B6AAE",
+                          "width": "fill_container",
+                          "height": "fill_container"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "wx3oC",
+                      "name": "swatch3",
+                      "clip": true,
+                      "width": 48,
+                      "height": 48,
+                      "cornerRadius": 12,
+                      "children": [
+                        {
+                          "type": "rectangle",
+                          "id": "afMFd",
+                          "name": "s3l",
+                          "fill": "#C9883E",
+                          "width": "fill_container",
+                          "height": "fill_container"
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "CZc5J",
+                          "name": "s3r",
+                          "fill": "#5A8B8B",
+                          "width": "fill_container",
+                          "height": "fill_container"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "AL7z9",
+                      "name": "swatch4",
+                      "clip": true,
+                      "width": 48,
+                      "height": 48,
+                      "cornerRadius": 12,
+                      "children": [
+                        {
+                          "type": "rectangle",
+                          "id": "xuDoG",
+                          "name": "s4l",
+                          "fill": "#B5678B",
+                          "width": "fill_container",
+                          "height": "fill_container"
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "HTRCx",
+                          "name": "s4r",
+                          "fill": "#6B9E5A",
+                          "width": "fill_container",
+                          "height": "fill_container"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "OUBAj",
+                      "name": "swatch5",
+                      "clip": true,
+                      "width": 48,
+                      "height": 48,
+                      "cornerRadius": 12,
+                      "children": [
+                        {
+                          "type": "rectangle",
+                          "id": "U38vz",
+                          "name": "s5l",
+                          "fill": "#C4735B",
+                          "width": "fill_container",
+                          "height": "fill_container"
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "OU2uV",
+                          "name": "s5r",
+                          "fill": "#5B7C8C",
+                          "width": "fill_container",
+                          "height": "fill_container"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "lVO5w",
+                      "name": "swatch6",
+                      "clip": true,
+                      "width": 48,
+                      "height": 48,
+                      "cornerRadius": 12,
+                      "children": [
+                        {
+                          "type": "rectangle",
+                          "id": "0MmBw",
+                          "name": "s6l",
+                          "fill": "#7A7A7A",
+                          "width": "fill_container",
+                          "height": "fill_container"
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "8xigY",
+                          "name": "s6r",
+                          "fill": "#B0A090",
+                          "width": "fill_container",
+                          "height": "fill_container"
                         }
                       ]
                     }
                   ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "XcSFD",
+          "name": "Gameplay Section",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 12,
+          "children": [
+            {
+              "type": "text",
+              "id": "Hfure",
+              "name": "sectionLabel",
+              "fill": "$foreground-muted",
+              "content": "GAMEPLAY",
+              "fontFamily": "Outfit",
+              "fontSize": 12,
+              "fontWeight": "500",
+              "letterSpacing": 1.2
+            },
+            {
+              "type": "frame",
+              "id": "fMEDC",
+              "name": "gameCard",
+              "width": "fill_container",
+              "fill": "#EDEAE4",
+              "cornerRadius": 14,
+              "layout": "vertical",
+              "padding": [
+                0,
+                18
+              ],
+              "children": [
+                {
+                  "id": "Qi71Y",
+                  "type": "ref",
+                  "ref": "NlKPZ",
+                  "width": "fill_container",
+                  "padding": [
+                    14,
+                    0
+                  ],
+                  "name": "row1",
+                  "descendants": {
+                    "hkwPC": {
+                      "content": "Highlight same numbers"
+                    },
+                    "zLhuN": {
+                      "content": "Highlight cells sharing the same digit"
+                    }
+                  }
+                },
+                {
+                  "type": "rectangle",
+                  "id": "BhtcH",
+                  "name": "divider",
+                  "fill": "#D5D2CC",
+                  "width": "fill_container",
+                  "height": 1
+                },
+                {
+                  "id": "8a2rL",
+                  "type": "ref",
+                  "ref": "NlKPZ",
+                  "width": "fill_container",
+                  "padding": [
+                    14,
+                    0
+                  ],
+                  "name": "row2",
+                  "descendants": {
+                    "hkwPC": {
+                      "content": "Completion animation"
+                    },
+                    "zLhuN": {
+                      "content": "Flash effect on completing a row, column, or box"
+                    }
+                  }
+                },
+                {
+                  "type": "rectangle",
+                  "id": "0J6jh",
+                  "name": "divider",
+                  "fill": "#D5D2CC",
+                  "width": "fill_container",
+                  "height": 1
+                },
+                {
+                  "id": "XFgMT",
+                  "type": "ref",
+                  "ref": "NlKPZ",
+                  "width": "fill_container",
+                  "padding": [
+                    14,
+                    0
+                  ],
+                  "name": "row3",
+                  "descendants": {
+                    "hkwPC": {
+                      "content": "Auto-remove notes"
+                    },
+                    "zLhuN": {
+                      "content": "Clear pencil marks from peers when placing a digit"
+                    }
+                  }
+                },
+                {
+                  "type": "rectangle",
+                  "id": "ccLmR",
+                  "name": "divider",
+                  "fill": "#D5D2CC",
+                  "width": "fill_container",
+                  "height": 1
+                },
+                {
+                  "id": "5Uft0",
+                  "type": "ref",
+                  "ref": "NlKPZ",
+                  "width": "fill_container",
+                  "padding": [
+                    14,
+                    0
+                  ],
+                  "name": "row4",
+                  "descendants": {
+                    "hkwPC": {
+                      "content": "Remaining count"
+                    },
+                    "zLhuN": {
+                      "content": "Show remaining count on digit buttons"
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "bBDSN",
+          "name": "About Section",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 12,
+          "children": [
+            {
+              "type": "text",
+              "id": "6MArU",
+              "name": "sectionLabel",
+              "fill": "$foreground-muted",
+              "content": "ABOUT",
+              "fontFamily": "Outfit",
+              "fontSize": 12,
+              "fontWeight": "500",
+              "letterSpacing": 1.2
+            },
+            {
+              "type": "frame",
+              "id": "YsEK0",
+              "name": "aboutCard",
+              "width": "fill_container",
+              "fill": "#EDEAE4",
+              "cornerRadius": 14,
+              "layout": "vertical",
+              "padding": [
+                0,
+                18
+              ],
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "2dXgB",
+                  "name": "howToPlay",
+                  "width": "fill_container",
+                  "padding": [
+                    14,
+                    0
+                  ],
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "0JKjC",
+                      "name": "htpText",
+                      "fill": "$foreground",
+                      "content": "How to play",
+                      "fontFamily": "Outfit",
+                      "fontSize": 15,
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "icon_font",
+                      "id": "ZF8i2",
+                      "name": "htpIcon",
+                      "width": 16,
+                      "height": 16,
+                      "iconFontName": "chevron-right",
+                      "iconFontFamily": "lucide",
+                      "fill": "$foreground-muted"
+                    }
+                  ]
+                },
+                {
+                  "type": "rectangle",
+                  "id": "fwvSp",
+                  "name": "divider",
+                  "fill": "#D5D2CC",
+                  "width": "fill_container",
+                  "height": 1
                 },
                 {
                   "type": "frame",
-                  "id": "5QZzK",
-                  "name": "GBC Card",
+                  "id": "YIKnr",
+                  "name": "version",
                   "width": "fill_container",
-                  "height": 120,
-                  "fill": "$card",
-                  "cornerRadius": 16,
-                  "stroke": {
-                    "align": "inside",
-                    "thickness": 1,
-                    "fill": "$border"
-                  },
-                  "effect": {
-                    "type": "shadow",
-                    "shadowType": "outer",
-                    "color": "#1A191808",
-                    "offset": {
-                      "x": 0,
-                      "y": 2
-                    },
-                    "blur": 8
-                  },
-                  "gap": 8,
-                  "padding": 4,
+                  "padding": [
+                    14,
+                    0
+                  ],
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
                   "children": [
                     {
-                      "type": "frame",
-                      "id": "ogLrD",
-                      "name": "GBC Thumbnail",
-                      "clip": true,
-                      "width": 90,
-                      "height": 112,
-                      "fill": {
-                        "type": "image",
-                        "enabled": true,
-                        "url": "./images/Gameboy Color - Sudoku.png",
-                        "mode": "fill"
-                      },
-                      "cornerRadius": [
-                        12,
-                        0,
-                        0,
-                        12
-                      ],
-                      "stroke": {
-                        "align": "inside",
-                        "thickness": 0,
-                        "fill": "#00000000"
-                      },
-                      "layout": "none"
+                      "type": "text",
+                      "id": "9G8Zv",
+                      "name": "verText",
+                      "fill": "$foreground",
+                      "content": "Version",
+                      "fontFamily": "Outfit",
+                      "fontSize": 15,
+                      "fontWeight": "500"
                     },
                     {
-                      "type": "frame",
-                      "id": "lrVGh",
-                      "name": "GBC Info",
-                      "width": "fill_container",
-                      "height": "fill_container",
-                      "layout": "vertical",
-                      "gap": 4,
-                      "padding": [
-                        12,
-                        16
-                      ],
-                      "justifyContent": "center",
-                      "children": [
-                        {
-                          "type": "text",
-                          "id": "kWnhG",
-                          "name": "gbcName",
-                          "fill": "$foreground",
-                          "content": "Game Boy Color",
-                          "fontFamily": "Outfit",
-                          "fontSize": 16,
-                          "fontWeight": "600"
-                        },
-                        {
-                          "type": "text",
-                          "id": "Tbzot",
-                          "name": "gbcDesc",
-                          "fill": "$foreground-secondary",
-                          "content": "Suddenly, it's 1998 again.",
-                          "fontFamily": "Outfit",
-                          "fontSize": 13,
-                          "fontWeight": "normal"
-                        }
-                      ]
+                      "type": "text",
+                      "id": "d8UZC",
+                      "name": "verNum",
+                      "fill": "$foreground-muted",
+                      "content": "1.0.0",
+                      "fontFamily": "Outfit",
+                      "fontSize": 13
                     }
                   ]
                 }
@@ -22174,6 +22399,79 @@
               "fontFamily": "Outfit",
               "fontSize": 15,
               "fontWeight": "500"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "NlKPZ",
+      "x": 1754,
+      "y": 560,
+      "name": "SettingRow",
+      "reusable": true,
+      "width": 362,
+      "padding": [
+        16,
+        0
+      ],
+      "justifyContent": "space_between",
+      "alignItems": "center",
+      "children": [
+        {
+          "type": "frame",
+          "id": "ZS5C8",
+          "name": "textGroup",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 4,
+          "children": [
+            {
+              "type": "text",
+              "id": "hkwPC",
+              "name": "title",
+              "fill": "$foreground",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "Setting Title",
+              "fontFamily": "Outfit",
+              "fontSize": 16,
+              "fontWeight": "600"
+            },
+            {
+              "type": "text",
+              "id": "zLhuN",
+              "name": "subtitle",
+              "fill": "$foreground-secondary",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "Setting description goes here",
+              "fontFamily": "Outfit",
+              "fontSize": 13,
+              "fontWeight": "normal"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "3IRfX",
+          "name": "toggle",
+          "width": 44,
+          "height": 26,
+          "fill": "$primary",
+          "cornerRadius": 13,
+          "layout": "none",
+          "children": [
+            {
+              "type": "ellipse",
+              "id": "PQ9Wz",
+              "x": 21,
+              "y": 3,
+              "name": "knob",
+              "fill": "#FFFFFF",
+              "width": 20,
+              "height": 20
             }
           ]
         }

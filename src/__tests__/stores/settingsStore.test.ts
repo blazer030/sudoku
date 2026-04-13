@@ -1,10 +1,22 @@
 import { createPinia, setActivePinia } from "pinia";
 import { useSettingsStore } from "@/stores/settingsStore";
+import { updateMetaThemeColor, updateFavicon, updateManifestLink, updateAppleTouchIcon } from "@/application/PwaThemeUpdater";
+
+vi.mock("@/application/PwaThemeUpdater", () => ({
+    updateMetaThemeColor: vi.fn(),
+    updateFavicon: vi.fn(),
+    updateManifestLink: vi.fn(),
+    updateAppleTouchIcon: vi.fn(),
+}));
 
 describe("settingsStore", () => {
     beforeEach(() => {
         localStorage.clear();
         setActivePinia(createPinia());
+    });
+
+    afterEach(() => {
+        vi.restoreAllMocks();
     });
 
     it("should have default values on first load", () => {
@@ -57,5 +69,16 @@ describe("settingsStore", () => {
         store.setColorTheme("purple");
 
         expect(document.documentElement.dataset.colorTheme).toBe("purple");
+    });
+
+    it("should call PwaThemeUpdater functions when setting color theme", () => {
+        const store = useSettingsStore();
+
+        store.setColorTheme("blue");
+
+        expect(updateMetaThemeColor).toHaveBeenCalledWith("blue");
+        expect(updateFavicon).toHaveBeenCalledWith("blue");
+        expect(updateManifestLink).toHaveBeenCalledWith("blue");
+        expect(updateAppleTouchIcon).toHaveBeenCalledWith("blue");
     });
 });

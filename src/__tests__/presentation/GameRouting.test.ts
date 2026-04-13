@@ -49,6 +49,7 @@ describe("Game Routing", () => {
         });
 
         it("should allow route leave when game is completed", async () => {
+            localStorage.setItem("sudoku-settings", JSON.stringify({ completionFlash: false }));
             const { wrapper, router } = await mountWithRouterView();
 
             for (let row = 0; row < 9; row++) {

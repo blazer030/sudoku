@@ -9,14 +9,19 @@ export const useCompletionFlash = (enabled: () => boolean = () => true) => {
     const triggerFlash = (
         cells: { row: number; column: number }[],
         origin: { row: number; column: number },
+        onComplete?: () => void,
     ) => {
-        if (!enabled()) return;
-        if (cells.length === 0) return;
+        if (!enabled() || cells.length === 0) {
+            onComplete?.();
+            return;
+        }
 
+        let maxDelay = 0;
         for (const cell of cells) {
             const key = `${cell.row},${cell.column}`;
             const distance = Math.abs(cell.row - origin.row) + Math.abs(cell.column - origin.column);
             const delay = distance * RIPPLE_DELAY;
+            if (delay > maxDelay) maxDelay = delay;
 
             setTimeout(() => {
                 flashingCells.value = new Set([...flashingCells.value, key]);
@@ -26,6 +31,10 @@ export const useCompletionFlash = (enabled: () => boolean = () => true) => {
                     flashingCells.value = next;
                 }, FLASH_DURATION);
             }, delay);
+        }
+
+        if (onComplete) {
+            setTimeout(onComplete, maxDelay + FLASH_DURATION);
         }
     };
 

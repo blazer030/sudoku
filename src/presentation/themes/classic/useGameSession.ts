@@ -1,7 +1,7 @@
 import { computed, reactive } from "vue";
 import { useRouter } from "vue-router";
 import { provideGameCompleteModal } from "@/presentation/themes/classic/components/useGameCompleteModal";
-import { Sudoku } from "@/domain";
+import { BOARD_SIZE, Sudoku } from "@/domain";
 import { useGameStore } from "@/stores/gameStore";
 import { ROUTER_PATH } from "@/router";
 import { useGameTimer } from "@/presentation/pages/game/useGameTimer";
@@ -37,11 +37,19 @@ export const useGameSession = () => {
         sudoku: sudoku.raw(),
         difficulty,
         getElapsedSeconds: () => elapsedSeconds.value,
-        onCompleted: () => {
-            void gameCompleteModal.open({
-                elapsedSeconds: elapsedSeconds.value,
-                difficulty: difficulty.value,
-                hintsUsed: sudoku.hintTracker.recordedUsed,
+        onCompleted: (origin) => {
+            const allCells: { row: number; column: number }[] = [];
+            for (let row = 0; row < BOARD_SIZE; row++) {
+                for (let column = 0; column < BOARD_SIZE; column++) {
+                    allCells.push({ row, column });
+                }
+            }
+            triggerFlash(allCells, origin, () => {
+                void gameCompleteModal.open({
+                    elapsedSeconds: elapsedSeconds.value,
+                    difficulty: difficulty.value,
+                    hintsUsed: sudoku.hintTracker.recordedUsed,
+                });
             });
         },
     });
@@ -51,7 +59,7 @@ export const useGameSession = () => {
 
     const { clearErrors, isError, openHintMenu } = useHintActions({
         sudoku: sudoku.raw(),
-        onRevealComplete: checkAndComplete,
+        onRevealComplete: (origin) => { checkAndComplete(origin); },
         onGroupCompleted: triggerFlash,
     });
 

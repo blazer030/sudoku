@@ -44,9 +44,11 @@ export const useGameInteraction = ({ sudoku, clearErrors, checkAndComplete, onGr
             return;
         }
         sudoku.fill(row, column, value, { autoRemoveNotes: autoRemoveNotes() });
-        const completed = sudoku.findCompletedGroups(row, column);
-        if (completed.cells.length > 0) onGroupCompleted?.(completed.cells, { row, column });
-        checkAndComplete();
+        if (!sudoku.isCompleted()) {
+            const completed = sudoku.findCompletedGroups(row, column);
+            if (completed.cells.length > 0) onGroupCompleted?.(completed.cells, { row, column });
+        }
+        checkAndComplete({ row, column });
         if (isDigitCompleted(value)) selectedDigit.value = null;
     };
 
