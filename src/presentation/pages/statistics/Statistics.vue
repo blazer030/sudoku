@@ -1,7 +1,7 @@
 <template>
-    <div class="flex flex-col h-dvh px-5 overflow-y-auto">
+    <div class="flex flex-col h-dvh px-5 bg-background overflow-y-auto">
         <!-- Header -->
-        <div class="flex items-center justify-between sticky top-0 bg-background pt-6 pb-2 z-10">
+        <div class="flex items-center justify-between sticky top-0 bg-background pt-6 pb-3 z-10">
             <button
                 class="flex items-center gap-2 cursor-pointer"
                 data-testid="stats-back-button"
@@ -14,12 +14,12 @@
                 <span class="text-foreground text-base font-medium">Back</span>
             </button>
             <span class="text-foreground text-lg font-semibold">Statistics</span>
-            <div class="w-[60px]" />
+            <div class="w-15" />
         </div>
 
         <!-- Overview -->
-        <div class="flex flex-col gap-3 mt-6">
-            <span class="text-foreground-secondary text-sm font-semibold">Overview</span>
+        <div class="flex flex-col gap-2 mt-2">
+            <span class="text-foreground-muted text-xs font-semibold tracking-wider uppercase px-1">Overview</span>
             <div class="flex gap-3">
                 <div
                     class="flex-1 flex flex-col items-center gap-1 bg-card rounded-2xl p-4 shadow-card"
@@ -46,8 +46,8 @@
         </div>
 
         <!-- Best Times -->
-        <div class="flex flex-col gap-3 mt-6">
-            <span class="text-foreground-secondary text-sm font-semibold">Best Times</span>
+        <div class="flex flex-col gap-2 mt-5">
+            <span class="text-foreground-muted text-xs font-semibold tracking-wider uppercase px-1">Best Times</span>
             <div class="bg-card rounded-2xl p-4 shadow-card flex flex-col gap-3">
                 <div
                     class="flex items-center justify-between"
@@ -92,8 +92,8 @@
         </div>
 
         <!-- Recent Games -->
-        <div class="flex flex-col gap-3 mt-6">
-            <span class="text-foreground-secondary text-sm font-semibold">Recent Games</span>
+        <div class="flex flex-col gap-2 mt-5">
+            <span class="text-foreground-muted text-xs font-semibold tracking-wider uppercase px-1">Recent Games</span>
             <div
                 v-if="hasRecords"
                 class="flex flex-col gap-2"
