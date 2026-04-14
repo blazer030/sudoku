@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
 @variant dark (&:where(.dark, .dark *));
+@custom-variant hover (&:hover) @media (hover: hover);
 
 @theme {
   --container-2xl: 1400px;
