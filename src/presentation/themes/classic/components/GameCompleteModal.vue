@@ -23,7 +23,7 @@
                     </p>
                 </div>
 
-                <div class="flex justify-center gap-8 w-full">
+                <div class="grid grid-cols-3 w-full">
                     <div class="flex flex-col items-center gap-1">
                         <span class="text-[32px] font-bold text-primary tracking-tighter">
                             {{ formatTime(params?.elapsedSeconds ?? 0) }}
