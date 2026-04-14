@@ -20,7 +20,7 @@ export const useLeaveGame = ({ sudoku, difficulty, completed, getElapsedSeconds 
     const leavingConfirmed = ref(false);
 
     const showLeaveDialog = async () => {
-        const result = await leaveDialog.open(undefined);
+        const result = await leaveDialog.open();
         if (result === "save") {
             const state = GameStateConverter.fromSudoku(sudoku.raw(), {
                 difficulty: difficulty.value,

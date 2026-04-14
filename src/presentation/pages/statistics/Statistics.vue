@@ -60,7 +60,9 @@
                         />
                         <span class="text-base font-medium text-foreground">Easy</span>
                     </div>
-                    <span class="text-base font-semibold text-primary font-mono">{{ formatBestTime(stats.easy.bestTime) }}</span>
+                    <span class="text-base font-semibold text-primary font-mono">
+                        {{ formatBestTime(stats.easy.bestTime) }}
+                    </span>
                 </div>
                 <div
                     class="flex items-center justify-between"
@@ -73,7 +75,9 @@
                         />
                         <span class="text-base font-medium text-foreground">Medium</span>
                     </div>
-                    <span class="text-base font-semibold text-primary font-mono">{{ formatBestTime(stats.medium.bestTime) }}</span>
+                    <span class="text-base font-semibold text-primary font-mono">
+                        {{ formatBestTime(stats.medium.bestTime) }}
+                    </span>
                 </div>
                 <div
                     class="flex items-center justify-between"
@@ -86,7 +90,9 @@
                         />
                         <span class="text-base font-medium text-foreground">Hard</span>
                     </div>
-                    <span class="text-base font-semibold text-primary font-mono">{{ formatBestTime(stats.hard.bestTime) }}</span>
+                    <span class="text-base font-semibold text-primary font-mono">
+                        {{ formatBestTime(stats.hard.bestTime) }}
+                    </span>
                 </div>
             </div>
         </div>
@@ -121,8 +127,12 @@
                             />
                         </div>
                         <div class="flex flex-col gap-0.5">
-                            <span class="text-sm font-semibold text-foreground">{{ difficultyLabel(game.difficulty) }}</span>
-                            <span class="text-[11px] text-foreground-muted">{{ formatDate(game.date) }}</span>
+                            <span class="text-sm font-semibold text-foreground">
+                                {{ difficultyLabel(game.difficulty) }}
+                            </span>
+                            <span class="text-[11px] text-foreground-muted">
+                                {{ formatDate(game.date) }}
+                            </span>
                         </div>
                     </div>
                     <div class="flex flex-col items-end gap-0.5">
@@ -133,7 +143,7 @@
                             {{ game.completed ? formatTime(game.elapsedSeconds) : "Gave up" }}
                         </span>
                         <span
-                            class="flex items-center gap-[3px] text-[11px] font-medium text-foreground-muted font-mono"
+                            class="flex items-center gap-0.75 text-[11px] font-medium text-foreground-muted font-mono"
                             data-testid="hints-used"
                         >
                             <Lightbulb :size="11" />
@@ -166,7 +176,7 @@
             class="sticky bottom-0 bg-background py-4"
         >
             <button
-                class="w-full h-[52px] rounded-xl border-2 border-danger bg-background flex items-center justify-center gap-2 cursor-pointer transition-all duration-200 hover:bg-danger/10"
+                class="w-full h-13 rounded-xl border-2 border-danger bg-background flex items-center justify-center gap-2 cursor-pointer transition-all duration-200 hover:bg-danger/10"
                 data-testid="clear-records-button"
                 @click="handleClearRecords"
             >
@@ -188,12 +198,12 @@ import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
 import { ChevronLeft, Lightbulb, Trash2, Trophy, X } from "lucide-vue-next";
 import { ROUTER_PATH } from "@/router";
-import { getStatistics, clearAllRecords } from "@/application/Statistics";
+import { clearAllRecords, getStatistics } from "@/application/Statistics";
 import { formatTime } from "@/utils/formatTime";
 import { formatDate } from "@/utils/formatDate";
-import { DifficultyLabels, type Difficulty } from "@/domain";
-import ClearRecordsDialog from "./ClearRecordsDialog.vue";
-import { provideClearRecordsDialog } from "./useClearRecordsDialog";
+import { type Difficulty, DifficultyLabels } from "@/domain";
+import ClearRecordsDialog from "@/presentation/pages/statistics/ClearRecordsDialog.vue";
+import { provideClearRecordsDialog } from "@/presentation/pages/statistics/useClearRecordsDialog";
 
 const router = useRouter();
 const { open: openClearRecordsDialog } = provideClearRecordsDialog();
@@ -201,7 +211,7 @@ const { open: openClearRecordsDialog } = provideClearRecordsDialog();
 const version = ref(0);
 
 const handleClearRecords = async () => {
-    const result = await openClearRecordsDialog(undefined);
+    const result = await openClearRecordsDialog();
     if (result === "confirm") {
         clearAllRecords();
         version.value++;

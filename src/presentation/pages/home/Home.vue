@@ -105,7 +105,7 @@ const difficulty = ref<Difficulty>("easy");
 
 const handleNewGame = async () => {
     if (hasSavedGame()) {
-        const result = await newGameDialog.open(undefined);
+        const result = await newGameDialog.open();
         if (result === "cancel") return;
         const saved = loadGame();
         if (saved) {
