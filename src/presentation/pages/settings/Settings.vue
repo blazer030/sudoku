@@ -119,7 +119,7 @@ const toggles = computed(() => [
     {
         key: "highlightSameDigit",
         label: "Highlight Same Numbers",
-        description: "Highlight cells with the same digit",
+        description: "Highlight matching numbers and notes when selected",
         value: settingsStore.highlightSameDigit,
         setter: settingsStore.setHighlightSameDigit,
     },
@@ -133,14 +133,14 @@ const toggles = computed(() => [
     {
         key: "autoRemoveNotes",
         label: "Auto-Remove Notes",
-        description: "Remove notes from peers when placing a digit",
+        description: "Remove notes from peers when placing a number",
         value: settingsStore.autoRemoveNotes,
         setter: settingsStore.setAutoRemoveNotes,
     },
     {
         key: "showRemainingCount",
         label: "Remaining Count",
-        description: "Show remaining count on digit buttons",
+        description: "Show remaining count on number buttons",
         value: settingsStore.showRemainingCount,
         setter: settingsStore.setShowRemainingCount,
     },

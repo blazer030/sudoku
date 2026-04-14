@@ -32,7 +32,7 @@
             >
                 <span
                     v-if="puzzleCell.notes.includes(n)"
-                    :class="selectedDigit === n
+                    :class="highlightSameDigit && selectedDigit === n
                         ? 'aspect-square max-w-5 max-h-5 w-full rounded-full bg-primary text-white font-semibold flex items-center justify-center'
                         : 'text-foreground-muted'"
                     class="text-[clamp(8px,-0.49px+2.26vw,14px)]"
