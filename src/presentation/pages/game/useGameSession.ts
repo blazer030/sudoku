@@ -1,11 +1,11 @@
 import { computed, reactive } from "vue";
 import { useRouter } from "vue-router";
-import { provideGameCompleteModal } from "@/presentation/themes/classic/components/useGameCompleteModal";
+import { provideGameCompleteModal } from "./components/useGameCompleteModal";
 import { BOARD_SIZE, Sudoku } from "@/domain";
 import { useGameStore } from "@/stores/gameStore";
 import { ROUTER_PATH } from "@/router";
-import { useGameTimer } from "@/presentation/pages/game/useGameTimer";
-import { useGameCompletion } from "@/presentation/pages/game/useGameCompletion";
+import { useGameTimer } from "./useGameTimer";
+import { useGameCompletion } from "./useGameCompletion";
 import { useLeaveGame } from "./useLeaveGame";
 import { useHintActions } from "./useHintActions";
 import { useCompletionFlash } from "./useCompletionFlash";

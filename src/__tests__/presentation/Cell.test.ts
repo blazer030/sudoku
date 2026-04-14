@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { mount } from "@vue/test-utils";
-import Cell from "@/presentation/themes/classic/components/Cell.vue";
+import Cell from "@/presentation/pages/game/components/Cell.vue";
 import { PuzzleCell } from "@/domain/board/PuzzleCell";
 
 describe("Cell", () => {

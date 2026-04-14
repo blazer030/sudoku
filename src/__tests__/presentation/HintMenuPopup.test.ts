@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { mount } from "@vue/test-utils";
 import { defineComponent } from "vue";
-import HintMenuPopup from "@/presentation/themes/classic/components/HintMenuPopup.vue";
-import { provideHintMenu } from "@/presentation/themes/classic/components/useHintMenu";
-import type { HintParams } from "@/presentation/themes/classic/components/useHintMenu";
+import HintMenuPopup from "@/presentation/pages/game/components/HintMenuPopup.vue";
+import { provideHintMenu } from "@/presentation/pages/game/components/useHintMenu";
+import type { HintParams } from "@/presentation/pages/game/components/useHintMenu";
 
 describe("HintMenuPopup", () => {
     const mountPopup = (params: Partial<HintParams> = {}) => {

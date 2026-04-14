@@ -1,6 +1,6 @@
 import { ref } from "vue";
 import type { Sudoku } from "@/domain/game/Sudoku";
-import { provideHintMenu } from "@/presentation/themes/classic/components/useHintMenu";
+import { provideHintMenu } from "./components/useHintMenu";
 
 interface HintActionsOptions {
     sudoku: Sudoku;
