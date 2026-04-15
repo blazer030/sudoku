@@ -111,7 +111,7 @@
         </div>
 
         <!-- Playback Controls -->
-        <div class="flex items-center justify-center gap-2">
+        <div class="flex items-center justify-center gap-5">
             <button
                 class="size-11 rounded-xl bg-card shadow-card-sm flex items-center justify-center cursor-pointer hover:bg-foreground/5"
                 data-testid="review-first"
