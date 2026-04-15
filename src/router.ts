@@ -3,6 +3,7 @@ import Home from "@/presentation/pages/home/Home.vue";
 import Game from "@/presentation/pages/game/Game.vue";
 import Statistics from "@/presentation/pages/statistics/Statistics.vue";
 import Settings from "@/presentation/pages/settings/Settings.vue";
+import GameReview from "@/presentation/pages/game-review/GameReview.vue";
 
 const baseUrl = import.meta.env.VITE_BASE_URL;
 
@@ -11,6 +12,7 @@ export const ROUTER_PATH = {
     game: "/game",
     statistics: "/statistics",
     settings: "/settings",
+    gameReview: "/game-review/:index",
 };
 
 export const router = createRouter({
@@ -20,6 +22,7 @@ export const router = createRouter({
         { path: "/game", component: Game },
         { path: "/statistics", component: Statistics },
         { path: "/settings", component: Settings },
+        { path: "/game-review/:index", component: GameReview, props: true },
         { path: "/:pathMatch(.*)*", redirect: "/" },
     ],
 });
