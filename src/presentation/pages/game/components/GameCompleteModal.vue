@@ -77,8 +77,8 @@ import { useRouter } from "vue-router";
 import { formatTime } from "@/utils/formatTime";
 import { DifficultyLabels } from "@/domain";
 import { computed } from "vue";
-import { useGameCompleteModal } from "./useGameCompleteModal";
-import FireworkCanvas from "./FireworkCanvas.vue";
+import { useGameCompleteModal } from "@/presentation/pages/game/components/useGameCompleteModal";
+import FireworkCanvas from "@/presentation/pages/game/components/FireworkCanvas.vue";
 
 const router = useRouter();
 const { visible, params, close } = useGameCompleteModal();

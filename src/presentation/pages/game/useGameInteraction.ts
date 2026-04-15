@@ -2,7 +2,7 @@ import { computed, ref } from "vue";
 import { BOARD_SIZE } from "@/domain";
 import type { Sudoku } from "@/domain";
 import type { StepRecorder } from "@/domain/game/StepRecorder";
-import { InputMode } from "./InputMode";
+import { InputMode } from "@/presentation/pages/game/InputMode";
 
 interface GameInteractionOptions {
     sudoku: Sudoku;

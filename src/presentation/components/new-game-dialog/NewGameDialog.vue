@@ -46,7 +46,7 @@
 
 <script lang="ts" setup>
 import { TriangleAlert } from "lucide-vue-next";
-import { useNewGameDialog } from "./useNewGameDialog";
+import { useNewGameDialog } from "@/presentation/components/new-game-dialog/useNewGameDialog";
 
 const { visible, close } = useNewGameDialog();
 </script>

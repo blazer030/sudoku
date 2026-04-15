@@ -46,7 +46,7 @@
 
 <script lang="ts" setup>
 import { Trash2 } from "lucide-vue-next";
-import { useClearRecordsDialog } from "./useClearRecordsDialog";
+import { useClearRecordsDialog } from "@/presentation/pages/statistics/useClearRecordsDialog";
 
 const { visible, close } = useClearRecordsDialog();
 </script>

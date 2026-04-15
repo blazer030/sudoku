@@ -58,7 +58,7 @@
 
 <script lang="ts" setup>
 import { Save } from "lucide-vue-next";
-import { useLeaveDialog } from "./useLeaveDialog";
+import { useLeaveDialog } from "@/presentation/pages/game/components/useLeaveDialog";
 
 const { visible, close } = useLeaveDialog();
 </script>

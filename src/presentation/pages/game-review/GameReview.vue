@@ -190,7 +190,7 @@ import { formatTime } from "@/utils/formatTime";
 import { formatDate } from "@/utils/formatDate";
 import { type Difficulty, DifficultyLabels } from "@/domain";
 import Cell from "@/presentation/pages/game/components/Cell.vue";
-import { useGameReview, useProgressDrag } from "./useGameReview";
+import { useGameReview, useProgressDrag } from "@/presentation/pages/game-review/useGameReview";
 
 const props = defineProps<{
     index: string;

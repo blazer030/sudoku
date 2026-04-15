@@ -1,7 +1,7 @@
 import { ref } from "vue";
 import type { Sudoku } from "@/domain/game/Sudoku";
 import type { StepRecorder } from "@/domain/game/StepRecorder";
-import { provideHintMenu } from "./components/useHintMenu";
+import { provideHintMenu } from "@/presentation/pages/game/components/useHintMenu";
 
 interface HintActionsOptions {
     sudoku: Sudoku;

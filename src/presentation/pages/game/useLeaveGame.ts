@@ -5,7 +5,7 @@ import type { Sudoku } from "@/domain/game/Sudoku";
 import { deleteSavedGame, saveGame } from "@/application/GameStorage";
 import { GameStateConverter } from "@/application/GameState";
 import { recordGameResult, type GameReplayData } from "@/application/Statistics";
-import { provideLeaveDialog } from "./components/useLeaveDialog";
+import { provideLeaveDialog } from "@/presentation/pages/game/components/useLeaveDialog";
 
 interface LeaveGameOptions {
     sudoku: Sudoku;

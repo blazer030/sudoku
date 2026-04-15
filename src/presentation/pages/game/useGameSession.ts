@@ -1,16 +1,16 @@
 import { computed, reactive } from "vue";
 import { useRouter } from "vue-router";
-import { provideGameCompleteModal } from "./components/useGameCompleteModal";
+import { provideGameCompleteModal } from "@/presentation/pages/game/components/useGameCompleteModal";
 import { BOARD_SIZE, Sudoku, StepRecorder } from "@/domain";
 import { useGameStore } from "@/stores/gameStore";
 import { ROUTER_PATH } from "@/router";
 import { captureInitialBoard } from "@/application/GameState";
 import type { GameReplayData } from "@/application/Statistics";
-import { useGameTimer } from "./useGameTimer";
-import { useGameCompletion } from "./useGameCompletion";
-import { useLeaveGame } from "./useLeaveGame";
-import { useHintActions } from "./useHintActions";
-import { useCompletionFlash } from "./useCompletionFlash";
+import { useGameTimer } from "@/presentation/pages/game/useGameTimer";
+import { useGameCompletion } from "@/presentation/pages/game/useGameCompletion";
+import { useLeaveGame } from "@/presentation/pages/game/useLeaveGame";
+import { useHintActions } from "@/presentation/pages/game/useHintActions";
+import { useCompletionFlash } from "@/presentation/pages/game/useCompletionFlash";
 import { useSettingsStore } from "@/stores/settingsStore";
 
 export const useGameSession = () => {

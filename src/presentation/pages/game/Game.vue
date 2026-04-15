@@ -74,16 +74,16 @@
 </template>
 
 <script lang="ts" setup>
-import GameHeader from "./components/GameHeader.vue";
-import GameCompleteModal from "./components/GameCompleteModal.vue";
-import LeaveGameDialog from "./components/LeaveGameDialog.vue";
-import GameControls from "./components/GameControls.vue";
-import HintMenuPopup from "./components/HintMenuPopup.vue";
-import DigitPad from "./components/DigitPad.vue";
-import Cell from "./components/Cell.vue";
-import { InputMode } from "./InputMode";
-import { useGameInteraction } from "./useGameInteraction";
-import { useGameSession } from "./useGameSession";
+import GameHeader from "@/presentation/pages/game/components/GameHeader.vue";
+import GameCompleteModal from "@/presentation/pages/game/components/GameCompleteModal.vue";
+import LeaveGameDialog from "@/presentation/pages/game/components/LeaveGameDialog.vue";
+import GameControls from "@/presentation/pages/game/components/GameControls.vue";
+import HintMenuPopup from "@/presentation/pages/game/components/HintMenuPopup.vue";
+import DigitPad from "@/presentation/pages/game/components/DigitPad.vue";
+import Cell from "@/presentation/pages/game/components/Cell.vue";
+import { InputMode } from "@/presentation/pages/game/InputMode";
+import { useGameInteraction } from "@/presentation/pages/game/useGameInteraction";
+import { useGameSession } from "@/presentation/pages/game/useGameSession";
 import { useSettingsStore } from "@/stores/settingsStore";
 
 const {
