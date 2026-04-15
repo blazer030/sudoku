@@ -57,6 +57,10 @@ export class GameReplay {
         this._currentStep = this._steps.length;
     }
 
+    public goToStep(step: number): void {
+        this._currentStep = Math.max(0, Math.min(step, this._steps.length));
+    }
+
     private buildBoardFromInitial(): PuzzleCell[][] {
         return this._initialBoard.map(row =>
             row.map(cell => {

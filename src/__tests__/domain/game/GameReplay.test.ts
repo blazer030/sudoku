@@ -122,4 +122,49 @@ describe("GameReplay", () => {
         expect(replay.board[4][4].isClue).toBe(true);
         expect(replay.board[0][0].entry).toBe(1);
     });
+
+    it("should jump to arbitrary step with goToStep", () => {
+        const initialBoard = createInitialBoard();
+        const step1 = createSnapshot();
+        step1[0][0].entry = 1;
+        const step2 = createSnapshot();
+        step2[0][0].entry = 1;
+        step2[1][1].entry = 2;
+        const step3 = createSnapshot();
+        step3[0][0].entry = 1;
+        step3[1][1].entry = 2;
+        step3[2][2].entry = 3;
+        const steps: GameStep[] = [
+            { board: step1, action: "fill", row: 0, column: 0, value: 1 },
+            { board: step2, action: "fill", row: 1, column: 1, value: 2 },
+            { board: step3, action: "fill", row: 2, column: 2, value: 3 },
+        ];
+
+        const replay = new GameReplay(initialBoard, steps);
+
+        replay.goToStep(2);
+        expect(replay.currentStep).toBe(2);
+        expect(replay.board[1][1].entry).toBe(2);
+
+        replay.goToStep(0);
+        expect(replay.currentStep).toBe(0);
+        expect(replay.board[1][1].entry).toBe(0);
+    });
+
+    it("should clamp goToStep within bounds", () => {
+        const initialBoard = createInitialBoard();
+        const stepBoard = createSnapshot();
+        stepBoard[0][0].entry = 1;
+        const steps: GameStep[] = [
+            { board: stepBoard, action: "fill", row: 0, column: 0, value: 1 },
+        ];
+
+        const replay = new GameReplay(initialBoard, steps);
+
+        replay.goToStep(-5);
+        expect(replay.currentStep).toBe(0);
+
+        replay.goToStep(100);
+        expect(replay.currentStep).toBe(1);
+    });
 });
