@@ -108,7 +108,7 @@
                     v-for="(game, index) in stats.recentGames"
                     :key="index"
                     :class="game.replay ? 'cursor-pointer' : 'cursor-default'"
-                    class="flex items-center justify-between bg-card rounded-xl py-3 px-4 shadow-card-sm"
+                    class="flex items-center justify-between bg-card rounded-xl py-3 px-4 shadow-card-sm text-left"
                     data-testid="recent-game"
                     @click="openReview(game, index)"
                 >
