@@ -27,4 +27,21 @@ describe("StepRecorder", () => {
         expect(recorder.steps[0].value).toBe(6);
         expect(recorder.steps[0].board[2][4].entry).toBe(6);
     });
+
+    it("should record multiple steps in order", () => {
+        const recorder = new StepRecorder();
+        const puzzle = createPuzzle();
+
+        puzzle[0][0].entry = 1;
+        recorder.record(puzzle, "fill", 0, 0, 1);
+
+        puzzle[1][1].entry = 2;
+        recorder.record(puzzle, "fill", 1, 1, 2);
+
+        expect(recorder.steps).toHaveLength(2);
+        expect(recorder.steps[0].board[0][0].entry).toBe(1);
+        expect(recorder.steps[0].board[1][1].entry).toBe(0);
+        expect(recorder.steps[1].board[0][0].entry).toBe(1);
+        expect(recorder.steps[1].board[1][1].entry).toBe(2);
+    });
 });
