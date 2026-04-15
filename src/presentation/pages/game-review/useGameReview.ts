@@ -13,64 +13,77 @@ const ACTION_LABELS: Record<GameStepAction, (step: GameStep) => string> = {
 };
 
 
-export const useGameReview = (replayData: GameReplayData) => {
+export const useGameReview = (replayData: GameReplayData, completed: boolean) => {
     const replay = new GameReplay(replayData.initialBoard, replayData.steps);
     const currentStep = ref(0);
     const isPlaying = ref(false);
     let playInterval: ReturnType<typeof setInterval> | null = null;
 
+    const virtualTotalSteps = replay.totalSteps + 1;
+    const isAtFinalStep = computed(() => currentStep.value === virtualTotalSteps);
+
     const board = computed(() => {
+        if (isAtFinalStep.value) {
+            replay.goToLast();
+        }
         void currentStep.value;
         return replay.board;
     });
 
     const gameStep = computed((): GameStep | null => {
+        if (isAtFinalStep.value) return null;
         void currentStep.value;
         return replay.currentGameStep;
     });
 
-    const description = computed(() => {
+    const description = computed((): string | null => {
+        if (isAtFinalStep.value) {
+            return completed ? "Completed" : "Gave up";
+        }
         const step = gameStep.value;
         if (!step) return null;
         return ACTION_LABELS[step.action](step);
     });
 
-    const totalSteps = computed(() => replay.totalSteps);
+    const totalSteps = computed(() => virtualTotalSteps);
+
+    const setStep = (step: number) => {
+        const clamped = Math.max(0, Math.min(step, virtualTotalSteps));
+        if (clamped <= replay.totalSteps) {
+            replay.goToStep(clamped);
+        }
+        currentStep.value = clamped;
+    };
 
     const next = () => {
-        replay.next();
-        currentStep.value = replay.currentStep;
-        if (currentStep.value >= replay.totalSteps) {
+        setStep(currentStep.value + 1);
+        if (currentStep.value >= virtualTotalSteps) {
             stopPlay();
         }
     };
 
     const previous = () => {
-        replay.previous();
-        currentStep.value = replay.currentStep;
+        setStep(currentStep.value - 1);
     };
 
     const goToFirst = () => {
-        replay.goToFirst();
-        currentStep.value = 0;
+        setStep(0);
     };
 
     const goToLast = () => {
-        replay.goToLast();
-        currentStep.value = replay.totalSteps;
+        setStep(virtualTotalSteps);
         stopPlay();
     };
 
     const goToStep = (step: number) => {
-        replay.goToStep(step);
-        currentStep.value = replay.currentStep;
+        setStep(step);
     };
 
     const togglePlay = () => {
         if (isPlaying.value) {
             stopPlay();
         } else {
-            if (currentStep.value >= replay.totalSteps) {
+            if (currentStep.value >= virtualTotalSteps) {
                 goToFirst();
             }
             isPlaying.value = true;
@@ -87,7 +100,7 @@ export const useGameReview = (replayData: GameReplayData) => {
     };
 
     const startPlay = () => {
-        if (currentStep.value >= replay.totalSteps) return;
+        if (currentStep.value >= virtualTotalSteps) return;
         isPlaying.value = true;
         playInterval = setInterval(next, 800);
     };
@@ -97,6 +110,8 @@ export const useGameReview = (replayData: GameReplayData) => {
     return {
         currentStep,
         totalSteps,
+        isAtFinalStep,
+        completed,
         board,
         gameStep,
         description,

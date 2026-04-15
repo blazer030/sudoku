@@ -200,6 +200,8 @@ if (!replayData) {
 const {
     currentStep,
     totalSteps,
+    isAtFinalStep,
+    completed: gameCompleted,
     board,
     gameStep,
     description,
@@ -212,7 +214,7 @@ const {
     togglePlay,
     stopPlay,
     startPlay,
-} = useGameReview(replayData ?? { initialBoard: [], steps: [] });
+} = useGameReview(replayData ?? { initialBoard: [], steps: [] }, game.completed);
 
 const ACTION_ICONS: Record<string, typeof Pencil> = {
     fill: Pencil,
@@ -224,6 +226,9 @@ const ACTION_ICONS: Record<string, typeof Pencil> = {
 };
 
 const stepIcon = computed(() => {
+    if (isAtFinalStep.value) {
+        return gameCompleted ? Trophy : X;
+    }
     const step = gameStep.value;
     if (!step) return null;
     return ACTION_ICONS[step.action];
