@@ -111,16 +111,16 @@
         </div>
 
         <!-- Playback Controls -->
-        <div class="flex items-center justify-center gap-6">
+        <div class="flex items-center justify-center gap-2">
             <button
-                class="w-11 h-11 rounded-full border border-border flex items-center justify-center cursor-pointer hover:bg-card"
+                class="w-14 h-14 rounded-xl bg-card shadow-card-sm flex items-center justify-center cursor-pointer hover:bg-foreground/5"
                 data-testid="review-first"
                 @click="goToFirst"
             >
                 <SkipBack :size="20" />
             </button>
             <button
-                class="w-11 h-11 rounded-full border border-border flex items-center justify-center cursor-pointer hover:bg-card"
+                class="w-14 h-14 rounded-xl bg-card shadow-card-sm flex items-center justify-center cursor-pointer hover:bg-foreground/5"
                 data-testid="review-prev"
                 @click="previous"
             >
@@ -141,14 +141,14 @@
                 />
             </button>
             <button
-                class="w-11 h-11 rounded-full border border-border flex items-center justify-center cursor-pointer hover:bg-card"
+                class="w-14 h-14 rounded-xl bg-card shadow-card-sm flex items-center justify-center cursor-pointer hover:bg-foreground/5"
                 data-testid="review-next"
                 @click="next"
             >
                 <ChevronRight :size="22" />
             </button>
             <button
-                class="w-11 h-11 rounded-full border border-border flex items-center justify-center cursor-pointer hover:bg-card"
+                class="w-14 h-14 rounded-xl bg-card shadow-card-sm flex items-center justify-center cursor-pointer hover:bg-foreground/5"
                 data-testid="review-last"
                 @click="goToLast"
             >
