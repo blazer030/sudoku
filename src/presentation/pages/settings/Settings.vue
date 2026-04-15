@@ -22,11 +22,11 @@
             <span class="text-foreground-muted text-xs font-semibold tracking-wider uppercase px-1">Appearance</span>
             <div class="bg-card rounded-2xl px-4 py-4 shadow-card-sm">
                 <span class="text-foreground text-[15px] font-medium">Color theme</span>
-                <div class="grid grid-cols-6 gap-3 mt-3">
+                <div class="grid grid-cols-6 gap-3 mt-3 justify-items-center">
                     <button
                         v-for="color in THEMES"
                         :key="color.id"
-                        class="relative aspect-square rounded-full cursor-pointer transition-all duration-200 overflow-hidden"
+                        class="relative aspect-square w-full max-w-15 rounded-full cursor-pointer transition-all duration-200 overflow-hidden"
                         :class="[
                             color.id === settingsStore.colorTheme
                                 ? 'ring-2 ring-offset-2 ring-primary scale-110'
