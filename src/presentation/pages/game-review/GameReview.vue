@@ -97,11 +97,22 @@
 
         <!-- Progress -->
         <div class="flex flex-col gap-1.5">
-            <div class="w-full bg-border rounded-full h-1">
+            <div
+                ref="progressBar"
+                class="group w-full py-1.5 cursor-pointer"
+                @mousedown="onPointerDown"
+                @touchstart="onPointerDown"
+            >
                 <div
-                    class="bg-primary h-1 rounded-full transition-all duration-200"
-                    :style="{ width: progressPercent }"
-                />
+                    :class="isDragging ? 'h-3' : 'h-2 group-hover:h-3'"
+                    class="w-full bg-border rounded-full transition-all duration-150"
+                >
+                    <div
+                        :class="isDragging ? 'h-3' : 'h-2 group-hover:h-3'"
+                        class="bg-primary rounded-full transition-all duration-150"
+                        :style="{ width: progressPercent }"
+                    />
+                </div>
             </div>
             <span class="text-xs text-foreground-muted text-center">
                 Step {{ currentStep }} of {{ totalSteps }}
@@ -157,7 +168,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
 import { ChevronLeft, ChevronRight, Lightbulb, Pause, Play, SkipBack, SkipForward, Trophy, X } from "lucide-vue-next";
 import { ROUTER_PATH } from "@/router";
@@ -166,7 +177,7 @@ import { formatTime } from "@/utils/formatTime";
 import { formatDate } from "@/utils/formatDate";
 import { type Difficulty, DifficultyLabels } from "@/domain";
 import Cell from "@/presentation/pages/game/components/Cell.vue";
-import { useGameReview } from "./useGameReview";
+import { useGameReview, useProgressDrag } from "./useGameReview";
 
 const props = defineProps<{
     index: string;
@@ -193,8 +204,12 @@ const {
     previous,
     goToFirst,
     goToLast,
+    goToStep,
     togglePlay,
 } = useGameReview(replayData ?? { initialBoard: [], steps: [] });
+
+const progressBar = ref<HTMLElement | null>(null);
+const { isDragging, onPointerDown } = useProgressDrag(progressBar, totalSteps, goToStep);
 
 const isActiveCell = (row: number, column: number): boolean => {
     const step = gameStep.value;

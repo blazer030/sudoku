@@ -1,4 +1,4 @@
-import { computed, onUnmounted, ref } from "vue";
+import { computed, onUnmounted, ref, type Ref } from "vue";
 import { GameReplay } from "@/domain/game/GameReplay";
 import type { GameReplayData } from "@/application/Statistics";
 import type { GameStep, GameStepAction } from "@/domain/game/GameStep";
@@ -69,6 +69,12 @@ export const useGameReview = (replayData: GameReplayData) => {
         stopPlay();
     };
 
+    const goToStep = (step: number) => {
+        stopPlay();
+        replay.goToStep(step);
+        currentStep.value = replay.currentStep;
+    };
+
     const togglePlay = () => {
         if (isPlaying.value) {
             stopPlay();
@@ -102,6 +108,51 @@ export const useGameReview = (replayData: GameReplayData) => {
         previous,
         goToFirst,
         goToLast,
+        goToStep,
         togglePlay,
     };
+};
+
+export const useProgressDrag = (
+    progressRef: Ref<HTMLElement | null>,
+    totalSteps: Ref<number>,
+    onSeek: (step: number) => void,
+) => {
+    const isDragging = ref(false);
+
+    const calcStep = (clientX: number): number => {
+        const el = progressRef.value;
+        if (!el) return 0;
+        const rect = el.getBoundingClientRect();
+        const ratio = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+        return Math.round(ratio * totalSteps.value);
+    };
+
+    const onPointerDown = (e: MouseEvent | TouchEvent) => {
+        isDragging.value = true;
+        const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
+        onSeek(calcStep(clientX));
+        window.addEventListener("mousemove", onPointerMove);
+        window.addEventListener("mouseup", onPointerUp);
+        window.addEventListener("touchmove", onPointerMove);
+        window.addEventListener("touchend", onPointerUp);
+    };
+
+    const onPointerMove = (e: MouseEvent | TouchEvent) => {
+        if (!isDragging.value) return;
+        const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
+        onSeek(calcStep(clientX));
+    };
+
+    const onPointerUp = () => {
+        isDragging.value = false;
+        window.removeEventListener("mousemove", onPointerMove);
+        window.removeEventListener("mouseup", onPointerUp);
+        window.removeEventListener("touchmove", onPointerMove);
+        window.removeEventListener("touchend", onPointerUp);
+    };
+
+    onUnmounted(onPointerUp);
+
+    return { isDragging, onPointerDown };
 };
