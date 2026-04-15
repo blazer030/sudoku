@@ -70,7 +70,6 @@ export const useGameReview = (replayData: GameReplayData) => {
     };
 
     const goToStep = (step: number) => {
-        stopPlay();
         replay.goToStep(step);
         currentStep.value = replay.currentStep;
     };
@@ -95,6 +94,12 @@ export const useGameReview = (replayData: GameReplayData) => {
         }
     };
 
+    const startPlay = () => {
+        if (currentStep.value >= replay.totalSteps) return;
+        isPlaying.value = true;
+        playInterval = setInterval(next, 800);
+    };
+
     onUnmounted(stopPlay);
 
     return {
@@ -110,6 +115,8 @@ export const useGameReview = (replayData: GameReplayData) => {
         goToLast,
         goToStep,
         togglePlay,
+        stopPlay,
+        startPlay,
     };
 };
 
@@ -117,8 +124,10 @@ export const useProgressDrag = (
     progressRef: Ref<HTMLElement | null>,
     totalSteps: Ref<number>,
     onSeek: (step: number) => void,
+    playState: { isPlaying: Ref<boolean>; stopPlay: () => void; startPlay: () => void },
 ) => {
     const isDragging = ref(false);
+    let wasPlaying = false;
 
     const calcStep = (clientX: number): number => {
         const el = progressRef.value;
@@ -130,6 +139,8 @@ export const useProgressDrag = (
 
     const onPointerDown = (e: MouseEvent | TouchEvent) => {
         isDragging.value = true;
+        wasPlaying = playState.isPlaying.value;
+        if (wasPlaying) playState.stopPlay();
         const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
         onSeek(calcStep(clientX));
         window.addEventListener("mousemove", onPointerMove);
@@ -146,6 +157,8 @@ export const useProgressDrag = (
 
     const onPointerUp = () => {
         isDragging.value = false;
+        if (wasPlaying) playState.startPlay();
+        wasPlaying = false;
         window.removeEventListener("mousemove", onPointerMove);
         window.removeEventListener("mouseup", onPointerUp);
         window.removeEventListener("touchmove", onPointerMove);

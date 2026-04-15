@@ -206,10 +206,12 @@ const {
     goToLast,
     goToStep,
     togglePlay,
+    stopPlay,
+    startPlay,
 } = useGameReview(replayData ?? { initialBoard: [], steps: [] });
 
 const progressBar = ref<HTMLElement | null>(null);
-const { isDragging, onPointerDown } = useProgressDrag(progressBar, totalSteps, goToStep);
+const { isDragging, onPointerDown } = useProgressDrag(progressBar, totalSteps, goToStep, { isPlaying, stopPlay, startPlay });
 
 const isActiveCell = (row: number, column: number): boolean => {
     const step = gameStep.value;
