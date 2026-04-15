@@ -104,11 +104,13 @@
                 v-if="hasRecords"
                 class="flex flex-col gap-2"
             >
-                <div
+                <button
                     v-for="(game, index) in stats.recentGames"
                     :key="index"
+                    :class="game.replay ? 'cursor-pointer' : 'cursor-default'"
                     class="flex items-center justify-between bg-card rounded-xl py-3 px-4 shadow-card-sm"
                     data-testid="recent-game"
+                    @click="openReview(game, index)"
                 >
                     <div class="flex items-center gap-3">
                         <div
@@ -135,22 +137,30 @@
                             </span>
                         </div>
                     </div>
-                    <div class="flex flex-col items-end gap-0.5">
-                        <span
-                            :class="game.completed ? 'text-primary' : 'text-accent'"
-                            class="text-base font-semibold font-mono"
-                        >
-                            {{ game.completed ? formatTime(game.elapsedSeconds) : "Gave up" }}
-                        </span>
-                        <span
-                            class="flex items-center gap-0.75 text-[11px] font-medium text-foreground-muted font-mono"
-                            data-testid="hints-used"
-                        >
-                            <Lightbulb :size="11" />
-                            {{ game.hintsUsed }}
-                        </span>
+                    <div class="flex items-center gap-2">
+                        <div class="flex flex-col items-end gap-0.5">
+                            <span
+                                :class="game.completed ? 'text-primary' : 'text-accent'"
+                                class="text-base font-semibold font-mono"
+                            >
+                                {{ game.completed ? formatTime(game.elapsedSeconds) : "Gave up" }}
+                            </span>
+                            <span
+                                class="flex items-center gap-0.75 text-[11px] font-medium text-foreground-muted font-mono"
+                                data-testid="hints-used"
+                            >
+                                <Lightbulb :size="11" />
+                                {{ game.hintsUsed }}
+                            </span>
+                        </div>
+                        <ChevronRight
+                            v-if="game.replay"
+                            :size="20"
+                            class="text-foreground-muted"
+                            data-testid="review-chevron"
+                        />
                     </div>
-                </div>
+                </button>
             </div>
 
             <!-- Empty State -->
@@ -196,9 +206,9 @@
 <script lang="ts" setup>
 import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
-import { ChevronLeft, Lightbulb, Trash2, Trophy, X } from "lucide-vue-next";
+import { ChevronLeft, ChevronRight, Lightbulb, Trash2, Trophy, X } from "lucide-vue-next";
 import { ROUTER_PATH } from "@/router";
-import { clearAllRecords, getStatistics } from "@/application/Statistics";
+import { clearAllRecords, getStatistics, type GameResult } from "@/application/Statistics";
 import { formatTime } from "@/utils/formatTime";
 import { formatDate } from "@/utils/formatDate";
 import { type Difficulty, DifficultyLabels } from "@/domain";
@@ -270,6 +280,12 @@ const formatBestTime = (seconds: number | null): string => {
 
 const difficultyLabel = (difficulty: Difficulty): string => {
     return DifficultyLabels[difficulty];
+};
+
+const openReview = (game: GameResult, displayIndex: number) => {
+    if (!game.replay) return;
+    const historyIndex = stats.value.recentGames.length - 1 - displayIndex;
+    void router.push(`/game-review/${historyIndex}`);
 };
 
 const goBack = () => {
