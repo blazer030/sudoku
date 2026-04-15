@@ -59,7 +59,7 @@
         </div>
 
         <!-- Board -->
-        <div class="bg-card rounded-2xl shadow-card-lg p-2 w-full">
+        <div class="bg-card rounded-2xl shadow-card-lg p-2 w-full pointer-events-none">
             <div class="flex flex-col border-3 border-foreground/20 rounded-xl">
                 <div
                     v-for="(row, rowIndex) in board"
