@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { Sudoku } from "@/domain/game/Sudoku";
-import { GameStateConverter, type CellState } from "@/application/GameState";
+import { GameStateConverter, captureInitialBoard, type CellState } from "@/application/GameState";
 import { knownAnswer, knownPuzzle, spyGeneratePuzzle } from "@/__tests__/fixtures/knownPuzzle";
 
 afterEach(() => {
@@ -118,6 +118,21 @@ describe("GameStateConverter", () => {
 
             expect(sudoku.hintTracker.totalUsed).toBe(3);
             expect(sudoku.hintTracker.recordedUsed).toBe(2);
+        });
+    });
+
+    describe("captureInitialBoard", () => {
+        it("should snapshot clue, entry, and notes for all cells", () => {
+            spyGeneratePuzzle();
+            const sudoku = new Sudoku();
+            sudoku.generate("easy");
+
+            const board = captureInitialBoard(sudoku);
+
+            expect(board).toHaveLength(9);
+            expect(board[0]).toHaveLength(9);
+            expect(board[0][0]).toEqual({ clue: 5, entry: 0, notes: [] });
+            expect(board[0][2]).toEqual({ clue: 0, entry: 0, notes: [] });
         });
     });
 });
