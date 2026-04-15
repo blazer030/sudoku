@@ -80,34 +80,32 @@
         </div>
 
         <!-- Step Description -->
-        <div class="flex flex-col gap-2">
-            <div class="bg-card rounded-lg py-2.5 px-4 shadow-card-sm min-h-9 flex items-center">
-                <span
-                    v-if="description"
-                    class="text-sm text-foreground"
-                >
-                    {{ description }}
-                </span>
-                <span
-                    v-else
-                    class="text-sm text-foreground-muted"
-                >
-                    Initial board
-                </span>
-            </div>
+        <div class="bg-card rounded-lg py-2.5 px-4 shadow-card-sm min-h-9 flex items-center">
+            <span
+                v-if="description"
+                class="text-sm text-foreground"
+            >
+                {{ description }}
+            </span>
+            <span
+                v-else
+                class="text-sm text-foreground-muted"
+            >
+                Initial board
+            </span>
+        </div>
 
-            <!-- Progress -->
-            <div class="flex flex-col gap-1.5">
-                <div class="w-full bg-border rounded-full h-1">
-                    <div
-                        class="bg-primary h-1 rounded-full transition-all duration-200"
-                        :style="{ width: progressPercent }"
-                    />
-                </div>
-                <span class="text-xs text-foreground-muted text-center">
-                    Step {{ currentStep }} of {{ totalSteps }}
-                </span>
+        <!-- Progress -->
+        <div class="flex flex-col gap-1.5">
+            <div class="w-full bg-border rounded-full h-1">
+                <div
+                    class="bg-primary h-1 rounded-full transition-all duration-200"
+                    :style="{ width: progressPercent }"
+                />
             </div>
+            <span class="text-xs text-foreground-muted text-center">
+                Step {{ currentStep }} of {{ totalSteps }}
+            </span>
         </div>
 
         <!-- Playback Controls -->
