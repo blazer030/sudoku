@@ -10,3 +10,5 @@ export { ConflictDetector } from "@/domain/game/ConflictDetector";
 export type { Conflict } from "@/domain/game/ConflictDetector";
 export { HintTracker } from "@/domain/game/HintTracker";
 export { BoardHistory } from "@/domain/game/BoardHistory";
+export { StepRecorder } from "@/domain/game/StepRecorder";
+export type { CellSnapshot, GameStep, GameStepAction } from "@/domain/game/GameStep";
