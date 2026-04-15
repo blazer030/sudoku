@@ -21,7 +21,7 @@
 
 <script lang="ts" setup>
 import { Lightbulb, Pencil, Undo2 } from "lucide-vue-next";
-import ControlButton from "./ControlButton.vue";
+import ControlButton from "@/presentation/pages/game/components/ControlButton.vue";
 
 defineProps<{
     noteActive: boolean;

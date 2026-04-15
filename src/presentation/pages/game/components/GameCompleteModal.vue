@@ -23,7 +23,7 @@
                     </p>
                 </div>
 
-                <div class="flex justify-center gap-8 w-full">
+                <div class="grid grid-cols-3 w-full">
                     <div class="flex flex-col items-center gap-1">
                         <span class="text-[32px] font-bold text-primary tracking-tighter">
                             {{ formatTime(params?.elapsedSeconds ?? 0) }}
@@ -77,8 +77,8 @@ import { useRouter } from "vue-router";
 import { formatTime } from "@/utils/formatTime";
 import { DifficultyLabels } from "@/domain";
 import { computed } from "vue";
-import { useGameCompleteModal } from "./useGameCompleteModal";
-import FireworkCanvas from "./FireworkCanvas.vue";
+import { useGameCompleteModal } from "@/presentation/pages/game/components/useGameCompleteModal";
+import FireworkCanvas from "@/presentation/pages/game/components/FireworkCanvas.vue";
 
 const router = useRouter();
 const { visible, params, close } = useGameCompleteModal();

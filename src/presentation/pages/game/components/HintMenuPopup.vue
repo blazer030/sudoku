@@ -5,11 +5,13 @@
             class="fixed inset-0 z-50"
         >
             <div
-                data-testid="hint-overlay"
                 class="absolute inset-0 bg-black/30"
+                data-testid="hint-overlay"
                 @click="close('close')"
             />
-            <div class="absolute bottom-24 left-1/2 -translate-x-1/2 bg-card rounded-popup shadow-popup w-[220px] z-10 flex flex-col gap-1 py-4 px-3">
+            <div
+                class="absolute bottom-24 left-1/2 -translate-x-1/2 bg-card rounded-popup shadow-popup w-55 z-10 flex flex-col gap-1 py-4 px-3"
+            >
                 <!-- Header: Title + Hint Lights -->
                 <div class="flex items-center justify-between px-3 pb-1">
                     <span class="text-foreground text-sm font-bold">Hints</span>
@@ -17,23 +19,25 @@
                         <div
                             v-for="i in 3"
                             :key="i"
-                            data-testid="hint-light"
                             :class="[
                                 'w-2 h-2 rounded-full',
                                 i <= remaining ? 'bg-primary' : 'border-[1.5px] border-border',
                             ]"
+                            data-testid="hint-light"
                         />
                     </div>
                 </div>
 
                 <!-- Subtitle -->
-                <span class="text-foreground-muted text-[11px] px-3 mb-1">First use is free and won't be recorded.</span>
+                <span class="text-foreground-muted text-[11px] mb-1 text-center">
+                    First use is free and won't be recorded.
+                </span>
 
                 <!-- Auto Notes -->
                 <button
-                    data-testid="hint-auto-notes"
                     :disabled="!params?.canUseHint"
                     class="hint-option"
+                    data-testid="hint-auto-notes"
                     @click="close('autoNotes')"
                 >
                     <Sparkles
@@ -45,9 +49,9 @@
 
                 <!-- Check Conflicts -->
                 <button
-                    data-testid="hint-check-conflicts"
                     :disabled="!params?.canUseHint"
                     class="hint-option"
+                    data-testid="hint-check-conflicts"
                     @click="close('checkConflicts')"
                 >
                     <ScanSearch
@@ -59,9 +63,9 @@
 
                 <!-- Check Errors -->
                 <button
-                    data-testid="hint-check-errors"
                     :disabled="!params?.canUseHint"
                     class="hint-option"
+                    data-testid="hint-check-errors"
                     @click="close('checkErrors')"
                 >
                     <CircleAlert
@@ -76,9 +80,9 @@
 
                 <!-- Reveal Cell -->
                 <button
-                    data-testid="hint-reveal-cell"
                     :disabled="!params?.canUseHint"
                     class="hint-option"
+                    data-testid="hint-reveal-cell"
                     @click="close('revealCell')"
                 >
                     <Eye
@@ -95,7 +99,7 @@
 <script lang="ts" setup>
 import { computed } from "vue";
 import { CircleAlert, Eye, ScanSearch, Sparkles } from "lucide-vue-next";
-import { useHintMenu } from "./useHintMenu";
+import { useHintMenu } from "@/presentation/pages/game/components/useHintMenu";
 
 const { visible, params, close } = useHintMenu();
 

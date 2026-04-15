@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { useCompletionFlash } from "@/presentation/themes/classic/useCompletionFlash";
+import { useCompletionFlash } from "@/presentation/pages/game/useCompletionFlash";
 
 afterEach(() => {
     vi.useRealTimers();

@@ -1,4 +1,4 @@
-import { type InjectionKey, type Ref, type ShallowRef, provide, inject, ref, shallowRef, readonly } from "vue";
+import { inject, type InjectionKey, provide, readonly, ref, type Ref, shallowRef, type ShallowRef } from "vue";
 
 type CloseFn<TResult> = undefined extends TResult
     ? (result?: TResult) => void
@@ -18,7 +18,7 @@ export const createDialog = <TParams = undefined, TResult = undefined>() => {
         const params = shallowRef<TParams>();
         let resolve: ((result: TResult) => void) | null = null;
 
-        const open = (dialogParams: TParams): Promise<TResult> => {
+        const open = (dialogParams?: TParams): Promise<TResult> => {
             params.value = dialogParams;
             visible.value = true;
             return new Promise(resolvePromise => { resolve = resolvePromise; });

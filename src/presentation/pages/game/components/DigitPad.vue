@@ -31,28 +31,28 @@
         <!-- Row 2: digits 6-9 + Erase -->
         <div class="flex justify-center gap-2">
             <div
-                v-for="digit in 4"
-                :key="`num-${digit + 5}`"
+                v-for="digit in [6, 7, 8, 9]"
+                :key="`num-${digit}`"
                 class="relative"
             >
                 <button
-                    :class="digitButtonClasses(digit + 5)"
-                    :data-testid="`number-${digit + 5}`"
-                    :disabled="isDigitCompleted(digit + 5)"
+                    :class="digitButtonClasses(digit)"
+                    :data-testid="`number-${digit}`"
+                    :disabled="isDigitCompleted(digit)"
                     class="w-14 h-14 rounded-xl flex items-center justify-center text-2xl font-semibold transition-all cursor-pointer disabled:cursor-default"
-                    @click="emit('selectDigit', digit + 5)"
+                    @click="emit('selectDigit', digit)"
                 >
-                    {{ digit + 5 }}
+                    {{ digit }}
                 </button>
                 <span
-                    v-if="showRemainingCount && !isDigitCompleted(digit + 5)"
-                    :class="selectedDigit === (digit + 5)
+                    v-if="showRemainingCount && !isDigitCompleted(digit)"
+                    :class="selectedDigit === digit
                         ? 'bg-white text-primary'
                         : 'bg-foreground-secondary text-white'"
-                    :data-testid="`badge-${digit + 5}`"
+                    :data-testid="`badge-${digit}`"
                     class="absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-semibold"
                 >
-                    {{ getRemainingCount(digit + 5) }}
+                    {{ getRemainingCount(digit) }}
                 </span>
             </div>
             <button

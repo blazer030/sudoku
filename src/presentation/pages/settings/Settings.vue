@@ -1,7 +1,7 @@
 <template>
-    <div class="flex flex-col gap-5 h-dvh py-6 px-5 bg-background">
+    <div class="flex flex-col gap-5 h-dvh px-5 bg-background overflow-y-auto">
         <!-- Header -->
-        <div class="flex items-center justify-between">
+        <div class="flex items-center justify-between sticky top-0 bg-background pt-6 pb-3 z-10">
             <button
                 class="flex items-center gap-2 cursor-pointer"
                 data-testid="back-button"
@@ -22,11 +22,11 @@
             <span class="text-foreground-muted text-xs font-semibold tracking-wider uppercase px-1">Appearance</span>
             <div class="bg-card rounded-2xl px-4 py-4 shadow-card-sm">
                 <span class="text-foreground text-[15px] font-medium">Color theme</span>
-                <div class="grid grid-cols-6 gap-3 mt-3">
+                <div class="grid grid-cols-6 gap-3 mt-3 justify-items-center">
                     <button
                         v-for="color in THEMES"
                         :key="color.id"
-                        class="relative aspect-square rounded-full cursor-pointer transition-all duration-200 overflow-hidden"
+                        class="relative aspect-square w-full max-w-15 rounded-full cursor-pointer transition-all duration-200 overflow-hidden"
                         :class="[
                             color.id === settingsStore.colorTheme
                                 ? 'ring-2 ring-offset-2 ring-primary scale-110'
@@ -119,7 +119,7 @@ const toggles = computed(() => [
     {
         key: "highlightSameDigit",
         label: "Highlight Same Numbers",
-        description: "Highlight cells with the same digit",
+        description: "Highlight matching numbers and notes when selected",
         value: settingsStore.highlightSameDigit,
         setter: settingsStore.setHighlightSameDigit,
     },
@@ -133,14 +133,14 @@ const toggles = computed(() => [
     {
         key: "autoRemoveNotes",
         label: "Auto-Remove Notes",
-        description: "Remove notes from peers when placing a digit",
+        description: "Remove notes from peers when placing a number",
         value: settingsStore.autoRemoveNotes,
         setter: settingsStore.setAutoRemoveNotes,
     },
     {
         key: "showRemainingCount",
         label: "Remaining Count",
-        description: "Show remaining count on digit buttons",
+        description: "Show remaining count on number buttons",
         value: settingsStore.showRemainingCount,
         setter: settingsStore.setShowRemainingCount,
     },

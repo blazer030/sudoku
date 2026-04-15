@@ -54,3 +54,12 @@ export const GameStateConverter = {
         };
     },
 };
+
+export const captureInitialBoard = (sudoku: Sudoku): CellState[][] =>
+    sudoku.puzzle.map(row =>
+        row.map(cell => ({
+            clue: cell.clue,
+            entry: cell.entry,
+            notes: [...cell.notes],
+        }))
+    );

@@ -1,14 +1,16 @@
 import { computed, reactive } from "vue";
 import { useRouter } from "vue-router";
-import { provideGameCompleteModal } from "@/presentation/themes/classic/components/useGameCompleteModal";
-import { BOARD_SIZE, Sudoku } from "@/domain";
+import { provideGameCompleteModal } from "@/presentation/pages/game/components/useGameCompleteModal";
+import { BOARD_SIZE, Sudoku, StepRecorder } from "@/domain";
 import { useGameStore } from "@/stores/gameStore";
 import { ROUTER_PATH } from "@/router";
+import { captureInitialBoard } from "@/application/GameState";
+import type { GameReplayData } from "@/application/Statistics";
 import { useGameTimer } from "@/presentation/pages/game/useGameTimer";
 import { useGameCompletion } from "@/presentation/pages/game/useGameCompletion";
-import { useLeaveGame } from "./useLeaveGame";
-import { useHintActions } from "./useHintActions";
-import { useCompletionFlash } from "./useCompletionFlash";
+import { useLeaveGame } from "@/presentation/pages/game/useLeaveGame";
+import { useHintActions } from "@/presentation/pages/game/useHintActions";
+import { useCompletionFlash } from "@/presentation/pages/game/useCompletionFlash";
 import { useSettingsStore } from "@/stores/settingsStore";
 
 export const useGameSession = () => {
@@ -29,6 +31,14 @@ export const useGameSession = () => {
         return reactive(new Sudoku());
     })();
 
+    const stepRecorder = new StepRecorder();
+    const initialBoard = captureInitialBoard(sudoku.raw());
+
+    const getReplayData = (): GameReplayData => ({
+        initialBoard,
+        steps: stepRecorder.steps,
+    });
+
     const gameCompleteModal = provideGameCompleteModal();
 
     const difficulty = computed(() => gameStore.difficulty ?? "easy");
@@ -37,6 +47,7 @@ export const useGameSession = () => {
         sudoku: sudoku.raw(),
         difficulty,
         getElapsedSeconds: () => elapsedSeconds.value,
+        getReplayData,
         onCompleted: (origin) => {
             const allCells: { row: number; column: number }[] = [];
             for (let row = 0; row < BOARD_SIZE; row++) {
@@ -59,6 +70,7 @@ export const useGameSession = () => {
 
     const { clearErrors, isError, openHintMenu } = useHintActions({
         sudoku: sudoku.raw(),
+        stepRecorder,
         onRevealComplete: (origin) => { checkAndComplete(origin); },
         onGroupCompleted: triggerFlash,
     });
@@ -68,6 +80,7 @@ export const useGameSession = () => {
         difficulty,
         completed,
         getElapsedSeconds: () => elapsedSeconds.value,
+        getReplayData,
     });
 
     const timerPaused = computed(() => completed.value || leaveDialog.visible.value);
@@ -79,6 +92,7 @@ export const useGameSession = () => {
     return {
         gameStore,
         sudoku,
+        stepRecorder,
         difficulty,
         elapsedSeconds,
         completed,
