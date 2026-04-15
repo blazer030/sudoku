@@ -7,6 +7,7 @@ const ACTION_LABELS: Record<GameStepAction, (step: GameStep) => string> = {
     fill: (s) => `Filled ${s.value} in R${s.row + 1}C${s.column + 1}`,
     erase: (s) => `Erased R${s.row + 1}C${s.column + 1}`,
     toggleNote: (s) => `Note ${s.value} in R${s.row + 1}C${s.column + 1}`,
+    hint: (s) => `Hint ${s.value} in R${s.row + 1}C${s.column + 1}`,
     autoNotes: () => "Auto Notes",
     undo: () => "Undo",
 };
@@ -15,6 +16,7 @@ const ACTION_ICONS: Record<GameStepAction, string> = {
     fill: "✏️",
     erase: "🧹",
     toggleNote: "📝",
+    hint: "💡",
     autoNotes: "🤖",
     undo: "↩️",
 };

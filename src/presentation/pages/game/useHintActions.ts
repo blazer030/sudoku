@@ -43,7 +43,7 @@ export const useHintActions = ({ sudoku, stepRecorder, onRevealComplete, onGroup
             const target = sudoku.revealRandomCell();
             if (target) {
                 const revealedValue = sudoku.puzzle[target.row][target.column].entry;
-                stepRecorder.record(sudoku.puzzle, "fill", target.row, target.column, revealedValue);
+                stepRecorder.record(sudoku.puzzle, "hint", target.row, target.column, revealedValue);
             }
             if (target && !sudoku.isCompleted()) {
                 const completed = sudoku.findCompletedGroups(target.row, target.column);

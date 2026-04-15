@@ -3,7 +3,7 @@ export interface CellSnapshot {
     notes: number[];
 }
 
-export type GameStepAction = "fill" | "erase" | "toggleNote" | "autoNotes" | "undo";
+export type GameStepAction = "fill" | "erase" | "toggleNote" | "autoNotes" | "undo" | "hint";
 
 export interface GameStep {
     board: CellSnapshot[][];
