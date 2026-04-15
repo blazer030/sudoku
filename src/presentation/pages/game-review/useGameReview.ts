@@ -12,14 +12,6 @@ const ACTION_LABELS: Record<GameStepAction, (step: GameStep) => string> = {
     undo: () => "Undo",
 };
 
-const ACTION_ICONS: Record<GameStepAction, string> = {
-    fill: "✏️",
-    erase: "🧹",
-    toggleNote: "📝",
-    hint: "💡",
-    autoNotes: "🤖",
-    undo: "↩️",
-};
 
 export const useGameReview = (replayData: GameReplayData) => {
     const replay = new GameReplay(replayData.initialBoard, replayData.steps);
@@ -40,9 +32,7 @@ export const useGameReview = (replayData: GameReplayData) => {
     const description = computed(() => {
         const step = gameStep.value;
         if (!step) return null;
-        const icon = ACTION_ICONS[step.action];
-        const label = ACTION_LABELS[step.action](step);
-        return `${icon} ${label}`;
+        return ACTION_LABELS[step.action](step);
     });
 
     const totalSteps = computed(() => replay.totalSteps);

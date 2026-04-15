@@ -80,13 +80,17 @@
         </div>
 
         <!-- Step Description -->
-        <div class="bg-card rounded-lg py-2.5 px-4 shadow-card-sm min-h-9 flex items-center">
-            <span
-                v-if="description"
-                class="text-sm text-foreground"
-            >
-                {{ description }}
-            </span>
+        <div class="bg-card rounded-lg py-2.5 px-4 shadow-card-sm min-h-9 flex items-center gap-2">
+            <template v-if="description && stepIcon">
+                <component
+                    :is="stepIcon"
+                    :size="16"
+                    class="text-foreground-muted shrink-0"
+                />
+                <span class="text-sm text-foreground">
+                    {{ description }}
+                </span>
+            </template>
             <span
                 v-else
                 class="text-sm text-foreground-muted"
@@ -170,7 +174,7 @@
 <script lang="ts" setup>
 import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
-import { ChevronLeft, ChevronRight, Lightbulb, Pause, Play, SkipBack, SkipForward, Trophy, X } from "lucide-vue-next";
+import { ChevronLeft, ChevronRight, Eraser, Lightbulb, Pause, Pencil, Play, SkipBack, SkipForward, Sparkles, StickyNote, Trophy, Undo2, X } from "lucide-vue-next";
 import { ROUTER_PATH } from "@/router";
 import { getGameHistory } from "@/application/Statistics";
 import { formatTime } from "@/utils/formatTime";
@@ -209,6 +213,21 @@ const {
     stopPlay,
     startPlay,
 } = useGameReview(replayData ?? { initialBoard: [], steps: [] });
+
+const ACTION_ICONS: Record<string, typeof Pencil> = {
+    fill: Pencil,
+    erase: Eraser,
+    toggleNote: StickyNote,
+    hint: Lightbulb,
+    autoNotes: Sparkles,
+    undo: Undo2,
+};
+
+const stepIcon = computed(() => {
+    const step = gameStep.value;
+    if (!step) return null;
+    return ACTION_ICONS[step.action];
+});
 
 const progressBar = ref<HTMLElement | null>(null);
 const { isDragging, onPointerDown } = useProgressDrag(progressBar, totalSteps, goToStep, { isPlaying, stopPlay, startPlay });
