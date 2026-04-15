@@ -285,7 +285,7 @@ const difficultyLabel = (difficulty: Difficulty): string => {
 const openReview = (game: GameResult, displayIndex: number) => {
     if (!game.replay) return;
     const historyIndex = stats.value.recentGames.length - 1 - displayIndex;
-    void router.push(`/game-review/${historyIndex}`);
+    void router.push(ROUTER_PATH.gameReviewFor(historyIndex));
 };
 
 const goBack = () => {

@@ -88,7 +88,16 @@
                     class="text-foreground-muted shrink-0"
                 />
                 <span class="text-sm text-foreground">
-                    {{ description }}
+                    <template
+                        v-for="(part, i) in description"
+                        :key="i"
+                    >
+                        <span
+                            v-if="part.bold"
+                            class="font-semibold"
+                        >{{ part.text }}</span>
+                        <template v-else>{{ part.text }}</template>
+                    </template>
                 </span>
             </template>
             <span
@@ -201,7 +210,6 @@ const {
     currentStep,
     totalSteps,
     isAtFinalStep,
-    completed: gameCompleted,
     board,
     gameStep,
     description,
@@ -227,7 +235,7 @@ const ACTION_ICONS: Record<string, typeof Pencil> = {
 
 const stepIcon = computed(() => {
     if (isAtFinalStep.value) {
-        return gameCompleted ? Trophy : X;
+        return game.completed ? Trophy : X;
     }
     const step = gameStep.value;
     if (!step) return null;

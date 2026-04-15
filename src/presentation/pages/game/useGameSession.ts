@@ -4,7 +4,7 @@ import { provideGameCompleteModal } from "./components/useGameCompleteModal";
 import { BOARD_SIZE, Sudoku, StepRecorder } from "@/domain";
 import { useGameStore } from "@/stores/gameStore";
 import { ROUTER_PATH } from "@/router";
-import { captureInitialBoard, type CellState } from "@/application/GameState";
+import { captureInitialBoard } from "@/application/GameState";
 import type { GameReplayData } from "@/application/Statistics";
 import { useGameTimer } from "./useGameTimer";
 import { useGameCompletion } from "./useGameCompletion";
@@ -32,7 +32,7 @@ export const useGameSession = () => {
     })();
 
     const stepRecorder = new StepRecorder();
-    const initialBoard: CellState[][] = captureInitialBoard(sudoku.raw());
+    const initialBoard = captureInitialBoard(sudoku.raw());
 
     const getReplayData = (): GameReplayData => ({
         initialBoard,

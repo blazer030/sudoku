@@ -3,13 +3,23 @@ import { GameReplay } from "@/domain/game/GameReplay";
 import type { GameReplayData } from "@/application/Statistics";
 import type { GameStep, GameStepAction } from "@/domain/game/GameStep";
 
-const ACTION_LABELS: Record<GameStepAction, (step: GameStep) => string> = {
-    fill: (s) => `Filled ${s.value} in R${s.row + 1}C${s.column + 1}`,
-    erase: (s) => `Erased R${s.row + 1}C${s.column + 1}`,
-    toggleNote: (s) => `Note ${s.value} in R${s.row + 1}C${s.column + 1}`,
-    hint: (s) => `Hint ${s.value} in R${s.row + 1}C${s.column + 1}`,
-    autoNotes: () => "Auto Notes",
-    undo: () => "Undo",
+export interface DescriptionPart {
+    text: string;
+    bold?: boolean;
+}
+
+const position = (step: GameStep): DescriptionPart[] => [
+    { text: "Row " }, { text: String(step.row + 1), bold: true },
+    { text: ", Col " }, { text: String(step.column + 1), bold: true },
+];
+
+const ACTION_LABELS: Record<GameStepAction, (step: GameStep) => DescriptionPart[]> = {
+    fill: (step) => [{ text: "Filled " }, { text: String(step.value), bold: true }, { text: " in " }, ...position(step)],
+    erase: (step) => [{ text: "Erased " }, ...position(step)],
+    toggleNote: (step) => [{ text: "Note " }, { text: String(step.value), bold: true }, { text: " in " }, ...position(step)],
+    hint: (step) => [{ text: "Hint " }, { text: String(step.value), bold: true }, { text: " in " }, ...position(step)],
+    autoNotes: () => [{ text: "Auto Notes" }],
+    undo: () => [{ text: "Undo" }],
 };
 
 
@@ -36,9 +46,9 @@ export const useGameReview = (replayData: GameReplayData, completed: boolean) =>
         return replay.currentGameStep;
     });
 
-    const description = computed((): string | null => {
+    const description = computed((): DescriptionPart[] | null => {
         if (isAtFinalStep.value) {
-            return completed ? "Completed" : "Gave up";
+            return [{ text: completed ? "Completed" : "Gave up" }];
         }
         const step = gameStep.value;
         if (!step) return null;
@@ -47,7 +57,7 @@ export const useGameReview = (replayData: GameReplayData, completed: boolean) =>
 
     const totalSteps = computed(() => virtualTotalSteps);
 
-    const setStep = (step: number) => {
+    const goToStep = (step: number) => {
         const clamped = Math.max(0, Math.min(step, virtualTotalSteps));
         if (clamped <= replay.totalSteps) {
             replay.goToStep(clamped);
@@ -56,27 +66,23 @@ export const useGameReview = (replayData: GameReplayData, completed: boolean) =>
     };
 
     const next = () => {
-        setStep(currentStep.value + 1);
+        goToStep(currentStep.value + 1);
         if (currentStep.value >= virtualTotalSteps) {
             stopPlay();
         }
     };
 
     const previous = () => {
-        setStep(currentStep.value - 1);
+        goToStep(currentStep.value - 1);
     };
 
     const goToFirst = () => {
-        setStep(0);
+        goToStep(0);
     };
 
     const goToLast = () => {
-        setStep(virtualTotalSteps);
+        goToStep(virtualTotalSteps);
         stopPlay();
-    };
-
-    const goToStep = (step: number) => {
-        setStep(step);
     };
 
     const togglePlay = () => {
@@ -111,7 +117,6 @@ export const useGameReview = (replayData: GameReplayData, completed: boolean) =>
         currentStep,
         totalSteps,
         isAtFinalStep,
-        completed,
         board,
         gameStep,
         description,

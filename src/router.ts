@@ -13,6 +13,7 @@ export const ROUTER_PATH = {
     statistics: "/statistics",
     settings: "/settings",
     gameReview: "/game-review/:index",
+    gameReviewFor: (index: number) => `/game-review/${index}`,
 };
 
 export const router = createRouter({

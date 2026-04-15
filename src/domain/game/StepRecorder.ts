@@ -6,7 +6,7 @@ export class StepRecorder {
 
     public record(puzzle: PuzzleCell[][], action: GameStepAction, row: number, column: number, value: number): void {
         this._steps.push({
-            board: puzzle.map(r => r.map(cell => ({ entry: cell.entry, notes: [...cell.notes] }))),
+            board: puzzle.map(row => row.map(cell => ({ entry: cell.entry, notes: [...cell.notes] }))),
             action,
             row,
             column,
