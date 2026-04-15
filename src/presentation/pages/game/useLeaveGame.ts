@@ -4,7 +4,7 @@ import type { Difficulty } from "@/domain";
 import type { Sudoku } from "@/domain/game/Sudoku";
 import { deleteSavedGame, saveGame } from "@/application/GameStorage";
 import { GameStateConverter } from "@/application/GameState";
-import { recordGameResult } from "@/application/Statistics";
+import { recordGameResult, type GameReplayData } from "@/application/Statistics";
 import { provideLeaveDialog } from "./components/useLeaveDialog";
 
 interface LeaveGameOptions {
@@ -12,9 +12,10 @@ interface LeaveGameOptions {
     difficulty: Ref<Difficulty>;
     completed: Ref<boolean>;
     getElapsedSeconds: () => number;
+    getReplayData: () => GameReplayData;
 }
 
-export const useLeaveGame = ({ sudoku, difficulty, completed, getElapsedSeconds }: LeaveGameOptions) => {
+export const useLeaveGame = ({ sudoku, difficulty, completed, getElapsedSeconds, getReplayData }: LeaveGameOptions) => {
     const router = useRouter();
     const leaveDialog = provideLeaveDialog();
     const leavingConfirmed = ref(false);
@@ -36,6 +37,7 @@ export const useLeaveGame = ({ sudoku, difficulty, completed, getElapsedSeconds 
                 elapsedSeconds: getElapsedSeconds(),
                 completed: false,
                 hintsUsed: sudoku.hintTracker.recordedUsed,
+                replay: getReplayData(),
             });
             deleteSavedGame();
             leavingConfirmed.value = true;

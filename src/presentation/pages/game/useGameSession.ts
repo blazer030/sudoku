@@ -1,9 +1,11 @@
 import { computed, reactive } from "vue";
 import { useRouter } from "vue-router";
 import { provideGameCompleteModal } from "./components/useGameCompleteModal";
-import { BOARD_SIZE, Sudoku } from "@/domain";
+import { BOARD_SIZE, Sudoku, StepRecorder } from "@/domain";
 import { useGameStore } from "@/stores/gameStore";
 import { ROUTER_PATH } from "@/router";
+import { captureInitialBoard, type CellState } from "@/application/GameState";
+import type { GameReplayData } from "@/application/Statistics";
 import { useGameTimer } from "./useGameTimer";
 import { useGameCompletion } from "./useGameCompletion";
 import { useLeaveGame } from "./useLeaveGame";
@@ -29,6 +31,14 @@ export const useGameSession = () => {
         return reactive(new Sudoku());
     })();
 
+    const stepRecorder = new StepRecorder();
+    const initialBoard: CellState[][] = captureInitialBoard(sudoku.raw());
+
+    const getReplayData = (): GameReplayData => ({
+        initialBoard,
+        steps: stepRecorder.steps,
+    });
+
     const gameCompleteModal = provideGameCompleteModal();
 
     const difficulty = computed(() => gameStore.difficulty ?? "easy");
@@ -37,6 +47,7 @@ export const useGameSession = () => {
         sudoku: sudoku.raw(),
         difficulty,
         getElapsedSeconds: () => elapsedSeconds.value,
+        getReplayData,
         onCompleted: (origin) => {
             const allCells: { row: number; column: number }[] = [];
             for (let row = 0; row < BOARD_SIZE; row++) {
@@ -59,6 +70,7 @@ export const useGameSession = () => {
 
     const { clearErrors, isError, openHintMenu } = useHintActions({
         sudoku: sudoku.raw(),
+        stepRecorder,
         onRevealComplete: (origin) => { checkAndComplete(origin); },
         onGroupCompleted: triggerFlash,
     });
@@ -68,6 +80,7 @@ export const useGameSession = () => {
         difficulty,
         completed,
         getElapsedSeconds: () => elapsedSeconds.value,
+        getReplayData,
     });
 
     const timerPaused = computed(() => completed.value || leaveDialog.visible.value);
@@ -79,6 +92,7 @@ export const useGameSession = () => {
     return {
         gameStore,
         sudoku,
+        stepRecorder,
         difficulty,
         elapsedSeconds,
         completed,

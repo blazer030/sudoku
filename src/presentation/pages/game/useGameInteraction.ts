@@ -1,17 +1,19 @@
 import { computed, ref } from "vue";
 import { BOARD_SIZE } from "@/domain";
 import type { Sudoku } from "@/domain";
+import type { StepRecorder } from "@/domain/game/StepRecorder";
 import { InputMode } from "./InputMode";
 
 interface GameInteractionOptions {
     sudoku: Sudoku;
+    stepRecorder: StepRecorder;
     clearErrors: () => void;
     checkAndComplete: (origin: { row: number; column: number }) => void;
     onGroupCompleted?: (cells: { row: number; column: number }[], origin: { row: number; column: number }) => void;
     autoRemoveNotes: () => boolean;
 }
 
-export const useGameInteraction = ({ sudoku, clearErrors, checkAndComplete, onGroupCompleted, autoRemoveNotes }: GameInteractionOptions) => {
+export const useGameInteraction = ({ sudoku, stepRecorder, clearErrors, checkAndComplete, onGroupCompleted, autoRemoveNotes }: GameInteractionOptions) => {
     const selectedCell = ref<{ row: number; column: number } | null>(null);
     const selectedDigit = ref<number | null>(null);
     const inputMode = ref(InputMode.Normal);
@@ -35,15 +37,18 @@ export const useGameInteraction = ({ sudoku, clearErrors, checkAndComplete, onGr
 
     const noteToCell = (row: number, column: number, value: number) => {
         sudoku.toggleNote(row, column, value);
+        stepRecorder.record(sudoku.puzzle, "toggleNote", row, column, value);
     };
 
     const inputToCell = (row: number, column: number, value: number) => {
         if (sudoku.puzzle[row][column].isClue) return;
         if (sudoku.puzzle[row][column].entry === value) {
             sudoku.fill(row, column, 0);
+            stepRecorder.record(sudoku.puzzle, "erase", row, column, 0);
             return;
         }
         sudoku.fill(row, column, value, { autoRemoveNotes: autoRemoveNotes() });
+        stepRecorder.record(sudoku.puzzle, "fill", row, column, value);
         if (!sudoku.isCompleted()) {
             const completed = sudoku.findCompletedGroups(row, column);
             if (completed.cells.length > 0) onGroupCompleted?.(completed.cells, { row, column });
@@ -88,6 +93,7 @@ export const useGameInteraction = ({ sudoku, clearErrors, checkAndComplete, onGr
 
     const eraseCell = (row: number, column: number) => {
         sudoku.erase(row, column);
+        stepRecorder.record(sudoku.puzzle, "erase", row, column, 0);
     };
 
     const toggleNoteMode = () => {
@@ -109,6 +115,7 @@ export const useGameInteraction = ({ sudoku, clearErrors, checkAndComplete, onGr
             const { row, column } = selectedCell.value;
             if (inputMode.value === InputMode.Note) {
                 sudoku.toggleNote(row, column, digit);
+                stepRecorder.record(sudoku.puzzle, "toggleNote", row, column, digit);
                 return;
             }
             inputToCell(row, column, digit);
@@ -116,6 +123,11 @@ export const useGameInteraction = ({ sudoku, clearErrors, checkAndComplete, onGr
             return;
         }
         selectedDigit.value = selectedDigit.value === digit ? null : digit;
+    };
+
+    const undo = () => {
+        sudoku.undo();
+        stepRecorder.record(sudoku.puzzle, "undo", 0, 0, 0);
     };
 
     return {
@@ -128,5 +140,6 @@ export const useGameInteraction = ({ sudoku, clearErrors, checkAndComplete, onGr
         toggleEraseMode,
         isSelected,
         digitCounts,
+        undo,
     };
 };

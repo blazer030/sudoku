@@ -1,14 +1,16 @@
 import { ref } from "vue";
 import type { Sudoku } from "@/domain/game/Sudoku";
+import type { StepRecorder } from "@/domain/game/StepRecorder";
 import { provideHintMenu } from "./components/useHintMenu";
 
 interface HintActionsOptions {
     sudoku: Sudoku;
+    stepRecorder: StepRecorder;
     onRevealComplete: (origin: { row: number; column: number }) => void;
     onGroupCompleted?: (cells: { row: number; column: number }[], origin: { row: number; column: number }) => void;
 }
 
-export const useHintActions = ({ sudoku, onRevealComplete, onGroupCompleted }: HintActionsOptions) => {
+export const useHintActions = ({ sudoku, stepRecorder, onRevealComplete, onGroupCompleted }: HintActionsOptions) => {
     const hintMenu = provideHintMenu();
     const errorCells = ref<{ row: number; column: number }[]>([]);
 
@@ -29,6 +31,7 @@ export const useHintActions = ({ sudoku, onRevealComplete, onGroupCompleted }: H
         switch (action) {
         case "autoNotes":
             sudoku.autoNotes();
+            stepRecorder.record(sudoku.puzzle, "autoNotes", 0, 0, 0);
             break;
         case "checkConflicts":
             errorCells.value = sudoku.checkAllConflicts();
@@ -38,6 +41,10 @@ export const useHintActions = ({ sudoku, onRevealComplete, onGroupCompleted }: H
             break;
         case "revealCell": {
             const target = sudoku.revealRandomCell();
+            if (target) {
+                const revealedValue = sudoku.puzzle[target.row][target.column].entry;
+                stepRecorder.record(sudoku.puzzle, "fill", target.row, target.column, revealedValue);
+            }
             if (target && !sudoku.isCompleted()) {
                 const completed = sudoku.findCompletedGroups(target.row, target.column);
                 if (completed.cells.length > 0) onGroupCompleted?.(completed.cells, target);

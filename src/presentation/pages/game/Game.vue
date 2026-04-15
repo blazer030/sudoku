@@ -43,7 +43,7 @@
             <!-- Controls -->
             <GameControls
                 :note-active="inputMode === InputMode.Note"
-                @undo="sudoku.undo()"
+                @undo="undo"
                 @toggle-note-mode="toggleNoteMode"
                 @show-hint-menu="openHintMenu"
             />
@@ -89,6 +89,7 @@ import { useSettingsStore } from "@/stores/settingsStore";
 const {
     gameStore,
     sudoku,
+    stepRecorder,
     elapsedSeconds,
     clearErrors,
     isError,
@@ -110,8 +111,10 @@ const {
     toggleEraseMode,
     isSelected,
     digitCounts,
+    undo,
 } = useGameInteraction({
     sudoku: sudoku.raw(),
+    stepRecorder,
     clearErrors,
     checkAndComplete,
     onGroupCompleted: triggerFlash,
