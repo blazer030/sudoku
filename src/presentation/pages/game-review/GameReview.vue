@@ -1,7 +1,7 @@
 <template>
-    <div class="flex flex-col h-dvh px-5 bg-background">
+    <div class="flex flex-col gap-7 px-5 bg-background">
         <!-- Header -->
-        <div class="flex items-center justify-between pt-6 pb-3">
+        <div class="flex items-center justify-between pt-6">
             <button
                 class="flex items-center gap-2 cursor-pointer"
                 data-testid="review-back-button"
@@ -59,7 +59,7 @@
         </div>
 
         <!-- Board -->
-        <div class="bg-card rounded-2xl shadow-card-lg p-2 w-full mt-5">
+        <div class="bg-card rounded-2xl shadow-card-lg p-2 w-full">
             <div class="flex flex-col border-3 border-foreground/20 rounded-xl">
                 <div
                     v-for="(row, rowIndex) in board"
@@ -80,7 +80,7 @@
         </div>
 
         <!-- Step Description -->
-        <div class="flex flex-col gap-2 mt-4">
+        <div class="flex flex-col gap-2">
             <div class="bg-card rounded-lg py-2.5 px-4 shadow-card-sm min-h-9 flex items-center">
                 <span
                     v-if="description"
@@ -110,11 +110,8 @@
             </div>
         </div>
 
-        <!-- Spacer -->
-        <div class="flex-1" />
-
         <!-- Playback Controls -->
-        <div class="flex items-center justify-center gap-6 pb-8">
+        <div class="flex items-center justify-center gap-6">
             <button
                 class="w-11 h-11 rounded-full border border-border flex items-center justify-center cursor-pointer hover:bg-card"
                 data-testid="review-first"
