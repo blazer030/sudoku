@@ -142,4 +142,48 @@ describe("Statistics", () => {
             expect(stats.recentGames[0].hintsUsed).toBe(0);
         });
     });
+
+    describe("replay data", () => {
+        it("should store and retrieve replay data with game result", () => {
+            const replay = {
+                initialBoard: Array.from({ length: 9 }, () =>
+                    Array.from({ length: 9 }, () => ({ clue: 0, entry: 0, notes: [] as number[] }))
+                ),
+                steps: [
+                    {
+                        board: Array.from({ length: 9 }, () =>
+                            Array.from({ length: 9 }, () => ({ entry: 0, notes: [] as number[] }))
+                        ),
+                        action: "fill" as const,
+                        row: 2,
+                        column: 4,
+                        value: 6,
+                    },
+                ],
+            };
+
+            recordGameResult({
+                difficulty: "easy",
+                elapsedSeconds: 120,
+                completed: true,
+                replay,
+            });
+
+            const history = getGameHistory();
+            const savedReplay = history[0].replay;
+            expect(savedReplay).toBeDefined();
+            expect(savedReplay?.steps).toHaveLength(1);
+            expect(savedReplay?.steps[0].action).toBe("fill");
+            expect(savedReplay?.initialBoard[0][0].clue).toBe(0);
+        });
+
+        it("old data without replay should have undefined replay", () => {
+            localStorage.setItem("sudoku-statistics", JSON.stringify([
+                { difficulty: "easy", elapsedSeconds: 100, completed: true, date: "2024-01-01", hintsUsed: 0 },
+            ]));
+
+            const history = getGameHistory();
+            expect(history[0].replay).toBeUndefined();
+        });
+    });
 });

@@ -1,6 +1,13 @@
 import type { Difficulty } from "@/domain";
+import type { GameStep } from "@/domain/game/GameStep";
+import type { CellState } from "@/application/GameState";
 
 const STORAGE_KEY = "sudoku-statistics";
+
+export interface GameReplayData {
+    initialBoard: CellState[][];
+    steps: GameStep[];
+}
 
 export interface GameResult {
     difficulty: Difficulty;
@@ -8,6 +15,7 @@ export interface GameResult {
     completed: boolean;
     date: string;
     hintsUsed: number;
+    replay?: GameReplayData;
 }
 
 interface GameResultInput {
@@ -15,6 +23,7 @@ interface GameResultInput {
     elapsedSeconds: number;
     completed: boolean;
     hintsUsed?: number;
+    replay?: GameReplayData;
 }
 
 export interface DifficultyStats {
