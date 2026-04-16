@@ -25,4 +25,15 @@ describe("NakedSingle", () => {
             ],
         });
     });
+
+    it("should return null when no cell has exactly one candidate", () => {
+        const emptyPuzzle: number[][] = Array.from({ length: 9 }, () =>
+            Array<number>(9).fill(0),
+        );
+        const state = BoardState.fromPuzzle(emptyPuzzle);
+
+        const step = new NakedSingle().find(state);
+
+        expect(step).toBeNull();
+    });
 });
