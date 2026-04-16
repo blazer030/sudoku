@@ -1,5 +1,5 @@
 <template>
-    <div class="flex flex-col gap-7 px-5 bg-background overflow-y-auto h-dvh">
+    <div class="flex flex-col gap-5 px-5 bg-background overflow-y-auto h-dvh">
         <!-- Header -->
         <div class="flex items-center justify-between sticky top-0 bg-background pt-6 pb-3 z-10">
             <button
@@ -112,7 +112,7 @@
         <div class="flex flex-col gap-1.5">
             <div
                 ref="progressBar"
-                class="group w-full py-1.5 cursor-pointer"
+                class="group w-full h-6 flex items-center cursor-pointer"
                 @mousedown="onPointerDown"
                 @touchstart="onPointerDown"
             >
