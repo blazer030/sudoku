@@ -4,23 +4,32 @@ const ALL_DIGITS_MASK = 0b111111111;
 
 export class BoardState {
     private constructor(
+        private readonly _values: number[][],
         private readonly _candidates: number[][],
     ) {}
 
     public static fromPuzzle(puzzle: number[][]): BoardState {
+        const values: number[][] = [];
         const candidates: number[][] = [];
         for (let row = 0; row < BOARD_SIZE; row++) {
+            const rowValues: number[] = [];
             const rowCandidates: number[] = [];
             for (let column = 0; column < BOARD_SIZE; column++) {
+                rowValues.push(puzzle[row][column]);
                 if (puzzle[row][column] !== 0) {
                     rowCandidates.push(0);
                 } else {
                     rowCandidates.push(BoardState.computeCandidates(puzzle, row, column));
                 }
             }
+            values.push(rowValues);
             candidates.push(rowCandidates);
         }
-        return new BoardState(candidates);
+        return new BoardState(values, candidates);
+    }
+
+    public valueAt(row: number, column: number): number {
+        return this._values[row][column];
     }
 
     public candidatesOf(row: number, column: number): number[] {
