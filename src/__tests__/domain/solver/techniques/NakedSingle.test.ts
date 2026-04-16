@@ -36,4 +36,28 @@ describe("NakedSingle", () => {
 
         expect(step).toBeNull();
     });
+
+    it("should detect a naked single narrowed by column peers", () => {
+        const puzzle: number[][] = [
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [2, 0, 0, 0, 0, 0, 0, 0, 0],
+            [3, 0, 0, 0, 0, 0, 0, 0, 0],
+            [4, 0, 0, 0, 0, 0, 0, 0, 0],
+            [5, 0, 0, 0, 0, 0, 0, 0, 0],
+            [6, 0, 0, 0, 0, 0, 0, 0, 0],
+            [7, 0, 0, 0, 0, 0, 0, 0, 0],
+            [8, 0, 0, 0, 0, 0, 0, 0, 0],
+            [9, 0, 0, 0, 0, 0, 0, 0, 0],
+        ];
+        const state = BoardState.fromPuzzle(puzzle);
+
+        const step = new NakedSingle().find(state);
+
+        expect(step).toEqual({
+            technique: "nakedSingle",
+            assignments: [
+                { cell: { row: 0, column: 0 }, digit: 1 },
+            ],
+        });
+    });
 });
