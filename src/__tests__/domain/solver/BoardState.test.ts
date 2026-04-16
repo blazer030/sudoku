@@ -36,4 +36,22 @@ describe("BoardState", () => {
 
         expect(state.valueAt(0, 0)).toBe(1);
     });
+
+    it("should return 0 for an empty cell", () => {
+        const puzzle: number[][] = [
+            [1, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        ];
+
+        const state = BoardState.fromPuzzle(puzzle);
+
+        expect(state.valueAt(0, 1)).toBe(0);
+    });
 });
