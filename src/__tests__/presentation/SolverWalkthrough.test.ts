@@ -95,4 +95,18 @@ describe("SolverWalkthrough", () => {
 
         expect(wrapper.find("[data-testid='erase-button']").classes()).toContain("bg-primary");
     });
+
+    it("should clear a filled cell when clicked in erase mode", async () => {
+        const { wrapper } = mountWalkthrough();
+
+        await wrapper.find("[data-testid='number-6']").trigger("click");
+        await wrapper.find("[data-testid='solver-cell-5-2']").trigger("click");
+        expect(wrapper.find("[data-testid='solver-cell-5-2']").text()).toBe("6");
+
+        await wrapper.find("[data-testid='number-6']").trigger("click");
+        await wrapper.find("[data-testid='erase-button']").trigger("click");
+        await wrapper.find("[data-testid='solver-cell-5-2']").trigger("click");
+
+        expect(wrapper.find("[data-testid='solver-cell-5-2']").text()).toBe("");
+    });
 });
