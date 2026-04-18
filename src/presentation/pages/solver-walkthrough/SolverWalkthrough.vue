@@ -102,6 +102,6 @@ const pickDigit = (digit: number) => {
         userValues.value[row][column] = digit;
         return;
     }
-    selectedDigit.value = digit;
+    selectedDigit.value = selectedDigit.value === digit ? null : digit;
 };
 </script>

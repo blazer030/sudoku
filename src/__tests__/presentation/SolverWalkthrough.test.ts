@@ -77,4 +77,14 @@ describe("SolverWalkthrough", () => {
         expect(wrapper.find("[data-testid='solver-cell-0-0']").text()).toBe("3");
         expect(wrapper.find("[data-testid='solver-cell-4-4']").text()).toBe("3");
     });
+
+    it("should deselect the digit when clicking the same digit again", async () => {
+        const { wrapper } = mountWalkthrough();
+
+        await wrapper.find("[data-testid='number-5']").trigger("click");
+        expect(wrapper.find("[data-testid='number-5']").classes()).toContain("bg-primary");
+
+        await wrapper.find("[data-testid='number-5']").trigger("click");
+        expect(wrapper.find("[data-testid='number-5']").classes()).not.toContain("bg-primary");
+    });
 });
