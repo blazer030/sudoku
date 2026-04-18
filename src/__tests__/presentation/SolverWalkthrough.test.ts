@@ -153,4 +153,23 @@ describe("SolverWalkthrough", () => {
 
         expect(wrapper.find("[data-testid='solver-cell-5-2']").text()).toBe("123456789");
     });
+
+    it("should render a Solve button", () => {
+        const { wrapper } = mountWalkthrough();
+
+        expect(wrapper.find("[data-testid='solve-button']").exists()).toBe(true);
+    });
+
+    it("should reveal step navigation buttons after clicking Solve", async () => {
+        const { wrapper } = mountWalkthrough();
+
+        expect(wrapper.find("[data-testid='next-step-button']").exists()).toBe(false);
+
+        await wrapper.find("[data-testid='solve-button']").trigger("click");
+
+        expect(wrapper.find("[data-testid='next-step-button']").exists()).toBe(true);
+        expect(wrapper.find("[data-testid='prev-step-button']").exists()).toBe(true);
+        expect(wrapper.find("[data-testid='first-step-button']").exists()).toBe(true);
+        expect(wrapper.find("[data-testid='last-step-button']").exists()).toBe(true);
+    });
 });

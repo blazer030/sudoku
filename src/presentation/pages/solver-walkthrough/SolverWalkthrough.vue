@@ -50,6 +50,43 @@
                 @select-digit="pickDigit"
                 @toggle-erase-mode="toggleEraseMode"
             />
+            <button
+                v-if="solveResult === null"
+                class="px-6 py-3 bg-primary text-white rounded-2xl font-semibold cursor-pointer shadow-primary-active"
+                data-testid="solve-button"
+                @click="runSolver"
+            >
+                Solve
+            </button>
+            <div
+                v-else
+                class="flex gap-2"
+            >
+                <button
+                    class="px-4 py-2 bg-card rounded-xl font-semibold cursor-pointer shadow-card-sm"
+                    data-testid="first-step-button"
+                >
+                    First
+                </button>
+                <button
+                    class="px-4 py-2 bg-card rounded-xl font-semibold cursor-pointer shadow-card-sm"
+                    data-testid="prev-step-button"
+                >
+                    Prev
+                </button>
+                <button
+                    class="px-4 py-2 bg-card rounded-xl font-semibold cursor-pointer shadow-card-sm"
+                    data-testid="next-step-button"
+                >
+                    Next
+                </button>
+                <button
+                    class="px-4 py-2 bg-card rounded-xl font-semibold cursor-pointer shadow-card-sm"
+                    data-testid="last-step-button"
+                >
+                    Last
+                </button>
+            </div>
         </div>
         <div class="flex-1" />
     </div>
@@ -62,6 +99,7 @@ import { ChevronLeft } from "lucide-vue-next";
 import { ROUTER_PATH } from "@/router";
 import { BOARD_SIZE } from "@/domain/board/constants";
 import { BoardState } from "@/domain/solver/BoardState";
+import { TechniqueSolver, type SolveResult } from "@/domain/solver/TechniqueSolver";
 import DigitPad from "@/presentation/pages/game/components/DigitPad.vue";
 import SolverBoardCell from "@/presentation/pages/solver-walkthrough/components/SolverBoardCell.vue";
 
@@ -79,10 +117,16 @@ const state = computed(() => BoardState.fromPuzzle(userValues.value));
 const selectedCell = ref<CellPosition | null>(null);
 const selectedDigit = ref<number | null>(null);
 const eraseMode = ref(false);
+const solveResult = ref<SolveResult | null>(null);
+const techniqueSolver = new TechniqueSolver();
 const emptyDigitCounts = Array.from({ length: 10 }, () => 0);
 
 const toggleEraseMode = () => {
     eraseMode.value = !eraseMode.value;
+};
+
+const runSolver = () => {
+    solveResult.value = techniqueSolver.solveWithTechniques(state.value);
 };
 
 const goBack = () => {
