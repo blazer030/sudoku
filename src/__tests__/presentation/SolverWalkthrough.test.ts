@@ -48,6 +48,21 @@ describe("SolverWalkthrough", () => {
         expect(wrapper.find("[data-testid='solver-cell-3-3']").text()).toBe("123456789");
     });
 
+    it("should restore candidate notes on peer cells after erasing", async () => {
+        const { wrapper } = mountWalkthrough();
+
+        await wrapper.find("[data-testid='number-9']").trigger("click");
+        await wrapper.find("[data-testid='solver-cell-0-0']").trigger("click");
+        expect(wrapper.find("[data-testid='solver-cell-0-1']").text()).toBe("12345678");
+
+        await wrapper.find("[data-testid='number-9']").trigger("click");
+        await wrapper.find("[data-testid='erase-button']").trigger("click");
+        await wrapper.find("[data-testid='solver-cell-0-0']").trigger("click");
+
+        expect(wrapper.find("[data-testid='solver-cell-0-1']").text()).toBe("123456789");
+        expect(wrapper.find("[data-testid='solver-cell-1-0']").text()).toBe("123456789");
+    });
+
     it("should fill selected cell when a digit is picked", async () => {
         const { wrapper } = mountWalkthrough();
 
