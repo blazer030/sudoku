@@ -74,4 +74,17 @@ describe("BoardState", () => {
         expect(updated.valueAt(0, 0)).toBe(1);
         expect(updated.candidatesOf(0, 0)).toEqual([]);
     });
+
+    it("should remove assigned digit from peer candidates", () => {
+        const puzzle: number[][] = Array.from({ length: 9 }, () =>
+            Array<number>(9).fill(0),
+        );
+        const state = BoardState.fromPuzzle(puzzle);
+
+        const updated = state.assign(0, 0, 5);
+
+        expect(updated.candidatesOf(0, 4)).not.toContain(5);
+        expect(updated.candidatesOf(4, 0)).not.toContain(5);
+        expect(updated.candidatesOf(1, 1)).not.toContain(5);
+    });
 });
