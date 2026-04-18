@@ -68,34 +68,34 @@
                 v-else
                 class="flex flex-col items-center gap-3"
             >
-                <div class="flex gap-2">
+                <div class="flex items-center justify-center gap-5">
                     <button
-                        class="px-4 py-2 bg-card rounded-xl font-semibold cursor-pointer shadow-card-sm"
+                        class="size-11 rounded-xl bg-card shadow-card-sm flex items-center justify-center cursor-pointer hover:bg-foreground/5"
                         data-testid="first-step-button"
                         @click="jumpToFirst"
                     >
-                        First
+                        <SkipBack :size="20" />
                     </button>
                     <button
-                        class="px-4 py-2 bg-card rounded-xl font-semibold cursor-pointer shadow-card-sm"
+                        class="size-11 rounded-xl bg-card shadow-card-sm flex items-center justify-center cursor-pointer hover:bg-foreground/5"
                         data-testid="prev-step-button"
                         @click="reverseStep"
                     >
-                        Prev
+                        <ChevronLeft :size="22" />
                     </button>
                     <button
-                        class="px-4 py-2 bg-card rounded-xl font-semibold cursor-pointer shadow-card-sm"
+                        class="size-11 rounded-xl bg-card shadow-card-sm flex items-center justify-center cursor-pointer hover:bg-foreground/5"
                         data-testid="next-step-button"
                         @click="advanceStep"
                     >
-                        Next
+                        <ChevronRight :size="22" />
                     </button>
                     <button
-                        class="px-4 py-2 bg-card rounded-xl font-semibold cursor-pointer shadow-card-sm"
+                        class="size-11 rounded-xl bg-card shadow-card-sm flex items-center justify-center cursor-pointer hover:bg-foreground/5"
                         data-testid="last-step-button"
                         @click="jumpToLast"
                     >
-                        Last
+                        <SkipForward :size="20" />
                     </button>
                 </div>
                 <button
@@ -114,7 +114,7 @@
 <script lang="ts" setup>
 import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
-import { ChevronLeft } from "lucide-vue-next";
+import { ChevronLeft, ChevronRight, SkipBack, SkipForward } from "lucide-vue-next";
 import { ROUTER_PATH } from "@/router";
 import { BOARD_SIZE } from "@/domain/board/constants";
 import { BoardState } from "@/domain/solver/BoardState";
