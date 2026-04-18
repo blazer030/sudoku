@@ -203,6 +203,7 @@ const isSelectedCell = (row: number, column: number): boolean => {
 };
 
 const pickDigit = (digit: number) => {
+    eraseMode.value = false;
     if (selectedCell.value !== null) {
         const { row, column } = selectedCell.value;
         tryFillCell(row, column, digit);

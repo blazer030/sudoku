@@ -166,6 +166,18 @@ describe("SolverWalkthrough", () => {
         expect(wrapper.find("[data-testid='erase-button']").classes()).toContain("bg-primary");
     });
 
+    it("should exit erase mode when selecting a digit", async () => {
+        const { wrapper } = mountWalkthrough();
+
+        await wrapper.find("[data-testid='erase-button']").trigger("click");
+        expect(wrapper.find("[data-testid='erase-button']").classes()).toContain("bg-primary");
+
+        await wrapper.find("[data-testid='number-3']").trigger("click");
+
+        expect(wrapper.find("[data-testid='erase-button']").classes()).not.toContain("bg-primary");
+        expect(wrapper.find("[data-testid='number-3']").classes()).toContain("bg-primary");
+    });
+
     it("should clear a filled cell when clicked in erase mode", async () => {
         const { wrapper } = mountWalkthrough();
 
