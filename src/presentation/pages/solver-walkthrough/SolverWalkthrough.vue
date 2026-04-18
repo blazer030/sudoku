@@ -24,19 +24,19 @@
             <div class="bg-card rounded-2xl shadow-card-lg p-2 w-full">
                 <div class="flex flex-col border-3 border-foreground/20 rounded-xl">
                     <div
-                        v-for="(rowValues, rowIndex) in values"
-                        :key="`row-${rowIndex}`"
+                        v-for="rowIndex in BOARD_SIZE"
+                        :key="`row-${rowIndex - 1}`"
                         class="flex"
                     >
                         <SolverBoardCell
-                            v-for="(digit, columnIndex) in rowValues"
-                            :key="`cell-${rowIndex}-${columnIndex}`"
-                            :column="columnIndex"
-                            :data-testid="`solver-cell-${rowIndex}-${columnIndex}`"
-                            :row="rowIndex"
-                            :selected="isSelectedCell(rowIndex, columnIndex)"
-                            :value="digit"
-                            @click="selectCell(rowIndex, columnIndex)"
+                            v-for="columnIndex in BOARD_SIZE"
+                            :key="`cell-${rowIndex - 1}-${columnIndex - 1}`"
+                            :column="columnIndex - 1"
+                            :data-testid="`solver-cell-${rowIndex - 1}-${columnIndex - 1}`"
+                            :row="rowIndex - 1"
+                            :selected="isSelectedCell(rowIndex - 1, columnIndex - 1)"
+                            :value="state.valueAt(rowIndex - 1, columnIndex - 1)"
+                            @click="selectCell(rowIndex - 1, columnIndex - 1)"
                         />
                     </div>
                 </div>
@@ -55,10 +55,12 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
 import { ChevronLeft } from "lucide-vue-next";
 import { ROUTER_PATH } from "@/router";
+import { BOARD_SIZE } from "@/domain/board/constants";
+import { BoardState } from "@/domain/solver/BoardState";
 import DigitPad from "@/presentation/pages/game/components/DigitPad.vue";
 import SolverBoardCell from "@/presentation/pages/solver-walkthrough/components/SolverBoardCell.vue";
 
@@ -68,10 +70,11 @@ interface CellPosition {
 }
 
 const createEmptyBoard = (): number[][] =>
-    Array.from({ length: 9 }, () => Array.from({ length: 9 }, () => 0));
+    Array.from({ length: BOARD_SIZE }, () => Array.from({ length: BOARD_SIZE }, () => 0));
 
 const router = useRouter();
-const values = ref<number[][]>(createEmptyBoard());
+const userValues = ref<number[][]>(createEmptyBoard());
+const state = computed(() => BoardState.fromPuzzle(userValues.value));
 const selectedCell = ref<CellPosition | null>(null);
 const emptyDigitCounts = Array.from({ length: 10 }, () => 0);
 
@@ -91,8 +94,6 @@ const isSelectedCell = (row: number, column: number): boolean => {
 const fillDigit = (digit: number) => {
     if (!selectedCell.value) return;
     const { row, column } = selectedCell.value;
-    const nextValues = values.value.map((rowValues) => [...rowValues]);
-    nextValues[row][column] = digit;
-    values.value = nextValues;
+    userValues.value[row][column] = digit;
 };
 </script>
