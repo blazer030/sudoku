@@ -1,5 +1,24 @@
 <template>
     <div class="flex flex-col gap-2 h-dvh py-6 px-5">
+        <div class="flex items-center justify-between">
+            <button
+                class="flex items-center gap-2 cursor-pointer"
+                data-testid="back-button"
+                @click="goBack"
+            >
+                <ChevronLeft
+                    :size="24"
+                    class="text-foreground"
+                />
+                <span class="text-foreground text-base font-medium">
+                    Back
+                </span>
+            </button>
+            <span class="text-foreground text-lg font-semibold">
+                Walkthrough
+            </span>
+            <div class="w-[72px]" />
+        </div>
         <div class="flex-1" />
         <div class="flex flex-col items-center gap-6">
             <div class="bg-card rounded-2xl shadow-card-lg p-2 w-full">
@@ -37,6 +56,9 @@
 
 <script lang="ts" setup>
 import { ref } from "vue";
+import { useRouter } from "vue-router";
+import { ChevronLeft } from "lucide-vue-next";
+import { ROUTER_PATH } from "@/router";
 import DigitPad from "@/presentation/pages/game/components/DigitPad.vue";
 import SolverBoardCell from "@/presentation/pages/solver-walkthrough/components/SolverBoardCell.vue";
 
@@ -48,9 +70,14 @@ interface CellPosition {
 const createEmptyBoard = (): number[][] =>
     Array.from({ length: 9 }, () => Array.from({ length: 9 }, () => 0));
 
+const router = useRouter();
 const values = ref<number[][]>(createEmptyBoard());
 const selectedCell = ref<CellPosition | null>(null);
 const emptyDigitCounts = Array.from({ length: 10 }, () => 0);
+
+const goBack = () => {
+    void router.push(ROUTER_PATH.home);
+};
 
 const selectCell = (row: number, column: number) => {
     selectedCell.value = { row, column };
