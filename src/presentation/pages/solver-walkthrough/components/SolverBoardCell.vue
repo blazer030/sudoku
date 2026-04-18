@@ -13,18 +13,38 @@
         >
             {{ value }}
         </div>
+        <div
+            v-else
+            class="grid grid-cols-3 grid-rows-3 w-full h-full p-0.5"
+        >
+            <div
+                v-for="noteDigit in 9"
+                :key="`note-${noteDigit}`"
+                class="flex justify-center items-center leading-none"
+            >
+                <span
+                    v-if="notes.includes(noteDigit)"
+                    class="text-foreground-muted text-[clamp(8px,-0.49px+2.26vw,14px)]"
+                >
+                    {{ noteDigit }}
+                </span>
+            </div>
+        </div>
     </div>
 </template>
 
 <script lang="ts" setup>
 import { computed } from "vue";
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
     value: number;
     row: number;
     column: number;
+    notes?: number[];
     selected?: boolean;
-}>();
+}>(), {
+    notes: () => [],
+});
 
 const cellBackground = computed(() => props.selected ? "bg-primary-light" : "bg-card");
 

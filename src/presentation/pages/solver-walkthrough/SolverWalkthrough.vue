@@ -33,6 +33,7 @@
                             :key="`cell-${rowIndex - 1}-${columnIndex - 1}`"
                             :column="columnIndex - 1"
                             :data-testid="`solver-cell-${rowIndex - 1}-${columnIndex - 1}`"
+                            :notes="state.candidatesOf(rowIndex - 1, columnIndex - 1)"
                             :row="rowIndex - 1"
                             :selected="isSelectedCell(rowIndex - 1, columnIndex - 1)"
                             :value="state.valueAt(rowIndex - 1, columnIndex - 1)"

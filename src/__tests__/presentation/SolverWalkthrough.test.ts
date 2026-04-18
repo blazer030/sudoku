@@ -18,16 +18,22 @@ const mountWalkthrough = () => {
 };
 
 describe("SolverWalkthrough", () => {
-    it("should render an empty 9x9 board on mount", () => {
+    it("should render a 9x9 board on mount", () => {
         const { wrapper } = mountWalkthrough();
 
         for (let row = 0; row < 9; row++) {
             for (let column = 0; column < 9; column++) {
                 const cell = wrapper.find(`[data-testid='solver-cell-${row}-${column}']`);
                 expect(cell.exists()).toBe(true);
-                expect(cell.text()).toBe("");
             }
         }
+    });
+
+    it("should show all 1-9 candidate notes in empty cells by default", () => {
+        const { wrapper } = mountWalkthrough();
+
+        const cell = wrapper.find("[data-testid='solver-cell-0-0']");
+        expect(cell.text()).toBe("123456789");
     });
 
     it("should fill selected cell when a digit is picked", async () => {
@@ -107,6 +113,6 @@ describe("SolverWalkthrough", () => {
         await wrapper.find("[data-testid='erase-button']").trigger("click");
         await wrapper.find("[data-testid='solver-cell-5-2']").trigger("click");
 
-        expect(wrapper.find("[data-testid='solver-cell-5-2']").text()).toBe("");
+        expect(wrapper.find("[data-testid='solver-cell-5-2']").text()).toBe("123456789");
     });
 });
