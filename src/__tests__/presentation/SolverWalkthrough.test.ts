@@ -302,6 +302,17 @@ describe("SolverWalkthrough", () => {
         expect(wrapper.find("[data-testid='step-description']").text()).toContain("Initial board");
     });
 
+    it("should show a 'Step N of M' counter that advances with Next", async () => {
+        const { wrapper } = mountWalkthrough();
+        await fillPuzzle(wrapper, singlesPuzzle);
+
+        await wrapper.find("[data-testid='solve-button']").trigger("click");
+        expect(wrapper.find("[data-testid='step-counter']").text()).toMatch(/Step 0 of \d+/);
+
+        await wrapper.find("[data-testid='next-step-button']").trigger("click");
+        expect(wrapper.find("[data-testid='step-counter']").text()).toMatch(/Step 1 of \d+/);
+    });
+
     it("should describe a Naked Single step with technique, cell and digit", async () => {
         const { wrapper } = mountWalkthrough();
         await fillPuzzle(wrapper, singlesPuzzle);

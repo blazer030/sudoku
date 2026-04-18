@@ -74,6 +74,12 @@
                 >
                     <span class="text-sm text-foreground-muted">{{ stepDescription }}</span>
                 </div>
+                <span
+                    class="text-xs text-foreground-muted"
+                    data-testid="step-counter"
+                >
+                    Step {{ currentStepIndex + 1 }} of {{ totalSteps }}
+                </span>
                 <div class="flex items-center justify-center gap-5">
                     <button
                         class="size-11 rounded-xl bg-card shadow-card-sm flex items-center justify-center cursor-pointer hover:bg-foreground/5"
@@ -152,6 +158,8 @@ const TECHNIQUE_LABELS: Record<TechniqueId, string> = {
     nakedSingle: "Naked Single",
     hiddenSingle: "Hidden Single",
 };
+
+const totalSteps = computed(() => solveResult.value?.steps.length ?? 0);
 
 const stepDescription = computed(() => {
     if (solveResult.value === null) return "";
