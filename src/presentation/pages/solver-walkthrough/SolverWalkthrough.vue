@@ -1,39 +1,44 @@
 <template>
-    <div class="flex flex-col gap-4 p-4">
-        <div class="grid grid-cols-9">
-            <div
-                v-for="row in 9"
-                :key="`row-${row}`"
-                class="contents"
-            >
-                <div
-                    v-for="column in 9"
-                    :key="`cell-${row}-${column}`"
-                    :data-testid="`solver-cell-${row - 1}-${column - 1}`"
-                    :class="[
-                        'aspect-square flex items-center justify-center border cursor-pointer',
-                        isSelectedCell(row - 1, column - 1) ? 'bg-highlight' : '',
-                    ]"
-                    @click="selectCell(row - 1, column - 1)"
-                >
-                    {{ values[row - 1][column - 1] === 0 ? "" : values[row - 1][column - 1] }}
+    <div class="flex flex-col gap-2 h-dvh py-6 px-5">
+        <div class="flex-1" />
+        <div class="flex flex-col items-center gap-6">
+            <div class="bg-card rounded-2xl shadow-card-lg p-2 w-full">
+                <div class="flex flex-col border-3 border-foreground/20 rounded-xl">
+                    <div
+                        v-for="(rowValues, rowIndex) in values"
+                        :key="`row-${rowIndex}`"
+                        class="flex"
+                    >
+                        <SolverBoardCell
+                            v-for="(digit, columnIndex) in rowValues"
+                            :key="`cell-${rowIndex}-${columnIndex}`"
+                            :column="columnIndex"
+                            :data-testid="`solver-cell-${rowIndex}-${columnIndex}`"
+                            :row="rowIndex"
+                            :selected="isSelectedCell(rowIndex, columnIndex)"
+                            :value="digit"
+                            @click="selectCell(rowIndex, columnIndex)"
+                        />
+                    </div>
                 </div>
             </div>
+            <DigitPad
+                :digit-counts="emptyDigitCounts"
+                :erase-active="false"
+                :selected-digit="null"
+                :show-remaining-count="false"
+                @select-digit="fillDigit"
+                @toggle-erase-mode="() => {}"
+            />
         </div>
-        <DigitPad
-            :selected-digit="null"
-            :erase-active="false"
-            :digit-counts="emptyDigitCounts"
-            :show-remaining-count="false"
-            @select-digit="fillDigit"
-            @toggle-erase-mode="() => {}"
-        />
+        <div class="flex-1" />
     </div>
 </template>
 
 <script lang="ts" setup>
 import { ref } from "vue";
 import DigitPad from "@/presentation/pages/game/components/DigitPad.vue";
+import SolverBoardCell from "@/presentation/pages/solver-walkthrough/components/SolverBoardCell.vue";
 
 interface CellPosition {
     row: number;
