@@ -35,6 +35,7 @@ export class HiddenSingle implements Technique {
             if (candidateCount === 1) {
                 return {
                     technique: "hiddenSingle",
+                    focus: [{ row, column: lastColumn }],
                     assignments: [
                         { cell: { row, column: lastColumn }, digit },
                     ],
@@ -57,6 +58,7 @@ export class HiddenSingle implements Technique {
             if (candidateCount === 1) {
                 return {
                     technique: "hiddenSingle",
+                    focus: [{ row: lastRow, column }],
                     assignments: [
                         { cell: { row: lastRow, column }, digit },
                     ],
@@ -83,6 +85,7 @@ export class HiddenSingle implements Technique {
             if (candidateCount === 1) {
                 return {
                     technique: "hiddenSingle",
+                    focus: [{ row: foundRow, column: foundColumn }],
                     assignments: [
                         { cell: { row: foundRow, column: foundColumn }, digit },
                     ],

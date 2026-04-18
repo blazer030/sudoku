@@ -11,6 +11,7 @@ export class NakedSingle implements Technique {
                 if (candidates.length === 1) {
                     return {
                         technique: "nakedSingle",
+                        focus: [{ row, column }],
                         assignments: [
                             { cell: { row, column }, digit: candidates[0] },
                         ],

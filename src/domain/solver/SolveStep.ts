@@ -12,5 +12,6 @@ export type TechniqueId = "nakedSingle" | "hiddenSingle";
 
 export interface SolveStep {
     technique: TechniqueId;
+    focus: CellReference[];
     assignments: Assignment[];
 }

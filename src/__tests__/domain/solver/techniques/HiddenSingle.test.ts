@@ -20,6 +20,7 @@ describe("HiddenSingle", () => {
 
         expect(step).toEqual({
             technique: "hiddenSingle",
+            focus: [{ row: 0, column: 0 }],
             assignments: [
                 { cell: { row: 0, column: 0 }, digit: 1 },
             ],
@@ -44,6 +45,7 @@ describe("HiddenSingle", () => {
 
         expect(step).toEqual({
             technique: "hiddenSingle",
+            focus: [{ row: 0, column: 0 }],
             assignments: [
                 { cell: { row: 0, column: 0 }, digit: 1 },
             ],
@@ -68,6 +70,7 @@ describe("HiddenSingle", () => {
 
         expect(step).toEqual({
             technique: "hiddenSingle",
+            focus: [{ row: 4, column: 4 }],
             assignments: [
                 { cell: { row: 4, column: 4 }, digit: 1 },
             ],

@@ -20,6 +20,7 @@ describe("NakedSingle", () => {
 
         expect(step).toEqual({
             technique: "nakedSingle",
+            focus: [{ row: 0, column: 0 }],
             assignments: [
                 { cell: { row: 0, column: 0 }, digit: 1 },
             ],
@@ -55,6 +56,7 @@ describe("NakedSingle", () => {
 
         expect(step).toEqual({
             technique: "nakedSingle",
+            focus: [{ row: 0, column: 0 }],
             assignments: [
                 { cell: { row: 0, column: 0 }, digit: 1 },
             ],
@@ -79,6 +81,7 @@ describe("NakedSingle", () => {
 
         expect(step).toEqual({
             technique: "nakedSingle",
+            focus: [{ row: 0, column: 0 }],
             assignments: [
                 { cell: { row: 0, column: 0 }, digit: 1 },
             ],
