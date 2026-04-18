@@ -43,6 +43,7 @@
                 </div>
             </div>
             <DigitPad
+                v-if="solveResult === null"
                 :digit-counts="emptyDigitCounts"
                 :erase-active="eraseMode"
                 :selected-digit="selectedDigit"

@@ -198,6 +198,16 @@ describe("SolverWalkthrough", () => {
         expect(wrapper.find("[data-testid='solve-button']").exists()).toBe(true);
     });
 
+    it("should hide DigitPad after clicking Solve", async () => {
+        const { wrapper } = mountWalkthrough();
+        expect(wrapper.find("[data-testid='number-1']").exists()).toBe(true);
+
+        await wrapper.find("[data-testid='solve-button']").trigger("click");
+
+        expect(wrapper.find("[data-testid='number-1']").exists()).toBe(false);
+        expect(wrapper.find("[data-testid='erase-button']").exists()).toBe(false);
+    });
+
     it("should reveal step navigation buttons after clicking Solve", async () => {
         const { wrapper } = mountWalkthrough();
 
