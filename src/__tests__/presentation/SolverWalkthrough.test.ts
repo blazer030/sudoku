@@ -4,7 +4,7 @@ import { createMemoryHistory, createRouter } from "vue-router";
 import SolverWalkthrough from "@/presentation/pages/solver-walkthrough/SolverWalkthrough.vue";
 import { BoardState } from "@/domain/solver/BoardState";
 import { TechniqueSolver } from "@/domain/solver/TechniqueSolver";
-import { singlesPuzzle } from "@/__tests__/fixtures/singlesPuzzle";
+import { singlesPuzzle, singlesSolution } from "@/__tests__/fixtures/singlesPuzzle";
 
 const fillPuzzle = async (wrapper: VueWrapper, puzzle: number[][]) => {
     for (let row = 0; row < 9; row++) {
@@ -218,5 +218,41 @@ describe("SolverWalkthrough", () => {
 
         await wrapper.find("[data-testid='prev-step-button']").trigger("click");
         expect(wrapper.find(targetSelector).find("[data-testid='cell-value']").exists()).toBe(false);
+    });
+
+    it("should jump to fully solved state when clicking Last", async () => {
+        const { wrapper } = mountWalkthrough();
+        await fillPuzzle(wrapper, singlesPuzzle);
+
+        await wrapper.find("[data-testid='solve-button']").trigger("click");
+        await wrapper.find("[data-testid='last-step-button']").trigger("click");
+
+        for (let row = 0; row < 9; row++) {
+            for (let column = 0; column < 9; column++) {
+                const cellValue = wrapper.find(`[data-testid='solver-cell-${row}-${column}']`).find("[data-testid='cell-value']");
+                expect(cellValue.text()).toBe(String(singlesSolution[row][column]));
+            }
+        }
+    });
+
+    it("should jump back to initial input state when clicking First", async () => {
+        const { wrapper } = mountWalkthrough();
+        await fillPuzzle(wrapper, singlesPuzzle);
+
+        await wrapper.find("[data-testid='solve-button']").trigger("click");
+        await wrapper.find("[data-testid='last-step-button']").trigger("click");
+        await wrapper.find("[data-testid='first-step-button']").trigger("click");
+
+        for (let row = 0; row < 9; row++) {
+            for (let column = 0; column < 9; column++) {
+                const puzzleDigit = singlesPuzzle[row][column];
+                const cellValue = wrapper.find(`[data-testid='solver-cell-${row}-${column}']`).find("[data-testid='cell-value']");
+                if (puzzleDigit === 0) {
+                    expect(cellValue.exists()).toBe(false);
+                } else {
+                    expect(cellValue.text()).toBe(String(puzzleDigit));
+                }
+            }
+        }
     });
 });

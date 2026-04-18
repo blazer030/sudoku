@@ -65,6 +65,7 @@
                 <button
                     class="px-4 py-2 bg-card rounded-xl font-semibold cursor-pointer shadow-card-sm"
                     data-testid="first-step-button"
+                    @click="jumpToFirst"
                 >
                     First
                 </button>
@@ -85,6 +86,7 @@
                 <button
                     class="px-4 py-2 bg-card rounded-xl font-semibold cursor-pointer shadow-card-sm"
                     data-testid="last-step-button"
+                    @click="jumpToLast"
                 >
                     Last
                 </button>
@@ -150,6 +152,15 @@ const reverseStep = () => {
     if (currentStepIndex.value >= 0) {
         currentStepIndex.value -= 1;
     }
+};
+
+const jumpToFirst = () => {
+    currentStepIndex.value = -1;
+};
+
+const jumpToLast = () => {
+    if (solveResult.value === null) return;
+    currentStepIndex.value = solveResult.value.steps.length - 1;
 };
 
 const toggleEraseMode = () => {
