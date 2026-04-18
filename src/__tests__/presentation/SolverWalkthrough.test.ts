@@ -66,4 +66,15 @@ describe("SolverWalkthrough", () => {
 
         expect(wrapper.find("[data-testid='solver-cell-2-6']").text()).toBe("8");
     });
+
+    it("should keep digit selected and fill subsequent clicked cells", async () => {
+        const { wrapper } = mountWalkthrough();
+
+        await wrapper.find("[data-testid='number-3']").trigger("click");
+        await wrapper.find("[data-testid='solver-cell-0-0']").trigger("click");
+        await wrapper.find("[data-testid='solver-cell-4-4']").trigger("click");
+
+        expect(wrapper.find("[data-testid='solver-cell-0-0']").text()).toBe("3");
+        expect(wrapper.find("[data-testid='solver-cell-4-4']").text()).toBe("3");
+    });
 });
