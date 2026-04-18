@@ -125,6 +125,7 @@ import { ROUTER_PATH } from "@/router";
 import { BOARD_SIZE } from "@/domain/board/constants";
 import { BoardState } from "@/domain/solver/BoardState";
 import { TechniqueSolver, type SolveResult } from "@/domain/solver/TechniqueSolver";
+import type { TechniqueId } from "@/domain/solver/SolveStep";
 import DigitPad from "@/presentation/pages/game/components/DigitPad.vue";
 import SolverBoardCell from "@/presentation/pages/solver-walkthrough/components/SolverBoardCell.vue";
 
@@ -147,10 +148,18 @@ const currentStepIndex = ref(-1);
 const techniqueSolver = new TechniqueSolver();
 const emptyDigitCounts = Array.from({ length: 10 }, () => 0);
 
+const TECHNIQUE_LABELS: Record<TechniqueId, string> = {
+    nakedSingle: "Naked Single",
+    hiddenSingle: "Hidden Single",
+};
+
 const stepDescription = computed(() => {
     if (solveResult.value === null) return "";
     if (currentStepIndex.value < 0) return "Initial board";
-    return "";
+    const step = solveResult.value.steps[currentStepIndex.value];
+    const { cell, digit } = step.assignments[0];
+    const label = TECHNIQUE_LABELS[step.technique];
+    return `${label}: Row ${cell.row + 1}, Col ${cell.column + 1} = ${digit}`;
 });
 
 const displayState = computed(() => {

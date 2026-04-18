@@ -302,6 +302,25 @@ describe("SolverWalkthrough", () => {
         expect(wrapper.find("[data-testid='step-description']").text()).toContain("Initial board");
     });
 
+    it("should describe a Naked Single step with technique, cell and digit", async () => {
+        const { wrapper } = mountWalkthrough();
+        await fillPuzzle(wrapper, singlesPuzzle);
+
+        const firstStep = new TechniqueSolver().nextStep(BoardState.fromPuzzle(singlesPuzzle));
+        if (firstStep === null) throw new Error("expected first step to exist");
+        expect(firstStep.technique).toBe("nakedSingle");
+        const { cell, digit } = firstStep.assignments[0];
+
+        await wrapper.find("[data-testid='solve-button']").trigger("click");
+        await wrapper.find("[data-testid='next-step-button']").trigger("click");
+
+        const text = wrapper.find("[data-testid='step-description']").text();
+        expect(text).toContain("Naked Single");
+        expect(text).toContain(`Row ${cell.row + 1}`);
+        expect(text).toContain(`Col ${cell.column + 1}`);
+        expect(text).toContain(String(digit));
+    });
+
     it("should jump back to initial input state when clicking First", async () => {
         const { wrapper } = mountWalkthrough();
         await fillPuzzle(wrapper, singlesPuzzle);
