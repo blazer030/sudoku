@@ -21,7 +21,12 @@
         </div>
         <div class="flex-1" />
         <div class="flex flex-col items-center gap-6">
-            <div class="bg-card rounded-2xl shadow-card-lg p-2 w-full">
+            <div
+                :class="[
+                    'bg-card rounded-2xl shadow-card-lg p-2 w-full',
+                    solveResult !== null ? 'pointer-events-none' : '',
+                ]"
+            >
                 <div class="flex flex-col border-3 border-foreground/20 rounded-xl">
                     <div
                         v-for="rowIndex in BOARD_SIZE"
@@ -187,6 +192,7 @@ const tryFillCell = (row: number, column: number, digit: number) => {
 };
 
 const selectCell = (row: number, column: number) => {
+    if (solveResult.value !== null) return;
     if (eraseMode.value) {
         userValues.value[row][column] = 0;
         return;

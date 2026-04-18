@@ -208,6 +208,15 @@ describe("SolverWalkthrough", () => {
         expect(wrapper.find("[data-testid='erase-button']").exists()).toBe(false);
     });
 
+    it("should ignore cell clicks after entering solve mode", async () => {
+        const { wrapper } = mountWalkthrough();
+
+        await wrapper.find("[data-testid='solve-button']").trigger("click");
+        await wrapper.find("[data-testid='solver-cell-0-0']").trigger("click");
+
+        expect(wrapper.find("[data-testid='solver-cell-0-0']").classes()).not.toContain("bg-primary-light");
+    });
+
     it("should reveal step navigation buttons after clicking Solve", async () => {
         const { wrapper } = mountWalkthrough();
 
