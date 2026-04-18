@@ -4,6 +4,7 @@ import Game from "@/presentation/pages/game/Game.vue";
 import Statistics from "@/presentation/pages/statistics/Statistics.vue";
 import Settings from "@/presentation/pages/settings/Settings.vue";
 import GameReview from "@/presentation/pages/game-review/GameReview.vue";
+import SolverWalkthrough from "@/presentation/pages/solver-walkthrough/SolverWalkthrough.vue";
 
 const baseUrl = import.meta.env.VITE_BASE_URL;
 
@@ -14,6 +15,7 @@ export const ROUTER_PATH = {
     settings: "/settings",
     gameReview: "/game-review/:index",
     gameReviewFor: (index: number) => `/game-review/${index}`,
+    solverWalkthrough: "/solver",
 };
 
 export const router = createRouter({
@@ -24,6 +26,7 @@ export const router = createRouter({
         { path: "/statistics", component: Statistics },
         { path: "/settings", component: Settings },
         { path: "/game-review/:index", component: GameReview, props: true },
+        { path: "/solver", component: SolverWalkthrough },
         { path: "/:pathMatch(.*)*", redirect: "/" },
     ],
 });

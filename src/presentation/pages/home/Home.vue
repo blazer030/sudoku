@@ -66,6 +66,17 @@
             </button>
             <button
                 class="flex flex-col items-center gap-1 cursor-pointer"
+                data-testid="walkthrough-button"
+                @click="goToWalkthrough"
+            >
+                <Wand2
+                    :size="24"
+                    class="text-foreground-muted"
+                />
+                <span class="text-foreground-muted text-[11px] font-medium">Walkthrough</span>
+            </button>
+            <button
+                class="flex flex-col items-center gap-1 cursor-pointer"
                 data-testid="statistics-button"
                 @click="goToStatistics"
             >
@@ -85,7 +96,7 @@
 <script lang="ts" setup>
 import { ref } from "vue";
 import { useRouter } from "vue-router";
-import { ChartBar, Plus, Settings } from "lucide-vue-next";
+import { ChartBar, Plus, Settings, Wand2 } from "lucide-vue-next";
 import { ROUTER_PATH } from "@/router";
 import type { Difficulty } from "@/domain";
 import { useGameStore } from "@/stores/gameStore";
@@ -131,6 +142,10 @@ const goToSettings = () => {
 
 const goToStatistics = () => {
     void router.push(ROUTER_PATH.statistics);
+};
+
+const goToWalkthrough = () => {
+    void router.push(ROUTER_PATH.solverWalkthrough);
 };
 
 const continueGame = () => {

@@ -15,6 +15,7 @@ const createTestRouter = () => {
         routes: [
             { path: "/", component: Home },
             { path: "/game", component: { template: "<div>Game</div>" } },
+            { path: "/solver", component: { template: "<div>Solver</div>" } },
         ],
     });
 };
@@ -133,6 +134,17 @@ describe("Home", () => {
         expect(gameStore.hasActiveGame).toBe(true);
         expect(gameStore.elapsedSeconds).toBe(204);
         expect(router.currentRoute.value.path).toBe(ROUTER_PATH.game);
+    });
+
+    it("should navigate to solver walkthrough when clicking Walkthrough button", async () => {
+        const { wrapper, router } = mountHome();
+        await router.push("/");
+        await router.isReady();
+
+        await wrapper.find("[data-testid='walkthrough-button']").trigger("click");
+        await flushPromises();
+
+        expect(router.currentRoute.value.path).toBe(ROUTER_PATH.solverWalkthrough);
     });
 
     it("should create game in store before navigating on New Game click", async () => {
