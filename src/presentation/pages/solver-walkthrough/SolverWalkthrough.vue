@@ -164,6 +164,9 @@ const jumpToLast = () => {
 };
 
 const toggleEraseMode = () => {
+    if (!eraseMode.value) {
+        selectedDigit.value = null;
+    }
     eraseMode.value = !eraseMode.value;
 };
 
