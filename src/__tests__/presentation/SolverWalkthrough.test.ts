@@ -293,6 +293,15 @@ describe("SolverWalkthrough", () => {
         }
     });
 
+    it("should show an 'Initial board' description before any step is applied", async () => {
+        const { wrapper } = mountWalkthrough();
+        await fillPuzzle(wrapper, singlesPuzzle);
+
+        await wrapper.find("[data-testid='solve-button']").trigger("click");
+
+        expect(wrapper.find("[data-testid='step-description']").text()).toContain("Initial board");
+    });
+
     it("should jump back to initial input state when clicking First", async () => {
         const { wrapper } = mountWalkthrough();
         await fillPuzzle(wrapper, singlesPuzzle);

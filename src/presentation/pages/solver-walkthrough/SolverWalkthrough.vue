@@ -66,8 +66,14 @@
             </button>
             <div
                 v-else
-                class="flex flex-col items-center gap-3"
+                class="flex flex-col items-center gap-3 w-full"
             >
+                <div
+                    class="bg-card rounded-lg py-2.5 px-4 shadow-card-sm min-h-9 flex items-center w-full"
+                    data-testid="step-description"
+                >
+                    <span class="text-sm text-foreground-muted">{{ stepDescription }}</span>
+                </div>
                 <div class="flex items-center justify-center gap-5">
                     <button
                         class="size-11 rounded-xl bg-card shadow-card-sm flex items-center justify-center cursor-pointer hover:bg-foreground/5"
@@ -140,6 +146,12 @@ const solveResult = ref<SolveResult | null>(null);
 const currentStepIndex = ref(-1);
 const techniqueSolver = new TechniqueSolver();
 const emptyDigitCounts = Array.from({ length: 10 }, () => 0);
+
+const stepDescription = computed(() => {
+    if (solveResult.value === null) return "";
+    if (currentStepIndex.value < 0) return "Initial board";
+    return "";
+});
 
 const displayState = computed(() => {
     const baseState = BoardState.fromPuzzle(userValues.value);
