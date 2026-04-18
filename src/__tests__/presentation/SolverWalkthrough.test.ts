@@ -202,4 +202,21 @@ describe("SolverWalkthrough", () => {
         await wrapper.find("[data-testid='next-step-button']").trigger("click");
         expect(wrapper.find(targetSelector).find("[data-testid='cell-value']").text()).toBe(String(digit));
     });
+
+    it("should reverse the last applied step when clicking Prev", async () => {
+        const { wrapper } = mountWalkthrough();
+        await fillPuzzle(wrapper, singlesPuzzle);
+
+        const firstStep = new TechniqueSolver().nextStep(BoardState.fromPuzzle(singlesPuzzle));
+        if (firstStep === null) throw new Error("expected first step to exist");
+        const { cell } = firstStep.assignments[0];
+        const targetSelector = `[data-testid='solver-cell-${cell.row}-${cell.column}']`;
+
+        await wrapper.find("[data-testid='solve-button']").trigger("click");
+        await wrapper.find("[data-testid='next-step-button']").trigger("click");
+        expect(wrapper.find(targetSelector).find("[data-testid='cell-value']").exists()).toBe(true);
+
+        await wrapper.find("[data-testid='prev-step-button']").trigger("click");
+        expect(wrapper.find(targetSelector).find("[data-testid='cell-value']").exists()).toBe(false);
+    });
 });

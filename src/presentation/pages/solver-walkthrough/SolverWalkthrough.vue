@@ -71,6 +71,7 @@
                 <button
                     class="px-4 py-2 bg-card rounded-xl font-semibold cursor-pointer shadow-card-sm"
                     data-testid="prev-step-button"
+                    @click="reverseStep"
                 >
                     Prev
                 </button>
@@ -142,6 +143,12 @@ const advanceStep = () => {
     const lastIndex = solveResult.value.steps.length - 1;
     if (currentStepIndex.value < lastIndex) {
         currentStepIndex.value += 1;
+    }
+};
+
+const reverseStep = () => {
+    if (currentStepIndex.value >= 0) {
+        currentStepIndex.value -= 1;
     }
 };
 
