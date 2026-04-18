@@ -63,6 +63,17 @@ describe("SolverWalkthrough", () => {
         expect(wrapper.find("[data-testid='solver-cell-1-0']").text()).toBe("123456789");
     });
 
+    it("should reject filling a digit not in the cell's candidates", async () => {
+        const { wrapper } = mountWalkthrough();
+
+        await wrapper.find("[data-testid='number-9']").trigger("click");
+        await wrapper.find("[data-testid='solver-cell-0-0']").trigger("click");
+
+        await wrapper.find("[data-testid='solver-cell-0-1']").trigger("click");
+
+        expect(wrapper.find("[data-testid='solver-cell-0-1']").text()).toBe("12345678");
+    });
+
     it("should fill selected cell when a digit is picked", async () => {
         const { wrapper } = mountWalkthrough();
 

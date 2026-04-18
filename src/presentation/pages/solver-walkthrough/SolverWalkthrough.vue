@@ -89,13 +89,19 @@ const goBack = () => {
     void router.push(ROUTER_PATH.home);
 };
 
+const tryFillCell = (row: number, column: number, digit: number) => {
+    if (state.value.candidatesOf(row, column).includes(digit)) {
+        userValues.value[row][column] = digit;
+    }
+};
+
 const selectCell = (row: number, column: number) => {
     if (eraseMode.value) {
         userValues.value[row][column] = 0;
         return;
     }
     if (selectedDigit.value !== null) {
-        userValues.value[row][column] = selectedDigit.value;
+        tryFillCell(row, column, selectedDigit.value);
         return;
     }
     selectedCell.value = { row, column };
@@ -109,7 +115,7 @@ const isSelectedCell = (row: number, column: number): boolean => {
 const pickDigit = (digit: number) => {
     if (selectedCell.value !== null) {
         const { row, column } = selectedCell.value;
-        userValues.value[row][column] = digit;
+        tryFillCell(row, column, digit);
         return;
     }
     selectedDigit.value = selectedDigit.value === digit ? null : digit;
