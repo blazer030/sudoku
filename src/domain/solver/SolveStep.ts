@@ -8,7 +8,9 @@ export interface Assignment {
     digit: number;
 }
 
+export type TechniqueId = "nakedSingle" | "hiddenSingle";
+
 export interface SolveStep {
-    technique: "nakedSingle";
+    technique: TechniqueId;
     assignments: Assignment[];
 }
