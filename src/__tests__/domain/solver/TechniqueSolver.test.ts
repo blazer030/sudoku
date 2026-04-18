@@ -1,5 +1,6 @@
 import { BoardState } from "@/domain/solver/BoardState";
 import { TechniqueSolver } from "@/domain/solver/TechniqueSolver";
+import { singlesPuzzle, singlesSolution } from "@/__tests__/fixtures/singlesPuzzle";
 
 describe("TechniqueSolver", () => {
     it("nextStep should find the first applicable technique", () => {
@@ -25,5 +26,21 @@ describe("TechniqueSolver", () => {
                 { cell: { row: 0, column: 0 }, digit: 1 },
             ],
         });
+    });
+
+    it("solveWithTechniques should solve a singles-only puzzle", () => {
+        const state = BoardState.fromPuzzle(singlesPuzzle);
+        const solver = new TechniqueSolver();
+
+        const result = solver.solveWithTechniques(state);
+
+        expect(result.solved).toBe(true);
+        expect(result.stuck).toBe(false);
+        expect(result.steps.length).toBeGreaterThan(0);
+        for (let row = 0; row < 9; row++) {
+            for (let column = 0; column < 9; column++) {
+                expect(result.finalState.valueAt(row, column)).toBe(singlesSolution[row][column]);
+            }
+        }
     });
 });
