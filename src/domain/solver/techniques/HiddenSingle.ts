@@ -1,8 +1,9 @@
 import { BOARD_SIZE, BOX_SIZE } from "@/domain/board/constants";
 import { BoardState } from "@/domain/solver/BoardState";
 import { SolveStep } from "@/domain/solver/SolveStep";
+import { Technique } from "@/domain/solver/techniques/Technique";
 
-export class HiddenSingle {
+export class HiddenSingle implements Technique {
     public find(state: BoardState): SolveStep | null {
         for (let row = 0; row < BOARD_SIZE; row++) {
             const step = this.findInRow(state, row);
