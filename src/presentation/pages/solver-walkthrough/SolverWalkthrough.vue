@@ -43,11 +43,11 @@
             </div>
             <DigitPad
                 :digit-counts="emptyDigitCounts"
-                :erase-active="false"
+                :erase-active="eraseMode"
                 :selected-digit="selectedDigit"
                 :show-remaining-count="false"
                 @select-digit="pickDigit"
-                @toggle-erase-mode="() => {}"
+                @toggle-erase-mode="toggleEraseMode"
             />
         </div>
         <div class="flex-1" />
@@ -77,7 +77,12 @@ const userValues = ref<number[][]>(createEmptyBoard());
 const state = computed(() => BoardState.fromPuzzle(userValues.value));
 const selectedCell = ref<CellPosition | null>(null);
 const selectedDigit = ref<number | null>(null);
+const eraseMode = ref(false);
 const emptyDigitCounts = Array.from({ length: 10 }, () => 0);
+
+const toggleEraseMode = () => {
+    eraseMode.value = !eraseMode.value;
+};
 
 const goBack = () => {
     void router.push(ROUTER_PATH.home);

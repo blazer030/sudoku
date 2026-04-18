@@ -87,4 +87,12 @@ describe("SolverWalkthrough", () => {
         await wrapper.find("[data-testid='number-5']").trigger("click");
         expect(wrapper.find("[data-testid='number-5']").classes()).not.toContain("bg-primary");
     });
+
+    it("should enter erase mode when clicking Erase button", async () => {
+        const { wrapper } = mountWalkthrough();
+
+        await wrapper.find("[data-testid='erase-button']").trigger("click");
+
+        expect(wrapper.find("[data-testid='erase-button']").classes()).toContain("bg-primary");
+    });
 });
