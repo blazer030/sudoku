@@ -74,6 +74,25 @@
                 >
                     <span class="text-sm text-foreground-muted">{{ stepDescription }}</span>
                 </div>
+                <div
+                    ref="progressBarRef"
+                    class="group w-full h-6 flex items-center cursor-pointer"
+                    data-testid="progress-bar"
+                    @mousedown="onPointerDown"
+                    @touchstart="onPointerDown"
+                >
+                    <div
+                        :class="isDragging ? 'h-3' : 'h-2 group-hover:h-3'"
+                        class="w-full bg-border rounded-full transition-all duration-150"
+                    >
+                        <div
+                            :class="isDragging ? 'h-3' : 'h-2 group-hover:h-3'"
+                            :style="{ width: progressPercent }"
+                            class="bg-primary rounded-full transition-all duration-150"
+                            data-testid="progress-fill"
+                        />
+                    </div>
+                </div>
                 <span
                     class="text-xs text-foreground-muted"
                     data-testid="step-counter"
@@ -148,6 +167,7 @@ import { TechniqueSolver, type SolveResult } from "@/domain/solver/TechniqueSolv
 import type { TechniqueId } from "@/domain/solver/SolveStep";
 import DigitPad from "@/presentation/pages/game/components/DigitPad.vue";
 import SolverBoardCell from "@/presentation/pages/solver-walkthrough/components/SolverBoardCell.vue";
+import { useProgressDrag } from "@/presentation/pages/game-review/useGameReview";
 
 interface CellPosition {
     row: number;
@@ -176,6 +196,13 @@ const TECHNIQUE_LABELS: Record<TechniqueId, string> = {
 };
 
 const totalSteps = computed(() => solveResult.value?.steps.length ?? 0);
+
+const progressPercent = computed(() => {
+    if (totalSteps.value === 0) return "0%";
+    return `${((currentStepIndex.value + 1) / totalSteps.value) * 100}%`;
+});
+
+const progressBarRef = ref<HTMLElement | null>(null);
 
 const stepDescription = computed(() => {
     if (solveResult.value === null) return "";
@@ -258,6 +285,20 @@ const togglePlay = () => {
 };
 
 onUnmounted(stopPlay);
+
+const seekToStep = (step: number) => {
+    if (solveResult.value === null) return;
+    const lastIndex = solveResult.value.steps.length - 1;
+    const targetIndex = step - 1;
+    currentStepIndex.value = Math.max(-1, Math.min(targetIndex, lastIndex));
+};
+
+const { isDragging, onPointerDown } = useProgressDrag(
+    progressBarRef,
+    totalSteps,
+    seekToStep,
+    { isPlaying, stopPlay, startPlay },
+);
 
 const toggleEraseMode = () => {
     if (!eraseMode.value) {

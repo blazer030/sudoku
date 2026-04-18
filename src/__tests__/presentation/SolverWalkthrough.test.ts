@@ -306,6 +306,17 @@ describe("SolverWalkthrough", () => {
         expect(wrapper.find("[data-testid='step-description']").text()).toContain("Initial board");
     });
 
+    it("should fill progress bar to 100% when at the final step", async () => {
+        const { wrapper } = mountWalkthrough();
+        await fillPuzzle(wrapper, singlesPuzzle);
+
+        await wrapper.find("[data-testid='solve-button']").trigger("click");
+        expect(wrapper.find("[data-testid='progress-fill']").attributes("style")).toContain("width: 0%");
+
+        await wrapper.find("[data-testid='last-step-button']").trigger("click");
+        expect(wrapper.find("[data-testid='progress-fill']").attributes("style")).toContain("width: 100%");
+    });
+
     it("should auto-advance steps every 800ms when Play is active", async () => {
         vi.useFakeTimers({ shouldAdvanceTime: true });
         const { wrapper } = mountWalkthrough();
