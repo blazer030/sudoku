@@ -96,6 +96,20 @@
                         <ChevronLeft :size="22" />
                     </button>
                     <button
+                        class="w-14 h-14 rounded-full bg-primary text-white flex items-center justify-center cursor-pointer hover:bg-primary/90"
+                        data-testid="play-button"
+                        @click="togglePlay"
+                    >
+                        <Pause
+                            v-if="isPlaying"
+                            :size="24"
+                        />
+                        <Play
+                            v-else
+                            :size="24"
+                        />
+                    </button>
+                    <button
                         class="size-11 rounded-xl bg-card shadow-card-sm flex items-center justify-center cursor-pointer hover:bg-foreground/5"
                         data-testid="next-step-button"
                         @click="advanceStep"
@@ -124,9 +138,9 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from "vue";
+import { computed, onUnmounted, ref } from "vue";
 import { useRouter } from "vue-router";
-import { ChevronLeft, ChevronRight, SkipBack, SkipForward } from "lucide-vue-next";
+import { ChevronLeft, ChevronRight, Pause, Play, SkipBack, SkipForward } from "lucide-vue-next";
 import { ROUTER_PATH } from "@/router";
 import { BOARD_SIZE } from "@/domain/board/constants";
 import { BoardState } from "@/domain/solver/BoardState";
@@ -151,6 +165,8 @@ const selectedDigit = ref<number | null>(null);
 const eraseMode = ref(false);
 const solveResult = ref<SolveResult | null>(null);
 const currentStepIndex = ref(-1);
+const isPlaying = ref(false);
+let playInterval: ReturnType<typeof setInterval> | null = null;
 const techniqueSolver = new TechniqueSolver();
 const emptyDigitCounts = Array.from({ length: 10 }, () => 0);
 
@@ -208,9 +224,40 @@ const jumpToLast = () => {
 };
 
 const returnToEdit = () => {
+    stopPlay();
     solveResult.value = null;
     currentStepIndex.value = -1;
 };
+
+const stopPlay = () => {
+    isPlaying.value = false;
+    if (playInterval !== null) {
+        clearInterval(playInterval);
+        playInterval = null;
+    }
+};
+
+const startPlay = () => {
+    if (solveResult.value === null) return;
+    if (currentStepIndex.value >= solveResult.value.steps.length - 1) return;
+    isPlaying.value = true;
+    playInterval = setInterval(() => {
+        advanceStep();
+        if (solveResult.value !== null && currentStepIndex.value >= solveResult.value.steps.length - 1) {
+            stopPlay();
+        }
+    }, 800);
+};
+
+const togglePlay = () => {
+    if (isPlaying.value) {
+        stopPlay();
+    } else {
+        startPlay();
+    }
+};
+
+onUnmounted(stopPlay);
 
 const toggleEraseMode = () => {
     if (!eraseMode.value) {

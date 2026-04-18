@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { flushPromises, mount, type VueWrapper } from "@vue/test-utils";
 import { createMemoryHistory, createRouter } from "vue-router";
 import SolverWalkthrough from "@/presentation/pages/solver-walkthrough/SolverWalkthrough.vue";
@@ -30,6 +30,10 @@ const mountWalkthrough = () => {
     const wrapper = mount(SolverWalkthrough, { global: { plugins: [router] } });
     return { wrapper, router };
 };
+
+afterEach(() => {
+    vi.useRealTimers();
+});
 
 describe("SolverWalkthrough", () => {
     it("should render a 9x9 board on mount", () => {
@@ -300,6 +304,23 @@ describe("SolverWalkthrough", () => {
         await wrapper.find("[data-testid='solve-button']").trigger("click");
 
         expect(wrapper.find("[data-testid='step-description']").text()).toContain("Initial board");
+    });
+
+    it("should auto-advance steps every 800ms when Play is active", async () => {
+        vi.useFakeTimers({ shouldAdvanceTime: true });
+        const { wrapper } = mountWalkthrough();
+        await fillPuzzle(wrapper, singlesPuzzle);
+
+        await wrapper.find("[data-testid='solve-button']").trigger("click");
+        expect(wrapper.find("[data-testid='step-counter']").text()).toMatch(/Step 0 /);
+
+        await wrapper.find("[data-testid='play-button']").trigger("click");
+
+        await vi.advanceTimersByTimeAsync(800);
+        expect(wrapper.find("[data-testid='step-counter']").text()).toMatch(/Step 1 /);
+
+        await vi.advanceTimersByTimeAsync(800);
+        expect(wrapper.find("[data-testid='step-counter']").text()).toMatch(/Step 2 /);
     });
 
     it("should show a 'Step N of M' counter that advances with Next", async () => {
