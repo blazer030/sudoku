@@ -49,4 +49,28 @@ describe("HiddenSingle", () => {
             ],
         });
     });
+
+    it("should find a hidden single in a box", () => {
+        const puzzle: number[][] = [
+            [0, 0, 0, 1, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 1, 0, 0, 0],
+        ];
+        const state = BoardState.fromPuzzle(puzzle);
+
+        const step = new HiddenSingle().find(state);
+
+        expect(step).toEqual({
+            technique: "hiddenSingle",
+            assignments: [
+                { cell: { row: 4, column: 4 }, digit: 1 },
+            ],
+        });
+    });
 });
