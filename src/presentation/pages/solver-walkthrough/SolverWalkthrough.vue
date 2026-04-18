@@ -44,9 +44,9 @@
             <DigitPad
                 :digit-counts="emptyDigitCounts"
                 :erase-active="false"
-                :selected-digit="null"
+                :selected-digit="selectedDigit"
                 :show-remaining-count="false"
-                @select-digit="fillDigit"
+                @select-digit="pickDigit"
                 @toggle-erase-mode="() => {}"
             />
         </div>
@@ -76,6 +76,7 @@ const router = useRouter();
 const userValues = ref<number[][]>(createEmptyBoard());
 const state = computed(() => BoardState.fromPuzzle(userValues.value));
 const selectedCell = ref<CellPosition | null>(null);
+const selectedDigit = ref<number | null>(null);
 const emptyDigitCounts = Array.from({ length: 10 }, () => 0);
 
 const goBack = () => {
@@ -91,9 +92,12 @@ const isSelectedCell = (row: number, column: number): boolean => {
     return selected !== null && selected.row === row && selected.column === column;
 };
 
-const fillDigit = (digit: number) => {
-    if (!selectedCell.value) return;
-    const { row, column } = selectedCell.value;
-    userValues.value[row][column] = digit;
+const pickDigit = (digit: number) => {
+    if (selectedCell.value !== null) {
+        const { row, column } = selectedCell.value;
+        userValues.value[row][column] = digit;
+        return;
+    }
+    selectedDigit.value = digit;
 };
 </script>

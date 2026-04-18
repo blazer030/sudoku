@@ -49,4 +49,12 @@ describe("SolverWalkthrough", () => {
 
         expect(router.currentRoute.value.path).toBe("/");
     });
+
+    it("should select a digit when clicked without a selected cell", async () => {
+        const { wrapper } = mountWalkthrough();
+
+        await wrapper.find("[data-testid='number-5']").trigger("click");
+
+        expect(wrapper.find("[data-testid='number-5']").classes()).toContain("bg-primary");
+    });
 });
