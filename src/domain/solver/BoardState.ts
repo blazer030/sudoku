@@ -32,6 +32,29 @@ export class BoardState {
         return this._values[row][column];
     }
 
+    public assign(row: number, column: number, digit: number): BoardState {
+        const newValues = this._values.map((rowValues) => [...rowValues]);
+        const newCandidates = this._candidates.map((rowCandidates) => [...rowCandidates]);
+
+        newValues[row][column] = digit;
+        newCandidates[row][column] = 0;
+
+        const digitBit = 1 << (digit - 1);
+        for (let index = 0; index < BOARD_SIZE; index++) {
+            newCandidates[row][index] &= ~digitBit;
+            newCandidates[index][column] &= ~digitBit;
+        }
+        const boxStartRow = Math.floor(row / BOX_SIZE) * BOX_SIZE;
+        const boxStartColumn = Math.floor(column / BOX_SIZE) * BOX_SIZE;
+        for (let boxRow = boxStartRow; boxRow < boxStartRow + BOX_SIZE; boxRow++) {
+            for (let boxColumn = boxStartColumn; boxColumn < boxStartColumn + BOX_SIZE; boxColumn++) {
+                newCandidates[boxRow][boxColumn] &= ~digitBit;
+            }
+        }
+
+        return new BoardState(newValues, newCandidates);
+    }
+
     public candidatesOf(row: number, column: number): number[] {
         const candidateMask = this._candidates[row][column];
         const digits: number[] = [];

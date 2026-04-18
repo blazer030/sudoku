@@ -54,4 +54,24 @@ describe("BoardState", () => {
 
         expect(state.valueAt(0, 1)).toBe(0);
     });
+
+    it("should update value and clear candidates after assign", () => {
+        const puzzle: number[][] = [
+            [0, 2, 3, 4, 5, 6, 7, 8, 9],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        ];
+        const state = BoardState.fromPuzzle(puzzle);
+
+        const updated = state.assign(0, 0, 1);
+
+        expect(updated.valueAt(0, 0)).toBe(1);
+        expect(updated.candidatesOf(0, 0)).toEqual([]);
+    });
 });
