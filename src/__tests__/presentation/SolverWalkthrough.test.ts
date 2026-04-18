@@ -33,4 +33,13 @@ describe("SolverWalkthrough", () => {
             }
         }
     });
+
+    it("should fill selected cell when a digit is picked", async () => {
+        const wrapper = mount(SolverWalkthrough);
+
+        await wrapper.find("[data-testid='solver-cell-3-4']").trigger("click");
+        await wrapper.find("[data-testid='number-7']").trigger("click");
+
+        expect(wrapper.find("[data-testid='solver-cell-3-4']").text()).toBe("7");
+    });
 });
