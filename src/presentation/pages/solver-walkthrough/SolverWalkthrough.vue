@@ -33,10 +33,10 @@
                             :key="`cell-${rowIndex - 1}-${columnIndex - 1}`"
                             :column="columnIndex - 1"
                             :data-testid="`solver-cell-${rowIndex - 1}-${columnIndex - 1}`"
-                            :notes="state.candidatesOf(rowIndex - 1, columnIndex - 1)"
+                            :notes="displayState.candidatesOf(rowIndex - 1, columnIndex - 1)"
                             :row="rowIndex - 1"
                             :selected="isSelectedCell(rowIndex - 1, columnIndex - 1)"
-                            :value="state.valueAt(rowIndex - 1, columnIndex - 1)"
+                            :value="displayState.valueAt(rowIndex - 1, columnIndex - 1)"
                             @click="selectCell(rowIndex - 1, columnIndex - 1)"
                         />
                     </div>
@@ -77,6 +77,7 @@
                 <button
                     class="px-4 py-2 bg-card rounded-xl font-semibold cursor-pointer shadow-card-sm"
                     data-testid="next-step-button"
+                    @click="advanceStep"
                 >
                     Next
                 </button>
@@ -118,8 +119,31 @@ const selectedCell = ref<CellPosition | null>(null);
 const selectedDigit = ref<number | null>(null);
 const eraseMode = ref(false);
 const solveResult = ref<SolveResult | null>(null);
+const currentStepIndex = ref(-1);
 const techniqueSolver = new TechniqueSolver();
 const emptyDigitCounts = Array.from({ length: 10 }, () => 0);
+
+const displayState = computed(() => {
+    const baseState = BoardState.fromPuzzle(userValues.value);
+    if (solveResult.value === null || currentStepIndex.value < 0) {
+        return baseState;
+    }
+    let currentState = baseState;
+    for (let stepIndex = 0; stepIndex <= currentStepIndex.value; stepIndex++) {
+        for (const assignment of solveResult.value.steps[stepIndex].assignments) {
+            currentState = currentState.assign(assignment.cell.row, assignment.cell.column, assignment.digit);
+        }
+    }
+    return currentState;
+});
+
+const advanceStep = () => {
+    if (solveResult.value === null) return;
+    const lastIndex = solveResult.value.steps.length - 1;
+    if (currentStepIndex.value < lastIndex) {
+        currentStepIndex.value += 1;
+    }
+};
 
 const toggleEraseMode = () => {
     eraseMode.value = !eraseMode.value;
@@ -127,6 +151,7 @@ const toggleEraseMode = () => {
 
 const runSolver = () => {
     solveResult.value = techniqueSolver.solveWithTechniques(state.value);
+    currentStepIndex.value = -1;
 };
 
 const goBack = () => {

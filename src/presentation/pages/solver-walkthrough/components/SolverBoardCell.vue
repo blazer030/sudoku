@@ -10,6 +10,7 @@
         <div
             v-if="value !== 0"
             class="text-foreground text-[22px] font-semibold"
+            data-testid="cell-value"
         >
             {{ value }}
         </div>

@@ -1,7 +1,21 @@
 import { describe, expect, it } from "vitest";
-import { flushPromises, mount } from "@vue/test-utils";
+import { flushPromises, mount, type VueWrapper } from "@vue/test-utils";
 import { createMemoryHistory, createRouter } from "vue-router";
 import SolverWalkthrough from "@/presentation/pages/solver-walkthrough/SolverWalkthrough.vue";
+import { BoardState } from "@/domain/solver/BoardState";
+import { TechniqueSolver } from "@/domain/solver/TechniqueSolver";
+import { singlesPuzzle } from "@/__tests__/fixtures/singlesPuzzle";
+
+const fillPuzzle = async (wrapper: VueWrapper, puzzle: number[][]) => {
+    for (let row = 0; row < 9; row++) {
+        for (let column = 0; column < 9; column++) {
+            const digit = puzzle[row][column];
+            if (digit === 0) continue;
+            await wrapper.find(`[data-testid='solver-cell-${row}-${column}']`).trigger("click");
+            await wrapper.find(`[data-testid='number-${digit}']`).trigger("click");
+        }
+    }
+};
 
 const createTestRouter = () => createRouter({
     history: createMemoryHistory(),
@@ -171,5 +185,21 @@ describe("SolverWalkthrough", () => {
         expect(wrapper.find("[data-testid='prev-step-button']").exists()).toBe(true);
         expect(wrapper.find("[data-testid='first-step-button']").exists()).toBe(true);
         expect(wrapper.find("[data-testid='last-step-button']").exists()).toBe(true);
+    });
+
+    it("should apply the first solver step to the board when clicking Next", async () => {
+        const { wrapper } = mountWalkthrough();
+        await fillPuzzle(wrapper, singlesPuzzle);
+
+        const firstStep = new TechniqueSolver().nextStep(BoardState.fromPuzzle(singlesPuzzle));
+        if (firstStep === null) throw new Error("expected first step to exist");
+        const { cell, digit } = firstStep.assignments[0];
+        const targetSelector = `[data-testid='solver-cell-${cell.row}-${cell.column}']`;
+
+        await wrapper.find("[data-testid='solve-button']").trigger("click");
+        expect(wrapper.find(targetSelector).find("[data-testid='cell-value']").exists()).toBe(false);
+
+        await wrapper.find("[data-testid='next-step-button']").trigger("click");
+        expect(wrapper.find(targetSelector).find("[data-testid='cell-value']").text()).toBe(String(digit));
     });
 });
