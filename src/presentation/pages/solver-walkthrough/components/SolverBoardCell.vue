@@ -37,17 +37,25 @@
 <script lang="ts" setup>
 import { computed } from "vue";
 
+export type CellHighlight = "focus";
+
 const props = withDefaults(defineProps<{
     value: number;
     row: number;
     column: number;
     notes?: number[];
     selected?: boolean;
+    highlight?: CellHighlight | null;
 }>(), {
     notes: () => [],
+    highlight: null,
 });
 
-const cellBackground = computed(() => props.selected ? "bg-primary-light" : "bg-card");
+const cellBackground = computed(() => {
+    if (props.highlight === "focus") return "bg-primary-light";
+    if (props.selected) return "bg-primary-light";
+    return "bg-card";
+});
 
 const positionClasses = computed(() => {
     const classes: string[] = [];
