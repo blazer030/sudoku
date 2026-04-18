@@ -57,4 +57,13 @@ describe("SolverWalkthrough", () => {
 
         expect(wrapper.find("[data-testid='number-5']").classes()).toContain("bg-primary");
     });
+
+    it("should fill clicked cell when a digit is already selected", async () => {
+        const { wrapper } = mountWalkthrough();
+
+        await wrapper.find("[data-testid='number-8']").trigger("click");
+        await wrapper.find("[data-testid='solver-cell-2-6']").trigger("click");
+
+        expect(wrapper.find("[data-testid='solver-cell-2-6']").text()).toBe("8");
+    });
 });

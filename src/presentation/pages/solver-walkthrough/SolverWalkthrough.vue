@@ -84,6 +84,10 @@ const goBack = () => {
 };
 
 const selectCell = (row: number, column: number) => {
+    if (selectedDigit.value !== null) {
+        userValues.value[row][column] = selectedDigit.value;
+        return;
+    }
     selectedCell.value = { row, column };
 };
 
