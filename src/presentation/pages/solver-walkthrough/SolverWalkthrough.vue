@@ -66,35 +66,44 @@
             </button>
             <div
                 v-else
-                class="flex gap-2"
+                class="flex flex-col items-center gap-3"
             >
+                <div class="flex gap-2">
+                    <button
+                        class="px-4 py-2 bg-card rounded-xl font-semibold cursor-pointer shadow-card-sm"
+                        data-testid="first-step-button"
+                        @click="jumpToFirst"
+                    >
+                        First
+                    </button>
+                    <button
+                        class="px-4 py-2 bg-card rounded-xl font-semibold cursor-pointer shadow-card-sm"
+                        data-testid="prev-step-button"
+                        @click="reverseStep"
+                    >
+                        Prev
+                    </button>
+                    <button
+                        class="px-4 py-2 bg-card rounded-xl font-semibold cursor-pointer shadow-card-sm"
+                        data-testid="next-step-button"
+                        @click="advanceStep"
+                    >
+                        Next
+                    </button>
+                    <button
+                        class="px-4 py-2 bg-card rounded-xl font-semibold cursor-pointer shadow-card-sm"
+                        data-testid="last-step-button"
+                        @click="jumpToLast"
+                    >
+                        Last
+                    </button>
+                </div>
                 <button
-                    class="px-4 py-2 bg-card rounded-xl font-semibold cursor-pointer shadow-card-sm"
-                    data-testid="first-step-button"
-                    @click="jumpToFirst"
+                    class="px-6 py-2 bg-card rounded-xl font-semibold cursor-pointer shadow-card-sm"
+                    data-testid="edit-button"
+                    @click="returnToEdit"
                 >
-                    First
-                </button>
-                <button
-                    class="px-4 py-2 bg-card rounded-xl font-semibold cursor-pointer shadow-card-sm"
-                    data-testid="prev-step-button"
-                    @click="reverseStep"
-                >
-                    Prev
-                </button>
-                <button
-                    class="px-4 py-2 bg-card rounded-xl font-semibold cursor-pointer shadow-card-sm"
-                    data-testid="next-step-button"
-                    @click="advanceStep"
-                >
-                    Next
-                </button>
-                <button
-                    class="px-4 py-2 bg-card rounded-xl font-semibold cursor-pointer shadow-card-sm"
-                    data-testid="last-step-button"
-                    @click="jumpToLast"
-                >
-                    Last
+                    Edit
                 </button>
             </div>
         </div>
@@ -167,6 +176,11 @@ const jumpToFirst = () => {
 const jumpToLast = () => {
     if (solveResult.value === null) return;
     currentStepIndex.value = solveResult.value.steps.length - 1;
+};
+
+const returnToEdit = () => {
+    solveResult.value = null;
+    currentStepIndex.value = -1;
 };
 
 const toggleEraseMode = () => {
