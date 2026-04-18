@@ -8,6 +8,10 @@ export class HiddenSingle {
             const step = this.findInRow(state, row);
             if (step) return step;
         }
+        for (let column = 0; column < BOARD_SIZE; column++) {
+            const step = this.findInColumn(state, column);
+            if (step) return step;
+        }
         return null;
     }
 
@@ -26,6 +30,28 @@ export class HiddenSingle {
                     technique: "hiddenSingle",
                     assignments: [
                         { cell: { row, column: lastColumn }, digit },
+                    ],
+                };
+            }
+        }
+        return null;
+    }
+
+    private findInColumn(state: BoardState, column: number): SolveStep | null {
+        for (let digit = 1; digit <= BOARD_SIZE; digit++) {
+            let candidateCount = 0;
+            let lastRow = -1;
+            for (let row = 0; row < BOARD_SIZE; row++) {
+                if (state.candidatesOf(row, column).includes(digit)) {
+                    candidateCount++;
+                    lastRow = row;
+                }
+            }
+            if (candidateCount === 1) {
+                return {
+                    technique: "hiddenSingle",
+                    assignments: [
+                        { cell: { row: lastRow, column }, digit },
                     ],
                 };
             }
