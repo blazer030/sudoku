@@ -83,13 +83,13 @@ describe("BoardCell", () => {
         expect(wrapperRow5.classes()).toContain("border-b-3");
     });
 
-    it("should render eliminated digits with strikethrough and error color in notes", () => {
+    it("should render eliminated digits with diagonal strike and error color in notes", () => {
         const wrapper = mountCell({ value: 0, notes: [1, 2, 3, 4], eliminatedDigits: [2, 4] });
 
         const elim2 = wrapper.find("[data-testid='eliminated-note-2']");
         const elim4 = wrapper.find("[data-testid='eliminated-note-4']");
         expect(elim2.exists()).toBe(true);
-        expect(elim2.classes()).toContain("line-through");
+        expect(elim2.classes()).toContain("strike-diagonal");
         expect(elim2.classes()).toContain("text-error");
         expect(elim4.exists()).toBe(true);
     });

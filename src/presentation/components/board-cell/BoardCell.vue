@@ -93,7 +93,7 @@ const valueFontWeightClass = computed(() => VALUE_FONT_WEIGHTS[props.valueFontWe
 
 const noteClass = (digit: number): string => {
     if (props.eliminatedDigits.includes(digit)) {
-        return "text-error line-through";
+        return "text-error strike-diagonal";
     }
     if (props.highlightedNote === digit) {
         return "aspect-square max-w-5 max-h-5 w-full rounded-full bg-primary text-white font-semibold flex items-center justify-center";
