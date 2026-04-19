@@ -15,7 +15,7 @@
             {{ value }}
         </div>
         <div
-            v-else-if="notes.length > 0"
+            v-else-if="notes.length > 0 || eliminatedDigits.length > 0"
             class="grid grid-cols-3 grid-rows-3 w-full h-full p-0.5"
         >
             <div
@@ -24,9 +24,10 @@
                 class="flex justify-center items-center leading-none"
             >
                 <span
-                    v-if="notes.includes(noteDigit)"
+                    v-if="notes.includes(noteDigit) || eliminatedDigits.includes(noteDigit)"
                     :class="noteClass(noteDigit)"
                     class="text-[clamp(8px,-0.49px+2.26vw,14px)]"
+                    :data-testid="eliminatedDigits.includes(noteDigit) ? `eliminated-note-${noteDigit}` : undefined"
                 >
                     {{ noteDigit }}
                 </span>
@@ -38,7 +39,7 @@
 <script lang="ts" setup>
 import { computed } from "vue";
 
-export type CellVariant = "default" | "clue" | "selected" | "focus" | "error" | "same-digit";
+export type CellVariant = "default" | "clue" | "selected" | "focus" | "scope" | "error" | "same-digit";
 export type ValueTextColor = "normal" | "error" | "primary";
 export type ValueFontWeight = "semibold" | "medium";
 
@@ -47,6 +48,7 @@ const props = withDefaults(defineProps<{
     column: number;
     value: number;
     notes?: number[];
+    eliminatedDigits?: number[];
     variant?: CellVariant;
     valueTextColor?: ValueTextColor;
     valueFontWeight?: ValueFontWeight;
@@ -54,6 +56,7 @@ const props = withDefaults(defineProps<{
     flashing?: boolean;
 }>(), {
     notes: () => [],
+    eliminatedDigits: () => [],
     variant: "default",
     valueTextColor: "normal",
     valueFontWeight: "semibold",
@@ -65,7 +68,8 @@ const VARIANT_BACKGROUNDS: Record<CellVariant, string> = {
     default: "bg-card",
     clue: "bg-cell-clue",
     selected: "bg-primary-light",
-    focus: "bg-primary-light",
+    focus: "bg-accent/40",
+    scope: "bg-accent/15",
     error: "bg-error-light",
     "same-digit": "bg-highlight",
 };
@@ -88,6 +92,9 @@ const valueTextColorClass = computed(() => VALUE_TEXT_COLORS[props.valueTextColo
 const valueFontWeightClass = computed(() => VALUE_FONT_WEIGHTS[props.valueFontWeight]);
 
 const noteClass = (digit: number): string => {
+    if (props.eliminatedDigits.includes(digit)) {
+        return "text-error line-through";
+    }
     if (props.highlightedNote === digit) {
         return "aspect-square max-w-5 max-h-5 w-full rounded-full bg-primary text-white font-semibold flex items-center justify-center";
     }
