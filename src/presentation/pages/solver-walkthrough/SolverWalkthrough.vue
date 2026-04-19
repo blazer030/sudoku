@@ -277,6 +277,12 @@ const loadPreset = (puzzle: number[][]) => {
 };
 
 const toggleEraseMode = () => {
+    if (selectedCell.value !== null) {
+        const { row, column } = selectedCell.value;
+        userValues.value[row][column] = 0;
+        selectedCell.value = null;
+        return;
+    }
     if (!eraseMode.value) {
         selectedDigit.value = null;
     }
