@@ -65,18 +65,18 @@
                 class="flex gap-3"
             >
                 <button
-                    class="px-6 py-3 bg-primary text-white rounded-2xl font-semibold cursor-pointer shadow-primary transition-all duration-200 hover:bg-primary-hover hover:shadow-primary-lg"
-                    data-testid="solve-button"
-                    @click="runSolver"
-                >
-                    Solve
-                </button>
-                <button
                     class="px-6 py-3 bg-danger text-white rounded-2xl font-semibold cursor-pointer shadow-danger transition-all duration-200 hover:bg-danger-hover hover:shadow-primary-lg"
                     data-testid="reset-button"
                     @click="resetBoard"
                 >
                     Reset
+                </button>
+                <button
+                    class="px-6 py-3 bg-primary text-white rounded-2xl font-semibold cursor-pointer shadow-primary transition-all duration-200 hover:bg-primary-hover hover:shadow-primary-lg"
+                    data-testid="solve-button"
+                    @click="runSolver"
+                >
+                    Solve
                 </button>
             </div>
             <div
