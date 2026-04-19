@@ -38,7 +38,8 @@
                             :key="`cell-${rowIndex - 1}-${columnIndex - 1}`"
                             :column="columnIndex - 1"
                             :data-testid="`solver-cell-${rowIndex - 1}-${columnIndex - 1}`"
-                            :notes="displayState.candidatesOf(rowIndex - 1, columnIndex - 1)"
+                            :eliminated-digits="eliminatedDigitsAt(rowIndex - 1, columnIndex - 1)"
+                            :notes="preStepState.candidatesOf(rowIndex - 1, columnIndex - 1)"
                             :row="rowIndex - 1"
                             :value="displayState.valueAt(rowIndex - 1, columnIndex - 1)"
                             :variant="cellVariant(rowIndex - 1, columnIndex - 1)"
@@ -200,19 +201,55 @@ const currentStepFocus = computed(() => {
     return solveResult.value.steps[currentStep.value - 1].focus;
 });
 
+const currentStepScopeCellKeys = computed(() => {
+    const keys = new Set<string>();
+    if (solveResult.value === null || currentStep.value === 0) return keys;
+    const scopes = solveResult.value.steps[currentStep.value - 1].scopes;
+    for (const scope of scopes) {
+        if (scope.kind === "row") {
+            for (let column = 0; column < BOARD_SIZE; column++) keys.add(`${scope.row}-${column}`);
+        } else if (scope.kind === "column") {
+            for (let row = 0; row < BOARD_SIZE; row++) keys.add(`${row}-${scope.column}`);
+        } else {
+            for (let row = scope.boxRow; row < scope.boxRow + 3; row++) {
+                for (let column = scope.boxColumn; column < scope.boxColumn + 3; column++) {
+                    keys.add(`${row}-${column}`);
+                }
+            }
+        }
+    }
+    return keys;
+});
+
+const currentStepEliminationMap = computed(() => {
+    const map = new Map<string, number[]>();
+    if (solveResult.value === null || currentStep.value === 0) return map;
+    const eliminations = solveResult.value.steps[currentStep.value - 1].eliminations;
+    for (const elimination of eliminations) {
+        const key = `${elimination.cell.row}-${elimination.cell.column}`;
+        const digits = map.get(key) ?? [];
+        digits.push(elimination.digit);
+        map.set(key, digits);
+    }
+    return map;
+});
+
+const eliminatedDigitsAt = (row: number, column: number): number[] => {
+    return currentStepEliminationMap.value.get(`${row}-${column}`) ?? [];
+};
+
 const cellVariant = (row: number, column: number): CellVariant => {
     if (currentStepFocus.value.some((c) => c.row === row && c.column === column)) return "focus";
+    if (currentStepScopeCellKeys.value.has(`${row}-${column}`)) return "scope";
     if (isSelectedCell(row, column)) return "selected";
     return "default";
 };
 
-const displayState = computed(() => {
+const preStepState = computed(() => {
     const baseState = BoardState.fromPuzzle(userValues.value);
-    if (solveResult.value === null || currentStep.value === 0) {
-        return baseState;
-    }
+    if (solveResult.value === null || currentStep.value === 0) return baseState;
     let currentState = baseState;
-    for (let stepIndex = 0; stepIndex < currentStep.value; stepIndex++) {
+    for (let stepIndex = 0; stepIndex < currentStep.value - 1; stepIndex++) {
         const step = solveResult.value.steps[stepIndex];
         for (const assignment of step.assignments) {
             currentState = currentState.assign(assignment.cell.row, assignment.cell.column, assignment.digit);
@@ -220,6 +257,16 @@ const displayState = computed(() => {
         for (const elimination of step.eliminations) {
             currentState = currentState.eliminate(elimination.cell.row, elimination.cell.column, elimination.digit);
         }
+    }
+    return currentState;
+});
+
+const displayState = computed(() => {
+    if (solveResult.value === null || currentStep.value === 0) return preStepState.value;
+    const step = solveResult.value.steps[currentStep.value - 1];
+    let currentState = preStepState.value;
+    for (const assignment of step.assignments) {
+        currentState = currentState.assign(assignment.cell.row, assignment.cell.column, assignment.digit);
     }
     return currentState;
 });
