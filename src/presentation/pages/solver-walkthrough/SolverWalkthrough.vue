@@ -308,6 +308,10 @@ const selectCell = (row: number, column: number) => {
         tryFillCell(row, column, selectedDigit.value);
         return;
     }
+    if (isSelectedCell(row, column)) {
+        selectedCell.value = null;
+        return;
+    }
     selectedCell.value = { row, column };
 };
 
@@ -321,6 +325,7 @@ const pickDigit = (digit: number) => {
     if (selectedCell.value !== null) {
         const { row, column } = selectedCell.value;
         tryFillCell(row, column, digit);
+        selectedCell.value = null;
         return;
     }
     selectedDigit.value = selectedDigit.value === digit ? null : digit;
