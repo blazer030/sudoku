@@ -9,7 +9,7 @@
     >
         <div
             v-if="value !== 0"
-            :class="[valueTextColorClass, 'text-[22px] font-semibold']"
+            :class="[valueTextColorClass, valueFontWeightClass, 'text-[22px]']"
             data-testid="cell-value"
         >
             {{ value }}
@@ -40,6 +40,7 @@ import { computed } from "vue";
 
 export type CellVariant = "default" | "clue" | "selected" | "focus" | "error" | "same-digit";
 export type ValueTextColor = "normal" | "error" | "primary";
+export type ValueFontWeight = "semibold" | "medium";
 
 const props = withDefaults(defineProps<{
     row: number;
@@ -48,12 +49,14 @@ const props = withDefaults(defineProps<{
     notes?: number[];
     variant?: CellVariant;
     valueTextColor?: ValueTextColor;
+    valueFontWeight?: ValueFontWeight;
     highlightedNote?: number | null;
     flashing?: boolean;
 }>(), {
     notes: () => [],
     variant: "default",
     valueTextColor: "normal",
+    valueFontWeight: "semibold",
     highlightedNote: null,
     flashing: false,
 });
@@ -73,9 +76,16 @@ const VALUE_TEXT_COLORS: Record<ValueTextColor, string> = {
     primary: "text-primary",
 };
 
+const VALUE_FONT_WEIGHTS: Record<ValueFontWeight, string> = {
+    semibold: "font-semibold",
+    medium: "font-medium",
+};
+
 const backgroundClass = computed(() => VARIANT_BACKGROUNDS[props.variant]);
 
 const valueTextColorClass = computed(() => VALUE_TEXT_COLORS[props.valueTextColor]);
+
+const valueFontWeightClass = computed(() => VALUE_FONT_WEIGHTS[props.valueFontWeight]);
 
 const noteClass = (digit: number): string => {
     if (props.highlightedNote === digit) {

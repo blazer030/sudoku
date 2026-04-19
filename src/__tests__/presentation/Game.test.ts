@@ -799,7 +799,7 @@ describe("Game", () => {
     it("should render 9x9 grid with clue cells showing their numbers", () => {
         const wrapper = mountGame();
 
-        const cells = wrapper.findAll("[data-testid^='cell-']");
+        const cells = wrapper.findAllComponents(Cell);
         expect(cells).toHaveLength(81);
 
         for (let row = 0; row < 9; row++) {
