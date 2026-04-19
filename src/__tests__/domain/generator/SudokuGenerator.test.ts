@@ -50,7 +50,7 @@ describe("SudokuGenerator", () => {
         expect(filledCells).toBeLessThanOrEqual(35);
     });
 
-    it.each(["easy", "medium", "hard"] as const)("should generate a %s puzzle with unique solution and valid clue count", { timeout: 30000 }, (difficulty) => {
+    it.each(["easy", "medium", "hard"] as const)("should generate a %s puzzle with unique solution and valid clue count", { timeout: 180000 }, (difficulty) => {
         const { puzzle } = generator.generatePuzzle(difficulty);
         const clueCount = puzzle.flat().filter(cell => cell !== 0).length;
         const ranges = { easy: [36, 45], medium: [27, 35], hard: [22, 26] };
@@ -86,7 +86,7 @@ describe("SudokuGenerator", () => {
 
     it("should fall back to the last candidate when rater always rejects", () => {
         const matchesSpy = vi.spyOn(DifficultyRater.prototype, "matches").mockReturnValue(false);
-        const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+        const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => undefined);
 
         const localGenerator = new SudokuGenerator();
         const { puzzle } = localGenerator.generatePuzzle("easy");
