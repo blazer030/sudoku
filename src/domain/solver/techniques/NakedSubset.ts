@@ -14,21 +14,17 @@ export class NakedSubset implements Technique {
 
     public find(state: BoardState): SolveStep | null {
         for (let row = 0; row < BOARD_SIZE; row++) {
-            const step = this.findInRow(state, row);
+            const step = this.findInScope(collectRowCells(state, row));
+            if (step) return step;
+        }
+        for (let column = 0; column < BOARD_SIZE; column++) {
+            const step = this.findInScope(collectColumnCells(state, column));
             if (step) return step;
         }
         return null;
     }
 
-    private findInRow(state: BoardState, row: number): SolveStep | null {
-        const emptyCells: { cell: CellReference; candidates: number[] }[] = [];
-        for (let column = 0; column < BOARD_SIZE; column++) {
-            const candidates = state.candidatesOf(row, column);
-            if (candidates.length > 0) {
-                emptyCells.push({ cell: { row, column }, candidates });
-            }
-        }
-
+    private findInScope(emptyCells: ScopeCell[]): SolveStep | null {
         const combinations = combinationsOfSize(emptyCells, this.size);
         for (const combination of combinations) {
             const combinedDigits = unionOfCandidates(combination.map((entry) => entry.candidates));
@@ -47,6 +43,33 @@ export class NakedSubset implements Technique {
         }
         return null;
     }
+}
+
+interface ScopeCell {
+    cell: CellReference;
+    candidates: number[];
+}
+
+function collectRowCells(state: BoardState, row: number): ScopeCell[] {
+    const cells: ScopeCell[] = [];
+    for (let column = 0; column < BOARD_SIZE; column++) {
+        const candidates = state.candidatesOf(row, column);
+        if (candidates.length > 0) {
+            cells.push({ cell: { row, column }, candidates });
+        }
+    }
+    return cells;
+}
+
+function collectColumnCells(state: BoardState, column: number): ScopeCell[] {
+    const cells: ScopeCell[] = [];
+    for (let row = 0; row < BOARD_SIZE; row++) {
+        const candidates = state.candidatesOf(row, column);
+        if (candidates.length > 0) {
+            cells.push({ cell: { row, column }, candidates });
+        }
+    }
+    return cells;
 }
 
 function combinationsOfSize<T>(items: T[], size: number): T[][] {
@@ -75,7 +98,7 @@ function unionOfCandidates(candidateLists: number[][]): number[] {
 }
 
 function collectEliminations(
-    emptyCells: { cell: CellReference; candidates: number[] }[],
+    emptyCells: ScopeCell[],
     focusCells: CellReference[],
     digits: number[],
 ): Elimination[] {
