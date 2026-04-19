@@ -50,6 +50,28 @@ describe("TechniqueSolver", () => {
         expect(step?.technique).toBe("nakedPair");
     });
 
+    it("solveWithTechniques should apply eliminations from subset steps to progress state", () => {
+        const puzzle: number[][] = [
+            [0, 0, 0, 0, 5, 6, 7, 8, 9],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [3, 0, 0, 0, 0, 0, 0, 0, 0],
+            [4, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 3, 0, 0, 0, 0, 0, 0, 0],
+            [0, 4, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        ];
+        const state = BoardState.fromPuzzle(puzzle);
+        const solver = new TechniqueSolver();
+
+        const result = solver.solveWithTechniques(state);
+
+        expect(result.steps[0].technique).toBe("nakedPair");
+        expect(result.finalState.candidatesOf(0, 2)).not.toContain(1);
+        expect(result.finalState.candidatesOf(0, 2)).not.toContain(2);
+    });
+
     it("solveWithTechniques should solve a singles-only puzzle", () => {
         const state = BoardState.fromPuzzle(singlesPuzzle);
         const solver = new TechniqueSolver();

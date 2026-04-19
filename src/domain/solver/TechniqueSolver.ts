@@ -51,6 +51,9 @@ export class TechniqueSolver {
             for (const assignment of step.assignments) {
                 currentState = currentState.assign(assignment.cell.row, assignment.cell.column, assignment.digit);
             }
+            for (const elimination of step.eliminations) {
+                currentState = currentState.eliminate(elimination.cell.row, elimination.cell.column, elimination.digit);
+            }
         }
 
         return { steps, finalState: currentState, solved: true, stuck: false };
