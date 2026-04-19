@@ -221,14 +221,14 @@ describe("SolverWalkthrough", () => {
         expect(wrapper.find("[data-testid='solver-cell-0-0']").classes()).not.toContain("bg-primary-light");
     });
 
-    it("should return to edit mode and preserve puzzle when clicking Edit", async () => {
+    it("should return to edit mode and preserve puzzle when clicking Back during solve mode", async () => {
         const { wrapper } = mountWalkthrough();
         await fillPuzzle(wrapper, singlesPuzzle);
 
         await wrapper.find("[data-testid='solve-button']").trigger("click");
         expect(wrapper.find("[data-testid='number-1']").exists()).toBe(false);
 
-        await wrapper.find("[data-testid='edit-button']").trigger("click");
+        await wrapper.find("[data-testid='back-button']").trigger("click");
 
         expect(wrapper.find("[data-testid='number-1']").exists()).toBe(true);
         expect(wrapper.find("[data-testid='solve-button']").exists()).toBe(true);

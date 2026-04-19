@@ -106,13 +106,6 @@
                     @next="advanceStep"
                     @last="jumpToLast"
                 />
-                <button
-                    class="px-6 py-2 bg-card rounded-xl font-semibold cursor-pointer shadow-card-sm"
-                    data-testid="edit-button"
-                    @click="returnToEdit"
-                >
-                    Edit
-                </button>
             </div>
         </div>
         <div class="flex-1" />
@@ -303,7 +296,7 @@ const displayState = computed(() => {
     return currentState;
 });
 
-const returnToEdit = () => {
+const exitSolveMode = () => {
     stopPlay();
     solveResult.value = null;
     jumpToFirst();
@@ -335,6 +328,10 @@ const runSolver = () => {
 };
 
 const goBack = () => {
+    if (solveResult.value !== null) {
+        exitSolveMode();
+        return;
+    }
     void router.push(ROUTER_PATH.home);
 };
 
