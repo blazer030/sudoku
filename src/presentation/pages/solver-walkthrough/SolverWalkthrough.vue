@@ -33,16 +33,16 @@
                         :key="`row-${rowIndex - 1}`"
                         class="flex"
                     >
-                        <SolverBoardCell
+                        <BoardCell
                             v-for="columnIndex in BOARD_SIZE"
                             :key="`cell-${rowIndex - 1}-${columnIndex - 1}`"
                             :column="columnIndex - 1"
                             :data-testid="`solver-cell-${rowIndex - 1}-${columnIndex - 1}`"
-                            :highlight="cellHighlight(rowIndex - 1, columnIndex - 1)"
                             :notes="displayState.candidatesOf(rowIndex - 1, columnIndex - 1)"
                             :row="rowIndex - 1"
-                            :selected="isSelectedCell(rowIndex - 1, columnIndex - 1)"
                             :value="displayState.valueAt(rowIndex - 1, columnIndex - 1)"
+                            :variant="cellVariant(rowIndex - 1, columnIndex - 1)"
+                            class="cursor-pointer"
                             @click="selectCell(rowIndex - 1, columnIndex - 1)"
                         />
                     </div>
@@ -181,8 +181,7 @@ import { BoardState } from "@/domain/solver/BoardState";
 import { TechniqueSolver, type SolveResult } from "@/domain/solver/TechniqueSolver";
 import type { TechniqueId } from "@/domain/solver/SolveStep";
 import DigitPad from "@/presentation/pages/game/components/DigitPad.vue";
-import SolverBoardCell from "@/presentation/pages/solver-walkthrough/components/SolverBoardCell.vue";
-import type { CellHighlight } from "@/presentation/pages/solver-walkthrough/components/cellHighlight";
+import BoardCell, { type CellVariant } from "@/presentation/components/board-cell/BoardCell.vue";
 import { TEST_PUZZLE_PRESETS } from "@/presentation/pages/solver-walkthrough/testPuzzles";
 import { useProgressDrag } from "@/presentation/pages/game-review/useGameReview";
 import { isFeatureEnabled } from "@/utils/featureToggle";
@@ -249,9 +248,10 @@ const currentStepFocus = computed(() => {
     return solveResult.value.steps[currentStepIndex.value].focus;
 });
 
-const cellHighlight = (row: number, column: number): CellHighlight | null => {
+const cellVariant = (row: number, column: number): CellVariant => {
     if (currentStepFocus.value.some((c) => c.row === row && c.column === column)) return "focus";
-    return null;
+    if (isSelectedCell(row, column)) return "selected";
+    return "default";
 };
 
 const displayState = computed(() => {
