@@ -62,7 +62,7 @@
             />
             <button
                 v-if="solveResult === null"
-                class="px-6 py-3 bg-primary text-white rounded-2xl font-semibold cursor-pointer shadow-primary-active"
+                class="px-6 py-3 bg-primary text-white rounded-2xl font-semibold cursor-pointer shadow-primary transition-all duration-200 hover:bg-primary-hover hover:shadow-primary-lg"
                 data-testid="solve-button"
                 @click="runSolver"
             >
