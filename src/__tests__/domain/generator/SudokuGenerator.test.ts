@@ -1,7 +1,12 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { SudokuBoard } from "@/domain/board/SudokuBoard";
 import { SudokuGenerator } from "@/domain/generator/SudokuGenerator";
 import { SudokuSolver } from "@/domain/generator/SudokuSolver";
+import { DifficultyRater } from "@/domain/solver/DifficultyRater";
+
+afterEach(() => {
+    vi.restoreAllMocks();
+});
 
 const sudokuBoard = new SudokuBoard();
 const generator = new SudokuGenerator();
@@ -64,5 +69,30 @@ describe("SudokuGenerator", () => {
             expect(row).toHaveLength(9);
         });
         expect(sudokuBoard.isValidSolution(board)).toBe(true);
+    });
+
+    it("should retry generating when rater.matches returns false", () => {
+        const matchesSpy = vi.spyOn(DifficultyRater.prototype, "matches");
+        matchesSpy.mockReturnValueOnce(false);
+        matchesSpy.mockReturnValueOnce(false);
+        matchesSpy.mockReturnValueOnce(true);
+
+        const localGenerator = new SudokuGenerator();
+        const { puzzle } = localGenerator.generatePuzzle("easy");
+
+        expect(matchesSpy).toHaveBeenCalledTimes(3);
+        expect(puzzle).toHaveLength(9);
+    });
+
+    it("should fall back to the last candidate when rater always rejects", () => {
+        const matchesSpy = vi.spyOn(DifficultyRater.prototype, "matches").mockReturnValue(false);
+        const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+        const localGenerator = new SudokuGenerator();
+        const { puzzle } = localGenerator.generatePuzzle("easy");
+
+        expect(matchesSpy.mock.calls.length).toBeGreaterThan(1);
+        expect(warnSpy).toHaveBeenCalled();
+        expect(puzzle).toHaveLength(9);
     });
 });
