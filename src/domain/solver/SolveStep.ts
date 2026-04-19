@@ -18,7 +18,10 @@ export type TechniqueId =
     | "hiddenSingle"
     | "nakedPair"
     | "nakedTriple"
-    | "nakedQuad";
+    | "nakedQuad"
+    | "hiddenPair"
+    | "hiddenTriple"
+    | "hiddenQuad";
 
 export interface SolveStep {
     technique: TechniqueId;
