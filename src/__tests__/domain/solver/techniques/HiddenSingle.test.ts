@@ -24,6 +24,7 @@ describe("HiddenSingle", () => {
             assignments: [
                 { cell: { row: 0, column: 0 }, digit: 1 },
             ],
+            eliminations: [],
         });
     });
 
@@ -49,6 +50,7 @@ describe("HiddenSingle", () => {
             assignments: [
                 { cell: { row: 0, column: 0 }, digit: 1 },
             ],
+            eliminations: [],
         });
     });
 
@@ -74,6 +76,7 @@ describe("HiddenSingle", () => {
             assignments: [
                 { cell: { row: 4, column: 4 }, digit: 1 },
             ],
+            eliminations: [],
         });
     });
 });

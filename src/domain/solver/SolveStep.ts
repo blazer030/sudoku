@@ -8,10 +8,16 @@ export interface Assignment {
     digit: number;
 }
 
+export interface Elimination {
+    cell: CellReference;
+    digit: number;
+}
+
 export type TechniqueId = "nakedSingle" | "hiddenSingle";
 
 export interface SolveStep {
     technique: TechniqueId;
     focus: CellReference[];
     assignments: Assignment[];
+    eliminations: Elimination[];
 }

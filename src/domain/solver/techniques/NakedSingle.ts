@@ -15,6 +15,7 @@ export class NakedSingle implements Technique {
                         assignments: [
                             { cell: { row, column }, digit: candidates[0] },
                         ],
+                        eliminations: [],
                     };
                 }
             }

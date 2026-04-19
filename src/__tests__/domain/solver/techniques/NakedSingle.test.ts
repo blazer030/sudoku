@@ -24,6 +24,7 @@ describe("NakedSingle", () => {
             assignments: [
                 { cell: { row: 0, column: 0 }, digit: 1 },
             ],
+            eliminations: [],
         });
     });
 
@@ -60,6 +61,7 @@ describe("NakedSingle", () => {
             assignments: [
                 { cell: { row: 0, column: 0 }, digit: 1 },
             ],
+            eliminations: [],
         });
     });
 
@@ -85,6 +87,7 @@ describe("NakedSingle", () => {
             assignments: [
                 { cell: { row: 0, column: 0 }, digit: 1 },
             ],
+            eliminations: [],
         });
     });
 });

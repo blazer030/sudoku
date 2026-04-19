@@ -39,6 +39,7 @@ export class HiddenSingle implements Technique {
                     assignments: [
                         { cell: { row, column: lastColumn }, digit },
                     ],
+                    eliminations: [],
                 };
             }
         }
@@ -62,6 +63,7 @@ export class HiddenSingle implements Technique {
                     assignments: [
                         { cell: { row: lastRow, column }, digit },
                     ],
+                    eliminations: [],
                 };
             }
         }
@@ -89,6 +91,7 @@ export class HiddenSingle implements Technique {
                     assignments: [
                         { cell: { row: foundRow, column: foundColumn }, digit },
                     ],
+                    eliminations: [],
                 };
             }
         }
