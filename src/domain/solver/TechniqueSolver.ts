@@ -9,6 +9,7 @@ import { HiddenSubset } from "@/domain/solver/techniques/HiddenSubset";
 import { Pointing } from "@/domain/solver/techniques/Pointing";
 import { Claiming } from "@/domain/solver/techniques/Claiming";
 import { XWing } from "@/domain/solver/techniques/XWing";
+import { XYWing } from "@/domain/solver/techniques/XYWing";
 
 const techniques: Technique[] = [
     new NakedSingle(),
@@ -22,6 +23,7 @@ const techniques: Technique[] = [
     new Pointing(),
     new Claiming(),
     new XWing(),
+    new XYWing(),
 ];
 
 export interface SolveResult {
