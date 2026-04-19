@@ -60,14 +60,25 @@
                 @select-digit="pickDigit"
                 @toggle-erase-mode="toggleEraseMode"
             />
-            <button
+            <div
                 v-if="solveResult === null"
-                class="px-6 py-3 bg-primary text-white rounded-2xl font-semibold cursor-pointer shadow-primary transition-all duration-200 hover:bg-primary-hover hover:shadow-primary-lg"
-                data-testid="solve-button"
-                @click="runSolver"
+                class="flex gap-3"
             >
-                Solve
-            </button>
+                <button
+                    class="px-6 py-3 bg-primary text-white rounded-2xl font-semibold cursor-pointer shadow-primary transition-all duration-200 hover:bg-primary-hover hover:shadow-primary-lg"
+                    data-testid="solve-button"
+                    @click="runSolver"
+                >
+                    Solve
+                </button>
+                <button
+                    class="px-6 py-3 bg-danger text-white rounded-2xl font-semibold cursor-pointer shadow-danger transition-all duration-200 hover:bg-danger-hover hover:shadow-primary-lg"
+                    data-testid="reset-button"
+                    @click="resetBoard"
+                >
+                    Reset
+                </button>
+            </div>
             <div
                 v-if="solveResult === null && testButtonsEnabled"
                 class="flex gap-2"
@@ -307,6 +318,13 @@ const loadPreset = (puzzle: number[][]) => {
     selectedDigit.value = null;
     eraseMode.value = false;
     userValues.value = puzzle.map((row) => [...row]);
+};
+
+const resetBoard = () => {
+    selectedCell.value = null;
+    selectedDigit.value = null;
+    eraseMode.value = false;
+    userValues.value = createEmptyBoard();
 };
 
 const toggleEraseMode = () => {
