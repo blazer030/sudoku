@@ -38,7 +38,8 @@ export type TechniqueId =
     | "claiming"
     | "xWing"
     | "xyWing"
-    | "wWing";
+    | "wWing"
+    | "xyzWing";
 
 export interface SolveStep {
     technique: TechniqueId;
