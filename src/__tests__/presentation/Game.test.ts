@@ -890,6 +890,17 @@ describe("Game", () => {
             expect(wrapper.find("[data-testid='cell-0-2']").classes()).not.toContain("bg-error-light");
         });
 
+        it("should show a hint result toast with the technique name after Reveal Cell", async () => {
+            const wrapper = mountGame();
+
+            await wrapper.find("[data-testid='hint-button']").trigger("click");
+            await wrapper.find("[data-testid='hint-reveal-cell']").trigger("click");
+
+            const toast = wrapper.find("[data-testid='hint-result-toast']");
+            expect(toast.exists()).toBe(true);
+            expect(toast.text()).toMatch(/Single|Pair|Triple|Quad|Pointing|Claiming|Wing/);
+        });
+
         it("should reveal a random cell with correct answer", async () => {
             const wrapper = mountGame();
 

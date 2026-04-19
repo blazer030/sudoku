@@ -68,6 +68,9 @@
         <!-- Hint Menu Popup -->
         <HintMenuPopup />
 
+        <!-- Hint Result Toast -->
+        <HintResultToast :outcome="hintResultOutcome" />
+
         <!-- Leave Game Dialog -->
         <LeaveGameDialog />
     </div>
@@ -79,6 +82,7 @@ import GameCompleteModal from "@/presentation/pages/game/components/GameComplete
 import LeaveGameDialog from "@/presentation/pages/game/components/LeaveGameDialog.vue";
 import GameControls from "@/presentation/pages/game/components/GameControls.vue";
 import HintMenuPopup from "@/presentation/pages/game/components/HintMenuPopup.vue";
+import HintResultToast from "@/presentation/pages/game/components/HintResultToast.vue";
 import DigitPad from "@/presentation/pages/game/components/DigitPad.vue";
 import Cell from "@/presentation/pages/game/components/Cell.vue";
 import { InputMode } from "@/presentation/pages/game/InputMode";
@@ -94,6 +98,7 @@ const {
     clearErrors,
     isError,
     openHintMenu,
+    hintResultOutcome,
     showLeaveDialog,
     checkAndComplete,
     triggerFlash,
