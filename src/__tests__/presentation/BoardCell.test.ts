@@ -26,8 +26,8 @@ describe("BoardCell", () => {
         ["default", "bg-card"],
         ["clue", "bg-cell-clue"],
         ["selected", "bg-primary-light"],
-        ["focus", "bg-accent/40"],
-        ["scope", "bg-accent/15"],
+        ["focus", "bg-primary/40"],
+        ["scope", "bg-primary/15"],
         ["error", "bg-error-light"],
         ["same-digit", "bg-highlight"],
     ])("variant='%s' applies background class '%s'", (variant, expectedClass) => {

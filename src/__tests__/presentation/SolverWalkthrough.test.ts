@@ -318,12 +318,12 @@ describe("SolverWalkthrough", () => {
         await wrapper.find("[data-testid='next-step-button']").trigger("click");
 
         const focusCell = wrapper.find(`[data-testid='solver-cell-${cell.row}-${cell.column}']`);
-        expect(focusCell.classes()).toContain("bg-accent/40");
+        expect(focusCell.classes()).toContain("bg-primary/40");
 
         const nonFocus = cell.row === 0 && cell.column === 0
             ? `[data-testid='solver-cell-0-1']`
             : `[data-testid='solver-cell-0-0']`;
-        expect(wrapper.find(nonFocus).classes()).not.toContain("bg-accent/40");
+        expect(wrapper.find(nonFocus).classes()).not.toContain("bg-primary/40");
     });
 
     it("should fill progress bar to 100% when at the final step", async () => {

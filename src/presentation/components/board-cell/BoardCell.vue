@@ -68,8 +68,8 @@ const VARIANT_BACKGROUNDS: Record<CellVariant, string> = {
     default: "bg-card",
     clue: "bg-cell-clue",
     selected: "bg-primary-light",
-    focus: "bg-accent/40",
-    scope: "bg-accent/15",
+    focus: "bg-primary/40",
+    scope: "bg-primary/15",
     error: "bg-error-light",
     "same-digit": "bg-highlight",
 };
