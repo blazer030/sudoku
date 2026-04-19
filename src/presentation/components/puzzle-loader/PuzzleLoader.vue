@@ -6,8 +6,13 @@
             data-testid="puzzle-loader"
         >
             <div
-                class="bg-card rounded-3xl px-8 py-6 flex flex-col items-center gap-4 shadow-modal"
-                :style="{ color: themeColor }"
+                class="rounded-3xl px-8 py-6 flex flex-col items-center gap-4 shadow-modal"
+                :style="{
+                    color: themeColor,
+                    background: 'rgba(0, 0, 0, 0.3)',
+                    backdropFilter: 'blur(8px) saturate(160%)',
+                    WebkitBackdropFilter: 'blur(8px) saturate(160%)',
+                }"
             >
                 <div class="puzzle-loader__animation">
                     <Vue3Lottie
@@ -18,7 +23,7 @@
                         :auto-play="true"
                     />
                 </div>
-                <p class="text-sm text-foreground-secondary font-medium">
+                <p class="text-sm text-white/80 font-medium">
                     {{ message }}
                 </p>
             </div>
