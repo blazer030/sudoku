@@ -112,7 +112,7 @@
                     class="text-xs text-foreground-muted"
                     data-testid="step-counter"
                 >
-                    Step {{ currentStepIndex + 1 }} of {{ totalSteps }}
+                    Step {{ currentStep }} of {{ totalSteps }}
                 </span>
                 <PlaybackControls
                     :is-playing="isPlaying"
@@ -136,7 +136,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onUnmounted, ref } from "vue";
+import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
 import { ChevronLeft } from "lucide-vue-next";
 import PlaybackControls from "@/presentation/components/playback/PlaybackControls.vue";
@@ -148,6 +148,7 @@ import type { TechniqueId } from "@/domain/solver/SolveStep";
 import DigitPad from "@/presentation/pages/game/components/DigitPad.vue";
 import BoardCell, { type CellVariant } from "@/presentation/components/board-cell/BoardCell.vue";
 import { TEST_PUZZLE_PRESETS } from "@/presentation/pages/solver-walkthrough/testPuzzles";
+import { usePlaybackState } from "@/presentation/components/playback/usePlaybackState";
 import { useProgressDrag } from "@/presentation/components/playback/useProgressDrag";
 import { isFeatureEnabled } from "@/utils/featureToggle";
 
@@ -166,12 +167,24 @@ const selectedCell = ref<CellPosition | null>(null);
 const selectedDigit = ref<number | null>(null);
 const eraseMode = ref(false);
 const solveResult = ref<SolveResult | null>(null);
-const currentStepIndex = ref(-1);
-const isPlaying = ref(false);
-let playInterval: ReturnType<typeof setInterval> | null = null;
 const techniqueSolver = new TechniqueSolver();
 const emptyDigitCounts = Array.from({ length: 10 }, () => 0);
 const testButtonsEnabled = isFeatureEnabled("walkthroughTestButtons");
+
+const totalSteps = computed(() => solveResult.value?.steps.length ?? 0);
+
+const {
+    currentStep,
+    isPlaying,
+    next: advanceStep,
+    previous: reverseStep,
+    goToFirst: jumpToFirst,
+    goToLast: jumpToLast,
+    goToStep,
+    togglePlay,
+    startPlay,
+    stopPlay,
+} = usePlaybackState(totalSteps);
 
 const TECHNIQUE_LABELS: Record<TechniqueId, string> = {
     nakedSingle: "Naked Single",
@@ -186,19 +199,17 @@ const TECHNIQUE_LABELS: Record<TechniqueId, string> = {
     claiming: "Claiming",
 };
 
-const totalSteps = computed(() => solveResult.value?.steps.length ?? 0);
-
 const progressPercent = computed(() => {
     if (totalSteps.value === 0) return "0%";
-    return `${((currentStepIndex.value + 1) / totalSteps.value) * 100}%`;
+    return `${(currentStep.value / totalSteps.value) * 100}%`;
 });
 
 const progressBarRef = ref<HTMLElement | null>(null);
 
 const stepDescription = computed(() => {
     if (solveResult.value === null) return "";
-    if (currentStepIndex.value < 0) return "Initial board";
-    const step = solveResult.value.steps[currentStepIndex.value];
+    if (currentStep.value === 0) return "Initial board";
+    const step = solveResult.value.steps[currentStep.value - 1];
     const label = TECHNIQUE_LABELS[step.technique];
     if (step.assignments.length > 0) {
         const { cell, digit } = step.assignments[0];
@@ -209,8 +220,8 @@ const stepDescription = computed(() => {
 });
 
 const currentStepFocus = computed(() => {
-    if (solveResult.value === null || currentStepIndex.value < 0) return [];
-    return solveResult.value.steps[currentStepIndex.value].focus;
+    if (solveResult.value === null || currentStep.value === 0) return [];
+    return solveResult.value.steps[currentStep.value - 1].focus;
 });
 
 const cellVariant = (row: number, column: number): CellVariant => {
@@ -221,11 +232,11 @@ const cellVariant = (row: number, column: number): CellVariant => {
 
 const displayState = computed(() => {
     const baseState = BoardState.fromPuzzle(userValues.value);
-    if (solveResult.value === null || currentStepIndex.value < 0) {
+    if (solveResult.value === null || currentStep.value === 0) {
         return baseState;
     }
     let currentState = baseState;
-    for (let stepIndex = 0; stepIndex <= currentStepIndex.value; stepIndex++) {
+    for (let stepIndex = 0; stepIndex < currentStep.value; stepIndex++) {
         const step = solveResult.value.steps[stepIndex];
         for (const assignment of step.assignments) {
             currentState = currentState.assign(assignment.cell.row, assignment.cell.column, assignment.digit);
@@ -237,33 +248,10 @@ const displayState = computed(() => {
     return currentState;
 });
 
-const advanceStep = () => {
-    if (solveResult.value === null) return;
-    const lastIndex = solveResult.value.steps.length - 1;
-    if (currentStepIndex.value < lastIndex) {
-        currentStepIndex.value += 1;
-    }
-};
-
-const reverseStep = () => {
-    if (currentStepIndex.value >= 0) {
-        currentStepIndex.value -= 1;
-    }
-};
-
-const jumpToFirst = () => {
-    currentStepIndex.value = -1;
-};
-
-const jumpToLast = () => {
-    if (solveResult.value === null) return;
-    currentStepIndex.value = solveResult.value.steps.length - 1;
-};
-
 const returnToEdit = () => {
     stopPlay();
     solveResult.value = null;
-    currentStepIndex.value = -1;
+    jumpToFirst();
 };
 
 const loadPreset = (puzzle: number[][]) => {
@@ -273,47 +261,10 @@ const loadPreset = (puzzle: number[][]) => {
     userValues.value = puzzle.map((row) => [...row]);
 };
 
-const stopPlay = () => {
-    isPlaying.value = false;
-    if (playInterval !== null) {
-        clearInterval(playInterval);
-        playInterval = null;
-    }
-};
-
-const startPlay = () => {
-    if (solveResult.value === null) return;
-    if (currentStepIndex.value >= solveResult.value.steps.length - 1) return;
-    isPlaying.value = true;
-    playInterval = setInterval(() => {
-        advanceStep();
-        if (solveResult.value !== null && currentStepIndex.value >= solveResult.value.steps.length - 1) {
-            stopPlay();
-        }
-    }, 800);
-};
-
-const togglePlay = () => {
-    if (isPlaying.value) {
-        stopPlay();
-    } else {
-        startPlay();
-    }
-};
-
-onUnmounted(stopPlay);
-
-const seekToStep = (step: number) => {
-    if (solveResult.value === null) return;
-    const lastIndex = solveResult.value.steps.length - 1;
-    const targetIndex = step - 1;
-    currentStepIndex.value = Math.max(-1, Math.min(targetIndex, lastIndex));
-};
-
 const { isDragging, onPointerDown } = useProgressDrag(
     progressBarRef,
     totalSteps,
-    seekToStep,
+    goToStep,
     { isPlaying, stopPlay, startPlay },
 );
 
@@ -326,7 +277,7 @@ const toggleEraseMode = () => {
 
 const runSolver = () => {
     solveResult.value = techniqueSolver.solveWithTechniques(state.value);
-    currentStepIndex.value = -1;
+    jumpToFirst();
 };
 
 const goBack = () => {
