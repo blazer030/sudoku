@@ -176,9 +176,11 @@ const conflictsWithPeers = (row: number, column: number, digit: number): boolean
 const invalidDigitsForSelectedCell = computed((): number[] => {
     if (selectedCell.value === null) return [];
     const { row, column } = selectedCell.value;
+    const currentValue = userValues.value[row][column];
     const invalid: number[] = [];
     for (let digit = 1; digit <= BOARD_SIZE; digit++) {
-        if (conflictsWithPeers(row, column, digit)) invalid.push(digit);
+        if (digit === currentValue) invalid.push(digit);
+        else if (conflictsWithPeers(row, column, digit)) invalid.push(digit);
     }
     return invalid;
 });
