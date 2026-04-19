@@ -183,7 +183,7 @@ import type { TechniqueId } from "@/domain/solver/SolveStep";
 import DigitPad from "@/presentation/pages/game/components/DigitPad.vue";
 import BoardCell, { type CellVariant } from "@/presentation/components/board-cell/BoardCell.vue";
 import { TEST_PUZZLE_PRESETS } from "@/presentation/pages/solver-walkthrough/testPuzzles";
-import { useProgressDrag } from "@/presentation/pages/game-review/useGameReview";
+import { useProgressDrag } from "@/presentation/components/playback/useProgressDrag";
 import { isFeatureEnabled } from "@/utils/featureToggle";
 
 interface CellPosition {
