@@ -183,7 +183,7 @@
     position: absolute;
     inset: 0;
     background: linear-gradient(
-        to bottom right,
+        to top right,
         transparent calc(50% - 0.5px),
         currentColor calc(50% - 0.5px),
         currentColor calc(50% + 0.5px),
