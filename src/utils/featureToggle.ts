@@ -1,6 +1,7 @@
 type FeatureEnvironment = 'all' | 'develop'
 
 const features: Partial<Record<string, FeatureEnvironment>> = {
+    walkthroughTestButtons: 'develop',
 }
 
 export const isDevelop = (): boolean =>

@@ -66,6 +66,20 @@
                 Solve
             </button>
             <div
+                v-if="solveResult === null && testButtonsEnabled"
+                class="flex gap-2"
+            >
+                <button
+                    v-for="preset in TEST_PUZZLE_PRESETS"
+                    :key="preset.label"
+                    :data-testid="`load-preset-${preset.label.toLowerCase()}`"
+                    class="px-3 py-1.5 bg-card border border-border rounded-lg text-xs text-foreground-muted cursor-pointer hover:bg-foreground/5"
+                    @click="loadPreset(preset.puzzle)"
+                >
+                    {{ preset.label }}
+                </button>
+            </div>
+            <div
                 v-else
                 class="flex flex-col items-center gap-3 w-full"
             >
@@ -169,7 +183,9 @@ import type { TechniqueId } from "@/domain/solver/SolveStep";
 import DigitPad from "@/presentation/pages/game/components/DigitPad.vue";
 import SolverBoardCell from "@/presentation/pages/solver-walkthrough/components/SolverBoardCell.vue";
 import type { CellHighlight } from "@/presentation/pages/solver-walkthrough/components/cellHighlight";
+import { TEST_PUZZLE_PRESETS } from "@/presentation/pages/solver-walkthrough/testPuzzles";
 import { useProgressDrag } from "@/presentation/pages/game-review/useGameReview";
+import { isFeatureEnabled } from "@/utils/featureToggle";
 
 interface CellPosition {
     row: number;
@@ -191,6 +207,7 @@ const isPlaying = ref(false);
 let playInterval: ReturnType<typeof setInterval> | null = null;
 const techniqueSolver = new TechniqueSolver();
 const emptyDigitCounts = Array.from({ length: 10 }, () => 0);
+const testButtonsEnabled = isFeatureEnabled("walkthroughTestButtons");
 
 const TECHNIQUE_LABELS: Record<TechniqueId, string> = {
     nakedSingle: "Naked Single",
@@ -266,6 +283,13 @@ const returnToEdit = () => {
     stopPlay();
     solveResult.value = null;
     currentStepIndex.value = -1;
+};
+
+const loadPreset = (puzzle: number[][]) => {
+    selectedCell.value = null;
+    selectedDigit.value = null;
+    eraseMode.value = false;
+    userValues.value = puzzle.map((row) => [...row]);
 };
 
 const stopPlay = () => {
