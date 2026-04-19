@@ -1,4 +1,4 @@
-import { BOARD_SIZE } from "@/domain/board/constants";
+import { BOARD_SIZE, BOX_SIZE } from "@/domain/board/constants";
 import { BoardState } from "@/domain/solver/BoardState";
 import { CellReference, Elimination, SolveStep, TechniqueId } from "@/domain/solver/SolveStep";
 import { Technique } from "@/domain/solver/techniques/Technique";
@@ -20,6 +20,12 @@ export class NakedSubset implements Technique {
         for (let column = 0; column < BOARD_SIZE; column++) {
             const step = this.findInScope(collectColumnCells(state, column));
             if (step) return step;
+        }
+        for (let boxRow = 0; boxRow < BOARD_SIZE; boxRow += BOX_SIZE) {
+            for (let boxColumn = 0; boxColumn < BOARD_SIZE; boxColumn += BOX_SIZE) {
+                const step = this.findInScope(collectBoxCells(state, boxRow, boxColumn));
+                if (step) return step;
+            }
         }
         return null;
     }
@@ -67,6 +73,19 @@ function collectColumnCells(state: BoardState, column: number): ScopeCell[] {
         const candidates = state.candidatesOf(row, column);
         if (candidates.length > 0) {
             cells.push({ cell: { row, column }, candidates });
+        }
+    }
+    return cells;
+}
+
+function collectBoxCells(state: BoardState, boxStartRow: number, boxStartColumn: number): ScopeCell[] {
+    const cells: ScopeCell[] = [];
+    for (let row = boxStartRow; row < boxStartRow + BOX_SIZE; row++) {
+        for (let column = boxStartColumn; column < boxStartColumn + BOX_SIZE; column++) {
+            const candidates = state.candidatesOf(row, column);
+            if (candidates.length > 0) {
+                cells.push({ cell: { row, column }, candidates });
+            }
         }
     }
     return cells;
