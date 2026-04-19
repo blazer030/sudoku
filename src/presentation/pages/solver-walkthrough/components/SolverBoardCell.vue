@@ -37,7 +37,7 @@
 <script lang="ts" setup>
 import { computed } from "vue";
 
-export type CellHighlight = "focus";
+import type { CellHighlight } from "@/presentation/pages/solver-walkthrough/components/cellHighlight";
 
 const props = withDefaults(defineProps<{
     value: number;

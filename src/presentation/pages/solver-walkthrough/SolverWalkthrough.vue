@@ -38,6 +38,7 @@
                             :key="`cell-${rowIndex - 1}-${columnIndex - 1}`"
                             :column="columnIndex - 1"
                             :data-testid="`solver-cell-${rowIndex - 1}-${columnIndex - 1}`"
+                            :highlight="cellHighlight(rowIndex - 1, columnIndex - 1)"
                             :notes="displayState.candidatesOf(rowIndex - 1, columnIndex - 1)"
                             :row="rowIndex - 1"
                             :selected="isSelectedCell(rowIndex - 1, columnIndex - 1)"
@@ -167,6 +168,7 @@ import { TechniqueSolver, type SolveResult } from "@/domain/solver/TechniqueSolv
 import type { TechniqueId } from "@/domain/solver/SolveStep";
 import DigitPad from "@/presentation/pages/game/components/DigitPad.vue";
 import SolverBoardCell from "@/presentation/pages/solver-walkthrough/components/SolverBoardCell.vue";
+import type { CellHighlight } from "@/presentation/pages/solver-walkthrough/components/cellHighlight";
 import { useProgressDrag } from "@/presentation/pages/game-review/useGameReview";
 
 interface CellPosition {
@@ -212,6 +214,16 @@ const stepDescription = computed(() => {
     const label = TECHNIQUE_LABELS[step.technique];
     return `${label}: Row ${cell.row + 1}, Col ${cell.column + 1} = ${digit}`;
 });
+
+const currentStepFocus = computed(() => {
+    if (solveResult.value === null || currentStepIndex.value < 0) return [];
+    return solveResult.value.steps[currentStepIndex.value].focus;
+});
+
+const cellHighlight = (row: number, column: number): CellHighlight | null => {
+    if (currentStepFocus.value.some((c) => c.row === row && c.column === column)) return "focus";
+    return null;
+};
 
 const displayState = computed(() => {
     const baseState = BoardState.fromPuzzle(userValues.value);

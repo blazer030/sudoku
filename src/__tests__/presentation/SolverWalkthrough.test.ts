@@ -306,6 +306,26 @@ describe("SolverWalkthrough", () => {
         expect(wrapper.find("[data-testid='step-description']").text()).toContain("Initial board");
     });
 
+    it("should highlight focus cell at the current solver step", async () => {
+        const { wrapper } = mountWalkthrough();
+        await fillPuzzle(wrapper, singlesPuzzle);
+
+        const firstStep = new TechniqueSolver().nextStep(BoardState.fromPuzzle(singlesPuzzle));
+        if (firstStep === null) throw new Error("expected first step to exist");
+        const { cell } = firstStep.assignments[0];
+
+        await wrapper.find("[data-testid='solve-button']").trigger("click");
+        await wrapper.find("[data-testid='next-step-button']").trigger("click");
+
+        const focusCell = wrapper.find(`[data-testid='solver-cell-${cell.row}-${cell.column}']`);
+        expect(focusCell.classes()).toContain("bg-primary-light");
+
+        const nonFocus = cell.row === 0 && cell.column === 0
+            ? `[data-testid='solver-cell-0-1']`
+            : `[data-testid='solver-cell-0-0']`;
+        expect(wrapper.find(nonFocus).classes()).not.toContain("bg-primary-light");
+    });
+
     it("should fill progress bar to 100% when at the final step", async () => {
         const { wrapper } = mountWalkthrough();
         await fillPuzzle(wrapper, singlesPuzzle);
