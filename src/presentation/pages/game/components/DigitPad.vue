@@ -56,10 +56,9 @@
                 </span>
             </div>
             <button
-                :class="eraseActive
-                    ? 'bg-primary text-white shadow-primary-active'
-                    : 'bg-card text-foreground shadow-card-sm hover:bg-foreground/5'"
-                class="w-14 h-14 rounded-xl flex items-center justify-center transition-all cursor-pointer"
+                :class="eraseButtonClasses"
+                :disabled="eraseDisabled"
+                class="w-14 h-14 rounded-xl flex items-center justify-center transition-all cursor-pointer disabled:cursor-default"
                 data-testid="erase-button"
                 @click="emit('toggleEraseMode')"
             >
@@ -70,6 +69,7 @@
 </template>
 
 <script lang="ts" setup>
+import { computed } from "vue";
 import { Eraser } from "lucide-vue-next";
 
 const props = withDefaults(defineProps<{
@@ -78,9 +78,11 @@ const props = withDefaults(defineProps<{
     digitCounts: number[];
     showRemainingCount?: boolean;
     disabledDigits?: number[];
+    eraseDisabled?: boolean;
 }>(), {
     showRemainingCount: true,
     disabledDigits: () => [],
+    eraseDisabled: false,
 });
 
 const emit = defineEmits<{
@@ -98,4 +100,10 @@ const digitButtonClasses = (digit: number): string => {
     if (props.selectedDigit === digit) return "bg-primary text-white shadow-primary-active";
     return "bg-card text-foreground shadow-card-sm hover:bg-foreground/5";
 };
+
+const eraseButtonClasses = computed(() => {
+    if (props.eraseDisabled) return "bg-card opacity-50 text-foreground-muted";
+    if (props.eraseActive) return "bg-primary text-white shadow-primary-active";
+    return "bg-card text-foreground shadow-card-sm hover:bg-foreground/5";
+});
 </script>

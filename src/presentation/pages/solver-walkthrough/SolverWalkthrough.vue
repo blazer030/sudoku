@@ -54,6 +54,7 @@
                 :digit-counts="emptyDigitCounts"
                 :disabled-digits="invalidDigitsForSelectedCell"
                 :erase-active="eraseMode"
+                :erase-disabled="eraseDisabledForSelectedCell"
                 :selected-digit="selectedDigit"
                 :show-remaining-count="false"
                 @select-digit="pickDigit"
@@ -172,6 +173,12 @@ const conflictsWithPeers = (row: number, column: number, digit: number): boolean
     }
     return false;
 };
+
+const eraseDisabledForSelectedCell = computed((): boolean => {
+    if (selectedCell.value === null) return false;
+    const { row, column } = selectedCell.value;
+    return userValues.value[row][column] === 0;
+});
 
 const invalidDigitsForSelectedCell = computed((): number[] => {
     if (selectedCell.value === null) return [];
