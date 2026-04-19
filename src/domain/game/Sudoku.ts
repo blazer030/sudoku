@@ -4,7 +4,10 @@ import { SudokuBoard } from "@/domain/board/SudokuBoard";
 import { BoardHistory } from "@/domain/game/BoardHistory";
 import { Conflict, ConflictDetector } from "@/domain/game/ConflictDetector";
 import { HintTracker } from "@/domain/game/HintTracker";
+import { RevealOutcome } from "@/domain/game/RevealOutcome";
 import { Difficulty, SudokuGenerator } from "@/domain/generator/SudokuGenerator";
+import { BoardState } from "@/domain/solver/BoardState";
+import { TechniqueSolver } from "@/domain/solver/TechniqueSolver";
 
 export interface CompletedCells {
     cells: { row: number; column: number }[];
@@ -180,6 +183,46 @@ export class Sudoku {
 
     public checkAllConflicts(): Conflict[] {
         return this.conflictDetector.findAllConflicts(this._puzzle, this.getCurrentBoard());
+    }
+
+    public revealCellWithTechnique(): RevealOutcome | null {
+        const state = BoardState.fromPuzzle(this.buildEffectiveNumberBoard());
+        const step = new TechniqueSolver().nextAssignment(state);
+        if (step !== null && step.assignments.length > 0) {
+            const { cell, digit } = step.assignments[0];
+            this.snapshot();
+            this._puzzle[cell.row][cell.column].entry = digit;
+            this.removeNoteFromPeers(cell.row, cell.column, digit);
+            return { cell, value: digit, step, fallback: false };
+        }
+
+        const target = this.revealRandomCell();
+        if (target === null) return null;
+        return {
+            cell: { row: target.row, column: target.column },
+            value: this._answer[target.row][target.column],
+            step: null,
+            fallback: true,
+        };
+    }
+
+    private buildEffectiveNumberBoard(): number[][] {
+        const board: number[][] = [];
+        for (let row = 0; row < BOARD_SIZE; row++) {
+            const rowValues: number[] = [];
+            for (let column = 0; column < BOARD_SIZE; column++) {
+                const cell = this._puzzle[row][column];
+                if (cell.isClue) {
+                    rowValues.push(cell.clue);
+                } else if (cell.hasEntry && cell.entry === this._answer[row][column]) {
+                    rowValues.push(cell.entry);
+                } else {
+                    rowValues.push(0);
+                }
+            }
+            board.push(rowValues);
+        }
+        return board;
     }
 
     public revealRandomCell(): Conflict | null {
