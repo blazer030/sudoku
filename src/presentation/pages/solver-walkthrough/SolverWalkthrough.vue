@@ -212,6 +212,14 @@ const testButtonsEnabled = isFeatureEnabled("walkthroughTestButtons");
 const TECHNIQUE_LABELS: Record<TechniqueId, string> = {
     nakedSingle: "Naked Single",
     hiddenSingle: "Hidden Single",
+    nakedPair: "Naked Pair",
+    nakedTriple: "Naked Triple",
+    nakedQuad: "Naked Quad",
+    hiddenPair: "Hidden Pair",
+    hiddenTriple: "Hidden Triple",
+    hiddenQuad: "Hidden Quad",
+    pointing: "Pointing",
+    claiming: "Claiming",
 };
 
 const totalSteps = computed(() => solveResult.value?.steps.length ?? 0);
@@ -227,9 +235,13 @@ const stepDescription = computed(() => {
     if (solveResult.value === null) return "";
     if (currentStepIndex.value < 0) return "Initial board";
     const step = solveResult.value.steps[currentStepIndex.value];
-    const { cell, digit } = step.assignments[0];
     const label = TECHNIQUE_LABELS[step.technique];
-    return `${label}: Row ${cell.row + 1}, Col ${cell.column + 1} = ${digit}`;
+    if (step.assignments.length > 0) {
+        const { cell, digit } = step.assignments[0];
+        return `${label}: Row ${cell.row + 1}, Col ${cell.column + 1} = ${digit}`;
+    }
+    const eliminationCount = step.eliminations.length;
+    return `${label}: ${eliminationCount} elimination${eliminationCount === 1 ? "" : "s"}`;
 });
 
 const currentStepFocus = computed(() => {
@@ -249,8 +261,12 @@ const displayState = computed(() => {
     }
     let currentState = baseState;
     for (let stepIndex = 0; stepIndex <= currentStepIndex.value; stepIndex++) {
-        for (const assignment of solveResult.value.steps[stepIndex].assignments) {
+        const step = solveResult.value.steps[stepIndex];
+        for (const assignment of step.assignments) {
             currentState = currentState.assign(assignment.cell.row, assignment.cell.column, assignment.digit);
+        }
+        for (const elimination of step.eliminations) {
+            currentState = currentState.eliminate(elimination.cell.row, elimination.cell.column, elimination.digit);
         }
     }
     return currentState;
