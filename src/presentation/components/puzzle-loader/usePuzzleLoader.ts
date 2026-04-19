@@ -5,7 +5,7 @@ export interface PuzzleLoaderController {
     runWithLoader: <T>(task: () => Promise<T>, minDurationMs?: number) => Promise<T>;
 }
 
-const DEFAULT_MIN_DURATION_MS = 400;
+const DEFAULT_MIN_DURATION_MS = 1000;
 
 export const usePuzzleLoader = (): PuzzleLoaderController => {
     const visible = ref(false);

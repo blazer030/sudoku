@@ -6,7 +6,7 @@
             data-testid="puzzle-loader"
         >
             <div
-                class="flex flex-col items-center gap-4"
+                class="bg-card rounded-3xl px-8 py-6 flex flex-col items-center gap-4 shadow-modal"
                 :style="{ color: themeColor }"
             >
                 <div class="puzzle-loader__animation">
