@@ -5,6 +5,11 @@ import SolverWalkthrough from "@/presentation/pages/solver-walkthrough/SolverWal
 import { BoardState } from "@/domain/solver/BoardState";
 import { TechniqueSolver } from "@/domain/solver/TechniqueSolver";
 import { singlesPuzzle, singlesSolution } from "@/__tests__/fixtures/singlesPuzzle";
+import { TEST_PUZZLE_PRESETS } from "@/presentation/pages/solver-walkthrough/testPuzzles";
+
+const mediumPreset = TEST_PUZZLE_PRESETS.find((preset) => preset.label === "Medium");
+if (!mediumPreset) throw new Error("expected Medium preset to exist");
+const mediumPuzzle = mediumPreset.puzzle;
 
 const fillPuzzle = async (wrapper: VueWrapper, puzzle: number[][]) => {
     for (let row = 0; row < 9; row++) {
@@ -324,6 +329,108 @@ describe("SolverWalkthrough", () => {
             ? `[data-testid='solver-cell-0-1']`
             : `[data-testid='solver-cell-0-0']`;
         expect(wrapper.find(nonFocus).classes()).not.toContain("bg-primary/40");
+    });
+
+    it("should apply scope variant to non-focus cells in the current step's scope", async () => {
+        const { wrapper } = mountWalkthrough();
+        await fillPuzzle(wrapper, mediumPuzzle);
+
+        const solver = new TechniqueSolver();
+        const result = solver.solveWithTechniques(BoardState.fromPuzzle(mediumPuzzle));
+        const stepIndex = result.steps.findIndex((step) => step.scopes.length > 0);
+        if (stepIndex === -1) throw new Error("expected at least one step with scope");
+        const step = result.steps[stepIndex];
+
+        await wrapper.find("[data-testid='solve-button']").trigger("click");
+        for (let click = 0; click <= stepIndex; click++) {
+            await wrapper.find("[data-testid='next-step-button']").trigger("click");
+        }
+
+        const focusKeys = new Set(step.focus.map((focusCell) => `${focusCell.row}-${focusCell.column}`));
+        const scopeKeys = new Set<string>();
+        for (const scope of step.scopes) {
+            if (scope.kind === "row") {
+                for (let column = 0; column < 9; column++) scopeKeys.add(`${scope.row}-${column}`);
+            } else if (scope.kind === "column") {
+                for (let row = 0; row < 9; row++) scopeKeys.add(`${row}-${scope.column}`);
+            } else {
+                for (let row = scope.boxRow; row < scope.boxRow + 3; row++) {
+                    for (let column = scope.boxColumn; column < scope.boxColumn + 3; column++) {
+                        scopeKeys.add(`${row}-${column}`);
+                    }
+                }
+            }
+        }
+
+        let checkedScopeCells = 0;
+        for (const key of scopeKeys) {
+            if (focusKeys.has(key)) continue;
+            const [row, column] = key.split("-").map(Number);
+            const cell = wrapper.find(`[data-testid='solver-cell-${row}-${column}']`);
+            expect(cell.classes()).toContain("bg-primary/15");
+            checkedScopeCells++;
+        }
+        expect(checkedScopeCells).toBeGreaterThan(0);
+    });
+
+    it("should strike through peer candidates cleared by an assignment step", async () => {
+        const { wrapper } = mountWalkthrough();
+        await fillPuzzle(wrapper, singlesPuzzle);
+
+        const firstStep = new TechniqueSolver().nextStep(BoardState.fromPuzzle(singlesPuzzle));
+        if (firstStep === null || firstStep.assignments.length === 0) {
+            throw new Error("expected first step to have an assignment");
+        }
+        const { cell: assignedCell, digit } = firstStep.assignments[0];
+
+        await wrapper.find("[data-testid='solve-button']").trigger("click");
+        await wrapper.find("[data-testid='next-step-button']").trigger("click");
+
+        const preStepState = BoardState.fromPuzzle(singlesPuzzle);
+        const peerKeys = new Set<string>();
+        for (let column = 0; column < 9; column++) {
+            if (column !== assignedCell.column) peerKeys.add(`${assignedCell.row}-${column}`);
+        }
+        for (let row = 0; row < 9; row++) {
+            if (row !== assignedCell.row) peerKeys.add(`${row}-${assignedCell.column}`);
+        }
+        const boxStartRow = Math.floor(assignedCell.row / 3) * 3;
+        const boxStartColumn = Math.floor(assignedCell.column / 3) * 3;
+        for (let row = boxStartRow; row < boxStartRow + 3; row++) {
+            for (let column = boxStartColumn; column < boxStartColumn + 3; column++) {
+                if (row === assignedCell.row && column === assignedCell.column) continue;
+                peerKeys.add(`${row}-${column}`);
+            }
+        }
+
+        let checkedPeers = 0;
+        for (const key of peerKeys) {
+            const [row, column] = key.split("-").map(Number);
+            if (!preStepState.candidatesOf(row, column).includes(digit)) continue;
+            const peerCell = wrapper.find(`[data-testid='solver-cell-${row}-${column}']`);
+            const striked = peerCell.find(`[data-testid='eliminated-note-${digit}']`);
+            expect(striked.exists()).toBe(true);
+            checkedPeers++;
+        }
+        expect(checkedPeers).toBeGreaterThan(0);
+    });
+
+    it("should clear scope highlight and eliminations when returning to initial step", async () => {
+        const { wrapper } = mountWalkthrough();
+        await fillPuzzle(wrapper, singlesPuzzle);
+
+        await wrapper.find("[data-testid='solve-button']").trigger("click");
+        await wrapper.find("[data-testid='next-step-button']").trigger("click");
+        await wrapper.find("[data-testid='first-step-button']").trigger("click");
+
+        for (let row = 0; row < 9; row++) {
+            for (let column = 0; column < 9; column++) {
+                const cell = wrapper.find(`[data-testid='solver-cell-${row}-${column}']`);
+                expect(cell.classes()).not.toContain("bg-primary/40");
+                expect(cell.classes()).not.toContain("bg-primary/15");
+            }
+        }
+        expect(wrapper.find("[data-testid^='eliminated-note-']").exists()).toBe(false);
     });
 
     it("should fill progress bar to 100% when at the final step", async () => {
