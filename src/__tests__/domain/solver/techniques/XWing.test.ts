@@ -91,4 +91,14 @@ describe("XWing", () => {
             ],
         });
     });
+
+    it("should return null when no X-Wing pattern exists", () => {
+        const state = BoardState.fromPuzzle(
+            Array.from({ length: 9 }, () => Array<number>(9).fill(0)),
+        );
+
+        const step = new XWing().find(state);
+
+        expect(step).toBeNull();
+    });
 });
