@@ -133,49 +133,16 @@
         </div>
 
         <!-- Playback Controls -->
-        <div class="flex items-center justify-center gap-5 pb-8">
-            <button
-                class="size-11 rounded-xl bg-card shadow-card-sm flex items-center justify-center cursor-pointer hover:bg-foreground/5"
-                data-testid="review-first"
-                @click="goToFirst"
-            >
-                <SkipBack :size="20" />
-            </button>
-            <button
-                class="size-11 rounded-xl bg-card shadow-card-sm flex items-center justify-center cursor-pointer hover:bg-foreground/5"
-                data-testid="review-prev"
-                @click="previous"
-            >
-                <ChevronLeft :size="22" />
-            </button>
-            <button
-                class="w-14 h-14 rounded-full bg-primary text-white flex items-center justify-center cursor-pointer hover:bg-primary/90"
-                data-testid="review-play"
-                @click="togglePlay"
-            >
-                <Pause
-                    v-if="isPlaying"
-                    :size="24"
-                />
-                <Play
-                    v-else
-                    :size="24"
-                />
-            </button>
-            <button
-                class="size-11 rounded-xl bg-card shadow-card-sm flex items-center justify-center cursor-pointer hover:bg-foreground/5"
-                data-testid="review-next"
-                @click="next"
-            >
-                <ChevronRight :size="22" />
-            </button>
-            <button
-                class="size-11 rounded-xl bg-card shadow-card-sm flex items-center justify-center cursor-pointer hover:bg-foreground/5"
-                data-testid="review-last"
-                @click="goToLast"
-            >
-                <SkipForward :size="20" />
-            </button>
+        <div class="pb-8">
+            <PlaybackControls
+                :is-playing="isPlaying"
+                testid-prefix="review-"
+                @first="goToFirst"
+                @prev="previous"
+                @toggle-play="togglePlay"
+                @next="next"
+                @last="goToLast"
+            />
         </div>
     </div>
 </template>
@@ -183,13 +150,14 @@
 <script lang="ts" setup>
 import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
-import { ChevronLeft, ChevronRight, Eraser, Lightbulb, Pause, Pencil, Play, SkipBack, SkipForward, Sparkles, StickyNote, Trophy, Undo2, X } from "lucide-vue-next";
+import { ChevronLeft, Eraser, Lightbulb, Pencil, Sparkles, StickyNote, Trophy, Undo2, X } from "lucide-vue-next";
 import { ROUTER_PATH } from "@/router";
 import { getGameHistory } from "@/application/Statistics";
 import { formatTime } from "@/utils/formatTime";
 import { formatDate } from "@/utils/formatDate";
 import { type Difficulty, DifficultyLabels } from "@/domain";
 import Cell from "@/presentation/pages/game/components/Cell.vue";
+import PlaybackControls from "@/presentation/components/playback/PlaybackControls.vue";
 import { useGameReview } from "@/presentation/pages/game-review/useGameReview";
 import { useProgressDrag } from "@/presentation/components/playback/useProgressDrag";
 

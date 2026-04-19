@@ -114,50 +114,14 @@
                 >
                     Step {{ currentStepIndex + 1 }} of {{ totalSteps }}
                 </span>
-                <div class="flex items-center justify-center gap-5">
-                    <button
-                        class="size-11 rounded-xl bg-card shadow-card-sm flex items-center justify-center cursor-pointer hover:bg-foreground/5"
-                        data-testid="first-step-button"
-                        @click="jumpToFirst"
-                    >
-                        <SkipBack :size="20" />
-                    </button>
-                    <button
-                        class="size-11 rounded-xl bg-card shadow-card-sm flex items-center justify-center cursor-pointer hover:bg-foreground/5"
-                        data-testid="prev-step-button"
-                        @click="reverseStep"
-                    >
-                        <ChevronLeft :size="22" />
-                    </button>
-                    <button
-                        class="w-14 h-14 rounded-full bg-primary text-white flex items-center justify-center cursor-pointer hover:bg-primary/90"
-                        data-testid="play-button"
-                        @click="togglePlay"
-                    >
-                        <Pause
-                            v-if="isPlaying"
-                            :size="24"
-                        />
-                        <Play
-                            v-else
-                            :size="24"
-                        />
-                    </button>
-                    <button
-                        class="size-11 rounded-xl bg-card shadow-card-sm flex items-center justify-center cursor-pointer hover:bg-foreground/5"
-                        data-testid="next-step-button"
-                        @click="advanceStep"
-                    >
-                        <ChevronRight :size="22" />
-                    </button>
-                    <button
-                        class="size-11 rounded-xl bg-card shadow-card-sm flex items-center justify-center cursor-pointer hover:bg-foreground/5"
-                        data-testid="last-step-button"
-                        @click="jumpToLast"
-                    >
-                        <SkipForward :size="20" />
-                    </button>
-                </div>
+                <PlaybackControls
+                    :is-playing="isPlaying"
+                    @first="jumpToFirst"
+                    @prev="reverseStep"
+                    @toggle-play="togglePlay"
+                    @next="advanceStep"
+                    @last="jumpToLast"
+                />
                 <button
                     class="px-6 py-2 bg-card rounded-xl font-semibold cursor-pointer shadow-card-sm"
                     data-testid="edit-button"
@@ -174,7 +138,8 @@
 <script lang="ts" setup>
 import { computed, onUnmounted, ref } from "vue";
 import { useRouter } from "vue-router";
-import { ChevronLeft, ChevronRight, Pause, Play, SkipBack, SkipForward } from "lucide-vue-next";
+import { ChevronLeft } from "lucide-vue-next";
+import PlaybackControls from "@/presentation/components/playback/PlaybackControls.vue";
 import { ROUTER_PATH } from "@/router";
 import { BOARD_SIZE } from "@/domain/board/constants";
 import { BoardState } from "@/domain/solver/BoardState";
