@@ -108,6 +108,24 @@ describe("TechniqueSolver", () => {
         expect(step?.technique).toBe("xyWing");
     });
 
+    it("nextStep should find a W-Wing when no simpler technique applies", () => {
+        let state = BoardState.fromPuzzle(
+            Array.from({ length: 9 }, () => Array<number>(9).fill(0)),
+        );
+        for (const digit of [3, 4, 5, 6, 7, 8, 9]) {
+            state = state.eliminate(0, 0, digit);
+            state = state.eliminate(4, 4, digit);
+        }
+        for (const column of [1, 2, 3, 5, 6, 7, 8]) {
+            state = state.eliminate(2, column, 1);
+        }
+        const solver = new TechniqueSolver();
+
+        const step = solver.nextStep(state);
+
+        expect(step?.technique).toBe("wWing");
+    });
+
     it("solveWithTechniques should solve a singles-only puzzle", () => {
         const state = BoardState.fromPuzzle(singlesPuzzle);
         const solver = new TechniqueSolver();

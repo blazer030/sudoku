@@ -10,6 +10,7 @@ import { Pointing } from "@/domain/solver/techniques/Pointing";
 import { Claiming } from "@/domain/solver/techniques/Claiming";
 import { XWing } from "@/domain/solver/techniques/XWing";
 import { XYWing } from "@/domain/solver/techniques/XYWing";
+import { WWing } from "@/domain/solver/techniques/WWing";
 
 const techniques: Technique[] = [
     new NakedSingle(),
@@ -24,6 +25,7 @@ const techniques: Technique[] = [
     new Claiming(),
     new XWing(),
     new XYWing(),
+    new WWing(),
 ];
 
 export interface SolveResult {

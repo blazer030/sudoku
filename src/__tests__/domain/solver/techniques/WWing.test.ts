@@ -34,4 +34,31 @@ describe("WWing", () => {
             scopes: [{ kind: "row", row: 2 }],
         });
     });
+
+    it("should return null when no W-Wing pattern exists", () => {
+        const state = BoardState.fromPuzzle(
+            Array.from({ length: 9 }, () => Array<number>(9).fill(0)),
+        );
+
+        const step = new WWing().find(state);
+
+        expect(step).toBeNull();
+    });
+
+    it("should not match when bivalue endpoints see each other directly", () => {
+        let state = BoardState.fromPuzzle(
+            Array.from({ length: 9 }, () => Array<number>(9).fill(0)),
+        );
+        for (const digit of [3, 4, 5, 6, 7, 8, 9]) {
+            state = state.eliminate(0, 0, digit);
+            state = state.eliminate(0, 4, digit);
+        }
+        for (const column of [1, 2, 3, 5, 6, 7, 8]) {
+            state = state.eliminate(2, column, 1);
+        }
+
+        const step = new WWing().find(state);
+
+        expect(step).toBeNull();
+    });
 });
