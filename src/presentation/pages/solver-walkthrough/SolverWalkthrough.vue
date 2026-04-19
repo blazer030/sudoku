@@ -132,7 +132,7 @@ import { ROUTER_PATH } from "@/router";
 import { BOARD_SIZE } from "@/domain/board/constants";
 import { BoardState } from "@/domain/solver/BoardState";
 import { TechniqueSolver, type SolveResult } from "@/domain/solver/TechniqueSolver";
-import type { TechniqueId } from "@/domain/solver/SolveStep";
+import { TECHNIQUE_LABELS } from "@/presentation/labels/techniqueLabels";
 import DigitPad from "@/presentation/pages/game/components/DigitPad.vue";
 import BoardCell, { type CellVariant } from "@/presentation/components/board-cell/BoardCell.vue";
 import ProgressBar from "@/presentation/components/playback/ProgressBar.vue";
@@ -213,23 +213,6 @@ const {
 } = usePlaybackState(totalSteps);
 
 const playState = { isPlaying, stopPlay, startPlay };
-
-const TECHNIQUE_LABELS: Record<TechniqueId, string> = {
-    nakedSingle: "Naked Single",
-    hiddenSingle: "Hidden Single",
-    nakedPair: "Naked Pair",
-    nakedTriple: "Naked Triple",
-    nakedQuad: "Naked Quad",
-    hiddenPair: "Hidden Pair",
-    hiddenTriple: "Hidden Triple",
-    hiddenQuad: "Hidden Quad",
-    pointing: "Pointing",
-    claiming: "Claiming",
-    xWing: "X-Wing",
-    xyWing: "XY-Wing",
-    wWing: "W-Wing",
-    xyzWing: "XYZ-Wing",
-};
 
 const stepDescription = computed(() => {
     if (solveResult.value === null) return "";
