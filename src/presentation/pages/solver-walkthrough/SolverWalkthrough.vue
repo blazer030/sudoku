@@ -221,21 +221,10 @@ const currentStepScopeCellKeys = computed(() => {
     return keys;
 });
 
-const currentStepEliminationMap = computed(() => {
-    const map = new Map<string, number[]>();
-    if (solveResult.value === null || currentStep.value === 0) return map;
-    const eliminations = solveResult.value.steps[currentStep.value - 1].eliminations;
-    for (const elimination of eliminations) {
-        const key = `${elimination.cell.row}-${elimination.cell.column}`;
-        const digits = map.get(key) ?? [];
-        digits.push(elimination.digit);
-        map.set(key, digits);
-    }
-    return map;
-});
-
 const eliminatedDigitsAt = (row: number, column: number): number[] => {
-    return currentStepEliminationMap.value.get(`${row}-${column}`) ?? [];
+    const preCandidates = preStepState.value.candidatesOf(row, column);
+    const postCandidates = displayState.value.candidatesOf(row, column);
+    return preCandidates.filter((digit) => !postCandidates.includes(digit));
 };
 
 const cellVariant = (row: number, column: number): CellVariant => {
@@ -267,6 +256,9 @@ const displayState = computed(() => {
     let currentState = preStepState.value;
     for (const assignment of step.assignments) {
         currentState = currentState.assign(assignment.cell.row, assignment.cell.column, assignment.digit);
+    }
+    for (const elimination of step.eliminations) {
+        currentState = currentState.eliminate(elimination.cell.row, elimination.cell.column, elimination.digit);
     }
     return currentState;
 });
