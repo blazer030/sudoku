@@ -46,6 +46,11 @@ export class HiddenSubset implements Technique {
             );
             if (matchingCells.length !== this.size) continue;
 
+            const allDigitsPresent = digits.every((digit) =>
+                matchingCells.some((entry) => entry.candidates.includes(digit)),
+            );
+            if (!allDigitsPresent) continue;
+
             const eliminations = collectOtherCandidates(matchingCells, digits);
             if (eliminations.length === 0) continue;
 
