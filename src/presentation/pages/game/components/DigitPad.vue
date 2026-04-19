@@ -1,6 +1,5 @@
 <template>
     <div class="flex flex-col gap-3">
-        <!-- Row 1: digits 1-5 -->
         <div class="flex justify-center gap-2">
             <div
                 v-for="digit in 5"
@@ -28,7 +27,6 @@
                 </span>
             </div>
         </div>
-        <!-- Row 2: digits 6-9 + Erase -->
         <div class="flex justify-center gap-2">
             <div
                 v-for="digit in [6, 7, 8, 9]"

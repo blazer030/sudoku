@@ -1,6 +1,5 @@
 <template>
     <div class="flex flex-col gap-5 px-5 bg-background overflow-y-auto h-dvh">
-        <!-- Header -->
         <div class="flex items-center justify-between sticky top-0 bg-background pt-6 pb-3 z-10">
             <button
                 class="flex items-center gap-2 cursor-pointer"
@@ -17,7 +16,6 @@
             <div class="w-15" />
         </div>
 
-        <!-- Game Info Card -->
         <div class="flex items-center justify-between bg-card rounded-xl py-3 px-4 shadow-card-sm">
             <div class="flex items-center gap-3">
                 <div
@@ -58,7 +56,6 @@
             </div>
         </div>
 
-        <!-- Board -->
         <div class="bg-card rounded-2xl shadow-card-lg p-2 w-full pointer-events-none">
             <div class="flex flex-col border-3 border-foreground/20 rounded-xl">
                 <div
@@ -79,7 +76,6 @@
             </div>
         </div>
 
-        <!-- Step Description -->
         <div class="bg-card rounded-lg py-2.5 px-4 shadow-card-sm min-h-9 flex items-center gap-2">
             <template v-if="description && stepIcon">
                 <component
@@ -108,7 +104,6 @@
             </span>
         </div>
 
-        <!-- Progress -->
         <ProgressBar
             :current-step="currentStep"
             :total-steps="totalSteps"
@@ -118,7 +113,6 @@
             @seek="goToStep"
         />
 
-        <!-- Playback Controls -->
         <div class="pb-8">
             <PlaybackControls
                 :is-playing="isPlaying"

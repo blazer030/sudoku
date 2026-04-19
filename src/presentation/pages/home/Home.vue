@@ -1,6 +1,5 @@
 <template>
     <div class="flex flex-col h-full items-center pt-20 pb-15 px-6">
-        <!-- Logo -->
         <div class="flex flex-col items-center gap-2">
             <div
                 class="w-20 h-20 bg-primary rounded-popup flex items-center justify-center shadow-primary-lg"
@@ -27,15 +26,11 @@
 
         <div class="flex-1" />
 
-        <!-- Menu -->
         <div class="flex flex-col gap-3 w-full">
-            <!-- Continue Game -->
             <ContinueButton @continue="continueGame" />
 
-            <!-- Difficulty Switcher -->
             <DifficultySwitcher v-model="difficulty" />
 
-            <!-- New Game -->
             <button
                 class="flex items-center justify-center gap-2.5 h-14 w-full bg-card rounded-2xl shadow-card cursor-pointer transition-all duration-200 hover:bg-foreground/3 hover:shadow-card-lg"
                 data-testid="new-game-button"
@@ -51,7 +46,6 @@
 
         <div class="flex-1" />
 
-        <!-- Bottom Nav -->
         <div class="flex items-center justify-center gap-10">
             <button
                 class="flex flex-col items-center gap-1 cursor-pointer"
@@ -88,10 +82,8 @@
             </button>
         </div>
 
-        <!-- New Game Confirm Dialog -->
         <NewGameDialog />
 
-        <!-- Puzzle Loader -->
         <PuzzleLoader :visible="puzzleLoader.visible.value" />
     </div>
 </template>

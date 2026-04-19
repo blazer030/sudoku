@@ -12,7 +12,6 @@
             <div
                 class="absolute bottom-24 left-1/2 -translate-x-1/2 bg-card rounded-popup shadow-popup w-55 z-10 flex flex-col gap-1 py-4 px-3"
             >
-                <!-- Header: Title + Hint Lights -->
                 <div class="flex items-center justify-between px-3 pb-1">
                     <span class="text-foreground text-sm font-bold">Hints</span>
                     <div class="flex items-center gap-1">
@@ -28,12 +27,10 @@
                     </div>
                 </div>
 
-                <!-- Subtitle -->
                 <span class="text-foreground-muted text-[11px] mb-1 text-center">
                     First use is free and won't be recorded.
                 </span>
 
-                <!-- Auto Notes -->
                 <button
                     :disabled="!params?.canUseHint"
                     class="hint-option"
@@ -47,7 +44,6 @@
                     <span>Auto Notes</span>
                 </button>
 
-                <!-- Check Conflicts -->
                 <button
                     :disabled="!params?.canUseHint"
                     class="hint-option"
@@ -61,7 +57,6 @@
                     <span>Check Conflicts</span>
                 </button>
 
-                <!-- Check Errors -->
                 <button
                     :disabled="!params?.canUseHint"
                     class="hint-option"
@@ -75,10 +70,8 @@
                     <span>Check Errors</span>
                 </button>
 
-                <!-- Divider -->
                 <div class="h-px bg-border mx-3" />
 
-                <!-- Reveal Cell -->
                 <button
                     :disabled="!params?.canUseHint"
                     class="hint-option"

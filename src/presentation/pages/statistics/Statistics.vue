@@ -1,6 +1,5 @@
 <template>
     <div class="flex flex-col h-dvh px-5 bg-background overflow-y-auto">
-        <!-- Header -->
         <div class="flex items-center justify-between sticky top-0 bg-background pt-6 pb-3 z-10">
             <button
                 class="flex items-center gap-2 cursor-pointer"
@@ -17,7 +16,6 @@
             <div class="w-15" />
         </div>
 
-        <!-- Overview -->
         <div class="flex flex-col gap-2 mt-2">
             <span class="text-foreground-muted text-xs font-semibold tracking-wider uppercase px-1">Overview</span>
             <div class="flex gap-3">
@@ -45,7 +43,6 @@
             </div>
         </div>
 
-        <!-- Best Times -->
         <div class="flex flex-col gap-2 mt-5">
             <span class="text-foreground-muted text-xs font-semibold tracking-wider uppercase px-1">Best Times</span>
             <div class="bg-card rounded-2xl p-4 shadow-card flex flex-col gap-3">
@@ -97,7 +94,6 @@
             </div>
         </div>
 
-        <!-- Recent Games -->
         <div class="flex flex-col gap-2 mt-5">
             <span class="text-foreground-muted text-xs font-semibold tracking-wider uppercase px-1">Recent Games</span>
             <div
@@ -163,7 +159,6 @@
                 </button>
             </div>
 
-            <!-- Empty State -->
             <div
                 v-if="!hasRecords"
                 class="flex flex-col items-center gap-2"
@@ -180,7 +175,6 @@
             </div>
         </div>
 
-        <!-- Clear All Records -->
         <div
             v-if="hasRecords"
             class="sticky bottom-0 bg-background py-4"
@@ -198,7 +192,6 @@
             </button>
         </div>
 
-        <!-- Clear Records Dialog -->
         <ClearRecordsDialog />
     </div>
 </template>

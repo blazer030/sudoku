@@ -3,18 +3,14 @@
         v-if="gameStore.hasActiveGame"
         class="flex flex-col gap-2 h-dvh py-6 px-5"
     >
-        <!-- Header -->
         <GameHeader
             :elapsed-seconds="elapsedSeconds"
             @back="showLeaveDialog"
         />
 
-        <!-- Spacer -->
         <div class="flex-1" />
 
-        <!-- Game Area -->
         <div class="flex flex-col items-center gap-6">
-            <!-- Board Container -->
             <div class="bg-card rounded-2xl shadow-card-lg p-2 w-full">
                 <div class="flex flex-col border-3 border-foreground/20 rounded-xl">
                     <div
@@ -40,7 +36,6 @@
                 </div>
             </div>
 
-            <!-- Controls -->
             <GameControls
                 :note-active="inputMode === InputMode.Note"
                 @undo="undo"
@@ -48,7 +43,6 @@
                 @show-hint-menu="openHintMenu"
             />
 
-            <!-- Digit Pad -->
             <DigitPad
                 :digit-counts="digitCounts"
                 :erase-active="inputMode === InputMode.Erase"
@@ -59,19 +53,14 @@
             />
         </div>
 
-        <!-- Spacer -->
         <div class="flex-1" />
 
-        <!-- Game Complete Modal -->
         <GameCompleteModal />
 
-        <!-- Hint Menu Popup -->
         <HintMenuPopup />
 
-        <!-- Hint Result Toast -->
         <HintResultToast :outcome="hintResultOutcome" />
 
-        <!-- Leave Game Dialog -->
         <LeaveGameDialog />
     </div>
 </template>
