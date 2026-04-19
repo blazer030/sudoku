@@ -153,13 +153,32 @@ const solveResult = ref<SolveResult | null>(null);
 const techniqueSolver = new TechniqueSolver();
 const emptyDigitCounts = Array.from({ length: 10 }, () => 0);
 
+const conflictsWithPeers = (row: number, column: number, digit: number): boolean => {
+    for (let otherColumn = 0; otherColumn < BOARD_SIZE; otherColumn++) {
+        if (otherColumn === column) continue;
+        if (userValues.value[row][otherColumn] === digit) return true;
+    }
+    for (let otherRow = 0; otherRow < BOARD_SIZE; otherRow++) {
+        if (otherRow === row) continue;
+        if (userValues.value[otherRow][column] === digit) return true;
+    }
+    const boxStartRow = Math.floor(row / 3) * 3;
+    const boxStartColumn = Math.floor(column / 3) * 3;
+    for (let boxRow = boxStartRow; boxRow < boxStartRow + 3; boxRow++) {
+        for (let boxColumn = boxStartColumn; boxColumn < boxStartColumn + 3; boxColumn++) {
+            if (boxRow === row && boxColumn === column) continue;
+            if (userValues.value[boxRow][boxColumn] === digit) return true;
+        }
+    }
+    return false;
+};
+
 const invalidDigitsForSelectedCell = computed((): number[] => {
     if (selectedCell.value === null) return [];
     const { row, column } = selectedCell.value;
-    const candidates = state.value.candidatesOf(row, column);
     const invalid: number[] = [];
     for (let digit = 1; digit <= BOARD_SIZE; digit++) {
-        if (!candidates.includes(digit)) invalid.push(digit);
+        if (conflictsWithPeers(row, column, digit)) invalid.push(digit);
     }
     return invalid;
 });
@@ -311,7 +330,7 @@ const goBack = () => {
 };
 
 const tryFillCell = (row: number, column: number, digit: number) => {
-    if (state.value.candidatesOf(row, column).includes(digit)) {
+    if (!conflictsWithPeers(row, column, digit)) {
         userValues.value[row][column] = digit;
     }
 };
