@@ -46,4 +46,49 @@ describe("XWing", () => {
             ],
         });
     });
+
+    it("should eliminate digit from rows when two columns share the same candidate pair of rows", () => {
+        let state = BoardState.fromPuzzle(
+            Array.from({ length: 9 }, () => Array<number>(9).fill(0)),
+        );
+        for (const row of [1, 2, 3, 5, 6, 7, 8]) {
+            state = state.eliminate(row, 0, 2);
+            state = state.eliminate(row, 4, 2);
+        }
+
+        const step = new XWing().find(state);
+
+        expect(step).toEqual({
+            technique: "xWing",
+            focus: [
+                { row: 0, column: 0 },
+                { row: 4, column: 0 },
+                { row: 0, column: 4 },
+                { row: 4, column: 4 },
+            ],
+            assignments: [],
+            eliminations: [
+                { cell: { row: 0, column: 1 }, digit: 2 },
+                { cell: { row: 0, column: 2 }, digit: 2 },
+                { cell: { row: 0, column: 3 }, digit: 2 },
+                { cell: { row: 0, column: 5 }, digit: 2 },
+                { cell: { row: 0, column: 6 }, digit: 2 },
+                { cell: { row: 0, column: 7 }, digit: 2 },
+                { cell: { row: 0, column: 8 }, digit: 2 },
+                { cell: { row: 4, column: 1 }, digit: 2 },
+                { cell: { row: 4, column: 2 }, digit: 2 },
+                { cell: { row: 4, column: 3 }, digit: 2 },
+                { cell: { row: 4, column: 5 }, digit: 2 },
+                { cell: { row: 4, column: 6 }, digit: 2 },
+                { cell: { row: 4, column: 7 }, digit: 2 },
+                { cell: { row: 4, column: 8 }, digit: 2 },
+            ],
+            scopes: [
+                { kind: "column", column: 0 },
+                { kind: "column", column: 4 },
+                { kind: "row", row: 0 },
+                { kind: "row", row: 4 },
+            ],
+        });
+    });
 });
