@@ -37,11 +37,30 @@ export interface SolveResult {
     stuck: boolean;
 }
 
+const MAX_ASSIGNMENT_ITERATIONS = 20;
+
 export class TechniqueSolver {
     public nextStep(state: BoardState): SolveStep | null {
         for (const technique of techniques) {
             const step = technique.find(state);
             if (step) return step;
+        }
+        return null;
+    }
+
+    public nextAssignment(state: BoardState): SolveStep | null {
+        let currentState = state;
+        for (let iteration = 0; iteration < MAX_ASSIGNMENT_ITERATIONS; iteration++) {
+            const step = this.nextStep(currentState);
+            if (step === null) return null;
+            if (step.assignments.length > 0) return step;
+            for (const elimination of step.eliminations) {
+                currentState = currentState.eliminate(
+                    elimination.cell.row,
+                    elimination.cell.column,
+                    elimination.digit,
+                );
+            }
         }
         return null;
     }
