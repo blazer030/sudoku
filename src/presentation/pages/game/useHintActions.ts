@@ -1,4 +1,5 @@
 import { ref } from "vue";
+import type { RevealOutcome } from "@/domain/game/RevealOutcome";
 import type { Sudoku } from "@/domain/game/Sudoku";
 import type { StepRecorder } from "@/domain/game/StepRecorder";
 import { provideHintMenu } from "@/presentation/pages/game/components/useHintMenu";
@@ -8,9 +9,10 @@ interface HintActionsOptions {
     stepRecorder: StepRecorder;
     onRevealComplete: (origin: { row: number; column: number }) => void;
     onGroupCompleted?: (cells: { row: number; column: number }[], origin: { row: number; column: number }) => void;
+    onHintReveal?: (outcome: RevealOutcome) => void;
 }
 
-export const useHintActions = ({ sudoku, stepRecorder, onRevealComplete, onGroupCompleted }: HintActionsOptions) => {
+export const useHintActions = ({ sudoku, stepRecorder, onRevealComplete, onGroupCompleted, onHintReveal }: HintActionsOptions) => {
     const hintMenu = provideHintMenu();
     const errorCells = ref<{ row: number; column: number }[]>([]);
 
@@ -40,16 +42,16 @@ export const useHintActions = ({ sudoku, stepRecorder, onRevealComplete, onGroup
             errorCells.value = sudoku.checkErrors();
             break;
         case "revealCell": {
-            const target = sudoku.revealRandomCell();
-            if (target) {
-                const revealedValue = sudoku.puzzle[target.row][target.column].entry;
-                stepRecorder.record(sudoku.puzzle, "hint", target.row, target.column, revealedValue);
+            const outcome = sudoku.revealCellWithTechnique();
+            if (outcome) {
+                stepRecorder.record(sudoku.puzzle, "hint", outcome.cell.row, outcome.cell.column, outcome.value);
+                onHintReveal?.(outcome);
             }
-            if (target && !sudoku.isCompleted()) {
-                const completed = sudoku.findCompletedGroups(target.row, target.column);
-                if (completed.cells.length > 0) onGroupCompleted?.(completed.cells, target);
+            if (outcome && !sudoku.isCompleted()) {
+                const completed = sudoku.findCompletedGroups(outcome.cell.row, outcome.cell.column);
+                if (completed.cells.length > 0) onGroupCompleted?.(completed.cells, outcome.cell);
             }
-            onRevealComplete(target ?? { row: 4, column: 4 });
+            onRevealComplete(outcome?.cell ?? { row: 4, column: 4 });
             break;
         }
         }
