@@ -89,31 +89,12 @@
                 >
                     <span class="text-sm text-foreground-muted">{{ stepDescription }}</span>
                 </div>
-                <div
-                    ref="progressBarRef"
-                    class="group w-full h-6 flex items-center cursor-pointer"
-                    data-testid="progress-bar"
-                    @mousedown="onPointerDown"
-                    @touchstart="onPointerDown"
-                >
-                    <div
-                        :class="isDragging ? 'h-3' : 'h-2 group-hover:h-3'"
-                        class="w-full bg-border rounded-full transition-all duration-150"
-                    >
-                        <div
-                            :class="isDragging ? 'h-3' : 'h-2 group-hover:h-3'"
-                            :style="{ width: progressPercent }"
-                            class="bg-primary rounded-full transition-all duration-150"
-                            data-testid="progress-fill"
-                        />
-                    </div>
-                </div>
-                <span
-                    class="text-xs text-foreground-muted"
-                    data-testid="step-counter"
-                >
-                    Step {{ currentStep }} of {{ totalSteps }}
-                </span>
+                <ProgressBar
+                    :current-step="currentStep"
+                    :total-steps="totalSteps"
+                    :play-state="playState"
+                    @seek="goToStep"
+                />
                 <PlaybackControls
                     :is-playing="isPlaying"
                     @first="jumpToFirst"
@@ -147,9 +128,9 @@ import { TechniqueSolver, type SolveResult } from "@/domain/solver/TechniqueSolv
 import type { TechniqueId } from "@/domain/solver/SolveStep";
 import DigitPad from "@/presentation/pages/game/components/DigitPad.vue";
 import BoardCell, { type CellVariant } from "@/presentation/components/board-cell/BoardCell.vue";
+import ProgressBar from "@/presentation/components/playback/ProgressBar.vue";
 import { TEST_PUZZLE_PRESETS } from "@/presentation/pages/solver-walkthrough/testPuzzles";
 import { usePlaybackState } from "@/presentation/components/playback/usePlaybackState";
-import { useProgressDrag } from "@/presentation/components/playback/useProgressDrag";
 import { isFeatureEnabled } from "@/utils/featureToggle";
 
 interface CellPosition {
@@ -186,6 +167,8 @@ const {
     stopPlay,
 } = usePlaybackState(totalSteps);
 
+const playState = { isPlaying, stopPlay, startPlay };
+
 const TECHNIQUE_LABELS: Record<TechniqueId, string> = {
     nakedSingle: "Naked Single",
     hiddenSingle: "Hidden Single",
@@ -198,13 +181,6 @@ const TECHNIQUE_LABELS: Record<TechniqueId, string> = {
     pointing: "Pointing",
     claiming: "Claiming",
 };
-
-const progressPercent = computed(() => {
-    if (totalSteps.value === 0) return "0%";
-    return `${(currentStep.value / totalSteps.value) * 100}%`;
-});
-
-const progressBarRef = ref<HTMLElement | null>(null);
 
 const stepDescription = computed(() => {
     if (solveResult.value === null) return "";
@@ -260,13 +236,6 @@ const loadPreset = (puzzle: number[][]) => {
     eraseMode.value = false;
     userValues.value = puzzle.map((row) => [...row]);
 };
-
-const { isDragging, onPointerDown } = useProgressDrag(
-    progressBarRef,
-    totalSteps,
-    goToStep,
-    { isPlaying, stopPlay, startPlay },
-);
 
 const toggleEraseMode = () => {
     if (!eraseMode.value) {

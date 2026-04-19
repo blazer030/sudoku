@@ -109,28 +109,14 @@
         </div>
 
         <!-- Progress -->
-        <div class="flex flex-col gap-1.5">
-            <div
-                ref="progressBar"
-                class="group w-full h-6 flex items-center cursor-pointer"
-                @mousedown="onPointerDown"
-                @touchstart="onPointerDown"
-            >
-                <div
-                    :class="isDragging ? 'h-3' : 'h-2 group-hover:h-3'"
-                    class="w-full bg-border rounded-full transition-all duration-150"
-                >
-                    <div
-                        :class="isDragging ? 'h-3' : 'h-2 group-hover:h-3'"
-                        class="bg-primary rounded-full transition-all duration-150"
-                        :style="{ width: progressPercent }"
-                    />
-                </div>
-            </div>
-            <span class="text-xs text-foreground-muted text-center">
-                Step {{ currentStep }} of {{ totalSteps }}
-            </span>
-        </div>
+        <ProgressBar
+            :current-step="currentStep"
+            :total-steps="totalSteps"
+            :play-state="playState"
+            testid-prefix="review-"
+            counter-align="center"
+            @seek="goToStep"
+        />
 
         <!-- Playback Controls -->
         <div class="pb-8">
@@ -148,7 +134,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from "vue";
+import { computed } from "vue";
 import { useRouter } from "vue-router";
 import { ChevronLeft, Eraser, Lightbulb, Pencil, Sparkles, StickyNote, Trophy, Undo2, X } from "lucide-vue-next";
 import { ROUTER_PATH } from "@/router";
@@ -158,8 +144,8 @@ import { formatDate } from "@/utils/formatDate";
 import { type Difficulty, DifficultyLabels } from "@/domain";
 import Cell from "@/presentation/pages/game/components/Cell.vue";
 import PlaybackControls from "@/presentation/components/playback/PlaybackControls.vue";
+import ProgressBar from "@/presentation/components/playback/ProgressBar.vue";
 import { useGameReview } from "@/presentation/pages/game-review/useGameReview";
-import { useProgressDrag } from "@/presentation/components/playback/useProgressDrag";
 
 const props = defineProps<{
     index: string;
@@ -193,6 +179,8 @@ const {
     startPlay,
 } = useGameReview(replayData ?? { initialBoard: [], steps: [] }, game.completed);
 
+const playState = { isPlaying, stopPlay, startPlay };
+
 const ACTION_ICONS: Record<string, typeof Pencil> = {
     fill: Pencil,
     erase: Eraser,
@@ -211,19 +199,11 @@ const stepIcon = computed(() => {
     return ACTION_ICONS[step.action];
 });
 
-const progressBar = ref<HTMLElement | null>(null);
-const { isDragging, onPointerDown } = useProgressDrag(progressBar, totalSteps, goToStep, { isPlaying, stopPlay, startPlay });
-
 const isActiveCell = (row: number, column: number): boolean => {
     const step = gameStep.value;
     if (!step) return false;
     return step.row === row && step.column === column;
 };
-
-const progressPercent = computed(() => {
-    if (totalSteps.value === 0) return "0%";
-    return `${(currentStep.value / totalSteps.value) * 100}%`;
-});
 
 const difficultyLabel = (difficulty: Difficulty): string => DifficultyLabels[difficulty];
 
