@@ -34,6 +34,40 @@ describe("NakedSubset", () => {
         });
     });
 
+    it("should find a naked quad in a row and eliminate the quad digits from other row cells", () => {
+        const puzzle: number[][] = [
+            [0, 0, 0, 0, 0, 6, 7, 8, 9],
+            [5, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 5, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        ];
+        const state = BoardState.fromPuzzle(puzzle);
+
+        const step = new NakedSubset(4).find(state);
+
+        expect(step).toEqual({
+            technique: "nakedQuad",
+            focus: [
+                { row: 0, column: 0 },
+                { row: 0, column: 1 },
+                { row: 0, column: 2 },
+                { row: 0, column: 3 },
+            ],
+            assignments: [],
+            eliminations: [
+                { cell: { row: 0, column: 4 }, digit: 1 },
+                { cell: { row: 0, column: 4 }, digit: 2 },
+                { cell: { row: 0, column: 4 }, digit: 3 },
+                { cell: { row: 0, column: 4 }, digit: 4 },
+            ],
+        });
+    });
+
     it("should return null when no naked pair exists in the board", () => {
         const emptyPuzzle: number[][] = Array.from({ length: 9 }, () =>
             Array<number>(9).fill(0),
