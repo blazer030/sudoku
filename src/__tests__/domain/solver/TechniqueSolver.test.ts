@@ -30,6 +30,26 @@ describe("TechniqueSolver", () => {
         });
     });
 
+    it("nextStep should find a naked pair when no singles are available", () => {
+        const puzzle: number[][] = [
+            [0, 0, 0, 0, 5, 6, 7, 8, 9],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [3, 0, 0, 0, 0, 0, 0, 0, 0],
+            [4, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 3, 0, 0, 0, 0, 0, 0, 0],
+            [0, 4, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        ];
+        const state = BoardState.fromPuzzle(puzzle);
+        const solver = new TechniqueSolver();
+
+        const step = solver.nextStep(state);
+
+        expect(step?.technique).toBe("nakedPair");
+    });
+
     it("solveWithTechniques should solve a singles-only puzzle", () => {
         const state = BoardState.fromPuzzle(singlesPuzzle);
         const solver = new TechniqueSolver();

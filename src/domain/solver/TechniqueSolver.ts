@@ -4,10 +4,22 @@ import { SolveStep } from "@/domain/solver/SolveStep";
 import { Technique } from "@/domain/solver/techniques/Technique";
 import { NakedSingle } from "@/domain/solver/techniques/NakedSingle";
 import { HiddenSingle } from "@/domain/solver/techniques/HiddenSingle";
+import { NakedSubset } from "@/domain/solver/techniques/NakedSubset";
+import { HiddenSubset } from "@/domain/solver/techniques/HiddenSubset";
+import { Pointing } from "@/domain/solver/techniques/Pointing";
+import { Claiming } from "@/domain/solver/techniques/Claiming";
 
 const techniques: Technique[] = [
     new NakedSingle(),
     new HiddenSingle(),
+    new NakedSubset(2),
+    new NakedSubset(3),
+    new NakedSubset(4),
+    new HiddenSubset(2),
+    new HiddenSubset(3),
+    new HiddenSubset(4),
+    new Pointing(),
+    new Claiming(),
 ];
 
 export interface SolveResult {
