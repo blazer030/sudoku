@@ -8,6 +8,7 @@ import { NakedSubset } from "@/domain/solver/techniques/NakedSubset";
 import { HiddenSubset } from "@/domain/solver/techniques/HiddenSubset";
 import { Pointing } from "@/domain/solver/techniques/Pointing";
 import { Claiming } from "@/domain/solver/techniques/Claiming";
+import { XWing } from "@/domain/solver/techniques/XWing";
 
 const techniques: Technique[] = [
     new NakedSingle(),
@@ -20,6 +21,7 @@ const techniques: Technique[] = [
     new HiddenSubset(4),
     new Pointing(),
     new Claiming(),
+    new XWing(),
 ];
 
 export interface SolveResult {
