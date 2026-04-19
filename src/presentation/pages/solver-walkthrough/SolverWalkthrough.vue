@@ -225,6 +225,10 @@ const TECHNIQUE_LABELS: Record<TechniqueId, string> = {
     hiddenQuad: "Hidden Quad",
     pointing: "Pointing",
     claiming: "Claiming",
+    xWing: "X-Wing",
+    xyWing: "XY-Wing",
+    wWing: "W-Wing",
+    xyzWing: "XYZ-Wing",
 };
 
 const stepDescription = computed(() => {
