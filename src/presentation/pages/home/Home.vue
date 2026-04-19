@@ -128,11 +128,11 @@ const handleNewGame = async () => {
         }
         deleteSavedGame();
     }
-    startGame();
+    await startGame();
 };
 
-const startGame = () => {
-    gameStore.startNewGame(difficulty.value);
+const startGame = async () => {
+    await gameStore.startNewGame(difficulty.value);
     void router.push(ROUTER_PATH.game);
 };
 

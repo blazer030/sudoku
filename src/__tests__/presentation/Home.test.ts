@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { flushPromises, mount } from "@vue/test-utils";
 import { createPinia } from "pinia";
 import { createRouter, createMemoryHistory } from "vue-router";
@@ -8,6 +8,14 @@ import { useGameStore } from "@/stores/gameStore";
 import { hasSavedGame, saveGame } from "@/application/GameStorage";
 import { getGameHistory } from "@/application/Statistics";
 import type { CellState, GameState } from "@/application/GameState";
+import { knownAnswer, knownPuzzle } from "@/__tests__/fixtures/knownPuzzle";
+
+vi.mock("@/application/PuzzleGenerationService", () => ({
+    generatePuzzleAsync: vi.fn(() => Promise.resolve({
+        puzzle: knownPuzzle.map(row => [...row]),
+        answer: knownAnswer.map(row => [...row]),
+    })),
+}));
 
 const createTestRouter = () => {
     return createRouter({
