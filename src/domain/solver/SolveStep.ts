@@ -13,7 +13,12 @@ export interface Elimination {
     digit: number;
 }
 
-export type TechniqueId = "nakedSingle" | "hiddenSingle";
+export type TechniqueId =
+    | "nakedSingle"
+    | "hiddenSingle"
+    | "nakedPair"
+    | "nakedTriple"
+    | "nakedQuad";
 
 export interface SolveStep {
     technique: TechniqueId;
