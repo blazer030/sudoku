@@ -52,6 +52,7 @@
             <DigitPad
                 v-if="solveResult === null"
                 :digit-counts="emptyDigitCounts"
+                :disabled-digits="invalidDigitsForSelectedCell"
                 :erase-active="eraseMode"
                 :selected-digit="selectedDigit"
                 :show-remaining-count="false"
@@ -151,6 +152,17 @@ const eraseMode = ref(false);
 const solveResult = ref<SolveResult | null>(null);
 const techniqueSolver = new TechniqueSolver();
 const emptyDigitCounts = Array.from({ length: 10 }, () => 0);
+
+const invalidDigitsForSelectedCell = computed((): number[] => {
+    if (selectedCell.value === null) return [];
+    const { row, column } = selectedCell.value;
+    const candidates = state.value.candidatesOf(row, column);
+    const invalid: number[] = [];
+    for (let digit = 1; digit <= BOARD_SIZE; digit++) {
+        if (!candidates.includes(digit)) invalid.push(digit);
+    }
+    return invalid;
+});
 const testButtonsEnabled = isFeatureEnabled("walkthroughTestButtons");
 
 const totalSteps = computed(() => solveResult.value?.steps.length ?? 0);
