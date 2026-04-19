@@ -2,6 +2,38 @@ import { BoardState } from "@/domain/solver/BoardState";
 import { NakedSubset } from "@/domain/solver/techniques/NakedSubset";
 
 describe("NakedSubset", () => {
+    it("should find a naked triple in a row and eliminate the triple digits from other row cells", () => {
+        const puzzle: number[][] = [
+            [0, 0, 0, 0, 5, 6, 7, 8, 9],
+            [4, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        ];
+        const state = BoardState.fromPuzzle(puzzle);
+
+        const step = new NakedSubset(3).find(state);
+
+        expect(step).toEqual({
+            technique: "nakedTriple",
+            focus: [
+                { row: 0, column: 0 },
+                { row: 0, column: 1 },
+                { row: 0, column: 2 },
+            ],
+            assignments: [],
+            eliminations: [
+                { cell: { row: 0, column: 3 }, digit: 1 },
+                { cell: { row: 0, column: 3 }, digit: 2 },
+                { cell: { row: 0, column: 3 }, digit: 3 },
+            ],
+        });
+    });
+
     it("should return null when no naked pair exists in the board", () => {
         const emptyPuzzle: number[][] = Array.from({ length: 9 }, () =>
             Array<number>(9).fill(0),
