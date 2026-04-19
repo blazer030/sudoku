@@ -34,6 +34,10 @@ describe("Pointing", () => {
                 { cell: { row: 7, column: 0 }, digit: 1 },
                 { cell: { row: 8, column: 0 }, digit: 1 },
             ],
+            scopes: [
+                { kind: "box", boxRow: 0, boxColumn: 0 },
+                { kind: "column", column: 0 },
+            ],
         });
     });
 
@@ -79,6 +83,10 @@ describe("Pointing", () => {
                 { cell: { row: 0, column: 6 }, digit: 1 },
                 { cell: { row: 0, column: 7 }, digit: 1 },
                 { cell: { row: 0, column: 8 }, digit: 1 },
+            ],
+            scopes: [
+                { kind: "box", boxRow: 0, boxColumn: 0 },
+                { kind: "row", row: 0 },
             ],
         });
     });

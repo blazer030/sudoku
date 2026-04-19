@@ -16,6 +16,7 @@ export class NakedSingle implements Technique {
                             { cell: { row, column }, digit: candidates[0] },
                         ],
                         eliminations: [],
+                        scopes: [],
                     };
                 }
             }

@@ -34,6 +34,10 @@ describe("Claiming", () => {
                 { cell: { row: 2, column: 1 }, digit: 1 },
                 { cell: { row: 2, column: 2 }, digit: 1 },
             ],
+            scopes: [
+                { kind: "column", column: 0 },
+                { kind: "box", boxRow: 0, boxColumn: 0 },
+            ],
         });
     });
 
@@ -79,6 +83,10 @@ describe("Claiming", () => {
                 { cell: { row: 2, column: 0 }, digit: 1 },
                 { cell: { row: 2, column: 1 }, digit: 1 },
                 { cell: { row: 2, column: 2 }, digit: 1 },
+            ],
+            scopes: [
+                { kind: "row", row: 0 },
+                { kind: "box", boxRow: 0, boxColumn: 0 },
             ],
         });
     });

@@ -40,6 +40,7 @@ export class HiddenSingle implements Technique {
                         { cell: { row, column: lastColumn }, digit },
                     ],
                     eliminations: [],
+                    scopes: [{ kind: "row", row }],
                 };
             }
         }
@@ -64,6 +65,7 @@ export class HiddenSingle implements Technique {
                         { cell: { row: lastRow, column }, digit },
                     ],
                     eliminations: [],
+                    scopes: [{ kind: "column", column }],
                 };
             }
         }
@@ -92,6 +94,7 @@ export class HiddenSingle implements Technique {
                         { cell: { row: foundRow, column: foundColumn }, digit },
                     ],
                     eliminations: [],
+                    scopes: [{ kind: "box", boxRow: boxStartRow, boxColumn: boxStartColumn }],
                 };
             }
         }

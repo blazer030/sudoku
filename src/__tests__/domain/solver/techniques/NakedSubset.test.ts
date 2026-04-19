@@ -31,6 +31,7 @@ describe("NakedSubset", () => {
                 { cell: { row: 0, column: 3 }, digit: 2 },
                 { cell: { row: 0, column: 3 }, digit: 3 },
             ],
+            scopes: [{ kind: "row", row: 0 }],
         });
     });
 
@@ -65,6 +66,7 @@ describe("NakedSubset", () => {
                 { cell: { row: 0, column: 4 }, digit: 3 },
                 { cell: { row: 0, column: 4 }, digit: 4 },
             ],
+            scopes: [{ kind: "row", row: 0 }],
         });
     });
 
@@ -106,6 +108,7 @@ describe("NakedSubset", () => {
                 { cell: { row: 2, column: 0 }, digit: 1 },
                 { cell: { row: 2, column: 0 }, digit: 2 },
             ],
+            scopes: [{ kind: "column", column: 0 }],
         });
     });
 
@@ -136,6 +139,7 @@ describe("NakedSubset", () => {
                 { cell: { row: 2, column: 2 }, digit: 1 },
                 { cell: { row: 2, column: 2 }, digit: 2 },
             ],
+            scopes: [{ kind: "box", boxRow: 0, boxColumn: 0 }],
         });
     });
 
@@ -166,6 +170,7 @@ describe("NakedSubset", () => {
                 { cell: { row: 0, column: 2 }, digit: 1 },
                 { cell: { row: 0, column: 2 }, digit: 2 },
             ],
+            scopes: [{ kind: "row", row: 0 }],
         });
     });
 });

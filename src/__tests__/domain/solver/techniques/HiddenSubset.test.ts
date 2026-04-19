@@ -29,6 +29,7 @@ describe("HiddenSubset", () => {
                 { cell: { row: 0, column: 0 }, digit: 3 },
                 { cell: { row: 1, column: 0 }, digit: 3 },
             ],
+            scopes: [{ kind: "column", column: 0 }],
         });
     });
 
@@ -59,6 +60,7 @@ describe("HiddenSubset", () => {
                 { cell: { row: 0, column: 0 }, digit: 3 },
                 { cell: { row: 0, column: 1 }, digit: 3 },
             ],
+            scopes: [{ kind: "box", boxRow: 0, boxColumn: 0 }],
         });
     });
 
@@ -102,6 +104,7 @@ describe("HiddenSubset", () => {
                 { cell: { row: 0, column: 1 }, digit: 7 },
                 { cell: { row: 0, column: 2 }, digit: 7 },
             ],
+            scopes: [{ kind: "row", row: 0 }],
         });
     });
 
@@ -132,6 +135,7 @@ describe("HiddenSubset", () => {
                 { cell: { row: 0, column: 0 }, digit: 3 },
                 { cell: { row: 0, column: 1 }, digit: 3 },
             ],
+            scopes: [{ kind: "row", row: 0 }],
         });
     });
 });

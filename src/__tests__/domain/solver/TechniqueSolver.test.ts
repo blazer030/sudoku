@@ -27,6 +27,7 @@ describe("TechniqueSolver", () => {
                 { cell: { row: 0, column: 0 }, digit: 1 },
             ],
             eliminations: [],
+            scopes: [],
         });
     });
 

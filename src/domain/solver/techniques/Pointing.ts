@@ -44,6 +44,10 @@ export class Pointing implements Technique {
                     focus: candidateCells,
                     assignments: [],
                     eliminations,
+                    scopes: [
+                        { kind: "box", boxRow: boxStartRow, boxColumn: boxStartColumn },
+                        { kind: "row", row: targetRow },
+                    ],
                 };
             }
         }
@@ -57,6 +61,10 @@ export class Pointing implements Technique {
                     focus: candidateCells,
                     assignments: [],
                     eliminations,
+                    scopes: [
+                        { kind: "box", boxRow: boxStartRow, boxColumn: boxStartColumn },
+                        { kind: "column", column: targetColumn },
+                    ],
                 };
             }
         }

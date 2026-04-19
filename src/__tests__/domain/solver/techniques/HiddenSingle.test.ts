@@ -25,6 +25,7 @@ describe("HiddenSingle", () => {
                 { cell: { row: 0, column: 0 }, digit: 1 },
             ],
             eliminations: [],
+            scopes: [{ kind: "row", row: 0 }],
         });
     });
 
@@ -51,10 +52,11 @@ describe("HiddenSingle", () => {
                 { cell: { row: 0, column: 0 }, digit: 1 },
             ],
             eliminations: [],
+            scopes: [{ kind: "column", column: 0 }],
         });
     });
 
-    it("should find a hidden single in a box", () => {
+    it("should find a hidden single when a digit is narrowed to a single cell across scopes", () => {
         const puzzle: number[][] = [
             [0, 0, 0, 1, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -77,6 +79,7 @@ describe("HiddenSingle", () => {
                 { cell: { row: 4, column: 4 }, digit: 1 },
             ],
             eliminations: [],
+            scopes: [{ kind: "row", row: 4 }],
         });
     });
 });

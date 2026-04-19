@@ -43,6 +43,10 @@ export class Claiming implements Technique {
             focus: candidateCells,
             assignments: [],
             eliminations,
+            scopes: [
+                { kind: "row", row },
+                { kind: "box", boxRow: boxStartRow, boxColumn: boxStartColumn },
+            ],
         };
     }
 
@@ -69,6 +73,10 @@ export class Claiming implements Technique {
             focus: candidateCells,
             assignments: [],
             eliminations,
+            scopes: [
+                { kind: "column", column },
+                { kind: "box", boxRow: boxStartRow, boxColumn: boxStartColumn },
+            ],
         };
     }
 }

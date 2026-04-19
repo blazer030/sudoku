@@ -1,6 +1,6 @@
 import { BOARD_SIZE, BOX_SIZE } from "@/domain/board/constants";
 import { BoardState } from "@/domain/solver/BoardState";
-import { CellReference, Elimination, SolveStep, TechniqueId } from "@/domain/solver/SolveStep";
+import { CellReference, Elimination, Scope, SolveStep, TechniqueId } from "@/domain/solver/SolveStep";
 import { Technique } from "@/domain/solver/techniques/Technique";
 
 const TECHNIQUE_BY_SIZE: Record<number, TechniqueId> = {
@@ -14,23 +14,26 @@ export class NakedSubset implements Technique {
 
     public find(state: BoardState): SolveStep | null {
         for (let row = 0; row < BOARD_SIZE; row++) {
-            const step = this.findInScope(collectRowCells(state, row));
+            const step = this.findInScope(collectRowCells(state, row), { kind: "row", row });
             if (step) return step;
         }
         for (let column = 0; column < BOARD_SIZE; column++) {
-            const step = this.findInScope(collectColumnCells(state, column));
+            const step = this.findInScope(collectColumnCells(state, column), { kind: "column", column });
             if (step) return step;
         }
         for (let boxRow = 0; boxRow < BOARD_SIZE; boxRow += BOX_SIZE) {
             for (let boxColumn = 0; boxColumn < BOARD_SIZE; boxColumn += BOX_SIZE) {
-                const step = this.findInScope(collectBoxCells(state, boxRow, boxColumn));
+                const step = this.findInScope(
+                    collectBoxCells(state, boxRow, boxColumn),
+                    { kind: "box", boxRow, boxColumn },
+                );
                 if (step) return step;
             }
         }
         return null;
     }
 
-    private findInScope(emptyCells: ScopeCell[]): SolveStep | null {
+    private findInScope(emptyCells: ScopeCell[], scope: Scope): SolveStep | null {
         const combinations = combinationsOfSize(emptyCells, this.size);
         for (const combination of combinations) {
             const combinedDigits = unionOfCandidates(combination.map((entry) => entry.candidates));
@@ -45,6 +48,7 @@ export class NakedSubset implements Technique {
                 focus: focusCells,
                 assignments: [],
                 eliminations,
+                scopes: [scope],
             };
         }
         return null;

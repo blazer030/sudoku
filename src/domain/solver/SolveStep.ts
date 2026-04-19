@@ -13,6 +13,18 @@ export interface Elimination {
     digit: number;
 }
 
+export type Scope =
+    | { kind: "row"; row: number }
+    | { kind: "column"; column: number }
+    | { kind: "box"; boxRow: number; boxColumn: number };
+
+export interface ChainLink {
+    from: CellReference;
+    to: CellReference;
+    digit: number;
+    type: "strong" | "weak";
+}
+
 export type TechniqueId =
     | "nakedSingle"
     | "hiddenSingle"
@@ -30,4 +42,7 @@ export interface SolveStep {
     focus: CellReference[];
     assignments: Assignment[];
     eliminations: Elimination[];
+    scopes: Scope[];
+    supporters?: CellReference[];
+    chainLinks?: ChainLink[];
 }
