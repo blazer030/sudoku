@@ -55,6 +55,13 @@ export class BoardState {
         return new BoardState(newValues, newCandidates);
     }
 
+    public eliminate(row: number, column: number, digit: number): BoardState {
+        const newCandidates = this._candidates.map((rowCandidates) => [...rowCandidates]);
+        newCandidates[row][column] &= ~(1 << (digit - 1));
+        const newValues = this._values.map((rowValues) => [...rowValues]);
+        return new BoardState(newValues, newCandidates);
+    }
+
     public candidatesOf(row: number, column: number): number[] {
         const candidateMask = this._candidates[row][column];
         const digits: number[] = [];

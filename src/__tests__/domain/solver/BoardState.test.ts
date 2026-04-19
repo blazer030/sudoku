@@ -75,6 +75,18 @@ describe("BoardState", () => {
         expect(updated.candidatesOf(0, 0)).toEqual([]);
     });
 
+    it("should remove a single candidate digit from a cell via eliminate", () => {
+        const emptyPuzzle: number[][] = Array.from({ length: 9 }, () =>
+            Array<number>(9).fill(0),
+        );
+        const state = BoardState.fromPuzzle(emptyPuzzle);
+
+        const updated = state.eliminate(0, 0, 5);
+
+        expect(updated.candidatesOf(0, 0)).toEqual([1, 2, 3, 4, 6, 7, 8, 9]);
+        expect(state.candidatesOf(0, 0)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    });
+
     it("should remove assigned digit from peer candidates", () => {
         const puzzle: number[][] = Array.from({ length: 9 }, () =>
             Array<number>(9).fill(0),
