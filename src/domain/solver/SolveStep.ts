@@ -36,7 +36,8 @@ export type TechniqueId =
     | "hiddenQuad"
     | "pointing"
     | "claiming"
-    | "xWing";
+    | "xWing"
+    | "xyWing";
 
 export interface SolveStep {
     technique: TechniqueId;
