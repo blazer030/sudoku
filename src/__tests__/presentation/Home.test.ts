@@ -17,6 +17,16 @@ vi.mock("@/application/PuzzleGenerationService", () => ({
     })),
 }));
 
+vi.mock("@/presentation/components/puzzle-loader/usePuzzleLoader", async () => {
+    const { ref } = await import("vue");
+    return {
+        usePuzzleLoader: () => ({
+            visible: ref(false),
+            runWithLoader: <T,>(task: () => Promise<T>) => task(),
+        }),
+    };
+});
+
 const createTestRouter = () => {
     return createRouter({
         history: createMemoryHistory(),

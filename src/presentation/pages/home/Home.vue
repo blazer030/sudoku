@@ -90,6 +90,9 @@
 
         <!-- New Game Confirm Dialog -->
         <NewGameDialog />
+
+        <!-- Puzzle Loader -->
+        <PuzzleLoader :visible="puzzleLoader.visible.value" />
     </div>
 </template>
 
@@ -107,10 +110,13 @@ import ContinueButton from "@/presentation/components/continue-button/ContinueBu
 import DifficultySwitcher from "@/presentation/components/difficulty-switcher/DifficultySwitcher.vue";
 import NewGameDialog from "@/presentation/components/new-game-dialog/NewGameDialog.vue";
 import { provideNewGameDialog } from "@/presentation/components/new-game-dialog/useNewGameDialog";
+import PuzzleLoader from "@/presentation/components/puzzle-loader/PuzzleLoader.vue";
+import { usePuzzleLoader } from "@/presentation/components/puzzle-loader/usePuzzleLoader";
 
 const router = useRouter();
 const gameStore = useGameStore();
 const newGameDialog = provideNewGameDialog();
+const puzzleLoader = usePuzzleLoader();
 
 const difficulty = ref<Difficulty>("easy");
 
@@ -132,7 +138,7 @@ const handleNewGame = async () => {
 };
 
 const startGame = async () => {
-    await gameStore.startNewGame(difficulty.value);
+    await puzzleLoader.runWithLoader(() => gameStore.startNewGame(difficulty.value));
     void router.push(ROUTER_PATH.game);
 };
 
