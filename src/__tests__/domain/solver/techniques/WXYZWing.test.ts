@@ -2,6 +2,16 @@ import { BoardState } from "@/domain/solver/BoardState";
 import { WXYZWing } from "@/domain/solver/techniques/WXYZWing";
 
 describe("WXYZWing", () => {
+    it("should return null when no WXYZ-Wing pattern exists", () => {
+        const state = BoardState.fromPuzzle(
+            Array.from({ length: 9 }, () => Array<number>(9).fill(0)),
+        );
+
+        const step = new WXYZWing().find(state);
+
+        expect(step).toBeNull();
+    });
+
     it("should eliminate Z from cells seeing pivot {W,X,Y,Z} and three pincers {W,Z}, {X,Z}, {Y,Z}", () => {
         let state = BoardState.fromPuzzle(
             Array.from({ length: 9 }, () => Array<number>(9).fill(0)),
