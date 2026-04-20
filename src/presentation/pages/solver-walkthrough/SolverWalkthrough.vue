@@ -28,11 +28,10 @@
                 ]"
             >
                 <div class="flex flex-col border-3 border-foreground/20 rounded-xl">
-                    <div class="relative aspect-square flex flex-col">
-                        <div
+                    <div class="relative aspect-square grid grid-cols-9 grid-rows-9">
+                        <template
                             v-for="rowIndex in BOARD_SIZE"
                             :key="`row-${rowIndex - 1}`"
-                            class="flex flex-1"
                         >
                             <BoardCell
                                 v-for="columnIndex in BOARD_SIZE"
@@ -47,7 +46,7 @@
                                 class="cursor-pointer"
                                 @click="selectCell(rowIndex - 1, columnIndex - 1)"
                             />
-                        </div>
+                        </template>
                         <ChainOverlay :chain-links="currentStepChainLinks" />
                     </div>
                 </div>
