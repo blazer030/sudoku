@@ -112,6 +112,8 @@
                     @seek="goToStep"
                 />
                 <PlaybackControls
+                    :can-go-next="currentStep < totalSteps"
+                    :can-go-prev="currentStep > 0"
                     :is-playing="isPlaying"
                     @first="jumpToFirst"
                     @last="jumpToLast"
