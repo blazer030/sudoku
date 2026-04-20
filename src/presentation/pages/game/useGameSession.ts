@@ -1,4 +1,4 @@
-import { computed, reactive } from "vue";
+import { computed, inject, reactive } from "vue";
 import { useRouter } from "vue-router";
 import { provideGameCompleteModal } from "@/presentation/pages/game/components/useGameCompleteModal";
 import { BOARD_SIZE, Sudoku, StepRecorder } from "@/domain";
@@ -13,10 +13,12 @@ import { useHintActions } from "@/presentation/pages/game/useHintActions";
 import { useHintResult } from "@/presentation/pages/game/useHintResult";
 import { useCompletionFlash } from "@/presentation/pages/game/useCompletionFlash";
 import { useSettingsStore } from "@/stores/settingsStore";
+import { ANALYTICS_KEY } from "@/application/analytics/AnalyticsService";
 
 export const useGameSession = () => {
     const router = useRouter();
     const gameStore = useGameStore();
+    const analytics = inject(ANALYTICS_KEY);
 
     if (!gameStore.hasActiveGame) {
         void router.replace(ROUTER_PATH.home);
@@ -49,6 +51,7 @@ export const useGameSession = () => {
         difficulty,
         getElapsedSeconds: () => elapsedSeconds.value,
         getReplayData,
+        analytics,
         onCompleted: (origin) => {
             const allCells: { row: number; column: number }[] = [];
             for (let row = 0; row < BOARD_SIZE; row++) {
