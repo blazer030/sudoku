@@ -89,10 +89,20 @@
         <div class="flex flex-col gap-2">
             <span class="text-foreground-muted text-xs font-semibold tracking-wider uppercase px-1">About</span>
             <div class="bg-card rounded-2xl px-4 shadow-card-sm">
-                <div class="flex items-center justify-between py-3.5">
+                <button
+                    class="flex items-center justify-between py-3.5 cursor-pointer w-full"
+                    data-testid="version-link"
+                    @click="goToChangelog"
+                >
                     <span class="text-foreground text-[15px] font-medium">Version</span>
-                    <span class="text-foreground-muted text-[15px]">{{ appVersion }}</span>
-                </div>
+                    <div class="flex items-center gap-1.5">
+                        <span class="text-foreground-muted text-[15px]">{{ appVersion }}</span>
+                        <ChevronRight
+                            :size="18"
+                            class="text-foreground-muted"
+                        />
+                    </div>
+                </button>
             </div>
         </div>
 
@@ -103,9 +113,10 @@
 <script lang="ts" setup>
 import { computed } from "vue";
 import { useRouter } from "vue-router";
-import { ChevronLeft, Check } from "lucide-vue-next";
+import { ChevronLeft, ChevronRight, Check } from "lucide-vue-next";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { appVersion } from "@/utils/appVersion";
+import { ROUTER_PATH } from "@/router";
 import { THEMES } from "@/theme/themeConfig";
 
 const router = useRouter();
@@ -144,5 +155,9 @@ const toggles = computed(() => [
 
 const goBack = () => {
     router.back();
+};
+
+const goToChangelog = () => {
+    void router.push(ROUTER_PATH.changelog);
 };
 </script>
