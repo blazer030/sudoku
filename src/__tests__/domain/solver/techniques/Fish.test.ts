@@ -169,6 +169,16 @@ describe("Fish", () => {
         });
     });
 
+    it("should return null when no jellyfish pattern exists", () => {
+        const state = BoardState.fromPuzzle(
+            Array.from({ length: 9 }, () => Array<number>(9).fill(0)),
+        );
+
+        const step = new Fish(4).find(state);
+
+        expect(step).toBeNull();
+    });
+
     it("should detect a size-4 jellyfish across four rows sharing four columns", () => {
         let state = BoardState.fromPuzzle(
             Array.from({ length: 9 }, () => Array<number>(9).fill(0)),
