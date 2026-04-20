@@ -1,7 +1,7 @@
 import { BoardState } from "@/domain/solver/BoardState";
-import { XWing } from "@/domain/solver/techniques/XWing";
+import { Fish } from "@/domain/solver/techniques/Fish";
 
-describe("XWing", () => {
+describe("Fish", () => {
     it("should eliminate digit from columns when two rows share the same candidate pair of columns", () => {
         let state = BoardState.fromPuzzle(
             Array.from({ length: 9 }, () => Array<number>(9).fill(0)),
@@ -11,7 +11,7 @@ describe("XWing", () => {
             state = state.eliminate(4, column, 1);
         }
 
-        const step = new XWing().find(state);
+        const step = new Fish(2).find(state);
 
         expect(step).toEqual({
             technique: "xWing",
@@ -56,7 +56,7 @@ describe("XWing", () => {
             state = state.eliminate(row, 4, 2);
         }
 
-        const step = new XWing().find(state);
+        const step = new Fish(2).find(state);
 
         expect(step).toEqual({
             technique: "xWing",
@@ -92,12 +92,12 @@ describe("XWing", () => {
         });
     });
 
-    it("should return null when no X-Wing pattern exists", () => {
+    it("should return null when no fish pattern exists", () => {
         const state = BoardState.fromPuzzle(
             Array.from({ length: 9 }, () => Array<number>(9).fill(0)),
         );
 
-        const step = new XWing().find(state);
+        const step = new Fish(2).find(state);
 
         expect(step).toBeNull();
     });

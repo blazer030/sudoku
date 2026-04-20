@@ -9,8 +9,8 @@ import { NakedSingle } from "@/domain/solver/techniques/NakedSingle";
 import { NakedSubset } from "@/domain/solver/techniques/NakedSubset";
 import { Pointing } from "@/domain/solver/techniques/Pointing";
 import type { Technique } from "@/domain/solver/techniques/Technique";
+import { Fish } from "@/domain/solver/techniques/Fish";
 import { WWing } from "@/domain/solver/techniques/WWing";
-import { XWing } from "@/domain/solver/techniques/XWing";
 import { XYWing } from "@/domain/solver/techniques/XYWing";
 import { XYZWing } from "@/domain/solver/techniques/XYZWing";
 
@@ -32,7 +32,7 @@ const mediumTechniques = (): Technique[] => [
 
 const hardTechniques = (): Technique[] => [
     ...mediumTechniques(),
-    new XWing(),
+    new Fish(2),
     new XYWing(),
     new WWing(),
     new XYZWing(),

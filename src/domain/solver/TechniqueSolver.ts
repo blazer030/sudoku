@@ -8,7 +8,7 @@ import { NakedSubset } from "@/domain/solver/techniques/NakedSubset";
 import { HiddenSubset } from "@/domain/solver/techniques/HiddenSubset";
 import { Pointing } from "@/domain/solver/techniques/Pointing";
 import { Claiming } from "@/domain/solver/techniques/Claiming";
-import { XWing } from "@/domain/solver/techniques/XWing";
+import { Fish } from "@/domain/solver/techniques/Fish";
 import { XYWing } from "@/domain/solver/techniques/XYWing";
 import { WWing } from "@/domain/solver/techniques/WWing";
 import { XYZWing } from "@/domain/solver/techniques/XYZWing";
@@ -24,7 +24,7 @@ const techniques: Technique[] = [
     new HiddenSubset(4),
     new Pointing(),
     new Claiming(),
-    new XWing(),
+    new Fish(2),
     new XYWing(),
     new WWing(),
     new XYZWing(),
