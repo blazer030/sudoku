@@ -98,6 +98,7 @@ export class Fish implements Technique {
 
     private techniqueId(): TechniqueId {
         if (this.size === 2) return "xWing";
+        if (this.size === 3) return "swordfish";
         throw new Error(`Fish size ${this.size} is not supported yet`);
     }
 }
