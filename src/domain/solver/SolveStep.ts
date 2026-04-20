@@ -38,6 +38,7 @@ export type TechniqueId =
     | "claiming"
     | "xWing"
     | "swordfish"
+    | "jellyfish"
     | "xyWing"
     | "wWing"
     | "xyzWing";
