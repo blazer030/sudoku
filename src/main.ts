@@ -6,6 +6,9 @@ import App from "@/presentation/App.vue";
 import { router } from "@/router";
 
 import { useSettingsStore } from "@/stores/settingsStore";
+import { ANALYTICS_KEY, type AnalyticsService } from "@/application/analytics/AnalyticsService";
+import { FirebaseAnalyticsAdapter } from "@/infrastructure/analytics/FirebaseAnalyticsAdapter";
+import { NoopAnalyticsAdapter } from "@/infrastructure/analytics/NoopAnalyticsAdapter";
 
 if (Capacitor.isNativePlatform() && "serviceWorker" in navigator) {
     void navigator.serviceWorker.getRegistrations().then((registrations) => {
@@ -15,9 +18,14 @@ if (Capacitor.isNativePlatform() && "serviceWorker" in navigator) {
     });
 }
 
+const analytics: AnalyticsService = Capacitor.isNativePlatform()
+    ? new FirebaseAnalyticsAdapter()
+    : new NoopAnalyticsAdapter();
+
 const app = createApp(App);
 app.use(createPinia());
 app.use(router);
+app.provide(ANALYTICS_KEY, analytics);
 
 useSettingsStore();
 
