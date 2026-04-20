@@ -102,6 +102,16 @@ describe("Fish", () => {
         expect(step).toBeNull();
     });
 
+    it("should return null when no swordfish pattern exists", () => {
+        const state = BoardState.fromPuzzle(
+            Array.from({ length: 9 }, () => Array<number>(9).fill(0)),
+        );
+
+        const step = new Fish(3).find(state);
+
+        expect(step).toBeNull();
+    });
+
     it("should detect a size-3 swordfish across three rows sharing three columns", () => {
         let state = BoardState.fromPuzzle(
             Array.from({ length: 9 }, () => Array<number>(9).fill(0)),
