@@ -1,11 +1,15 @@
 import { BOARD_SIZE, TOTAL_CELLS } from "@/domain/board/constants";
 import { SudokuSolver } from "@/domain/generator/SudokuSolver";
+import { DifficultyRater } from "@/domain/solver/DifficultyRater";
 
 export type Difficulty = "easy" | "medium" | "hard";
 export const DifficultyLabels: Record<Difficulty, string> = { easy: "Easy", medium: "Medium", hard: "Hard" };
 
+const MAX_DIFFICULTY_ATTEMPTS = 30;
+
 export class SudokuGenerator {
     private solver = new SudokuSolver();
+    private rater = new DifficultyRater();
 
     public generateFullBoard(): number[][] {
         const emptyBoard = Array.from({ length: BOARD_SIZE }, () => Array.from({ length: BOARD_SIZE }, () => 0));
@@ -15,6 +19,21 @@ export class SudokuGenerator {
     }
 
     public generatePuzzle(difficulty: Difficulty): { puzzle: number[][], answer: number[][] } {
+        let lastCandidate = this.generateWithClueCount(difficulty);
+        if (this.rater.matches(lastCandidate.puzzle, difficulty)) {
+            return lastCandidate;
+        }
+        for (let attempt = 1; attempt < MAX_DIFFICULTY_ATTEMPTS; attempt++) {
+            lastCandidate = this.generateWithClueCount(difficulty);
+            if (this.rater.matches(lastCandidate.puzzle, difficulty)) {
+                return lastCandidate;
+            }
+        }
+        console.warn(`SudokuGenerator: falling back to last candidate after ${MAX_DIFFICULTY_ATTEMPTS} attempts for ${difficulty}`);
+        return lastCandidate;
+    }
+
+    private generateWithClueCount(difficulty: Difficulty): { puzzle: number[][], answer: number[][] } {
         for (;;) {
             const answer = this.generateFullBoard();
             const puzzle = answer.map(row => [...row]);

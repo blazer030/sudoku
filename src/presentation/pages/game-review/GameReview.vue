@@ -1,6 +1,5 @@
 <template>
-    <div class="flex flex-col gap-7 px-5 bg-background overflow-y-auto h-dvh">
-        <!-- Header -->
+    <div class="flex flex-col gap-5 px-5 bg-background overflow-y-auto h-dvh">
         <div class="flex items-center justify-between sticky top-0 bg-background pt-6 pb-3 z-10">
             <button
                 class="flex items-center gap-2 cursor-pointer"
@@ -17,7 +16,6 @@
             <div class="w-15" />
         </div>
 
-        <!-- Game Info Card -->
         <div class="flex items-center justify-between bg-card rounded-xl py-3 px-4 shadow-card-sm">
             <div class="flex items-center gap-3">
                 <div
@@ -58,7 +56,6 @@
             </div>
         </div>
 
-        <!-- Board -->
         <div class="bg-card rounded-2xl shadow-card-lg p-2 w-full pointer-events-none">
             <div class="flex flex-col border-3 border-foreground/20 rounded-xl">
                 <div
@@ -79,7 +76,6 @@
             </div>
         </div>
 
-        <!-- Step Description -->
         <div class="bg-card rounded-lg py-2.5 px-4 shadow-card-sm min-h-9 flex items-center gap-2">
             <template v-if="description && stepIcon">
                 <component
@@ -108,89 +104,42 @@
             </span>
         </div>
 
-        <!-- Progress -->
-        <div class="flex flex-col gap-1.5">
-            <div
-                ref="progressBar"
-                class="group w-full py-1.5 cursor-pointer"
-                @mousedown="onPointerDown"
-                @touchstart="onPointerDown"
-            >
-                <div
-                    :class="isDragging ? 'h-3' : 'h-2 group-hover:h-3'"
-                    class="w-full bg-border rounded-full transition-all duration-150"
-                >
-                    <div
-                        :class="isDragging ? 'h-3' : 'h-2 group-hover:h-3'"
-                        class="bg-primary rounded-full transition-all duration-150"
-                        :style="{ width: progressPercent }"
-                    />
-                </div>
-            </div>
-            <span class="text-xs text-foreground-muted text-center">
-                Step {{ currentStep }} of {{ totalSteps }}
-            </span>
-        </div>
+        <ProgressBar
+            :current-step="currentStep"
+            :total-steps="totalSteps"
+            :play-state="playState"
+            testid-prefix="review-"
+            counter-align="center"
+            @seek="goToStep"
+        />
 
-        <!-- Playback Controls -->
-        <div class="flex items-center justify-center gap-5 pb-8">
-            <button
-                class="size-11 rounded-xl bg-card shadow-card-sm flex items-center justify-center cursor-pointer hover:bg-foreground/5"
-                data-testid="review-first"
-                @click="goToFirst"
-            >
-                <SkipBack :size="20" />
-            </button>
-            <button
-                class="size-11 rounded-xl bg-card shadow-card-sm flex items-center justify-center cursor-pointer hover:bg-foreground/5"
-                data-testid="review-prev"
-                @click="previous"
-            >
-                <ChevronLeft :size="22" />
-            </button>
-            <button
-                class="w-14 h-14 rounded-full bg-primary text-white flex items-center justify-center cursor-pointer hover:bg-primary/90"
-                data-testid="review-play"
-                @click="togglePlay"
-            >
-                <Pause
-                    v-if="isPlaying"
-                    :size="24"
-                />
-                <Play
-                    v-else
-                    :size="24"
-                />
-            </button>
-            <button
-                class="size-11 rounded-xl bg-card shadow-card-sm flex items-center justify-center cursor-pointer hover:bg-foreground/5"
-                data-testid="review-next"
-                @click="next"
-            >
-                <ChevronRight :size="22" />
-            </button>
-            <button
-                class="size-11 rounded-xl bg-card shadow-card-sm flex items-center justify-center cursor-pointer hover:bg-foreground/5"
-                data-testid="review-last"
-                @click="goToLast"
-            >
-                <SkipForward :size="20" />
-            </button>
+        <div class="pb-8">
+            <PlaybackControls
+                :is-playing="isPlaying"
+                testid-prefix="review-"
+                @first="goToFirst"
+                @prev="previous"
+                @toggle-play="togglePlay"
+                @next="next"
+                @last="goToLast"
+            />
         </div>
     </div>
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from "vue";
+import { computed } from "vue";
 import { useRouter } from "vue-router";
-import { ChevronLeft, ChevronRight, Eraser, Lightbulb, Pause, Pencil, Play, SkipBack, SkipForward, Sparkles, StickyNote, Trophy, Undo2, X } from "lucide-vue-next";
+import { ChevronLeft, Eraser, Lightbulb, Pencil, Sparkles, StickyNote, Trophy, Undo2, X } from "lucide-vue-next";
 import { ROUTER_PATH } from "@/router";
 import { getGameHistory } from "@/application/Statistics";
 import { formatTime } from "@/utils/formatTime";
 import { formatDate } from "@/utils/formatDate";
 import { type Difficulty, DifficultyLabels } from "@/domain";
 import Cell from "@/presentation/pages/game/components/Cell.vue";
-import { useGameReview, useProgressDrag } from "@/presentation/pages/game-review/useGameReview";
+import PlaybackControls from "@/presentation/components/playback/PlaybackControls.vue";
+import ProgressBar from "@/presentation/components/playback/ProgressBar.vue";
+import { useGameReview } from "@/presentation/pages/game-review/useGameReview";
 
 const props = defineProps<{
     index: string;
@@ -224,6 +173,8 @@ const {
     startPlay,
 } = useGameReview(replayData ?? { initialBoard: [], steps: [] }, game.completed);
 
+const playState = { isPlaying, stopPlay, startPlay };
+
 const ACTION_ICONS: Record<string, typeof Pencil> = {
     fill: Pencil,
     erase: Eraser,
@@ -242,19 +193,11 @@ const stepIcon = computed(() => {
     return ACTION_ICONS[step.action];
 });
 
-const progressBar = ref<HTMLElement | null>(null);
-const { isDragging, onPointerDown } = useProgressDrag(progressBar, totalSteps, goToStep, { isPlaying, stopPlay, startPlay });
-
 const isActiveCell = (row: number, column: number): boolean => {
     const step = gameStep.value;
     if (!step) return false;
     return step.row === row && step.column === column;
 };
-
-const progressPercent = computed(() => {
-    if (totalSteps.value === 0) return "0%";
-    return `${(currentStep.value / totalSteps.value) * 100}%`;
-});
 
 const difficultyLabel = (difficulty: Difficulty): string => DifficultyLabels[difficulty];
 

@@ -1,8 +1,15 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createPinia, setActivePinia } from "pinia";
 import { useGameStore } from "@/stores/gameStore";
 import type { GameState } from "@/application/GameState";
 import { knownPuzzle, knownAnswer } from "@/__tests__/fixtures/knownPuzzle";
+
+vi.mock("@/application/PuzzleGenerationService", () => ({
+    generatePuzzleAsync: vi.fn(() => Promise.resolve({
+        puzzle: knownPuzzle.map(row => [...row]),
+        answer: knownAnswer.map(row => [...row]),
+    })),
+}));
 
 describe("gameStore", () => {
     beforeEach(() => {
@@ -20,9 +27,9 @@ describe("gameStore", () => {
         expect(store.hasActiveGame).toBe(false);
     });
 
-    it("startNewGame should create a new game in store", () => {
+    it("startNewGame should create a new game in store", async () => {
         const store = useGameStore();
-        store.startNewGame("medium");
+        await store.startNewGame("medium");
 
         expect(store.sudoku).not.toBeNull();
         expect(store.difficulty).toBe("medium");

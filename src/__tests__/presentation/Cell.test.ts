@@ -14,7 +14,7 @@ describe("Cell", () => {
         const wrapper = mountCell({ puzzleCell, error: true });
 
         expect(wrapper.classes()).toContain("bg-error-light");
-        expect(wrapper.find("[data-testid='cell-entry']").classes()).toContain("text-error");
+        expect(wrapper.find("[data-testid='cell-value']").classes()).toContain("text-error");
     });
 
     it("should display normally when error=false", () => {
@@ -24,6 +24,6 @@ describe("Cell", () => {
         const wrapper = mountCell({ puzzleCell, error: false });
 
         expect(wrapper.classes()).not.toContain("bg-error-light");
-        expect(wrapper.find("[data-testid='cell-entry']").classes()).not.toContain("text-error");
+        expect(wrapper.find("[data-testid='cell-value']").classes()).not.toContain("text-error");
     });
 });

@@ -1,7 +1,6 @@
 @import "tailwindcss";
 
 @variant dark (&:where(.dark, .dark *));
-@custom-variant hover (&:hover) @media (hover: hover);
 
 @theme {
   --container-2xl: 1400px;
@@ -171,6 +170,26 @@
 .hint-popup-leave-to > *:last-child {
   transform: translateY(16px);
   opacity: 0;
+}
+
+/* Diagonal strike-through for eliminated candidates (top-left to bottom-right) */
+.strike-diagonal {
+    position: relative;
+    display: inline-block;
+}
+
+.strike-diagonal::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        to top right,
+        transparent calc(50% - 0.5px),
+        currentColor calc(50% - 0.5px),
+        currentColor calc(50% + 0.5px),
+        transparent calc(50% + 0.5px)
+    );
+    pointer-events: none;
 }
 
 /* Completion flash animation */

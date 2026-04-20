@@ -799,7 +799,7 @@ describe("Game", () => {
     it("should render 9x9 grid with clue cells showing their numbers", () => {
         const wrapper = mountGame();
 
-        const cells = wrapper.findAll("[data-testid^='cell-']");
+        const cells = wrapper.findAllComponents(Cell);
         expect(cells).toHaveLength(81);
 
         for (let row = 0; row < 9; row++) {
@@ -888,6 +888,17 @@ describe("Game", () => {
             await wrapper.find("[data-testid='cell-0-3']").trigger("click");
 
             expect(wrapper.find("[data-testid='cell-0-2']").classes()).not.toContain("bg-error-light");
+        });
+
+        it("should show a hint result toast with the technique name after Reveal Cell", async () => {
+            const wrapper = mountGame();
+
+            await wrapper.find("[data-testid='hint-button']").trigger("click");
+            await wrapper.find("[data-testid='hint-reveal-cell']").trigger("click");
+
+            const toast = wrapper.find("[data-testid='hint-result-toast']");
+            expect(toast.exists()).toBe(true);
+            expect(toast.text()).toMatch(/Single|Pair|Triple|Quad|Pointing|Claiming|Wing/);
         });
 
         it("should reveal a random cell with correct answer", async () => {

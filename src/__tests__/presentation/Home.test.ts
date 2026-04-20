@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { flushPromises, mount } from "@vue/test-utils";
 import { createPinia } from "pinia";
 import { createRouter, createMemoryHistory } from "vue-router";
@@ -8,6 +8,24 @@ import { useGameStore } from "@/stores/gameStore";
 import { hasSavedGame, saveGame } from "@/application/GameStorage";
 import { getGameHistory } from "@/application/Statistics";
 import type { CellState, GameState } from "@/application/GameState";
+import { knownAnswer, knownPuzzle } from "@/__tests__/fixtures/knownPuzzle";
+
+vi.mock("@/application/PuzzleGenerationService", () => ({
+    generatePuzzleAsync: vi.fn(() => Promise.resolve({
+        puzzle: knownPuzzle.map(row => [...row]),
+        answer: knownAnswer.map(row => [...row]),
+    })),
+}));
+
+vi.mock("@/presentation/components/puzzle-loader/usePuzzleLoader", async () => {
+    const { ref } = await import("vue");
+    return {
+        usePuzzleLoader: () => ({
+            visible: ref(false),
+            runWithLoader: <T,>(task: () => Promise<T>) => task(),
+        }),
+    };
+});
 
 const createTestRouter = () => {
     return createRouter({
@@ -15,6 +33,7 @@ const createTestRouter = () => {
         routes: [
             { path: "/", component: Home },
             { path: "/game", component: { template: "<div>Game</div>" } },
+            { path: "/solver", component: { template: "<div>Solver</div>" } },
         ],
     });
 };
@@ -133,6 +152,17 @@ describe("Home", () => {
         expect(gameStore.hasActiveGame).toBe(true);
         expect(gameStore.elapsedSeconds).toBe(204);
         expect(router.currentRoute.value.path).toBe(ROUTER_PATH.game);
+    });
+
+    it("should navigate to solver walkthrough when clicking Walkthrough button", async () => {
+        const { wrapper, router } = mountHome();
+        await router.push("/");
+        await router.isReady();
+
+        await wrapper.find("[data-testid='walkthrough-button']").trigger("click");
+        await flushPromises();
+
+        expect(router.currentRoute.value.path).toBe(ROUTER_PATH.solverWalkthrough);
     });
 
     it("should create game in store before navigating on New Game click", async () => {

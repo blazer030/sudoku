@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { Sudoku } from "@/domain/game/Sudoku";
+import { TechniqueSolver } from "@/domain/solver/TechniqueSolver";
 import { createKnownSudoku, knownAnswer, knownPuzzle, spyGeneratePuzzle } from "@/__tests__/fixtures/knownPuzzle";
 
 afterEach(() => {
@@ -433,6 +434,35 @@ describe("Sudoku", () => {
             const result = sudoku.revealRandomCell();
 
             expect(result).toBeNull();
+        });
+    });
+
+    describe("revealCellWithTechnique", () => {
+        it("should fill a cell using the technique solver and return the step used", () => {
+            const sudoku = createKnownSudoku();
+
+            const outcome = sudoku.revealCellWithTechnique();
+
+            expect(outcome).not.toBeNull();
+            if (!outcome) return;
+            expect(outcome.fallback).toBe(false);
+            expect(outcome.step).not.toBeNull();
+            expect(outcome.value).toBe(knownAnswer[outcome.cell.row][outcome.cell.column]);
+            expect(sudoku.puzzle[outcome.cell.row][outcome.cell.column].entry).toBe(outcome.value);
+        });
+
+        it("should fallback to random reveal when the solver cannot find an assignment", () => {
+            const sudoku = createKnownSudoku();
+            vi.spyOn(TechniqueSolver.prototype, "nextAssignment").mockReturnValue(null);
+
+            const outcome = sudoku.revealCellWithTechnique();
+
+            expect(outcome).not.toBeNull();
+            if (!outcome) return;
+            expect(outcome.fallback).toBe(true);
+            expect(outcome.step).toBeNull();
+            expect(outcome.value).toBe(knownAnswer[outcome.cell.row][outcome.cell.column]);
+            expect(sudoku.puzzle[outcome.cell.row][outcome.cell.column].entry).toBe(outcome.value);
         });
     });
 

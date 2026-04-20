@@ -1,6 +1,5 @@
 <template>
     <div class="flex flex-col gap-5 h-dvh px-5 bg-background overflow-y-auto">
-        <!-- Header -->
         <div class="flex items-center justify-between sticky top-0 bg-background pt-6 pb-3 z-10">
             <button
                 class="flex items-center gap-2 cursor-pointer"
@@ -17,7 +16,6 @@
             <div class="w-15" />
         </div>
 
-        <!-- Appearance Section -->
         <div class="flex flex-col gap-2">
             <span class="text-foreground-muted text-xs font-semibold tracking-wider uppercase px-1">Appearance</span>
             <div class="bg-card rounded-2xl px-4 py-4 shadow-card-sm">
@@ -61,7 +59,6 @@
             </div>
         </div>
 
-        <!-- Gameplay Section -->
         <div class="flex flex-col gap-2">
             <span class="text-foreground-muted text-xs font-semibold tracking-wider uppercase px-1">Gameplay</span>
             <div class="bg-card rounded-2xl px-4 shadow-card-sm divide-y divide-border">
@@ -89,7 +86,6 @@
             </div>
         </div>
 
-        <!-- About Section -->
         <div class="flex flex-col gap-2">
             <span class="text-foreground-muted text-xs font-semibold tracking-wider uppercase px-1">About</span>
             <div class="bg-card rounded-2xl px-4 shadow-card-sm">
