@@ -12,6 +12,28 @@ describe("WXYZWing", () => {
         expect(step).toBeNull();
     });
 
+    it("should return null when three pincers do not share a common Z digit", () => {
+        let state = BoardState.fromPuzzle(
+            Array.from({ length: 9 }, () => Array<number>(9).fill(0)),
+        );
+        for (const digit of [5, 6, 7, 8, 9]) {
+            state = state.eliminate(0, 0, digit);
+        }
+        for (const digit of [3, 4, 5, 6, 7, 8, 9]) {
+            state = state.eliminate(0, 1, digit);
+        }
+        for (const digit of [1, 4, 5, 6, 7, 8, 9]) {
+            state = state.eliminate(0, 2, digit);
+        }
+        for (const digit of [1, 2, 5, 6, 7, 8, 9]) {
+            state = state.eliminate(1, 0, digit);
+        }
+
+        const step = new WXYZWing().find(state);
+
+        expect(step).toBeNull();
+    });
+
     it("should eliminate Z from cells seeing pivot {W,X,Y,Z} and three pincers {W,Z}, {X,Z}, {Y,Z}", () => {
         let state = BoardState.fromPuzzle(
             Array.from({ length: 9 }, () => Array<number>(9).fill(0)),
