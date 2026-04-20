@@ -115,6 +115,8 @@
 
         <div class="pb-8">
             <PlaybackControls
+                :can-go-next="currentStep < totalSteps"
+                :can-go-prev="currentStep > 0"
                 :is-playing="isPlaying"
                 testid-prefix="review-"
                 @first="goToFirst"

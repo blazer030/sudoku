@@ -1,15 +1,17 @@
 <template>
     <div class="flex items-center justify-center gap-5">
         <button
-            class="size-11 rounded-xl bg-card shadow-card-sm flex items-center justify-center cursor-pointer hover:bg-foreground/5"
+            class="size-11 rounded-xl bg-card shadow-card-sm flex items-center justify-center cursor-pointer hover:bg-foreground/5 disabled:opacity-40 disabled:pointer-events-none"
             :data-testid="`${testidPrefix}first-step-button`"
+            :disabled="!canGoPrev"
             @click="emit('first')"
         >
             <SkipBack :size="20" />
         </button>
         <button
-            class="size-11 rounded-xl bg-card shadow-card-sm flex items-center justify-center cursor-pointer hover:bg-foreground/5"
+            class="size-11 rounded-xl bg-card shadow-card-sm flex items-center justify-center cursor-pointer hover:bg-foreground/5 disabled:opacity-40 disabled:pointer-events-none"
             :data-testid="`${testidPrefix}prev-step-button`"
+            :disabled="!canGoPrev"
             @click="emit('prev')"
         >
             <ChevronLeft :size="22" />
@@ -29,15 +31,17 @@
             />
         </button>
         <button
-            class="size-11 rounded-xl bg-card shadow-card-sm flex items-center justify-center cursor-pointer hover:bg-foreground/5"
+            class="size-11 rounded-xl bg-card shadow-card-sm flex items-center justify-center cursor-pointer hover:bg-foreground/5 disabled:opacity-40 disabled:pointer-events-none"
             :data-testid="`${testidPrefix}next-step-button`"
+            :disabled="!canGoNext"
             @click="emit('next')"
         >
             <ChevronRight :size="22" />
         </button>
         <button
-            class="size-11 rounded-xl bg-card shadow-card-sm flex items-center justify-center cursor-pointer hover:bg-foreground/5"
+            class="size-11 rounded-xl bg-card shadow-card-sm flex items-center justify-center cursor-pointer hover:bg-foreground/5 disabled:opacity-40 disabled:pointer-events-none"
             :data-testid="`${testidPrefix}last-step-button`"
+            :disabled="!canGoNext"
             @click="emit('last')"
         >
             <SkipForward :size="20" />
@@ -50,8 +54,12 @@ import { ChevronLeft, ChevronRight, Pause, Play, SkipBack, SkipForward } from "l
 
 withDefaults(defineProps<{
     isPlaying: boolean;
+    canGoPrev?: boolean;
+    canGoNext?: boolean;
     testidPrefix?: string;
 }>(), {
+    canGoPrev: true,
+    canGoNext: true,
     testidPrefix: "",
 });
 

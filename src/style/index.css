@@ -2,6 +2,14 @@
 
 @variant dark (&:where(.dark, .dark *));
 
+@custom-variant hover {
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      @slot;
+    }
+  }
+}
+
 @theme {
   --container-2xl: 1400px;
   --font-sans: "Outfit", sans-serif;

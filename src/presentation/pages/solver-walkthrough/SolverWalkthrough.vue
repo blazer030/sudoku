@@ -28,24 +28,26 @@
                 ]"
             >
                 <div class="flex flex-col border-3 border-foreground/20 rounded-xl">
-                    <div
-                        v-for="rowIndex in BOARD_SIZE"
-                        :key="`row-${rowIndex - 1}`"
-                        class="flex"
-                    >
-                        <BoardCell
-                            v-for="columnIndex in BOARD_SIZE"
-                            :key="`cell-${rowIndex - 1}-${columnIndex - 1}`"
-                            :column="columnIndex - 1"
-                            :data-testid="`solver-cell-${rowIndex - 1}-${columnIndex - 1}`"
-                            :eliminated-digits="eliminatedDigitsAt(rowIndex - 1, columnIndex - 1)"
-                            :notes="preStepState.candidatesOf(rowIndex - 1, columnIndex - 1)"
-                            :row="rowIndex - 1"
-                            :value="displayState.valueAt(rowIndex - 1, columnIndex - 1)"
-                            :variant="cellVariant(rowIndex - 1, columnIndex - 1)"
-                            class="cursor-pointer"
-                            @click="selectCell(rowIndex - 1, columnIndex - 1)"
-                        />
+                    <div class="relative aspect-square grid grid-cols-9 grid-rows-9">
+                        <template
+                            v-for="rowIndex in BOARD_SIZE"
+                            :key="`row-${rowIndex - 1}`"
+                        >
+                            <BoardCell
+                                v-for="columnIndex in BOARD_SIZE"
+                                :key="`cell-${rowIndex - 1}-${columnIndex - 1}`"
+                                :column="columnIndex - 1"
+                                :data-testid="`solver-cell-${rowIndex - 1}-${columnIndex - 1}`"
+                                :eliminated-digits="eliminatedDigitsAt(rowIndex - 1, columnIndex - 1)"
+                                :notes="preStepState.candidatesOf(rowIndex - 1, columnIndex - 1)"
+                                :row="rowIndex - 1"
+                                :value="displayState.valueAt(rowIndex - 1, columnIndex - 1)"
+                                :variant="cellVariant(rowIndex - 1, columnIndex - 1)"
+                                class="cursor-pointer"
+                                @click="selectCell(rowIndex - 1, columnIndex - 1)"
+                            />
+                        </template>
+                        <ChainOverlay :chain-links="currentStepChainLinks" />
                     </div>
                 </div>
             </div>
@@ -110,6 +112,8 @@
                     @seek="goToStep"
                 />
                 <PlaybackControls
+                    :can-go-next="currentStep < totalSteps"
+                    :can-go-prev="currentStep > 0"
                     :is-playing="isPlaying"
                     @first="jumpToFirst"
                     @last="jumpToLast"
@@ -135,6 +139,7 @@ import { type SolveResult, TechniqueSolver } from "@/domain/solver/TechniqueSolv
 import { TECHNIQUE_LABELS } from "@/presentation/labels/techniqueLabels";
 import DigitPad from "@/presentation/pages/game/components/DigitPad.vue";
 import BoardCell, { type CellVariant } from "@/presentation/components/board-cell/BoardCell.vue";
+import ChainOverlay from "@/presentation/pages/solver-walkthrough/components/ChainOverlay.vue";
 import ProgressBar from "@/presentation/components/playback/ProgressBar.vue";
 import { TEST_PUZZLE_PRESETS } from "@/presentation/pages/solver-walkthrough/testPuzzles";
 import { usePlaybackState } from "@/presentation/components/playback/usePlaybackState";
@@ -230,6 +235,11 @@ const stepDescription = computed(() => {
 const currentStepFocus = computed(() => {
     if (solveResult.value === null || currentStep.value === 0) return [];
     return solveResult.value.steps[currentStep.value - 1].focus;
+});
+
+const currentStepChainLinks = computed(() => {
+    if (solveResult.value === null || currentStep.value === 0) return [];
+    return solveResult.value.steps[currentStep.value - 1].chainLinks ?? [];
 });
 
 const currentStepScopeCellKeys = computed(() => {
