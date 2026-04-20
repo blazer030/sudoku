@@ -5,6 +5,23 @@ const emptyBoard = (): number[][] =>
     Array.from({ length: 9 }, () => Array<number>(9).fill(0));
 
 describe("XYChain", () => {
+    it("should return null when there are no bivalue cells", () => {
+        const state = BoardState.fromPuzzle(emptyBoard());
+
+        const step = new XYChain().find(state);
+
+        expect(step).toBeNull();
+    });
+
+    it("should return null when a single bivalue cell cannot start a chain", () => {
+        let state = BoardState.fromPuzzle(emptyBoard());
+        for (const digit of [3, 4, 5, 6, 7, 8, 9]) state = state.eliminate(0, 0, digit);
+
+        const step = new XYChain().find(state);
+
+        expect(step).toBeNull();
+    });
+
     it("should eliminate digit Z from cells seeing both ends of a bivalue chain", () => {
         let state = BoardState.fromPuzzle(emptyBoard());
         for (const digit of [3, 4, 5, 6, 7, 8, 9]) state = state.eliminate(0, 0, digit);
