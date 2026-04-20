@@ -88,6 +88,7 @@ export const useGameSession = () => {
         completed,
         getElapsedSeconds: () => elapsedSeconds.value,
         getReplayData,
+        analytics,
     });
 
     const timerPaused = computed(() => completed.value || leaveDialog.visible.value);

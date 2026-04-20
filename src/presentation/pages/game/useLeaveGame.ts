@@ -6,6 +6,7 @@ import { deleteSavedGame, saveGame } from "@/application/GameStorage";
 import { GameStateConverter } from "@/application/GameState";
 import { recordGameResult, type GameReplayData } from "@/application/Statistics";
 import { provideLeaveDialog } from "@/presentation/pages/game/components/useLeaveDialog";
+import type { AnalyticsService } from "@/application/analytics/AnalyticsService";
 
 interface LeaveGameOptions {
     sudoku: Sudoku;
@@ -13,9 +14,22 @@ interface LeaveGameOptions {
     completed: Ref<boolean>;
     getElapsedSeconds: () => number;
     getReplayData: () => GameReplayData;
+    analytics?: AnalyticsService;
 }
 
-export const useLeaveGame = ({ sudoku, difficulty, completed, getElapsedSeconds, getReplayData }: LeaveGameOptions) => {
+const TOTAL_CELLS = 81;
+
+const computeProgressPct = (sudoku: Sudoku): number => {
+    let filled = 0;
+    for (const row of sudoku.puzzle) {
+        for (const cell of row) {
+            if (cell.isClue || cell.hasEntry) filled += 1;
+        }
+    }
+    return Math.round((filled / TOTAL_CELLS) * 100);
+};
+
+export const useLeaveGame = ({ sudoku, difficulty, completed, getElapsedSeconds, getReplayData, analytics }: LeaveGameOptions) => {
     const router = useRouter();
     const leaveDialog = provideLeaveDialog();
     const leavingConfirmed = ref(false);
@@ -32,6 +46,11 @@ export const useLeaveGame = ({ sudoku, difficulty, completed, getElapsedSeconds,
             leavingConfirmed.value = true;
             router.back();
         } else if (result === "giveUp") {
+            void analytics?.logEvent({
+                name: "game_abandon",
+                difficulty: difficulty.value,
+                progress_pct: computeProgressPct(sudoku),
+            });
             recordGameResult({
                 difficulty: difficulty.value,
                 elapsedSeconds: getElapsedSeconds(),
