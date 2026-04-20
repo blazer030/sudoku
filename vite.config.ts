@@ -9,7 +9,7 @@ const { version } = JSON.parse(readFileSync("./package.json", "utf-8")) as { ver
 
 // https://vitejs.dev/config/
 export default ({ mode }: { mode: string }) => {
-    process.env = { ...process.env, ...loadEnv(mode, process.cwd()) };
+    process.env = { ...loadEnv(mode, process.cwd()), ...process.env };
 
     return defineConfig({
         base: process.env.VITE_BASE_URL,
