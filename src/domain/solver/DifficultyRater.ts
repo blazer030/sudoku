@@ -13,6 +13,7 @@ import { Fish } from "@/domain/solver/techniques/Fish";
 import { WWing } from "@/domain/solver/techniques/WWing";
 import { XYWing } from "@/domain/solver/techniques/XYWing";
 import { XYZWing } from "@/domain/solver/techniques/XYZWing";
+import { WXYZWing } from "@/domain/solver/techniques/WXYZWing";
 
 const MAX_SOLVE_ITERATIONS = 200;
 
@@ -38,6 +39,7 @@ const hardTechniques = (): Technique[] => [
     new XYWing(),
     new WWing(),
     new XYZWing(),
+    new WXYZWing(),
 ];
 
 export class DifficultyRater {

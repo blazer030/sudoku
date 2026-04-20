@@ -12,6 +12,7 @@ import { Fish } from "@/domain/solver/techniques/Fish";
 import { XYWing } from "@/domain/solver/techniques/XYWing";
 import { WWing } from "@/domain/solver/techniques/WWing";
 import { XYZWing } from "@/domain/solver/techniques/XYZWing";
+import { WXYZWing } from "@/domain/solver/techniques/WXYZWing";
 
 const techniques: Technique[] = [
     new NakedSingle(),
@@ -30,6 +31,7 @@ const techniques: Technique[] = [
     new XYWing(),
     new WWing(),
     new XYZWing(),
+    new WXYZWing(),
 ];
 
 export interface SolveResult {
