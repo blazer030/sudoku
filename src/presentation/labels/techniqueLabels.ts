@@ -12,6 +12,7 @@ export const TECHNIQUE_LABELS: Record<TechniqueId, string> = {
     pointing: "Pointing",
     claiming: "Claiming",
     xWing: "X-Wing",
+    swordfish: "Swordfish",
     xyWing: "XY-Wing",
     wWing: "W-Wing",
     xyzWing: "XYZ-Wing",
