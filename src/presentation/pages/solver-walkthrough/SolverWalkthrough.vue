@@ -28,11 +28,11 @@
                 ]"
             >
                 <div class="flex flex-col border-3 border-foreground/20 rounded-xl">
-                    <div class="relative">
+                    <div class="relative aspect-square flex flex-col">
                         <div
                             v-for="rowIndex in BOARD_SIZE"
                             :key="`row-${rowIndex - 1}`"
-                            class="flex"
+                            class="flex flex-1"
                         >
                             <BoardCell
                                 v-for="columnIndex in BOARD_SIZE"
