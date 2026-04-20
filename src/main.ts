@@ -6,6 +6,7 @@ import App from "@/presentation/App.vue";
 import { router } from "@/router";
 
 import { useSettingsStore } from "@/stores/settingsStore";
+import { useGameStore } from "@/stores/gameStore";
 import { ANALYTICS_KEY, type AnalyticsService } from "@/application/analytics/AnalyticsService";
 import { FirebaseAnalyticsAdapter } from "@/infrastructure/analytics/FirebaseAnalyticsAdapter";
 import { NoopAnalyticsAdapter } from "@/infrastructure/analytics/NoopAnalyticsAdapter";
@@ -28,5 +29,6 @@ app.use(router);
 app.provide(ANALYTICS_KEY, analytics);
 
 useSettingsStore();
+useGameStore().setAnalytics(analytics);
 
 app.mount("#root");

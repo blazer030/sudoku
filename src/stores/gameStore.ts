@@ -5,12 +5,18 @@ import { PuzzleCell } from "@/domain/board/PuzzleCell";
 import { Sudoku } from "@/domain/game/Sudoku";
 import { GameStateConverter, type GameState } from "@/application/GameState";
 import { generatePuzzleAsync } from "@/application/PuzzleGenerationService";
+import type { AnalyticsService } from "@/application/analytics/AnalyticsService";
 
 export const useGameStore = defineStore("game", () => {
     const difficulty = ref<Difficulty | null>(null);
     const sudoku = shallowRef<Sudoku | null>(null);
     const elapsedSeconds = ref(0);
     const hasActiveGame = computed(() => sudoku.value !== null);
+    let analytics: AnalyticsService | null = null;
+
+    const setAnalytics = (service: AnalyticsService) => {
+        analytics = service;
+    };
 
     const setDifficulty = (value: Difficulty) => {
         difficulty.value = value;
@@ -22,6 +28,7 @@ export const useGameStore = defineStore("game", () => {
         sudoku.value = Sudoku.restoreSave(answer, puzzleCells);
         difficulty.value = newDifficulty;
         elapsedSeconds.value = 0;
+        void analytics?.logEvent({ name: "game_start", difficulty: newDifficulty });
     };
 
     const loadSavedGame = (state: GameState) => {
@@ -30,5 +37,14 @@ export const useGameStore = defineStore("game", () => {
         elapsedSeconds.value = state.elapsedSeconds;
     };
 
-    return { difficulty, setDifficulty, sudoku, hasActiveGame, startNewGame, loadSavedGame, elapsedSeconds };
+    return {
+        difficulty,
+        setDifficulty,
+        sudoku,
+        hasActiveGame,
+        startNewGame,
+        loadSavedGame,
+        elapsedSeconds,
+        setAnalytics,
+    };
 });
