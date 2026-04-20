@@ -27,27 +27,29 @@
                     solveResult !== null ? 'pointer-events-none' : '',
                 ]"
             >
-                <div class="flex flex-col border-3 border-foreground/20 rounded-xl relative">
-                    <div
-                        v-for="rowIndex in BOARD_SIZE"
-                        :key="`row-${rowIndex - 1}`"
-                        class="flex"
-                    >
-                        <BoardCell
-                            v-for="columnIndex in BOARD_SIZE"
-                            :key="`cell-${rowIndex - 1}-${columnIndex - 1}`"
-                            :column="columnIndex - 1"
-                            :data-testid="`solver-cell-${rowIndex - 1}-${columnIndex - 1}`"
-                            :eliminated-digits="eliminatedDigitsAt(rowIndex - 1, columnIndex - 1)"
-                            :notes="preStepState.candidatesOf(rowIndex - 1, columnIndex - 1)"
-                            :row="rowIndex - 1"
-                            :value="displayState.valueAt(rowIndex - 1, columnIndex - 1)"
-                            :variant="cellVariant(rowIndex - 1, columnIndex - 1)"
-                            class="cursor-pointer"
-                            @click="selectCell(rowIndex - 1, columnIndex - 1)"
-                        />
+                <div class="flex flex-col border-3 border-foreground/20 rounded-xl">
+                    <div class="relative">
+                        <div
+                            v-for="rowIndex in BOARD_SIZE"
+                            :key="`row-${rowIndex - 1}`"
+                            class="flex"
+                        >
+                            <BoardCell
+                                v-for="columnIndex in BOARD_SIZE"
+                                :key="`cell-${rowIndex - 1}-${columnIndex - 1}`"
+                                :column="columnIndex - 1"
+                                :data-testid="`solver-cell-${rowIndex - 1}-${columnIndex - 1}`"
+                                :eliminated-digits="eliminatedDigitsAt(rowIndex - 1, columnIndex - 1)"
+                                :notes="preStepState.candidatesOf(rowIndex - 1, columnIndex - 1)"
+                                :row="rowIndex - 1"
+                                :value="displayState.valueAt(rowIndex - 1, columnIndex - 1)"
+                                :variant="cellVariant(rowIndex - 1, columnIndex - 1)"
+                                class="cursor-pointer"
+                                @click="selectCell(rowIndex - 1, columnIndex - 1)"
+                            />
+                        </div>
+                        <ChainOverlay :chain-links="currentStepChainLinks" />
                     </div>
-                    <ChainOverlay :chain-links="currentStepChainLinks" />
                 </div>
             </div>
             <DigitPad
