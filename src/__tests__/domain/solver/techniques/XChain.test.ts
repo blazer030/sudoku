@@ -5,6 +5,25 @@ const emptyBoard = (): number[][] =>
     Array.from({ length: 9 }, () => Array<number>(9).fill(0));
 
 describe("XChain", () => {
+    it("should return null when the board has no strong link", () => {
+        const state = BoardState.fromPuzzle(emptyBoard());
+
+        const step = new XChain().find(state);
+
+        expect(step).toBeNull();
+    });
+
+    it("should return null when a single strong link cannot be extended into a chain", () => {
+        let state = BoardState.fromPuzzle(emptyBoard());
+        for (const column of [2, 3, 4, 5, 6, 7, 8]) {
+            state = state.eliminate(0, column, 1);
+        }
+
+        const step = new XChain().find(state);
+
+        expect(step).toBeNull();
+    });
+
     it("should eliminate digit from cells seeing both ends of a strong-weak-strong chain", () => {
         let state = BoardState.fromPuzzle(emptyBoard());
         for (const column of [1, 2, 3, 4, 6, 7, 8]) {
