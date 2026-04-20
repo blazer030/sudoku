@@ -168,4 +168,73 @@ describe("Fish", () => {
             ],
         });
     });
+
+    it("should detect a size-4 jellyfish across four rows sharing four columns", () => {
+        let state = BoardState.fromPuzzle(
+            Array.from({ length: 9 }, () => Array<number>(9).fill(0)),
+        );
+        for (const column of [4, 5, 6, 7, 8]) {
+            state = state.eliminate(0, column, 1);
+            state = state.eliminate(2, column, 1);
+            state = state.eliminate(4, column, 1);
+            state = state.eliminate(6, column, 1);
+        }
+
+        const step = new Fish(4).find(state);
+
+        expect(step).toEqual({
+            technique: "jellyfish",
+            focus: [
+                { row: 0, column: 0 },
+                { row: 0, column: 1 },
+                { row: 0, column: 2 },
+                { row: 0, column: 3 },
+                { row: 2, column: 0 },
+                { row: 2, column: 1 },
+                { row: 2, column: 2 },
+                { row: 2, column: 3 },
+                { row: 4, column: 0 },
+                { row: 4, column: 1 },
+                { row: 4, column: 2 },
+                { row: 4, column: 3 },
+                { row: 6, column: 0 },
+                { row: 6, column: 1 },
+                { row: 6, column: 2 },
+                { row: 6, column: 3 },
+            ],
+            assignments: [],
+            eliminations: [
+                { cell: { row: 1, column: 0 }, digit: 1 },
+                { cell: { row: 3, column: 0 }, digit: 1 },
+                { cell: { row: 5, column: 0 }, digit: 1 },
+                { cell: { row: 7, column: 0 }, digit: 1 },
+                { cell: { row: 8, column: 0 }, digit: 1 },
+                { cell: { row: 1, column: 1 }, digit: 1 },
+                { cell: { row: 3, column: 1 }, digit: 1 },
+                { cell: { row: 5, column: 1 }, digit: 1 },
+                { cell: { row: 7, column: 1 }, digit: 1 },
+                { cell: { row: 8, column: 1 }, digit: 1 },
+                { cell: { row: 1, column: 2 }, digit: 1 },
+                { cell: { row: 3, column: 2 }, digit: 1 },
+                { cell: { row: 5, column: 2 }, digit: 1 },
+                { cell: { row: 7, column: 2 }, digit: 1 },
+                { cell: { row: 8, column: 2 }, digit: 1 },
+                { cell: { row: 1, column: 3 }, digit: 1 },
+                { cell: { row: 3, column: 3 }, digit: 1 },
+                { cell: { row: 5, column: 3 }, digit: 1 },
+                { cell: { row: 7, column: 3 }, digit: 1 },
+                { cell: { row: 8, column: 3 }, digit: 1 },
+            ],
+            scopes: [
+                { kind: "row", row: 0 },
+                { kind: "row", row: 2 },
+                { kind: "row", row: 4 },
+                { kind: "row", row: 6 },
+                { kind: "column", column: 0 },
+                { kind: "column", column: 1 },
+                { kind: "column", column: 2 },
+                { kind: "column", column: 3 },
+            ],
+        });
+    });
 });
