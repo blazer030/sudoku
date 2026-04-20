@@ -25,6 +25,8 @@ const techniques: Technique[] = [
     new Pointing(),
     new Claiming(),
     new Fish(2),
+    new Fish(3),
+    new Fish(4),
     new XYWing(),
     new WWing(),
     new XYZWing(),

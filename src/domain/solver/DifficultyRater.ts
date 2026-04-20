@@ -33,6 +33,8 @@ const mediumTechniques = (): Technique[] => [
 const hardTechniques = (): Technique[] => [
     ...mediumTechniques(),
     new Fish(2),
+    new Fish(3),
+    new Fish(4),
     new XYWing(),
     new WWing(),
     new XYZWing(),
