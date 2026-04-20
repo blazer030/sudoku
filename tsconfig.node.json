@@ -7,5 +7,5 @@
     "allowSyntheticDefaultImports": true,
     "strict": true
   },
-  "include": ["vite.config.ts", "eslint.config.js", "scripts/**/*.ts"]
+  "include": ["vite.config.ts", "eslint.config.js", "capacitor.config.ts", "scripts/**/*.ts"]
 }
