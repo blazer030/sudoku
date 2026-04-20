@@ -24,6 +24,10 @@ export default tseslint.config(
                 { allowNumber: true },
             ],
             "@typescript-eslint/related-getter-setter-pairs": "off",
+            "@typescript-eslint/no-unused-vars": [
+                "error",
+                { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
+            ],
         },
     },
     ...pluginVue.configs["flat/recommended"].map(config => ({
