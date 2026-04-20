@@ -6,6 +6,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
     {
+        version: "1.6.0",
+        date: "2026-04-20",
+        changes: [
+            "New solver techniques: X-Chain and XY-Chain for puzzles needing chain reasoning",
+            "Walkthrough visualizes chain links over the board (solid for strong links, dashed for weak)",
+            "Settings Version is now a link to this Changelog page",
+        ],
+    },
+    {
         version: "1.5.1",
         date: "2026-04-20",
         changes: [
