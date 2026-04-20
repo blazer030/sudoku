@@ -27,7 +27,7 @@
                     solveResult !== null ? 'pointer-events-none' : '',
                 ]"
             >
-                <div class="flex flex-col border-3 border-foreground/20 rounded-xl">
+                <div class="flex flex-col border-3 border-foreground/20 rounded-xl relative">
                     <div
                         v-for="rowIndex in BOARD_SIZE"
                         :key="`row-${rowIndex - 1}`"
@@ -47,6 +47,7 @@
                             @click="selectCell(rowIndex - 1, columnIndex - 1)"
                         />
                     </div>
+                    <ChainOverlay :chain-links="currentStepChainLinks" />
                 </div>
             </div>
             <DigitPad
@@ -135,6 +136,7 @@ import { type SolveResult, TechniqueSolver } from "@/domain/solver/TechniqueSolv
 import { TECHNIQUE_LABELS } from "@/presentation/labels/techniqueLabels";
 import DigitPad from "@/presentation/pages/game/components/DigitPad.vue";
 import BoardCell, { type CellVariant } from "@/presentation/components/board-cell/BoardCell.vue";
+import ChainOverlay from "@/presentation/pages/solver-walkthrough/components/ChainOverlay.vue";
 import ProgressBar from "@/presentation/components/playback/ProgressBar.vue";
 import { TEST_PUZZLE_PRESETS } from "@/presentation/pages/solver-walkthrough/testPuzzles";
 import { usePlaybackState } from "@/presentation/components/playback/usePlaybackState";
@@ -230,6 +232,11 @@ const stepDescription = computed(() => {
 const currentStepFocus = computed(() => {
     if (solveResult.value === null || currentStep.value === 0) return [];
     return solveResult.value.steps[currentStep.value - 1].focus;
+});
+
+const currentStepChainLinks = computed(() => {
+    if (solveResult.value === null || currentStep.value === 0) return [];
+    return solveResult.value.steps[currentStep.value - 1].chainLinks ?? [];
 });
 
 const currentStepScopeCellKeys = computed(() => {
