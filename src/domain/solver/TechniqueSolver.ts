@@ -13,6 +13,7 @@ import { XYWing } from "@/domain/solver/techniques/XYWing";
 import { WWing } from "@/domain/solver/techniques/WWing";
 import { XYZWing } from "@/domain/solver/techniques/XYZWing";
 import { WXYZWing } from "@/domain/solver/techniques/WXYZWing";
+import { XChain } from "@/domain/solver/techniques/XChain";
 
 const techniques: Technique[] = [
     new NakedSingle(),
@@ -32,6 +33,7 @@ const techniques: Technique[] = [
     new WWing(),
     new XYZWing(),
     new WXYZWing(),
+    new XChain(),
 ];
 
 export interface SolveResult {

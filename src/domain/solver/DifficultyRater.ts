@@ -14,6 +14,7 @@ import { WWing } from "@/domain/solver/techniques/WWing";
 import { XYWing } from "@/domain/solver/techniques/XYWing";
 import { XYZWing } from "@/domain/solver/techniques/XYZWing";
 import { WXYZWing } from "@/domain/solver/techniques/WXYZWing";
+import { XChain } from "@/domain/solver/techniques/XChain";
 
 const MAX_SOLVE_ITERATIONS = 200;
 
@@ -40,6 +41,7 @@ const hardTechniques = (): Technique[] => [
     new WWing(),
     new XYZWing(),
     new WXYZWing(),
+    new XChain(),
 ];
 
 export class DifficultyRater {
