@@ -41,7 +41,8 @@ export type TechniqueId =
     | "jellyfish"
     | "xyWing"
     | "wWing"
-    | "xyzWing";
+    | "xyzWing"
+    | "wxyzWing";
 
 export interface SolveStep {
     technique: TechniqueId;

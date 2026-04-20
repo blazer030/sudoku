@@ -17,4 +17,5 @@ export const TECHNIQUE_LABELS: Record<TechniqueId, string> = {
     xyWing: "XY-Wing",
     wWing: "W-Wing",
     xyzWing: "XYZ-Wing",
+    wxyzWing: "WXYZ-Wing",
 };
