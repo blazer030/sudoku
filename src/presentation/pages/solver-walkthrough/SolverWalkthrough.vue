@@ -17,7 +17,7 @@
             <span class="text-foreground text-lg font-semibold">
                 Walkthrough
             </span>
-            <div class="w-[72px]" />
+            <div class="w-18" />
         </div>
         <div class="flex-1" />
         <div class="flex flex-col items-center gap-6">
@@ -94,7 +94,7 @@
                 </button>
             </div>
             <div
-                v-else
+                v-if="solveResult !== null"
                 class="flex flex-col items-center gap-3 w-full"
             >
                 <div
@@ -105,17 +105,17 @@
                 </div>
                 <ProgressBar
                     :current-step="currentStep"
-                    :total-steps="totalSteps"
                     :play-state="playState"
+                    :total-steps="totalSteps"
                     @seek="goToStep"
                 />
                 <PlaybackControls
                     :is-playing="isPlaying"
                     @first="jumpToFirst"
+                    @last="jumpToLast"
+                    @next="advanceStep"
                     @prev="reverseStep"
                     @toggle-play="togglePlay"
-                    @next="advanceStep"
-                    @last="jumpToLast"
                 />
             </div>
         </div>
@@ -131,7 +131,7 @@ import PlaybackControls from "@/presentation/components/playback/PlaybackControl
 import { ROUTER_PATH } from "@/router";
 import { BOARD_SIZE } from "@/domain/board/constants";
 import { BoardState } from "@/domain/solver/BoardState";
-import { TechniqueSolver, type SolveResult } from "@/domain/solver/TechniqueSolver";
+import { type SolveResult, TechniqueSolver } from "@/domain/solver/TechniqueSolver";
 import { TECHNIQUE_LABELS } from "@/presentation/labels/techniqueLabels";
 import DigitPad from "@/presentation/pages/game/components/DigitPad.vue";
 import BoardCell, { type CellVariant } from "@/presentation/components/board-cell/BoardCell.vue";
