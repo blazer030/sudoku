@@ -80,6 +80,7 @@ export const useGameSession = () => {
         onRevealComplete: (origin) => { checkAndComplete(origin); },
         onGroupCompleted: triggerFlash,
         onHintReveal: hintResult.show,
+        analytics,
     });
 
     const { leaveDialog, showLeaveDialog } = useLeaveGame({

@@ -2,7 +2,8 @@ import { ref } from "vue";
 import type { RevealOutcome } from "@/domain/game/RevealOutcome";
 import type { Sudoku } from "@/domain/game/Sudoku";
 import type { StepRecorder } from "@/domain/game/StepRecorder";
-import { provideHintMenu } from "@/presentation/pages/game/components/useHintMenu";
+import { provideHintMenu, type HintAction } from "@/presentation/pages/game/components/useHintMenu";
+import type { AnalyticsEvent, AnalyticsService } from "@/application/analytics/AnalyticsService";
 
 interface HintActionsOptions {
     sudoku: Sudoku;
@@ -10,9 +11,19 @@ interface HintActionsOptions {
     onRevealComplete: (origin: { row: number; column: number }) => void;
     onGroupCompleted?: (cells: { row: number; column: number }[], origin: { row: number; column: number }) => void;
     onHintReveal?: (outcome: RevealOutcome) => void;
+    analytics?: AnalyticsService;
 }
 
-export const useHintActions = ({ sudoku, stepRecorder, onRevealComplete, onGroupCompleted, onHintReveal }: HintActionsOptions) => {
+type HintUsedEvent = Extract<AnalyticsEvent, { name: "hint_used" }>;
+
+const HINT_TYPE_EVENT: Record<Exclude<HintAction, "close">, HintUsedEvent["hint_type"]> = {
+    autoNotes:      "auto_notes",
+    checkConflicts: "check_conflicts",
+    checkErrors:    "check_errors",
+    revealCell:     "reveal_cell",
+};
+
+export const useHintActions = ({ sudoku, stepRecorder, onRevealComplete, onGroupCompleted, onHintReveal, analytics }: HintActionsOptions) => {
     const hintMenu = provideHintMenu();
     const errorCells = ref<{ row: number; column: number }[]>([]);
 
@@ -30,6 +41,7 @@ export const useHintActions = ({ sudoku, stepRecorder, onRevealComplete, onGroup
         });
         if (action === "close") return;
         sudoku.hintTracker.useHint();
+        void analytics?.logEvent({ name: "hint_used", hint_type: HINT_TYPE_EVENT[action] });
         switch (action) {
         case "autoNotes":
             sudoku.autoNotes();
