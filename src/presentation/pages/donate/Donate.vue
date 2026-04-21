@@ -10,4 +10,12 @@
 </template>
 
 <script lang="ts" setup>
+import { inject, onMounted } from "vue";
+import { ANALYTICS_KEY } from "@/application/analytics/AnalyticsService";
+
+const analytics = inject(ANALYTICS_KEY);
+
+onMounted(() => {
+    void analytics?.logEvent({ name: "donate_view" });
+});
 </script>
