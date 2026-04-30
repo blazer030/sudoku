@@ -10,6 +10,7 @@ export const useSettingsStore = defineStore("settings", () => {
     const completionFlash = ref(settings.completionFlash);
     const autoRemoveNotes = ref(settings.autoRemoveNotes);
     const showRemainingCount = ref(settings.showRemainingCount);
+    const matchLauncherIconToTheme = ref(settings.matchLauncherIconToTheme);
 
     const applyColorTheme = () => {
         const id = colorTheme.value;
@@ -27,6 +28,7 @@ export const useSettingsStore = defineStore("settings", () => {
             completionFlash: completionFlash.value,
             autoRemoveNotes: autoRemoveNotes.value,
             showRemainingCount: showRemainingCount.value,
+            matchLauncherIconToTheme: matchLauncherIconToTheme.value,
         });
     };
 
@@ -56,6 +58,11 @@ export const useSettingsStore = defineStore("settings", () => {
         persistAll();
     };
 
+    const setMatchLauncherIconToTheme = (value: boolean) => {
+        matchLauncherIconToTheme.value = value;
+        persistAll();
+    };
+
     applyColorTheme();
 
     return {
@@ -64,10 +71,12 @@ export const useSettingsStore = defineStore("settings", () => {
         completionFlash,
         autoRemoveNotes,
         showRemainingCount,
+        matchLauncherIconToTheme,
         setColorTheme,
         setHighlightSameDigit,
         setCompletionFlash,
         setAutoRemoveNotes,
         setShowRemainingCount,
+        setMatchLauncherIconToTheme,
     };
 });
