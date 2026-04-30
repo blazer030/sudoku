@@ -6,7 +6,7 @@
 
 **Architecture:** Capacitor wraps the existing Vue + Vite build. Port/Adapter pattern isolates native integrations (analytics, billing, icon) in a new `src/infrastructure/` layer. A `usePlatform` composable plus a router guard and `v-if="isNative"` checks hide native-only features cleanly on web.
 
-**Tech Stack:** Vue 3, Vite, Pinia, Capacitor 6, `@capacitor-firebase/analytics`, `@squareetlabs/capacitor-google-play-billing`, `@capgo/capacitor-dynamic-icon`, Vitest, @vue/test-utils.
+**Tech Stack:** Vue 3, Vite, Pinia, Capacitor 6, `@capacitor-firebase/analytics`, `capacitor-plugin-cdv-purchase` (Capacitor wrapper for `cordova-plugin-purchase` v13), `@capgo/capacitor-dynamic-icon`, Vitest, @vue/test-utils.
 
 **Spec:** `docs/superpowers/specs/2026-04-20-android-apk-donate-ga-design.md`
 
@@ -1854,10 +1854,12 @@ Goal: Real Play Billing on native. License Tester can complete a sandbox purchas
 **Files:**
 - Modify: `package.json`, `package-lock.json`
 
+> **Plugin choice:** `capacitor-plugin-cdv-purchase` is the Capacitor wrapper for `cordova-plugin-purchase` v13. It targets Google Play Billing 7 on Android and StoreKit 2 on iOS, has zero runtime deps, and exposes an event-driven `CdvPurchase.store` API. This replaces the originally specced `@squareetlabs/capacitor-google-play-billing`, which is not published on npm.
+
 - [ ] **Step 1: Install**
 
 ```bash
-npm install @squareetlabs/capacitor-google-play-billing
+npm install capacitor-plugin-cdv-purchase
 npx cap sync android
 ```
 
@@ -1879,121 +1881,193 @@ git commit -m "🚧 chore: install play billing plugin"
 - [ ] **Step 1: Inspect plugin API**
 
 ```bash
-ls node_modules/@squareetlabs/capacitor-google-play-billing/
+ls node_modules/capacitor-plugin-cdv-purchase/
+cat node_modules/capacitor-plugin-cdv-purchase/types/index.d.ts
 ```
 
-Read the README/types to confirm the method names. Expected surface (based on the package's typical Capacitor Play Billing shape):
-- `initializeBilling()`
-- `querySkuDetails({ skus: string[] })` → `{ products: [{ productId, priceAmount, price, ... }] }`
-- `launchPurchaseFlow({ productId })` → `{ responseCode, purchaseState, orderId, purchaseToken, ... }`
-- `consumePurchase({ purchaseToken })`
+Key surface used by the adapter (from `CdvPurchase` namespace in `node_modules/capacitor-plugin-cdv-purchase/www/store.d.ts`):
 
-Adjust the adapter implementation in Step 3 to match the actual API signatures.
+- `store.register([{ id, type: ProductType.CONSUMABLE, platform: Platform.GOOGLE_PLAY }, ...])` — declare products at startup
+- `store.initialize([Platform.GOOGLE_PLAY])` → `Promise<IError[]>` — kick off the platform adapter
+- `store.when()` → fluent `When` chain with `productUpdated(cb)`, `approved(cb)`, `error(cb)` — register event listeners
+- `store.get(id, Platform.GOOGLE_PLAY)` → `Product | undefined` with `.getOffer()` and `.pricing` (`{ price, priceMicros, currency }`)
+- `offer.order()` → `Promise<IError | undefined>` — launches Google Play purchase UI; resolves with `IError` on failure (including `ErrorCode.PAYMENT_CANCELLED`) or `undefined` if the flow proceeds to the `approved` event
+- `transaction.finish()` → `Promise<void>` — for consumables this calls `consumePurchase` natively; we call it from the `approved` callback
+- `store.localTransactions` → array of all known transactions; used by `consumeAll` to clean up unfinished purchases on startup
+
+Because the API is event-driven, the adapter has to bridge events to the port's promise-based contract:
+
+- `loadProducts()`: register products + initialize on first call, then resolve once a `productUpdated` callback has supplied pricing for every registered SKU
+- `purchase(id)`: store a pending resolver keyed by productId, call `offer.order()`. If `order()` resolves with a non-cancellation error, resolve immediately. Otherwise wait for the `approved` event matching the productId, call `transaction.finish()`, then resolve with `kind: "success"`
+- `consumeAll()`: iterate `store.localTransactions`, call `.finish()` on any whose `state` is APPROVED but not yet FINISHED — guards against the user closing the app between approve and consume
 
 - [ ] **Step 2: Write the failing tests**
 
 ```ts
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-const launchPurchaseFlow = vi.fn();
-const querySkuDetails = vi.fn();
-const consumePurchase = vi.fn();
-const initializeBilling = vi.fn();
-const getPurchases = vi.fn();
+type EventName =
+    | "productUpdated" | "receiptUpdated" | "approved" | "verified" | "unverified"
+    | "initiated" | "pending" | "finished" | "receiptsReady" | "receiptsVerified" | "storefrontUpdated" | "updated";
 
-vi.mock("@squareetlabs/capacitor-google-play-billing", () => ({
-    GooglePlayBilling: {
-        initializeBilling,
-        querySkuDetails,
-        launchPurchaseFlow,
-        consumePurchase,
-        getPurchases,
-    },
+interface FakeOffer {
+    order: ReturnType<typeof vi.fn>;
+}
+interface FakeProduct {
+    id: string;
+    pricing: { price: string; priceMicros: number; currency?: string };
+    getOffer: () => FakeOffer;
+}
+interface FakeTransaction {
+    products: { id: string }[];
+    state: "approved" | "finished" | "initiated" | "pending" | "cancelled" | "";
+    finish: ReturnType<typeof vi.fn>;
+}
+
+const handlers = new Map<EventName, Array<(arg: unknown) => void>>();
+const errorHandlers: Array<(error: { code: number; message: string }) => void> = [];
+const productById = new Map<string, FakeProduct>();
+const localTransactions: FakeTransaction[] = [];
+
+const registerSpy = vi.fn();
+const initializeSpy = vi.fn().mockResolvedValue([]);
+
+const whenChain: Record<EventName, (cb: (arg: unknown) => void) => unknown> = {} as never;
+(["productUpdated", "receiptUpdated", "approved", "verified", "unverified", "initiated", "pending", "finished", "receiptsReady", "receiptsVerified", "storefrontUpdated", "updated"] as EventName[])
+    .forEach((event) => {
+        whenChain[event] = (cb) => {
+            const list = handlers.get(event) ?? [];
+            list.push(cb);
+            handlers.set(event, list);
+            return whenChain;
+        };
+    });
+
+const fakeStore = {
+    register: registerSpy,
+    initialize: initializeSpy,
+    when: () => whenChain,
+    get: (id: string) => productById.get(id),
+    error: (cb: (error: { code: number; message: string }) => void) => { errorHandlers.push(cb); },
+    get localTransactions(): FakeTransaction[] { return localTransactions; },
+};
+
+vi.mock("capacitor-plugin-cdv-purchase", () => ({
+    store: fakeStore,
+    ProductType: { CONSUMABLE: "consumable" },
+    Platform: { GOOGLE_PLAY: "android-playstore" },
+    ErrorCode: { PAYMENT_CANCELLED: 5, PURCHASE: 2 },
 }));
 
 import { PlayBillingAdapter } from "@/infrastructure/billing/PlayBillingAdapter";
 
+const fireProductUpdated = (product: FakeProduct) => {
+    productById.set(product.id, product);
+    handlers.get("productUpdated")?.forEach((cb) => cb(product));
+};
+
+const fireApproved = (transaction: FakeTransaction) => {
+    handlers.get("approved")?.forEach((cb) => cb(transaction));
+};
+
+const buildProduct = (id: string, price: string, priceMicros: number): FakeProduct => {
+    const offer: FakeOffer = { order: vi.fn().mockResolvedValue(undefined) };
+    return { id, pricing: { price, priceMicros, currency: "USD" }, getOffer: () => offer };
+};
+
+beforeEach(() => {
+    handlers.clear();
+    errorHandlers.length = 0;
+    productById.clear();
+    localTransactions.length = 0;
+    registerSpy.mockClear();
+    initializeSpy.mockClear();
+    initializeSpy.mockResolvedValue([]);
+});
+
 describe("PlayBillingAdapter", () => {
-    beforeEach(() => {
-        vi.clearAllMocks();
-        initializeBilling.mockResolvedValue(undefined);
-    });
-
-    it("loadProducts maps SKU details to Product[] (three tiers)", async () => {
-        querySkuDetails.mockResolvedValue({
-            products: [
-                { productId: "donate_coffee",      price: "$2.99", priceAmountMicros: "2990000" },
-                { productId: "donate_lunch",       price: "$5.99", priceAmountMicros: "5990000" },
-                { productId: "donate_coding_time", price: "$9.99", priceAmountMicros: "9990000" },
-            ],
-        });
+    it("loadProducts registers the three donate SKUs and resolves once productUpdated fires for each", async () => {
         const adapter = new PlayBillingAdapter();
-        const products = await adapter.loadProducts();
+        const promise = adapter.loadProducts();
 
-        expect(products).toEqual([
+        expect(registerSpy).toHaveBeenCalledWith([
+            { id: "donate_coffee",      type: "consumable", platform: "android-playstore" },
+            { id: "donate_lunch",       type: "consumable", platform: "android-playstore" },
+            { id: "donate_coding_time", type: "consumable", platform: "android-playstore" },
+        ]);
+        expect(initializeSpy).toHaveBeenCalledWith(["android-playstore"]);
+
+        fireProductUpdated(buildProduct("donate_coffee",      "$2.99", 2_990_000));
+        fireProductUpdated(buildProduct("donate_lunch",       "$5.99", 5_990_000));
+        fireProductUpdated(buildProduct("donate_coding_time", "$9.99", 9_990_000));
+
+        await expect(promise).resolves.toEqual([
             { id: "donate_coffee",      tier: "coffee",      label: "Coffee",      priceText: "$2.99", amountUsd: 2.99 },
             { id: "donate_lunch",       tier: "lunch",       label: "Lunch",       priceText: "$5.99", amountUsd: 5.99 },
             { id: "donate_coding_time", tier: "coding_time", label: "Coding Time", priceText: "$9.99", amountUsd: 9.99 },
         ]);
     });
 
-    it("purchase returns success for purchaseState=PURCHASED", async () => {
-        launchPurchaseFlow.mockResolvedValue({
-            responseCode: 0,
-            purchaseState: 1, // PURCHASED
-            purchaseToken: "tok_abc",
-            orderId: "ord_1",
-        });
-        querySkuDetails.mockResolvedValue({
-            products: [{ productId: "donate_coffee", price: "$2.99", priceAmountMicros: "2990000" }],
-        });
-        consumePurchase.mockResolvedValue(undefined);
-
+    it("purchase resolves with success after the approved callback finishes the transaction", async () => {
         const adapter = new PlayBillingAdapter();
-        await adapter.loadProducts();
-        const result = await adapter.purchase("donate_coffee");
+        const productsPromise = adapter.loadProducts();
+        const product = buildProduct("donate_coffee", "$2.99", 2_990_000);
+        fireProductUpdated(product);
+        fireProductUpdated(buildProduct("donate_lunch",       "$5.99", 5_990_000));
+        fireProductUpdated(buildProduct("donate_coding_time", "$9.99", 9_990_000));
+        await productsPromise;
 
-        expect(result).toEqual({
-            kind: "success",
-            productId: "donate_coffee",
-            tier: "coffee",
-            amountUsd: 2.99,
+        const finishSpy = vi.fn().mockResolvedValue(undefined);
+        const purchasePromise = adapter.purchase("donate_coffee");
+        await Promise.resolve();
+        fireApproved({ products: [{ id: "donate_coffee" }], state: "approved", finish: finishSpy });
+
+        await expect(purchasePromise).resolves.toEqual({
+            kind: "success", productId: "donate_coffee", tier: "coffee", amountUsd: 2.99,
         });
-        expect(consumePurchase).toHaveBeenCalledWith({ purchaseToken: "tok_abc" });
+        expect(product.getOffer().order).toHaveBeenCalled();
+        expect(finishSpy).toHaveBeenCalled();
     });
 
-    it("purchase returns cancelled when responseCode=1 (USER_CANCELED)", async () => {
-        launchPurchaseFlow.mockResolvedValue({ responseCode: 1 });
-
+    it("purchase resolves with cancelled when order returns PAYMENT_CANCELLED", async () => {
         const adapter = new PlayBillingAdapter();
-        const result = await adapter.purchase("donate_coffee");
+        const productsPromise = adapter.loadProducts();
+        const product = buildProduct("donate_coffee", "$2.99", 2_990_000);
+        product.getOffer().order.mockResolvedValue({ code: 5, message: "User cancelled" });
+        fireProductUpdated(product);
+        fireProductUpdated(buildProduct("donate_lunch",       "$5.99", 5_990_000));
+        fireProductUpdated(buildProduct("donate_coding_time", "$9.99", 9_990_000));
+        await productsPromise;
 
-        expect(result).toEqual({ kind: "cancelled" });
+        await expect(adapter.purchase("donate_coffee")).resolves.toEqual({ kind: "cancelled" });
     });
 
-    it("purchase returns error with reason for other non-zero responseCodes", async () => {
-        launchPurchaseFlow.mockResolvedValue({ responseCode: 6, debugMessage: "Service disconnected" });
-
+    it("purchase resolves with error when order returns a non-cancellation error", async () => {
         const adapter = new PlayBillingAdapter();
-        const result = await adapter.purchase("donate_coffee");
+        const productsPromise = adapter.loadProducts();
+        const product = buildProduct("donate_coffee", "$2.99", 2_990_000);
+        product.getOffer().order.mockResolvedValue({ code: 2, message: "Service disconnected" });
+        fireProductUpdated(product);
+        fireProductUpdated(buildProduct("donate_lunch",       "$5.99", 5_990_000));
+        fireProductUpdated(buildProduct("donate_coding_time", "$9.99", 9_990_000));
+        await productsPromise;
 
-        expect(result).toEqual({ kind: "error", reason: "Service disconnected" });
+        await expect(adapter.purchase("donate_coffee")).resolves.toEqual({ kind: "error", reason: "Service disconnected" });
     });
 
-    it("consumeAll consumes every unconsumed purchase", async () => {
-        getPurchases.mockResolvedValue({
-            purchases: [
-                { purchaseToken: "t1" },
-                { purchaseToken: "t2" },
-            ],
-        });
-        consumePurchase.mockResolvedValue(undefined);
+    it("consumeAll finishes any approved-but-unfinished local transaction", async () => {
+        const finishApproved = vi.fn().mockResolvedValue(undefined);
+        const finishAlreadyDone = vi.fn().mockResolvedValue(undefined);
+        localTransactions.push(
+            { products: [{ id: "donate_coffee" }], state: "approved", finish: finishApproved },
+            { products: [{ id: "donate_lunch" }],  state: "finished", finish: finishAlreadyDone },
+        );
 
         const adapter = new PlayBillingAdapter();
         await adapter.consumeAll();
 
-        expect(consumePurchase).toHaveBeenCalledWith({ purchaseToken: "t1" });
-        expect(consumePurchase).toHaveBeenCalledWith({ purchaseToken: "t2" });
+        expect(finishApproved).toHaveBeenCalled();
+        expect(finishAlreadyDone).not.toHaveBeenCalled();
     });
 });
 ```
@@ -2009,7 +2083,8 @@ Expected: FAIL (module not found).
 - [ ] **Step 4: Implement PlayBillingAdapter**
 
 ```ts
-import { GooglePlayBilling } from "@squareetlabs/capacitor-google-play-billing";
+import { store, ProductType, Platform, ErrorCode } from "capacitor-plugin-cdv-purchase";
+import type { Product as CdvProduct, Transaction, IError } from "capacitor-plugin-cdv-purchase";
 import type { BillingService, Product, PurchaseResult } from "@/application/billing/BillingService";
 import type { DonateTier } from "@/application/analytics/AnalyticsService";
 
@@ -2021,73 +2096,108 @@ const TIER_META: Record<string, { tier: DonateTier; label: string }> = {
 
 const PRODUCT_IDS = Object.keys(TIER_META);
 
-const PURCHASE_STATE_PURCHASED = 1;
-const RESPONSE_CODE_OK = 0;
-const RESPONSE_CODE_USER_CANCELED = 1;
-
 export class PlayBillingAdapter implements BillingService {
     private initialized = false;
     private cachedProducts = new Map<string, Product>();
+    private productsReady: Promise<Product[]> | null = null;
+    private pendingPurchases = new Map<string, (result: PurchaseResult) => void>();
 
-    private async ensureInitialized() {
+    private ensureSetup(): void {
         if (this.initialized) return;
-        await GooglePlayBilling.initializeBilling();
         this.initialized = true;
+        store.register(PRODUCT_IDS.map((id) => ({
+            id,
+            type: ProductType.CONSUMABLE,
+            platform: Platform.GOOGLE_PLAY,
+        })));
+        store.when()
+            .productUpdated((product) => this.handleProductUpdated(product))
+            .approved((transaction) => this.handleApproved(transaction));
+        void store.initialize([Platform.GOOGLE_PLAY]);
     }
 
-    async loadProducts(): Promise<Product[]> {
-        await this.ensureInitialized();
-        const { products } = await GooglePlayBilling.querySkuDetails({ skus: PRODUCT_IDS });
-        const mapped = products.map((raw): Product => {
-            const meta = TIER_META[raw.productId];
-            return {
-                id: raw.productId,
-                tier: meta.tier,
-                label: meta.label,
-                priceText: raw.price,
-                amountUsd: Number(raw.priceAmountMicros) / 1_000_000,
-            };
+    loadProducts(): Promise<Product[]> {
+        this.ensureSetup();
+        if (this.productsReady === null) {
+            this.productsReady = new Promise<Product[]>((resolve) => {
+                this.resolveProductsWhenReady = resolve;
+                this.maybeResolveProducts();
+            });
+        }
+        return this.productsReady;
+    }
+
+    purchase(productId: string): Promise<PurchaseResult> {
+        this.ensureSetup();
+        const product = store.get(productId, Platform.GOOGLE_PLAY);
+        const offer = product?.getOffer();
+        if (offer === undefined) {
+            return Promise.resolve({ kind: "error", reason: "Product not available" });
+        }
+        return new Promise<PurchaseResult>((resolve) => {
+            this.pendingPurchases.set(productId, resolve);
+            void offer.order().then((error) => {
+                if (error === undefined) return;
+                this.pendingPurchases.delete(productId);
+                if (error.code === ErrorCode.PAYMENT_CANCELLED) {
+                    resolve({ kind: "cancelled" });
+                } else {
+                    resolve({ kind: "error", reason: error.message });
+                }
+            });
         });
-        this.cachedProducts = new Map(mapped.map((p) => [p.id, p]));
-        return mapped;
-    }
-
-    async purchase(productId: string): Promise<PurchaseResult> {
-        await this.ensureInitialized();
-        const response = await GooglePlayBilling.launchPurchaseFlow({ productId });
-
-        if (response.responseCode === RESPONSE_CODE_USER_CANCELED) {
-            return { kind: "cancelled" };
-        }
-        if (response.responseCode !== RESPONSE_CODE_OK) {
-            return { kind: "error", reason: response.debugMessage ?? "Unknown billing error" };
-        }
-        if (response.purchaseState !== PURCHASE_STATE_PURCHASED) {
-            return { kind: "error", reason: "Purchase not completed" };
-        }
-
-        await GooglePlayBilling.consumePurchase({ purchaseToken: response.purchaseToken });
-
-        const product = this.cachedProducts.get(productId);
-        if (product === undefined) {
-            return { kind: "error", reason: "Product metadata missing" };
-        }
-        return {
-            kind: "success",
-            productId,
-            tier: product.tier,
-            amountUsd: product.amountUsd,
-        };
     }
 
     async consumeAll(): Promise<void> {
-        await this.ensureInitialized();
-        const { purchases } = await GooglePlayBilling.getPurchases();
-        for (const purchase of purchases) {
-            await GooglePlayBilling.consumePurchase({ purchaseToken: purchase.purchaseToken });
+        this.ensureSetup();
+        for (const transaction of store.localTransactions) {
+            if (transaction.state === "approved") {
+                await transaction.finish();
+            }
         }
     }
+
+    private resolveProductsWhenReady: ((products: Product[]) => void) | null = null;
+
+    private handleProductUpdated(product: CdvProduct): void {
+        const meta = TIER_META[product.id];
+        if (meta === undefined) return;
+        const pricing = product.pricing;
+        if (pricing === undefined) return;
+        this.cachedProducts.set(product.id, {
+            id: product.id,
+            tier: meta.tier,
+            label: meta.label,
+            priceText: pricing.price,
+            amountUsd: pricing.priceMicros / 1_000_000,
+        });
+        this.maybeResolveProducts();
+    }
+
+    private maybeResolveProducts(): void {
+        if (this.resolveProductsWhenReady === null) return;
+        if (this.cachedProducts.size < PRODUCT_IDS.length) return;
+        const ordered = PRODUCT_IDS
+            .map((id) => this.cachedProducts.get(id))
+            .filter((entry): entry is Product => entry !== undefined);
+        this.resolveProductsWhenReady(ordered);
+        this.resolveProductsWhenReady = null;
+    }
+
+    private handleApproved(transaction: Transaction): void {
+        const productId = transaction.products[0]?.id;
+        if (productId === undefined) return;
+        void transaction.finish();
+        const resolve = this.pendingPurchases.get(productId);
+        const product = this.cachedProducts.get(productId);
+        if (resolve === undefined || product === undefined) return;
+        this.pendingPurchases.delete(productId);
+        resolve({ kind: "success", productId, tier: product.tier, amountUsd: product.amountUsd });
+    }
 }
+
+// Re-export to silence unused-import warnings if `IError` ends up unused after refactors.
+export type { IError };
 ```
 
 - [ ] **Step 5: Run — expect pass**

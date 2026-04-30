@@ -37,7 +37,7 @@ All three concerns ship as a single coordinated release (v2.0.0) rather than sep
 | Dynamic icon UX | Settings toggle; first enable shows a one-time restart-warning dialog; after that, theme changes swap the icon automatically; disabling the toggle leaves the icon at its last state |
 | Donate model | Consumable tip jar, three tiers |
 | Donate tiers | `donate_coffee` $2.99 · `donate_lunch` $5.99 · `donate_coding_time` $9.99 (USD base, auto-localized) |
-| IAP plugin | `@squareetlabs/capacitor-google-play-billing` |
+| IAP plugin | `capacitor-plugin-cdv-purchase` (Capacitor wrapper for `cordova-plugin-purchase` v13, supports Google Play Billing 7) |
 | Analytics SDK | `@capacitor-firebase/analytics` (Firebase) |
 | Analytics events | Automatic events + `game_start`, `game_complete`, `game_abandon`, `hint_used`, `donate_view`, `donate_tap`, `donate_success` |
 | Event naming | snake_case throughout (matches GA4 convention and is used directly in TypeScript types) |
@@ -159,7 +159,7 @@ router.beforeEach((to) => {
     "@capacitor/app": "^6.x",
     "@capgo/capacitor-dynamic-icon": "^6.x",
     "@capacitor-firebase/analytics": "^6.x",
-    "@squareetlabs/capacitor-google-play-billing": "^6.x"
+    "capacitor-plugin-cdv-purchase": "^13.x"
   },
   "devDependencies": {
     "@capacitor/cli": "^6.x"
@@ -502,7 +502,7 @@ Test what we decide. Do not test third-party SDK pass-throughs.
 
 - Capacitor core: `vi.mock("@capacitor/core", () => ({ Capacitor: { isNativePlatform: vi.fn(), getPlatform: vi.fn() } }))`
 - Application services in presentation tests: `provide(ANALYTICS_KEY, mockService)` at mount time
-- `PlayBillingAdapter` tests: `vi.mock("@squareetlabs/capacitor-google-play-billing", ...)` at module level
+- `PlayBillingAdapter` tests: `vi.mock("capacitor-plugin-cdv-purchase", ...)` at module level — fake `store` object exposes spy-friendly `register`, `initialize`, `when()` chain, `get()`, `error()`; tests trigger captured event handlers (`approved`, `productUpdated`) directly to drive the adapter's promise resolution
 
 ### Manual Verification Checklist (per phase)
 
