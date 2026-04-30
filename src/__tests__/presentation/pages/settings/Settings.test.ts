@@ -52,3 +52,57 @@ describe("Settings.vue Support section", () => {
         expect(wrapper.find("[data-testid='donate-link']").exists()).toBe(true);
     });
 });
+
+describe("Settings.vue match-launcher-icon toggle", () => {
+    beforeEach(() => {
+        localStorage.clear();
+        vi.mocked(Capacitor.isNativePlatform).mockReset();
+    });
+
+    it("hides the toggle on web", () => {
+        vi.mocked(Capacitor.isNativePlatform).mockReturnValue(false);
+        const wrapper = mountSettings();
+        expect(wrapper.find("[data-testid='toggle-matchLauncherIconToTheme']").exists()).toBe(false);
+    });
+
+    it("shows confirm dialog when tapping the toggle while OFF", async () => {
+        vi.mocked(Capacitor.isNativePlatform).mockReturnValue(true);
+        const wrapper = mountSettings();
+        await wrapper.find("[data-testid='toggle-matchLauncherIconToTheme']").trigger("click");
+        expect(wrapper.find("[data-testid='icon-dialog-confirm']").exists()).toBe(true);
+    });
+
+    it("enables the setting only after the user confirms", async () => {
+        vi.mocked(Capacitor.isNativePlatform).mockReturnValue(true);
+        const wrapper = mountSettings();
+        await wrapper.find("[data-testid='toggle-matchLauncherIconToTheme']").trigger("click");
+        await wrapper.find("[data-testid='icon-dialog-confirm']").trigger("click");
+
+        const { useSettingsStore } = await import("@/stores/settingsStore");
+        expect(useSettingsStore().matchLauncherIconToTheme).toBe(true);
+        expect(wrapper.find("[data-testid='icon-dialog-confirm']").exists()).toBe(false);
+    });
+
+    it("keeps the setting OFF when the user cancels the dialog", async () => {
+        vi.mocked(Capacitor.isNativePlatform).mockReturnValue(true);
+        const wrapper = mountSettings();
+        await wrapper.find("[data-testid='toggle-matchLauncherIconToTheme']").trigger("click");
+        await wrapper.find("[data-testid='icon-dialog-cancel']").trigger("click");
+
+        const { useSettingsStore } = await import("@/stores/settingsStore");
+        expect(useSettingsStore().matchLauncherIconToTheme).toBe(false);
+        expect(wrapper.find("[data-testid='icon-dialog-confirm']").exists()).toBe(false);
+    });
+
+    it("disables without a dialog when toggling from ON", async () => {
+        vi.mocked(Capacitor.isNativePlatform).mockReturnValue(true);
+        const wrapper = mountSettings();
+        await wrapper.find("[data-testid='toggle-matchLauncherIconToTheme']").trigger("click");
+        await wrapper.find("[data-testid='icon-dialog-confirm']").trigger("click");
+        await wrapper.find("[data-testid='toggle-matchLauncherIconToTheme']").trigger("click");
+
+        expect(wrapper.find("[data-testid='icon-dialog-confirm']").exists()).toBe(false);
+        const { useSettingsStore } = await import("@/stores/settingsStore");
+        expect(useSettingsStore().matchLauncherIconToTheme).toBe(false);
+    });
+});
