@@ -3,7 +3,7 @@ import tseslint from "typescript-eslint";
 import pluginVue from "eslint-plugin-vue";
 
 export default tseslint.config(
-    { ignores: ["dist", "android"] },
+    { ignores: ["dist", "android", ".worktrees"] },
     {
         extends: [
             js.configs.recommended,
