@@ -6,6 +6,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
     {
+        version: "2.0.0",
+        date: "2026-05-01",
+        changes: [
+            "First app release",
+            "Launcher icon can match the selected color theme (App)",
+        ],
+    },
+    {
         version: "1.6.0",
         date: "2026-04-20",
         changes: [
