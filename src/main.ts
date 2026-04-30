@@ -14,6 +14,9 @@ import { NoopAnalyticsAdapter } from "@/infrastructure/analytics/NoopAnalyticsAd
 import { BILLING_KEY, type BillingService } from "@/application/billing/BillingService";
 import { NoopBillingAdapter } from "@/infrastructure/billing/NoopBillingAdapter";
 import { PlayBillingAdapter } from "@/infrastructure/billing/PlayBillingAdapter";
+import { ICON_KEY, type IconService } from "@/application/icon/IconService";
+import { DynamicIconAdapter } from "@/infrastructure/icon/DynamicIconAdapter";
+import { NoopIconAdapter } from "@/infrastructure/icon/NoopIconAdapter";
 
 if (Capacitor.isNativePlatform() && "serviceWorker" in navigator) {
     void navigator.serviceWorker.getRegistrations().then((registrations) => {
@@ -31,11 +34,16 @@ const billing: BillingService = Capacitor.isNativePlatform()
     ? new PlayBillingAdapter()
     : new NoopBillingAdapter();
 
+const icon: IconService = Capacitor.isNativePlatform()
+    ? new DynamicIconAdapter()
+    : new NoopIconAdapter();
+
 const app = createApp(App);
 app.use(createPinia());
 app.use(router);
 app.provide(ANALYTICS_KEY, analytics);
 app.provide(BILLING_KEY, billing);
+app.provide(ICON_KEY, icon);
 
 useSettingsStore();
 useGameStore().setAnalytics(analytics);
