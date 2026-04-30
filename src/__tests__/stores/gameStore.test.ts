@@ -3,6 +3,7 @@ import { createPinia, setActivePinia } from "pinia";
 import { useGameStore } from "@/stores/gameStore";
 import type { GameState } from "@/application/GameState";
 import { knownPuzzle, knownAnswer } from "@/__tests__/fixtures/knownPuzzle";
+import type { AnalyticsService } from "@/application/analytics/AnalyticsService";
 
 vi.mock("@/application/PuzzleGenerationService", () => ({
     generatePuzzleAsync: vi.fn(() => Promise.resolve({
@@ -61,5 +62,19 @@ describe("gameStore", () => {
         const store = useGameStore();
         store.setDifficulty("hard");
         expect(store.difficulty).toBe("hard");
+    });
+
+    it("emits game_start analytics event on startNewGame", async () => {
+        const logEvent = vi.fn().mockResolvedValue(undefined);
+        const analytics: AnalyticsService = { logEvent };
+        const store = useGameStore();
+        store.setAnalytics(analytics);
+
+        await store.startNewGame("medium");
+
+        expect(logEvent).toHaveBeenCalledWith({
+            name: "game_start",
+            difficulty: "medium",
+        });
     });
 });

@@ -3,7 +3,7 @@ import tseslint from "typescript-eslint";
 import pluginVue from "eslint-plugin-vue";
 
 export default tseslint.config(
-    { ignores: ["dist"] },
+    { ignores: ["dist", "android"] },
     {
         extends: [
             js.configs.recommended,
@@ -24,6 +24,10 @@ export default tseslint.config(
                 { allowNumber: true },
             ],
             "@typescript-eslint/related-getter-setter-pairs": "off",
+            "@typescript-eslint/no-unused-vars": [
+                "error",
+                { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
+            ],
         },
     },
     ...pluginVue.configs["flat/recommended"].map(config => ({

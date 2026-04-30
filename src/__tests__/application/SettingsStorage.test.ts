@@ -15,6 +15,7 @@ describe("SettingsStorage", () => {
                 completionFlash: true,
                 autoRemoveNotes: true,
                 showRemainingCount: true,
+                matchLauncherIconToTheme: false,
             });
         });
 
@@ -25,6 +26,7 @@ describe("SettingsStorage", () => {
                 completionFlash: false,
                 autoRemoveNotes: false,
                 showRemainingCount: false,
+                matchLauncherIconToTheme: true,
             });
 
             const settings = loadSettings();
@@ -34,6 +36,7 @@ describe("SettingsStorage", () => {
             expect(settings.completionFlash).toBe(false);
             expect(settings.autoRemoveNotes).toBe(false);
             expect(settings.showRemainingCount).toBe(false);
+            expect(settings.matchLauncherIconToTheme).toBe(true);
         });
 
         it("should fill missing fields with defaults for backward compatibility", () => {
@@ -46,6 +49,7 @@ describe("SettingsStorage", () => {
             expect(settings.completionFlash).toBe(true);
             expect(settings.autoRemoveNotes).toBe(true);
             expect(settings.showRemainingCount).toBe(true);
+            expect(settings.matchLauncherIconToTheme).toBe(false);
         });
     });
 });

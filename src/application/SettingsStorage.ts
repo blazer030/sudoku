@@ -6,6 +6,7 @@ export interface Settings {
     completionFlash: boolean;
     autoRemoveNotes: boolean;
     showRemainingCount: boolean;
+    matchLauncherIconToTheme: boolean;
 }
 
 const STORAGE_KEY = "sudoku-settings";
@@ -16,6 +17,7 @@ const DEFAULT_SETTINGS: Settings = {
     completionFlash: true,
     autoRemoveNotes: true,
     showRemainingCount: true,
+    matchLauncherIconToTheme: false,
 };
 
 export const loadSettings = (): Settings => {

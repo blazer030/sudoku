@@ -1,7 +1,7 @@
 {
   "name": "sudoku",
   "private": true,
-  "version": "1.6.0",
+  "version": "2.0.0",
   "type": "module",
   "scripts": {
     "start": "vite",
@@ -9,10 +9,25 @@
     "lint": "eslint . --max-warnings 0",
     "preview": "vite preview",
     "test": "vitest",
+    "postinstall": "patch-package",
     "generate:icons": "npx tsx scripts/generate-pwa-icons.ts",
-    "prebuild": "npm run generate:icons"
+    "generate:launcher-icons": "npx tsx scripts/generate-launcher-icons.ts",
+    "prebuild": "npm run generate:icons",
+    "android:sync": "cross-env VITE_BASE_URL=/ VITE_CAPACITOR=1 npm run build && npx cap sync android",
+    "android:open": "npx cap open android",
+    "android:run": "cross-env VITE_BASE_URL=/ VITE_CAPACITOR=1 npm run build && npx cap run android && npm run android:debug-firebase",
+    "android:build:dev": "cross-env VITE_BASE_URL=/ VITE_CAPACITOR=1 VITE_APP_ENV=develop npm run build && npx cap sync android && npm run android:debug-firebase",
+    "android:build:release": "cross-env VITE_BASE_URL=/ VITE_CAPACITOR=1 VITE_APP_ENV=production npm run build && npx cap sync android",
+    "android:debug-firebase": "adb shell setprop debug.firebase.analytics.app io.github.blazer030.sudoku || echo 'adb not in PATH; run manually'"
   },
   "dependencies": {
+    "@capacitor-community/app-icon": "^7.0.0",
+    "@capacitor-firebase/analytics": "^8.2.0",
+    "@capacitor/android": "^8.3.1",
+    "@capacitor/app": "^8.1.0",
+    "@capacitor/core": "^8.3.1",
+    "capacitor-plugin-cdv-purchase": "^13.15.4",
+    "firebase": "^12.12.0",
     "lucide-vue-next": "^0.576.0",
     "pinia": "^3.0.4",
     "vue": "^3.5.29",
@@ -20,14 +35,17 @@
     "vue3-lottie": "^3.3.1"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.3.1",
     "@eslint/js": "^9.39.3",
     "@tailwindcss/postcss": "^4.2.1",
     "@types/node": "^25.3.0",
     "@vitejs/plugin-vue": "^6.0.4",
     "@vue/test-utils": "^2.4.6",
+    "cross-env": "^10.1.0",
     "eslint": "^9.39.3",
     "eslint-plugin-vue": "^10.8.0",
     "jsdom": "^27.0.1",
+    "patch-package": "^8.0.1",
     "postcss": "^8.4.33",
     "sharp": "^0.34.5",
     "tailwindcss": "^4.2.1",
