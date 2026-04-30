@@ -45,7 +45,7 @@ app.provide(ANALYTICS_KEY, analytics);
 app.provide(BILLING_KEY, billing);
 app.provide(ICON_KEY, icon);
 
-useSettingsStore();
+useSettingsStore().setIconService(icon);
 useGameStore().setAnalytics(analytics);
 useDonateStore().setBilling(billing);
 
