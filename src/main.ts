@@ -7,6 +7,7 @@ import { router } from "@/router";
 
 import { useSettingsStore } from "@/stores/settingsStore";
 import { useGameStore } from "@/stores/gameStore";
+import { useDonateStore } from "@/stores/donateStore";
 import { ANALYTICS_KEY, type AnalyticsService } from "@/application/analytics/AnalyticsService";
 import { FirebaseAnalyticsAdapter } from "@/infrastructure/analytics/FirebaseAnalyticsAdapter";
 import { NoopAnalyticsAdapter } from "@/infrastructure/analytics/NoopAnalyticsAdapter";
@@ -35,5 +36,6 @@ app.provide(BILLING_KEY, billing);
 
 useSettingsStore();
 useGameStore().setAnalytics(analytics);
+useDonateStore().setBilling(billing);
 
 app.mount("#root");
