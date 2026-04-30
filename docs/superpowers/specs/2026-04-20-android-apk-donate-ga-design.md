@@ -157,7 +157,7 @@ router.beforeEach((to) => {
     "@capacitor/core": "^6.x",
     "@capacitor/android": "^6.x",
     "@capacitor/app": "^6.x",
-    "@capgo/capacitor-dynamic-icon": "^6.x",
+    "@capacitor-community/app-icon": "^7.x",
     "@capacitor-firebase/analytics": "^6.x",
     "capacitor-plugin-cdv-purchase": "^13.x"
   },
@@ -541,4 +541,4 @@ Sequenced so each phase has an independent verification milestone.
 - **Firebase project ownership** — a new Firebase project is required for the app. Created during Phase 3.
 - **Tax form (W-8BEN)** — must be submitted before the first payout; does not block upload.
 - **Play Store review rejections** — Sudoku games with tip-jar IAP occasionally trigger "digital goods" policy reviews. If rejected, iterate on the Privacy Policy and Data Safety answers.
-- **Dynamic icon plugin stability** — `@capgo/capacitor-dynamic-icon` handles the activity-alias swap; some third-party Android launchers may not refresh immediately. Documented as an acceptable caveat.
+- **Dynamic icon plugin stability** — `@capacitor-community/app-icon` handles the activity-alias swap (calls `AppIcon.change({ name, disable })` where `disable` lists all other alias names); some third-party Android launchers may not refresh immediately. Documented as an acceptable caveat.

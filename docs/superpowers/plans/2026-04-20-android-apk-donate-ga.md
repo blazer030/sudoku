@@ -6,7 +6,7 @@
 
 **Architecture:** Capacitor wraps the existing Vue + Vite build. Port/Adapter pattern isolates native integrations (analytics, billing, icon) in a new `src/infrastructure/` layer. A `usePlatform` composable plus a router guard and `v-if="isNative"` checks hide native-only features cleanly on web.
 
-**Tech Stack:** Vue 3, Vite, Pinia, Capacitor 6, `@capacitor-firebase/analytics`, `capacitor-plugin-cdv-purchase` (Capacitor wrapper for `cordova-plugin-purchase` v13), `@capgo/capacitor-dynamic-icon`, Vitest, @vue/test-utils.
+**Tech Stack:** Vue 3, Vite, Pinia, Capacitor 6, `@capacitor-firebase/analytics`, `capacitor-plugin-cdv-purchase` (Capacitor wrapper for `cordova-plugin-purchase` v13), `@capacitor-community/app-icon`, Vitest, @vue/test-utils.
 
 **Spec:** `docs/superpowers/specs/2026-04-20-android-apk-donate-ga-design.md`
 
@@ -2286,10 +2286,12 @@ Goal: 6 theme-variant launcher icons; settings toggle that syncs icon to color t
 
 ### Task 33: Install dynamic icon plugin
 
+> **Plugin choice:** `@capacitor-community/app-icon@^7` is the official community plugin for changing launcher icons on Android (and iOS). API: `AppIcon.change({ name, disable, suppressNotification })` where `name` is the activity-alias short name (without leading dot) and `disable` lists all OTHER alias names to disable simultaneously. This replaces the originally specced `@capgo/capacitor-dynamic-icon`, which is not published on npm.
+
 - [ ] **Step 1: Install**
 
 ```bash
-npm install @capgo/capacitor-dynamic-icon
+npm install @capacitor-community/app-icon
 npx cap sync android
 ```
 
@@ -2405,7 +2407,7 @@ git commit -m "🚧 chore: generate launcher icons for 6 color themes"
 
 - [ ] **Step 1: Locate the main `<activity android:name=".MainActivity"` block**
 
-- [ ] **Step 2: Change its `android:icon` to reference the default theme**
+- [ ] **Step 2: Change its `android:icon` to reference the default theme (green)**
 
 ```xml
 <activity
@@ -2420,13 +2422,26 @@ git commit -m "🚧 chore: generate launcher icons for 6 color themes"
 </activity>
 ```
 
-- [ ] **Step 3: Add 5 activity-alias entries (blue, purple, orange, pink, teal)**
+- [ ] **Step 3: Add 6 activity-alias entries — one per theme (green, blue, purple, orange, pink, teal)**
 
-Just below the main `<activity>` block, still inside `<application>`:
+Just below the main `<activity>` block, still inside `<application>`. The plugin's `AppIcon.change({ name })` API uses the alias short name (without the leading dot), so we name aliases `.green`, `.blue`, `.purple`, `.orange`, `.pink`, `.teal`. We add `.green` too so the adapter can use a single uniform code path for every theme — first install shows green via `<activity android:icon="@mipmap/ic_launcher_green">`, and `change({name: 'green'})` switches to the alias without a visible change.
 
 ```xml
 <activity-alias
-    android:name=".MainActivityBlue"
+    android:name=".green"
+    android:enabled="false"
+    android:icon="@mipmap/ic_launcher_green"
+    android:roundIcon="@mipmap/ic_launcher_green"
+    android:targetActivity=".MainActivity"
+    android:exported="true">
+    <intent-filter>
+        <action android:name="android.intent.action.MAIN" />
+        <category android:name="android.intent.category.LAUNCHER" />
+    </intent-filter>
+</activity-alias>
+
+<activity-alias
+    android:name=".blue"
     android:enabled="false"
     android:icon="@mipmap/ic_launcher_blue"
     android:roundIcon="@mipmap/ic_launcher_blue"
@@ -2437,10 +2452,11 @@ Just below the main `<activity>` block, still inside `<application>`:
         <category android:name="android.intent.category.LAUNCHER" />
     </intent-filter>
 </activity-alias>
-<!-- Repeat for Purple, Orange, Pink, Teal -->
+
+<!-- Repeat for .purple, .orange, .pink, .teal — same shape, only android:name and the two icon refs change. -->
 ```
 
-All 5 aliases have `android:enabled="false"` — only the main `.MainActivity` (green) is active on first install.
+All 6 aliases have `android:enabled="false"` — only the main `.MainActivity` (showing the green icon) is active on first install.
 
 - [ ] **Step 4: Verify APK still builds**
 
@@ -2482,30 +2498,23 @@ export const ICON_KEY: InjectionKey<IconService> = Symbol("IconService");
 - [ ] **Step 2: Write dynamic adapter**
 
 ```ts
-import { CapgoCapacitorDynamicIcon as DynamicIcon } from "@capgo/capacitor-dynamic-icon";
+import { AppIcon } from "@capacitor-community/app-icon";
 import type { ColorThemeId } from "@/application/SettingsStorage";
 import type { IconService } from "@/application/icon/IconService";
 
-// Map theme ids to the activity-alias names in AndroidManifest.xml.
-// Note: the main .MainActivity (green) is registered as default; the plugin expects
-// the alias name or the icon name depending on the version — verify at integration time.
-const ALIAS_NAME: Record<ColorThemeId, string> = {
-    green:  "MainActivity",
-    blue:   "MainActivityBlue",
-    purple: "MainActivityPurple",
-    orange: "MainActivityOrange",
-    pink:   "MainActivityPink",
-    teal:   "MainActivityTeal",
-};
+// Activity-alias short names declared in AndroidManifest.xml (without the leading dot).
+// All 6 themes are aliases so the adapter has one uniform code path.
+const ALIAS_NAMES: ColorThemeId[] = ["green", "blue", "purple", "orange", "pink", "teal"];
 
 export class DynamicIconAdapter implements IconService {
     async setIcon(themeId: ColorThemeId): Promise<void> {
-        await DynamicIcon.setIcon({ name: ALIAS_NAME[themeId], suppressNotification: false });
+        const others = ALIAS_NAMES.filter((id) => id !== themeId);
+        await AppIcon.change({ name: themeId, disable: others, suppressNotification: false });
     }
 }
 ```
 
-(Verify the plugin's import name and method signature match the installed version. Adjust if needed.)
+The `disable` array is REQUIRED on Android — passing all other theme aliases ensures only one alias is enabled at a time. `suppressNotification` is iOS-only and ignored on Android. Verify the import name and method signature match the installed version.
 
 - [ ] **Step 3: Write noop adapter**
 
