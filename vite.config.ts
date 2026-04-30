@@ -11,6 +11,8 @@ const { version } = JSON.parse(readFileSync("./package.json", "utf-8")) as { ver
 export default ({ mode }: { mode: string }) => {
     process.env = { ...loadEnv(mode, process.cwd()), ...process.env };
 
+    const isCapacitorBuild = process.env.VITE_CAPACITOR === "1";
+
     return defineConfig({
         base: process.env.VITE_BASE_URL,
         define: {
@@ -18,33 +20,35 @@ export default ({ mode }: { mode: string }) => {
         },
         plugins: [
             vue(),
-            VitePWA({
-                registerType: "autoUpdate",
-                workbox: {
-                    globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2,webmanifest}"],
-                    runtimeCaching: [
-                        {
-                            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
-                            handler: "CacheFirst",
-                            options: {
-                                cacheName: "google-fonts-cache",
-                                expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 * 365 },
-                                cacheableResponse: { statuses: [0, 200] },
+            ...(isCapacitorBuild ? [] : [
+                VitePWA({
+                    registerType: "autoUpdate",
+                    workbox: {
+                        globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2,webmanifest}"],
+                        runtimeCaching: [
+                            {
+                                urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+                                handler: "CacheFirst",
+                                options: {
+                                    cacheName: "google-fonts-cache",
+                                    expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 * 365 },
+                                    cacheableResponse: { statuses: [0, 200] },
+                                },
                             },
-                        },
-                        {
-                            urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
-                            handler: "CacheFirst",
-                            options: {
-                                cacheName: "gstatic-fonts-cache",
-                                expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 * 365 },
-                                cacheableResponse: { statuses: [0, 200] },
+                            {
+                                urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
+                                handler: "CacheFirst",
+                                options: {
+                                    cacheName: "gstatic-fonts-cache",
+                                    expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 * 365 },
+                                    cacheableResponse: { statuses: [0, 200] },
+                                },
                             },
-                        },
-                    ],
-                },
-                manifest: false,
-            }),
+                        ],
+                    },
+                    manifest: false,
+                }),
+            ]),
         ],
         resolve: {
             alias: {
