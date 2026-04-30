@@ -19,6 +19,7 @@
     "android:debug-firebase": "adb shell setprop debug.firebase.analytics.app io.github.blazer030.sudoku || echo 'adb not in PATH; run manually'"
   },
   "dependencies": {
+    "@capacitor-community/app-icon": "^7.0.0",
     "@capacitor-firebase/analytics": "^8.2.0",
     "@capacitor/android": "^8.3.1",
     "@capacitor/app": "^8.1.0",
