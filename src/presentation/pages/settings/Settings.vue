@@ -86,6 +86,26 @@
             </div>
         </div>
 
+        <div
+            v-if="platform.isNative"
+            class="flex flex-col gap-2"
+        >
+            <span class="text-foreground-muted text-xs font-semibold tracking-wider uppercase px-1">Support</span>
+            <div class="bg-card rounded-2xl px-4 shadow-card-sm">
+                <button
+                    class="flex items-center justify-between py-3.5 cursor-pointer w-full"
+                    data-testid="donate-link"
+                    @click="goToDonate"
+                >
+                    <span class="text-foreground text-[15px] font-medium">Donate</span>
+                    <ChevronRight
+                        :size="18"
+                        class="text-foreground-muted"
+                    />
+                </button>
+            </div>
+        </div>
+
         <div class="flex flex-col gap-2">
             <span class="text-foreground-muted text-xs font-semibold tracking-wider uppercase px-1">About</span>
             <div class="bg-card rounded-2xl px-4 shadow-card-sm">
@@ -115,12 +135,14 @@ import { computed } from "vue";
 import { useRouter } from "vue-router";
 import { ChevronLeft, ChevronRight, Check } from "lucide-vue-next";
 import { useSettingsStore } from "@/stores/settingsStore";
+import { usePlatform } from "@/presentation/composables/usePlatform";
 import { appVersion } from "@/utils/appVersion";
 import { ROUTER_PATH } from "@/router";
 import { THEMES } from "@/theme/themeConfig";
 
 const router = useRouter();
 const settingsStore = useSettingsStore();
+const platform = usePlatform();
 
 const toggles = computed(() => [
     {
@@ -159,5 +181,9 @@ const goBack = () => {
 
 const goToChangelog = () => {
     void router.push(ROUTER_PATH.changelog);
+};
+
+const goToDonate = () => {
+    void router.push(ROUTER_PATH.donate);
 };
 </script>
