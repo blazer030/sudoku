@@ -6,7 +6,6 @@ import Game from "@/presentation/pages/game/Game.vue";
 import { knownAnswer, knownPuzzle, createKnownSudoku } from "@/__tests__/fixtures/knownPuzzle";
 import { useGameStore } from "@/stores/gameStore";
 import { useStatisticsStore } from "@/stores/statisticsStore";
-import { useGameStore } from "@/stores/gameStore";
 
 const mountWithRouterView = async () => {
     const pinia = createPinia();
