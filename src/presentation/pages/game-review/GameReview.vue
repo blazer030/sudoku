@@ -134,7 +134,7 @@ import { computed } from "vue";
 import { useRouter } from "vue-router";
 import { ChevronLeft, Eraser, Lightbulb, Pencil, Sparkles, StickyNote, Trophy, Undo2, X } from "lucide-vue-next";
 import { ROUTER_PATH } from "@/router";
-import { getGameHistory } from "@/application/Statistics";
+import { useStatisticsStore } from "@/stores/statisticsStore";
 import { formatTime } from "@/utils/formatTime";
 import { formatDate } from "@/utils/formatDate";
 import { type Difficulty, DifficultyLabels } from "@/domain";
@@ -148,7 +148,7 @@ const props = defineProps<{
 }>();
 
 const router = useRouter();
-const history = getGameHistory();
+const history = useStatisticsStore().history;
 const gameIndex = Number(props.index);
 const game = history[gameIndex];
 const replayData = game.replay;
