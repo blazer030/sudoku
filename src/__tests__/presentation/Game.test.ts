@@ -8,7 +8,7 @@ import type { GameState } from "@/application/GameState";
 import Cell from "@/presentation/pages/game/components/Cell.vue";
 import { useGameStore } from "@/stores/gameStore";
 import type { Difficulty } from "@/domain/generator/SudokuGenerator";
-import { getGameHistory } from "@/application/Statistics";
+import { useStatisticsStore } from "@/stores/statisticsStore";
 import { hasSavedGame, loadGame, saveGame } from "@/application/GameStorage";
 
 const createTestRouter = () => {
@@ -755,7 +755,7 @@ describe("Game", () => {
             }
         }
 
-        const history = getGameHistory();
+        const history = useStatisticsStore().history;
         expect(history).toHaveLength(1);
         expect(history[0].completed).toBe(true);
         expect(history[0].difficulty).toBe("easy");

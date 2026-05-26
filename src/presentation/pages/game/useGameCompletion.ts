@@ -2,7 +2,8 @@ import { type Ref, ref } from "vue";
 import type { Difficulty } from "@/domain";
 import type { Sudoku } from "@/domain/game/Sudoku";
 import { deleteSavedGame } from "@/application/GameStorage";
-import { recordGameResult, type GameReplayData } from "@/application/Statistics";
+import { useStatisticsStore } from "@/stores/statisticsStore";
+import type { GameReplayData } from "@/application/statistics/StatisticsRepository";
 import type { AnalyticsService } from "@/application/analytics/AnalyticsService";
 
 interface GameCompletionOptions {
@@ -16,12 +17,13 @@ interface GameCompletionOptions {
 
 export const useGameCompletion = ({ sudoku, difficulty, getElapsedSeconds, getReplayData, onCompleted, analytics }: GameCompletionOptions) => {
     const completed = ref(false);
+    const statisticsStore = useStatisticsStore();
 
     const checkAndComplete = (origin: { row: number; column: number }) => {
         if (!sudoku.isCompleted()) return;
         completed.value = true;
         deleteSavedGame();
-        recordGameResult({
+        statisticsStore.recordGame({
             difficulty: difficulty.value,
             elapsedSeconds: getElapsedSeconds(),
             completed: true,

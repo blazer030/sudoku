@@ -1,10 +1,11 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { ref } from "vue";
+import { createPinia, setActivePinia } from "pinia";
 import { Sudoku } from "@/domain/game/Sudoku";
 import { PuzzleCell } from "@/domain/board/PuzzleCell";
 import { useGameCompletion } from "@/presentation/pages/game/useGameCompletion";
 import type { AnalyticsService } from "@/application/analytics/AnalyticsService";
-import type { GameReplayData } from "@/application/Statistics";
+import type { GameReplayData } from "@/application/statistics/StatisticsRepository";
 
 const SOLVED_BOARD: number[][] = [
     [5, 3, 4, 6, 7, 8, 9, 1, 2],
@@ -36,6 +37,11 @@ const emptyReplay = (): GameReplayData => ({
 });
 
 describe("useGameCompletion", () => {
+    beforeEach(() => {
+        setActivePinia(createPinia());
+        localStorage.clear();
+    });
+
     it("emits game_complete analytics event when sudoku is completed", () => {
         const logEvent = vi.fn().mockResolvedValue(undefined);
         const analytics: AnalyticsService = { logEvent };
