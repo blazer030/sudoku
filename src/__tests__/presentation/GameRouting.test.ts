@@ -5,7 +5,7 @@ import { createMemoryHistory, createRouter } from "vue-router";
 import Game from "@/presentation/pages/game/Game.vue";
 import { knownAnswer, knownPuzzle, createKnownSudoku } from "@/__tests__/fixtures/knownPuzzle";
 import { useGameStore } from "@/stores/gameStore";
-import { getGameHistory } from "@/application/Statistics";
+import { useStatisticsStore } from "@/stores/statisticsStore";
 import { hasSavedGame, loadGame } from "@/application/GameStorage";
 
 const mountWithRouterView = async () => {
@@ -103,7 +103,7 @@ describe("Game Routing", () => {
             await wrapper.find("[data-testid='give-up-and-leave-button']").trigger("click");
             await flushPromises();
 
-            const history = getGameHistory();
+            const history = useStatisticsStore().history;
             expect(history).toHaveLength(1);
             expect(history[0].completed).toBe(false);
             expect(history[0].difficulty).toBe("easy");
