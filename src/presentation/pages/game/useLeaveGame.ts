@@ -4,7 +4,8 @@ import type { Difficulty } from "@/domain";
 import type { Sudoku } from "@/domain/game/Sudoku";
 import { deleteSavedGame, saveGame } from "@/application/GameStorage";
 import { GameStateConverter } from "@/application/GameState";
-import { recordGameResult, type GameReplayData } from "@/application/Statistics";
+import { useStatisticsStore } from "@/stores/statisticsStore";
+import type { GameReplayData } from "@/application/statistics/StatisticsRepository";
 import { provideLeaveDialog } from "@/presentation/pages/game/components/useLeaveDialog";
 import type { AnalyticsService } from "@/application/analytics/AnalyticsService";
 
@@ -33,6 +34,7 @@ export const useLeaveGame = ({ sudoku, difficulty, completed, getElapsedSeconds,
     const router = useRouter();
     const leaveDialog = provideLeaveDialog();
     const leavingConfirmed = ref(false);
+    const statisticsStore = useStatisticsStore();
 
     const showLeaveDialog = async () => {
         const result = await leaveDialog.open();
@@ -51,7 +53,7 @@ export const useLeaveGame = ({ sudoku, difficulty, completed, getElapsedSeconds,
                 difficulty: difficulty.value,
                 progress_pct: computeProgressPct(sudoku),
             });
-            recordGameResult({
+            statisticsStore.recordGame({
                 difficulty: difficulty.value,
                 elapsedSeconds: getElapsedSeconds(),
                 completed: false,

@@ -1,20 +1,22 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { ref, defineComponent } from "vue";
 import { mount } from "@vue/test-utils";
 import { createRouter, createMemoryHistory } from "vue-router";
+import { createPinia, setActivePinia } from "pinia";
 import { Sudoku } from "@/domain/game/Sudoku";
 import { PuzzleCell } from "@/domain/board/PuzzleCell";
 import { useLeaveGame } from "@/presentation/pages/game/useLeaveGame";
 import type { AnalyticsService } from "@/application/analytics/AnalyticsService";
-import type { GameReplayData } from "@/application/Statistics";
+import type { GameReplayData } from "@/application/statistics/StatisticsRepository";
 
 vi.mock("@/application/GameStorage", () => ({
     saveGame: vi.fn(),
     deleteSavedGame: vi.fn(),
 }));
-vi.mock("@/application/Statistics", () => ({
-    recordGameResult: vi.fn(),
-}));
+
+beforeEach(() => {
+    setActivePinia(createPinia());
+});
 
 const SOLVED_BOARD: number[][] = [
     [5, 3, 4, 6, 7, 8, 9, 1, 2],
