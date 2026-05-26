@@ -75,4 +75,74 @@ describe("useStatisticsStore", () => {
         expect(save).toHaveBeenCalledTimes(1);
         expect(save).toHaveBeenCalledWith(store.history);
     });
+
+    it("clearAll empties history and clears the repository", async () => {
+        const clear = vi.fn().mockResolvedValue(undefined);
+        const repo = buildRepo({ load: vi.fn().mockResolvedValue([sampleGame]), clear });
+        const store = useStatisticsStore();
+        store.setRepository(repo);
+        await store.loadFromRepository();
+
+        await store.clearAll();
+
+        expect(store.history).toEqual([]);
+        expect(clear).toHaveBeenCalledTimes(1);
+    });
+
+    describe("statistics getter", () => {
+        const game = (overrides: Partial<GameResult>): GameResult => ({
+            difficulty: "easy",
+            elapsedSeconds: 60,
+            completed: true,
+            date: "2026-05-26T00:00:00.000Z",
+            hintsUsed: 0,
+            ...overrides,
+        });
+
+        it("returns zeroed difficulty stats and empty recent games when history is empty", () => {
+            const store = useStatisticsStore();
+            expect(store.statistics).toEqual({
+                easy: { gamesWon: 0, gamesPlayed: 0, bestTime: null, averageTime: null },
+                medium: { gamesWon: 0, gamesPlayed: 0, bestTime: null, averageTime: null },
+                hard: { gamesWon: 0, gamesPlayed: 0, bestTime: null, averageTime: null },
+                overall: { gamesWon: 0, gamesPlayed: 0, winRate: 0 },
+                recentGames: [],
+            });
+        });
+
+        it("computes best, average, win rate and reverse-ordered recent games", async () => {
+            const repo = buildRepo({
+                load: vi.fn().mockResolvedValue([
+                    game({ difficulty: "easy", elapsedSeconds: 100, completed: true }),
+                    game({ difficulty: "easy", elapsedSeconds: 50, completed: true }),
+                    game({ difficulty: "easy", elapsedSeconds: 999, completed: false }),
+                    game({ difficulty: "hard", elapsedSeconds: 600, completed: true }),
+                ]),
+            });
+            const store = useStatisticsStore();
+            store.setRepository(repo);
+            await store.loadFromRepository();
+
+            const stats = store.statistics;
+            expect(stats.easy).toEqual({
+                gamesWon: 2,
+                gamesPlayed: 3,
+                bestTime: 50,
+                averageTime: 75,
+            });
+            expect(stats.hard).toEqual({
+                gamesWon: 1,
+                gamesPlayed: 1,
+                bestTime: 600,
+                averageTime: 600,
+            });
+            expect(stats.overall).toEqual({
+                gamesWon: 3,
+                gamesPlayed: 4,
+                winRate: 0.75,
+            });
+            expect(stats.recentGames).toHaveLength(4);
+            expect(stats.recentGames[0].difficulty).toBe("hard");
+        });
+    });
 });
