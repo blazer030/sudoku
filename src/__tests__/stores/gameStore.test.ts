@@ -124,6 +124,18 @@ describe("gameStore", () => {
             expect(save).toHaveBeenCalledWith(sampleState);
         });
 
+        it("persistGame stays resilient when the repository rejects (the bug that motivated this refactor)", async () => {
+            const save = vi.fn().mockRejectedValue(new DOMException("QuotaExceededError", "QuotaExceededError"));
+            const repo = buildGameRepo({ save });
+            const store = useGameStore();
+            store.setGameRepository(repo);
+
+            expect(() => { store.persistGame(sampleState); }).not.toThrow();
+            await Promise.resolve();
+            await Promise.resolve();
+            expect(store.savedGame).toEqual(sampleState);
+        });
+
         it("clearSavedGame nulls savedGame and clears repository", async () => {
             const clear = vi.fn().mockResolvedValue(undefined);
             const repo = buildGameRepo({

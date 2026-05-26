@@ -76,6 +76,22 @@ describe("useStatisticsStore", () => {
         expect(save).toHaveBeenCalledWith(store.history);
     });
 
+    it("recordGame stays resilient when the repository rejects (the bug that motivated this refactor)", async () => {
+        const save = vi.fn().mockRejectedValue(new DOMException("QuotaExceededError", "QuotaExceededError"));
+        const repo = buildRepo({ save });
+        const store = useStatisticsStore();
+        store.setRepository(repo);
+
+        expect(() => {
+            store.recordGame({ difficulty: "easy", elapsedSeconds: 30, completed: true });
+        }).not.toThrow();
+        // Allow the rejected promise to settle; the store's persist must swallow it
+        // so it does not surface as an unhandled rejection.
+        await Promise.resolve();
+        await Promise.resolve();
+        expect(store.history).toHaveLength(1);
+    });
+
     it("clearAll empties history and clears the repository", async () => {
         const clear = vi.fn().mockResolvedValue(undefined);
         const repo = buildRepo({ load: vi.fn().mockResolvedValue([sampleGame]), clear });

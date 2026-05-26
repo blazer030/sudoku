@@ -33,7 +33,8 @@ export const useGameStore = defineStore("game", () => {
     const persistGame = (state: GameState) => {
         savedGame.value = state;
         if (gameRepository === null) return;
-        void gameRepository.save(state);
+        // Fire-and-forget; failures (e.g. storage quota) must not break the UI flow.
+        gameRepository.save(state).catch(() => { /* swallowed by design */ });
     };
 
     const clearSavedGame = async () => {

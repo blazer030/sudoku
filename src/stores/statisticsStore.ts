@@ -65,7 +65,8 @@ export const useStatisticsStore = defineStore("statistics", () => {
 
     const persist = () => {
         if (repository === null) return;
-        void repository.save(history.value);
+        // Fire-and-forget; failures (e.g. storage quota) must not break the UI flow.
+        repository.save(history.value).catch(() => { /* swallowed by design */ });
     };
 
     const recordGame = (input: RecordGameInput) => {
