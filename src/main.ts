@@ -19,9 +19,9 @@ import { ICON_KEY, type IconService } from "@/application/icon/IconService";
 import { DynamicIconAdapter } from "@/infrastructure/icon/DynamicIconAdapter";
 import { NoopIconAdapter } from "@/infrastructure/icon/NoopIconAdapter";
 import { STATISTICS_REPOSITORY_KEY, type StatisticsRepository } from "@/application/statistics/StatisticsRepository";
-import { LocalStorageStatisticsRepository } from "@/infrastructure/statistics/LocalStorageStatisticsRepository";
+import { IndexedDBStatisticsRepository } from "@/infrastructure/statistics/IndexedDBStatisticsRepository";
 import { GAME_REPOSITORY_KEY, type GameRepository } from "@/application/game/GameRepository";
-import { LocalStorageGameRepository } from "@/infrastructure/game/LocalStorageGameRepository";
+import { IndexedDBGameRepository } from "@/infrastructure/game/IndexedDBGameRepository";
 
 if (Capacitor.isNativePlatform() && "serviceWorker" in navigator) {
     void navigator.serviceWorker.getRegistrations().then((registrations) => {
@@ -43,8 +43,8 @@ const icon: IconService = Capacitor.isNativePlatform()
     ? new DynamicIconAdapter()
     : new NoopIconAdapter();
 
-const statisticsRepository: StatisticsRepository = new LocalStorageStatisticsRepository();
-const gameRepository: GameRepository = new LocalStorageGameRepository();
+const statisticsRepository: StatisticsRepository = new IndexedDBStatisticsRepository();
+const gameRepository: GameRepository = new IndexedDBGameRepository();
 
 const app = createApp(App);
 app.use(createPinia());
