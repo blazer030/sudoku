@@ -1,6 +1,19 @@
 import { ref } from "vue";
 import { defineStore } from "pinia";
-import type { GameResult, StatisticsRepository } from "@/application/statistics/StatisticsRepository";
+import type { Difficulty } from "@/domain";
+import type {
+    GameReplayData,
+    GameResult,
+    StatisticsRepository,
+} from "@/application/statistics/StatisticsRepository";
+
+export interface RecordGameInput {
+    difficulty: Difficulty;
+    elapsedSeconds: number;
+    completed: boolean;
+    hintsUsed?: number;
+    replay?: GameReplayData;
+}
 
 export const useStatisticsStore = defineStore("statistics", () => {
     const history = ref<GameResult[]>([]);
@@ -15,9 +28,24 @@ export const useStatisticsStore = defineStore("statistics", () => {
         history.value = await repository.load();
     };
 
+    const persist = () => {
+        if (repository === null) return;
+        void repository.save(history.value);
+    };
+
+    const recordGame = (input: RecordGameInput) => {
+        history.value.push({
+            ...input,
+            hintsUsed: input.hintsUsed ?? 0,
+            date: new Date().toISOString(),
+        });
+        persist();
+    };
+
     return {
         history,
         setRepository,
         loadFromRepository,
+        recordGame,
     };
 });
