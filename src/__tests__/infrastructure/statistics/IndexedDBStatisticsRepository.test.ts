@@ -1,4 +1,5 @@
 import { vi, describe, it, expect, beforeEach } from "vitest";
+import { reactive, isReactive } from "vue";
 import type { GameResult } from "@/application/statistics/StatisticsRepository";
 
 const mocks = vi.hoisted(() => {
@@ -61,5 +62,14 @@ describe("IndexedDBStatisticsRepository", () => {
         await repo.save([sampleGame]);
         await repo.clear();
         await expect(repo.load()).resolves.toEqual([]);
+    });
+
+    it("save strips Vue reactivity wrappers before storing (IndexedDB DataCloneError fix)", async () => {
+        const repo = new IndexedDBStatisticsRepository();
+        const reactiveHistory = reactive([sampleGame]);
+        await repo.save(reactiveHistory);
+        const stored = mocks.store.get("history");
+        expect(isReactive(stored)).toBe(false);
+        expect(stored).toEqual([sampleGame]);
     });
 });

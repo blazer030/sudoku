@@ -21,7 +21,10 @@ export class IndexedDBStatisticsRepository implements StatisticsRepository {
     }
 
     async save(history: GameResult[]): Promise<void> {
-        await store.setItem(HISTORY_KEY, history);
+        // Strip Vue reactivity wrappers; IndexedDB's structured-clone algorithm
+        // cannot serialize Proxy objects and throws DataCloneError.
+        const plain = JSON.parse(JSON.stringify(history)) as GameResult[];
+        await store.setItem(HISTORY_KEY, plain);
     }
 
     async clear(): Promise<void> {

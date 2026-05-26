@@ -15,7 +15,10 @@ export class IndexedDBGameRepository implements GameRepository {
     }
 
     async save(state: GameState): Promise<void> {
-        await store.setItem(SAVE_KEY, state);
+        // Strip Vue reactivity wrappers; IndexedDB's structured-clone algorithm
+        // cannot serialize Proxy objects and throws DataCloneError.
+        const plain = JSON.parse(JSON.stringify(state)) as GameState;
+        await store.setItem(SAVE_KEY, plain);
     }
 
     async clear(): Promise<void> {
