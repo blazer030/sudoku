@@ -197,11 +197,12 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from "vue";
+import { computed } from "vue";
 import { useRouter } from "vue-router";
 import { ChevronLeft, ChevronRight, Lightbulb, Trash2, Trophy, X } from "lucide-vue-next";
 import { ROUTER_PATH } from "@/router";
-import { clearAllRecords, getStatistics, type GameResult } from "@/application/Statistics";
+import { useStatisticsStore } from "@/stores/statisticsStore";
+import type { GameResult } from "@/application/statistics/StatisticsRepository";
 import { formatTime } from "@/utils/formatTime";
 import { formatDate } from "@/utils/formatDate";
 import { type Difficulty, DifficultyLabels } from "@/domain";
@@ -210,21 +211,16 @@ import { provideClearRecordsDialog } from "@/presentation/pages/statistics/useCl
 
 const router = useRouter();
 const { open: openClearRecordsDialog } = provideClearRecordsDialog();
-
-const version = ref(0);
+const statisticsStore = useStatisticsStore();
 
 const handleClearRecords = async () => {
     const result = await openClearRecordsDialog();
     if (result === "confirm") {
-        clearAllRecords();
-        version.value++;
+        void statisticsStore.clearAll();
     }
 };
 
-const stats = computed(() => {
-    void version.value;
-    return getStatistics();
-});
+const stats = computed(() => statisticsStore.statistics);
 
 const hasRecords = computed(() => stats.value.overall.gamesPlayed > 0);
 

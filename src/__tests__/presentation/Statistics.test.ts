@@ -1,9 +1,9 @@
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { flushPromises, mount } from "@vue/test-utils";
-import { createPinia } from "pinia";
+import { createPinia, setActivePinia, getActivePinia } from "pinia";
 import { createRouter, createMemoryHistory } from "vue-router";
 import Statistics from "@/presentation/pages/statistics/Statistics.vue";
-import { recordGameResult, getGameHistory } from "@/application/Statistics";
+import { useStatisticsStore, type RecordGameInput } from "@/stores/statisticsStore";
 
 const createTestRouter = () => {
     return createRouter({
@@ -17,12 +17,22 @@ const createTestRouter = () => {
 
 const mountStatistics = () => {
     const router = createTestRouter();
-    const pinia = createPinia();
+    const pinia = getActivePinia();
+    if (pinia === undefined) throw new Error("pinia not active");
     const wrapper = mount(Statistics, {
         global: { plugins: [router, pinia] },
     });
     return { wrapper, router };
 };
+
+const recordGames = (games: RecordGameInput[]) => {
+    const store = useStatisticsStore();
+    games.forEach((game) => { store.recordGame(game); });
+};
+
+beforeEach(() => {
+    setActivePinia(createPinia());
+});
 
 afterEach(() => {
     localStorage.clear();
@@ -30,8 +40,10 @@ afterEach(() => {
 
 describe("Statistics", () => {
     it("should display overview cards with games won, win rate, and day streak", () => {
-        recordGameResult({ difficulty: "easy", elapsedSeconds: 120, completed: true });
-        recordGameResult({ difficulty: "medium", elapsedSeconds: 200, completed: false });
+        recordGames([
+            { difficulty: "easy", elapsedSeconds: 120, completed: true },
+            { difficulty: "medium", elapsedSeconds: 200, completed: false },
+        ]);
 
         const { wrapper } = mountStatistics();
 
@@ -40,9 +52,11 @@ describe("Statistics", () => {
     });
 
     it("should display best times per difficulty", () => {
-        recordGameResult({ difficulty: "easy", elapsedSeconds: 263, completed: true });
-        recordGameResult({ difficulty: "easy", elapsedSeconds: 300, completed: true });
-        recordGameResult({ difficulty: "medium", elapsedSeconds: 512, completed: true });
+        recordGames([
+            { difficulty: "easy", elapsedSeconds: 263, completed: true },
+            { difficulty: "easy", elapsedSeconds: 300, completed: true },
+            { difficulty: "medium", elapsedSeconds: 512, completed: true },
+        ]);
 
         const { wrapper } = mountStatistics();
 
@@ -52,8 +66,10 @@ describe("Statistics", () => {
     });
 
     it("should display recent games list", () => {
-        recordGameResult({ difficulty: "easy", elapsedSeconds: 332, completed: true });
-        recordGameResult({ difficulty: "hard", elapsedSeconds: 500, completed: false });
+        recordGames([
+            { difficulty: "easy", elapsedSeconds: 332, completed: true },
+            { difficulty: "hard", elapsedSeconds: 500, completed: false },
+        ]);
 
         const { wrapper } = mountStatistics();
 
@@ -77,7 +93,7 @@ describe("Statistics", () => {
     });
 
     it("should display hintsUsed in recent games", () => {
-        recordGameResult({ difficulty: "easy", elapsedSeconds: 120, completed: true, hintsUsed: 2 });
+        recordGames([{ difficulty: "easy", elapsedSeconds: 120, completed: true, hintsUsed: 2 }]);
 
         const { wrapper } = mountStatistics();
 
@@ -85,11 +101,8 @@ describe("Statistics", () => {
         expect(games[0].find("[data-testid='hints-used']").text()).toContain("2");
     });
 
-    it("should display 0 hints for old records without hintsUsed", () => {
-        // 模擬舊資料
-        localStorage.setItem("sudoku-statistics", JSON.stringify([
-            { difficulty: "easy", elapsedSeconds: 100, completed: true, date: "2024-01-01" },
-        ]));
+    it("should display 0 hints for entries without hintsUsed", () => {
+        recordGames([{ difficulty: "easy", elapsedSeconds: 100, completed: true }]);
 
         const { wrapper } = mountStatistics();
 
@@ -113,7 +126,7 @@ describe("Statistics", () => {
     });
 
     it("should show clear records dialog when clicking Clear All Records button", async () => {
-        recordGameResult({ difficulty: "easy", elapsedSeconds: 120, completed: true });
+        recordGames([{ difficulty: "easy", elapsedSeconds: 120, completed: true }]);
         const { wrapper } = mountStatistics();
 
         await wrapper.find("[data-testid='clear-records-button']").trigger("click");
@@ -122,7 +135,7 @@ describe("Statistics", () => {
     });
 
     it("should clear all records when confirming in dialog", async () => {
-        recordGameResult({ difficulty: "easy", elapsedSeconds: 120, completed: true });
+        recordGames([{ difficulty: "easy", elapsedSeconds: 120, completed: true }]);
 
         const { wrapper } = mountStatistics();
 
@@ -130,11 +143,11 @@ describe("Statistics", () => {
         await wrapper.find("[data-testid='clear-records-confirm-button']").trigger("click");
         await flushPromises();
 
-        expect(getGameHistory()).toHaveLength(0);
+        expect(useStatisticsStore().history).toHaveLength(0);
     });
 
     it("should keep records when cancelling in dialog", async () => {
-        recordGameResult({ difficulty: "easy", elapsedSeconds: 120, completed: true });
+        recordGames([{ difficulty: "easy", elapsedSeconds: 120, completed: true }]);
 
         const { wrapper } = mountStatistics();
 
@@ -142,6 +155,6 @@ describe("Statistics", () => {
         await wrapper.find("[data-testid='clear-records-cancel-button']").trigger("click");
         await flushPromises();
 
-        expect(getGameHistory()).toHaveLength(1);
+        expect(useStatisticsStore().history).toHaveLength(1);
     });
 });
