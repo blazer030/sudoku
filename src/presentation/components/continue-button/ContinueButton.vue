@@ -14,13 +14,16 @@
 </template>
 
 <script lang="ts" setup>
+import { computed } from "vue";
 import { Play } from "lucide-vue-next";
-import { hasSavedGame, loadGame } from "@/application/GameStorage";
+import { useGameStore } from "@/stores/gameStore";
 import { formatTime } from "@/utils/formatTime";
 
 defineEmits<{ continue: [] }>();
 
-const showContinue = hasSavedGame();
-const saved = loadGame();
-const savedTimeLabel = saved ? formatTime(saved.elapsedSeconds) : "00:00";
+const gameStore = useGameStore();
+const showContinue = computed(() => gameStore.savedGame !== null);
+const savedTimeLabel = computed(() =>
+    gameStore.savedGame === null ? "00:00" : formatTime(gameStore.savedGame.elapsedSeconds)
+);
 </script>

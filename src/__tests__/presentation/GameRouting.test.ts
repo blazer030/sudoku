@@ -6,7 +6,7 @@ import Game from "@/presentation/pages/game/Game.vue";
 import { knownAnswer, knownPuzzle, createKnownSudoku } from "@/__tests__/fixtures/knownPuzzle";
 import { useGameStore } from "@/stores/gameStore";
 import { useStatisticsStore } from "@/stores/statisticsStore";
-import { hasSavedGame, loadGame } from "@/application/GameStorage";
+import { useGameStore } from "@/stores/gameStore";
 
 const mountWithRouterView = async () => {
     const pinia = createPinia();
@@ -92,8 +92,9 @@ describe("Game Routing", () => {
             await wrapper.find("[data-testid='save-and-leave-button']").trigger("click");
             await flushPromises();
 
-            expect(hasSavedGame()).toBe(true);
-            expect(loadGame()?.cells[0][2].entry).toBe(4);
+            const saved = useGameStore().savedGame;
+            expect(saved).not.toBeNull();
+            expect(saved?.cells[0][2].entry).toBe(4);
         });
 
         it("should record gave up and delete save when clicking Give Up & Leave", async () => {
@@ -107,7 +108,7 @@ describe("Game Routing", () => {
             expect(history).toHaveLength(1);
             expect(history[0].completed).toBe(false);
             expect(history[0].difficulty).toBe("easy");
-            expect(hasSavedGame()).toBe(false);
+            expect(useGameStore().savedGame).toBeNull();
         });
 
         it("should close dialog when clicking Cancel", async () => {

@@ -96,7 +96,6 @@ import { ROUTER_PATH } from "@/router";
 import type { Difficulty } from "@/domain";
 import { useGameStore } from "@/stores/gameStore";
 import { useStatisticsStore } from "@/stores/statisticsStore";
-import { deleteSavedGame, hasSavedGame, loadGame } from "@/application/GameStorage";
 
 import ContinueButton from "@/presentation/components/continue-button/ContinueButton.vue";
 import DifficultySwitcher from "@/presentation/components/difficulty-switcher/DifficultySwitcher.vue";
@@ -114,18 +113,16 @@ const puzzleLoader = usePuzzleLoader();
 const difficulty = ref<Difficulty>("easy");
 
 const handleNewGame = async () => {
-    if (hasSavedGame()) {
+    if (gameStore.savedGame !== null) {
         const result = await newGameDialog.open();
         if (result === "cancel") return;
-        const saved = loadGame();
-        if (saved) {
-            statisticsStore.recordGame({
-                difficulty: saved.difficulty,
-                elapsedSeconds: saved.elapsedSeconds,
-                completed: false,
-            });
-        }
-        deleteSavedGame();
+        const saved = gameStore.savedGame;
+        statisticsStore.recordGame({
+            difficulty: saved.difficulty,
+            elapsedSeconds: saved.elapsedSeconds,
+            completed: false,
+        });
+        await gameStore.clearSavedGame();
     }
     await startGame();
 };
@@ -148,7 +145,7 @@ const goToWalkthrough = () => {
 };
 
 const continueGame = () => {
-    const saved = loadGame();
+    const saved = gameStore.savedGame;
     if (saved) {
         gameStore.loadSavedGame(saved);
     }

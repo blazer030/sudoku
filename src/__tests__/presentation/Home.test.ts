@@ -1,11 +1,10 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { flushPromises, mount } from "@vue/test-utils";
-import { createPinia } from "pinia";
+import { createPinia, setActivePinia } from "pinia";
 import { createRouter, createMemoryHistory } from "vue-router";
 import Home from "@/presentation/pages/home/Home.vue";
 import { ROUTER_PATH } from "@/router";
 import { useGameStore } from "@/stores/gameStore";
-import { hasSavedGame, saveGame } from "@/application/GameStorage";
 import { useStatisticsStore } from "@/stores/statisticsStore";
 import type { CellState, GameState } from "@/application/GameState";
 import { knownAnswer, knownPuzzle } from "@/__tests__/fixtures/knownPuzzle";
@@ -38,9 +37,13 @@ const createTestRouter = () => {
     });
 };
 
-const mountHome = () => {
+const mountHome = ({ savedGame }: { savedGame?: GameState } = {}) => {
     const router = createTestRouter();
     const pinia = createPinia();
+    setActivePinia(pinia);
+    if (savedGame !== undefined) {
+        useGameStore().persistGame(savedGame);
+    }
     const wrapper = mount(Home, {
         global: { plugins: [router, pinia] },
     });
@@ -94,8 +97,7 @@ describe("Home", () => {
     });
 
     it("should show Continue button when saved game exists", () => {
-        saveGame(dummySave);
-        const { wrapper } = mountHome();
+        const { wrapper } = mountHome({ savedGame: dummySave });
 
         expect(wrapper.find("[data-testid='continue-button']").exists()).toBe(true);
     });
@@ -107,15 +109,13 @@ describe("Home", () => {
     });
 
     it("should display saved elapsed time on Continue button", () => {
-        saveGame(dummySave);
-        const { wrapper } = mountHome();
+        const { wrapper } = mountHome({ savedGame: dummySave });
 
         expect(wrapper.find("[data-testid='continue-button']").text()).toContain("03:24");
     });
 
     it("should navigate to game page when clicking Continue", async () => {
-        saveGame(dummySave);
-        const { wrapper, router } = mountHome();
+        const { wrapper, router } = mountHome({ savedGame: dummySave });
         await router.push("/");
         await router.isReady();
 
@@ -140,8 +140,7 @@ describe("Home", () => {
     });
 
     it("should load saved game into store before navigating on Continue click", async () => {
-        saveGame(dummySave);
-        const { wrapper, router, pinia } = mountHome();
+        const { wrapper, router, pinia } = mountHome({ savedGame: dummySave });
         await router.push("/");
         await router.isReady();
 
@@ -181,8 +180,7 @@ describe("Home", () => {
 
     describe("New Game Confirm Dialog", () => {
         it("should show confirm dialog when clicking New Game with saved game", async () => {
-            saveGame(dummySave);
-            const { wrapper } = mountHome();
+            const { wrapper } = mountHome({ savedGame: dummySave });
 
             await wrapper.find("[data-testid='new-game-button']").trigger("click");
 
@@ -191,8 +189,7 @@ describe("Home", () => {
         });
 
         it("should record gave up and start new game when clicking Give Up & Start New", async () => {
-            saveGame(dummySave);
-            const { wrapper, router, pinia } = mountHome();
+            const { wrapper, router, pinia } = mountHome({ savedGame: dummySave });
             await router.push("/");
             await router.isReady();
 
@@ -206,13 +203,12 @@ describe("Home", () => {
             expect(history).toHaveLength(1);
             expect(history[0].completed).toBe(false);
             expect(history[0].difficulty).toBe("easy");
-            expect(hasSavedGame()).toBe(false);
+            expect(useGameStore(pinia).savedGame).toBeNull();
             expect(router.currentRoute.value.path).toBe(ROUTER_PATH.game);
         });
 
         it("should close dialog when clicking Cancel", async () => {
-            saveGame(dummySave);
-            const { wrapper } = mountHome();
+            const { wrapper } = mountHome({ savedGame: dummySave });
 
             await wrapper.find("[data-testid='new-game-button']").trigger("click");
             expect(wrapper.find("[data-testid='new-game-confirm-dialog']").exists()).toBe(true);

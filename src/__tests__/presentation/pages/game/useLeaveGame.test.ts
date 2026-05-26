@@ -9,11 +9,6 @@ import { useLeaveGame } from "@/presentation/pages/game/useLeaveGame";
 import type { AnalyticsService } from "@/application/analytics/AnalyticsService";
 import type { GameReplayData } from "@/application/statistics/StatisticsRepository";
 
-vi.mock("@/application/GameStorage", () => ({
-    saveGame: vi.fn(),
-    deleteSavedGame: vi.fn(),
-}));
-
 beforeEach(() => {
     setActivePinia(createPinia());
 });

@@ -2,8 +2,8 @@ import { type Ref, ref } from "vue";
 import { onBeforeRouteLeave, useRouter } from "vue-router";
 import type { Difficulty } from "@/domain";
 import type { Sudoku } from "@/domain/game/Sudoku";
-import { deleteSavedGame, saveGame } from "@/application/GameStorage";
 import { GameStateConverter } from "@/application/GameState";
+import { useGameStore } from "@/stores/gameStore";
 import { useStatisticsStore } from "@/stores/statisticsStore";
 import type { GameReplayData } from "@/application/statistics/StatisticsRepository";
 import { provideLeaveDialog } from "@/presentation/pages/game/components/useLeaveDialog";
@@ -35,6 +35,7 @@ export const useLeaveGame = ({ sudoku, difficulty, completed, getElapsedSeconds,
     const leaveDialog = provideLeaveDialog();
     const leavingConfirmed = ref(false);
     const statisticsStore = useStatisticsStore();
+    const gameStore = useGameStore();
 
     const showLeaveDialog = async () => {
         const result = await leaveDialog.open();
@@ -44,7 +45,7 @@ export const useLeaveGame = ({ sudoku, difficulty, completed, getElapsedSeconds,
                 elapsedSeconds: getElapsedSeconds(),
                 completed: completed.value,
             });
-            saveGame(state);
+            gameStore.persistGame(state);
             leavingConfirmed.value = true;
             router.back();
         } else if (result === "giveUp") {
@@ -60,7 +61,7 @@ export const useLeaveGame = ({ sudoku, difficulty, completed, getElapsedSeconds,
                 hintsUsed: sudoku.hintTracker.recordedUsed,
                 replay: getReplayData(),
             });
-            deleteSavedGame();
+            void gameStore.clearSavedGame();
             leavingConfirmed.value = true;
             router.back();
         }
