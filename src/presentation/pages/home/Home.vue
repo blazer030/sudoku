@@ -95,8 +95,8 @@ import { ChartBar, Plus, Settings, Wand2 } from "lucide-vue-next";
 import { ROUTER_PATH } from "@/router";
 import type { Difficulty } from "@/domain";
 import { useGameStore } from "@/stores/gameStore";
+import { useStatisticsStore } from "@/stores/statisticsStore";
 import { deleteSavedGame, hasSavedGame, loadGame } from "@/application/GameStorage";
-import { recordGameResult } from "@/application/Statistics";
 
 import ContinueButton from "@/presentation/components/continue-button/ContinueButton.vue";
 import DifficultySwitcher from "@/presentation/components/difficulty-switcher/DifficultySwitcher.vue";
@@ -107,6 +107,7 @@ import { usePuzzleLoader } from "@/presentation/components/puzzle-loader/usePuzz
 
 const router = useRouter();
 const gameStore = useGameStore();
+const statisticsStore = useStatisticsStore();
 const newGameDialog = provideNewGameDialog();
 const puzzleLoader = usePuzzleLoader();
 
@@ -118,7 +119,7 @@ const handleNewGame = async () => {
         if (result === "cancel") return;
         const saved = loadGame();
         if (saved) {
-            recordGameResult({
+            statisticsStore.recordGame({
                 difficulty: saved.difficulty,
                 elapsedSeconds: saved.elapsedSeconds,
                 completed: false,

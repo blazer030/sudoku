@@ -6,7 +6,7 @@ import Home from "@/presentation/pages/home/Home.vue";
 import { ROUTER_PATH } from "@/router";
 import { useGameStore } from "@/stores/gameStore";
 import { hasSavedGame, saveGame } from "@/application/GameStorage";
-import { getGameHistory } from "@/application/Statistics";
+import { useStatisticsStore } from "@/stores/statisticsStore";
 import type { CellState, GameState } from "@/application/GameState";
 import { knownAnswer, knownPuzzle } from "@/__tests__/fixtures/knownPuzzle";
 
@@ -202,7 +202,7 @@ describe("Home", () => {
 
             const gameStore = useGameStore(pinia);
             expect(gameStore.hasActiveGame).toBe(true);
-            const history = getGameHistory();
+            const history = useStatisticsStore(pinia).history;
             expect(history).toHaveLength(1);
             expect(history[0].completed).toBe(false);
             expect(history[0].difficulty).toBe("easy");
