@@ -1,6 +1,6 @@
 import { computed, watch } from "vue";
 import { GameReplay } from "@/domain/game/GameReplay";
-import type { GameReplayData } from "@/application/Statistics";
+import type { GameReplayData } from "@/application/statistics/StatisticsRepository";
 import type { GameStep, GameStepAction } from "@/domain/game/GameStep";
 import { usePlaybackState } from "@/presentation/components/playback/usePlaybackState";
 

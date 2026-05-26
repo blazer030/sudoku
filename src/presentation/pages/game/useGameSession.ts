@@ -5,7 +5,7 @@ import { BOARD_SIZE, Sudoku, StepRecorder } from "@/domain";
 import { useGameStore } from "@/stores/gameStore";
 import { ROUTER_PATH } from "@/router";
 import { captureInitialBoard } from "@/application/GameState";
-import type { GameReplayData } from "@/application/Statistics";
+import type { GameReplayData } from "@/application/statistics/StatisticsRepository";
 import { useGameTimer } from "@/presentation/pages/game/useGameTimer";
 import { useGameCompletion } from "@/presentation/pages/game/useGameCompletion";
 import { useLeaveGame } from "@/presentation/pages/game/useLeaveGame";
