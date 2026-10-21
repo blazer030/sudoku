@@ -929,6 +929,22 @@ describe("Game", () => {
             expect(wrapper.find("[data-testid='cell-0-2']").classes()).toContain("bg-error-light");
         });
 
+        it("should clear conflict marks on the next interaction", async () => {
+            const wrapper = mountGame();
+
+            await wrapper.find("[data-testid='number-5']").trigger("click");
+            await wrapper.find("[data-testid='cell-0-2']").trigger("click");
+            await wrapper.find("[data-testid='number-5']").trigger("click"); // deselect
+
+            await wrapper.find("[data-testid='hint-button']").trigger("click");
+            await wrapper.find("[data-testid='hint-check-conflicts']").trigger("click");
+            expect(wrapper.find("[data-testid='cell-0-2']").classes()).toContain("bg-error-light");
+
+            await wrapper.find("[data-testid='cell-0-3']").trigger("click");
+
+            expect(wrapper.find("[data-testid='cell-0-2']").classes()).not.toContain("bg-error-light");
+        });
+
         it("should show a random-reveal toast after Reveal Cell", async () => {
             vi.spyOn(Sudoku.prototype, "planRevealHint").mockReturnValue({ kind: "noTechnique" });
             const wrapper = mountGame();
