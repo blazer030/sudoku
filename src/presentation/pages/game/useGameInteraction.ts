@@ -73,6 +73,16 @@ export const useGameInteraction = ({
     const pickClueDigit = (row: number, column: number) => {
         const digit = sudoku.puzzle[row][column].clue;
         if (inputMode.value === InputMode.Erase) inputMode.value = InputMode.Normal;
+        // Tapping a different clue of the selected digit moves the outline; only the same one (or a digit-pad pick) toggles off.
+        const outlinedClue = selectedCell.value;
+        const movesOutline = selectedDigit.value === digit
+            && outlinedClue !== null
+            && (outlinedClue.row !== row || outlinedClue.column !== column)
+            && sudoku.puzzle[outlinedClue.row][outlinedClue.column].isClue;
+        if (movesOutline) {
+            selectedCell.value = { row, column };
+            return;
+        }
         selectedDigit.value = selectedDigit.value === digit ? null : digit;
         selectedCell.value = selectedDigit.value === digit ? { row, column } : null;
     };

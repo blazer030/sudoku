@@ -78,6 +78,20 @@ describe("useGameInteraction quick input", () => {
             expect(selectedDigit.value).toBeNull();
         });
 
+        it("moves the outline to another clue with the same digit and keeps the digit selected", () => {
+            const { sudoku, clickCell, isSelected, selectedDigit } = setup();
+            const otherFive = sudoku.puzzle.flatMap((cells, row) => cells.map((cell, column) => ({ cell, row, column })))
+                .find(({ cell, row, column }) => cell.isClue && cell.clue === 5 && !(row === 0 && column === 0));
+            expect(otherFive).toBeDefined();
+
+            clickCell(0, 0);
+            clickCell(otherFive!.row, otherFive!.column);
+
+            expect(isSelected(otherFive!.row, otherFive!.column)).toBe(true);
+            expect(isSelected(0, 0)).toBe(false);
+            expect(selectedDigit.value).toBe(5);
+        });
+
         it("never writes into a selected clue from the digit pad", () => {
             const { clickCell, selectDigit, sudoku, isSelected, selectedDigit } = setup();
 
