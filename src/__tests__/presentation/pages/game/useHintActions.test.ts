@@ -144,7 +144,9 @@ describe("useHintActions — reveal cell", () => {
 
         expect(api.hintMode.active.value).toBe(false);
         expect(sudoku.hintTracker.totalUsed).toBe(1);
-        expect(onHintReveal).toHaveBeenCalledWith(expect.objectContaining({ fallback: true }));
+        expect(onHintReveal).toHaveBeenCalledTimes(1);
+        const [outcome] = onHintReveal.mock.calls[0] as [RevealOutcome];
+        expect(outcome.value).toBe(sudoku.answer[outcome.cell.row][outcome.cell.column]);
     });
 
     it("enters hint mode, spends one hint and logs it once without touching the board", async () => {

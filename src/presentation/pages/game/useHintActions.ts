@@ -89,7 +89,6 @@ export const useHintActions = ({
         const outcome: RevealOutcome = {
             cell: { row: target.row, column: target.column },
             value: sudoku.answer[target.row][target.column],
-            fallback: true,
         };
         stepRecorder.record(sudoku.puzzle, "hint", outcome.cell.row, outcome.cell.column, outcome.value);
         onHintReveal?.(outcome);
