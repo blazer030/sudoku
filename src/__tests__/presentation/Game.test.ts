@@ -1105,6 +1105,17 @@ describe("Game", () => {
             expect(wrapper.find("[data-testid='cell-0-2']").text()).toBe("4");
         });
 
+        it("should count a long run of steps with a counter that fits the panel", async () => {
+            const plan = multiStepPlan();
+            const wrapper = mountGameWith(createMultiStepSudoku());
+
+            await openRevealCell(wrapper);
+            await wrapper.find("[data-testid='hint-primary']").trigger("click");
+
+            expect(wrapper.find("[data-testid='hint-step-counter']").text()).toBe(`2 / ${plan.steps.length}`);
+            expect(wrapper.findAll("[data-testid^='hint-dot-']")).toHaveLength(0);
+        });
+
         it("should step with Next and fill the answer on the last step", async () => {
             const plan = multiStepPlan();
             const wrapper = mountGameWith(createMultiStepSudoku());

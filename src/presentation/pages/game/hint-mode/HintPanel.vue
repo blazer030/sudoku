@@ -70,7 +70,17 @@
                     >
                         <ChevronLeft :size="20" />
                     </button>
-                    <div class="flex items-center gap-1.5 px-1">
+                    <span
+                        v-if="totalSteps > MAX_STEP_DOTS"
+                        class="min-w-11 text-center text-[13px] font-semibold tabular-nums text-foreground-secondary"
+                        data-testid="hint-step-counter"
+                    >
+                        {{ stepIndex + 1 }} / {{ totalSteps }}
+                    </span>
+                    <div
+                        v-else
+                        class="flex items-center gap-1 px-0.5"
+                    >
                         <button
                             v-for="index in totalSteps"
                             :key="`dot-${index}`"
@@ -220,6 +230,10 @@ const scrollExplanationToTop = () => {
 
 onMounted(updateExplanationClipped);
 watch(() => [props.maxHeight, explanation.value], () => { void nextTick(updateExplanationClipped); });
+
+// Beyond this many steps the dots, the arrows and the longest technique name no longer fit
+// one row of a 360px-wide panel, so a "3 / 8" counter takes the dots' place.
+const MAX_STEP_DOTS = 6;
 
 const dotClass = (index: number): string => {
     if (index === props.stepIndex) return "w-5 bg-primary";
