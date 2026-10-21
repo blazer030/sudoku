@@ -47,7 +47,7 @@ export class PlayBillingAdapter implements BillingService {
     async loadProducts(): Promise<Product[]> {
         await settleWithin(this.ensureSetup(), LOAD_TIMEOUT_MILLISECONDS);
         if (this.hasLoadedProducts && this.availableProducts().length < PRODUCT_IDS.length) {
-            await store.update();
+            await settleWithin(store.update(), LOAD_TIMEOUT_MILLISECONDS);
         }
         this.hasLoadedProducts = true;
         return this.availableProducts();

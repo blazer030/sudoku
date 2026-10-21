@@ -197,6 +197,18 @@ describe("PlayBillingAdapter", () => {
         expect(retried.map((product) => product.id)).toEqual(["donate_coffee", "donate_lunch", "donate_coding_time"]);
     });
 
+    it("a retry gives up with no products when the store refresh never settles", async () => {
+        const adapter = new PlayBillingAdapter();
+        await adapter.loadProducts();
+
+        vi.useFakeTimers();
+        mocks.updateSpy.mockReturnValue(new Promise(() => undefined));
+        const retrying = adapter.loadProducts();
+        await vi.advanceTimersByTimeAsync(10_000);
+
+        await expect(retrying).resolves.toEqual([]);
+    });
+
     it("purchase resolves with success after the approved callback finishes the transaction", async () => {
         const adapter = new PlayBillingAdapter();
         const productsPromise = adapter.loadProducts();
