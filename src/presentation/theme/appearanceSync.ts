@@ -18,6 +18,18 @@ export const resolveColorMode = (appearance: Appearance, systemPrefersDark: bool
     return appearance;
 };
 
+// Older WebViews only offer the deprecated addListener / removeListener pair
+const listenForChanges = (query: MediaQueryList, listener: () => void): (() => void) => {
+    if (typeof query.addEventListener === "function") {
+        query.addEventListener("change", listener);
+        return () => { query.removeEventListener("change", listener); };
+    }
+    // eslint-disable-next-line @typescript-eslint/no-deprecated -- the only API those WebViews have
+    query.addListener(listener);
+    // eslint-disable-next-line @typescript-eslint/no-deprecated -- pairs with addListener above
+    return () => { query.removeListener(listener); };
+};
+
 /** Owns the <html> theme attributes, the dark class, the theme-color meta and the system bars. */
 export const startAppearanceSync = (sources: AppearanceSources, systemBar: SystemBarService): (() => void) => {
     // Old WebViews and jsdom may lack matchMedia; treat them as a light system
@@ -34,10 +46,10 @@ export const startAppearanceSync = (sources: AppearanceSources, systemBar: Syste
     };
 
     const stopWatching = watch([sources.appearance, sources.style, sources.colorTheme], apply, { immediate: true });
-    darkScheme?.addEventListener("change", apply);
+    const stopListening = darkScheme === null ? () => undefined : listenForChanges(darkScheme, apply);
 
     return () => {
         stopWatching();
-        darkScheme?.removeEventListener("change", apply);
+        stopListening();
     };
 };

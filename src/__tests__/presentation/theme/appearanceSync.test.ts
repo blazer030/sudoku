@@ -166,4 +166,21 @@ describe("startAppearanceSync", () => {
 
         expect(systemBar.apply).toHaveBeenLastCalledWith("dark");
     });
+
+    it("should follow the system through addListener on WebViews without addEventListener", () => {
+        let matches = false;
+        const listeners: ((event: MediaQueryListEvent) => void)[] = [];
+        vi.stubGlobal("matchMedia", (query: string) => ({
+            get matches() { return matches; },
+            media: query,
+            addListener: (listener: (event: MediaQueryListEvent) => void) => { listeners.push(listener); },
+            removeListener: vi.fn(),
+        }));
+
+        stop = startAppearanceSync(buildSources("green", "system"), systemBar);
+        matches = true;
+        listeners.forEach((listener) => { listener({ matches: true } as MediaQueryListEvent); });
+
+        expect(isDark()).toBe(true);
+    });
 });
