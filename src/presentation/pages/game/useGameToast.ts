@@ -6,11 +6,16 @@ export interface RandomRevealToast {
     outcome: RevealOutcome;
 }
 
+export interface NoConflictsToast {
+    kind: "noConflicts";
+}
+
 /** One-off messages on the game screen; only one shows at a time. */
-export type ToastContent = RandomRevealToast;
+export type ToastContent = RandomRevealToast | NoConflictsToast;
 
 const TOAST_DURATION_MS: Record<ToastContent["kind"], number> = {
     randomReveal: 3000,
+    noConflicts: 3000,
 };
 
 export const useGameToast = () => {

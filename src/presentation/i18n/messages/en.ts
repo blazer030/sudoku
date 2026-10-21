@@ -82,7 +82,11 @@ export const en = {
             freeNote: "First use is free and won't be recorded.",
             autoNotes: "Auto Notes",
             checkConflicts: "Check Conflicts",
+            checkConflictsDescription: "Finds repeated digits in a row, column or box",
             revealCell: "Reveal Cell",
+        },
+        toast: {
+            noConflicts: "No repeated digits found",
         },
         hintResult: "{technique}: {position}",
         randomReveal: "Random reveal: {position}",

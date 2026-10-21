@@ -35,8 +35,17 @@ describe("HintMenuPopup", () => {
         await nextTick();
 
         expect(wrapper.find("[data-testid='hint-auto-notes']").text()).toBe("自動筆記");
-        expect(wrapper.find("[data-testid='hint-check-conflicts']").text()).toBe("檢查衝突");
+        expect(wrapper.find("[data-testid='hint-check-conflicts']").text()).toContain("檢查衝突");
         expect(wrapper.find("[data-testid='hint-reveal-cell']").text()).toBe("揭示一格");
+    });
+
+    it("should explain that Check Conflicts looks for repeated digits", async () => {
+        const wrapper = mountPopup();
+
+        expect(wrapper.find("[data-testid='hint-check-conflicts-description']").text()).toBe("Finds repeated digits in a row, column or box");
+        i18n.global.locale.value = "zh-Hant";
+        await nextTick();
+        expect(wrapper.find("[data-testid='hint-check-conflicts-description']").text()).toBe("找出同列、欄、宮裡重複的數字");
     });
 
     it("should display 3 hint lights matching usage count", () => {

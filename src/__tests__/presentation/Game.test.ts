@@ -952,6 +952,33 @@ describe("Game", () => {
             expect(wrapper.find("[data-testid='cell-0-2']").classes()).toContain("bg-error-surface");
         });
 
+        it("should toast when Check Conflicts finds nothing", async () => {
+            const wrapper = mountGame();
+
+            await wrapper.find("[data-testid='hint-button']").trigger("click");
+            await wrapper.find("[data-testid='hint-check-conflicts']").trigger("click");
+            await flushPromises();
+
+            expect(wrapper.find("[data-testid='game-toast']").text()).toBe("No repeated digits found");
+        });
+
+        it("should mark only the player cell when an entry repeats a clue", async () => {
+            const wrapper = mountGame();
+
+            // (0, 0) is the clue 5; fill 5 at (0, 2)
+            await wrapper.find("[data-testid='number-5']").trigger("click");
+            await wrapper.find("[data-testid='cell-0-2']").trigger("click");
+            await wrapper.find("[data-testid='number-5']").trigger("click"); // deselect
+
+            await wrapper.find("[data-testid='hint-button']").trigger("click");
+            await wrapper.find("[data-testid='hint-check-conflicts']").trigger("click");
+            await flushPromises();
+
+            expect(wrapper.find("[data-testid='cell-0-2']").classes()).toContain("bg-error-surface");
+            expect(wrapper.find("[data-testid='cell-0-0']").classes()).not.toContain("bg-error-surface");
+            expect(wrapper.find("[data-testid='game-toast']").exists()).toBe(false);
+        });
+
         it("should clear conflict marks on the next interaction", async () => {
             const wrapper = mountGame();
 

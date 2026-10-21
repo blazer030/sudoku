@@ -14,6 +14,8 @@ interface HintActionsOptions {
     onRevealComplete: (origin: { row: number; column: number }) => void;
     onGroupCompleted?: (cells: { row: number; column: number }[], origin: { row: number; column: number }) => void;
     onHintReveal?: (outcome: RevealOutcome) => void;
+    /** Check Conflicts found no repeated digits; the hint is still spent. */
+    onNoConflicts?: () => void;
     analytics?: AnalyticsService;
 }
 
@@ -35,6 +37,7 @@ export const useHintActions = ({
     onRevealComplete,
     onGroupCompleted,
     onHintReveal,
+    onNoConflicts,
     analytics,
 }: HintActionsOptions) => {
     const hintMenu = provideHintMenu();
@@ -114,6 +117,7 @@ export const useHintActions = ({
             break;
         case "checkConflicts":
             errorCells.value = sudoku.checkAllConflicts();
+            if (errorCells.value.length === 0) onNoConflicts?.();
             break;
         case "revealCell": {
             // A wrong entry or a solver path is shown step by step; only a stuck solver falls back to a random cell.

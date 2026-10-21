@@ -56,7 +56,13 @@
                         :size="20"
                         class="text-foreground shrink-0"
                     />
-                    <span>{{ t("game.hints.checkConflicts") }}</span>
+                    <span class="flex flex-col items-start text-left">
+                        <span>{{ t("game.hints.checkConflicts") }}</span>
+                        <span
+                            class="text-[12px] text-foreground-secondary font-normal"
+                            data-testid="hint-check-conflicts-description"
+                        >{{ t("game.hints.checkConflictsDescription") }}</span>
+                    </span>
                 </button>
 
                 <div class="h-px bg-border mx-3" />

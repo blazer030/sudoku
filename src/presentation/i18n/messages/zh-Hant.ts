@@ -80,7 +80,11 @@ export const zhHant: MessageSchema = {
             freeNote: "第一次使用免費，不會被記錄。",
             autoNotes: "自動筆記",
             checkConflicts: "檢查衝突",
+            checkConflictsDescription: "找出同列、欄、宮裡重複的數字",
             revealCell: "揭示一格",
+        },
+        toast: {
+            noConflicts: "沒有發現重複的數字",
         },
         hintResult: "{technique}：{position}",
         randomReveal: "隨機揭示：{position}",

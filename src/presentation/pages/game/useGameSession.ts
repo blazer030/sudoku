@@ -85,6 +85,7 @@ export const useGameSession = () => {
         onRevealComplete: (origin) => { checkAndComplete(origin); },
         onGroupCompleted: triggerFlash,
         onHintReveal: outcome => { gameToast.show({ kind: "randomReveal", outcome }); },
+        onNoConflicts: () => { gameToast.show({ kind: "noConflicts" }); },
         analytics,
     });
 

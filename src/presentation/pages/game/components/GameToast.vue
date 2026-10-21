@@ -26,8 +26,14 @@ const { t } = useI18n();
 const position = (outcome: RevealOutcome) =>
     t("position.cell", { row: outcome.cell.row + 1, column: outcome.cell.column + 1, value: outcome.value });
 
-const message = (content: ToastContent): string =>
-    t("game.randomReveal", { position: position(content.outcome) });
+const message = (content: ToastContent): string => {
+    switch (content.kind) {
+    case "randomReveal":
+        return t("game.randomReveal", { position: position(content.outcome) });
+    case "noConflicts":
+        return t("game.toast.noConflicts");
+    }
+};
 </script>
 
 <style scoped>
