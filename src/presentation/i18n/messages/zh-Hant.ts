@@ -161,7 +161,7 @@ export const zhHant: MessageSchema = {
         badge: "提示模式",
         panel: {
             wrongEntry: "{cell}填錯了",
-            wrongEntryNote: "清除後，這格的筆記會保留。",
+            wrongEntryNote: "清除只會移除這格的數字。",
             clear: "清除",
             close: "關閉",
             next: "下一步",

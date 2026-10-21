@@ -19,7 +19,10 @@
                     {{ t("hintMode.panel.wrongEntry", { cell: cellName(wrongCell) }) }}
                 </span>
             </div>
-            <p class="text-foreground-secondary text-sm leading-relaxed">
+            <p
+                class="text-foreground-secondary text-sm leading-relaxed"
+                data-testid="hint-wrong-entry-note"
+            >
                 {{ t("hintMode.panel.wrongEntryNote") }}
             </p>
             <div class="flex gap-2.5 pt-1">

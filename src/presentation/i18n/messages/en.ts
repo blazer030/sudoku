@@ -163,7 +163,7 @@ export const en = {
         badge: "Hint mode",
         panel: {
             wrongEntry: "{cell} is wrong",
-            wrongEntryNote: "Clearing it keeps the cell's notes.",
+            wrongEntryNote: "Clearing removes just this digit.",
             clear: "Clear",
             close: "Close",
             next: "Next",

@@ -1,4 +1,6 @@
+import { nextTick } from "vue";
 import { mount } from "@vue/test-utils";
+import { i18n } from "@/presentation/i18n";
 import HintPanel from "@/presentation/pages/game/hint-mode/HintPanel.vue";
 import { createMultiStepSudoku } from "@/__tests__/fixtures/multiStepPuzzle";
 
@@ -21,7 +23,31 @@ const mountSteps = (totalSteps: number, stepIndex: number) =>
         },
     });
 
+const mountWrongEntry = () =>
+    mount(HintPanel, {
+        props: {
+            phase: "wrongEntry",
+            wrongCell: { row: 1, column: 1 },
+            step: null,
+            stepIndex: 0,
+            totalSteps: 0,
+            isLastStep: false,
+            digit: null,
+        },
+    });
+
 describe("HintPanel", () => {
+    it("should say that Clear removes only the wrong digit", async () => {
+        const wrapper = mountWrongEntry();
+
+        expect(wrapper.find("[data-testid='hint-wrong-entry-note']").text()).toBe("Clearing removes just this digit.");
+
+        i18n.global.locale.value = "zh-Hant";
+        await nextTick();
+
+        expect(wrapper.find("[data-testid='hint-wrong-entry-note']").text()).toBe("清除只會移除這格的數字。");
+    });
+
     it("should show one dot per step when the dots fit beside the longest technique name", () => {
         const wrapper = mountSteps(6, 2);
 

@@ -26,10 +26,10 @@ const planSteps = (sudoku: Sudoku): StepsPlan => {
 
 describe("useHintMode", () => {
     describe("wrong entry", () => {
-        // Known puzzle: (1, 1) should be 7; the player wrote 1 and kept notes in it.
+        // Known puzzle: (1, 1) should be 7; the player wrote 1 there and keeps a note elsewhere.
         const withWrongEntry = () => {
             const sudoku = createKnownSudoku();
-            sudoku.puzzle[1][1].restore(1, [2, 7]);
+            sudoku.fill(1, 1, 1);
             sudoku.toggleNote(0, 2, 4);
             return sudoku;
         };
@@ -47,7 +47,7 @@ describe("useHintMode", () => {
             expect(hintMode.cellView(0, 2)).toEqual({ highlight: "none", candidates: null, eliminated: [], emphasized: [] });
         });
 
-        it("clearWrongEntry erases only that entry, keeps its notes, records an erase and ends", () => {
+        it("clearWrongEntry erases only that entry, keeps the other notes, records an erase and ends", () => {
             const sudoku = withWrongEntry();
             const { hintMode, record } = setup(sudoku);
             hintMode.start(sudoku.planRevealHint());
@@ -55,7 +55,6 @@ describe("useHintMode", () => {
             hintMode.clearWrongEntry();
 
             expect(sudoku.puzzle[1][1].entry).toBe(0);
-            expect(sudoku.puzzle[1][1].notes).toEqual([2, 7]);
             expect(sudoku.puzzle[0][2].notes).toEqual([4]);
             expect(record).toHaveBeenCalledWith("erase", { row: 1, column: 1 }, 0);
             expect(hintMode.active.value).toBe(false);
