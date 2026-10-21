@@ -1105,7 +1105,10 @@ describe("Game", () => {
             await wrapper.find("[data-testid='number-4']").trigger("click");
             const cell = wrapper.find("[data-testid='cell-0-2']");
 
-            await cell.trigger("pointerdown");
+            // jsdom has no PointerEvent, so build a plain event carrying the pointer fields.
+            const pointerdown = new Event("pointerdown", { bubbles: true });
+            Object.assign(pointerdown, { isPrimary: true, pointerType: "touch", button: 0, clientX: 10, clientY: 10 });
+            cell.element.dispatchEvent(pointerdown);
             vi.advanceTimersByTime(400);
             await cell.trigger("pointerup");
             await cell.trigger("click");

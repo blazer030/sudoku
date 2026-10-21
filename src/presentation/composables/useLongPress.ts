@@ -1,3 +1,5 @@
+import { onScopeDispose } from "vue";
+
 const DEFAULT_DELAY_MILLISECONDS = 400;
 const DEFAULT_MOVE_TOLERANCE_PIXELS = 8;
 const HAPTIC_TICK_MILLISECONDS = 15;
@@ -24,7 +26,11 @@ export const useLongPress = ({
         timer = null;
     };
 
+    onScopeDispose(cancel);
+
     const onPointerdown = (event: PointerEvent) => {
+        if (!event.isPrimary) return;
+        if (event.pointerType === "mouse" && event.button !== 0) return;
         cancel();
         suppressNextClick = false;
         startX = event.clientX;

@@ -1,7 +1,9 @@
+import { effectScope } from "vue";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useLongPress } from "@/presentation/composables/useLongPress";
 
-const pointerAt = (clientX: number, clientY: number) => ({ clientX, clientY }) as PointerEvent;
+const pointerAt = (clientX: number, clientY: number, extra: Partial<PointerEvent> = {}) =>
+    ({ clientX, clientY, isPrimary: true, pointerType: "touch", button: 0, ...extra }) as PointerEvent;
 
 describe("useLongPress", () => {
     beforeEach(() => {
@@ -102,5 +104,59 @@ describe("useLongPress", () => {
 
         expect(vibrate).toHaveBeenCalledWith(15);
         vi.unstubAllGlobals();
+    });
+
+    it("ignores non-primary pointers", () => {
+        const onLongPress = vi.fn();
+        const { onPointerdown } = useLongPress({ onLongPress });
+
+        onPointerdown(pointerAt(10, 10, { isPrimary: false }));
+        vi.advanceTimersByTime(1000);
+
+        expect(onLongPress).not.toHaveBeenCalled();
+    });
+
+    it("ignores non-left mouse buttons", () => {
+        const onLongPress = vi.fn();
+        const { onPointerdown } = useLongPress({ onLongPress });
+
+        onPointerdown(pointerAt(10, 10, { pointerType: "mouse", button: 2 }));
+        vi.advanceTimersByTime(1000);
+
+        expect(onLongPress).not.toHaveBeenCalled();
+    });
+
+    it("fires for the left mouse button", () => {
+        const onLongPress = vi.fn();
+        const { onPointerdown } = useLongPress({ onLongPress });
+
+        onPointerdown(pointerAt(10, 10, { pointerType: "mouse", button: 0 }));
+        vi.advanceTimersByTime(400);
+
+        expect(onLongPress).toHaveBeenCalledTimes(1);
+    });
+
+    it("does not fire after its scope is disposed", () => {
+        const onLongPress = vi.fn();
+        const scope = effectScope();
+        const handlers = scope.run(() => useLongPress({ onLongPress }));
+
+        handlers?.onPointerdown(pointerAt(10, 10));
+        scope.stop();
+        vi.advanceTimersByTime(1000);
+
+        expect(onLongPress).not.toHaveBeenCalled();
+    });
+
+    it("does not suppress a fresh tap when the click after a long press never came", () => {
+        const { onPointerdown, onPointerup, consumeClickSuppression } = useLongPress({ onLongPress: vi.fn() });
+
+        onPointerdown(pointerAt(10, 10));
+        vi.advanceTimersByTime(400);
+        onPointerup();
+        onPointerdown(pointerAt(10, 10));
+        onPointerup();
+
+        expect(consumeClickSuppression()).toBe(false);
     });
 });
