@@ -1,8 +1,9 @@
 import { watch, type Ref } from "vue";
-import { systemBarColor } from "@/theme/palettes";
+import { getPalette, systemBarColor } from "@/theme/palettes";
 import { updateMetaThemeColor } from "@/application/PwaThemeUpdater";
 import type { Appearance, ColorMode, ColorThemeId, StyleId } from "@/application/SettingsStorage";
 import type { SystemBarService } from "@/application/systemBar/SystemBarService";
+import type { AppearanceBridgeService } from "@/application/appearanceBridge/AppearanceBridgeService";
 
 export interface AppearanceSources {
     appearance: Ref<Appearance>;
@@ -30,8 +31,15 @@ const listenForChanges = (query: MediaQueryList, listener: () => void): (() => v
     return () => { query.removeListener(listener); };
 };
 
-/** Owns the <html> theme attributes, the dark class, the theme-color meta and the system bars. */
-export const startAppearanceSync = (sources: AppearanceSources, systemBar: SystemBarService): (() => void) => {
+/**
+ * Owns the <html> theme attributes, the dark class, the theme-color meta and the system bars,
+ * and keeps the Android shell told of the appearance for its next cold start.
+ */
+export const startAppearanceSync = (
+    sources: AppearanceSources,
+    systemBar: SystemBarService,
+    appearanceBridge: AppearanceBridgeService,
+): (() => void) => {
     // Old WebViews and jsdom may lack matchMedia; treat them as a light system
     const darkScheme = typeof window.matchMedia === "function" ? window.matchMedia(DARK_SCHEME_QUERY) : null;
 
@@ -43,13 +51,21 @@ export const startAppearanceSync = (sources: AppearanceSources, systemBar: Syste
         root.dataset.colorTheme = sources.colorTheme.value;
         updateMetaThemeColor(systemBarColor(sources.style.value, sources.colorTheme.value, mode));
         void systemBar.apply(mode);
+        void appearanceBridge.setSystemBarColors({
+            background: getPalette(sources.style.value, sources.colorTheme.value, mode).background,
+            darkIcons: mode === "light",
+        });
     };
 
     const stopWatching = watch([sources.appearance, sources.style, sources.colorTheme], apply, { immediate: true });
+    const stopWatchingAppearance = watch(sources.appearance, (appearance) => {
+        void appearanceBridge.setAppearance(appearance);
+    }, { immediate: true });
     const stopListening = darkScheme === null ? () => undefined : listenForChanges(darkScheme, apply);
 
     return () => {
         stopWatching();
+        stopWatchingAppearance();
         stopListening();
     };
 };

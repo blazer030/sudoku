@@ -25,6 +25,9 @@ import { NoopIconAdapter } from "@/infrastructure/icon/NoopIconAdapter";
 import type { SystemBarService } from "@/application/systemBar/SystemBarService";
 import { CapacitorSystemBarAdapter } from "@/infrastructure/systemBar/CapacitorSystemBarAdapter";
 import { NoopSystemBarAdapter } from "@/infrastructure/systemBar/NoopSystemBarAdapter";
+import type { AppearanceBridgeService } from "@/application/appearanceBridge/AppearanceBridgeService";
+import { CapacitorAppearanceBridgeAdapter } from "@/infrastructure/appearanceBridge/CapacitorAppearanceBridgeAdapter";
+import { NoopAppearanceBridgeAdapter } from "@/infrastructure/appearanceBridge/NoopAppearanceBridgeAdapter";
 import { STATISTICS_REPOSITORY_KEY, type StatisticsRepository } from "@/application/statistics/StatisticsRepository";
 import { IndexedDBStatisticsRepository } from "@/infrastructure/statistics/IndexedDBStatisticsRepository";
 import { GAME_REPOSITORY_KEY, type GameRepository } from "@/application/game/GameRepository";
@@ -54,6 +57,10 @@ const systemBar: SystemBarService = Capacitor.isNativePlatform()
     ? new CapacitorSystemBarAdapter()
     : new NoopSystemBarAdapter();
 
+const appearanceBridge: AppearanceBridgeService = Capacitor.isNativePlatform()
+    ? new CapacitorAppearanceBridgeAdapter()
+    : new NoopAppearanceBridgeAdapter();
+
 const statisticsRepository: StatisticsRepository = new IndexedDBStatisticsRepository();
 const gameRepository: GameRepository = new IndexedDBGameRepository();
 
@@ -68,7 +75,7 @@ app.provide(STATISTICS_REPOSITORY_KEY, statisticsRepository);
 app.provide(GAME_REPOSITORY_KEY, gameRepository);
 
 useSettingsStore().setIconService(icon);
-startAppearanceSync(storeToRefs(useSettingsStore()), systemBar);
+startAppearanceSync(storeToRefs(useSettingsStore()), systemBar, appearanceBridge);
 useDonateStore().setBilling(billing);
 const gameStore = useGameStore();
 gameStore.setAnalytics(analytics);
