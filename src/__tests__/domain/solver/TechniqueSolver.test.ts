@@ -1,6 +1,7 @@
 import { BoardState } from "@/domain/solver/BoardState";
 import { TechniqueSolver } from "@/domain/solver/TechniqueSolver";
 import { singlesPuzzle, singlesSolution } from "@/__tests__/fixtures/singlesPuzzle";
+import { TEST_PUZZLE_PRESETS } from "@/presentation/pages/solver-walkthrough/testPuzzles";
 
 describe("TechniqueSolver", () => {
     it("nextStep should find the first applicable technique", () => {
@@ -210,6 +211,53 @@ describe("TechniqueSolver", () => {
         const step = solver.nextAssignment(state);
 
         expect(step).toBeNull();
+    });
+
+    describe("stepsToNextAssignment", () => {
+        it("should return only the assignment step when a single is available", () => {
+            const state = BoardState.fromPuzzle(singlesPuzzle);
+
+            const steps = new TechniqueSolver().stepsToNextAssignment(state);
+
+            expect(steps).toHaveLength(1);
+            expect(steps[0].assignments.length).toBeGreaterThan(0);
+        });
+
+        it("should return elimination steps before the assignment", () => {
+            const hardPreset = TEST_PUZZLE_PRESETS.find((preset) => preset.label === "Hard");
+            if (!hardPreset) throw new Error("Hard preset missing");
+            const hardPuzzle = hardPreset.puzzle;
+            const solver = new TechniqueSolver();
+            let state = BoardState.fromPuzzle(hardPuzzle);
+            for (;;) {
+                const step = solver.nextStep(state);
+                if (step === null) throw new Error("no elimination-only step found");
+                if (step.assignments.length === 0) break;
+                for (const assignment of step.assignments) {
+                    state = state.assign(assignment.cell.row, assignment.cell.column, assignment.digit);
+                }
+                for (const elimination of step.eliminations) {
+                    state = state.eliminate(elimination.cell.row, elimination.cell.column, elimination.digit);
+                }
+            }
+
+            const steps = solver.stepsToNextAssignment(state);
+
+            expect(steps.length).toBeGreaterThan(1);
+            for (const step of steps.slice(0, -1)) {
+                expect(step.assignments).toHaveLength(0);
+                expect(step.eliminations.length).toBeGreaterThan(0);
+            }
+            expect(steps[steps.length - 1].assignments.length).toBeGreaterThan(0);
+        });
+
+        it("should return an empty list when no technique applies", () => {
+            const state = BoardState.fromPuzzle(
+                Array.from({ length: 9 }, () => Array<number>(9).fill(0)),
+            );
+
+            expect(new TechniqueSolver().stepsToNextAssignment(state)).toEqual([]);
+        });
     });
 
     it("solveWithTechniques should solve a singles-only puzzle", () => {

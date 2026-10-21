@@ -57,11 +57,18 @@ export class TechniqueSolver {
     }
 
     public nextAssignment(state: BoardState): SolveStep | null {
+        const steps = this.stepsToNextAssignment(state);
+        return steps.length > 0 ? steps[steps.length - 1] : null;
+    }
+
+    public stepsToNextAssignment(state: BoardState): SolveStep[] {
+        const steps: SolveStep[] = [];
         let currentState = state;
         for (let iteration = 0; iteration < MAX_ASSIGNMENT_ITERATIONS; iteration++) {
             const step = this.nextStep(currentState);
-            if (step === null) return null;
-            if (step.assignments.length > 0) return step;
+            if (step === null) return [];
+            steps.push(step);
+            if (step.assignments.length > 0) return steps;
             for (const elimination of step.eliminations) {
                 currentState = currentState.eliminate(
                     elimination.cell.row,
@@ -70,7 +77,7 @@ export class TechniqueSolver {
                 );
             }
         }
-        return null;
+        return [];
     }
 
     public solveWithTechniques(initialState: BoardState): SolveResult {
