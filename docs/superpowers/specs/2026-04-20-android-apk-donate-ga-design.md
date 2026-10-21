@@ -202,7 +202,7 @@ export default config;
 
 - `package.json` `"version"`: `"2.0.0"`
 - `android/app/build.gradle` `versionName`: read from `package.json` via build script
-- `android/app/build.gradle` `versionCode`: starts at `1`, increments by 1 per Play Store submission
+- `android/app/build.gradle` `versionCode`: derived as `major * 10000 + minor * 100 + patch` (2.0.0 → 20000), so it always increases with the version; see `docs/release.md`
 
 ### PWA Registration Gate
 
