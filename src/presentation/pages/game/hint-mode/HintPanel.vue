@@ -111,7 +111,7 @@
             <div
                 ref="explanationBox"
                 :class="explanationClipped ? 'hint-explanation-fade' : ''"
-                class="min-h-[4.6rem] shrink! overflow-y-auto"
+                class="hint-explanation-box min-h-[4.6rem] shrink! overflow-y-auto"
                 @scroll="updateExplanationClipped"
             >
                 <Transition
@@ -163,7 +163,7 @@
             </div>
 
             <p
-                class="hint-caption flex items-center justify-center gap-1.5 text-foreground-muted text-[11px] leading-snug text-center"
+                class="flex items-center justify-center gap-1.5 text-foreground-muted text-[11px] leading-snug text-center"
                 data-testid="hint-caption"
             >
                 <EyeOff
@@ -248,10 +248,10 @@ const dotClass = (index: number): string => {
 <style scoped>
 @reference "../../../../style/index.css";
 
-/* Short screens drop the caption so the panel stays clear of the screen edge. */
+/* Short screens let the explanation shrink to one line, so the buttons and the caption stay on screen. */
 @media (max-height: 700px) {
-    .hint-caption {
-        display: none;
+    .hint-explanation-box {
+        min-height: 1.45rem;
     }
 }
 
