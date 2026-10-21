@@ -3,6 +3,7 @@ package io.github.blazer030.sudoku;
 import android.app.UiModeManager;
 import android.graphics.Color;
 import android.os.Build;
+import androidx.appcompat.app.AppCompatDelegate;
 import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
@@ -21,12 +22,17 @@ public class AppearanceBridgePlugin extends Plugin {
         }
 
         AppearanceStore.saveMode(getContext(), mode);
-        // From API 31 the system draws the splash screen itself; this per-app night mode is what it reads
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            // The system persists this and applies it to the splash screen, the process and the WebView,
+            // including a switch back to "system"; AppCompat's default must stay out of the way
             UiModeManager uiModeManager = getContext().getSystemService(UiModeManager.class);
             if (uiModeManager != null) {
                 uiModeManager.setApplicationNightMode(AppearanceStore.applicationNightMode(mode));
             }
+        } else {
+            getBridge().executeOnMainThread(() ->
+                AppCompatDelegate.setDefaultNightMode(AppearanceStore.appCompatNightMode(mode))
+            );
         }
         call.resolve();
     }
