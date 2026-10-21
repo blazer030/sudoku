@@ -47,6 +47,19 @@ describe("safe area", () => {
         expect(wrapper.classes()).not.toContain("overflow-y-auto");
     });
 
+    it("should let pages that do not scroll themselves grow, so their bottom padding stays reachable", () => {
+        // A fixed-height page that overflows leaves its own bottom padding out of the scroll range
+        const pageRoots = collectVueFiles("src/presentation/pages")
+            .map(path => ({ path, root: /<template>\s*<div class="([^"]*)"/.exec(readFileSync(path, "utf8"))?.[1] }))
+            .filter((page): page is { path: string; root: string } => page.root !== undefined);
+        const fixedButNotScrolling = pageRoots
+            .filter(({ root }) => /(?:^|\s)h-full(?:\s|$)/.test(root) && !root.includes("overflow-y-auto"))
+            .map(({ path }) => path);
+
+        expect(pageRoots.length).toBeGreaterThan(5);
+        expect(fixedButNotScrolling).toEqual([]);
+    });
+
     it("should size pages to the padded root instead of the whole viewport", () => {
         const offenders = collectVueFiles("src/presentation/pages").filter(path => /\bh-(?:dvh|screen)\b/.test(readFileSync(path, "utf8")));
 

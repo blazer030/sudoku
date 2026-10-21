@@ -1,5 +1,5 @@
 <template>
-    <div class="flex flex-col gap-2 h-full py-6 px-5">
+    <div class="flex flex-col gap-2 min-h-full py-6 px-5">
         <GameHeader
             :elapsed-seconds="elapsedSeconds"
             :hint-mode="hintMode.active.value"

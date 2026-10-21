@@ -1,5 +1,5 @@
 <template>
-    <div class="flex flex-col h-full items-center pt-20 pb-15 px-6">
+    <div class="flex flex-col min-h-full items-center pt-20 pb-15 px-6">
         <div class="flex flex-col items-center gap-2">
             <div
                 class="w-20 h-20 bg-primary rounded-popup flex items-center justify-center shadow-primary-lg"
