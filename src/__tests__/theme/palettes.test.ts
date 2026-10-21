@@ -18,12 +18,22 @@ describe("palettes", () => {
     });
 
     it("should merge each theme's overrides over the shared base", () => {
-        expect(getPalette("minimal", "blue", "light").primary).toBe("#316099");
-        expect(getPalette("minimal", "blue", "light").highlight).toBe("#E4EFF9");
+        expect(getPalette("minimal", "blue", "light").primary).toBe("#2C5689");
+        expect(getPalette("minimal", "blue", "light").highlight).toBe("#ABCEF1");
     });
 
     it("getPalette falls back to the style's first theme", () => {
         expect(getPalette("minimal", "red" as ColorThemeId, "light")).toEqual(getPalette("minimal", "green", "light"));
+    });
+
+    it("uses the secondary text colour for notes in every palette", () => {
+        for (const style of Object.values(STYLES)) {
+            for (const theme of style.themes) {
+                for (const mode of ["light", "dark"] as const) {
+                    expect(theme[mode].note, `${style.id}/${theme.id}/${mode}`).toBe(theme[mode]["foreground-secondary"]);
+                }
+            }
+        }
     });
 
     it("should keep the dark toast a dark surface rather than a light block", () => {

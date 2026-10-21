@@ -53,9 +53,21 @@ const TEXT_PAIRS: readonly ContrastPair[] = [
 
 const BOARD_SURFACES: readonly PaletteToken[] = [
     "card", "cell-clue", "primary-light", "highlight", "cell-focus", "cell-scope", "cell-pattern", "error-surface",
+    "cell-selected", "cell-peer",
 ];
 const BOARD_INKS: readonly PaletteToken[] = ["foreground", "primary", "error", "note"];
 const BOARD_PAIRS: readonly ContrastPair[] = BOARD_SURFACES.flatMap(surface => BOARD_INKS.map(ink => pair(ink, surface)));
+
+// Board layers must look different from each other, not just carry readable ink
+const SURFACE_PAIRS: readonly ContrastPair[] = [
+    pair("cell-clue", "card", 1.25),
+    pair("highlight", "cell-clue", 1.25),
+    pair("highlight", "card", 1.25),
+    pair("highlight", "cell-peer", 1.25),
+    pair("cell-peer", "card", 1.08),
+    // The selection outline is a UI component, so 3:1 applies
+    pair("primary", "cell-selected", LARGE_OR_ICON),
+];
 
 const TINTED_PAIRS: readonly ContrastPair[] = [
     tinted("accent", "accent", 0.1, "card", TEXT),
@@ -69,7 +81,7 @@ const TINTED_PAIRS: readonly ContrastPair[] = [
 
 const CASES = Object.values(STYLES).flatMap(style => style.themes.flatMap(theme =>
     (["light", "dark"] as const).flatMap(mode =>
-        [...TEXT_PAIRS, ...BOARD_PAIRS, ...TINTED_PAIRS].map(contrastPair => ({
+        [...TEXT_PAIRS, ...BOARD_PAIRS, ...SURFACE_PAIRS, ...TINTED_PAIRS].map(contrastPair => ({
             label: `${style.id}/${theme.id}/${mode}: ${contrastPair.name} ≥ ${contrastPair.minimum}`,
             palette: theme[mode],
             contrastPair,
