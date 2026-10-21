@@ -7,6 +7,7 @@ export const useDonateStore = defineStore("donate", () => {
     const purchasing = ref<string | null>(null);
     const lastResult = ref<PurchaseResult | null>(null);
     const loadFailed = ref(false);
+    const loading = ref(false);
     let billing: BillingService | null = null;
 
     const setBilling = (service: BillingService) => {
@@ -15,11 +16,14 @@ export const useDonateStore = defineStore("donate", () => {
 
     const loadProducts = async () => {
         if (billing === null) return;
+        loading.value = true;
         try {
             await billing.consumeAll();
             products.value = await billing.loadProducts();
         } catch {
             products.value = [];
+        } finally {
+            loading.value = false;
         }
         loadFailed.value = products.value.length === 0;
     };
@@ -35,5 +39,5 @@ export const useDonateStore = defineStore("donate", () => {
         }
     };
 
-    return { products, purchasing, lastResult, loadFailed, setBilling, loadProducts, purchase };
+    return { products, purchasing, lastResult, loadFailed, loading, setBilling, loadProducts, purchase };
 });

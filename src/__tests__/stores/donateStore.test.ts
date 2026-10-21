@@ -44,6 +44,22 @@ describe("donateStore", () => {
         expect(store.products).toEqual(sampleProducts);
     });
 
+    it("reports loading while products are being fetched", async () => {
+        const store = useDonateStore();
+        let finishLoading: (products: Product[]) => void = () => undefined;
+        store.setBilling(mockBilling({
+            loadProducts: vi.fn(() => new Promise<Product[]>((resolve) => { finishLoading = resolve; })),
+        }));
+
+        const pending = store.loadProducts();
+        expect(store.loading).toBe(true);
+
+        await new Promise((resolve) => setTimeout(resolve, 0));
+        finishLoading(sampleProducts);
+        await pending;
+        expect(store.loading).toBe(false);
+    });
+
     it("marks loading as failed when billing returns no products", async () => {
         const store = useDonateStore();
         store.setBilling(mockBilling({ loadProducts: vi.fn().mockResolvedValue([]) }));
