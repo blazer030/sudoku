@@ -43,6 +43,12 @@ describe("GameCompleteModal", () => {
         expect(wrapper.text()).not.toContain("Congratulations!");
     });
 
+    it("should keep a gap between the stat columns so wide zh difficulty labels do not touch the time", () => {
+        const wrapper = mountModal();
+
+        expect(wrapper.find(".grid-cols-3").classes()).toContain("gap-2");
+    });
+
     it("should display 0 hints when no hints used", () => {
         const wrapper = mountModal({ hintsUsed: 0 });
 

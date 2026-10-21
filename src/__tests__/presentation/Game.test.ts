@@ -923,6 +923,15 @@ describe("Game", () => {
             expect(wrapper.find("[data-testid='hint-result-toast']").text()).toMatch(/第 \d 列第 \d 欄 = \d/);
         });
 
+        it("should size the hint toast to its content so Chinese positions do not wrap early", async () => {
+            const wrapper = mountGame();
+
+            await wrapper.find("[data-testid='hint-button']").trigger("click");
+            await wrapper.find("[data-testid='hint-reveal-cell']").trigger("click");
+
+            expect(wrapper.find("[data-testid='hint-result-toast']").classes()).toContain("w-max");
+        });
+
         it("should reveal a random cell with correct answer", async () => {
             const wrapper = mountGame();
 

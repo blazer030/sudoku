@@ -58,6 +58,16 @@ describe("Statistics", () => {
         expect(text).not.toContain("Gave up");
     });
 
+    it("should keep overview card padding tight so the longest zh label fits on one line", () => {
+        recordGames([{ difficulty: "easy", elapsedSeconds: 100, completed: true }]);
+        const { wrapper } = mountStatistics();
+
+        for (const testid of ["games-won", "win-rate", "day-streak"]) {
+            expect(wrapper.find(`[data-testid='${testid}']`).classes()).toContain("px-2");
+        }
+        expect(wrapper.find("[data-testid='day-streak'] span:last-child").classes()).toContain("text-center");
+    });
+
     it("should show the clear records dialog in Traditional Chinese", async () => {
         recordGames([{ difficulty: "easy", elapsedSeconds: 100, completed: true }]);
         const { wrapper } = mountStatistics();

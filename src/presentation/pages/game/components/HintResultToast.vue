@@ -2,7 +2,7 @@
     <Transition name="toast">
         <div
             v-if="outcome"
-            class="fixed left-1/2 -translate-x-1/2 bottom-24 z-50 bg-foreground text-background text-sm px-4 py-3 rounded-xl shadow-lg max-w-[90%]"
+            class="fixed left-1/2 -translate-x-1/2 bottom-24 z-50 w-max bg-foreground text-background text-sm px-4 py-3 rounded-xl shadow-lg max-w-[90%]"
             data-testid="hint-result-toast"
         >
             <span v-if="outcome.fallback">

@@ -20,25 +20,25 @@
             <span class="text-foreground-muted text-xs font-semibold tracking-wider uppercase px-1">{{ t("statistics.overview") }}</span>
             <div class="flex gap-3">
                 <div
-                    class="flex-1 flex flex-col items-center gap-1 bg-card rounded-2xl p-4 shadow-card"
+                    class="flex-1 flex flex-col items-center gap-1 bg-card rounded-2xl px-2 py-4 shadow-card"
                     data-testid="games-won"
                 >
                     <span class="text-3xl font-bold text-primary font-mono">{{ stats.overall.gamesWon }}</span>
                     <span class="text-xs font-medium text-foreground-secondary">{{ t("statistics.gamesWon") }}</span>
                 </div>
                 <div
-                    class="flex-1 flex flex-col items-center gap-1 bg-card rounded-2xl p-4 shadow-card"
+                    class="flex-1 flex flex-col items-center gap-1 bg-card rounded-2xl px-2 py-4 shadow-card"
                     data-testid="win-rate"
                 >
                     <span class="text-3xl font-bold text-primary font-mono">{{ winRateDisplay }}</span>
                     <span class="text-xs font-medium text-foreground-secondary">{{ t("statistics.winRate") }}</span>
                 </div>
                 <div
-                    class="flex-1 flex flex-col items-center gap-1 bg-card rounded-2xl p-4 shadow-card"
+                    class="flex-1 flex flex-col items-center gap-1 bg-card rounded-2xl px-2 py-4 shadow-card"
                     data-testid="day-streak"
                 >
                     <span class="text-3xl font-bold text-foreground font-mono">{{ dayStreak }}</span>
-                    <span class="text-xs font-medium text-foreground-secondary">{{ t("statistics.dayStreak") }}</span>
+                    <span class="text-xs font-medium text-foreground-secondary text-center">{{ t("statistics.dayStreak") }}</span>
                 </div>
             </div>
         </div>
