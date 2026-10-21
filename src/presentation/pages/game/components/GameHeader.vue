@@ -37,12 +37,14 @@
 import { ChevronLeft, Timer } from "lucide-vue-next";
 import { useGameStore } from "@/stores/gameStore";
 import { formatTime } from "@/utils/formatTime";
-import { DIFFICULTY_LABELS } from "@/presentation/labels/difficultyLabels";
+import { computed } from "vue";
+import { useDifficultyLabel } from "@/presentation/labels/difficultyLabels";
 
 defineProps<{ elapsedSeconds: number }>();
 const emit = defineEmits<{ back: [] }>();
 
 const gameStore = useGameStore();
 
-const difficultyLabel = DIFFICULTY_LABELS[gameStore.difficulty ?? "easy"];
+const difficultyText = useDifficultyLabel();
+const difficultyLabel = computed(() => difficultyText(gameStore.difficulty ?? "easy"));
 </script>

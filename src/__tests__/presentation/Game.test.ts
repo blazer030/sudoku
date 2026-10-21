@@ -1,3 +1,5 @@
+import { nextTick } from "vue";
+import { i18n } from "@/presentation/i18n";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { flushPromises, mount } from "@vue/test-utils";
 import { createPinia } from "pinia";
@@ -47,6 +49,16 @@ afterEach(() => {
 });
 
 describe("Game", () => {
+    it("should update the difficulty pill when the language changes", async () => {
+        const wrapper = mountGame("medium");
+        expect(wrapper.text()).toContain("Medium");
+
+        i18n.global.locale.value = "zh-Hant";
+        await nextTick();
+
+        expect(wrapper.text()).toContain("中等");
+    });
+
     it("should redirect to home when store has no active game", async () => {
         const pinia = createPinia();
         const router = createTestRouter();

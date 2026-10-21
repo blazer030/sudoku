@@ -138,7 +138,7 @@ import { ROUTER_PATH } from "@/router";
 import { BOARD_SIZE } from "@/domain/board/constants";
 import { BoardState } from "@/domain/solver/BoardState";
 import { type SolveResult, TechniqueSolver } from "@/domain/solver/TechniqueSolver";
-import { TECHNIQUE_LABELS } from "@/presentation/labels/techniqueLabels";
+import { useTechniqueLabel } from "@/presentation/labels/techniqueLabels";
 import DigitPad from "@/presentation/pages/game/components/DigitPad.vue";
 import BoardCell, { type CellVariant } from "@/presentation/components/board-cell/BoardCell.vue";
 import ChainOverlay from "@/presentation/pages/solver-walkthrough/components/ChainOverlay.vue";
@@ -156,6 +156,7 @@ const createEmptyBoard = (): number[][] =>
     Array.from({ length: BOARD_SIZE }, () => Array.from({ length: BOARD_SIZE }, () => 0));
 
 const router = useRouter();
+const techniqueLabel = useTechniqueLabel();
 const userValues = ref<number[][]>(createEmptyBoard());
 const state = computed(() => BoardState.fromPuzzle(userValues.value));
 const selectedCell = ref<CellPosition | null>(null);
@@ -225,7 +226,7 @@ const stepDescription = computed(() => {
     if (solveResult.value === null) return "";
     if (currentStep.value === 0) return "Initial board";
     const step = solveResult.value.steps[currentStep.value - 1];
-    const label = TECHNIQUE_LABELS[step.technique];
+    const label = techniqueLabel(step.technique);
     if (step.assignments.length > 0) {
         const { cell, digit } = step.assignments[0];
         return `${label}: Row ${cell.row + 1}, Col ${cell.column + 1} = ${digit}`;

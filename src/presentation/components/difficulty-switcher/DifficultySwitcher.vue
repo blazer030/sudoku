@@ -13,17 +13,18 @@
             class="flex-1 h-full rounded-icon flex items-center justify-center text-sm transition-all cursor-pointer"
             @click="$emit('update:modelValue', difficulty)"
         >
-            {{ DIFFICULTY_LABELS[difficulty] }}
+            {{ difficultyLabel(difficulty) }}
         </button>
     </div>
 </template>
 
 <script lang="ts" setup>
 import { type Difficulty } from "@/domain";
-import { DIFFICULTY_LABELS } from "@/presentation/labels/difficultyLabels";
+import { useDifficultyLabel } from "@/presentation/labels/difficultyLabels";
 
 defineProps<{ modelValue: Difficulty }>();
 defineEmits<{ "update:modelValue": [value: Difficulty] }>();
 
+const difficultyLabel = useDifficultyLabel();
 const difficulties: Difficulty[] = ["easy", "medium", "hard"];
 </script>

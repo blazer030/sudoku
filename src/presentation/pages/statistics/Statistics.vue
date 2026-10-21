@@ -55,7 +55,7 @@
                             :size="20"
                             class="text-foreground-muted"
                         />
-                        <span class="text-base font-medium text-foreground">Easy</span>
+                        <span class="text-base font-medium text-foreground">{{ difficultyLabel("easy") }}</span>
                     </div>
                     <span class="text-base font-semibold text-primary font-mono">
                         {{ formatBestTime(stats.easy.bestTime) }}
@@ -70,7 +70,7 @@
                             :size="20"
                             class="text-foreground-muted"
                         />
-                        <span class="text-base font-medium text-foreground">Medium</span>
+                        <span class="text-base font-medium text-foreground">{{ difficultyLabel("medium") }}</span>
                     </div>
                     <span class="text-base font-semibold text-primary font-mono">
                         {{ formatBestTime(stats.medium.bestTime) }}
@@ -85,7 +85,7 @@
                             :size="20"
                             class="text-foreground-muted"
                         />
-                        <span class="text-base font-medium text-foreground">Hard</span>
+                        <span class="text-base font-medium text-foreground">{{ difficultyLabel("hard") }}</span>
                     </div>
                     <span class="text-base font-semibold text-primary font-mono">
                         {{ formatBestTime(stats.hard.bestTime) }}
@@ -205,8 +205,7 @@ import { useStatisticsStore } from "@/stores/statisticsStore";
 import type { GameResult } from "@/application/statistics/StatisticsRepository";
 import { formatTime } from "@/utils/formatTime";
 import { formatDate } from "@/utils/formatDate";
-import { type Difficulty } from "@/domain";
-import { DIFFICULTY_LABELS } from "@/presentation/labels/difficultyLabels";
+import { useDifficultyLabel } from "@/presentation/labels/difficultyLabels";
 import ClearRecordsDialog from "@/presentation/pages/statistics/ClearRecordsDialog.vue";
 import { provideClearRecordsDialog } from "@/presentation/pages/statistics/useClearRecordsDialog";
 
@@ -268,9 +267,7 @@ const formatBestTime = (seconds: number | null): string => {
     return formatTime(seconds);
 };
 
-const difficultyLabel = (difficulty: Difficulty): string => {
-    return DIFFICULTY_LABELS[difficulty];
-};
+const difficultyLabel = useDifficultyLabel();
 
 const openReview = (game: GameResult, displayIndex: number) => {
     if (!game.replay) return;

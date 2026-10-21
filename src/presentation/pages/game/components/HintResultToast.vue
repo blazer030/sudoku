@@ -9,7 +9,7 @@
                 Random reveal: Row {{ outcome.cell.row + 1 }}, Col {{ outcome.cell.column + 1 }} = {{ outcome.value }}
             </span>
             <span v-else-if="outcome.step">
-                {{ TECHNIQUE_LABELS[outcome.step.technique] }}:
+                {{ techniqueLabel(outcome.step.technique) }}:
                 Row {{ outcome.cell.row + 1 }}, Col {{ outcome.cell.column + 1 }} = {{ outcome.value }}
             </span>
         </div>
@@ -18,11 +18,13 @@
 
 <script setup lang="ts">
 import type { RevealOutcome } from "@/domain/game/RevealOutcome";
-import { TECHNIQUE_LABELS } from "@/presentation/labels/techniqueLabels";
+import { useTechniqueLabel } from "@/presentation/labels/techniqueLabels";
 
 defineProps<{
     outcome: RevealOutcome | null;
 }>();
+
+const techniqueLabel = useTechniqueLabel();
 </script>
 
 <style scoped>

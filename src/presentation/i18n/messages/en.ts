@@ -31,6 +31,31 @@ export const en = {
         about: "About",
         version: "Version",
     },
+    difficulty: { easy: "Easy", medium: "Medium", hard: "Hard" },
+    technique: {
+        nakedSingle: "Naked Single",
+        hiddenSingle: "Hidden Single",
+        nakedPair: "Naked Pair",
+        nakedTriple: "Naked Triple",
+        nakedQuad: "Naked Quad",
+        hiddenPair: "Hidden Pair",
+        hiddenTriple: "Hidden Triple",
+        hiddenQuad: "Hidden Quad",
+        pointing: "Pointing",
+        claiming: "Claiming",
+        xWing: "X-Wing",
+        swordfish: "Swordfish",
+        jellyfish: "Jellyfish",
+        xyWing: "XY-Wing",
+        wWing: "W-Wing",
+        xyzWing: "XYZ-Wing",
+        wxyzWing: "WXYZ-Wing",
+        xChain: "X-Chain",
+        xyChain: "XY-Chain",
+    },
+    position: {
+        cell: "Row {row}, Col {column} = {value}",
+    },
 };
 
 export type MessageSchema = typeof en;
