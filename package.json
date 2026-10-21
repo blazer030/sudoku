@@ -12,6 +12,7 @@
     "postinstall": "patch-package",
     "generate:icons": "npx tsx scripts/generate-pwa-icons.ts",
     "generate:launcher-icons": "npx tsx scripts/generate-launcher-icons.ts",
+    "generate:theme-css": "npx tsx scripts/generate-theme-css.ts",
     "prebuild": "npm run generate:icons",
     "android:sync": "cross-env VITE_BASE_URL=/ VITE_CAPACITOR=1 npm run build && npx cap sync android",
     "android:open": "npx cap open android",

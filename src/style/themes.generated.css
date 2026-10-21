@@ -1,0 +1,260 @@
+/* Generated from src/theme/palettes.ts by npm run generate:theme-css. Do not edit. */
+@theme static {
+    --color-background: #F5F4F1;
+    --color-card: #FFFFFF;
+    --color-border: #E5E4E1;
+    --color-foreground: #1A1918;
+    --color-foreground-secondary: #6D6C6A;
+    --color-foreground-muted: #9C9B99;
+    --color-primary: #3D8A5A;
+    --color-primary-hover: #347A4E;
+    --color-primary-light: #C8F0D8;
+    --color-accent: #D89575;
+    --color-highlight: #E8F8EE;
+    --color-cell-clue: #F7F6F3;
+    --color-danger: #C75A4A;
+    --color-danger-hover: #B34E40;
+    --color-error: #D08068;
+    --color-error-light: #FDEAE6;
+    --color-shadow: #1A1918;
+}
+
+:root[data-style="minimal"][data-color-theme="green"] {
+    --color-background: #F5F4F1;
+    --color-card: #FFFFFF;
+    --color-border: #E5E4E1;
+    --color-foreground: #1A1918;
+    --color-foreground-secondary: #6D6C6A;
+    --color-foreground-muted: #9C9B99;
+    --color-primary: #3D8A5A;
+    --color-primary-hover: #347A4E;
+    --color-primary-light: #C8F0D8;
+    --color-accent: #D89575;
+    --color-highlight: #E8F8EE;
+    --color-cell-clue: #F7F6F3;
+    --color-danger: #C75A4A;
+    --color-danger-hover: #B34E40;
+    --color-error: #D08068;
+    --color-error-light: #FDEAE6;
+    --color-shadow: #1A1918;
+}
+
+:root.dark[data-style="minimal"][data-color-theme="green"] {
+    --color-background: #F5F4F1;
+    --color-card: #FFFFFF;
+    --color-border: #E5E4E1;
+    --color-foreground: #1A1918;
+    --color-foreground-secondary: #6D6C6A;
+    --color-foreground-muted: #9C9B99;
+    --color-primary: #3D8A5A;
+    --color-primary-hover: #347A4E;
+    --color-primary-light: #C8F0D8;
+    --color-accent: #D89575;
+    --color-highlight: #E8F8EE;
+    --color-cell-clue: #F7F6F3;
+    --color-danger: #C75A4A;
+    --color-danger-hover: #B34E40;
+    --color-error: #D08068;
+    --color-error-light: #FDEAE6;
+    --color-shadow: #1A1918;
+}
+
+:root[data-style="minimal"][data-color-theme="blue"] {
+    --color-background: #F5F4F1;
+    --color-card: #FFFFFF;
+    --color-border: #E5E4E1;
+    --color-foreground: #1A1918;
+    --color-foreground-secondary: #6D6C6A;
+    --color-foreground-muted: #9C9B99;
+    --color-primary: #4A7AB5;
+    --color-primary-hover: #3E6A9E;
+    --color-primary-light: #D0E4F7;
+    --color-accent: #C49A5C;
+    --color-highlight: #E4EFF9;
+    --color-cell-clue: #F7F6F3;
+    --color-danger: #C75A4A;
+    --color-danger-hover: #B34E40;
+    --color-error: #D08068;
+    --color-error-light: #FDEAE6;
+    --color-shadow: #1A1918;
+}
+
+:root.dark[data-style="minimal"][data-color-theme="blue"] {
+    --color-background: #F5F4F1;
+    --color-card: #FFFFFF;
+    --color-border: #E5E4E1;
+    --color-foreground: #1A1918;
+    --color-foreground-secondary: #6D6C6A;
+    --color-foreground-muted: #9C9B99;
+    --color-primary: #4A7AB5;
+    --color-primary-hover: #3E6A9E;
+    --color-primary-light: #D0E4F7;
+    --color-accent: #C49A5C;
+    --color-highlight: #E4EFF9;
+    --color-cell-clue: #F7F6F3;
+    --color-danger: #C75A4A;
+    --color-danger-hover: #B34E40;
+    --color-error: #D08068;
+    --color-error-light: #FDEAE6;
+    --color-shadow: #1A1918;
+}
+
+:root[data-style="minimal"][data-color-theme="purple"] {
+    --color-background: #F5F4F1;
+    --color-card: #FFFFFF;
+    --color-border: #E5E4E1;
+    --color-foreground: #1A1918;
+    --color-foreground-secondary: #6D6C6A;
+    --color-foreground-muted: #9C9B99;
+    --color-primary: #7B5EA7;
+    --color-primary-hover: #6B5093;
+    --color-primary-light: #E4D8F0;
+    --color-accent: #5A9E8F;
+    --color-highlight: #EFE8F6;
+    --color-cell-clue: #F7F6F3;
+    --color-danger: #C75A4A;
+    --color-danger-hover: #B34E40;
+    --color-error: #D08068;
+    --color-error-light: #FDEAE6;
+    --color-shadow: #1A1918;
+}
+
+:root.dark[data-style="minimal"][data-color-theme="purple"] {
+    --color-background: #F5F4F1;
+    --color-card: #FFFFFF;
+    --color-border: #E5E4E1;
+    --color-foreground: #1A1918;
+    --color-foreground-secondary: #6D6C6A;
+    --color-foreground-muted: #9C9B99;
+    --color-primary: #7B5EA7;
+    --color-primary-hover: #6B5093;
+    --color-primary-light: #E4D8F0;
+    --color-accent: #5A9E8F;
+    --color-highlight: #EFE8F6;
+    --color-cell-clue: #F7F6F3;
+    --color-danger: #C75A4A;
+    --color-danger-hover: #B34E40;
+    --color-error: #D08068;
+    --color-error-light: #FDEAE6;
+    --color-shadow: #1A1918;
+}
+
+:root[data-style="minimal"][data-color-theme="orange"] {
+    --color-background: #F5F4F1;
+    --color-card: #FFFFFF;
+    --color-border: #E5E4E1;
+    --color-foreground: #1A1918;
+    --color-foreground-secondary: #6D6C6A;
+    --color-foreground-muted: #9C9B99;
+    --color-primary: #C08040;
+    --color-primary-hover: #A87038;
+    --color-primary-light: #F5E0C8;
+    --color-accent: #6888A5;
+    --color-highlight: #F9F0E4;
+    --color-cell-clue: #F7F6F3;
+    --color-danger: #C75A4A;
+    --color-danger-hover: #B34E40;
+    --color-error: #D08068;
+    --color-error-light: #FDEAE6;
+    --color-shadow: #1A1918;
+}
+
+:root.dark[data-style="minimal"][data-color-theme="orange"] {
+    --color-background: #F5F4F1;
+    --color-card: #FFFFFF;
+    --color-border: #E5E4E1;
+    --color-foreground: #1A1918;
+    --color-foreground-secondary: #6D6C6A;
+    --color-foreground-muted: #9C9B99;
+    --color-primary: #C08040;
+    --color-primary-hover: #A87038;
+    --color-primary-light: #F5E0C8;
+    --color-accent: #6888A5;
+    --color-highlight: #F9F0E4;
+    --color-cell-clue: #F7F6F3;
+    --color-danger: #C75A4A;
+    --color-danger-hover: #B34E40;
+    --color-error: #D08068;
+    --color-error-light: #FDEAE6;
+    --color-shadow: #1A1918;
+}
+
+:root[data-style="minimal"][data-color-theme="pink"] {
+    --color-background: #F5F4F1;
+    --color-card: #FFFFFF;
+    --color-border: #E5E4E1;
+    --color-foreground: #1A1918;
+    --color-foreground-secondary: #6D6C6A;
+    --color-foreground-muted: #9C9B99;
+    --color-primary: #B5607A;
+    --color-primary-hover: #A0536B;
+    --color-primary-light: #F7D4DE;
+    --color-accent: #5A9A8A;
+    --color-highlight: #FBEAEF;
+    --color-cell-clue: #F7F6F3;
+    --color-danger: #C75A4A;
+    --color-danger-hover: #B34E40;
+    --color-error: #D08068;
+    --color-error-light: #FDEAE6;
+    --color-shadow: #1A1918;
+}
+
+:root.dark[data-style="minimal"][data-color-theme="pink"] {
+    --color-background: #F5F4F1;
+    --color-card: #FFFFFF;
+    --color-border: #E5E4E1;
+    --color-foreground: #1A1918;
+    --color-foreground-secondary: #6D6C6A;
+    --color-foreground-muted: #9C9B99;
+    --color-primary: #B5607A;
+    --color-primary-hover: #A0536B;
+    --color-primary-light: #F7D4DE;
+    --color-accent: #5A9A8A;
+    --color-highlight: #FBEAEF;
+    --color-cell-clue: #F7F6F3;
+    --color-danger: #C75A4A;
+    --color-danger-hover: #B34E40;
+    --color-error: #D08068;
+    --color-error-light: #FDEAE6;
+    --color-shadow: #1A1918;
+}
+
+:root[data-style="minimal"][data-color-theme="teal"] {
+    --color-background: #F5F4F1;
+    --color-card: #FFFFFF;
+    --color-border: #E5E4E1;
+    --color-foreground: #1A1918;
+    --color-foreground-secondary: #6D6C6A;
+    --color-foreground-muted: #9C9B99;
+    --color-primary: #4A9A9A;
+    --color-primary-hover: #3E8686;
+    --color-primary-light: #D0F0F0;
+    --color-accent: #C07A6A;
+    --color-highlight: #E4F4F4;
+    --color-cell-clue: #F7F6F3;
+    --color-danger: #C75A4A;
+    --color-danger-hover: #B34E40;
+    --color-error: #D08068;
+    --color-error-light: #FDEAE6;
+    --color-shadow: #1A1918;
+}
+
+:root.dark[data-style="minimal"][data-color-theme="teal"] {
+    --color-background: #F5F4F1;
+    --color-card: #FFFFFF;
+    --color-border: #E5E4E1;
+    --color-foreground: #1A1918;
+    --color-foreground-secondary: #6D6C6A;
+    --color-foreground-muted: #9C9B99;
+    --color-primary: #4A9A9A;
+    --color-primary-hover: #3E8686;
+    --color-primary-light: #D0F0F0;
+    --color-accent: #C07A6A;
+    --color-highlight: #E4F4F4;
+    --color-cell-clue: #F7F6F3;
+    --color-danger: #C75A4A;
+    --color-danger-hover: #B34E40;
+    --color-error: #D08068;
+    --color-error-light: #FDEAE6;
+    --color-shadow: #1A1918;
+}

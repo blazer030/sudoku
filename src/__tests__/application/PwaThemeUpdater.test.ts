@@ -1,4 +1,5 @@
 import { updateMetaThemeColor, updateFavicon, updateManifestLink, updateAppleTouchIcon } from "@/application/PwaThemeUpdater";
+import { getPalette } from "@/theme/palettes";
 
 describe("PwaThemeUpdater", () => {
     describe("updateMetaThemeColor", () => {
@@ -14,7 +15,7 @@ describe("PwaThemeUpdater", () => {
 
             updateMetaThemeColor("blue");
 
-            expect(meta.content).toBe("#4A7AB5");
+            expect(meta.content).toBe(getPalette("minimal", "blue", "light").primary);
         });
 
         it("should not throw when meta theme-color element is missing", () => {

@@ -20,6 +20,8 @@ export const useSettingsStore = defineStore("settings", () => {
     const applyColorTheme = () => {
         const id = colorTheme.value;
         document.documentElement.dataset.colorTheme = id;
+        // The generated theme blocks are keyed by style as well as theme
+        document.documentElement.dataset.style = style.value;
         updateMetaThemeColor(id);
         updateFavicon(id);
         updateManifestLink(id);
