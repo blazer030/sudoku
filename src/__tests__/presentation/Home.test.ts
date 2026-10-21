@@ -363,7 +363,7 @@ describe("Home", () => {
 
         await button.trigger("pointerdown");
 
-        expect(button.classes()).toContain("is-pressed");
+        expect(button.attributes()).toHaveProperty("data-pressed");
         window.dispatchEvent(new Event("pointerup"));
     });
 });

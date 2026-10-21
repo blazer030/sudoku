@@ -1395,11 +1395,11 @@ describe("Game", () => {
 
             pressDown(digitKey.element);
             await nextTick();
-            expect(digitKey.classes()).toContain("is-pressed");
-            expect(digitKey.classes()).toContain("press-motion");
+            expect(digitKey.attributes()).toHaveProperty("data-pressed");
+            expect(digitKey.attributes()).toHaveProperty("data-press-motion");
 
             releaseOnWindow();
-            expect(digitKey.classes()).toContain("press-bounce-release");
+            expect(digitKey.attributes()).toHaveProperty("data-press-bounce");
         });
 
         it("should tint a cell without motion", () => {
@@ -1408,8 +1408,8 @@ describe("Game", () => {
 
             pressDown(cell.element);
 
-            expect(cell.classes()).toContain("is-pressed");
-            expect(cell.classes()).not.toContain("press-motion");
+            expect(cell.attributes()).toHaveProperty("data-pressed");
+            expect(cell.attributes()).not.toHaveProperty("data-press-motion");
         });
 
         it("should still long-press a cell with press feedback", async () => {

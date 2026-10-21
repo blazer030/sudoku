@@ -148,21 +148,21 @@
   animation: hint-reveal-glow 1000ms ease-out;
 }
 
-/* Press feedback — minimal style. vPress adds the classes; input never waits for them.
+/* Press feedback — minimal style. vPress sets the data attributes; input never waits for them.
    The overlay is a colour change, so it stays on under reduced motion. */
-[data-style="minimal"] .is-pressed {
+[data-style="minimal"] [data-pressed] {
     --press-overlay: color-mix(in srgb, var(--color-foreground) 8%, transparent);
     background-image: linear-gradient(var(--press-overlay), var(--press-overlay));
 }
 
 /* Outranks Tailwind's transition-all, so release springs back on an elastic curve */
-[data-style="minimal"] .press-motion {
+[data-style="minimal"] [data-press-motion] {
     transition-property: transform, background-color, color, box-shadow, opacity;
     transition-duration: 220ms;
     transition-timing-function: cubic-bezier(0.34, 1.4, 0.64, 1);
 }
 
-[data-style="minimal"] .press-motion.is-pressed {
+[data-style="minimal"] [data-press-motion][data-pressed] {
     transform: scale(0.96);
     transition-duration: 90ms;
     transition-timing-function: ease-out;
@@ -175,7 +175,7 @@
     100% { transform: scale(1); }
 }
 
-[data-style="minimal"] .press-bounce-release {
+[data-style="minimal"] [data-press-bounce] {
     animation: press-bounce 260ms ease-out;
 }
 
@@ -189,10 +189,10 @@
         transition: none;
     }
 
-    [data-style="minimal"] .is-pressed,
-    [data-style="minimal"] .press-motion,
-    [data-style="minimal"] .press-motion.is-pressed,
-    [data-style="minimal"] .press-bounce-release {
+    [data-style="minimal"] [data-pressed],
+    [data-style="minimal"] [data-press-motion],
+    [data-style="minimal"] [data-press-motion][data-pressed],
+    [data-style="minimal"] [data-press-bounce] {
         transform: none;
         animation: none;
     }

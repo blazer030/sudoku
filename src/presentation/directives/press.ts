@@ -4,9 +4,11 @@ import { prefersReducedMotion } from "@/presentation/composables/prefersReducedM
 /** scale: shrink while held; bounce: scale plus a small bounce on release; tint: colour only. */
 export type PressFeedback = "scale" | "bounce" | "tint";
 
-const PRESSED_CLASS = "is-pressed";
-const MOTION_CLASS = "press-motion";
-const BOUNCE_RELEASE_CLASS = "press-bounce-release";
+// Data attributes rather than classes: Vue rewrites the class attribute whenever a
+// bound :class changes, which would drop the press state mid-press or mid-bounce.
+const PRESSED_ATTRIBUTE = "data-pressed";
+const MOTION_ATTRIBUTE = "data-press-motion";
+const BOUNCE_ATTRIBUTE = "data-press-bounce";
 
 interface PressBinding {
     onPointerdown: (event: PointerEvent) => void;
@@ -19,8 +21,8 @@ const isDisabled = (element: HTMLElement): boolean =>
     element.matches(":disabled") || element.getAttribute("aria-disabled") === "true";
 
 /**
- * Press feedback for the minimal style: classes go on at pointerdown and come off on
- * release or cancel anywhere. It only adds classes, so input never waits for it.
+ * Press feedback for the minimal style: state goes on at pointerdown and comes off on
+ * release or cancel anywhere. It only sets attributes, so input never waits for it.
  */
 export const vPress: Directive<HTMLElement, undefined, string, PressFeedback> = {
     mounted(element, binding) {
@@ -28,14 +30,14 @@ export const vPress: Directive<HTMLElement, undefined, string, PressFeedback> = 
         let withMotion = false;
 
         const clearBounce = () => {
-            element.classList.remove(BOUNCE_RELEASE_CLASS);
+            element.removeAttribute(BOUNCE_ATTRIBUTE);
         };
 
         const release = () => {
             stopWaitingForRelease();
-            element.classList.remove(PRESSED_CLASS);
+            element.removeAttribute(PRESSED_ATTRIBUTE);
             if (feedback === "bounce" && withMotion) {
-                element.classList.add(BOUNCE_RELEASE_CLASS);
+                element.setAttribute(BOUNCE_ATTRIBUTE, "");
                 element.addEventListener("animationend", clearBounce, { once: true });
             }
         };
@@ -51,8 +53,8 @@ export const vPress: Directive<HTMLElement, undefined, string, PressFeedback> = 
             stopWaitingForRelease();
             clearBounce();
             withMotion = feedback !== "tint" && !prefersReducedMotion();
-            element.classList.toggle(MOTION_CLASS, withMotion);
-            element.classList.add(PRESSED_CLASS);
+            element.toggleAttribute(MOTION_ATTRIBUTE, withMotion);
+            element.setAttribute(PRESSED_ATTRIBUTE, "");
             window.addEventListener("pointerup", release);
             window.addEventListener("pointercancel", release);
         };
