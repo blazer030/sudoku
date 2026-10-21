@@ -34,6 +34,19 @@ describe("safe area", () => {
         }
     });
 
+    it("should scroll a page taller than the safe area inside the padded root", () => {
+        const page = { template: '<div data-testid="page" />' };
+        const router = createRouter({ history: createMemoryHistory(), routes: [{ path: "/", component: page }] });
+        const wrapper = mount(App, { global: { plugins: [router] } });
+        const scroller = wrapper.find('[data-testid="page-scroller"]');
+
+        // The scroller fills the root's padded box and clips there, so the last row of a tall
+        // page scrolls up to the bottom inset instead of running under the navigation bar
+        expect(scroller.element.parentElement).toBe(wrapper.element);
+        expect(scroller.classes()).toEqual(expect.arrayContaining(["h-full", "overflow-y-auto"]));
+        expect(wrapper.classes()).not.toContain("overflow-y-auto");
+    });
+
     it("should size pages to the padded root instead of the whole viewport", () => {
         const offenders = collectVueFiles("src/presentation/pages").filter(path => /\bh-(?:dvh|screen)\b/.test(readFileSync(path, "utf8")));
 
