@@ -297,8 +297,8 @@ const dotClass = (index: number): string => {
 }
 
 .hint-explanation-fade {
-    /* The mask only reads alpha */
-    mask-image: linear-gradient(to bottom, black calc(100% - 1.5rem), transparent);
+    /* The mask only reads alpha, so any opaque token works */
+    mask-image: linear-gradient(to bottom, var(--color-foreground) calc(100% - 1.5rem), transparent);
 }
 
 .hint-step-enter-active,
