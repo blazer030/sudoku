@@ -148,6 +148,47 @@
   animation: hint-reveal-glow 1000ms ease-out;
 }
 
+/* Press feedback — minimal style. vPress adds the classes; input never waits for them.
+   The overlay is a colour change, so it stays on under reduced motion. */
+[data-style="minimal"] .is-pressed {
+    --press-overlay: color-mix(in srgb, var(--color-foreground) 8%, transparent);
+    background-image: linear-gradient(var(--press-overlay), var(--press-overlay));
+}
+
+/* Outranks Tailwind's transition-all, so release springs back on an elastic curve */
+[data-style="minimal"] .press-motion {
+    transition-property: transform, background-color, color, box-shadow, opacity;
+    transition-duration: 220ms;
+    transition-timing-function: cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+
+[data-style="minimal"] .press-motion.is-pressed {
+    transform: scale(0.96);
+    transition-duration: 90ms;
+    transition-timing-function: ease-out;
+}
+
+@keyframes press-bounce {
+    0% { transform: scale(0.96); }
+    45% { transform: scale(1.04); }
+    75% { transform: scale(0.99); }
+    100% { transform: scale(1); }
+}
+
+[data-style="minimal"] .press-bounce-release {
+    animation: press-bounce 260ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    [data-style="minimal"] .is-pressed,
+    [data-style="minimal"] .press-motion,
+    [data-style="minimal"] .press-motion.is-pressed,
+    [data-style="minimal"] .press-bounce-release {
+        transform: none;
+        animation: none;
+    }
+}
+
 /* Subtle, thin scrollbars so the centered max-w-sm layout doesn't get
    a chunky default scrollbar floating in the middle of wide viewports. */
 :root {
