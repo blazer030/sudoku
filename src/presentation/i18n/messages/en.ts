@@ -6,6 +6,7 @@ export const en = {
     common: {
         back: "Back",
         cancel: "Cancel",
+        giveUpConsequence: "Giving up counts as an unfinished game and lowers your win rate.",
     },
     changelog: {
         title: "Changelog",
@@ -113,7 +114,7 @@ export const en = {
             title: "Leave Game?",
             message: "Do you want to save your current progress before leaving?",
             saveAndLeave: "Save & Leave",
-            giveUpAndLeave: "Give Up & Leave",
+            giveUp: "Give Up This Game",
         },
         complete: {
             title: "Congratulations!",

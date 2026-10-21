@@ -4,6 +4,7 @@ export const zhHant: MessageSchema = {
     common: {
         back: "返回",
         cancel: "取消",
+        giveUpConsequence: "放棄會記為一場未完成，會影響勝率",
     },
     changelog: {
         title: "更新日誌",
@@ -111,7 +112,7 @@ export const zhHant: MessageSchema = {
             title: "離開遊戲？",
             message: "離開前要儲存目前的進度嗎？",
             saveAndLeave: "儲存並離開",
-            giveUpAndLeave: "放棄並離開",
+            giveUp: "放棄這局",
         },
         complete: {
             title: "恭喜過關！",

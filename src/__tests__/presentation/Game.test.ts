@@ -1402,6 +1402,39 @@ describe("Game", () => {
         });
     });
 
+    describe("leave dialog", () => {
+        const openLeaveDialog = async () => {
+            const wrapper = mountGame();
+            await wrapper.find("[data-testid='back-button']").trigger("click");
+            return wrapper;
+        };
+
+        it("should make saving the primary choice and giving up a quiet text button", async () => {
+            const wrapper = await openLeaveDialog();
+
+            expect(wrapper.find("[data-testid='save-and-leave-button']").classes()).toContain("bg-primary");
+            const giveUp = wrapper.find("[data-testid='give-up-and-leave-button']");
+            expect(giveUp.text()).toBe("Give Up This Game");
+            expect(giveUp.classes()).toContain("text-danger");
+            expect(giveUp.classes()).not.toContain("bg-danger");
+        });
+
+        it("should spell out what giving up costs", async () => {
+            const wrapper = await openLeaveDialog();
+
+            expect(wrapper.find("[data-testid='leave-give-up-note']").text()).toBe("Giving up counts as an unfinished game and lowers your win rate.");
+        });
+
+        it("should show the give-up choice and its cost in Traditional Chinese", async () => {
+            const wrapper = await openLeaveDialog();
+            i18n.global.locale.value = "zh-Hant";
+            await nextTick();
+
+            expect(wrapper.find("[data-testid='give-up-and-leave-button']").text()).toBe("放棄這局");
+            expect(wrapper.find("[data-testid='leave-give-up-note']").text()).toBe("放棄會記為一場未完成，會影響勝率");
+        });
+    });
+
     describe("long-press tip", () => {
         const LONG_PRESS_TIP = "Long-press a cell to toggle a note directly (in note mode, it fills the digit)";
 

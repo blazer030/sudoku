@@ -36,23 +36,31 @@
                         <span class="text-base font-semibold text-on-primary">{{ t("game.leave.saveAndLeave") }}</span>
                     </button>
 
-                    <button
-                        v-press
-                        class="w-full h-[52px] rounded-button bg-danger flex items-center justify-center gap-2 shadow-danger cursor-pointer transition-all duration-200 hover:bg-danger-hover hover:shadow-primary-lg"
-                        data-testid="give-up-and-leave-button"
-                        @click="close('giveUp')"
-                    >
-                        <span class="text-base font-semibold text-on-danger">{{ t("game.leave.giveUpAndLeave") }}</span>
-                    </button>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button
+                            v-press
+                            class="h-11 flex items-center justify-center cursor-pointer rounded-button text-foreground text-[15px] font-semibold transition-all duration-200 hover:bg-foreground/5"
+                            data-testid="leave-cancel-button"
+                            @click="close('cancel')"
+                        >
+                            {{ t("common.cancel") }}
+                        </button>
+                        <button
+                            v-press
+                            class="h-11 flex items-center justify-center cursor-pointer rounded-button text-danger text-[15px] font-semibold transition-all duration-200 hover:bg-foreground/5"
+                            data-testid="give-up-and-leave-button"
+                            @click="close('giveUp')"
+                        >
+                            {{ t("game.leave.giveUp") }}
+                        </button>
+                    </div>
 
-                    <button
-                        v-press
-                        class="w-full h-[44px] flex items-center justify-center cursor-pointer rounded-button transition-all duration-200 hover:bg-foreground/5"
-                        data-testid="leave-cancel-button"
-                        @click="close('cancel')"
+                    <p
+                        class="text-[13px] text-foreground-secondary text-center"
+                        data-testid="leave-give-up-note"
                     >
-                        <span class="text-base font-semibold text-foreground">{{ t("common.cancel") }}</span>
-                    </button>
+                        {{ t("common.giveUpConsequence") }}
+                    </p>
                 </div>
             </div>
         </div>
