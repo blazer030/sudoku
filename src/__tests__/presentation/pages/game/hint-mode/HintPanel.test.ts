@@ -98,4 +98,16 @@ describe("HintPanel", () => {
         expect(wrapper.find("[data-testid='hint-step-counter']").text()).toBe("3 / 7");
         expect(wrapper.findAll("[data-testid^='hint-dot-']")).toHaveLength(0);
     });
+
+    it("should read the step counter out as a full sentence", async () => {
+        const wrapper = mountSteps(7, 2);
+
+        expect(wrapper.find("[data-testid='hint-step-counter']").attributes("aria-hidden")).toBe("true");
+        expect(wrapper.find("[data-testid='hint-step-counter-label']").text()).toBe("Step 3 of 7");
+
+        i18n.global.locale.value = "zh-Hant";
+        await nextTick();
+
+        expect(wrapper.find("[data-testid='hint-step-counter-label']").text()).toBe("第 3 步，共 7 步");
+    });
 });

@@ -170,6 +170,7 @@ export const en = {
             previousStep: "Previous step",
             nextStep: "Next step",
             stepCounter: "Step {current} of {total}",
+            stepCount: "{current} / {total}",
             fill: "Fill in {digit}",
             notesHidden: "Board candidates shown; your notes are hidden for now",
         },

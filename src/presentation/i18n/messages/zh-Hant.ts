@@ -168,6 +168,7 @@ export const zhHant: MessageSchema = {
             previousStep: "上一步",
             nextStep: "下一步",
             stepCounter: "第 {current} 步，共 {total} 步",
+            stepCount: "{current} / {total}",
             fill: "{digit} 填入答案",
             notesHidden: "顯示盤面算出的候選數，你的筆記暫時隱藏",
         },

@@ -79,13 +79,21 @@
                     >
                         <ChevronLeft :size="20" />
                     </button>
-                    <span
-                        v-if="totalSteps > MAX_STEP_DOTS"
-                        class="min-w-11 text-center text-[13px] font-semibold tabular-nums text-foreground-secondary"
-                        data-testid="hint-step-counter"
-                    >
-                        {{ stepIndex + 1 }} / {{ totalSteps }}
-                    </span>
+                    <template v-if="totalSteps > MAX_STEP_DOTS">
+                        <span
+                            aria-hidden="true"
+                            class="min-w-11 text-center text-[13px] font-semibold tabular-nums text-foreground-secondary"
+                            data-testid="hint-step-counter"
+                        >
+                            {{ t("hintMode.panel.stepCount", { current: stepIndex + 1, total: totalSteps }) }}
+                        </span>
+                        <span
+                            class="sr-only"
+                            data-testid="hint-step-counter-label"
+                        >
+                            {{ t("hintMode.panel.stepCounter", { current: stepIndex + 1, total: totalSteps }) }}
+                        </span>
+                    </template>
                     <div
                         v-else
                         class="flex items-center gap-1 px-0.5"
