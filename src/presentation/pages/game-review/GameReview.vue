@@ -137,7 +137,8 @@ import { ROUTER_PATH } from "@/router";
 import { useStatisticsStore } from "@/stores/statisticsStore";
 import { formatTime } from "@/utils/formatTime";
 import { formatDate } from "@/utils/formatDate";
-import { type Difficulty, DifficultyLabels } from "@/domain";
+import { type Difficulty } from "@/domain";
+import { DIFFICULTY_LABELS } from "@/presentation/labels/difficultyLabels";
 import Cell from "@/presentation/pages/game/components/Cell.vue";
 import PlaybackControls from "@/presentation/components/playback/PlaybackControls.vue";
 import ProgressBar from "@/presentation/components/playback/ProgressBar.vue";
@@ -201,7 +202,7 @@ const isActiveCell = (row: number, column: number): boolean => {
     return step.row === row && step.column === column;
 };
 
-const difficultyLabel = (difficulty: Difficulty): string => DifficultyLabels[difficulty];
+const difficultyLabel = (difficulty: Difficulty): string => DIFFICULTY_LABELS[difficulty];
 
 const goBack = () => {
     void router.push(ROUTER_PATH.statistics);

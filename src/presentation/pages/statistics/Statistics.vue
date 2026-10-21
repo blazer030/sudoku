@@ -205,7 +205,8 @@ import { useStatisticsStore } from "@/stores/statisticsStore";
 import type { GameResult } from "@/application/statistics/StatisticsRepository";
 import { formatTime } from "@/utils/formatTime";
 import { formatDate } from "@/utils/formatDate";
-import { type Difficulty, DifficultyLabels } from "@/domain";
+import { type Difficulty } from "@/domain";
+import { DIFFICULTY_LABELS } from "@/presentation/labels/difficultyLabels";
 import ClearRecordsDialog from "@/presentation/pages/statistics/ClearRecordsDialog.vue";
 import { provideClearRecordsDialog } from "@/presentation/pages/statistics/useClearRecordsDialog";
 
@@ -268,7 +269,7 @@ const formatBestTime = (seconds: number | null): string => {
 };
 
 const difficultyLabel = (difficulty: Difficulty): string => {
-    return DifficultyLabels[difficulty];
+    return DIFFICULTY_LABELS[difficulty];
 };
 
 const openReview = (game: GameResult, displayIndex: number) => {

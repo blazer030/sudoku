@@ -3,7 +3,6 @@ import { SudokuSolver } from "@/domain/generator/SudokuSolver";
 import { DifficultyRater } from "@/domain/solver/DifficultyRater";
 
 export type Difficulty = "easy" | "medium" | "hard";
-export const DifficultyLabels: Record<Difficulty, string> = { easy: "Easy", medium: "Medium", hard: "Hard" };
 
 const MAX_DIFFICULTY_ATTEMPTS = 30;
 

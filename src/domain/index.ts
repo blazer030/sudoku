@@ -1,7 +1,7 @@
 export { BOARD_SIZE, BOX_SIZE, TOTAL_CELLS } from "@/domain/board/constants";
 export { PuzzleCell } from "@/domain/board/PuzzleCell";
 export { SudokuBoard } from "@/domain/board/SudokuBoard";
-export { SudokuGenerator, DifficultyLabels } from "@/domain/generator/SudokuGenerator";
+export { SudokuGenerator } from "@/domain/generator/SudokuGenerator";
 export type { Difficulty } from "@/domain/generator/SudokuGenerator";
 export { SudokuSolver } from "@/domain/generator/SudokuSolver";
 export { Sudoku } from "@/domain/game/Sudoku";

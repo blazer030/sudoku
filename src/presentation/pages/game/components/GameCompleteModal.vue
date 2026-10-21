@@ -75,7 +75,7 @@
 import { Trophy, Home } from "lucide-vue-next";
 import { useRouter } from "vue-router";
 import { formatTime } from "@/utils/formatTime";
-import { DifficultyLabels } from "@/domain";
+import { DIFFICULTY_LABELS } from "@/presentation/labels/difficultyLabels";
 import { computed } from "vue";
 import { useGameCompleteModal } from "@/presentation/pages/game/components/useGameCompleteModal";
 import FireworkCanvas from "@/presentation/pages/game/components/FireworkCanvas.vue";
@@ -83,7 +83,7 @@ import FireworkCanvas from "@/presentation/pages/game/components/FireworkCanvas.
 const router = useRouter();
 const { visible, params, close } = useGameCompleteModal();
 
-const difficultyLabel = computed(() => DifficultyLabels[params.value?.difficulty ?? "easy"]);
+const difficultyLabel = computed(() => DIFFICULTY_LABELS[params.value?.difficulty ?? "easy"]);
 
 const goHome = () => {
     router.back();
