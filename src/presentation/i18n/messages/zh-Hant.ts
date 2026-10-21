@@ -5,6 +5,9 @@ export const zhHant: MessageSchema = {
         back: "返回",
         cancel: "取消",
     },
+    changelog: {
+        title: "更新日誌",
+    },
     settings: {
         title: "設定",
         language: {

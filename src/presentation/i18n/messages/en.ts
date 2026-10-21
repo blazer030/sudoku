@@ -3,6 +3,9 @@ export const en = {
         back: "Back",
         cancel: "Cancel",
     },
+    changelog: {
+        title: "Changelog",
+    },
     settings: {
         title: "Settings",
         language: {

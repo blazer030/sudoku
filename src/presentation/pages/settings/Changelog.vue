@@ -10,9 +10,9 @@
                     :size="24"
                     class="text-foreground"
                 />
-                <span class="text-foreground text-base font-medium">Back</span>
+                <span class="text-foreground text-base font-medium">{{ t("common.back") }}</span>
             </button>
-            <span class="text-foreground text-lg font-semibold">Changelog</span>
+            <span class="text-foreground text-lg font-semibold">{{ t("changelog.title") }}</span>
             <div class="w-15" />
         </div>
 
@@ -29,7 +29,7 @@
                 </div>
                 <ul class="flex flex-col gap-1.5">
                     <li
-                        v-for="(change, index) in entry.changes"
+                        v-for="(change, index) in entry.changes[appLocale]"
                         :key="index"
                         class="text-foreground-muted text-[13px] leading-relaxed pl-3 relative before:absolute before:left-0 before:top-[0.5em] before:w-1 before:h-1 before:rounded-full before:bg-foreground-muted"
                     >
@@ -45,10 +45,15 @@
 
 <script lang="ts" setup>
 import { useRouter } from "vue-router";
+import { computed } from "vue";
+import { useI18n } from "vue-i18n";
+import type { AppLocale } from "@/application/SettingsStorage";
 import { ChevronLeft } from "lucide-vue-next";
 import { CHANGELOG } from "@/presentation/pages/settings/changelogData";
 
 const router = useRouter();
+const { t, locale } = useI18n();
+const appLocale = computed(() => locale.value as AppLocale);
 
 const goBack = () => {
     router.back();
