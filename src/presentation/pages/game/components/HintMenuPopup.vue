@@ -57,19 +57,6 @@
                     <span>{{ t("game.hints.checkConflicts") }}</span>
                 </button>
 
-                <button
-                    :disabled="!params?.canUseHint"
-                    class="hint-option"
-                    data-testid="hint-check-errors"
-                    @click="close('checkErrors')"
-                >
-                    <CircleAlert
-                        :size="20"
-                        class="text-foreground shrink-0"
-                    />
-                    <span>{{ t("game.hints.checkErrors") }}</span>
-                </button>
-
                 <div class="h-px bg-border mx-3" />
 
                 <button
@@ -92,7 +79,7 @@
 <script lang="ts" setup>
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
-import { CircleAlert, Eye, ScanSearch, Sparkles } from "lucide-vue-next";
+import { Eye, ScanSearch, Sparkles } from "lucide-vue-next";
 import { useHintMenu } from "@/presentation/pages/game/components/useHintMenu";
 
 const { t } = useI18n();

@@ -211,6 +211,38 @@
   animation: completion-flash 500ms ease-in-out;
 }
 
+/* The answer a Reveal Cell hint fills in grows past its size and settles back. */
+@keyframes hint-reveal-pop {
+  0% { transform: scale(0.3); opacity: 0; }
+  55% { transform: scale(1.35); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
+.animate-hint-reveal-pop {
+  animation: hint-reveal-pop 450ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-hint-reveal-pop {
+    animation: none;
+  }
+}
+
+/* The answer cell keeps the hint's highlight for a beat, then fades back, so the fill
+   reads clearly while the panel slides away. Defined after the completion flash so it
+   wins on the answer cell when the fill also completes a row, column or box.
+   It is only a colour change, so it stays on under reduced motion. */
+@keyframes hint-reveal-glow {
+  0%, 45% {
+    background-color: var(--color-primary-light);
+    box-shadow: inset 0 0 0 2px var(--color-primary);
+  }
+}
+
+.animate-hint-reveal-glow {
+  animation: hint-reveal-glow 1000ms ease-out;
+}
+
 /* Subtle, thin scrollbars so the centered max-w-sm layout doesn't get
    a chunky default scrollbar floating in the middle of wide viewports. */
 :root {

@@ -2,7 +2,9 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { SudokuBoard } from "@/domain/board/SudokuBoard";
 import { SudokuGenerator } from "@/domain/generator/SudokuGenerator";
 import { SudokuSolver } from "@/domain/generator/SudokuSolver";
+import { BoardState } from "@/domain/solver/BoardState";
 import { DifficultyRater } from "@/domain/solver/DifficultyRater";
+import { TechniqueSolver } from "@/domain/solver/TechniqueSolver";
 
 afterEach(() => {
     vi.restoreAllMocks();
@@ -11,6 +13,22 @@ afterEach(() => {
 const sudokuBoard = new SudokuBoard();
 const generator = new SudokuGenerator();
 const solver = new SudokuSolver();
+
+// Asks for the next reveal hint the way `Sudoku.planRevealHint` does, rebuilding the solver state
+// from the givens plus the cells filled so far, and fills its answer until the board is complete.
+const walkRevealHintsToCompletion = ({ puzzle, answer }: { puzzle: number[][]; answer: number[][] }) => {
+    const technique = new TechniqueSolver();
+    const board = puzzle.map(row => [...row]);
+    let remaining = board.flat().filter(cell => cell === 0).length;
+    while (remaining > 0) {
+        const steps = technique.stepsToNextAssignment(BoardState.fromPuzzle(board));
+        expect(steps.length).toBeGreaterThan(0);
+        const { cell, digit } = steps[steps.length - 1].assignments[0];
+        expect(digit).toBe(answer[cell.row][cell.column]);
+        board[cell.row][cell.column] = digit;
+        remaining--;
+    }
+};
 
 describe("SudokuGenerator", () => {
     it.skip("should generate different boards on multiple calls", () => {
@@ -84,15 +102,27 @@ describe("SudokuGenerator", () => {
         expect(puzzle).toHaveLength(9);
     });
 
-    it("should fall back to the last candidate when rater always rejects", () => {
-        const matchesSpy = vi.spyOn(DifficultyRater.prototype, "matches").mockReturnValue(false);
-        const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    it("should only fall back to a technique-solvable puzzle", () => {
+        vi.spyOn(DifficultyRater.prototype, "matches").mockReturnValue(false);
+        const rateSpy = vi.spyOn(DifficultyRater.prototype, "rate");
+        rateSpy.mockReturnValueOnce(null);
+        rateSpy.mockReturnValueOnce(null);
+        rateSpy.mockReturnValue("hard");
 
-        const localGenerator = new SudokuGenerator();
-        const { puzzle } = localGenerator.generatePuzzle("easy");
+        const { puzzle } = new SudokuGenerator().generatePuzzle("easy");
 
-        expect(matchesSpy.mock.calls.length).toBeGreaterThan(1);
-        expect(warnSpy).toHaveBeenCalled();
-        expect(puzzle).toHaveLength(9);
+        const solvableIndex = rateSpy.mock.results.findIndex(result => result.value !== null);
+        expect(solvableIndex).toBe(2);
+        expect(puzzle).toBe(rateSpy.mock.calls[solvableIndex][0]);
+    });
+
+    it.skip.each(["easy", "medium", "hard"] as const)("should keep every generated %s puzzle solvable step by step", { timeout: 180000 }, (difficulty) => {
+        for (let round = 0; round < 2; round++) {
+            walkRevealHintsToCompletion(generator.generatePuzzle(difficulty));
+        }
+    });
+
+    it("should keep a generated medium puzzle solvable one reveal hint at a time", { timeout: 30000 }, () => {
+        walkRevealHintsToCompletion(generator.generatePuzzle("medium"));
     });
 });

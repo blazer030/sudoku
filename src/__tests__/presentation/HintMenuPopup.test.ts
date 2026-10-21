@@ -20,12 +20,12 @@ describe("HintMenuPopup", () => {
         return mount(Host);
     };
 
-    it("should render 4 hint options", () => {
+    it("should render 3 hint options and no Check Errors", () => {
         const wrapper = mountPopup();
 
         expect(wrapper.find("[data-testid='hint-auto-notes']").exists()).toBe(true);
         expect(wrapper.find("[data-testid='hint-check-conflicts']").exists()).toBe(true);
-        expect(wrapper.find("[data-testid='hint-check-errors']").exists()).toBe(true);
+        expect(wrapper.find("[data-testid='hint-check-errors']").exists()).toBe(false);
         expect(wrapper.find("[data-testid='hint-reveal-cell']").exists()).toBe(true);
     });
 
@@ -36,7 +36,6 @@ describe("HintMenuPopup", () => {
 
         expect(wrapper.find("[data-testid='hint-auto-notes']").text()).toBe("自動筆記");
         expect(wrapper.find("[data-testid='hint-check-conflicts']").text()).toBe("檢查衝突");
-        expect(wrapper.find("[data-testid='hint-check-errors']").text()).toBe("檢查錯誤");
         expect(wrapper.find("[data-testid='hint-reveal-cell']").text()).toBe("揭示一格");
     });
 
@@ -62,7 +61,7 @@ describe("HintMenuPopup", () => {
     });
 
     it("should close popup when clicking each option", async () => {
-        const testCases = ["hint-auto-notes", "hint-check-conflicts", "hint-check-errors", "hint-reveal-cell"];
+        const testCases = ["hint-auto-notes", "hint-check-conflicts", "hint-reveal-cell"];
         for (const testId of testCases) {
             const wrapper = mountPopup();
             await wrapper.find(`[data-testid='${testId}']`).trigger("click");

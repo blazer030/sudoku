@@ -18,18 +18,19 @@ export class SudokuGenerator {
     }
 
     public generatePuzzle(difficulty: Difficulty): { puzzle: number[][], answer: number[][] } {
-        let lastCandidate = this.generateWithClueCount(difficulty);
-        if (this.rater.matches(lastCandidate.puzzle, difficulty)) {
-            return lastCandidate;
-        }
-        for (let attempt = 1; attempt < MAX_DIFFICULTY_ATTEMPTS; attempt++) {
-            lastCandidate = this.generateWithClueCount(difficulty);
-            if (this.rater.matches(lastCandidate.puzzle, difficulty)) {
-                return lastCandidate;
+        for (let attempt = 0; attempt < MAX_DIFFICULTY_ATTEMPTS; attempt++) {
+            const candidate = this.generateWithClueCount(difficulty);
+            if (this.rater.matches(candidate.puzzle, difficulty)) {
+                return candidate;
             }
         }
-        console.warn(`SudokuGenerator: falling back to last candidate after ${MAX_DIFFICULTY_ATTEMPTS} attempts for ${difficulty}`);
-        return lastCandidate;
+        // No candidate fit the difficulty: settle for any puzzle the techniques can still finish.
+        for (;;) {
+            const candidate = this.generateWithClueCount(difficulty);
+            if (this.rater.rate(candidate.puzzle) !== null) {
+                return candidate;
+            }
+        }
     }
 
     private generateWithClueCount(difficulty: Difficulty): { puzzle: number[][], answer: number[][] } {

@@ -4,12 +4,13 @@
             backgroundClass,
             positionClasses,
             flashing ? 'animate-completion-flash' : '',
+            popping ? 'animate-hint-reveal-glow' : '',
         ]"
         class="flex justify-center items-center flex-1 aspect-square"
     >
         <div
             v-if="value !== 0"
-            :class="[valueTextColorClass, valueFontWeightClass, 'text-[22px]']"
+            :class="[valueTextColorClass, valueFontWeightClass, popping ? 'animate-hint-reveal-pop' : '', 'text-[22px]']"
             data-testid="cell-value"
         >
             {{ value }}
@@ -25,8 +26,7 @@
             >
                 <span
                     v-if="notes.includes(noteDigit) || eliminatedDigits.includes(noteDigit)"
-                    :class="noteClass(noteDigit)"
-                    class="text-[clamp(8px,-0.49px+2.26vw,14px)]"
+                    :class="[noteClass(noteDigit), noteSizeClass]"
                     :data-testid="eliminatedDigits.includes(noteDigit) ? `eliminated-note-${noteDigit}` : undefined"
                 >
                     {{ noteDigit }}
@@ -39,7 +39,9 @@
 <script lang="ts" setup>
 import { computed } from "vue";
 
-export type CellVariant = "default" | "clue" | "selected" | "focus" | "scope" | "error" | "same-digit";
+export type CellVariant = "default" | "clue" | "selected" | "focus" | "scope" | "error" | "same-digit" | "pattern" | "answer" | "wrong";
+/** Player notes are muted; solver candidates are bold in the theme colour so they never pass for the player's own. */
+export type NoteTone = "player" | "solver";
 export type ValueTextColor = "normal" | "error" | "primary";
 export type ValueFontWeight = "semibold" | "medium";
 
@@ -54,6 +56,9 @@ const props = withDefaults(defineProps<{
     valueFontWeight?: ValueFontWeight;
     highlightedNote?: number | null;
     flashing?: boolean;
+    noteTone?: NoteTone;
+    emphasizedDigits?: number[];
+    popping?: boolean;
 }>(), {
     notes: () => [],
     eliminatedDigits: () => [],
@@ -62,6 +67,9 @@ const props = withDefaults(defineProps<{
     valueFontWeight: "semibold",
     highlightedNote: null,
     flashing: false,
+    noteTone: "player",
+    emphasizedDigits: () => [],
+    popping: false,
 });
 
 const VARIANT_BACKGROUNDS: Record<CellVariant, string> = {
@@ -72,6 +80,9 @@ const VARIANT_BACKGROUNDS: Record<CellVariant, string> = {
     scope: "bg-primary/15",
     error: "bg-error-light",
     "same-digit": "bg-highlight",
+    pattern: "bg-primary/30",
+    answer: "bg-primary-light ring-2 ring-inset ring-primary",
+    wrong: "bg-error-light ring-2 ring-inset ring-error",
 };
 
 const VALUE_TEXT_COLORS: Record<ValueTextColor, string> = {
@@ -91,13 +102,18 @@ const valueTextColorClass = computed(() => VALUE_TEXT_COLORS[props.valueTextColo
 
 const valueFontWeightClass = computed(() => VALUE_FONT_WEIGHTS[props.valueFontWeight]);
 
+const noteSizeClass = computed(() => (props.noteTone === "solver"
+    ? "text-[clamp(9.5px,-0.49px+2.7vw,15px)]"
+    : "text-[clamp(8px,-0.49px+2.26vw,14px)]"));
+
 const noteClass = (digit: number): string => {
     if (props.eliminatedDigits.includes(digit)) {
-        return "text-error strike-diagonal";
+        return props.noteTone === "solver" ? "text-error font-semibold strike-diagonal" : "text-error strike-diagonal";
     }
-    if (props.highlightedNote === digit) {
+    if (props.highlightedNote === digit || props.emphasizedDigits.includes(digit)) {
         return "aspect-square max-w-5 max-h-5 w-full rounded-full bg-primary text-white font-semibold flex items-center justify-center";
     }
+    if (props.noteTone === "solver") return "text-primary font-semibold";
     return "text-foreground-muted";
 };
 

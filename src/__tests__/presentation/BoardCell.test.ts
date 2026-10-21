@@ -106,4 +106,17 @@ describe("BoardCell", () => {
 
         expect(wrapper.classes()).toContain("animate-completion-flash");
     });
+
+    it("should glow the whole cell and pop the digit while popping", () => {
+        const wrapper = mountCell({ value: 5, popping: true });
+
+        expect(wrapper.classes()).toContain("animate-hint-reveal-glow");
+        expect(wrapper.find("[data-testid='cell-value']").classes()).toContain("animate-hint-reveal-pop");
+    });
+
+    it("should not glow when not popping", () => {
+        const wrapper = mountCell({ value: 5 });
+
+        expect(wrapper.classes()).not.toContain("animate-hint-reveal-glow");
+    });
 });

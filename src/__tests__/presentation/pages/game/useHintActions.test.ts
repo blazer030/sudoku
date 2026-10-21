@@ -4,8 +4,10 @@ import { mount } from "@vue/test-utils";
 import { Sudoku } from "@/domain/game/Sudoku";
 import { StepRecorder } from "@/domain/game/StepRecorder";
 import { PuzzleCell } from "@/domain/board/PuzzleCell";
+import type { RevealOutcome } from "@/domain/game/RevealOutcome";
 import type { AnalyticsService } from "@/application/analytics/AnalyticsService";
 import type { HintAction } from "@/presentation/pages/game/components/useHintMenu";
+import { createKnownSudoku } from "@/__tests__/fixtures/knownPuzzle";
 
 const openHintDialog = vi.fn();
 
@@ -48,11 +50,12 @@ type HintApi = ReturnType<typeof useHintActions>;
 interface HarnessParts {
     sudoku?: Sudoku;
     stepRecorder?: StepRecorder;
+    onHintReveal?: (outcome: RevealOutcome) => void;
 }
 
 const mountHintHarness = (
     analytics: AnalyticsService,
-    { sudoku = buildPartialSudoku(), stepRecorder = new StepRecorder() }: HarnessParts = {},
+    { sudoku = buildPartialSudoku(), stepRecorder = new StepRecorder(), onHintReveal }: HarnessParts = {},
 ) => {
     const captured: { api: HintApi | undefined } = { api: undefined };
     const Harness = defineComponent({
@@ -60,7 +63,9 @@ const mountHintHarness = (
             captured.api = useHintActions({
                 sudoku,
                 stepRecorder,
+                autoRemoveNotes: () => true,
                 onRevealComplete: () => { /* noop */ },
+                onHintReveal,
                 analytics,
             });
             return () => null;
@@ -81,7 +86,6 @@ describe("useHintActions — analytics", () => {
     it.each([
         ["autoNotes" as const,       "auto_notes"],
         ["checkConflicts" as const,  "check_conflicts"],
-        ["checkErrors" as const,     "check_errors"],
         ["revealCell" as const,      "reveal_cell"],
     ])("emits hint_used with hint_type=%s -> %s", async (action, hintType) => {
         const logEvent = vi.fn().mockResolvedValue(undefined);
@@ -109,5 +113,58 @@ describe("useHintActions — step recording", () => {
         expect(sudoku.hintTracker.recordedUsed).toBe(0);
         expect(stepRecorder.steps).toHaveLength(1);
         expect(stepRecorder.steps[0].action).toBe("autoNotes");
+    });
+});
+
+describe("useHintActions — reveal cell", () => {
+    it("does not spend a hint when the puzzle is already solved", async () => {
+        openHintDialog.mockReset();
+        openHintDialog.mockResolvedValue("revealCell");
+        const logEvent = vi.fn().mockResolvedValue(undefined);
+        const sudoku = createKnownSudoku();
+        vi.spyOn(sudoku, "planRevealHint").mockReturnValue({ kind: "solved" });
+        const api = mountHintHarness({ logEvent }, { sudoku });
+
+        await api.openHintMenu();
+
+        expect(sudoku.hintTracker.totalUsed).toBe(0);
+        expect(logEvent).not.toHaveBeenCalled();
+        expect(api.hintMode.active.value).toBe(false);
+    });
+
+    it("falls back to a random reveal when no technique applies", async () => {
+        openHintDialog.mockReset();
+        openHintDialog.mockResolvedValue("revealCell");
+        const sudoku = createKnownSudoku();
+        vi.spyOn(sudoku, "planRevealHint").mockReturnValue({ kind: "noTechnique" });
+        const onHintReveal = vi.fn();
+        const api = mountHintHarness({ logEvent: vi.fn().mockResolvedValue(undefined) }, { sudoku, onHintReveal });
+
+        await api.openHintMenu();
+
+        expect(api.hintMode.active.value).toBe(false);
+        expect(sudoku.hintTracker.totalUsed).toBe(1);
+        expect(onHintReveal).toHaveBeenCalledTimes(1);
+        const [outcome] = onHintReveal.mock.calls[0] as [RevealOutcome];
+        expect(outcome.value).toBe(sudoku.answer[outcome.cell.row][outcome.cell.column]);
+    });
+
+    it("enters hint mode, spends one hint and logs it once without touching the board", async () => {
+        openHintDialog.mockReset();
+        openHintDialog.mockResolvedValue("revealCell");
+        const logEvent = vi.fn().mockResolvedValue(undefined);
+        const sudoku = createKnownSudoku();
+        const stepRecorder = new StepRecorder();
+        const api = mountHintHarness({ logEvent }, { sudoku, stepRecorder });
+
+        await api.openHintMenu();
+        await api.openHintMenu();
+
+        expect(api.hintMode.active.value).toBe(true);
+        expect(sudoku.hintTracker.totalUsed).toBe(1);
+        expect(openHintDialog).toHaveBeenCalledTimes(1);
+        expect(logEvent).toHaveBeenCalledTimes(1);
+        expect(logEvent).toHaveBeenCalledWith({ name: "hint_used", hint_type: "reveal_cell" });
+        expect(stepRecorder.steps).toHaveLength(0);
     });
 });

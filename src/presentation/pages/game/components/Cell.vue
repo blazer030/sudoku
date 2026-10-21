@@ -9,7 +9,11 @@
         :value-font-weight="valueFontWeight"
         :highlighted-note="highlightedNote"
         :flashing="flashing"
-        :class="[puzzleCell.isClue ? '' : 'cursor-pointer', 'select-none [-webkit-touch-callout:none]']"
+        :note-tone="hint?.candidates ? 'solver' : 'player'"
+        :eliminated-digits="hint?.eliminated ?? []"
+        :emphasized-digits="hint?.emphasized ?? []"
+        :popping="revealed"
+        :class="[interactionClass, 'select-none [-webkit-touch-callout:none]']"
         @click="handleClick"
         @contextmenu.prevent
         @pointerdown="longPress.onPointerdown"
@@ -25,6 +29,7 @@ import { computed } from "vue";
 import BoardCell, { type CellVariant, type ValueTextColor, type ValueFontWeight } from "@/presentation/components/board-cell/BoardCell.vue";
 import { PuzzleCell } from "@/domain";
 import { useLongPress } from "@/presentation/composables/useLongPress";
+import type { HintCellView, HintHighlight } from "@/presentation/pages/game/hint-mode/useHintMode";
 
 const props = withDefaults(defineProps<{
     puzzleCell: PuzzleCell;
@@ -35,10 +40,22 @@ const props = withDefaults(defineProps<{
     error?: boolean;
     flashing?: boolean;
     highlightSameDigit?: boolean;
+    /** While hint mode is on, how the hint wants this cell shown; it replaces the normal highlights. */
+    hint?: HintCellView | null;
+    revealed?: boolean;
 }>(), {
     selectedDigit: null,
     highlightSameDigit: true,
+    hint: null,
+    revealed: false,
 });
+
+const HINT_VARIANTS: Record<Exclude<HintHighlight, "none">, CellVariant> = {
+    scope: "scope",
+    pattern: "pattern",
+    answer: "answer",
+    wrong: "wrong",
+};
 
 const emit = defineEmits<{
     click: [];
@@ -66,9 +83,22 @@ const value = computed(() => {
     return 0;
 });
 
-const notes = computed(() => (props.puzzleCell.hasNotes ? props.puzzleCell.notes : []));
+const notes = computed(() => {
+    if (props.hint?.candidates) return props.hint.candidates;
+    return props.puzzleCell.hasNotes ? props.puzzleCell.notes : [];
+});
+
+// Colour changes animate only while hinting, so normal selection stays instant.
+const interactionClass = computed(() => {
+    if (props.hint) return "transition-colors duration-300";
+    return props.puzzleCell.isClue ? "" : "cursor-pointer";
+});
 
 const variant = computed((): CellVariant => {
+    if (props.hint) {
+        if (props.hint.highlight !== "none") return HINT_VARIANTS[props.hint.highlight];
+        return props.puzzleCell.isClue ? "clue" : "default";
+    }
     if (props.error) return "error";
     if (props.selected) return "selected";
     if (isSameDigit.value) return "same-digit";
@@ -78,6 +108,7 @@ const variant = computed((): CellVariant => {
 
 const valueTextColor = computed((): ValueTextColor => {
     if (props.puzzleCell.isClue) return "normal";
+    if (props.hint) return props.hint.highlight === "wrong" ? "error" : "primary";
     if (props.error) return "error";
     return "primary";
 });
@@ -85,6 +116,7 @@ const valueTextColor = computed((): ValueTextColor => {
 const valueFontWeight = computed((): ValueFontWeight => (props.puzzleCell.isClue ? "semibold" : "medium"));
 
 const highlightedNote = computed((): number | null => {
+    if (props.hint) return null;
     if (!props.highlightSameDigit) return null;
     return props.selectedDigit;
 });
