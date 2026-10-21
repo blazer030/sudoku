@@ -18,26 +18,32 @@
                     <h2 class="text-[28px] font-bold text-foreground tracking-tight">
                         {{ t("game.complete.title") }}
                     </h2>
+                    <div class="flex flex-wrap items-center justify-center gap-2">
+                        <span
+                            class="bg-accent/10 text-accent text-[13px] font-semibold rounded-full px-2.5 py-1"
+                            data-testid="complete-difficulty"
+                        >{{ difficultyLabel }}</span>
+                        <span
+                            v-if="params?.isNewRecord"
+                            class="bg-primary text-on-primary text-[13px] font-semibold rounded-full px-2.5 py-1"
+                            data-testid="new-record-badge"
+                        >{{ t("game.complete.newRecord") }}</span>
+                    </div>
                     <p class="text-base text-foreground-secondary">
                         {{ t("game.complete.message") }}
                     </p>
                 </div>
 
-                <div class="grid grid-cols-3 gap-2 w-full">
+                <div
+                    class="grid grid-cols-2 gap-2 w-full"
+                    data-testid="complete-stats"
+                >
                     <div class="flex flex-col items-center gap-1">
                         <span class="text-[32px] font-bold text-primary tracking-tighter">
                             {{ formatTime(params?.elapsedSeconds ?? 0) }}
                         </span>
                         <span class="text-[13px] font-medium text-foreground-secondary">
                             {{ t("game.complete.time") }}
-                        </span>
-                    </div>
-                    <div class="flex flex-col items-center gap-1">
-                        <span class="text-[32px] font-bold text-accent tracking-tighter">
-                            {{ difficultyLabel }}
-                        </span>
-                        <span class="text-[13px] font-medium text-foreground-secondary">
-                            {{ t("game.complete.difficulty") }}
                         </span>
                     </div>
                     <div class="flex flex-col items-center gap-1">

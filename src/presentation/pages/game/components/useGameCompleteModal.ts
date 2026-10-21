@@ -5,6 +5,7 @@ export interface GameCompleteParams {
     elapsedSeconds: number;
     difficulty: Difficulty;
     hintsUsed: number;
+    isNewRecord: boolean;
 }
 
 export const { provideDialog: provideGameCompleteModal, useDialog: useGameCompleteModal } =

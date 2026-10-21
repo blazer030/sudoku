@@ -78,6 +78,12 @@ export const useStatisticsStore = defineStore("statistics", () => {
         persist();
     };
 
+    /** True when this time would be the best win at this difficulty: the first win, or strictly faster. */
+    const isNewBestTime = (difficulty: Difficulty, elapsedSeconds: number): boolean => {
+        const wins = history.value.filter(game => game.difficulty === difficulty && game.completed);
+        return wins.every(game => elapsedSeconds < game.elapsedSeconds);
+    };
+
     const clearAll = async () => {
         history.value = [];
         if (repository === null) return;
@@ -108,6 +114,7 @@ export const useStatisticsStore = defineStore("statistics", () => {
         setRepository,
         loadFromRepository,
         recordGame,
+        isNewBestTime,
         clearAll,
     };
 });

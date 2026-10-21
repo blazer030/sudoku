@@ -119,9 +119,9 @@ export const en = {
             title: "Congratulations!",
             message: "You solved the puzzle!",
             time: "Time",
-            difficulty: "Difficulty",
             hints: "Hints",
             backToHome: "Back to Home",
+            newRecord: "New record!",
         },
     },
     playback: {

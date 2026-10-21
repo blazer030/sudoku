@@ -117,9 +117,9 @@ export const zhHant: MessageSchema = {
             title: "恭喜過關！",
             message: "你完成了這道題目！",
             time: "時間",
-            difficulty: "難度",
             hints: "提示",
             backToHome: "回到首頁",
+            newRecord: "新紀錄！",
         },
     },
     playback: {

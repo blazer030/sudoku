@@ -56,7 +56,7 @@ export const useGameSession = () => {
         getElapsedSeconds: () => elapsedSeconds.value,
         getReplayData,
         analytics,
-        onCompleted: (origin) => {
+        onCompleted: (origin, { isNewRecord }) => {
             const allCells: { row: number; column: number }[] = [];
             for (let row = 0; row < BOARD_SIZE; row++) {
                 for (let column = 0; column < BOARD_SIZE; column++) {
@@ -68,6 +68,7 @@ export const useGameSession = () => {
                     elapsedSeconds: elapsedSeconds.value,
                     difficulty: difficulty.value,
                     hintsUsed: sudoku.hintTracker.recordedUsed,
+                    isNewRecord,
                 });
             });
         },

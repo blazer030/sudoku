@@ -16,7 +16,7 @@ const mountModal = (overrides: Partial<GameCompleteParams> = {}) => {
         components: { GameCompleteModal },
         setup() {
             const modal = provideGameCompleteModal();
-            void modal.open({ elapsedSeconds: 120, difficulty: "easy", hintsUsed: 0, ...overrides });
+            void modal.open({ elapsedSeconds: 120, difficulty: "easy", hintsUsed: 0, isNewRecord: false, ...overrides });
             return {};
         },
         template: "<GameCompleteModal />",
@@ -38,15 +38,34 @@ describe("GameCompleteModal", () => {
         await nextTick();
 
         expect(wrapper.text()).toContain("時間");
-        expect(wrapper.text()).toContain("難度");
+        expect(wrapper.find("[data-testid='complete-difficulty']").text()).toBe("簡單");
         expect(wrapper.text()).toContain("提示");
         expect(wrapper.text()).not.toContain("Congratulations!");
     });
 
-    it("should keep a gap between the stat columns so wide zh difficulty labels do not touch the time", () => {
-        const wrapper = mountModal();
+    it("should show the difficulty as a tag under the title, not as a stat", () => {
+        const wrapper = mountModal({ difficulty: "medium" });
 
-        expect(wrapper.find(".grid-cols-3").classes()).toContain("gap-2");
+        expect(wrapper.find("[data-testid='complete-difficulty']").text()).toBe("Medium");
+        const stats = wrapper.find("[data-testid='complete-stats']");
+        expect(stats.classes()).toContain("grid-cols-2");
+        expect(stats.text()).not.toContain("Medium");
+        expect(stats.text()).not.toContain("Difficulty");
+    });
+
+    it("should celebrate a new record", async () => {
+        const wrapper = mountModal({ isNewRecord: true });
+
+        expect(wrapper.find("[data-testid='new-record-badge']").text()).toBe("New record!");
+        i18n.global.locale.value = "zh-Hant";
+        await nextTick();
+        expect(wrapper.find("[data-testid='new-record-badge']").text()).toBe("新紀錄！");
+    });
+
+    it("should not show the record badge otherwise", () => {
+        const wrapper = mountModal({ isNewRecord: false });
+
+        expect(wrapper.find("[data-testid='new-record-badge']").exists()).toBe(false);
     });
 
     it("should display 0 hints when no hints used", () => {
