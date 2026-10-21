@@ -2,10 +2,25 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
+    <link href="/sudoku-green.svg" rel="icon" type="image/svg+xml" />
+    <link href="/apple-touch-icon-green.png" rel="apple-touch-icon" />
+    <link href="/manifest-green.webmanifest" rel="manifest" />
+    <meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport" />
+    <!-- The inline script below fills in the colour for the stored theme and mode -->
+    <meta name="theme-color" />
     <script>
-        // Applies the theme before first paint. Mirrors loadSettings() and resolveColorMode();
-        // unknown values fall back the same way.
+        // Applies the theme before first paint. Mirrors loadSettings(), resolveColorMode() and
+        // systemBarColor(); unknown values fall back the same way.
         (function () {
+            // BEGIN theme-color data: systemBarColor() per style and theme. noFlashScript.test.ts keeps it in sync.
+            var barColors = {
+                minimal: {
+                    dark: "#111110",
+                    light: { green: "#1A6C3E", blue: "#316099", purple: "#6E5199", orange: "#8C5000", pink: "#95435E", teal: "#0B696A" }
+                }
+            };
+            // END theme-color data
+            var has = function (object, key) { return Object.prototype.hasOwnProperty.call(object, key); };
             var settings = {};
             try {
                 settings = JSON.parse(localStorage.getItem("sudoku-settings") || "{}") || {};
@@ -13,21 +28,19 @@
                 settings = {};
             }
             var root = document.documentElement;
-            root.setAttribute("data-style", /^(minimal)$/.test(settings.style) ? settings.style : "minimal");
-            root.setAttribute("data-color-theme",
-                /^(green|blue|purple|orange|pink|teal)$/.test(settings.colorTheme) ? settings.colorTheme : "green");
+            var style = has(barColors, settings.style) ? settings.style : "minimal";
+            var lightColors = barColors[style].light;
+            var colorTheme = has(lightColors, settings.colorTheme) ? settings.colorTheme : "green";
+            root.setAttribute("data-style", style);
+            root.setAttribute("data-color-theme", colorTheme);
             var systemDark = typeof window.matchMedia === "function"
                 && window.matchMedia("(prefers-color-scheme: dark)").matches;
-            if (settings.appearance === "dark" || (settings.appearance !== "light" && systemDark)) {
-                root.classList.add("dark");
-            }
+            var dark = settings.appearance === "dark" || (settings.appearance !== "light" && systemDark);
+            if (dark) root.classList.add("dark");
+            var meta = document.querySelector('meta[name="theme-color"]');
+            if (meta) meta.setAttribute("content", dark ? barColors[style].dark : lightColors[colorTheme]);
         })();
     </script>
-    <link href="/sudoku-green.svg" rel="icon" type="image/svg+xml" />
-    <link href="/apple-touch-icon-green.png" rel="apple-touch-icon" />
-    <link href="/manifest-green.webmanifest" rel="manifest" />
-    <meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport" />
-    <meta name="theme-color" content="#3D8A5A" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Roboto+Mono:wght@500;600;700&display=swap" rel="stylesheet" />

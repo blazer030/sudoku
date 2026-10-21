@@ -1,4 +1,6 @@
 import { readFileSync } from "fs";
+import { COLOR_THEME_IDS, STYLE_IDS } from "@/application/SettingsStorage";
+import { systemBarColor } from "@/theme/palettes";
 
 const extractInlineScript = (): string => {
     const html = readFileSync("index.html", "utf8");
@@ -27,12 +29,17 @@ const storeSettings = (settings: Record<string, unknown>) => {
 
 describe("index.html no-flash script", () => {
     const root = document.documentElement;
+    let meta: HTMLMetaElement;
 
     beforeEach(() => {
         localStorage.clear();
+        meta = document.createElement("meta");
+        meta.name = "theme-color";
+        document.head.appendChild(meta);
     });
 
     afterEach(() => {
+        meta.remove();
         vi.unstubAllGlobals();
         localStorage.clear();
         root.className = "";
@@ -93,5 +100,44 @@ describe("index.html no-flash script", () => {
 
         expect(runInlineScript).not.toThrow();
         expect(root.classList.contains("dark")).toBe(false);
+    });
+
+    it("should accept every style id the app knows", () => {
+        stubSystemDark(false);
+        for (const styleId of STYLE_IDS) {
+            storeSettings({ style: styleId });
+            runInlineScript();
+            expect(root.dataset.style).toBe(styleId);
+        }
+    });
+
+    it("should accept every color theme id the app knows", () => {
+        stubSystemDark(false);
+        for (const themeId of COLOR_THEME_IDS) {
+            storeSettings({ colorTheme: themeId });
+            runInlineScript();
+            expect(root.dataset.colorTheme).toBe(themeId);
+        }
+    });
+
+    it("should set the theme-color meta for every theme and mode", () => {
+        stubSystemDark(false);
+        for (const themeId of COLOR_THEME_IDS) {
+            for (const mode of ["light", "dark"] as const) {
+                storeSettings({ colorTheme: themeId, appearance: mode });
+                runInlineScript();
+                expect(meta.content, `${themeId}/${mode}`).toBe(systemBarColor("minimal", themeId, mode));
+            }
+        }
+    });
+
+    it("should use the default theme's colour for an unknown theme", () => {
+        stubSystemDark(false);
+        storeSettings({ colorTheme: "red" });
+
+        runInlineScript();
+
+        expect(root.dataset.colorTheme).toBe("green");
+        expect(meta.content).toBe(systemBarColor("minimal", "green", "light"));
     });
 });
