@@ -101,8 +101,8 @@ export const useHintActions = ({
     const openHintMenu = async () => {
         if (hintMode.active.value) return;
         const action = await hintMenu.open({
-            recordedUsed: sudoku.hintTracker.recordedUsed,
-            canUseHint: sudoku.hintTracker.canUseHint,
+            remaining: sudoku.hintTracker.remainingHints,
+            firstHintFree: sudoku.hintTracker.totalUsed === 0,
         });
         if (action === "close") return;
         // Plan before spending: a solved board has nothing to reveal and must not cost a hint.

@@ -12,28 +12,31 @@
             <div
                 class="absolute bottom-safe-24 left-1/2 -translate-x-1/2 bg-card rounded-popup shadow-popup w-55 z-10 flex flex-col gap-1 py-4 px-3"
             >
-                <div class="flex items-center justify-between px-3 pb-1">
+                <div class="flex flex-col px-3 pb-1">
                     <span class="text-foreground text-sm font-bold">{{ t("game.hints.title") }}</span>
-                    <div class="flex items-center gap-1">
-                        <div
-                            v-for="lightNumber in 3"
-                            :key="lightNumber"
-                            :class="[
-                                'w-2 h-2 rounded-full',
-                                lightNumber <= remaining ? 'bg-primary' : 'border-[1.5px] border-border',
-                            ]"
-                            data-testid="hint-light"
-                        />
-                    </div>
+                    <span
+                        v-if="remaining > 0"
+                        class="text-[13px] text-foreground-secondary"
+                        data-testid="hint-remaining"
+                    >{{ t("game.hints.remaining", { count: remaining }, remaining) }}</span>
+                    <span
+                        v-else
+                        class="text-[13px] text-foreground-secondary"
+                        data-testid="hint-used-up"
+                    >{{ t("game.hints.usedUp", { max: MAX_HINTS }) }}</span>
                 </div>
 
-                <span class="text-foreground-muted text-[11px] mb-1 text-center">
+                <span
+                    v-if="params?.firstHintFree"
+                    class="text-foreground-muted text-[11px] mb-1 text-center"
+                    data-testid="hint-free-note"
+                >
                     {{ t("game.hints.freeNote") }}
                 </span>
 
                 <button
                     v-press
-                    :disabled="!params?.canUseHint"
+                    :disabled="remaining === 0"
                     class="hint-option"
                     data-testid="hint-auto-notes"
                     @click="close('autoNotes')"
@@ -47,7 +50,7 @@
 
                 <button
                     v-press
-                    :disabled="!params?.canUseHint"
+                    :disabled="remaining === 0"
                     class="hint-option"
                     data-testid="hint-check-conflicts"
                     @click="close('checkConflicts')"
@@ -69,7 +72,7 @@
 
                 <button
                     v-press
-                    :disabled="!params?.canUseHint"
+                    :disabled="remaining === 0"
                     class="hint-option"
                     data-testid="hint-reveal-cell"
                     @click="close('revealCell')"
@@ -89,13 +92,14 @@
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import { Eye, ScanSearch, Sparkles } from "lucide-vue-next";
+import { MAX_HINTS } from "@/domain/game/HintTracker";
 import { useHintMenu } from "@/presentation/pages/game/components/useHintMenu";
 import { vPress } from "@/presentation/directives/press";
 
 const { t } = useI18n();
 const { visible, params, close } = useHintMenu();
 
-const remaining = computed(() => 3 - (params.value?.recordedUsed ?? 0));
+const remaining = computed(() => params.value?.remaining ?? 0);
 </script>
 
 <style scoped>

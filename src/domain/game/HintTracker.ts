@@ -1,4 +1,4 @@
-const MAX_HINTS = 4
+export const MAX_HINTS = 4
 const FREE_HINTS = 1
 
 export class HintTracker {

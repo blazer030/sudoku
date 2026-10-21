@@ -79,7 +79,9 @@ export const en = {
     game: {
         hints: {
             title: "Hints",
-            freeNote: "First use is free and won't be recorded.",
+            remaining: "{count} hint left this game | {count} hints left this game",
+            freeNote: "Your first hint each game is free and isn't counted in statistics.",
+            usedUp: "No hints left in this game ({max} per game)",
             autoNotes: "Auto Notes",
             checkConflicts: "Check Conflicts",
             checkConflictsDescription: "Finds repeated digits in a row, column or box",

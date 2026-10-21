@@ -933,9 +933,8 @@ describe("Game", () => {
 
             // 再開 hint menu 檢查用量
             await wrapper.find("[data-testid='hint-button']").trigger("click");
-            const dots = wrapper.findAll("[data-testid='hint-light']");
-            // recordedUsed=0（第一次免費），所以 3 個都亮
-            expect(dots.filter(dot => dot.classes().some(cssClass => cssClass.includes("opacity")))).toHaveLength(0);
+            expect(wrapper.find("[data-testid='hint-remaining']").text()).toBe("3 hints left this game");
+            expect(wrapper.find("[data-testid='hint-free-note']").exists()).toBe(false);
         });
 
         it("should show error style on conflict cells after Check Conflicts", async () => {
@@ -1093,13 +1092,10 @@ describe("Game", () => {
             };
             const wrapper = mountContinueGame(savedState);
 
-            // 打開 hint menu，檢查 dot 狀態 (totalUsed=3, recordedUsed=2, 2 dots dimmed)
+            // Three hints used out of four
             await wrapper.find("[data-testid='hint-button']").trigger("click");
 
-            const dots = wrapper.findAll("[data-testid='hint-light']");
-            expect(dots).toHaveLength(3);
-            const outlined = dots.filter(dot => dot.classes().some(cssClass => cssClass.includes("border")));
-            expect(outlined).toHaveLength(2);
+            expect(wrapper.find("[data-testid='hint-remaining']").text()).toBe("1 hint left this game");
         });
 
         it("should check completion after Reveal Cell", async () => {
