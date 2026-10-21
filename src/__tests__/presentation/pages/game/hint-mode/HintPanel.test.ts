@@ -48,6 +48,26 @@ describe("HintPanel", () => {
         expect(wrapper.find("[data-testid='hint-wrong-entry-note']").text()).toBe("清除只會移除這格的數字。");
     });
 
+    it("should move focus into the panel, named for hint mode, when it opens", () => {
+        const wrapper = mount(HintPanel, {
+            attachTo: document.body,
+            props: {
+                phase: "wrongEntry",
+                wrongCell: { row: 1, column: 1 },
+                step: null,
+                stepIndex: 0,
+                totalSteps: 0,
+                isLastStep: false,
+                digit: null,
+            },
+        });
+
+        const panel = wrapper.find("[data-testid='hint-panel']");
+        expect(panel.element.contains(document.activeElement)).toBe(true);
+        expect(panel.attributes("aria-label")).toBe("Hint mode");
+        wrapper.unmount();
+    });
+
     it("should announce the wrong entry as soon as the panel shows it", () => {
         const wrapper = mountWrongEntry();
 

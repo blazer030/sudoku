@@ -1,8 +1,12 @@
 <template>
     <div
+        ref="panel"
+        :aria-label="t('hintMode.badge')"
         :style="maxHeight === null ? undefined : { maxHeight: `${maxHeight}px` }"
-        class="bg-card rounded-2xl shadow-card-lg w-full p-4 pb-3 flex flex-col gap-3 [&>*]:shrink-0"
+        class="bg-card rounded-2xl shadow-card-lg w-full p-4 pb-3 flex flex-col gap-3 outline-none [&>*]:shrink-0"
         data-testid="hint-panel"
+        role="group"
+        tabindex="-1"
     >
         <template v-if="phase === 'wrongEntry' && wrongCell">
             <div class="flex items-center gap-2.5">
@@ -235,7 +239,13 @@ const scrollExplanationToTop = () => {
     if (explanationBox.value !== null) explanationBox.value.scrollTop = 0;
 };
 
-onMounted(updateExplanationClipped);
+// The controls underneath turn inert while the panel is open, so take keyboard focus with it.
+const panel = useTemplateRef<HTMLElement>("panel");
+
+onMounted(() => {
+    panel.value?.focus({ preventScroll: true });
+    updateExplanationClipped();
+});
 watch(() => [props.maxHeight, explanation.value], () => { void nextTick(updateExplanationClipped); });
 
 // Beyond this many steps the dots, the arrows and the longest technique name no longer fit
