@@ -22,13 +22,14 @@ const fillStep: GameStep = {
     value: 5,
 };
 
-const mountReview = async () => {
+const mountReview = async (options: { action?: GameStep["action"]; completed?: boolean; nextClicks?: number } = {}) => {
+    const { action = "fill", completed = false, nextClicks = 1 } = options;
     setActivePinia(createPinia());
     useStatisticsStore().recordGame({
         difficulty: "hard",
         elapsedSeconds: 100,
-        completed: false,
-        replay: { initialBoard: emptyBoard(), steps: [fillStep] },
+        completed,
+        replay: { initialBoard: emptyBoard(), steps: [{ ...fillStep, action }] },
     });
     const router = createRouter({
         history: createMemoryHistory(),
@@ -41,7 +42,9 @@ const mountReview = async () => {
         global: { plugins: [router, pinia] },
     });
     await flushPromises();
-    await wrapper.find("[data-testid='review-next-step-button']").trigger("click");
+    for (let click = 0; click < nextClicks; click++) {
+        await wrapper.find("[data-testid='review-next-step-button']").trigger("click");
+    }
     return wrapper;
 };
 
@@ -72,5 +75,23 @@ describe("GameReview", () => {
 
         expect(wrapper.text()).toContain("在第 1 列第 2 欄填入 5");
         expect(boldTexts(wrapper)).toEqual(expect.arrayContaining(["5", "1", "2"]));
+    });
+
+    it("should describe a hint step in Traditional Chinese", async () => {
+        const wrapper = await mountReview({ action: "hint" });
+
+        i18n.global.locale.value = "zh-Hant";
+        await nextTick();
+
+        expect(wrapper.text()).toContain("在第 1 列第 2 欄揭示 5");
+    });
+
+    it("should label the final step of a completed game in Traditional Chinese", async () => {
+        const wrapper = await mountReview({ completed: true, nextClicks: 2 });
+
+        i18n.global.locale.value = "zh-Hant";
+        await nextTick();
+
+        expect(wrapper.text()).toContain("已完成");
     });
 });
