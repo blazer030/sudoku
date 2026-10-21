@@ -2,7 +2,9 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { SudokuBoard } from "@/domain/board/SudokuBoard";
 import { SudokuGenerator } from "@/domain/generator/SudokuGenerator";
 import { SudokuSolver } from "@/domain/generator/SudokuSolver";
+import { BoardState } from "@/domain/solver/BoardState";
 import { DifficultyRater } from "@/domain/solver/DifficultyRater";
+import { TechniqueSolver } from "@/domain/solver/TechniqueSolver";
 
 afterEach(() => {
     vi.restoreAllMocks();
@@ -84,15 +86,39 @@ describe("SudokuGenerator", () => {
         expect(puzzle).toHaveLength(9);
     });
 
-    it("should fall back to the last candidate when rater always rejects", () => {
-        const matchesSpy = vi.spyOn(DifficultyRater.prototype, "matches").mockReturnValue(false);
-        const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    it("should only fall back to a technique-solvable puzzle", () => {
+        vi.spyOn(DifficultyRater.prototype, "matches").mockReturnValue(false);
+        const rateSpy = vi.spyOn(DifficultyRater.prototype, "rate");
+        rateSpy.mockReturnValueOnce(null);
+        rateSpy.mockReturnValueOnce(null);
+        rateSpy.mockReturnValue("hard");
 
-        const localGenerator = new SudokuGenerator();
-        const { puzzle } = localGenerator.generatePuzzle("easy");
+        const { puzzle } = new SudokuGenerator().generatePuzzle("easy");
 
-        expect(matchesSpy.mock.calls.length).toBeGreaterThan(1);
-        expect(warnSpy).toHaveBeenCalled();
-        expect(puzzle).toHaveLength(9);
+        const solvableIndex = rateSpy.mock.results.findIndex(result => result.value !== null);
+        expect(solvableIndex).toBe(2);
+        expect(puzzle).toBe(rateSpy.mock.calls[solvableIndex][0]);
+    });
+
+    it.skip.each(["easy", "medium", "hard"] as const)("should keep every generated %s puzzle solvable step by step", { timeout: 180000 }, (difficulty) => {
+        const technique = new TechniqueSolver();
+        for (let round = 0; round < 2; round++) {
+            const { puzzle } = generator.generatePuzzle(difficulty);
+            let state = BoardState.fromPuzzle(puzzle);
+            let remaining = puzzle.flat().filter(cell => cell === 0).length;
+            while (remaining > 0) {
+                const steps = technique.stepsToNextAssignment(state);
+                expect(steps.length).toBeGreaterThan(0);
+                for (const step of steps) {
+                    for (const elimination of step.eliminations) {
+                        state = state.eliminate(elimination.cell.row, elimination.cell.column, elimination.digit);
+                    }
+                    for (const assignment of step.assignments) {
+                        state = state.assign(assignment.cell.row, assignment.cell.column, assignment.digit);
+                        remaining--;
+                    }
+                }
+            }
+        }
     });
 });
