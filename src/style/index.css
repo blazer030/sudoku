@@ -179,7 +179,16 @@
     animation: press-bounce 260ms ease-out;
 }
 
+/* The segmented control's selection slides with the same elastic curve */
+[data-style="minimal"] .segmented-indicator-motion {
+    transition: transform 250ms cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+
 @media (prefers-reduced-motion: reduce) {
+    [data-style="minimal"] .segmented-indicator-motion {
+        transition: none;
+    }
+
     [data-style="minimal"] .is-pressed,
     [data-style="minimal"] .press-motion,
     [data-style="minimal"] .press-motion.is-pressed,

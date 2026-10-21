@@ -100,19 +100,19 @@ describe("Home", () => {
         const { wrapper } = mountHome();
         const easyBtn = wrapper.find("[data-testid='difficulty-easy']");
 
-        expect(easyBtn.classes()).toContain("bg-primary");
+        expect(easyBtn.attributes("aria-pressed")).toBe("true");
     });
 
     it("should select difficulty when clicking pill", async () => {
         const { wrapper } = mountHome();
 
         await wrapper.find("[data-testid='difficulty-medium']").trigger("click");
-        expect(wrapper.find("[data-testid='difficulty-medium']").classes()).toContain("bg-primary");
-        expect(wrapper.find("[data-testid='difficulty-easy']").classes()).not.toContain("bg-primary");
+        expect(wrapper.find("[data-testid='difficulty-medium']").attributes("aria-pressed")).toBe("true");
+        expect(wrapper.find("[data-testid='difficulty-easy']").attributes("aria-pressed")).toBe("false");
 
         await wrapper.find("[data-testid='difficulty-hard']").trigger("click");
-        expect(wrapper.find("[data-testid='difficulty-hard']").classes()).toContain("bg-primary");
-        expect(wrapper.find("[data-testid='difficulty-medium']").classes()).not.toContain("bg-primary");
+        expect(wrapper.find("[data-testid='difficulty-hard']").attributes("aria-pressed")).toBe("true");
+        expect(wrapper.find("[data-testid='difficulty-medium']").attributes("aria-pressed")).toBe("false");
     });
 
     it("should show Continue button when saved game exists", () => {
