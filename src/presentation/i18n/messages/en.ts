@@ -67,6 +67,32 @@ export const en = {
             confirm: "Give Up & Start New",
         },
     },
+    game: {
+        hints: {
+            title: "Hints",
+            freeNote: "First use is free and won't be recorded.",
+            autoNotes: "Auto Notes",
+            checkConflicts: "Check Conflicts",
+            checkErrors: "Check Errors",
+            revealCell: "Reveal Cell",
+        },
+        hintResult: "{technique}: {position}",
+        randomReveal: "Random reveal: {position}",
+        leave: {
+            title: "Leave Game?",
+            message: "Do you want to save your current progress before leaving?",
+            saveAndLeave: "Save & Leave",
+            giveUpAndLeave: "Give Up & Leave",
+        },
+        complete: {
+            title: "Congratulations!",
+            message: "You solved the puzzle!",
+            time: "Time",
+            difficulty: "Difficulty",
+            hints: "Hints",
+            backToHome: "Back to Home",
+        },
+    },
     position: {
         cell: "Row {row}, Col {column} = {value}",
     },

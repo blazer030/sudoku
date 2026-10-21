@@ -15,10 +15,10 @@
 
                 <div class="flex flex-col items-center gap-2">
                     <h2 class="text-2xl font-bold text-foreground tracking-tight">
-                        Leave Game?
+                        {{ t("game.leave.title") }}
                     </h2>
                     <p class="text-sm text-foreground-secondary text-center">
-                        Do you want to save your current progress before leaving?
+                        {{ t("game.leave.message") }}
                     </p>
                 </div>
 
@@ -32,7 +32,7 @@
                             :size="20"
                             class="text-white"
                         />
-                        <span class="text-base font-semibold text-white">Save & Leave</span>
+                        <span class="text-base font-semibold text-white">{{ t("game.leave.saveAndLeave") }}</span>
                     </button>
 
                     <button
@@ -40,7 +40,7 @@
                         data-testid="give-up-and-leave-button"
                         @click="close('giveUp')"
                     >
-                        <span class="text-base font-semibold text-white">Give Up & Leave</span>
+                        <span class="text-base font-semibold text-white">{{ t("game.leave.giveUpAndLeave") }}</span>
                     </button>
 
                     <button
@@ -48,7 +48,7 @@
                         data-testid="leave-cancel-button"
                         @click="close('cancel')"
                     >
-                        <span class="text-base font-semibold text-foreground">Cancel</span>
+                        <span class="text-base font-semibold text-foreground">{{ t("common.cancel") }}</span>
                     </button>
                 </div>
             </div>
@@ -58,7 +58,9 @@
 
 <script lang="ts" setup>
 import { Save } from "lucide-vue-next";
+import { useI18n } from "vue-i18n";
 import { useLeaveDialog } from "@/presentation/pages/game/components/useLeaveDialog";
 
+const { t } = useI18n();
 const { visible, close } = useLeaveDialog();
 </script>

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { mount } from "@vue/test-utils";
-import { defineComponent } from "vue";
+import { defineComponent, nextTick } from "vue";
+import { i18n } from "@/presentation/i18n";
 import { createMemoryHistory, createRouter } from "vue-router";
 import GameCompleteModal from "@/presentation/pages/game/components/GameCompleteModal.vue";
 import { provideGameCompleteModal } from "@/presentation/pages/game/components/useGameCompleteModal";
@@ -29,6 +30,17 @@ describe("GameCompleteModal", () => {
 
         expect(wrapper.text()).toContain("2");
         expect(wrapper.text()).toContain("Hints");
+    });
+
+    it("should render the stat labels in Traditional Chinese", async () => {
+        const wrapper = mountModal();
+        i18n.global.locale.value = "zh-Hant";
+        await nextTick();
+
+        expect(wrapper.text()).toContain("時間");
+        expect(wrapper.text()).toContain("難度");
+        expect(wrapper.text()).toContain("提示");
+        expect(wrapper.text()).not.toContain("Congratulations!");
     });
 
     it("should display 0 hints when no hints used", () => {

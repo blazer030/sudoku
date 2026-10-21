@@ -69,6 +69,32 @@ export const zhHant: MessageSchema = {
             confirm: "放棄並開始新遊戲",
         },
     },
+    game: {
+        hints: {
+            title: "提示",
+            freeNote: "第一次使用免費，不會被記錄。",
+            autoNotes: "自動筆記",
+            checkConflicts: "檢查衝突",
+            checkErrors: "檢查錯誤",
+            revealCell: "揭示一格",
+        },
+        hintResult: "{technique}：{position}",
+        randomReveal: "隨機揭示：{position}",
+        leave: {
+            title: "離開遊戲？",
+            message: "離開前要儲存目前的進度嗎？",
+            saveAndLeave: "儲存並離開",
+            giveUpAndLeave: "放棄並離開",
+        },
+        complete: {
+            title: "恭喜過關！",
+            message: "你完成了這道題目！",
+            time: "時間",
+            difficulty: "難度",
+            hints: "提示",
+            backToHome: "回到首頁",
+        },
+    },
     position: {
         cell: "第 {row} 列第 {column} 欄 = {value}",
     },

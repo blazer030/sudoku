@@ -912,6 +912,17 @@ describe("Game", () => {
             expect(toast.text()).toMatch(/Single|Pair|Triple|Quad|Pointing|Claiming|Wing/);
         });
 
+        it("should show the toast position in Chinese after Reveal Cell", async () => {
+            const wrapper = mountGame();
+            i18n.global.locale.value = "zh-Hant";
+            await nextTick();
+
+            await wrapper.find("[data-testid='hint-button']").trigger("click");
+            await wrapper.find("[data-testid='hint-reveal-cell']").trigger("click");
+
+            expect(wrapper.find("[data-testid='hint-result-toast']").text()).toMatch(/第 \d 列第 \d 欄 = \d/);
+        });
+
         it("should reveal a random cell with correct answer", async () => {
             const wrapper = mountGame();
 
