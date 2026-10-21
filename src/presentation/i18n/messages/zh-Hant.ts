@@ -159,6 +159,19 @@ export const zhHant: MessageSchema = {
         cell: "第 {row} 列第 {column} 欄 = {value}",
     },
     hintMode: {
+        badge: "提示模式",
+        panel: {
+            wrongEntry: "{cell}填錯了",
+            wrongEntryNote: "清除後，這格的筆記會保留。",
+            clear: "清除",
+            close: "關閉",
+            next: "下一步",
+            previousStep: "上一步",
+            nextStep: "下一步",
+            stepCounter: "第 {current} 步，共 {total} 步",
+            fill: "{digit} 填入答案",
+            notesHidden: "顯示盤面算出的候選數，你的筆記暫時隱藏",
+        },
         place: {
             cell: "第 {row} 列第 {column} 欄",
             row: "第 {number} 列",

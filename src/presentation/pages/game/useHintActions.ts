@@ -2,12 +2,15 @@ import { ref } from "vue";
 import type { RevealOutcome } from "@/domain/game/RevealOutcome";
 import type { Sudoku } from "@/domain/game/Sudoku";
 import type { StepRecorder } from "@/domain/game/StepRecorder";
+import type { CellReference } from "@/domain/solver/SolveStep";
 import { provideHintMenu, type HintAction } from "@/presentation/pages/game/components/useHintMenu";
 import type { AnalyticsEvent, AnalyticsService } from "@/application/analytics/AnalyticsService";
+import { useHintMode } from "@/presentation/pages/game/hint-mode/useHintMode";
 
 interface HintActionsOptions {
     sudoku: Sudoku;
     stepRecorder: StepRecorder;
+    autoRemoveNotes: () => boolean;
     onRevealComplete: (origin: { row: number; column: number }) => void;
     onGroupCompleted?: (cells: { row: number; column: number }[], origin: { row: number; column: number }) => void;
     onHintReveal?: (outcome: RevealOutcome) => void;
@@ -23,9 +26,22 @@ const HINT_TYPE_EVENT: Record<Exclude<HintAction, "close">, HintUsedEvent["hint_
     revealCell:     "reveal_cell",
 };
 
-export const useHintActions = ({ sudoku, stepRecorder, onRevealComplete, onGroupCompleted, onHintReveal, analytics }: HintActionsOptions) => {
+// Long enough for the pop animation on the filled answer to finish.
+const REVEALED_CELL_DURATION_MS = 500;
+
+export const useHintActions = ({
+    sudoku,
+    stepRecorder,
+    autoRemoveNotes,
+    onRevealComplete,
+    onGroupCompleted,
+    onHintReveal,
+    analytics,
+}: HintActionsOptions) => {
     const hintMenu = provideHintMenu();
     const errorCells = ref<{ row: number; column: number }[]>([]);
+    const revealedCell = ref<CellReference | null>(null);
+    let revealedCellTimeout: ReturnType<typeof setTimeout> | null = null;
 
     const clearErrors = () => {
         errorCells.value = [];
@@ -34,7 +50,55 @@ export const useHintActions = ({ sudoku, stepRecorder, onRevealComplete, onGroup
     const isError = (row: number, column: number): boolean =>
         errorCells.value.some(cell => cell.row === row && cell.column === column);
 
+    const isRevealed = (row: number, column: number): boolean =>
+        revealedCell.value?.row === row && revealedCell.value.column === column;
+
+    const markRevealed = (cell: CellReference) => {
+        if (revealedCellTimeout !== null) clearTimeout(revealedCellTimeout);
+        revealedCell.value = cell;
+        revealedCellTimeout = setTimeout(() => {
+            revealedCell.value = null;
+            revealedCellTimeout = null;
+        }, REVEALED_CELL_DURATION_MS);
+    };
+
+    const finishReveal = (cell: CellReference) => {
+        if (!sudoku.isCompleted()) {
+            const completed = sudoku.findCompletedGroups(cell.row, cell.column);
+            if (completed.cells.length > 0) onGroupCompleted?.(completed.cells, cell);
+        }
+        onRevealComplete(cell);
+    };
+
+    const hintMode = useHintMode(sudoku, {
+        autoRemoveNotes,
+        record: (action, cell, value) => {
+            stepRecorder.record(sudoku.puzzle, action, cell.row, cell.column, value);
+        },
+        onApplied: (cell) => {
+            markRevealed(cell);
+            finishReveal(cell);
+        },
+    });
+
+    const revealRandomCell = () => {
+        const target = sudoku.revealRandomCell();
+        if (target === null) {
+            onRevealComplete({ row: 4, column: 4 });
+            return;
+        }
+        const outcome: RevealOutcome = {
+            cell: { row: target.row, column: target.column },
+            value: sudoku.answer[target.row][target.column],
+            fallback: true,
+        };
+        stepRecorder.record(sudoku.puzzle, "hint", outcome.cell.row, outcome.cell.column, outcome.value);
+        onHintReveal?.(outcome);
+        finishReveal(outcome.cell);
+    };
+
     const openHintMenu = async () => {
+        if (hintMode.active.value) return;
         const action = await hintMenu.open({
             recordedUsed: sudoku.hintTracker.recordedUsed,
             canUseHint: sudoku.hintTracker.canUseHint,
@@ -54,25 +118,18 @@ export const useHintActions = ({ sudoku, stepRecorder, onRevealComplete, onGroup
             errorCells.value = sudoku.checkErrors();
             break;
         case "revealCell": {
-            const target = sudoku.revealRandomCell();
-            const outcome: RevealOutcome | null = target === null ? null : {
-                cell: { row: target.row, column: target.column },
-                value: sudoku.answer[target.row][target.column],
-                fallback: true,
-            };
-            if (outcome) {
-                stepRecorder.record(sudoku.puzzle, "hint", outcome.cell.row, outcome.cell.column, outcome.value);
-                onHintReveal?.(outcome);
+            // A wrong entry or a solver path is shown step by step; only a stuck solver falls back to a random cell.
+            const plan = sudoku.planRevealHint();
+            if (plan.kind === "wrongEntry" || plan.kind === "steps") {
+                clearErrors();
+                hintMode.start(plan);
+                break;
             }
-            if (outcome && !sudoku.isCompleted()) {
-                const completed = sudoku.findCompletedGroups(outcome.cell.row, outcome.cell.column);
-                if (completed.cells.length > 0) onGroupCompleted?.(completed.cells, outcome.cell);
-            }
-            onRevealComplete(outcome?.cell ?? { row: 4, column: 4 });
+            revealRandomCell();
             break;
         }
         }
     };
 
-    return { errorCells, clearErrors, isError, openHintMenu };
+    return { errorCells, clearErrors, isError, isRevealed, openHintMenu, hintMode };
 };

@@ -238,5 +238,3 @@ export const useHintMode = (sudoku: Sudoku, { autoRemoveNotes, onApplied, record
         cellView,
     };
 };
-
-export type HintMode = ReturnType<typeof useHintMode>;

@@ -161,6 +161,19 @@ export const en = {
         cell: "Row {row}, Col {column} = {value}",
     },
     hintMode: {
+        badge: "Hint mode",
+        panel: {
+            wrongEntry: "{cell} is wrong",
+            wrongEntryNote: "Clearing it keeps the cell's notes.",
+            clear: "Clear",
+            close: "Close",
+            next: "Next",
+            previousStep: "Previous step",
+            nextStep: "Next step",
+            stepCounter: "Step {current} of {total}",
+            fill: "Fill in {digit}",
+            notesHidden: "Board candidates shown; your notes are hidden for now",
+        },
         place: {
             cell: "Row {row}, Col {column}",
             row: "row {number}",

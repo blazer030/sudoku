@@ -6,6 +6,7 @@ import { StepRecorder } from "@/domain/game/StepRecorder";
 import { PuzzleCell } from "@/domain/board/PuzzleCell";
 import type { AnalyticsService } from "@/application/analytics/AnalyticsService";
 import type { HintAction } from "@/presentation/pages/game/components/useHintMenu";
+import { createKnownSudoku } from "@/__tests__/fixtures/knownPuzzle";
 
 const openHintDialog = vi.fn();
 
@@ -60,6 +61,7 @@ const mountHintHarness = (
             captured.api = useHintActions({
                 sudoku,
                 stepRecorder,
+                autoRemoveNotes: () => true,
                 onRevealComplete: () => { /* noop */ },
                 analytics,
             });
@@ -109,5 +111,26 @@ describe("useHintActions — step recording", () => {
         expect(sudoku.hintTracker.recordedUsed).toBe(0);
         expect(stepRecorder.steps).toHaveLength(1);
         expect(stepRecorder.steps[0].action).toBe("autoNotes");
+    });
+});
+
+describe("useHintActions — reveal cell", () => {
+    it("enters hint mode, spends one hint and logs it once without touching the board", async () => {
+        openHintDialog.mockReset();
+        openHintDialog.mockResolvedValue("revealCell");
+        const logEvent = vi.fn().mockResolvedValue(undefined);
+        const sudoku = createKnownSudoku();
+        const stepRecorder = new StepRecorder();
+        const api = mountHintHarness({ logEvent }, { sudoku, stepRecorder });
+
+        await api.openHintMenu();
+        await api.openHintMenu();
+
+        expect(api.hintMode.active.value).toBe(true);
+        expect(sudoku.hintTracker.totalUsed).toBe(1);
+        expect(openHintDialog).toHaveBeenCalledTimes(1);
+        expect(logEvent).toHaveBeenCalledTimes(1);
+        expect(logEvent).toHaveBeenCalledWith({ name: "hint_used", hint_type: "reveal_cell" });
+        expect(stepRecorder.steps).toHaveLength(0);
     });
 });

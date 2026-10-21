@@ -17,9 +17,11 @@ interface LeaveGameOptions {
     getElapsedSeconds: () => number;
     getReplayData: () => GameReplayData;
     analytics?: AnalyticsService;
+    /** Runs once leaving is confirmed, before the game is saved or given up. */
+    onLeave?: () => void;
 }
 
-export const useLeaveGame = ({ sudoku, difficulty, completed, getElapsedSeconds, getReplayData, analytics }: LeaveGameOptions) => {
+export const useLeaveGame = ({ sudoku, difficulty, completed, getElapsedSeconds, getReplayData, analytics, onLeave }: LeaveGameOptions) => {
     const router = useRouter();
     const leaveDialog = provideLeaveDialog();
     const leavingConfirmed = ref(false);
@@ -28,6 +30,7 @@ export const useLeaveGame = ({ sudoku, difficulty, completed, getElapsedSeconds,
 
     const showLeaveDialog = async () => {
         const result = await leaveDialog.open();
+        if (result === "save" || result === "giveUp") onLeave?.();
         if (result === "save") {
             const state = GameStateConverter.fromSudoku(sudoku.raw(), {
                 difficulty: difficulty.value,

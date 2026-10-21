@@ -78,9 +78,10 @@ export const useGameSession = () => {
 
     const hintResult = useHintResult();
 
-    const { clearErrors, isError, openHintMenu } = useHintActions({
+    const { clearErrors, isError, isRevealed, openHintMenu, hintMode } = useHintActions({
         sudoku: sudoku.raw(),
         stepRecorder,
+        autoRemoveNotes: () => settingsStore.autoRemoveNotes,
         onRevealComplete: (origin) => { checkAndComplete(origin); },
         onGroupCompleted: triggerFlash,
         onHintReveal: hintResult.show,
@@ -94,6 +95,8 @@ export const useGameSession = () => {
         getElapsedSeconds: () => elapsedSeconds.value,
         getReplayData,
         analytics,
+        // Hint mode is never saved: leaving ends it with the board untouched.
+        onLeave: hintMode.cancel,
     });
 
     const timerPaused = computed(() => completed.value || leaveDialog.visible.value);
@@ -112,7 +115,9 @@ export const useGameSession = () => {
         checkAndComplete,
         clearErrors,
         isError,
+        isRevealed,
         openHintMenu,
+        hintMode,
         hintResultOutcome: hintResult.outcome,
         showLeaveDialog,
         triggerFlash,

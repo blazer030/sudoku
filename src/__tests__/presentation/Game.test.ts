@@ -3,7 +3,7 @@ import { i18n } from "@/presentation/i18n";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { flushPromises, mount } from "@vue/test-utils";
 import { createPinia } from "pinia";
-import { createMemoryHistory, createRouter } from "vue-router";
+import { createMemoryHistory, createRouter, onBeforeRouteLeave } from "vue-router";
 import Game from "@/presentation/pages/game/Game.vue";
 import { knownAnswer, knownPuzzle, createKnownSudoku } from "@/__tests__/fixtures/knownPuzzle";
 import type { GameState } from "@/application/GameState";
@@ -11,6 +11,10 @@ import Cell from "@/presentation/pages/game/components/Cell.vue";
 import { useGameStore } from "@/stores/gameStore";
 import type { Difficulty } from "@/domain/generator/SudokuGenerator";
 import { useStatisticsStore } from "@/stores/statisticsStore";
+import { Sudoku } from "@/domain/game/Sudoku";
+import type { PuzzleCell } from "@/domain/board/PuzzleCell";
+import { createMultiStepSudoku } from "@/__tests__/fixtures/multiStepPuzzle";
+import { ANALYTICS_KEY, type AnalyticsService } from "@/application/analytics/AnalyticsService";
 
 const createTestRouter = () => {
     return createRouter({
@@ -35,6 +39,62 @@ const mountContinueGame = (savedState: GameState) => {
     gameStore.persistGame(savedState);
     gameStore.loadSavedGame(savedState);
     return mount(Game, { global: { plugins: [pinia, router] } });
+};
+
+const mountGameWith = (sudoku: Sudoku, analytics?: AnalyticsService) => {
+    const pinia = createPinia();
+    const router = createTestRouter();
+    const gameStore = useGameStore(pinia);
+    gameStore.sudoku = sudoku;
+    gameStore.setDifficulty("hard");
+    return mount(Game, {
+        global: {
+            plugins: [pinia, router],
+            provide: analytics === undefined ? {} : { [ANALYTICS_KEY as symbol]: analytics },
+        },
+    });
+};
+
+type GameWrapper = ReturnType<typeof mountGame>;
+
+const openRevealCell = async (wrapper: GameWrapper) => {
+    await wrapper.find("[data-testid='hint-button']").trigger("click");
+    await wrapper.find("[data-testid='hint-reveal-cell']").trigger("click");
+    await flushPromises();
+};
+
+// Fills every empty cell of the known puzzle except the last one, digit first.
+const fillAllButLastEmptyCell = async (wrapper: GameWrapper) => {
+    const emptyCells: [number, number][] = [];
+    for (let row = 0; row < 9; row++) {
+        for (let column = 0; column < 9; column++) {
+            if (knownPuzzle[row][column] === 0) emptyCells.push([row, column]);
+        }
+    }
+    for (const [row, column] of emptyCells.slice(0, -1)) {
+        const numberButton = wrapper.find(`[data-testid='number-${knownAnswer[row][column]}']`);
+        await numberButton.trigger("click");
+        await wrapper.find(`[data-testid='cell-${row}-${column}']`).trigger("click");
+        await numberButton.trigger("click");
+    }
+};
+
+const boardOf = (wrapper: GameWrapper) =>
+    wrapper.findAllComponents(Cell).map((cell) => {
+        const puzzleCell = cell.props("puzzleCell") as PuzzleCell;
+        return { entry: puzzleCell.entry, notes: [...puzzleCell.notes] };
+    });
+
+const pressPrimaryUntilLastStep = async (wrapper: GameWrapper, totalSteps: number) => {
+    for (let index = 0; index < totalSteps - 1; index++) {
+        await wrapper.find("[data-testid='hint-primary']").trigger("click");
+    }
+};
+
+const multiStepPlan = () => {
+    const plan = createMultiStepSudoku().planRevealHint();
+    if (plan.kind !== "steps") throw new Error(`expected a steps plan, got ${plan.kind}`);
+    return plan;
 };
 
 vi.mock("vue-router", async () => {
@@ -902,6 +962,7 @@ describe("Game", () => {
         });
 
         it("should show a random-reveal toast after Reveal Cell", async () => {
+            vi.spyOn(Sudoku.prototype, "planRevealHint").mockReturnValue({ kind: "noTechnique" });
             const wrapper = mountGame();
 
             await wrapper.find("[data-testid='hint-button']").trigger("click");
@@ -913,6 +974,7 @@ describe("Game", () => {
         });
 
         it("should show the toast position in Chinese after Reveal Cell", async () => {
+            vi.spyOn(Sudoku.prototype, "planRevealHint").mockReturnValue({ kind: "noTechnique" });
             const wrapper = mountGame();
             i18n.global.locale.value = "zh-Hant";
             await nextTick();
@@ -924,6 +986,7 @@ describe("Game", () => {
         });
 
         it("should size the hint toast to its content so Chinese positions do not wrap early", async () => {
+            vi.spyOn(Sudoku.prototype, "planRevealHint").mockReturnValue({ kind: "noTechnique" });
             const wrapper = mountGame();
 
             await wrapper.find("[data-testid='hint-button']").trigger("click");
@@ -933,6 +996,7 @@ describe("Game", () => {
         });
 
         it("should reveal a random cell with correct answer", async () => {
+            vi.spyOn(Sudoku.prototype, "planRevealHint").mockReturnValue({ kind: "noTechnique" });
             const wrapper = mountGame();
 
             await wrapper.find("[data-testid='hint-button']").trigger("click");
@@ -1006,30 +1070,195 @@ describe("Game", () => {
 
         it("should check completion after Reveal Cell", async () => {
             localStorage.setItem("sudoku-settings", JSON.stringify({ completionFlash: false }));
+            vi.spyOn(Sudoku.prototype, "planRevealHint").mockReturnValue({ kind: "noTechnique" });
             const wrapper = mountGame();
+            await fillAllButLastEmptyCell(wrapper);
 
-            // 填入除一格外所有正確答案
-            const emptyCells: [number, number][] = [];
-            for (let row = 0; row < 9; row++) {
-                for (let column = 0; column < 9; column++) {
-                    if (knownPuzzle[row][column] === 0) emptyCells.push([row, column]);
-                }
-            }
-            // 留最後一個空格
-            for (let index = 0; index < emptyCells.length - 1; index++) {
-                const [row, column] = emptyCells[index];
-                const value = knownAnswer[row][column];
-                const numBtn = wrapper.find(`[data-testid='number-${value}']`);
-                await numBtn.trigger("click");
-                await wrapper.find(`[data-testid='cell-${row}-${column}']`).trigger("click");
-                await numBtn.trigger("click");
-            }
-
-            // Reveal Cell 填入最後一格
-            await wrapper.find("[data-testid='hint-button']").trigger("click");
-            await wrapper.find("[data-testid='hint-reveal-cell']").trigger("click");
+            await openRevealCell(wrapper);
 
             expect(wrapper.find("[data-testid='game-complete-modal']").exists()).toBe(true);
+        });
+    });
+
+    describe("Reveal Cell hint mode", () => {
+        it("should point out one wrong cell with Clear and Close, and spend the hint", async () => {
+            const wrapper = mountGame();
+            i18n.global.locale.value = "zh-Hant";
+            await nextTick();
+            // (1, 1) should be 7
+            await wrapper.find("[data-testid='cell-1-1']").trigger("click");
+            await wrapper.find("[data-testid='number-1']").trigger("click");
+
+            await openRevealCell(wrapper);
+
+            expect(wrapper.find("[data-testid='hint-panel']").text()).toContain("第 2 列第 2 欄填錯了");
+            expect(wrapper.find("[data-testid='hint-clear']").text()).toBe("清除");
+            expect(wrapper.find("[data-testid='hint-close']").text()).toBe("關閉");
+            expect(wrapper.find("[data-testid='hint-primary']").exists()).toBe(false);
+
+            await wrapper.find("[data-testid='hint-close']").trigger("click");
+
+            expect(wrapper.find("[data-testid='hint-panel']").exists()).toBe(false);
+            expect(wrapper.find("[data-testid='cell-1-1']").text()).toBe("1");
+            await wrapper.find("[data-testid='back-button']").trigger("click");
+            await wrapper.find("[data-testid='save-and-leave-button']").trigger("click");
+            await flushPromises();
+            expect(useGameStore().savedGame?.hintsUsed).toBe(1);
+        });
+
+        it("should clear only the wrong entry when Clear is pressed", async () => {
+            const wrapper = mountGame();
+            await wrapper.find("[data-testid='cell-0-2']").trigger("click");
+            await wrapper.find("[data-testid='number-4']").trigger("click");
+            await wrapper.find("[data-testid='cell-1-1']").trigger("click");
+            await wrapper.find("[data-testid='number-1']").trigger("click");
+            await openRevealCell(wrapper);
+
+            await wrapper.find("[data-testid='hint-clear']").trigger("click");
+
+            expect(wrapper.find("[data-testid='hint-panel']").exists()).toBe(false);
+            expect(wrapper.find("[data-testid='cell-1-1']").text()).toBe("");
+            expect(wrapper.find("[data-testid='cell-0-2']").text()).toBe("4");
+        });
+
+        it("should step with Next and fill the answer on the last step", async () => {
+            const plan = multiStepPlan();
+            const wrapper = mountGameWith(createMultiStepSudoku());
+            i18n.global.locale.value = "zh-Hant";
+            await nextTick();
+
+            await openRevealCell(wrapper);
+
+            const primary = () => wrapper.find("[data-testid='hint-primary']");
+            for (let index = 0; index < plan.steps.length - 1; index++) {
+                expect(primary().text()).toBe("下一步");
+                await primary().trigger("click");
+            }
+            expect(primary().text()).toBe(`${plan.digit} 填入答案`);
+
+            await primary().trigger("click");
+
+            const { row, column } = plan.target;
+            expect(wrapper.find(`[data-testid='cell-${row}-${column}']`).text()).toBe(String(plan.digit));
+            expect(wrapper.find("[data-testid='hint-panel']").exists()).toBe(false);
+            expect(wrapper.find("[data-testid='game-inputs']").attributes("inert")).toBeUndefined();
+        });
+
+        it("should lock the board and show the hint mode badge while hinting", async () => {
+            const wrapper = mountGame();
+            i18n.global.locale.value = "zh-Hant";
+            await nextTick();
+            await wrapper.find("[data-testid='cell-0-2']").trigger("click");
+            await wrapper.find("[data-testid='number-4']").trigger("click");
+            await openRevealCell(wrapper);
+            const before = boardOf(wrapper);
+
+            expect(wrapper.find("[data-testid='hint-mode-pill']").text()).toBe("提示模式");
+            expect(wrapper.find("[data-testid='game-inputs']").attributes("inert")).toBeDefined();
+            await wrapper.find("[data-testid='cell-0-3']").trigger("click");
+            await wrapper.find("[data-testid='number-6']").trigger("click");
+            await wrapper.find("[data-testid='cell-0-3']").trigger("click");
+            await wrapper.find("[data-testid='cell-0-0']").trigger("click");
+            await wrapper.find("[data-testid='undo-button']").trigger("click");
+            await wrapper.find("[data-testid='note-button']").trigger("click");
+            await wrapper.find("[data-testid='erase-button']").trigger("click");
+            await wrapper.find("[data-testid='cell-0-2']").trigger("click");
+            await wrapper.find("[data-testid='hint-button']").trigger("click");
+
+            expect(boardOf(wrapper)).toEqual(before);
+            expect(wrapper.find("[data-testid='hint-auto-notes']").exists()).toBe(false);
+            expect(wrapper.find("[data-testid='hint-panel']").exists()).toBe(true);
+
+            await wrapper.find("[data-testid='hint-cancel']").trigger("click");
+            await wrapper.find("[data-testid='cell-0-3']").trigger("click");
+            await wrapper.find("[data-testid='number-6']").trigger("click");
+            expect(wrapper.find("[data-testid='cell-0-3']").text()).toBe("6");
+        });
+
+        it("should ignore long presses while hinting", async () => {
+            const wrapper = mountGame();
+            await wrapper.find("[data-testid='number-4']").trigger("click");
+            await openRevealCell(wrapper);
+            vi.useFakeTimers();
+            const cell = wrapper.find("[data-testid='cell-0-2']");
+
+            const pointerdown = new Event("pointerdown", { bubbles: true });
+            Object.assign(pointerdown, { isPrimary: true, pointerType: "touch", button: 0, clientX: 10, clientY: 10 });
+            cell.element.dispatchEvent(pointerdown);
+            vi.advanceTimersByTime(400);
+            await cell.trigger("pointerup");
+            await cell.trigger("click");
+
+            const puzzleCell = wrapper.findComponent<typeof Cell>("[data-testid='cell-0-2']").props("puzzleCell");
+            expect(puzzleCell.notes).toEqual([]);
+            expect(puzzleCell.entry).toBe(0);
+        });
+
+        it("should show the complete modal and log game_complete when the hint fills the last cell", async () => {
+            localStorage.setItem("sudoku-settings", JSON.stringify({ completionFlash: false }));
+            const logEvent = vi.fn().mockResolvedValue(undefined);
+            const wrapper = mountGameWith(createKnownSudoku(), { logEvent });
+            await fillAllButLastEmptyCell(wrapper);
+
+            await openRevealCell(wrapper);
+            await wrapper.find("[data-testid='hint-primary']").trigger("click");
+
+            expect(wrapper.find("[data-testid='game-complete-modal']").exists()).toBe(true);
+            expect(logEvent).toHaveBeenCalledWith(expect.objectContaining({ name: "game_complete" }));
+        });
+
+        it("should keep every note empty after filling when the player had none", async () => {
+            const plan = multiStepPlan();
+            const wrapper = mountGameWith(createMultiStepSudoku());
+            await openRevealCell(wrapper);
+            await pressPrimaryUntilLastStep(wrapper, plan.steps.length);
+
+            await wrapper.find("[data-testid='hint-primary']").trigger("click");
+
+            expect(boardOf(wrapper).every((cell) => cell.notes.length === 0)).toBe(true);
+        });
+
+        it("should undo the whole hint in one step", async () => {
+            const plan = multiStepPlan();
+            const wrapper = mountGameWith(createMultiStepSudoku());
+            await wrapper.find("[data-testid='hint-button']").trigger("click");
+            await wrapper.find("[data-testid='hint-auto-notes']").trigger("click");
+            const before = boardOf(wrapper);
+            await openRevealCell(wrapper);
+            await pressPrimaryUntilLastStep(wrapper, plan.steps.length);
+            await wrapper.find("[data-testid='hint-primary']").trigger("click");
+            expect(boardOf(wrapper)).not.toEqual(before);
+
+            await wrapper.find("[data-testid='undo-button']").trigger("click");
+
+            expect(boardOf(wrapper)).toEqual(before);
+        });
+
+        it("should end hint mode without changing the board when leaving through the router", async () => {
+            const wrapper = mountGame();
+            await wrapper.find("[data-testid='note-button']").trigger("click");
+            await wrapper.find("[data-testid='cell-0-3']").trigger("click");
+            await wrapper.find("[data-testid='number-6']").trigger("click");
+            await wrapper.find("[data-testid='note-button']").trigger("click");
+            await wrapper.find("[data-testid='cell-0-2']").trigger("click");
+            await wrapper.find("[data-testid='number-4']").trigger("click");
+            await openRevealCell(wrapper);
+            expect(wrapper.find("[data-testid='hint-panel']").exists()).toBe(true);
+            const before = boardOf(wrapper);
+
+            const leaveGuards = vi.mocked(onBeforeRouteLeave).mock.calls;
+            const leaveGuard = leaveGuards[leaveGuards.length - 1][0] as unknown as () => boolean;
+            expect(leaveGuard()).toBe(false);
+            await flushPromises();
+            await wrapper.find("[data-testid='save-and-leave-button']").trigger("click");
+            await flushPromises();
+
+            expect(wrapper.find("[data-testid='hint-panel']").exists()).toBe(false);
+            expect(wrapper.find("[data-testid='hint-mode-pill']").exists()).toBe(false);
+            expect(boardOf(wrapper)).toEqual(before);
+            const saved = useGameStore().savedGame;
+            expect(saved?.cells.flat().map(({ entry, notes }) => ({ entry, notes }))).toEqual(before);
+            expect(saved?.hintsUsed).toBe(1);
         });
     });
 

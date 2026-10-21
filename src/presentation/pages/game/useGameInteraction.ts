@@ -11,14 +11,25 @@ interface GameInteractionOptions {
     checkAndComplete: (origin: { row: number; column: number }) => void;
     onGroupCompleted?: (cells: { row: number; column: number }[], origin: { row: number; column: number }) => void;
     autoRemoveNotes: () => boolean;
+    /** True while the board ignores the player, e.g. during hint mode. */
+    isLocked?: () => boolean;
 }
 
-export const useGameInteraction = ({ sudoku, stepRecorder, clearErrors, checkAndComplete, onGroupCompleted, autoRemoveNotes }: GameInteractionOptions) => {
+export const useGameInteraction = ({
+    sudoku,
+    stepRecorder,
+    clearErrors,
+    checkAndComplete,
+    onGroupCompleted,
+    autoRemoveNotes,
+    isLocked = () => false,
+}: GameInteractionOptions) => {
     const selectedCell = ref<{ row: number; column: number } | null>(null);
     const selectedDigit = ref<number | null>(null);
     const inputMode = ref(InputMode.Normal);
 
     const clickCell = (row: number, column: number) => {
+        if (isLocked()) return;
         clearErrors();
         if (sudoku.puzzle[row][column].isClue) {
             pickClueDigit(sudoku.puzzle[row][column].clue);
@@ -41,6 +52,7 @@ export const useGameInteraction = ({ sudoku, stepRecorder, clearErrors, checkAnd
 
     // Digit-first only: performs the opposite input of the current mode, once, without changing the mode.
     const longPressCell = (row: number, column: number) => {
+        if (isLocked()) return;
         if (sudoku.puzzle[row][column].isClue) {
             clickCell(row, column);
             return;
@@ -123,10 +135,12 @@ export const useGameInteraction = ({ sudoku, stepRecorder, clearErrors, checkAnd
     };
 
     const toggleNoteMode = () => {
+        if (isLocked()) return;
         inputMode.value = inputMode.value === InputMode.Note ? InputMode.Normal : InputMode.Note;
     };
 
     const toggleEraseMode = () => {
+        if (isLocked()) return;
         inputMode.value = inputMode.value === InputMode.Erase ? InputMode.Normal : InputMode.Erase;
         if (inputMode.value === InputMode.Erase) {
             selectedCell.value = null;
@@ -135,6 +149,7 @@ export const useGameInteraction = ({ sudoku, stepRecorder, clearErrors, checkAnd
     };
 
     const selectDigit = (digit: number) => {
+        if (isLocked()) return;
         clearErrors();
         if (inputMode.value === InputMode.Erase) inputMode.value = InputMode.Normal;
         if (selectedCell.value) {
@@ -152,6 +167,7 @@ export const useGameInteraction = ({ sudoku, stepRecorder, clearErrors, checkAnd
     };
 
     const undo = () => {
+        if (isLocked()) return;
         sudoku.undo();
         stepRecorder.record(sudoku.puzzle, "undo", 0, 0, 0);
     };
