@@ -126,3 +126,15 @@ describe("Donate.vue product loading", () => {
         expect(wrapper.find("[data-testid='donate-retry']").exists()).toBe(false);
     });
 });
+
+describe("Donate.vue purchase feedback", () => {
+    it("shows a Cancelled toast when the purchase is cancelled", async () => {
+        const wrapper = mountDonate({ logEvent: vi.fn().mockResolvedValue(undefined) }, buildBilling({ kind: "cancelled" }));
+        await flushPromises();
+
+        await wrapper.find("[data-testid='donate-tier-coffee']").trigger("click");
+        await flushPromises();
+
+        expect(wrapper.find("[data-testid='donate-toast']").text()).toBe("Cancelled");
+    });
+});

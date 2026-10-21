@@ -75,6 +75,16 @@
             Payments handled by Google Play
         </p>
 
+        <Transition name="toast">
+            <div
+                v-if="toastMessage !== null"
+                class="fixed left-1/2 -translate-x-1/2 bottom-24 z-50 bg-foreground text-background text-sm px-4 py-3 rounded-xl shadow-lg max-w-[90%]"
+                data-testid="donate-toast"
+            >
+                {{ toastMessage }}
+            </div>
+        </Transition>
+
         <DonateSuccess
             v-if="successTier !== null"
             :tier="successTier"
@@ -84,7 +94,7 @@
 </template>
 
 <script lang="ts" setup>
-import { inject, onMounted, ref, watch } from "vue";
+import { inject, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import { ChevronLeft, ChevronRight } from "lucide-vue-next";
 import { useDonateStore } from "@/stores/donateStore";
@@ -96,6 +106,10 @@ const router = useRouter();
 const store = useDonateStore();
 const analytics = inject(ANALYTICS_KEY);
 const successTier = ref<DonateTier | null>(null);
+const toastMessage = ref<string | null>(null);
+let toastTimeout: ReturnType<typeof setTimeout> | null = null;
+
+const TOAST_DURATION = 2500;
 
 const TIER_EMOJI: Record<DonateTier, string> = {
     coffee: "☕",
@@ -104,6 +118,15 @@ const TIER_EMOJI: Record<DonateTier, string> = {
 };
 
 const emojiFor = (tier: DonateTier) => TIER_EMOJI[tier];
+
+const showToast = (message: string) => {
+    if (toastTimeout !== null) clearTimeout(toastTimeout);
+    toastMessage.value = message;
+    toastTimeout = setTimeout(() => {
+        toastMessage.value = null;
+        toastTimeout = null;
+    }, TOAST_DURATION);
+};
 
 const goBack = () => {
     router.back();
@@ -130,7 +153,13 @@ watch(() => store.lastResult, (result) => {
             tier: result.tier,
             amount_usd: result.amountUsd,
         });
+    } else if (result?.kind === "cancelled") {
+        showToast("Cancelled");
     }
+});
+
+onBeforeUnmount(() => {
+    if (toastTimeout !== null) clearTimeout(toastTimeout);
 });
 
 onMounted(async () => {
@@ -138,3 +167,15 @@ onMounted(async () => {
     await store.loadProducts();
 });
 </script>
+
+<style scoped>
+.toast-enter-active,
+.toast-leave-active {
+    transition: opacity 200ms ease, transform 200ms ease;
+}
+.toast-enter-from,
+.toast-leave-to {
+    opacity: 0;
+    transform: translate(-50%, 10px);
+}
+</style>
