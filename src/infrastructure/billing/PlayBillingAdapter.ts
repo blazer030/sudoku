@@ -11,6 +11,19 @@ const TIER_META = new Map<string, { tier: DonateTier; label: string }>([
 
 const PRODUCT_IDS = Array.from(TIER_META.keys());
 
+// cdv-purchase retries Play connection and product loading indefinitely, so cap how long the page waits
+const LOAD_TIMEOUT_MILLISECONDS = 10_000;
+
+const settleWithin = (promise: Promise<unknown>, milliseconds: number): Promise<void> =>
+    new Promise((resolve) => {
+        const timeout = setTimeout(resolve, milliseconds);
+        const finish = () => {
+            clearTimeout(timeout);
+            resolve();
+        };
+        promise.then(finish, finish);
+    });
+
 export class PlayBillingAdapter implements BillingService {
     private initialization: Promise<unknown> | null = null;
     private hasLoadedProducts = false;
@@ -32,7 +45,7 @@ export class PlayBillingAdapter implements BillingService {
     }
 
     async loadProducts(): Promise<Product[]> {
-        await this.ensureSetup();
+        await settleWithin(this.ensureSetup(), LOAD_TIMEOUT_MILLISECONDS);
         if (this.hasLoadedProducts && this.availableProducts().length < PRODUCT_IDS.length) {
             await store.update();
         }

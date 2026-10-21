@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 interface FakeOffer {
     order: ReturnType<typeof vi.fn>;
@@ -120,6 +120,10 @@ beforeEach(() => {
     mocks.fakeStore.minTimeBetweenUpdates = 600_000;
 });
 
+afterEach(() => {
+    vi.useRealTimers();
+});
+
 describe("PlayBillingAdapter", () => {
     it("loadProducts registers the three donate SKUs and resolves once productUpdated fires for each", async () => {
         const adapter = new PlayBillingAdapter();
@@ -165,6 +169,17 @@ describe("PlayBillingAdapter", () => {
         await expect(adapter.loadProducts()).resolves.toEqual([
             { id: "donate_coffee", tier: "coffee", label: "Coffee", priceText: "$2.99", amountUsd: 2.99 },
         ]);
+    });
+
+    it("loadProducts gives up with no products when store initialization never settles", async () => {
+        vi.useFakeTimers();
+        mocks.initializeSpy.mockReturnValue(new Promise(() => undefined));
+
+        const adapter = new PlayBillingAdapter();
+        const loading = adapter.loadProducts();
+        await vi.advanceTimersByTimeAsync(10_000);
+
+        await expect(loading).resolves.toEqual([]);
     });
 
     it("loadProducts asks the store to refresh unthrottled when retried after an incomplete load", async () => {
