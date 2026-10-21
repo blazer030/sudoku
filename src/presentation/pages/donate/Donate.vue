@@ -11,18 +11,18 @@
                     class="text-foreground"
                 />
                 <span class="text-foreground text-base font-medium">
-                    Back
+                    {{ t("common.back") }}
                 </span>
             </button>
             <span class="text-foreground text-lg font-semibold">
-                Support
+                {{ t("settings.support") }}
             </span>
             <div class="w-15" />
         </div>
 
         <p class="text-foreground-muted text-[15px] leading-relaxed">
-            Sudoku is 100% free, no ads.<br>
-            If you'd like to support development:
+            {{ t("donate.intro1") }}<br>
+            {{ t("donate.intro2") }}
         </p>
 
         <div
@@ -31,7 +31,7 @@
             data-testid="donate-loading"
         >
             <span class="text-foreground-muted text-[15px]">
-                Loading…
+                {{ t("donate.loading") }}
             </span>
         </div>
 
@@ -40,14 +40,14 @@
             class="flex flex-col items-center gap-3 bg-card rounded-2xl shadow-card-sm px-4 py-6"
         >
             <span class="text-foreground-muted text-[15px]">
-                Couldn't load donation options.
+                {{ t("donate.loadFailed") }}
             </span>
             <button
                 class="px-5 py-2 rounded-button bg-primary text-white text-[15px] font-medium cursor-pointer hover:bg-primary-hover"
                 data-testid="donate-retry"
                 @click="retryLoad"
             >
-                Retry
+                {{ t("donate.retry") }}
             </button>
         </div>
 
@@ -66,7 +66,7 @@
                 <div class="flex items-center gap-3">
                     <span class="text-2xl">{{ emojiFor(product.tier) }}</span>
                     <span class="text-foreground text-[15px] font-medium">
-                        {{ product.label }}
+                        {{ t(`donate.tiers.${product.tier}`) }}
                     </span>
                 </div>
                 <div class="flex items-center gap-1.5">
@@ -82,7 +82,7 @@
         </div>
 
         <p class="text-foreground-muted text-[12px] text-center">
-            Payments handled by Google Play
+            {{ t("donate.payments") }}
         </p>
 
         <Transition name="toast">
@@ -106,12 +106,14 @@
 <script lang="ts" setup>
 import { inject, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
 import { ChevronLeft, ChevronRight } from "lucide-vue-next";
 import { useDonateStore } from "@/stores/donateStore";
 import { ANALYTICS_KEY, type DonateTier } from "@/application/analytics/AnalyticsService";
 import type { Product } from "@/application/billing/BillingService";
 import DonateSuccess from "@/presentation/pages/donate/components/DonateSuccess.vue";
 
+const { t } = useI18n();
 const router = useRouter();
 const store = useDonateStore();
 const analytics = inject(ANALYTICS_KEY);
@@ -165,10 +167,10 @@ watch(() => store.lastResult, (result) => {
             amount_usd: result.amountUsd,
         });
     } else if (result?.kind === "cancelled") {
-        showToast("Cancelled");
+        showToast(t("donate.cancelled"));
     } else if (result?.kind === "error") {
         console.error("Donate purchase failed:", result.reason);
-        showToast("Purchase failed. Please try again.");
+        showToast(t("donate.purchaseFailed"));
     }
 });
 

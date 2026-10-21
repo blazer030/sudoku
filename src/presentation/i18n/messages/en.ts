@@ -132,6 +132,23 @@ export const en = {
             message: "All your game history, statistics and best times will be permanently deleted. This action cannot be undone.",
         },
     },
+    donate: {
+        intro1: "Sudoku is 100% free, no ads.",
+        intro2: "If you'd like to support development:",
+        loading: "Loading…",
+        loadFailed: "Couldn't load donation options.",
+        retry: "Retry",
+        payments: "Payments handled by Google Play",
+        tiers: { coffee: "Coffee", lunch: "Lunch", coding_time: "Coding Time" },
+        thanks: {
+            coffee: "Thank you for the Coffee!",
+            lunch: "Thank you for the Lunch!",
+            coding_time: "Thank you for the Coding Time!",
+        },
+        done: "Done",
+        cancelled: "Cancelled",
+        purchaseFailed: "Purchase failed. Please try again.",
+    },
     date: {
         today: "Today, {time}",
         yesterday: "Yesterday, {time}",

@@ -134,6 +134,23 @@ export const zhHant: MessageSchema = {
             message: "所有對局紀錄、統計和最佳時間都會被永久刪除，且無法復原。",
         },
     },
+    donate: {
+        intro1: "數獨完全免費，沒有廣告。",
+        intro2: "如果你想支持開發：",
+        loading: "載入中…",
+        loadFailed: "無法載入贊助選項。",
+        retry: "重試",
+        payments: "付款由 Google Play 處理",
+        tiers: { coffee: "一杯咖啡", lunch: "一份午餐", coding_time: "寫程式時間" },
+        thanks: {
+            coffee: "謝謝你請我喝咖啡！",
+            lunch: "謝謝你請我吃午餐！",
+            coding_time: "謝謝你給我寫程式的時間！",
+        },
+        done: "完成",
+        cancelled: "已取消",
+        purchaseFailed: "購買失敗，請再試一次。",
+    },
     date: {
         today: "今天 {time}",
         yesterday: "昨天 {time}",
