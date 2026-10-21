@@ -926,7 +926,7 @@ describe("Game", () => {
             await wrapper.find("[data-testid='hint-button']").trigger("click");
             await wrapper.find("[data-testid='hint-check-conflicts']").trigger("click");
 
-            expect(wrapper.find("[data-testid='cell-0-2']").classes()).toContain("bg-error-light");
+            expect(wrapper.find("[data-testid='cell-0-2']").classes()).toContain("bg-error-surface");
         });
 
         it("should clear conflict marks on the next interaction", async () => {
@@ -938,11 +938,11 @@ describe("Game", () => {
 
             await wrapper.find("[data-testid='hint-button']").trigger("click");
             await wrapper.find("[data-testid='hint-check-conflicts']").trigger("click");
-            expect(wrapper.find("[data-testid='cell-0-2']").classes()).toContain("bg-error-light");
+            expect(wrapper.find("[data-testid='cell-0-2']").classes()).toContain("bg-error-surface");
 
             await wrapper.find("[data-testid='cell-0-3']").trigger("click");
 
-            expect(wrapper.find("[data-testid='cell-0-2']").classes()).not.toContain("bg-error-light");
+            expect(wrapper.find("[data-testid='cell-0-2']").classes()).not.toContain("bg-error-surface");
         });
 
         it("should show a random-reveal toast after Reveal Cell", async () => {

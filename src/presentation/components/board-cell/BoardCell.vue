@@ -76,13 +76,13 @@ const VARIANT_BACKGROUNDS: Record<CellVariant, string> = {
     default: "bg-card",
     clue: "bg-cell-clue",
     selected: "bg-primary-light",
-    focus: "bg-primary/40",
-    scope: "bg-primary/15",
-    error: "bg-error-light",
+    focus: "bg-cell-focus",
+    scope: "bg-cell-scope",
+    error: "bg-error-surface",
     "same-digit": "bg-highlight",
-    pattern: "bg-primary/30",
+    pattern: "bg-cell-pattern",
     answer: "bg-primary-light ring-2 ring-inset ring-primary",
-    wrong: "bg-error-light ring-2 ring-inset ring-error",
+    wrong: "bg-error-surface ring-2 ring-inset ring-error",
 };
 
 const VALUE_TEXT_COLORS: Record<ValueTextColor, string> = {
@@ -111,10 +111,10 @@ const noteClass = (digit: number): string => {
         return props.noteTone === "solver" ? "text-error font-semibold strike-diagonal" : "text-error strike-diagonal";
     }
     if (props.highlightedNote === digit || props.emphasizedDigits.includes(digit)) {
-        return "aspect-square max-w-5 max-h-5 w-full rounded-full bg-primary text-white font-semibold flex items-center justify-center";
+        return "aspect-square max-w-5 max-h-5 w-full rounded-full bg-primary text-on-primary font-semibold flex items-center justify-center";
     }
     if (props.noteTone === "solver") return "text-primary font-semibold";
-    return "text-foreground-muted";
+    return "text-note";
 };
 
 const positionClasses = computed(() => {

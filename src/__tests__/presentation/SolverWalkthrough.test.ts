@@ -342,12 +342,12 @@ describe("SolverWalkthrough", () => {
         await wrapper.find("[data-testid='next-step-button']").trigger("click");
 
         const focusCell = wrapper.find(`[data-testid='solver-cell-${cell.row}-${cell.column}']`);
-        expect(focusCell.classes()).toContain("bg-primary/40");
+        expect(focusCell.classes()).toContain("bg-cell-focus");
 
         const nonFocus = cell.row === 0 && cell.column === 0
             ? `[data-testid='solver-cell-0-1']`
             : `[data-testid='solver-cell-0-0']`;
-        expect(wrapper.find(nonFocus).classes()).not.toContain("bg-primary/40");
+        expect(wrapper.find(nonFocus).classes()).not.toContain("bg-cell-focus");
     });
 
     it("should apply scope variant to non-focus cells in the current step's scope", async () => {
@@ -386,7 +386,7 @@ describe("SolverWalkthrough", () => {
             if (focusKeys.has(key)) continue;
             const [row, column] = key.split("-").map(Number);
             const cell = wrapper.find(`[data-testid='solver-cell-${row}-${column}']`);
-            expect(cell.classes()).toContain("bg-primary/15");
+            expect(cell.classes()).toContain("bg-cell-scope");
             checkedScopeCells++;
         }
         expect(checkedScopeCells).toBeGreaterThan(0);
@@ -445,8 +445,8 @@ describe("SolverWalkthrough", () => {
         for (let row = 0; row < 9; row++) {
             for (let column = 0; column < 9; column++) {
                 const cell = wrapper.find(`[data-testid='solver-cell-${row}-${column}']`);
-                expect(cell.classes()).not.toContain("bg-primary/40");
-                expect(cell.classes()).not.toContain("bg-primary/15");
+                expect(cell.classes()).not.toContain("bg-cell-focus");
+                expect(cell.classes()).not.toContain("bg-cell-scope");
             }
         }
         expect(wrapper.find("[data-testid^='eliminated-note-']").exists()).toBe(false);

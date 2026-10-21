@@ -18,8 +18,8 @@
                 <span
                     v-if="showRemainingCount && !isDigitCompleted(digit)"
                     :class="selectedDigit === digit
-                        ? 'bg-white text-primary'
-                        : 'bg-foreground-secondary text-white'"
+                        ? 'bg-on-primary text-primary'
+                        : 'bg-foreground-secondary text-card'"
                     :data-testid="`badge-${digit}`"
                     class="absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-semibold"
                 >
@@ -45,8 +45,8 @@
                 <span
                     v-if="showRemainingCount && !isDigitCompleted(digit)"
                     :class="selectedDigit === digit
-                        ? 'bg-white text-primary'
-                        : 'bg-foreground-secondary text-white'"
+                        ? 'bg-on-primary text-primary'
+                        : 'bg-foreground-secondary text-card'"
                     :data-testid="`badge-${digit}`"
                     class="absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-semibold"
                 >
@@ -95,13 +95,13 @@ const getRemainingCount = (digit: number): number => 9 - props.digitCounts[digit
 
 const digitButtonClasses = (digit: number): string => {
     if (isDigitDisabled(digit)) return "bg-card opacity-50 text-foreground-muted";
-    if (props.selectedDigit === digit) return "bg-primary text-white shadow-primary-active";
+    if (props.selectedDigit === digit) return "bg-primary text-on-primary shadow-primary-active";
     return "bg-card text-foreground shadow-card-sm hover:bg-foreground/5";
 };
 
 const eraseButtonClasses = computed(() => {
     if (props.eraseDisabled) return "bg-card opacity-50 text-foreground-muted";
-    if (props.eraseActive) return "bg-primary text-white shadow-primary-active";
+    if (props.eraseActive) return "bg-primary text-on-primary shadow-primary-active";
     return "bg-card text-foreground shadow-card-sm hover:bg-foreground/5";
 });
 </script>

@@ -26,9 +26,9 @@ describe("BoardCell", () => {
         ["default", "bg-card"],
         ["clue", "bg-cell-clue"],
         ["selected", "bg-primary-light"],
-        ["focus", "bg-primary/40"],
-        ["scope", "bg-primary/15"],
-        ["error", "bg-error-light"],
+        ["focus", "bg-cell-focus"],
+        ["scope", "bg-cell-scope"],
+        ["error", "bg-error-surface"],
         ["same-digit", "bg-highlight"],
     ])("variant='%s' applies background class '%s'", (variant, expectedClass) => {
         const wrapper = mountCell({ variant });
@@ -52,7 +52,7 @@ describe("BoardCell", () => {
         const spans = wrapper.findAll("span");
         const highlightedSpan = spans.find((span) => span.text() === "2");
         expect(highlightedSpan?.classes()).toContain("bg-primary");
-        expect(highlightedSpan?.classes()).toContain("text-white");
+        expect(highlightedSpan?.classes()).toContain("text-on-primary");
     });
 
     it("should apply top-left corner rounding at (0, 0)", () => {

@@ -43,7 +43,7 @@
                 {{ t("donate.loadFailed") }}
             </span>
             <button
-                class="px-5 py-2 rounded-button bg-primary text-white text-[15px] font-medium cursor-pointer hover:bg-primary-hover"
+                class="px-5 py-2 rounded-button bg-primary text-on-primary text-[15px] font-medium cursor-pointer hover:bg-primary-hover"
                 data-testid="donate-retry"
                 @click="retryLoad"
             >

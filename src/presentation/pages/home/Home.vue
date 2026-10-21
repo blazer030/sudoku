@@ -5,15 +5,15 @@
                 class="w-20 h-20 bg-primary rounded-popup flex items-center justify-center shadow-primary-lg"
             >
                 <div class="grid grid-cols-3 gap-1 w-12 h-12">
-                    <div class="rounded-sm bg-white/40" />
-                    <div class="rounded-sm bg-white" />
-                    <div class="rounded-sm bg-white/40" />
-                    <div class="rounded-sm bg-white" />
-                    <div class="rounded-sm bg-white/40" />
-                    <div class="rounded-sm bg-white" />
-                    <div class="rounded-sm bg-white/40" />
-                    <div class="rounded-sm bg-white" />
-                    <div class="rounded-sm bg-white/40" />
+                    <div class="rounded-sm bg-on-primary/40" />
+                    <div class="rounded-sm bg-on-primary" />
+                    <div class="rounded-sm bg-on-primary/40" />
+                    <div class="rounded-sm bg-on-primary" />
+                    <div class="rounded-sm bg-on-primary/40" />
+                    <div class="rounded-sm bg-on-primary" />
+                    <div class="rounded-sm bg-on-primary/40" />
+                    <div class="rounded-sm bg-on-primary" />
+                    <div class="rounded-sm bg-on-primary/40" />
                 </div>
             </div>
             <h1 class="text-foreground text-4xl font-bold tracking-[-1px]">

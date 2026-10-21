@@ -27,7 +27,7 @@
                     :key="option.value"
                     :aria-pressed="settingsStore.language === option.value"
                     :class="settingsStore.language === option.value
-                        ? 'bg-primary text-white font-semibold shadow-primary-sm'
+                        ? 'bg-primary text-on-primary font-semibold shadow-primary-sm'
                         : 'text-foreground-secondary font-medium hover:bg-foreground/5'"
                     :data-testid="`language-${option.value}`"
                     class="flex-1 h-full rounded-icon flex items-center justify-center text-sm transition-all cursor-pointer"
@@ -72,7 +72,7 @@
                         >
                             <Check
                                 :size="18"
-                                class="text-white"
+                                class="text-on-primary"
                                 :stroke-width="3"
                             />
                         </div>
@@ -94,7 +94,7 @@
                         :class="settingsStore.matchLauncherIconToTheme ? 'bg-primary' : 'bg-foreground-muted'"
                     >
                         <div
-                            class="absolute top-0.5 w-5 h-5 bg-white rounded-full shadow-card-sm transition-transform duration-200"
+                            class="absolute top-0.5 w-5 h-5 bg-card rounded-full shadow-card-sm transition-transform duration-200"
                             :class="settingsStore.matchLauncherIconToTheme ? 'translate-x-5.5' : 'translate-x-0.5'"
                         />
                     </div>
@@ -121,7 +121,7 @@
                         :class="toggle.value ? 'bg-primary' : 'bg-foreground-muted'"
                     >
                         <div
-                            class="absolute top-0.5 w-5 h-5 bg-white rounded-full shadow-card-sm transition-transform duration-200"
+                            class="absolute top-0.5 w-5 h-5 bg-card rounded-full shadow-card-sm transition-transform duration-200"
                             :class="toggle.value ? 'translate-x-5.5' : 'translate-x-0.5'"
                         />
                     </div>

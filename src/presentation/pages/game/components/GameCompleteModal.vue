@@ -2,7 +2,7 @@
     <Transition name="modal">
         <div
             v-if="visible"
-            class="fixed inset-0 bg-black/60 flex items-center justify-center z-50"
+            class="fixed inset-0 bg-scrim/60 flex items-center justify-center z-50"
             data-testid="game-complete-modal"
         >
             <FireworkCanvas />
@@ -60,9 +60,9 @@
                 >
                     <Home
                         :size="20"
-                        class="text-white"
+                        class="text-on-primary"
                     />
-                    <span class="text-base font-semibold text-white">
+                    <span class="text-base font-semibold text-on-primary">
                         {{ t("game.complete.backToHome") }}
                     </span>
                 </button>

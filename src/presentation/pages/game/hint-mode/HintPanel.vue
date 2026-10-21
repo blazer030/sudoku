@@ -10,7 +10,7 @@
     >
         <template v-if="phase === 'wrongEntry' && wrongCell">
             <div class="flex items-center gap-2.5">
-                <span class="w-8 h-8 rounded-full bg-error-light flex items-center justify-center shrink-0">
+                <span class="w-8 h-8 rounded-full bg-error-surface flex items-center justify-center shrink-0">
                     <CircleAlert
                         :size="18"
                         class="text-error"
@@ -58,7 +58,7 @@
                 >
                     <span
                         :key="`technique-${stepIndex}`"
-                        :class="isLastStep ? 'bg-primary text-white' : 'bg-primary-light text-primary'"
+                        :class="isLastStep ? 'bg-primary text-on-primary' : 'bg-primary-light text-primary'"
                         class="inline-flex items-center gap-1.5 rounded-full text-[13px] font-semibold pl-2 pr-2.5 py-1 leading-none whitespace-nowrap"
                         data-testid="hint-technique"
                     >
@@ -168,7 +168,7 @@
                         tag="span"
                     >
                         <template #digit>
-                            <span class="w-6 h-6 rounded-md bg-white/20 flex items-center justify-center text-[15px] font-semibold leading-none">{{ digit }}</span>
+                            <span class="w-6 h-6 rounded-md bg-on-primary/20 flex items-center justify-center text-[15px] font-semibold leading-none">{{ digit }}</span>
                         </template>
                     </i18n-t>
                     <template v-else>
@@ -278,7 +278,7 @@ const dotClass = (index: number): string => {
 }
 
 .hint-primary {
-    @apply flex-[1.6] flex items-center justify-center gap-1.5 py-2.5 rounded-2xl bg-primary text-white text-[15px] font-semibold cursor-pointer shadow-primary transition-all duration-200 hover:bg-primary-hover active:scale-[0.98];
+    @apply flex-[1.6] flex items-center justify-center gap-1.5 py-2.5 rounded-2xl bg-primary text-on-primary text-[15px] font-semibold cursor-pointer shadow-primary transition-all duration-200 hover:bg-primary-hover active:scale-[0.98];
 }
 
 .hint-secondary {
@@ -290,7 +290,8 @@ const dotClass = (index: number): string => {
 }
 
 .hint-explanation-fade {
-    mask-image: linear-gradient(to bottom, #000 calc(100% - 1.5rem), transparent);
+    /* The mask only reads alpha */
+    mask-image: linear-gradient(to bottom, black calc(100% - 1.5rem), transparent);
 }
 
 .hint-step-enter-active,

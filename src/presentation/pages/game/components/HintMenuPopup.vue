@@ -5,7 +5,7 @@
             class="fixed inset-0 z-50"
         >
             <div
-                class="absolute inset-0 bg-black/30"
+                class="absolute inset-0 bg-scrim/30"
                 data-testid="hint-overlay"
                 @click="close('close')"
             />

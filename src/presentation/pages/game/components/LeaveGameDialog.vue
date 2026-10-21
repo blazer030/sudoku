@@ -2,7 +2,7 @@
     <Transition name="modal">
         <div
             v-if="visible"
-            class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+            class="fixed inset-0 bg-scrim/50 flex items-center justify-center z-50"
             data-testid="leave-game-dialog"
         >
             <div class="bg-card rounded-3xl p-8 mx-6 w-full max-w-[354px] flex flex-col items-center gap-6 shadow-modal">
@@ -30,9 +30,9 @@
                     >
                         <Save
                             :size="20"
-                            class="text-white"
+                            class="text-on-primary"
                         />
-                        <span class="text-base font-semibold text-white">{{ t("game.leave.saveAndLeave") }}</span>
+                        <span class="text-base font-semibold text-on-primary">{{ t("game.leave.saveAndLeave") }}</span>
                     </button>
 
                     <button
@@ -40,7 +40,7 @@
                         data-testid="give-up-and-leave-button"
                         @click="close('giveUp')"
                     >
-                        <span class="text-base font-semibold text-white">{{ t("game.leave.giveUpAndLeave") }}</span>
+                        <span class="text-base font-semibold text-on-danger">{{ t("game.leave.giveUpAndLeave") }}</span>
                     </button>
 
                     <button

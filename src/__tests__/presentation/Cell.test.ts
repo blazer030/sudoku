@@ -13,7 +13,7 @@ describe("Cell", () => {
 
         const wrapper = mountCell({ puzzleCell, error: true });
 
-        expect(wrapper.classes()).toContain("bg-error-light");
+        expect(wrapper.classes()).toContain("bg-error-surface");
         expect(wrapper.find("[data-testid='cell-value']").classes()).toContain("text-error");
     });
 
@@ -23,7 +23,7 @@ describe("Cell", () => {
 
         const wrapper = mountCell({ puzzleCell, error: false });
 
-        expect(wrapper.classes()).not.toContain("bg-error-light");
+        expect(wrapper.classes()).not.toContain("bg-error-surface");
         expect(wrapper.find("[data-testid='cell-value']").classes()).not.toContain("text-error");
     });
 

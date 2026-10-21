@@ -8,6 +8,7 @@
 
 <script lang="ts" setup>
 import { onBeforeUnmount, onMounted, ref } from "vue";
+import { FIREWORK_COLORS } from "@/theme/fireworkColors";
 
 interface Particle {
     x: number;
@@ -56,11 +57,7 @@ const getThemeColors = (): string[] => {
         primary,
         accent,
         primaryLight,
-        "#FFD700",
-        "#FF6B6B",
-        "#4ECDC4",
-        "#A78BFA",
-        "#FB923C",
+        ...FIREWORK_COLORS,
     ].filter(Boolean);
 };
 

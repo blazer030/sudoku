@@ -17,7 +17,7 @@
             <ChevronLeft :size="22" />
         </button>
         <button
-            class="w-14 h-14 rounded-full bg-primary text-white flex items-center justify-center cursor-pointer hover:bg-primary/90"
+            class="w-14 h-14 rounded-full bg-primary text-on-primary flex items-center justify-center cursor-pointer hover:bg-primary/90"
             :data-testid="`${testidPrefix}play-button`"
             @click="emit('toggle-play')"
         >

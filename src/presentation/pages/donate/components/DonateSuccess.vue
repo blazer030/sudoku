@@ -7,7 +7,7 @@
                 {{ t(`donate.thanks.${props.tier}`) }}
             </span>
             <button
-                class="mt-6 px-8 py-3 bg-primary text-white rounded-2xl font-medium cursor-pointer"
+                class="mt-6 px-8 py-3 bg-primary text-on-primary rounded-2xl font-medium cursor-pointer"
                 data-testid="donate-success-done"
                 @click="$emit('done')"
             >

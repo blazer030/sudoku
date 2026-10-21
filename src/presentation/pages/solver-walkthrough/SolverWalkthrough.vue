@@ -69,14 +69,14 @@
                 class="flex gap-3"
             >
                 <button
-                    class="px-6 py-3 bg-danger text-white rounded-2xl font-semibold cursor-pointer shadow-danger transition-all duration-200 hover:bg-danger-hover hover:shadow-primary-lg"
+                    class="px-6 py-3 bg-danger text-on-danger rounded-2xl font-semibold cursor-pointer shadow-danger transition-all duration-200 hover:bg-danger-hover hover:shadow-primary-lg"
                     data-testid="reset-button"
                     @click="resetBoard"
                 >
                     {{ t("walkthrough.reset") }}
                 </button>
                 <button
-                    class="px-6 py-3 bg-primary text-white rounded-2xl font-semibold cursor-pointer shadow-primary transition-all duration-200 hover:bg-primary-hover hover:shadow-primary-lg"
+                    class="px-6 py-3 bg-primary text-on-primary rounded-2xl font-semibold cursor-pointer shadow-primary transition-all duration-200 hover:bg-primary-hover hover:shadow-primary-lg"
                     data-testid="solve-button"
                     @click="runSolver"
                 >

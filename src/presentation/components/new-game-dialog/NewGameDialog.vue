@@ -2,11 +2,11 @@
     <Transition name="modal">
         <div
             v-if="visible"
-            class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+            class="fixed inset-0 bg-scrim/50 flex items-center justify-center z-50"
             data-testid="new-game-confirm-dialog"
         >
             <div class="bg-card rounded-3xl p-8 mx-6 w-full max-w-[354px] flex flex-col items-center gap-6 shadow-modal">
-                <div class="w-16 h-16 rounded-2xl bg-[#FFF3E0] flex items-center justify-center">
+                <div class="w-16 h-16 rounded-2xl bg-danger/10 flex items-center justify-center">
                     <TriangleAlert
                         :size="32"
                         class="text-danger"
@@ -28,7 +28,7 @@
                         data-testid="give-up-and-start-new-button"
                         @click="close('giveUp')"
                     >
-                        <span class="text-base font-semibold text-white">{{ t("home.giveUp.confirm") }}</span>
+                        <span class="text-base font-semibold text-on-danger">{{ t("home.giveUp.confirm") }}</span>
                     </button>
 
                     <button
