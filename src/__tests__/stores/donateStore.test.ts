@@ -76,6 +76,7 @@ describe("donateStore", () => {
         await expect(store.loadProducts()).resolves.toBeUndefined();
 
         expect(store.loadFailed).toBe(true);
+        expect(store.loading).toBe(false);
         expect(store.products).toEqual([]);
     });
 

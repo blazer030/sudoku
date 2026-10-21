@@ -125,7 +125,7 @@ afterEach(() => {
 });
 
 describe("PlayBillingAdapter", () => {
-    it("loadProducts registers the three donate SKUs and resolves once productUpdated fires for each", async () => {
+    it("loadProducts registers the three donate SKUs and resolves with all of them once loaded", async () => {
         const adapter = new PlayBillingAdapter();
         const promise = adapter.loadProducts();
 
@@ -195,6 +195,16 @@ describe("PlayBillingAdapter", () => {
         expect(mocks.fakeStore.minTimeBetweenUpdates).toBe(0);
         expect(mocks.updateSpy).toHaveBeenCalledTimes(1);
         expect(retried.map((product) => product.id)).toEqual(["donate_coffee", "donate_lunch", "donate_coding_time"]);
+    });
+
+    it("loadProducts does not refresh the store when every product is already loaded", async () => {
+        const adapter = new PlayBillingAdapter();
+        fireAllProductsUpdated(buildProduct("donate_coffee", "$2.99", 2_990_000));
+        await adapter.loadProducts();
+
+        await adapter.loadProducts();
+
+        expect(mocks.updateSpy).not.toHaveBeenCalled();
     });
 
     it("a retry gives up with no products when the store refresh never settles", async () => {
