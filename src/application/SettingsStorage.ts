@@ -1,4 +1,6 @@
 export type ColorThemeId = "green" | "blue" | "purple" | "orange" | "pink" | "teal";
+export type AppLocale = "en" | "zh-Hant";
+export type LanguagePreference = "system" | AppLocale;
 
 export interface Settings {
     colorTheme: ColorThemeId;
