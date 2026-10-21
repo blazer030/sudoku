@@ -141,11 +141,6 @@
   animation: hint-reveal-pop 450ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .animate-hint-reveal-pop {
-    animation: none;
-  }
-}
 
 /* The answer cell keeps the hint's highlight for a beat, then fades back, so the fill
    reads clearly while the panel slides away. Defined after the completion flash so it
@@ -198,7 +193,21 @@
     transition: transform 250ms cubic-bezier(0.34, 1.4, 0.64, 1);
 }
 
+/* Reduced motion: no scaling, bouncing or sliding; colour changes and fades stay.
+   Enter and leave transitions (modals, popups, toasts, hint steps) keep their opacity
+   fade but lose their movement, including the ones in component styles. */
 @media (prefers-reduced-motion: reduce) {
+    [class*="-enter-from"],
+    [class*="-leave-to"],
+    [class*="-enter-from"] > *,
+    [class*="-leave-to"] > * {
+        transform: none !important;
+    }
+
+    .animate-hint-reveal-pop {
+        animation: none;
+    }
+
     [data-style="minimal"] .segmented-indicator-motion {
         transition: none;
     }
