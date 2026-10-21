@@ -76,7 +76,6 @@ export const en = {
             freeNote: "First use is free and won't be recorded.",
             autoNotes: "Auto Notes",
             checkConflicts: "Check Conflicts",
-            checkErrors: "Check Errors",
             revealCell: "Reveal Cell",
         },
         hintResult: "{technique}: {position}",

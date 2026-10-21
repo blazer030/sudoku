@@ -929,38 +929,6 @@ describe("Game", () => {
             expect(wrapper.find("[data-testid='cell-0-2']").classes()).toContain("bg-error-light");
         });
 
-        it("should show error style on wrong cells after Check Errors", async () => {
-            const wrapper = mountGame();
-
-            // 填錯: (0,2) 答案是 4，填 5
-            await wrapper.find("[data-testid='number-5']").trigger("click");
-            await wrapper.find("[data-testid='cell-0-2']").trigger("click");
-            await wrapper.find("[data-testid='number-5']").trigger("click"); // deselect
-
-            await wrapper.find("[data-testid='hint-button']").trigger("click");
-            await wrapper.find("[data-testid='hint-check-errors']").trigger("click");
-
-            expect(wrapper.find("[data-testid='cell-0-2']").classes()).toContain("bg-error-light");
-        });
-
-        it("should clear error marks on next interaction", async () => {
-            const wrapper = mountGame();
-
-            // 填錯並 check errors
-            await wrapper.find("[data-testid='number-5']").trigger("click");
-            await wrapper.find("[data-testid='cell-0-2']").trigger("click");
-            await wrapper.find("[data-testid='number-5']").trigger("click");
-
-            await wrapper.find("[data-testid='hint-button']").trigger("click");
-            await wrapper.find("[data-testid='hint-check-errors']").trigger("click");
-            expect(wrapper.find("[data-testid='cell-0-2']").classes()).toContain("bg-error-light");
-
-            // 點擊格子，error 應清除
-            await wrapper.find("[data-testid='cell-0-3']").trigger("click");
-
-            expect(wrapper.find("[data-testid='cell-0-2']").classes()).not.toContain("bg-error-light");
-        });
-
         it("should show a random-reveal toast after Reveal Cell", async () => {
             vi.spyOn(Sudoku.prototype, "planRevealHint").mockReturnValue({ kind: "noTechnique" });
             const wrapper = mountGame();

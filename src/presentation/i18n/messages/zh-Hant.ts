@@ -74,7 +74,6 @@ export const zhHant: MessageSchema = {
             freeNote: "第一次使用免費，不會被記錄。",
             autoNotes: "自動筆記",
             checkConflicts: "檢查衝突",
-            checkErrors: "檢查錯誤",
             revealCell: "揭示一格",
         },
         hintResult: "{technique}：{position}",

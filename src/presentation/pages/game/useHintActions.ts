@@ -22,7 +22,6 @@ type HintUsedEvent = Extract<AnalyticsEvent, { name: "hint_used" }>;
 const HINT_TYPE_EVENT: Record<Exclude<HintAction, "close">, HintUsedEvent["hint_type"]> = {
     autoNotes:      "auto_notes",
     checkConflicts: "check_conflicts",
-    checkErrors:    "check_errors",
     revealCell:     "reveal_cell",
 };
 
@@ -104,6 +103,9 @@ export const useHintActions = ({
             canUseHint: sudoku.hintTracker.canUseHint,
         });
         if (action === "close") return;
+        // Plan before spending: a solved board has nothing to reveal and must not cost a hint.
+        const plan = action === "revealCell" ? sudoku.planRevealHint() : null;
+        if (plan?.kind === "solved") return;
         sudoku.hintTracker.useHint();
         void analytics?.logEvent({ name: "hint_used", hint_type: HINT_TYPE_EVENT[action] });
         switch (action) {
@@ -114,13 +116,9 @@ export const useHintActions = ({
         case "checkConflicts":
             errorCells.value = sudoku.checkAllConflicts();
             break;
-        case "checkErrors":
-            errorCells.value = sudoku.checkErrors();
-            break;
         case "revealCell": {
             // A wrong entry or a solver path is shown step by step; only a stuck solver falls back to a random cell.
-            const plan = sudoku.planRevealHint();
-            if (plan.kind === "wrongEntry" || plan.kind === "steps") {
+            if (plan?.kind === "wrongEntry" || plan?.kind === "steps") {
                 clearErrors();
                 hintMode.start(plan);
                 break;
