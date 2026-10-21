@@ -131,6 +131,7 @@ import { useRoomBelow } from "@/presentation/pages/game/hint-mode/useRoomBelow";
 import { InputMode } from "@/presentation/pages/game/InputMode";
 import { useGameInteraction } from "@/presentation/pages/game/useGameInteraction";
 import { useGameSession } from "@/presentation/pages/game/useGameSession";
+import { useLongPressTip } from "@/presentation/pages/game/useLongPressTip";
 import { useSettingsStore } from "@/stores/settingsStore";
 
 const {
@@ -144,6 +145,7 @@ const {
     openHintMenu,
     hintMode,
     toastContent,
+    showToast,
     showLeaveDialog,
     checkAndComplete,
     triggerFlash,
@@ -182,6 +184,8 @@ const {
     autoRemoveNotes: () => settingsStore.autoRemoveNotes,
     isLocked: () => hintMode.active.value,
 });
+
+useLongPressTip({ selectedDigit, showTip: () => { showToast({ kind: "longPressTip" }); } });
 </script>
 
 <style scoped>

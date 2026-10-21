@@ -11,6 +11,7 @@ import Cell from "@/presentation/pages/game/components/Cell.vue";
 import { useGameStore } from "@/stores/gameStore";
 import type { Difficulty } from "@/domain/generator/SudokuGenerator";
 import { useStatisticsStore } from "@/stores/statisticsStore";
+import { useSettingsStore } from "@/stores/settingsStore";
 import { Sudoku } from "@/domain/game/Sudoku";
 import type { PuzzleCell } from "@/domain/board/PuzzleCell";
 import { createMultiStepSudoku } from "@/__tests__/fixtures/multiStepPuzzle";
@@ -962,6 +963,8 @@ describe("Game", () => {
         });
 
         it("should mark only the player cell when an entry repeats a clue", async () => {
+            // Keep the one-time long-press tip out of the way of the toast check
+            localStorage.setItem("sudoku-settings", JSON.stringify({ seenLongPressTip: true }));
             const wrapper = mountGame();
 
             // (0, 0) is the clue 5; fill 5 at (0, 2)
@@ -1396,6 +1399,50 @@ describe("Game", () => {
             const replay = useStatisticsStore().history[0].replay;
             expect(replay?.initialBoard[0][2].entry).toBe(4);
             expect(replay?.steps).toEqual([]);
+        });
+    });
+
+    describe("long-press tip", () => {
+        const LONG_PRESS_TIP = "Long-press a cell to toggle a note directly (in note mode, it fills the digit)";
+
+        it("should show the long-press tip the first time a digit is selected", async () => {
+            const wrapper = mountGame();
+
+            await wrapper.find("[data-testid='number-4']").trigger("click");
+
+            expect(wrapper.find("[data-testid='game-toast']").text()).toBe(LONG_PRESS_TIP);
+            expect(useSettingsStore().seenLongPressTip).toBe(true);
+            const stored = JSON.parse(localStorage.getItem("sudoku-settings") ?? "{}") as Record<string, unknown>;
+            expect(stored.seenLongPressTip).toBe(true);
+        });
+
+        it("should show the tip when the first digit comes from a clue", async () => {
+            const wrapper = mountGame();
+
+            await wrapper.find("[data-testid='cell-0-0']").trigger("click");
+
+            expect(wrapper.find("[data-testid='game-toast']").text()).toBe(LONG_PRESS_TIP);
+        });
+
+        it("should not show the tip twice in one game", async () => {
+            vi.useFakeTimers();
+            const wrapper = mountGame();
+
+            await wrapper.find("[data-testid='number-4']").trigger("click");
+            await vi.advanceTimersByTimeAsync(6000);
+            await wrapper.find("[data-testid='number-4']").trigger("click");
+            await wrapper.find("[data-testid='number-6']").trigger("click");
+
+            expect(wrapper.find("[data-testid='game-toast']").exists()).toBe(false);
+        });
+
+        it("should not show the tip after a reload", async () => {
+            localStorage.setItem("sudoku-settings", JSON.stringify({ seenLongPressTip: true }));
+            const wrapper = mountGame();
+
+            await wrapper.find("[data-testid='number-4']").trigger("click");
+
+            expect(wrapper.find("[data-testid='game-toast']").exists()).toBe(false);
         });
     });
 

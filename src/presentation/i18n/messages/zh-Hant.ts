@@ -87,6 +87,7 @@ export const zhHant: MessageSchema = {
         },
         toast: {
             noConflicts: "沒有發現重複的數字",
+            longPressTip: "長按格子可以直接切換筆記（筆記模式下則是填入）",
         },
         controls: {
             undo: "復原",
