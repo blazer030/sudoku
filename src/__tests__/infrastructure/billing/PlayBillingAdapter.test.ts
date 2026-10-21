@@ -24,6 +24,7 @@ const mocks = vi.hoisted(() => {
 
     const registerSpy = vi.fn();
     const initializeSpy = vi.fn().mockResolvedValue([]);
+    const updateSpy = vi.fn().mockResolvedValue(undefined);
 
     const eventNames = [
         "productUpdated", "receiptUpdated", "approved", "verified", "unverified",
@@ -43,6 +44,8 @@ const mocks = vi.hoisted(() => {
     const fakeStore = {
         register: registerSpy,
         initialize: initializeSpy,
+        update: updateSpy,
+        minTimeBetweenUpdates: 600_000,
         when: () => whenChain,
         get: (id: string) => productById.get(id),
         error: (cb: (error: { code: number; message: string }) => void) => {
@@ -60,6 +63,7 @@ const mocks = vi.hoisted(() => {
         localTransactions,
         registerSpy,
         initializeSpy,
+        updateSpy,
         fakeStore,
     };
 });
@@ -111,6 +115,9 @@ beforeEach(() => {
     mocks.registerSpy.mockClear();
     mocks.initializeSpy.mockClear();
     mocks.initializeSpy.mockResolvedValue([]);
+    mocks.updateSpy.mockReset();
+    mocks.updateSpy.mockResolvedValue(undefined);
+    mocks.fakeStore.minTimeBetweenUpdates = 600_000;
 });
 
 describe("PlayBillingAdapter", () => {
@@ -145,6 +152,21 @@ describe("PlayBillingAdapter", () => {
         await expect(adapter.loadProducts()).resolves.toEqual([
             { id: "donate_lunch", tier: "lunch", label: "Lunch", priceText: "$5.99", amountUsd: 5.99 },
         ]);
+    });
+
+    it("loadProducts asks the store to refresh unthrottled when retried after an incomplete load", async () => {
+        const adapter = new PlayBillingAdapter();
+        await expect(adapter.loadProducts()).resolves.toEqual([]);
+
+        mocks.updateSpy.mockImplementation(() => {
+            fireAllProductsUpdated(buildProduct("donate_coffee", "$2.99", 2_990_000));
+            return Promise.resolve();
+        });
+        const retried = await adapter.loadProducts();
+
+        expect(mocks.fakeStore.minTimeBetweenUpdates).toBe(0);
+        expect(mocks.updateSpy).toHaveBeenCalledTimes(1);
+        expect(retried.map((product) => product.id)).toEqual(["donate_coffee", "donate_lunch", "donate_coding_time"]);
     });
 
     it("purchase resolves with success after the approved callback finishes the transaction", async () => {

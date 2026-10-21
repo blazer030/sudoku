@@ -13,6 +13,7 @@ const PRODUCT_IDS = Array.from(TIER_META.keys());
 
 export class PlayBillingAdapter implements BillingService {
     private initialization: Promise<unknown> | null = null;
+    private hasLoadedProducts = false;
     private cachedProducts = new Map<string, Product>();
     private pendingPurchases = new Map<string, (result: PurchaseResult) => void>();
 
@@ -26,12 +27,18 @@ export class PlayBillingAdapter implements BillingService {
         store.when()
             .productUpdated((product) => { this.handleProductUpdated(product); })
             .approved((transaction) => { this.handleApproved(transaction); });
+        // Only user-initiated retries call store.update(), so never throttle them
+        store.minTimeBetweenUpdates = 0;
         this.initialization = store.initialize([Platform.GOOGLE_PLAY]);
         return this.initialization;
     }
 
     async loadProducts(): Promise<Product[]> {
         await this.ensureSetup();
+        if (this.hasLoadedProducts && this.cachedProducts.size < PRODUCT_IDS.length) {
+            await store.update();
+        }
+        this.hasLoadedProducts = true;
         return PRODUCT_IDS
             .map((id) => this.cachedProducts.get(id))
             .filter((entry): entry is Product => entry !== undefined);
