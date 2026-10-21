@@ -10,41 +10,41 @@
                     :size="24"
                     class="text-foreground"
                 />
-                <span class="text-foreground text-base font-medium">Back</span>
+                <span class="text-foreground text-base font-medium">{{ t("common.back") }}</span>
             </button>
-            <span class="text-foreground text-lg font-semibold">Statistics</span>
+            <span class="text-foreground text-lg font-semibold">{{ t("home.statistics") }}</span>
             <div class="w-15" />
         </div>
 
         <div class="flex flex-col gap-2 mt-2">
-            <span class="text-foreground-muted text-xs font-semibold tracking-wider uppercase px-1">Overview</span>
+            <span class="text-foreground-muted text-xs font-semibold tracking-wider uppercase px-1">{{ t("statistics.overview") }}</span>
             <div class="flex gap-3">
                 <div
                     class="flex-1 flex flex-col items-center gap-1 bg-card rounded-2xl p-4 shadow-card"
                     data-testid="games-won"
                 >
                     <span class="text-3xl font-bold text-primary font-mono">{{ stats.overall.gamesWon }}</span>
-                    <span class="text-xs font-medium text-foreground-secondary">Games Won</span>
+                    <span class="text-xs font-medium text-foreground-secondary">{{ t("statistics.gamesWon") }}</span>
                 </div>
                 <div
                     class="flex-1 flex flex-col items-center gap-1 bg-card rounded-2xl p-4 shadow-card"
                     data-testid="win-rate"
                 >
                     <span class="text-3xl font-bold text-primary font-mono">{{ winRateDisplay }}</span>
-                    <span class="text-xs font-medium text-foreground-secondary">Win Rate</span>
+                    <span class="text-xs font-medium text-foreground-secondary">{{ t("statistics.winRate") }}</span>
                 </div>
                 <div
                     class="flex-1 flex flex-col items-center gap-1 bg-card rounded-2xl p-4 shadow-card"
                     data-testid="day-streak"
                 >
                     <span class="text-3xl font-bold text-foreground font-mono">{{ dayStreak }}</span>
-                    <span class="text-xs font-medium text-foreground-secondary">Day Streak</span>
+                    <span class="text-xs font-medium text-foreground-secondary">{{ t("statistics.dayStreak") }}</span>
                 </div>
             </div>
         </div>
 
         <div class="flex flex-col gap-2 mt-5">
-            <span class="text-foreground-muted text-xs font-semibold tracking-wider uppercase px-1">Best Times</span>
+            <span class="text-foreground-muted text-xs font-semibold tracking-wider uppercase px-1">{{ t("statistics.bestTimes") }}</span>
             <div class="bg-card rounded-2xl p-4 shadow-card flex flex-col gap-3">
                 <div
                     class="flex items-center justify-between"
@@ -95,7 +95,7 @@
         </div>
 
         <div class="flex flex-col gap-2 mt-5">
-            <span class="text-foreground-muted text-xs font-semibold tracking-wider uppercase px-1">Recent Games</span>
+            <span class="text-foreground-muted text-xs font-semibold tracking-wider uppercase px-1">{{ t("statistics.recentGames") }}</span>
             <div
                 v-if="hasRecords"
                 class="flex flex-col gap-2"
@@ -129,7 +129,7 @@
                                 {{ difficultyLabel(game.difficulty) }}
                             </span>
                             <span class="text-[11px] text-foreground-muted">
-                                {{ formatDate(game.date) }}
+                                {{ formatDate(game.date, locale as AppLocale) }}
                             </span>
                         </div>
                     </div>
@@ -139,7 +139,7 @@
                                 :class="game.completed ? 'text-primary' : 'text-accent'"
                                 class="text-base font-semibold font-mono"
                             >
-                                {{ game.completed ? formatTime(game.elapsedSeconds) : "Gave up" }}
+                                {{ game.completed ? formatTime(game.elapsedSeconds) : t("statistics.gaveUp") }}
                             </span>
                             <span
                                 class="flex items-center gap-0.75 text-[11px] font-medium text-foreground-muted font-mono"
@@ -170,8 +170,8 @@
                         class="text-foreground-muted"
                     />
                 </div>
-                <span class="text-base font-semibold text-foreground">No games played yet</span>
-                <span class="text-sm text-foreground-muted">Your game history will appear here</span>
+                <span class="text-base font-semibold text-foreground">{{ t("statistics.empty.title") }}</span>
+                <span class="text-sm text-foreground-muted">{{ t("statistics.empty.description") }}</span>
             </div>
         </div>
 
@@ -188,7 +188,7 @@
                     :size="18"
                     class="text-danger"
                 />
-                <span class="text-base font-semibold text-danger">Clear All Records</span>
+                <span class="text-base font-semibold text-danger">{{ t("statistics.clearRecords") }}</span>
             </button>
         </div>
 
@@ -204,11 +204,14 @@ import { ROUTER_PATH } from "@/router";
 import { useStatisticsStore } from "@/stores/statisticsStore";
 import type { GameResult } from "@/application/statistics/StatisticsRepository";
 import { formatTime } from "@/utils/formatTime";
-import { formatDate } from "@/utils/formatDate";
+import { useI18n } from "vue-i18n";
+import type { AppLocale } from "@/application/SettingsStorage";
+import { formatDate } from "@/presentation/i18n/formatDate";
 import { useDifficultyLabel } from "@/presentation/labels/difficultyLabels";
 import ClearRecordsDialog from "@/presentation/pages/statistics/ClearRecordsDialog.vue";
 import { provideClearRecordsDialog } from "@/presentation/pages/statistics/useClearRecordsDialog";
 
+const { t, locale } = useI18n();
 const router = useRouter();
 const { open: openClearRecordsDialog } = provideClearRecordsDialog();
 const statisticsStore = useStatisticsStore();

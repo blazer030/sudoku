@@ -4,25 +4,25 @@ import type { GameReplayData } from "@/application/statistics/StatisticsReposito
 import type { GameStep, GameStepAction } from "@/domain/game/GameStep";
 import { usePlaybackState } from "@/presentation/components/playback/usePlaybackState";
 
-export interface DescriptionPart {
-    text: string;
-    bold?: boolean;
+export interface ReviewDescription {
+    keypath: string;
+    params: { value?: number; row?: number; column?: number };
 }
 
-const position = (step: GameStep): DescriptionPart[] => [
-    { text: "Row " }, { text: String(step.row + 1), bold: true },
-    { text: ", Col " }, { text: String(step.column + 1), bold: true },
-];
+const stepParams = (step: GameStep): ReviewDescription["params"] => ({
+    value: step.value,
+    row: step.row + 1,
+    column: step.column + 1,
+});
 
-const ACTION_LABELS: Record<GameStepAction, (step: GameStep) => DescriptionPart[]> = {
-    fill: (step) => [{ text: "Filled " }, { text: String(step.value), bold: true }, { text: " in " }, ...position(step)],
-    erase: (step) => [{ text: "Erased " }, ...position(step)],
-    toggleNote: (step) => [{ text: "Note " }, { text: String(step.value), bold: true }, { text: " in " }, ...position(step)],
-    hint: (step) => [{ text: "Hint " }, { text: String(step.value), bold: true }, { text: " in " }, ...position(step)],
-    autoNotes: () => [{ text: "Auto Notes" }],
-    undo: () => [{ text: "Undo" }],
+const ACTION_DESCRIPTIONS: Record<GameStepAction, (step: GameStep) => ReviewDescription> = {
+    fill: (step) => ({ keypath: "review.fill", params: stepParams(step) }),
+    erase: (step) => ({ keypath: "review.erase", params: stepParams(step) }),
+    toggleNote: (step) => ({ keypath: "review.toggleNote", params: stepParams(step) }),
+    hint: (step) => ({ keypath: "review.hint", params: stepParams(step) }),
+    autoNotes: () => ({ keypath: "review.autoNotes", params: {} }),
+    undo: () => ({ keypath: "review.undo", params: {} }),
 };
-
 
 export const useGameReview = (replayData: GameReplayData, completed: boolean) => {
     const replay = new GameReplay(replayData.initialBoard, replayData.steps);
@@ -52,13 +52,13 @@ export const useGameReview = (replayData: GameReplayData, completed: boolean) =>
         return replay.currentGameStep;
     });
 
-    const description = computed((): DescriptionPart[] | null => {
+    const description = computed((): ReviewDescription | null => {
         if (isAtFinalStep.value) {
-            return [{ text: completed ? "Completed" : "Gave up" }];
+            return { keypath: completed ? "review.completed" : "review.gaveUp", params: {} };
         }
         const step = gameStep.value;
         if (!step) return null;
-        return ACTION_LABELS[step.action](step);
+        return ACTION_DESCRIPTIONS[step.action](step);
     });
 
     return {
