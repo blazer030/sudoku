@@ -22,6 +22,7 @@ export interface Settings {
     style: StyleId;
 }
 
+// index.html's inline script reads these fields too (style, colorTheme, appearance) before first paint
 const STORAGE_KEY = "sudoku-settings";
 
 const DEFAULT_SETTINGS: Settings = {

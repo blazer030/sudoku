@@ -2,6 +2,27 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
+    <script>
+        // Applies the theme before first paint. Mirrors loadSettings() and resolveColorMode();
+        // unknown values fall back the same way.
+        (function () {
+            var settings = {};
+            try {
+                settings = JSON.parse(localStorage.getItem("sudoku-settings") || "{}") || {};
+            } catch (error) {
+                settings = {};
+            }
+            var root = document.documentElement;
+            root.setAttribute("data-style", /^(minimal)$/.test(settings.style) ? settings.style : "minimal");
+            root.setAttribute("data-color-theme",
+                /^(green|blue|purple|orange|pink|teal)$/.test(settings.colorTheme) ? settings.colorTheme : "green");
+            var systemDark = typeof window.matchMedia === "function"
+                && window.matchMedia("(prefers-color-scheme: dark)").matches;
+            if (settings.appearance === "dark" || (settings.appearance !== "light" && systemDark)) {
+                root.classList.add("dark");
+            }
+        })();
+    </script>
     <link href="/sudoku-green.svg" rel="icon" type="image/svg+xml" />
     <link href="/apple-touch-icon-green.png" rel="apple-touch-icon" />
     <link href="/manifest-green.webmanifest" rel="manifest" />
