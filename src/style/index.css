@@ -33,6 +33,14 @@
   --radius-popup: 20px;
 }
 
+:root {
+  color-scheme: light;
+}
+
+:root.dark {
+  color-scheme: dark;
+}
+
 @layer base {
   body {
     @apply bg-background text-foreground font-sans;
