@@ -93,6 +93,15 @@ export const en = {
             backToHome: "Back to Home",
         },
     },
+    playback: {
+        step: "Step {current} of {total}",
+    },
+    walkthrough: {
+        initialBoard: "Initial board",
+        eliminations: "{technique}: {count} elimination | {technique}: {count} eliminations",
+        reset: "Reset",
+        solve: "Solve",
+    },
     position: {
         cell: "Row {row}, Col {column} = {value}",
     },

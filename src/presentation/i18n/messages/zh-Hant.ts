@@ -95,6 +95,15 @@ export const zhHant: MessageSchema = {
             backToHome: "回到首頁",
         },
     },
+    playback: {
+        step: "第 {current} 步／共 {total} 步",
+    },
+    walkthrough: {
+        initialBoard: "初始盤面",
+        eliminations: "{technique}：刪去 {count} 個候選數",
+        reset: "重設",
+        solve: "解題",
+    },
     position: {
         cell: "第 {row} 列第 {column} 欄 = {value}",
     },

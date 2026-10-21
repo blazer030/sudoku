@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { ref } from "vue";
+import { nextTick, ref } from "vue";
+import { i18n } from "@/presentation/i18n";
 import { mount } from "@vue/test-utils";
 import ProgressBar from "@/presentation/components/playback/ProgressBar.vue";
 
@@ -48,6 +49,16 @@ describe("ProgressBar", () => {
         });
 
         expect(wrapper.find("[data-testid='step-counter']").text()).toBe("Step 3 of 7");
+    });
+
+    it("should display the step counter in Traditional Chinese", async () => {
+        i18n.global.locale.value = "zh-Hant";
+        await nextTick();
+        const wrapper = mount(ProgressBar, {
+            props: { currentStep: 3, totalSteps: 7, playState: noopPlayState() },
+        });
+
+        expect(wrapper.find("[data-testid='step-counter']").text()).toBe("第 3 步／共 7 步");
     });
 
     it("should prefix testids when testidPrefix is given", () => {

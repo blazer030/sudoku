@@ -11,11 +11,11 @@
                     class="text-foreground"
                 />
                 <span class="text-foreground text-base font-medium">
-                    Back
+                    {{ t("common.back") }}
                 </span>
             </button>
             <span class="text-foreground text-lg font-semibold">
-                Walkthrough
+                {{ t("home.walkthrough") }}
             </span>
             <div class="w-18" />
         </div>
@@ -73,14 +73,14 @@
                     data-testid="reset-button"
                     @click="resetBoard"
                 >
-                    Reset
+                    {{ t("walkthrough.reset") }}
                 </button>
                 <button
                     class="px-6 py-3 bg-primary text-white rounded-2xl font-semibold cursor-pointer shadow-primary transition-all duration-200 hover:bg-primary-hover hover:shadow-primary-lg"
                     data-testid="solve-button"
                     @click="runSolver"
                 >
-                    Solve
+                    {{ t("walkthrough.solve") }}
                 </button>
             </div>
             <div
@@ -132,6 +132,7 @@
 <script lang="ts" setup>
 import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
 import { ChevronLeft } from "lucide-vue-next";
 import PlaybackControls from "@/presentation/components/playback/PlaybackControls.vue";
 import { ROUTER_PATH } from "@/router";
@@ -156,6 +157,7 @@ const createEmptyBoard = (): number[][] =>
     Array.from({ length: BOARD_SIZE }, () => Array.from({ length: BOARD_SIZE }, () => 0));
 
 const router = useRouter();
+const { t } = useI18n();
 const techniqueLabel = useTechniqueLabel();
 const userValues = ref<number[][]>(createEmptyBoard());
 const state = computed(() => BoardState.fromPuzzle(userValues.value));
@@ -224,15 +226,16 @@ const playState = { isPlaying, stopPlay, startPlay };
 
 const stepDescription = computed(() => {
     if (solveResult.value === null) return "";
-    if (currentStep.value === 0) return "Initial board";
+    if (currentStep.value === 0) return t("walkthrough.initialBoard");
     const step = solveResult.value.steps[currentStep.value - 1];
     const label = techniqueLabel(step.technique);
     if (step.assignments.length > 0) {
         const { cell, digit } = step.assignments[0];
-        return `${label}: Row ${cell.row + 1}, Col ${cell.column + 1} = ${digit}`;
+        const position = t("position.cell", { row: cell.row + 1, column: cell.column + 1, value: digit });
+        return t("game.hintResult", { technique: label, position });
     }
     const eliminationCount = step.eliminations.length;
-    return `${label}: ${eliminationCount} elimination${eliminationCount === 1 ? "" : "s"}`;
+    return t("walkthrough.eliminations", { technique: label, count: eliminationCount }, eliminationCount);
 });
 
 const currentStepFocus = computed(() => {
