@@ -123,6 +123,7 @@ const handleNewGame = async () => {
             difficulty: saved.difficulty,
             elapsedSeconds: saved.elapsedSeconds,
             completed: false,
+            replay: saved.replay,
         });
         await gameStore.clearSavedGame();
     }

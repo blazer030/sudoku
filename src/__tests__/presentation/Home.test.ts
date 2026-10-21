@@ -235,6 +235,43 @@ describe("Home", () => {
             expect(router.currentRoute.value.path).toBe(ROUTER_PATH.game);
         });
 
+        const giveUpAndStartNew = async (savedGame: GameState) => {
+            const { wrapper, router, pinia } = mountHome({ savedGame });
+            await router.push("/");
+            await router.isReady();
+
+            await wrapper.find("[data-testid='new-game-button']").trigger("click");
+            await wrapper.find("[data-testid='give-up-and-start-new-button']").trigger("click");
+            await flushPromises();
+
+            return useStatisticsStore(pinia).history;
+        };
+
+        it("should keep the saved replay of the game given up by starting a new one", async () => {
+            const replay = {
+                initialBoard: dummySave.cells,
+                steps: [{
+                    board: dummySave.cells.map(row => row.map(() => ({ entry: 0, notes: [1, 2] }))),
+                    action: "autoNotes" as const,
+                    row: 0,
+                    column: 0,
+                    value: 0,
+                }],
+            };
+
+            const history = await giveUpAndStartNew({ ...dummySave, replay });
+
+            expect(history).toHaveLength(1);
+            expect(history[0].replay).toEqual(replay);
+        });
+
+        it("should record a given-up game without a replay when its save has none", async () => {
+            const history = await giveUpAndStartNew(dummySave);
+
+            expect(history).toHaveLength(1);
+            expect(history[0].replay).toBeUndefined();
+        });
+
         it("should close dialog when clicking Cancel", async () => {
             const { wrapper } = mountHome({ savedGame: dummySave });
 
