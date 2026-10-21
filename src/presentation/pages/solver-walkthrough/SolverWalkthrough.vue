@@ -1,5 +1,5 @@
 <template>
-    <div class="flex flex-col gap-2 h-dvh py-6 px-5">
+    <div class="flex flex-col gap-2 h-full py-6 px-5">
         <div class="flex items-center justify-between">
             <button
                 class="flex items-center gap-2 cursor-pointer"

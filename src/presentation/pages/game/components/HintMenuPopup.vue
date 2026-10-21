@@ -10,7 +10,7 @@
                 @click="close('close')"
             />
             <div
-                class="absolute bottom-24 left-1/2 -translate-x-1/2 bg-card rounded-popup shadow-popup w-55 z-10 flex flex-col gap-1 py-4 px-3"
+                class="absolute bottom-safe-24 left-1/2 -translate-x-1/2 bg-card rounded-popup shadow-popup w-55 z-10 flex flex-col gap-1 py-4 px-3"
             >
                 <div class="flex items-center justify-between px-3 pb-1">
                     <span class="text-foreground text-sm font-bold">{{ t("game.hints.title") }}</span>

@@ -1,5 +1,5 @@
 <template>
-    <div class="flex flex-col gap-5 h-dvh px-5 bg-background overflow-y-auto">
+    <div class="flex flex-col gap-5 h-full px-5 bg-background overflow-y-auto">
         <div class="flex items-center justify-between sticky top-0 bg-background pt-6 pb-3 z-10">
             <button
                 class="flex items-center gap-2 cursor-pointer"
@@ -88,7 +88,7 @@
         <Transition name="toast">
             <div
                 v-if="toastMessage !== null"
-                class="fixed left-1/2 -translate-x-1/2 bottom-24 z-50 bg-toast text-on-toast text-sm px-4 py-3 rounded-xl shadow-lg max-w-[90%]"
+                class="fixed left-1/2 -translate-x-1/2 bottom-safe-24 z-50 bg-toast text-on-toast text-sm px-4 py-3 rounded-xl shadow-lg max-w-[90%]"
                 data-testid="donate-toast"
             >
                 {{ toastMessage }}

@@ -1,5 +1,5 @@
 <template>
-    <div class="max-w-screen-sm h-dvh mx-auto">
+    <div class="app-safe-area max-w-screen-sm h-dvh mx-auto">
         <RouterView />
     </div>
 </template>

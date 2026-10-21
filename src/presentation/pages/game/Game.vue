@@ -1,7 +1,7 @@
 <template>
     <div
         v-if="gameStore.hasActiveGame"
-        class="flex flex-col gap-2 h-dvh py-6 px-5"
+        class="flex flex-col gap-2 h-full py-6 px-5"
     >
         <GameHeader
             :elapsed-seconds="elapsedSeconds"
