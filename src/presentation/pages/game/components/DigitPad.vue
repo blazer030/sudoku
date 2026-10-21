@@ -9,6 +9,7 @@
                 <button
                     v-press:bounce
                     :aria-label="digitLabel(digit)"
+                    :aria-pressed="selectedDigit === digit"
                     :class="[digitButtonClasses(digit), digitSizeClasses]"
                     :data-testid="`number-${digit}`"
                     :disabled="isDigitDisabled(digit)"
@@ -38,6 +39,7 @@
                 <button
                     v-press:bounce
                     :aria-label="digitLabel(digit)"
+                    :aria-pressed="selectedDigit === digit"
                     :class="[digitButtonClasses(digit), digitSizeClasses]"
                     :data-testid="`number-${digit}`"
                     :disabled="isDigitDisabled(digit)"
@@ -60,6 +62,7 @@
             <button
                 v-press:bounce
                 :aria-label="t('game.controls.erase')"
+                :aria-pressed="eraseActive"
                 :class="eraseButtonClasses"
                 :disabled="eraseDisabled"
                 class="w-14 h-14 rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all cursor-pointer disabled:cursor-default"

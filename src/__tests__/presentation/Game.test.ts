@@ -1546,6 +1546,21 @@ describe("Game", () => {
             expect(noteButton().attributes("aria-label")).toBe("筆記");
         });
 
+        it("should expose the erase mode and the selected digit as pressed states", async () => {
+            const wrapper = mountGame();
+            const eraseKey = () => wrapper.find("[data-testid='erase-button']");
+            const digitKey = (digit: number) => wrapper.find(`[data-testid='number-${digit}']`);
+            expect(eraseKey().attributes("aria-pressed")).toBe("false");
+            expect(digitKey(4).attributes("aria-pressed")).toBe("false");
+
+            await eraseKey().trigger("click");
+            expect(eraseKey().attributes("aria-pressed")).toBe("true");
+
+            await digitKey(4).trigger("click");
+            expect(digitKey(4).attributes("aria-pressed")).toBe("true");
+            expect(digitKey(3).attributes("aria-pressed")).toBe("false");
+        });
+
         it("should name each digit key with what it does and how many are left", async () => {
             const wrapper = mountGame();
             const digitKey = () => wrapper.find("[data-testid='number-8']");
