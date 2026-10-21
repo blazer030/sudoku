@@ -74,6 +74,7 @@ describe("GameReview", () => {
         await nextTick();
 
         expect(wrapper.text()).toContain("在第 1 列第 2 欄填入 5");
+        expect(wrapper.text()).toContain("遊戲回顧");
         expect(boldTexts(wrapper)).toEqual(expect.arrayContaining(["5", "1", "2"]));
     });
 

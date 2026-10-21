@@ -108,7 +108,7 @@ export const zhHant: MessageSchema = {
         solve: "解題",
     },
     review: {
-        title: "對局回顧",
+        title: "遊戲回顧",
         initialBoard: "初始盤面",
         fill: "在第 {row} 列第 {column} 欄填入 {value}",
         erase: "清除第 {row} 列第 {column} 欄",
@@ -125,16 +125,16 @@ export const zhHant: MessageSchema = {
         winRate: "勝率",
         dayStreak: "連續遊玩天數",
         bestTimes: "最佳時間",
-        recentGames: "最近對局",
+        recentGames: "最近遊戲",
         gaveUp: "已放棄",
         empty: {
-            title: "還沒有對局紀錄",
-            description: "你的對局紀錄會顯示在這裡",
+            title: "還沒有遊戲紀錄",
+            description: "你的遊戲紀錄會顯示在這裡",
         },
         clearRecords: "清除所有紀錄",
         clearDialog: {
             title: "要清除所有紀錄嗎？",
-            message: "所有對局紀錄、統計和最佳時間都會被永久刪除，且無法復原。",
+            message: "所有遊戲紀錄、統計和最佳時間都會被永久刪除，且無法復原。",
         },
     },
     donate: {

@@ -52,7 +52,7 @@ describe("Statistics", () => {
         await nextTick();
 
         const text = wrapper.text();
-        for (const label of ["統計", "總覽", "連續遊玩天數", "最佳時間", "最近對局", "已放棄", "困難", "今天 15:05", "清除所有紀錄"]) {
+        for (const label of ["統計", "總覽", "連續遊玩天數", "最佳時間", "最近遊戲", "已放棄", "困難", "今天 15:05", "清除所有紀錄"]) {
             expect(text).toContain(label);
         }
         expect(text).not.toContain("Gave up");

@@ -77,9 +77,9 @@ export const CHANGELOG: ChangelogEntry[] = [
                 "Sticky headers when scrolling Settings and Game Review",
             ],
             "zh-Hant": [
-                "新增對局回顧，可重播已完成的對局（從統計進入）",
+                "新增遊戲回顧，可重播已完成的遊戲（從統計進入）",
                 "播放控制更順暢，並新增可拖曳的進度條",
-                "捲動設定與對局回顧時，標題列會固定在頂端",
+                "捲動設定與遊戲回顧時，標題列會固定在頂端",
             ],
         },
     },
@@ -152,7 +152,7 @@ export const CHANGELOG: ChangelogEntry[] = [
                 "Clearing a filled cell also clears the same digit from peer notes",
             ],
             "zh-Hant": [
-                "尚無對局時，統計會顯示空白狀態",
+                "尚無遊戲紀錄時，統計會顯示空白狀態",
                 "統計新增「清除所有紀錄」按鈕，並會先請你確認",
                 "設定頁面會顯示 App 版本",
                 "清除已填入的格子時，也會一併清除同列、同欄、同宮格筆記中的相同數字",
