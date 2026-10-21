@@ -67,10 +67,10 @@
                             v-if="color.id === settingsStore.colorTheme"
                             data-testid="color-theme-check"
                             class="absolute inset-0 flex items-center justify-center"
+                            :style="{ color: color.onPrimary }"
                         >
                             <Check
                                 :size="18"
-                                class="text-on-primary"
                                 :stroke-width="3"
                             />
                         </div>

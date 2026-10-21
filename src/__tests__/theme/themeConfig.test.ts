@@ -1,5 +1,6 @@
 import type { ColorThemeId } from "@/application/SettingsStorage";
 import { THEMES } from "@/theme/themeConfig";
+import { contrastRatio } from "@/theme/contrast";
 
 describe("themeConfig", () => {
     const ALL_THEME_IDS: ColorThemeId[] = ["green", "blue", "purple", "orange", "pink", "teal"];
@@ -15,6 +16,12 @@ describe("themeConfig", () => {
         for (const theme of THEMES) {
             expect(theme.primary).toMatch(hexPattern);
             expect(theme.accent).toMatch(hexPattern);
+        }
+    });
+
+    it("should give each swatch a check colour that reads on its primary in any mode", () => {
+        for (const theme of THEMES) {
+            expect(contrastRatio(theme.onPrimary, theme.primary)).toBeGreaterThanOrEqual(3);
         }
     });
 });

@@ -3,6 +3,7 @@ import { createPinia } from "pinia";
 import { createRouter, createMemoryHistory } from "vue-router";
 import Settings from "@/presentation/pages/settings/Settings.vue";
 import { useSettingsStore } from "@/stores/settingsStore";
+import { getPalette } from "@/theme/palettes";
 
 const createTestRouter = () => {
     return createRouter({
@@ -41,6 +42,16 @@ describe("Settings Page", () => {
 
         const greenSwatch = wrapper.find("[data-testid='color-theme-green']");
         expect(greenSwatch.find("[data-testid='color-theme-check']").exists()).toBe(true);
+    });
+
+    it("should draw the swatch check in the swatch's own on-primary colour", () => {
+        const { wrapper } = mountSettings();
+        const probe = document.createElement("div");
+        probe.style.color = getPalette("minimal", "green", "light")["on-primary"];
+
+        const check = wrapper.get<HTMLElement>("[data-testid='color-theme-check']").element;
+
+        expect(check.style.color).toBe(probe.style.color);
     });
 
     it("should change color theme when clicking a swatch", async () => {
