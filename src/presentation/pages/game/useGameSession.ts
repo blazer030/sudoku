@@ -1,9 +1,7 @@
 import { computed, inject, reactive } from "vue";
-import { useRouter } from "vue-router";
 import { provideGameCompleteModal } from "@/presentation/pages/game/components/useGameCompleteModal";
 import { BOARD_SIZE, Sudoku, StepRecorder } from "@/domain";
 import { useGameStore } from "@/stores/gameStore";
-import { ROUTER_PATH } from "@/router";
 import { captureInitialBoard } from "@/application/GameState";
 import type { GameReplayData } from "@/application/statistics/StatisticsRepository";
 import { useGameTimer } from "@/presentation/pages/game/useGameTimer";
@@ -16,13 +14,8 @@ import { useSettingsStore } from "@/stores/settingsStore";
 import { ANALYTICS_KEY } from "@/application/analytics/AnalyticsService";
 
 export const useGameSession = () => {
-    const router = useRouter();
     const gameStore = useGameStore();
     const analytics = inject(ANALYTICS_KEY);
-
-    if (!gameStore.hasActiveGame) {
-        void router.replace(ROUTER_PATH.home);
-    }
 
     const sudoku = (() => {
         if (gameStore.sudoku) {
