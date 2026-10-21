@@ -110,6 +110,25 @@ describe("Donate.vue analytics", () => {
 });
 
 describe("Donate.vue product loading", () => {
+    it("shows a loading state instead of tiers or retry while products are being fetched", async () => {
+        let finishLoading: (products: Product[]) => void = () => undefined;
+        const billing: BillingService = {
+            ...buildBilling({ kind: "cancelled" }),
+            loadProducts: vi.fn(() => new Promise<Product[]>((resolve) => { finishLoading = resolve; })),
+        };
+        const wrapper = mountDonate({ logEvent: vi.fn().mockResolvedValue(undefined) }, billing);
+        await flushPromises();
+
+        expect(wrapper.find("[data-testid='donate-loading']").exists()).toBe(true);
+        expect(wrapper.find("[data-testid='donate-retry']").exists()).toBe(false);
+
+        finishLoading(fakeProducts);
+        await flushPromises();
+
+        expect(wrapper.find("[data-testid='donate-loading']").exists()).toBe(false);
+        expect(wrapper.find("[data-testid='donate-tier-coffee']").exists()).toBe(true);
+    });
+
     it("offers a retry when no products load, and shows the tiers once a retry succeeds", async () => {
         const billing: BillingService = {
             ...buildBilling({ kind: "cancelled" }),

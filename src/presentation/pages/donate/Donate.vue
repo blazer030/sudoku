@@ -26,7 +26,17 @@
         </p>
 
         <div
-            v-if="store.loadFailed"
+            v-if="store.loading"
+            class="flex justify-center bg-card rounded-2xl shadow-card-sm px-4 py-6"
+            data-testid="donate-loading"
+        >
+            <span class="text-foreground-muted text-[15px]">
+                Loading…
+            </span>
+        </div>
+
+        <div
+            v-else-if="store.loadFailed"
             class="flex flex-col items-center gap-3 bg-card rounded-2xl shadow-card-sm px-4 py-6"
         >
             <span class="text-foreground-muted text-[15px]">
