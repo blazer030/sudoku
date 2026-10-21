@@ -2,6 +2,7 @@ import { watch, type Ref } from "vue";
 import { systemBarColor } from "@/theme/palettes";
 import { updateMetaThemeColor } from "@/application/PwaThemeUpdater";
 import type { Appearance, ColorMode, ColorThemeId, StyleId } from "@/application/SettingsStorage";
+import type { SystemBarService } from "@/application/systemBar/SystemBarService";
 
 export interface AppearanceSources {
     appearance: Ref<Appearance>;
@@ -17,8 +18,8 @@ export const resolveColorMode = (appearance: Appearance, systemPrefersDark: bool
     return appearance;
 };
 
-/** Owns the <html> theme attributes, the dark class and the theme-color meta. */
-export const startAppearanceSync = (sources: AppearanceSources): (() => void) => {
+/** Owns the <html> theme attributes, the dark class, the theme-color meta and the system bars. */
+export const startAppearanceSync = (sources: AppearanceSources, systemBar: SystemBarService): (() => void) => {
     // Old WebViews and jsdom may lack matchMedia; treat them as a light system
     const darkScheme = typeof window.matchMedia === "function" ? window.matchMedia(DARK_SCHEME_QUERY) : null;
 
@@ -29,6 +30,7 @@ export const startAppearanceSync = (sources: AppearanceSources): (() => void) =>
         root.dataset.style = sources.style.value;
         root.dataset.colorTheme = sources.colorTheme.value;
         updateMetaThemeColor(systemBarColor(sources.style.value, sources.colorTheme.value, mode));
+        void systemBar.apply(mode);
     };
 
     const stopWatching = watch([sources.appearance, sources.style, sources.colorTheme], apply, { immediate: true });

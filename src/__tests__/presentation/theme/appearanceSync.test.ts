@@ -1,11 +1,14 @@
 import { nextTick, ref } from "vue";
+import type { Mock } from "vitest";
 import { resolveColorMode, startAppearanceSync } from "@/presentation/theme/appearanceSync";
 import { getPalette } from "@/theme/palettes";
-import type { Appearance, ColorThemeId, StyleId } from "@/application/SettingsStorage";
+import type { Appearance, ColorMode, ColorThemeId, StyleId } from "@/application/SettingsStorage";
+import type { SystemBarService } from "@/application/systemBar/SystemBarService";
 
 describe("startAppearanceSync", () => {
     let stop: (() => void) | undefined;
     let meta: HTMLMetaElement;
+    let systemBar: SystemBarService & { apply: Mock<(mode: ColorMode) => Promise<void>> };
 
     const buildSources = (colorTheme: ColorThemeId = "green", appearance: Appearance = "light") => ({
         appearance: ref<Appearance>(appearance),
@@ -31,6 +34,8 @@ describe("startAppearanceSync", () => {
     const isDark = () => document.documentElement.classList.contains("dark");
 
     beforeEach(() => {
+        const apply = vi.fn<(mode: ColorMode) => Promise<void>>().mockResolvedValue(undefined);
+        systemBar = { apply };
         meta = document.createElement("meta");
         meta.name = "theme-color";
         document.head.appendChild(meta);
@@ -47,14 +52,14 @@ describe("startAppearanceSync", () => {
     });
 
     it("should set data-color-theme on start", () => {
-        stop = startAppearanceSync(buildSources());
+        stop = startAppearanceSync(buildSources(), systemBar);
 
         expect(document.documentElement.dataset.colorTheme).toBe("green");
     });
 
     it("should update data-color-theme and theme-color when the color theme changes", async () => {
         const sources = buildSources();
-        stop = startAppearanceSync(sources);
+        stop = startAppearanceSync(sources, systemBar);
 
         sources.colorTheme.value = "purple";
         await nextTick();
@@ -75,7 +80,7 @@ describe("startAppearanceSync", () => {
     it("should apply the system mode immediately", () => {
         mockSystemDark(true);
 
-        stop = startAppearanceSync(buildSources("green", "system"));
+        stop = startAppearanceSync(buildSources("green", "system"), systemBar);
 
         expect(isDark()).toBe(true);
         expect(document.documentElement.dataset.style).toBe("minimal");
@@ -85,7 +90,7 @@ describe("startAppearanceSync", () => {
     it("should switch when the appearance changes", async () => {
         mockSystemDark(true);
         const sources = buildSources("green", "system");
-        stop = startAppearanceSync(sources);
+        stop = startAppearanceSync(sources, systemBar);
 
         sources.appearance.value = "light";
         await nextTick();
@@ -95,7 +100,7 @@ describe("startAppearanceSync", () => {
 
     it("should follow system changes while appearance is system", () => {
         const setSystemDark = mockSystemDark(false);
-        stop = startAppearanceSync(buildSources("green", "system"));
+        stop = startAppearanceSync(buildSources("green", "system"), systemBar);
         expect(isDark()).toBe(false);
 
         setSystemDark(true);
@@ -105,7 +110,7 @@ describe("startAppearanceSync", () => {
 
     it("should ignore system changes while a mode is chosen", () => {
         const setSystemDark = mockSystemDark(true);
-        stop = startAppearanceSync(buildSources("green", "dark"));
+        stop = startAppearanceSync(buildSources("green", "dark"), systemBar);
 
         setSystemDark(false);
 
@@ -115,7 +120,7 @@ describe("startAppearanceSync", () => {
     it("should pick up the current system mode when switching back to system", async () => {
         const setSystemDark = mockSystemDark(true);
         const sources = buildSources("green", "dark");
-        stop = startAppearanceSync(sources);
+        stop = startAppearanceSync(sources, systemBar);
 
         setSystemDark(false);
         sources.appearance.value = "system";
@@ -127,7 +132,7 @@ describe("startAppearanceSync", () => {
     it("should set theme-color to the dark background in dark mode", () => {
         mockSystemDark(false);
 
-        stop = startAppearanceSync(buildSources("green", "dark"));
+        stop = startAppearanceSync(buildSources("green", "dark"), systemBar);
 
         expect(meta.content).toBe(getPalette("minimal", "green", "dark").background);
     });
@@ -135,18 +140,30 @@ describe("startAppearanceSync", () => {
     it("should treat a missing matchMedia as a light system", () => {
         vi.stubGlobal("matchMedia", undefined);
 
-        expect(() => { stop = startAppearanceSync(buildSources("green", "system")); }).not.toThrow();
+        expect(() => { stop = startAppearanceSync(buildSources("green", "system"), systemBar); }).not.toThrow();
         expect(isDark()).toBe(false);
     });
 
     it("should stop following the system after stop", () => {
         const setSystemDark = mockSystemDark(false);
-        stop = startAppearanceSync(buildSources("green", "system"));
+        stop = startAppearanceSync(buildSources("green", "system"), systemBar);
 
         stop();
         stop = undefined;
         setSystemDark(true);
 
         expect(isDark()).toBe(false);
+    });
+
+    it("should match the Android system bars to the mode", async () => {
+        mockSystemDark(false);
+        const sources = buildSources("green", "light");
+        stop = startAppearanceSync(sources, systemBar);
+        expect(systemBar.apply).toHaveBeenLastCalledWith("light");
+
+        sources.appearance.value = "dark";
+        await nextTick();
+
+        expect(systemBar.apply).toHaveBeenLastCalledWith("dark");
     });
 });
