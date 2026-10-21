@@ -8,10 +8,11 @@
             >
                 <button
                     v-press:bounce
-                    :class="digitButtonClasses(digit)"
+                    :aria-label="digitLabel(digit)"
+                    :class="[digitButtonClasses(digit), digitSizeClasses]"
                     :data-testid="`number-${digit}`"
                     :disabled="isDigitDisabled(digit)"
-                    class="w-14 h-14 rounded-xl flex items-center justify-center text-2xl font-semibold transition-all cursor-pointer disabled:cursor-default"
+                    class="w-14 h-14 rounded-xl flex justify-center font-semibold transition-all cursor-pointer disabled:cursor-default"
                     @click="emit('selectDigit', digit)"
                 >
                     {{ digit }}
@@ -36,10 +37,11 @@
             >
                 <button
                     v-press:bounce
-                    :class="digitButtonClasses(digit)"
+                    :aria-label="digitLabel(digit)"
+                    :class="[digitButtonClasses(digit), digitSizeClasses]"
                     :data-testid="`number-${digit}`"
                     :disabled="isDigitDisabled(digit)"
-                    class="w-14 h-14 rounded-xl flex items-center justify-center text-2xl font-semibold transition-all cursor-pointer disabled:cursor-default"
+                    class="w-14 h-14 rounded-xl flex justify-center font-semibold transition-all cursor-pointer disabled:cursor-default"
                     @click="emit('selectDigit', digit)"
                 >
                     {{ digit }}
@@ -57,13 +59,15 @@
             </div>
             <button
                 v-press:bounce
+                :aria-label="t('game.controls.erase')"
                 :class="eraseButtonClasses"
                 :disabled="eraseDisabled"
-                class="w-14 h-14 rounded-xl flex items-center justify-center transition-all cursor-pointer disabled:cursor-default"
+                class="w-14 h-14 rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all cursor-pointer disabled:cursor-default"
                 data-testid="erase-button"
                 @click="emit('toggleEraseMode')"
             >
-                <Eraser :size="22" />
+                <Eraser :size="20" />
+                <span class="text-[10px] font-medium leading-none">{{ t("game.controls.erase") }}</span>
             </button>
         </div>
     </div>
@@ -71,6 +75,7 @@
 
 <script lang="ts" setup>
 import { computed } from "vue";
+import { useI18n } from "vue-i18n";
 import { Eraser } from "lucide-vue-next";
 import { vPress } from "@/presentation/directives/press";
 
@@ -81,10 +86,13 @@ const props = withDefaults(defineProps<{
     showRemainingCount?: boolean;
     disabledDigits?: number[];
     eraseDisabled?: boolean;
+    /** Digits go into notes, so the keys show smaller, top-aligned digits. */
+    noteMode?: boolean;
 }>(), {
     showRemainingCount: true,
     disabledDigits: () => [],
     eraseDisabled: false,
+    noteMode: false,
 });
 
 const emit = defineEmits<{
@@ -92,10 +100,17 @@ const emit = defineEmits<{
     toggleEraseMode: [];
 }>();
 
+const { t } = useI18n();
+
 const isDigitCompleted = (digit: number): boolean => props.digitCounts[digit] >= 9;
 const isDigitDisabled = (digit: number): boolean =>
     isDigitCompleted(digit) || props.disabledDigits.includes(digit);
 const getRemainingCount = (digit: number): number => 9 - props.digitCounts[digit];
+
+const digitLabel = (digit: number): string =>
+    t(props.noteMode ? "game.digitPad.note" : "game.digitPad.fill", { digit, count: getRemainingCount(digit) });
+
+const digitSizeClasses = computed(() => (props.noteMode ? "text-lg items-start pt-1.5" : "text-2xl items-center"));
 
 const digitButtonClasses = (digit: number): string => {
     if (isDigitDisabled(digit)) return "bg-card opacity-50 text-foreground-muted";

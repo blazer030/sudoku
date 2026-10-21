@@ -90,6 +90,17 @@ export const en = {
         toast: {
             noConflicts: "No repeated digits found",
         },
+        controls: {
+            undo: "Undo",
+            notes: "Notes",
+            notesOn: "Notes on",
+            hint: "Hint",
+            erase: "Erase",
+        },
+        digitPad: {
+            fill: "Fill {digit}, {count} left",
+            note: "Note {digit}, {count} left",
+        },
         hintResult: "{technique}: {position}",
         randomReveal: "Random reveal: {position}",
         leave: {

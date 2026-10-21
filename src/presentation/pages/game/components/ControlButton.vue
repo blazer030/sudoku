@@ -1,21 +1,27 @@
 <template>
     <button
-        class="flex items-center justify-center cursor-pointer"
+        :aria-label="label"
+        :aria-pressed="pressed === null ? undefined : pressed"
+        class="flex flex-col items-center gap-1 cursor-pointer"
         @click="$emit('click')"
     >
         <span
             v-press
-            :class="active
-                ? 'bg-accent/15 border-2 border-accent'
-                : 'bg-card shadow-card-sm hover:bg-foreground/5'"
+            :class="pressed
+                ? 'bg-primary text-on-primary shadow-primary-active'
+                : 'bg-card text-foreground shadow-card-sm hover:bg-foreground/5'"
             class="w-11 h-11 rounded-xl flex items-center justify-center transition-all duration-200"
+            data-testid="control-tile"
         >
             <component
                 :is="icon"
-                :class="active ? 'text-accent' : 'text-foreground'"
                 :size="22"
             />
         </span>
+        <span
+            :class="pressed ? 'text-primary font-semibold' : 'text-foreground-secondary font-medium'"
+            class="text-[11px] leading-none whitespace-nowrap"
+        >{{ label }}</span>
     </button>
 </template>
 
@@ -25,8 +31,10 @@ import { vPress } from "@/presentation/directives/press";
 
 withDefaults(defineProps<{
     icon: Component;
-    active?: boolean;
-}>(), { active: false });
+    label: string;
+    /** A toggle's state; null for a plain action button. */
+    pressed?: boolean | null;
+}>(), { pressed: null });
 
 defineEmits<{ click: [] }>();
 </script>

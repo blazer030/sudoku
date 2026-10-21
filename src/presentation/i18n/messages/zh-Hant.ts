@@ -88,6 +88,17 @@ export const zhHant: MessageSchema = {
         toast: {
             noConflicts: "沒有發現重複的數字",
         },
+        controls: {
+            undo: "復原",
+            notes: "筆記",
+            notesOn: "筆記 開",
+            hint: "提示",
+            erase: "擦除",
+        },
+        digitPad: {
+            fill: "填入 {digit}，還剩 {count} 個",
+            note: "筆記 {digit}，還剩 {count} 個",
+        },
         hintResult: "{technique}：{position}",
         randomReveal: "隨機揭示：{position}",
         leave: {

@@ -386,7 +386,7 @@ describe("Game", () => {
 
         await wrapper.find("[data-testid='note-button']").trigger("click");
 
-        expect(wrapper.find("[data-testid='note-button']").find(".border-accent").exists()).toBe(true);
+        expect(wrapper.find("[data-testid='note-button']").attributes("aria-pressed")).toBe("true");
     });
 
     it("should add note to slot cell in note mode", async () => {
@@ -777,7 +777,7 @@ describe("Game", () => {
         // erase mode 取消
         expect(wrapper.find("[data-testid='erase-button']").classes()).not.toContain("bg-primary");
         // note mode 啟用
-        expect(wrapper.find("[data-testid='note-button']").find(".border-accent").exists()).toBe(true);
+        expect(wrapper.find("[data-testid='note-button']").attributes("aria-pressed")).toBe("true");
     });
 
     it("should restore saved game state from store", () => {
@@ -1396,6 +1396,68 @@ describe("Game", () => {
             const replay = useStatisticsStore().history[0].replay;
             expect(replay?.initialBoard[0][2].entry).toBe(4);
             expect(replay?.steps).toEqual([]);
+        });
+    });
+
+    describe("control labels", () => {
+        it.each([
+            ["undo-button", "Undo", "復原"],
+            ["note-button", "Notes", "筆記"],
+            ["hint-button", "Hint", "提示"],
+            ["erase-button", "Erase", "擦除"],
+        ])("should label %s in text and for screen readers", async (testId, english, chinese) => {
+            const wrapper = mountGame();
+            const button = () => wrapper.find(`[data-testid='${testId}']`);
+
+            expect(button().text()).toBe(english);
+            expect(button().attributes("aria-label")).toBe(english);
+
+            i18n.global.locale.value = "zh-Hant";
+            await nextTick();
+
+            expect(button().text()).toBe(chinese);
+            expect(button().attributes("aria-label")).toBe(chinese);
+        });
+
+        it("should show note mode as a pressed, solid Notes button", async () => {
+            const wrapper = mountGame();
+            const noteButton = () => wrapper.find("[data-testid='note-button']");
+            expect(noteButton().attributes("aria-pressed")).toBe("false");
+
+            await noteButton().trigger("click");
+
+            expect(noteButton().text()).toBe("Notes on");
+            expect(noteButton().attributes("aria-pressed")).toBe("true");
+            expect(noteButton().find("[data-testid='control-tile']").classes()).toContain("bg-primary");
+            i18n.global.locale.value = "zh-Hant";
+            await nextTick();
+            expect(noteButton().text()).toBe("筆記 開");
+        });
+
+        it("should name each digit key with what it does and how many are left", async () => {
+            const wrapper = mountGame();
+            const digitKey = () => wrapper.find("[data-testid='number-8']");
+
+            // 8 has five clues in the fixture
+            expect(digitKey().attributes("aria-label")).toBe("Fill 8, 4 left");
+            await wrapper.find("[data-testid='note-button']").trigger("click");
+            expect(digitKey().attributes("aria-label")).toBe("Note 8, 4 left");
+            await wrapper.find("[data-testid='note-button']").trigger("click");
+
+            i18n.global.locale.value = "zh-Hant";
+            await nextTick();
+            expect(digitKey().attributes("aria-label")).toBe("填入 8，還剩 4 個");
+        });
+
+        it("should draw smaller, top-aligned digits in note mode", async () => {
+            const wrapper = mountGame();
+            const digitKey = () => wrapper.find("[data-testid='number-8']");
+            expect(digitKey().classes()).toEqual(expect.arrayContaining(["items-center", "text-2xl"]));
+
+            await wrapper.find("[data-testid='note-button']").trigger("click");
+
+            expect(digitKey().classes()).toEqual(expect.arrayContaining(["items-start", "text-lg"]));
+            expect(digitKey().classes()).not.toContain("text-2xl");
         });
     });
 
