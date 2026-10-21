@@ -1,12 +1,12 @@
 <template>
     <Transition name="toast">
         <div
-            v-if="outcome"
+            v-if="content"
             class="fixed left-1/2 -translate-x-1/2 bottom-safe-24 z-50 w-max bg-toast text-on-toast text-sm px-4 py-3 rounded-xl shadow-lg max-w-[90%]"
-            data-testid="hint-result-toast"
+            data-testid="game-toast"
         >
             <span>
-                {{ t("game.randomReveal", { position: position(outcome) }) }}
+                {{ message(content) }}
             </span>
         </div>
     </Transition>
@@ -14,16 +14,20 @@
 
 <script setup lang="ts">
 import type { RevealOutcome } from "@/domain/game/RevealOutcome";
+import type { ToastContent } from "@/presentation/pages/game/useGameToast";
 import { useI18n } from "vue-i18n";
 
 defineProps<{
-    outcome: RevealOutcome | null;
+    content: ToastContent | null;
 }>();
 
 const { t } = useI18n();
 
 const position = (outcome: RevealOutcome) =>
     t("position.cell", { row: outcome.cell.row + 1, column: outcome.cell.column + 1, value: outcome.value });
+
+const message = (content: ToastContent): string =>
+    t("game.randomReveal", { position: position(content.outcome) });
 </script>
 
 <style scoped>

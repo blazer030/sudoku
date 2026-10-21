@@ -109,7 +109,7 @@
 
         <HintMenuPopup />
 
-        <HintResultToast :outcome="hintResultOutcome" />
+        <GameToast :content="toastContent" />
 
         <LeaveGameDialog />
     </div>
@@ -122,7 +122,7 @@ import GameCompleteModal from "@/presentation/pages/game/components/GameComplete
 import LeaveGameDialog from "@/presentation/pages/game/components/LeaveGameDialog.vue";
 import GameControls from "@/presentation/pages/game/components/GameControls.vue";
 import HintMenuPopup from "@/presentation/pages/game/components/HintMenuPopup.vue";
-import HintResultToast from "@/presentation/pages/game/components/HintResultToast.vue";
+import GameToast from "@/presentation/pages/game/components/GameToast.vue";
 import DigitPad from "@/presentation/pages/game/components/DigitPad.vue";
 import Cell from "@/presentation/pages/game/components/Cell.vue";
 import HintLinkOverlay from "@/presentation/pages/game/hint-mode/HintLinkOverlay.vue";
@@ -143,7 +143,7 @@ const {
     isRevealed,
     openHintMenu,
     hintMode,
-    hintResultOutcome,
+    toastContent,
     showLeaveDialog,
     checkAndComplete,
     triggerFlash,

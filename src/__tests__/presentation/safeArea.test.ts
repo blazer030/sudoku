@@ -42,7 +42,7 @@ describe("safe area", () => {
 
     it("should lift bottom-anchored floating elements above the bottom inset", () => {
         const floating = [
-            "src/presentation/pages/game/components/HintResultToast.vue",
+            "src/presentation/pages/game/components/GameToast.vue",
             "src/presentation/pages/game/components/HintMenuPopup.vue",
             "src/presentation/pages/donate/Donate.vue",
         ];

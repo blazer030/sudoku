@@ -10,7 +10,7 @@ import { useGameTimer } from "@/presentation/pages/game/useGameTimer";
 import { useGameCompletion } from "@/presentation/pages/game/useGameCompletion";
 import { useLeaveGame } from "@/presentation/pages/game/useLeaveGame";
 import { useHintActions } from "@/presentation/pages/game/useHintActions";
-import { useHintResult } from "@/presentation/pages/game/useHintResult";
+import { useGameToast } from "@/presentation/pages/game/useGameToast";
 import { useCompletionFlash } from "@/presentation/pages/game/useCompletionFlash";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { ANALYTICS_KEY } from "@/application/analytics/AnalyticsService";
@@ -76,7 +76,7 @@ export const useGameSession = () => {
     const settingsStore = useSettingsStore();
     const { triggerFlash, isFlashing } = useCompletionFlash(() => settingsStore.completionFlash);
 
-    const hintResult = useHintResult();
+    const gameToast = useGameToast();
 
     const { clearErrors, isError, isRevealed, openHintMenu, hintMode } = useHintActions({
         sudoku: sudoku.raw(),
@@ -84,7 +84,7 @@ export const useGameSession = () => {
         autoRemoveNotes: () => settingsStore.autoRemoveNotes,
         onRevealComplete: (origin) => { checkAndComplete(origin); },
         onGroupCompleted: triggerFlash,
-        onHintReveal: hintResult.show,
+        onHintReveal: outcome => { gameToast.show({ kind: "randomReveal", outcome }); },
         analytics,
     });
 
@@ -118,7 +118,8 @@ export const useGameSession = () => {
         isRevealed,
         openHintMenu,
         hintMode,
-        hintResultOutcome: hintResult.outcome,
+        toastContent: gameToast.content,
+        showToast: gameToast.show,
         showLeaveDialog,
         triggerFlash,
         isFlashing,
