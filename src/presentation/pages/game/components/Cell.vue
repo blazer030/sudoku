@@ -38,6 +38,8 @@ const props = withDefaults(defineProps<{
     row: number;
     column: number;
     selected?: boolean;
+    /** In the selected cell's row, column or box. */
+    peer?: boolean;
     selectedDigit?: number | null;
     error?: boolean;
     flashing?: boolean;
@@ -46,6 +48,7 @@ const props = withDefaults(defineProps<{
     hint?: HintCellView | null;
     revealed?: boolean;
 }>(), {
+    peer: false,
     selectedDigit: null,
     highlightSameDigit: true,
     hint: null,
@@ -104,6 +107,7 @@ const variant = computed((): CellVariant => {
     if (props.error) return "error";
     if (props.selected) return "selected";
     if (isSameDigit.value) return "same-digit";
+    if (props.peer) return "peer";
     if (props.puzzleCell.isClue) return "clue";
     return "default";
 });
@@ -115,7 +119,7 @@ const valueTextColor = computed((): ValueTextColor => {
     return "primary";
 });
 
-const valueFontWeight = computed((): ValueFontWeight => (props.puzzleCell.isClue ? "semibold" : "medium"));
+const valueFontWeight = computed((): ValueFontWeight => (props.puzzleCell.isClue ? "bold" : "medium"));
 
 const highlightedNote = computed((): number | null => {
     if (props.hint) return null;

@@ -170,13 +170,36 @@ describe("Game", () => {
         expect(wrapper.findComponent<typeof Cell>("[data-testid='cell-0-2']").props("selected")).toBe(true);
     });
 
-    it("should not select a clue cell", async () => {
+    it("should outline a tapped clue cell", async () => {
         const wrapper = mountGame();
 
-        // (0, 0) 是 clue 格子（值為 5）
+        // (0, 0) is the clue 5
         await wrapper.find("[data-testid='cell-0-0']").trigger("click");
 
-        expect(wrapper.findComponent<typeof Cell>("[data-testid='cell-0-0']").props("selected")).toBeFalsy();
+        expect(wrapper.findComponent<typeof Cell>("[data-testid='cell-0-0']").props("selected")).toBe(true);
+        expect(wrapper.find("[data-testid='cell-0-0']").classes()).toContain("ring-primary");
+        await wrapper.find("[data-testid='number-4']").trigger("click");
+        expect(wrapper.find("[data-testid='cell-0-0']").text()).toBe("5");
+    });
+
+    it("should tint the row, column and box of the selected cell", async () => {
+        const wrapper = mountGame();
+
+        await wrapper.find("[data-testid='cell-0-2']").trigger("click");
+
+        expect(wrapper.find("[data-testid='cell-0-8']").classes()).toContain("bg-cell-peer");
+        expect(wrapper.find("[data-testid='cell-8-2']").classes()).toContain("bg-cell-peer");
+        expect(wrapper.find("[data-testid='cell-1-1']").classes()).toContain("bg-cell-peer");
+        expect(wrapper.find("[data-testid='cell-4-4']").classes()).not.toContain("bg-cell-peer");
+    });
+
+    it("should not tint peers when highlightScope is off", async () => {
+        localStorage.setItem("sudoku-settings", JSON.stringify({ highlightScope: false }));
+        const wrapper = mountGame();
+
+        await wrapper.find("[data-testid='cell-0-2']").trigger("click");
+
+        expect(wrapper.find("[data-testid='cell-0-8']").classes()).not.toContain("bg-cell-peer");
     });
 
     it("should deselect when clicking the same cell again", async () => {

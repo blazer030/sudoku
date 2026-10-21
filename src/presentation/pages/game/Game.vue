@@ -31,6 +31,7 @@
                             :flashing="isFlashing(rowIndex, columnIndex)"
                             :highlight-same-digit="settingsStore.highlightSameDigit"
                             :hint="hintMode.cellViews.value?.[rowIndex][columnIndex] ?? null"
+                            :peer="settingsStore.highlightScope && isPeerOfSelected(rowIndex, columnIndex)"
                             :puzzle-cell="puzzleCell.raw()"
                             :revealed="isRevealed(rowIndex, columnIndex)"
                             :selected-digit="selectedDigit"
@@ -169,6 +170,7 @@ const {
     toggleNoteMode,
     toggleEraseMode,
     isSelected,
+    isPeerOfSelected,
     digitCounts,
     undo,
 } = useGameInteraction({

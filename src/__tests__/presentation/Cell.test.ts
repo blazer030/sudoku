@@ -27,6 +27,21 @@ describe("Cell", () => {
         expect(wrapper.find("[data-testid='cell-value']").classes()).not.toContain("text-error");
     });
 
+    it("should layer selected over same digit over peer over clue", async () => {
+        const wrapper = mountCell({ puzzleCell: new PuzzleCell(5) });
+        expect(wrapper.classes()).toContain("bg-cell-clue");
+        expect(wrapper.find("[data-testid='cell-value']").classes()).toContain("font-bold");
+
+        await wrapper.setProps({ peer: true });
+        expect(wrapper.classes()).toContain("bg-cell-peer");
+
+        await wrapper.setProps({ selectedDigit: 5 });
+        expect(wrapper.classes()).toContain("bg-highlight");
+
+        await wrapper.setProps({ selected: true });
+        expect(wrapper.classes()).toContain("bg-cell-selected");
+    });
+
     describe("click handling", () => {
         beforeEach(() => {
             vi.useFakeTimers();

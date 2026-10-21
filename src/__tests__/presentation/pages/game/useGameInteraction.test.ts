@@ -47,15 +47,57 @@ describe("useGameInteraction quick input", () => {
             expect(selectedDigit.value).toBe(5);
         });
 
-        it("does not fill the selected cell and drops the cell selection", () => {
+        it("does not fill the selected cell and moves the selection to the clue", () => {
             const { clickCell, sudoku, selectedCell, selectedDigit } = setup();
             clickCell(0, 2);
 
             clickCell(0, 0);
 
             expect(sudoku.puzzle[0][2].entry).toBe(0);
-            expect(selectedCell.value).toBeNull();
+            expect(selectedCell.value).toEqual({ row: 0, column: 0 });
             expect(selectedDigit.value).toBe(5);
+        });
+
+        it("selects the tapped clue cell along with its digit", () => {
+            const { clickCell, isSelected, selectedDigit } = setup();
+
+            clickCell(0, 0);
+
+            expect(isSelected(0, 0)).toBe(true);
+            expect(selectedDigit.value).toBe(5);
+        });
+
+        it("clears the clue selection when the clue is tapped again", () => {
+            const { clickCell, isSelected, selectedCell, selectedDigit } = setup();
+
+            clickCell(0, 0);
+            clickCell(0, 0);
+
+            expect(isSelected(0, 0)).toBe(false);
+            expect(selectedCell.value).toBeNull();
+            expect(selectedDigit.value).toBeNull();
+        });
+
+        it("never writes into a selected clue from the digit pad", () => {
+            const { clickCell, selectDigit, sudoku, isSelected, selectedDigit } = setup();
+
+            clickCell(0, 0);
+            selectDigit(4);
+
+            expect(sudoku.puzzle[0][0].clue).toBe(5);
+            expect(sudoku.puzzle[0][0].entry).toBe(0);
+            expect(selectedDigit.value).toBe(4);
+            expect(isSelected(0, 0)).toBe(false);
+        });
+
+        it("moves the outline off a clue when an empty cell is filled digit first", () => {
+            const { clickCell, sudoku, isSelected } = setup();
+
+            clickCell(0, 0);
+            clickCell(0, 2);
+
+            expect(sudoku.puzzle[0][2].entry).toBe(5);
+            expect(isSelected(0, 0)).toBe(false);
         });
 
         it("does not make player-filled cells pick their digit", () => {
@@ -67,6 +109,33 @@ describe("useGameInteraction quick input", () => {
 
             expect(sudoku.puzzle[0][2].entry).toBe(0);
             expect(selectedDigit.value).toBe(4);
+        });
+    });
+
+    describe("a selected clue and long press", () => {
+        it("moves the outline off a clue when another cell is long-pressed", () => {
+            const { clickCell, longPressCell, sudoku, isSelected } = setup();
+
+            clickCell(0, 0);
+            longPressCell(0, 2);
+
+            expect(sudoku.puzzle[0][2].notes).toEqual([5]);
+            expect(isSelected(0, 0)).toBe(false);
+        });
+    });
+
+    describe("row, column and box peers", () => {
+        it("finds the row, column and box peers of the selected cell", () => {
+            const { clickCell, isPeerOfSelected } = setup();
+            expect(isPeerOfSelected(0, 4)).toBe(false);
+
+            clickCell(4, 4);
+
+            expect(isPeerOfSelected(4, 0)).toBe(true);
+            expect(isPeerOfSelected(0, 4)).toBe(true);
+            expect(isPeerOfSelected(3, 3)).toBe(true);
+            expect(isPeerOfSelected(0, 0)).toBe(false);
+            expect(isPeerOfSelected(4, 4)).toBe(false);
         });
     });
 
