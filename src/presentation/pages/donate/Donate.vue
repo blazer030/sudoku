@@ -155,6 +155,9 @@ watch(() => store.lastResult, (result) => {
         });
     } else if (result?.kind === "cancelled") {
         showToast("Cancelled");
+    } else if (result?.kind === "error") {
+        console.error("Donate purchase failed:", result.reason);
+        showToast("Purchase failed. Please try again.");
     }
 });
 

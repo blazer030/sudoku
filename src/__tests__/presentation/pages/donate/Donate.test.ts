@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { mount, flushPromises } from "@vue/test-utils";
 import { createPinia, setActivePinia } from "pinia";
 import { createRouter, createMemoryHistory } from "vue-router";
@@ -128,6 +128,10 @@ describe("Donate.vue product loading", () => {
 });
 
 describe("Donate.vue purchase feedback", () => {
+    afterEach(() => {
+        vi.restoreAllMocks();
+    });
+
     it("shows a Cancelled toast when the purchase is cancelled", async () => {
         const wrapper = mountDonate({ logEvent: vi.fn().mockResolvedValue(undefined) }, buildBilling({ kind: "cancelled" }));
         await flushPromises();
@@ -136,5 +140,20 @@ describe("Donate.vue purchase feedback", () => {
         await flushPromises();
 
         expect(wrapper.find("[data-testid='donate-toast']").text()).toBe("Cancelled");
+    });
+
+    it("shows a generic error toast and logs the reason when the purchase fails", async () => {
+        const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
+        const wrapper = mountDonate(
+            { logEvent: vi.fn().mockResolvedValue(undefined) },
+            buildBilling({ kind: "error", reason: "Service disconnected" }),
+        );
+        await flushPromises();
+
+        await wrapper.find("[data-testid='donate-tier-coffee']").trigger("click");
+        await flushPromises();
+
+        expect(wrapper.find("[data-testid='donate-toast']").text()).toBe("Purchase failed. Please try again.");
+        expect(consoleError).toHaveBeenCalledWith("Donate purchase failed:", "Service disconnected");
     });
 });
