@@ -104,7 +104,7 @@
 | 對局回顧的描述 | 用片段陣列拼接，數字加粗 | 改用 `<i18n-t>` 加插槽，讓各語言自己決定語序，數字仍加粗 |
 | 「Thank you for the {label}!」 | 贊助成功頁 | 三個等級各寫一句完整的話，不用填空。例如「謝謝你請我喝咖啡！」 |
 | 贊助頁說明裡的 `<br>` | 寫在模板裡 | 拆成兩段文字 |
-| 日期 | `formatDate` 寫死 `en-US`，含 Today／Yesterday | 傳入目前語言，前綴也要翻譯。中文例：「今天 下午3:05」「10月21日」 |
+| 日期 | `formatDate` 寫死 `en-US`，含 Today／Yesterday | 依目前語言輸出。英文維持現狀（「Today, 3:05 PM」「Oct 21, 3:05 PM」）。中文用斜線日期加 24 小時制，不用「10月21日」「下午」：「今天 15:05」「昨天 09:12」「10/21 15:05」（使用者決定；小時補零是我的決定 ⚙︎）。跨年的日期跟現在一樣不顯示年份 |
 | 難度名稱 | `DifficultyLabels` 放在 domain 層，統計頁又寫死一份，遊戲頁標頭不是響應式 | 移到 `presentation/labels` 改用翻譯 key；domain 只留 id。這一步先做成純結構調整（Tidy First），再接翻譯 |
 | 贊助等級名稱 | `PlayBillingAdapter`、`NoopBillingAdapter`、`DonateSuccess` 三處各一份 | 畫面依等級 id 查翻譯；`Product.label` 拿掉或不再用於顯示 |
 | PuzzleLoader 預設訊息 | prop 預設值 | 呼叫端傳入翻譯後的文字，或在元件內用 computed |
