@@ -39,6 +39,22 @@ export const useGameInteraction = ({ sudoku, stepRecorder, clearErrors, checkAnd
         toggleSelectCell(row, column);
     };
 
+    // Digit-first only: performs the opposite input of the current mode, once, without changing the mode.
+    const longPressCell = (row: number, column: number) => {
+        if (sudoku.puzzle[row][column].isClue) {
+            clickCell(row, column);
+            return;
+        }
+        if (inputMode.value === InputMode.Erase) return;
+        if (selectedDigit.value === null) return;
+        clearErrors();
+        if (inputMode.value === InputMode.Note) {
+            inputToCell(row, column, selectedDigit.value);
+        } else {
+            noteToCell(row, column, selectedDigit.value);
+        }
+    };
+
     const pickClueDigit = (digit: number) => {
         if (inputMode.value === InputMode.Erase) inputMode.value = InputMode.Normal;
         selectedCell.value = null;
@@ -145,6 +161,7 @@ export const useGameInteraction = ({ sudoku, stepRecorder, clearErrors, checkAnd
         selectedDigit,
         inputMode,
         clickCell,
+        longPressCell,
         selectDigit,
         toggleNoteMode,
         toggleEraseMode,
