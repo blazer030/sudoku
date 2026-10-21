@@ -1,4 +1,4 @@
-import { ref } from "vue";
+import { onScopeDispose, ref } from "vue";
 import type { RevealOutcome } from "@/domain/game/RevealOutcome";
 
 export interface RandomRevealToast {
@@ -43,6 +43,8 @@ export const useGameToast = () => {
         }
         content.value = null;
     };
+
+    onScopeDispose(hide);
 
     return { content, show, hide };
 };
