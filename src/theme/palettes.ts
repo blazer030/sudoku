@@ -1,6 +1,7 @@
 // The only place colour values live. src/style/themes.generated.css is rendered from this
 // file by `npm run generate:theme-css`. Relative imports only: scripts/ import this file.
 import type { ColorMode, ColorThemeId, StyleId } from "../application/SettingsStorage";
+import { mixColors } from "./contrast";
 
 export const PALETTE_TOKENS = [
     "background", "card", "border", "foreground", "foreground-secondary", "foreground-muted",
@@ -22,67 +23,98 @@ export interface StyleDefinition {
     themes: readonly ThemePalette[];
 }
 
-type ThemeAccents = Pick<Palette,
-    "primary" | "primary-hover" | "primary-light" | "accent" | "highlight" | "cell-focus" | "cell-scope" | "cell-pattern">;
+// Per-theme colours; the remaining tokens are shared neutrals or tints derived below
+type LightThemeColors = Pick<Palette, "primary" | "primary-hover" | "primary-light" | "accent" | "highlight">;
+type DarkThemeColors = Pick<Palette, "primary" | "primary-hover" | "accent">;
+type DerivedToken = "primary-light" | "highlight" | "cell-focus" | "cell-scope" | "cell-pattern";
 
-const MINIMAL_LIGHT_NEUTRALS: Omit<Palette, keyof ThemeAccents> = {
+// Values are tuned so every pair in paletteContrast.test.ts meets WCAG AA
+const MINIMAL_LIGHT_NEUTRALS: Omit<Palette, keyof LightThemeColors | DerivedToken> = {
     "background": "#F5F4F1",
     "card": "#FFFFFF",
     "border": "#E5E4E1",
     "foreground": "#1A1918",
-    "foreground-secondary": "#6D6C6A",
-    "foreground-muted": "#9C9B99",
+    "foreground-secondary": "#5C5B59",
+    "foreground-muted": "#6F6E6C",
     "cell-clue": "#F7F6F3",
-    "danger": "#C75A4A",
-    "danger-hover": "#B34E40",
-    "error": "#D08068",
+    "danger": "#B84C3D",
+    "danger-hover": "#A73D2F",
+    "error": "#B5231B",
     "error-surface": "#FDEAE6",
     "shadow": "#1A1918",
     "on-primary": "#FFFFFF",
     "on-danger": "#FFFFFF",
-    "note": "#9C9B99",
+    "note": "#5E5D5B",
     "scrim": "#000000",
     "on-scrim": "#FFFFFF",
 };
 
-const minimalTheme = (id: ColorThemeId, accents: ThemeAccents): ThemePalette => {
-    const light: Palette = { ...MINIMAL_LIGHT_NEUTRALS, ...accents };
-    return { id, light, dark: { ...light } };
+// Direction C neutrals; primaries are light tints, so text on them is dark
+const MINIMAL_DARK_NEUTRALS: Omit<Palette, keyof DarkThemeColors | DerivedToken> = {
+    "background": "#111110",
+    "card": "#1D1D1B",
+    "border": "#2D2D2A",
+    "foreground": "#F3F2EE",
+    "foreground-secondary": "#A9A7A2",
+    "foreground-muted": "#878684",
+    "cell-clue": "#191917",
+    "danger": "#D36554",
+    "danger-hover": "#E47463",
+    "error": "#FF8B78",
+    "error-surface": "#3C2C27",
+    "shadow": "#000000",
+    "on-primary": "#111110",
+    "on-danger": "#111110",
+    "note": "#ADACA9",
+    "scrim": "#000000",
+    "on-scrim": "#FFFFFF",
 };
+
+// Board tints are the primary painted over the card at these strengths
+const LIGHT_TINTS = { "cell-focus": 0.22, "cell-scope": 0.08, "cell-pattern": 0.15 } as const;
+const DARK_TINTS = {
+    "primary-light": 0.18, "highlight": 0.13, "cell-focus": 0.24, "cell-scope": 0.1, "cell-pattern": 0.17,
+} as const;
+
+const tintsOf = <Token extends DerivedToken>(primary: string, card: string, strengths: Readonly<Record<Token, number>>) =>
+    Object.fromEntries(Object.entries<number>(strengths).map(([token, alpha]) =>
+        [token, mixColors(primary, alpha, card)])) as Record<Token, string>;
+
+const minimalTheme = (id: ColorThemeId, light: LightThemeColors, dark: DarkThemeColors): ThemePalette => ({
+    id,
+    light: {
+        ...MINIMAL_LIGHT_NEUTRALS,
+        ...light,
+        ...tintsOf(light.primary, MINIMAL_LIGHT_NEUTRALS.card, LIGHT_TINTS),
+    },
+    dark: {
+        ...MINIMAL_DARK_NEUTRALS,
+        ...dark,
+        ...tintsOf(dark.primary, MINIMAL_DARK_NEUTRALS.card, DARK_TINTS),
+    },
+});
 
 const MINIMAL: StyleDefinition = {
     id: "minimal",
     themes: [
-        minimalTheme("green", {
-            "primary": "#3D8A5A", "primary-hover": "#347A4E", "primary-light": "#C8F0D8",
-            "accent": "#D89575", "highlight": "#E8F8EE",
-            "cell-focus": "#B1D0BD", "cell-scope": "#E2EDE6", "cell-pattern": "#C5DCCE",
-        }),
-        minimalTheme("blue", {
-            "primary": "#4A7AB5", "primary-hover": "#3E6A9E", "primary-light": "#D0E4F7",
-            "accent": "#C49A5C", "highlight": "#E4EFF9",
-            "cell-focus": "#B7CAE1", "cell-scope": "#E4EBF4", "cell-pattern": "#C9D7E9",
-        }),
-        minimalTheme("purple", {
-            "primary": "#7B5EA7", "primary-hover": "#6B5093", "primary-light": "#E4D8F0",
-            "accent": "#5A9E8F", "highlight": "#EFE8F6",
-            "cell-focus": "#CABFDC", "cell-scope": "#EBE7F2", "cell-pattern": "#D7CFE5",
-        }),
-        minimalTheme("orange", {
-            "primary": "#C08040", "primary-hover": "#A87038", "primary-light": "#F5E0C8",
-            "accent": "#6888A5", "highlight": "#F9F0E4",
-            "cell-focus": "#E6CCB3", "cell-scope": "#F6ECE2", "cell-pattern": "#ECD9C6",
-        }),
-        minimalTheme("pink", {
-            "primary": "#B5607A", "primary-hover": "#A0536B", "primary-light": "#F7D4DE",
-            "accent": "#5A9A8A", "highlight": "#FBEAEF",
-            "cell-focus": "#E1BFCA", "cell-scope": "#F4E7EB", "cell-pattern": "#E9CFD7",
-        }),
-        minimalTheme("teal", {
-            "primary": "#4A9A9A", "primary-hover": "#3E8686", "primary-light": "#D0F0F0",
-            "accent": "#C07A6A", "highlight": "#E4F4F4",
-            "cell-focus": "#B7D7D7", "cell-scope": "#E4F0F0", "cell-pattern": "#C9E1E1",
-        }),
+        minimalTheme("green",
+            { "primary": "#1A6C3E", "primary-hover": "#005E31", "primary-light": "#C8F0D8", "accent": "#9A5C3E", "highlight": "#E8F8EE" },
+            { "primary": "#6EBB88", "primary-hover": "#7ECB97", "accent": "#D89575" }),
+        minimalTheme("blue",
+            { "primary": "#316099", "primary-hover": "#235289", "primary-light": "#D0E4F7", "accent": "#8C6524", "highlight": "#E4EFF9" },
+            { "primary": "#7CAFED", "primary-hover": "#8BBFFE", "accent": "#C49A5C" }),
+        minimalTheme("purple",
+            { "primary": "#6E5199", "primary-hover": "#604389", "primary-light": "#E4D8F0", "accent": "#327769", "highlight": "#EFE8F6" },
+            { "primary": "#BC9EED", "primary-hover": "#CCAEFE", "accent": "#5A9E8F" }),
+        minimalTheme("orange",
+            { "primary": "#8C5000", "primary-hover": "#7C4200", "primary-light": "#F5E0C8", "accent": "#506F8B", "highlight": "#F9F0E4" },
+            { "primary": "#DE9C5C", "primary-hover": "#EFAC6C", "accent": "#7394B1" }),
+        minimalTheme("pink",
+            { "primary": "#95435E", "primary-hover": "#853550", "primary-light": "#F7D4DE", "accent": "#367667", "highlight": "#FBEAEF" },
+            { "primary": "#EB91AA", "primary-hover": "#FCA1BA", "accent": "#5C9C8C" }),
+        minimalTheme("teal",
+            { "primary": "#0B696A", "primary-hover": "#005B5C", "primary-light": "#D0F0F0", "accent": "#9D5A4B", "highlight": "#E4F4F4" },
+            { "primary": "#69B8B8", "primary-hover": "#79C8C8", "accent": "#C57E6E" }),
     ],
 };
 

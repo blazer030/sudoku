@@ -10,6 +10,6 @@ describe("themes.generated.css", () => {
         const css = renderThemeCss();
 
         expect(css).toContain(':root.dark[data-style="minimal"][data-color-theme="teal"] {');
-        expect(css).toContain("--color-primary: #4A9A9A;");
+        expect(css).toContain("--color-primary: #0B696A;");
     });
 });

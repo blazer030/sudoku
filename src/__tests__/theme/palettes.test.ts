@@ -17,7 +17,7 @@ describe("palettes", () => {
     });
 
     it("should merge each theme's overrides over the shared base", () => {
-        expect(getPalette("minimal", "blue", "light").primary).toBe("#4A7AB5");
+        expect(getPalette("minimal", "blue", "light").primary).toBe("#316099");
         expect(getPalette("minimal", "blue", "light").highlight).toBe("#E4EFF9");
     });
 
