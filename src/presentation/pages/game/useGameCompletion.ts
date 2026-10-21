@@ -36,6 +36,7 @@ export const useGameCompletion = ({ sudoku, difficulty, getElapsedSeconds, getRe
             difficulty: difficulty.value,
             time_seconds: getElapsedSeconds(),
             hints_used: sudoku.hintTracker.recordedUsed,
+            hints_total: sudoku.hintTracker.totalUsed,
         });
         onCompleted(origin);
     };

@@ -63,7 +63,27 @@ describe("useGameCompletion", () => {
             difficulty: "easy",
             time_seconds: 420,
             hints_used: 0,
+            hints_total: 0,
         });
+    });
+
+    it("reports hints_used 0 and hints_total 1 when only the free hint was used", () => {
+        const logEvent = vi.fn().mockResolvedValue(undefined);
+        const sudoku = buildCompleteSudoku();
+        sudoku.hintTracker.useHint();
+
+        const { checkAndComplete } = useGameCompletion({
+            sudoku,
+            difficulty: ref("easy"),
+            getElapsedSeconds: () => 420,
+            getReplayData: emptyReplay,
+            onCompleted: () => { /* noop */ },
+            analytics: { logEvent },
+        });
+
+        checkAndComplete({ row: 0, column: 0 });
+
+        expect(logEvent).toHaveBeenCalledWith(expect.objectContaining({ hints_used: 0, hints_total: 1 }));
     });
 
     it("does not emit event when sudoku is not completed", () => {

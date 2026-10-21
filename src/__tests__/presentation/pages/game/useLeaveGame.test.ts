@@ -26,6 +26,19 @@ const SOLVED_BOARD: number[][] = [
     [3, 4, 5, 2, 8, 6, 1, 7, 9],
 ];
 
+const buildSudokuWithEntries = (entryCount: number, wrongCount = 0): Sudoku => {
+    // Every cell is an empty slot; the first `entryCount` get an entry, the first `wrongCount` of those are wrong.
+    const puzzleCells = SOLVED_BOARD.map((row, rowIndex) =>
+        row.map((value, columnIndex) => {
+            const cellIndex = rowIndex * 9 + columnIndex;
+            const cell = new PuzzleCell(0);
+            if (cellIndex < entryCount) cell.entry = cellIndex < wrongCount ? (value % 9) + 1 : value;
+            return cell;
+        })
+    );
+    return Sudoku.restoreSave(SOLVED_BOARD, puzzleCells);
+};
+
 const buildSudokuWithFilledCount = (filledCount: number): Sudoku => {
     const puzzleCells = SOLVED_BOARD.map((row, rowIndex) =>
         row.map((value, columnIndex) => {
@@ -74,8 +87,9 @@ const mountLeaveHarness = ({ sudoku, analytics }: MountConfig): LeaveApi => {
 };
 
 describe("useLeaveGame — analytics", () => {
-    it("emits game_abandon with correct progress_pct when user gives up", async () => {
+    it("emits game_abandon with progress computed without clue cells", async () => {
         const logEvent = vi.fn().mockResolvedValue(undefined);
+        // 40 clue cells, 41 empty cells with no entries yet.
         const api = mountLeaveHarness({
             sudoku: buildSudokuWithFilledCount(40),
             analytics: { logEvent },
@@ -87,7 +101,29 @@ describe("useLeaveGame — analytics", () => {
         expect(logEvent).toHaveBeenCalledWith({
             name: "game_abandon",
             difficulty: "easy",
+            progress_pct: 0,
+            correct_pct: 0,
+            incorrect_pct: 0,
+        });
+    });
+
+    it("emits progress, correct and incorrect percentages of the player's cells", async () => {
+        const logEvent = vi.fn().mockResolvedValue(undefined);
+        // 81 empty cells: 40 entries, 20 of them wrong.
+        const api = mountLeaveHarness({
+            sudoku: buildSudokuWithEntries(40, 20),
+            analytics: { logEvent },
+        });
+        vi.spyOn(api.leaveDialog, "open").mockResolvedValue("giveUp");
+
+        await api.showLeaveDialog();
+
+        expect(logEvent).toHaveBeenCalledWith({
+            name: "game_abandon",
+            difficulty: "easy",
             progress_pct: Math.round((40 / 81) * 100),
+            correct_pct: Math.round((20 / 81) * 100),
+            incorrect_pct: Math.round((20 / 81) * 100),
         });
     });
 

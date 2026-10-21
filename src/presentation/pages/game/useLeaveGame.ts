@@ -8,6 +8,7 @@ import { useStatisticsStore } from "@/stores/statisticsStore";
 import type { GameReplayData } from "@/application/statistics/StatisticsRepository";
 import { provideLeaveDialog } from "@/presentation/pages/game/components/useLeaveDialog";
 import type { AnalyticsService } from "@/application/analytics/AnalyticsService";
+import { computeAbandonProgress } from "@/application/analytics/computeAbandonProgress";
 
 interface LeaveGameOptions {
     sudoku: Sudoku;
@@ -17,18 +18,6 @@ interface LeaveGameOptions {
     getReplayData: () => GameReplayData;
     analytics?: AnalyticsService;
 }
-
-const TOTAL_CELLS = 81;
-
-const computeProgressPct = (sudoku: Sudoku): number => {
-    let filled = 0;
-    for (const row of sudoku.puzzle) {
-        for (const cell of row) {
-            if (cell.isClue || cell.hasEntry) filled += 1;
-        }
-    }
-    return Math.round((filled / TOTAL_CELLS) * 100);
-};
 
 export const useLeaveGame = ({ sudoku, difficulty, completed, getElapsedSeconds, getReplayData, analytics }: LeaveGameOptions) => {
     const router = useRouter();
@@ -50,10 +39,13 @@ export const useLeaveGame = ({ sudoku, difficulty, completed, getElapsedSeconds,
             leavingConfirmed.value = true;
             router.back();
         } else if (result === "giveUp") {
+            const { progressPct, correctPct, incorrectPct } = computeAbandonProgress(sudoku.puzzle, sudoku.answer);
             void analytics?.logEvent({
                 name: "game_abandon",
                 difficulty: difficulty.value,
-                progress_pct: computeProgressPct(sudoku),
+                progress_pct: progressPct,
+                correct_pct: correctPct,
+                incorrect_pct: incorrectPct,
             });
             statisticsStore.recordGame({
                 difficulty: difficulty.value,
