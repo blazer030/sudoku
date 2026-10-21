@@ -6,6 +6,9 @@ import App from "@/presentation/App.vue";
 import { router } from "@/router";
 
 import { useSettingsStore } from "@/stores/settingsStore";
+import { storeToRefs } from "pinia";
+import { i18n } from "@/presentation/i18n";
+import { startLocaleSync } from "@/presentation/i18n/localeSync";
 import { useGameStore } from "@/stores/gameStore";
 import { useDonateStore } from "@/stores/donateStore";
 import { useStatisticsStore } from "@/stores/statisticsStore";
@@ -49,6 +52,7 @@ const gameRepository: GameRepository = new IndexedDBGameRepository();
 const app = createApp(App);
 app.use(createPinia());
 app.use(router);
+app.use(i18n);
 app.provide(ANALYTICS_KEY, analytics);
 app.provide(BILLING_KEY, billing);
 app.provide(ICON_KEY, icon);
@@ -66,5 +70,6 @@ await Promise.all([
     statisticsStore.loadFromRepository(),
     gameStore.loadFromRepository(),
 ]);
+startLocaleSync(storeToRefs(useSettingsStore()).language);
 
 app.mount("#root");
