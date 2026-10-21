@@ -26,6 +26,10 @@ IMPORTANT: Domain layer must never import from `presentation/`, `stores/`, or `a
 
 Design specs and implementation plans live under `docs/` — never in a root `plan.md`.
 
+## Release
+
+Follow `docs/release.md` (git flow, web + Android). Bump the version only on the release/hotfix branch; `package.json` is the single source and Android derives `versionName` / `versionCode` from it.
+
 ## Code Style
 
 - **Composition API** with `<script setup>` and arrow functions — no Options API
