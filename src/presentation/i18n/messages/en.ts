@@ -76,6 +76,7 @@ export const en = {
             summary: "{difficulty} · {time} played",
             continue: "Continue That Game",
             confirm: "Give Up & Start New",
+            stay: "Stay here",
         },
     },
     game: {

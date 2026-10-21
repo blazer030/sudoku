@@ -229,6 +229,79 @@ describe("Home", () => {
             expect(giveUp.classes()).not.toContain("bg-danger");
         });
 
+        describe("staying on Home", () => {
+            const openDialog = async () => {
+                const analytics = { logEvent: vi.fn(() => Promise.resolve()) };
+                const { wrapper, router, pinia } = mountHome({ savedGame: dummySave, analytics });
+                await router.push("/");
+                await router.isReady();
+                await wrapper.find("[data-testid='new-game-button']").trigger("click");
+                return { wrapper, router, pinia, analytics };
+            };
+
+            const expectStayedWithoutSideEffects = async ({ wrapper, router, pinia, analytics }: Awaited<ReturnType<typeof openDialog>>) => {
+                await flushPromises();
+                expect(wrapper.find("[data-testid='new-game-confirm-dialog']").exists()).toBe(false);
+                expect(router.currentRoute.value.path).toBe("/");
+                const gameStore = useGameStore(pinia);
+                expect(gameStore.savedGame).not.toBeNull();
+                expect(gameStore.hasActiveGame).toBe(false);
+                expect(useStatisticsStore(pinia).history).toHaveLength(0);
+                expect(analytics.logEvent).not.toHaveBeenCalled();
+            };
+
+            it("should offer a quiet Stay here action below the give up action", async () => {
+                const { wrapper } = await openDialog();
+
+                const stay = wrapper.find("[data-testid='new-game-stay-button']");
+                expect(stay.text()).toBe("Stay here");
+                expect(stay.classes()).not.toContain("bg-primary");
+                expect(stay.classes()).not.toContain("text-danger");
+            });
+
+            it("should label the Stay here action in Traditional Chinese", async () => {
+                const { wrapper } = mountHome({ savedGame: dummySave });
+                i18n.global.locale.value = "zh-Hant";
+                await nextTick();
+
+                await wrapper.find("[data-testid='new-game-button']").trigger("click");
+
+                expect(wrapper.find("[data-testid='new-game-stay-button']").text()).toBe("留在首頁");
+            });
+
+            it("should close the dialog without side effects when tapping Stay here", async () => {
+                const context = await openDialog();
+
+                await context.wrapper.find("[data-testid='new-game-stay-button']").trigger("click");
+
+                await expectStayedWithoutSideEffects(context);
+            });
+
+            it("should close the dialog without side effects when tapping the scrim", async () => {
+                const context = await openDialog();
+
+                await context.wrapper.find("[data-testid='new-game-confirm-dialog']").trigger("click");
+
+                await expectStayedWithoutSideEffects(context);
+            });
+
+            it("should keep the dialog open when tapping inside the card", async () => {
+                const { wrapper } = await openDialog();
+
+                await wrapper.find("[data-testid='new-game-saved-summary']").trigger("click");
+
+                expect(wrapper.find("[data-testid='new-game-confirm-dialog']").exists()).toBe(true);
+            });
+
+            it("should close the dialog without side effects when pressing Escape", async () => {
+                const context = await openDialog();
+
+                document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+
+                await expectStayedWithoutSideEffects(context);
+            });
+        });
+
         it("should show the confirm dialog in Traditional Chinese when the language is zh-Hant", async () => {
             const { wrapper } = mountHome({ savedGame: dummySave });
             i18n.global.locale.value = "zh-Hant";

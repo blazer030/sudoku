@@ -74,6 +74,7 @@ export const zhHant: MessageSchema = {
             summary: "{difficulty}・已玩 {time}",
             continue: "繼續原本那局",
             confirm: "放棄並開新局",
+            stay: "留在首頁",
         },
     },
     game: {

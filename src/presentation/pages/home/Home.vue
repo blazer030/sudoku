@@ -126,6 +126,7 @@ const handleNewGame = async () => {
     if (gameStore.savedGame !== null) {
         const unfinished = gameStore.savedGame;
         const result = await newGameDialog.open({ difficulty: unfinished.difficulty, elapsedSeconds: unfinished.elapsedSeconds });
+        if (result === "stay") return;
         if (result === "continue") {
             continueGame();
             return;

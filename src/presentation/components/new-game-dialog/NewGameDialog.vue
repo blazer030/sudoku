@@ -4,6 +4,7 @@
             v-if="visible"
             class="fixed inset-0 bg-scrim/50 flex items-center justify-center z-50"
             data-testid="new-game-confirm-dialog"
+            @click.self="close('stay')"
         >
             <div class="bg-card rounded-3xl p-8 mx-6 w-full max-w-[354px] flex flex-col items-center gap-6 shadow-modal">
                 <div class="w-16 h-16 rounded-2xl bg-danger/10 flex items-center justify-center">
@@ -50,6 +51,15 @@
                     >
                         {{ t("home.giveUp.confirm") }}
                     </button>
+
+                    <button
+                        v-press
+                        class="w-full h-11 flex items-center justify-center cursor-pointer rounded-button text-foreground-secondary text-[15px] font-medium transition-all duration-200 hover:bg-foreground/5"
+                        data-testid="new-game-stay-button"
+                        @click="close('stay')"
+                    >
+                        {{ t("home.giveUp.stay") }}
+                    </button>
                 </div>
             </div>
         </div>
@@ -57,7 +67,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from "vue";
+import { computed, onBeforeUnmount, onMounted } from "vue";
 import { Play, TriangleAlert } from "lucide-vue-next";
 import { useI18n } from "vue-i18n";
 import { useNewGameDialog } from "@/presentation/components/new-game-dialog/useNewGameDialog";
@@ -68,6 +78,12 @@ import { vPress } from "@/presentation/directives/press";
 const { t } = useI18n();
 const { visible, params, close } = useNewGameDialog();
 const difficultyLabel = useDifficultyLabel();
+
+const closeOnEscape = (event: KeyboardEvent) => {
+    if (visible.value && event.key === "Escape") close("stay");
+};
+onMounted(() => document.addEventListener("keydown", closeOnEscape));
+onBeforeUnmount(() => document.removeEventListener("keydown", closeOnEscape));
 
 const summary = computed(() => {
     if (params.value === undefined) return "";
