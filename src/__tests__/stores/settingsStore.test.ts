@@ -1,6 +1,6 @@
 import { createPinia, setActivePinia } from "pinia";
 import { useSettingsStore } from "@/stores/settingsStore";
-import { updateMetaThemeColor, updateFavicon, updateManifestLink, updateAppleTouchIcon } from "@/application/PwaThemeUpdater";
+import { updateFavicon, updateManifestLink, updateAppleTouchIcon } from "@/application/PwaThemeUpdater";
 import type { IconService } from "@/application/icon/IconService";
 
 vi.mock("@/application/PwaThemeUpdater", () => ({
@@ -84,26 +84,11 @@ describe("settingsStore", () => {
         expect(stored.completionFlash).toBe(false);
     });
 
-    it("should set data-color-theme on document element on init", () => {
-        useSettingsStore();
-
-        expect(document.documentElement.dataset.colorTheme).toBe("green");
-    });
-
-    it("should update data-color-theme when colorTheme changes", () => {
-        const store = useSettingsStore();
-
-        store.setColorTheme("purple");
-
-        expect(document.documentElement.dataset.colorTheme).toBe("purple");
-    });
-
     it("should call PwaThemeUpdater functions when setting color theme", () => {
         const store = useSettingsStore();
 
         store.setColorTheme("blue");
 
-        expect(updateMetaThemeColor).toHaveBeenCalledWith("blue");
         expect(updateFavicon).toHaveBeenCalledWith("blue");
         expect(updateManifestLink).toHaveBeenCalledWith("blue");
         expect(updateAppleTouchIcon).toHaveBeenCalledWith("blue");

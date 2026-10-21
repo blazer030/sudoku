@@ -1,9 +1,8 @@
-import { getPalette } from "@/theme/palettes";
 import type { ColorThemeId } from "@/application/SettingsStorage";
 
-export const updateMetaThemeColor = (id: ColorThemeId): void => {
+export const updateMetaThemeColor = (color: string): void => {
     const meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
-    if (meta) meta.content = getPalette("minimal", id, "light").primary;
+    if (meta) meta.content = color;
 };
 
 export const updateFavicon = (id: ColorThemeId): void => {

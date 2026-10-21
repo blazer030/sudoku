@@ -1,7 +1,7 @@
 import { ref } from "vue";
 import { defineStore } from "pinia";
 import { loadSettings, saveSettings, type Appearance, type ColorThemeId, type LanguagePreference, type StyleId } from "@/application/SettingsStorage";
-import { updateMetaThemeColor, updateFavicon, updateManifestLink, updateAppleTouchIcon } from "@/application/PwaThemeUpdater";
+import { updateFavicon, updateManifestLink, updateAppleTouchIcon } from "@/application/PwaThemeUpdater";
 import type { IconService } from "@/application/icon/IconService";
 
 export const useSettingsStore = defineStore("settings", () => {
@@ -19,10 +19,6 @@ export const useSettingsStore = defineStore("settings", () => {
 
     const applyColorTheme = () => {
         const id = colorTheme.value;
-        document.documentElement.dataset.colorTheme = id;
-        // The generated theme blocks are keyed by style as well as theme
-        document.documentElement.dataset.style = style.value;
-        updateMetaThemeColor(id);
         updateFavicon(id);
         updateManifestLink(id);
         updateAppleTouchIcon(id);

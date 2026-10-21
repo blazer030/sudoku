@@ -1,5 +1,4 @@
 import { updateMetaThemeColor, updateFavicon, updateManifestLink, updateAppleTouchIcon } from "@/application/PwaThemeUpdater";
-import { getPalette } from "@/theme/palettes";
 
 describe("PwaThemeUpdater", () => {
     describe("updateMetaThemeColor", () => {
@@ -7,19 +6,19 @@ describe("PwaThemeUpdater", () => {
             document.head.innerHTML = "";
         });
 
-        it("should set meta theme-color content to the theme primary color", () => {
+        it("should set meta theme-color content to the given color", () => {
             const meta = document.createElement("meta");
             meta.name = "theme-color";
             meta.content = "#000000";
             document.head.appendChild(meta);
 
-            updateMetaThemeColor("blue");
+            updateMetaThemeColor("#123456");
 
-            expect(meta.content).toBe(getPalette("minimal", "blue", "light").primary);
+            expect(meta.content).toBe("#123456");
         });
 
         it("should not throw when meta theme-color element is missing", () => {
-            expect(() => { updateMetaThemeColor("blue"); }).not.toThrow();
+            expect(() => { updateMetaThemeColor("#123456"); }).not.toThrow();
         });
     });
 

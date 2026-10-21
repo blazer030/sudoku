@@ -131,3 +131,9 @@ const findTheme = (style: StyleId, themeId: ColorThemeId): ThemePalette => {
 
 export const getPalette = (style: StyleId, themeId: ColorThemeId, mode: ColorMode): Palette =>
     findTheme(style, themeId)[mode];
+
+/** The browser theme-color and Android bar colour: the primary in light mode, the page background in dark mode. */
+export const systemBarColor = (style: StyleId, themeId: ColorThemeId, mode: ColorMode): string => {
+    const palette = getPalette(style, themeId, mode);
+    return mode === "light" ? palette.primary : palette.background;
+};
