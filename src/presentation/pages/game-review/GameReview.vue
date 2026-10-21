@@ -38,7 +38,7 @@
                         {{ difficultyLabel(game.difficulty) }}
                     </span>
                     <span class="text-[11px] text-foreground-muted">
-                        {{ formatDate(game.date, locale as AppLocale) }}
+                        {{ formatDate(game.date, appLocale) }}
                     </span>
                 </div>
             </div>
@@ -141,7 +141,7 @@ import { ROUTER_PATH } from "@/router";
 import { useStatisticsStore } from "@/stores/statisticsStore";
 import { formatTime } from "@/utils/formatTime";
 import { useI18n } from "vue-i18n";
-import type { AppLocale } from "@/application/SettingsStorage";
+import { useAppLocale } from "@/presentation/i18n/useAppLocale";
 import { formatDate } from "@/presentation/i18n/formatDate";
 import { useDifficultyLabel } from "@/presentation/labels/difficultyLabels";
 import Cell from "@/presentation/pages/game/components/Cell.vue";
@@ -153,7 +153,8 @@ const props = defineProps<{
     index: string;
 }>();
 
-const { t, locale } = useI18n();
+const { t } = useI18n();
+const appLocale = useAppLocale();
 const router = useRouter();
 const history = useStatisticsStore().history;
 const gameIndex = Number(props.index);

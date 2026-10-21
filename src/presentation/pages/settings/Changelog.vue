@@ -45,15 +45,14 @@
 
 <script lang="ts" setup>
 import { useRouter } from "vue-router";
-import { computed } from "vue";
 import { useI18n } from "vue-i18n";
-import type { AppLocale } from "@/application/SettingsStorage";
+import { useAppLocale } from "@/presentation/i18n/useAppLocale";
 import { ChevronLeft } from "lucide-vue-next";
 import { CHANGELOG } from "@/presentation/pages/settings/changelogData";
 
 const router = useRouter();
-const { t, locale } = useI18n();
-const appLocale = computed(() => locale.value as AppLocale);
+const { t } = useI18n();
+const appLocale = useAppLocale();
 
 const goBack = () => {
     router.back();
