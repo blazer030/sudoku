@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { Sudoku } from "@/domain/game/Sudoku";
 import { TechniqueSolver } from "@/domain/solver/TechniqueSolver";
 import { createKnownSudoku, knownAnswer, knownPuzzle, spyGeneratePuzzle } from "@/__tests__/fixtures/knownPuzzle";
+import { createMultiStepSudoku } from "@/__tests__/fixtures/multiStepPuzzle";
 
 afterEach(() => {
     vi.restoreAllMocks();
@@ -470,21 +471,21 @@ describe("Sudoku", () => {
         });
 
         it("planRevealHint should record the candidates before each step", () => {
-            const sudoku = createKnownSudoku();
+            const sudoku = createMultiStepSudoku();
 
             const plan = sudoku.planRevealHint();
 
             expect(plan.kind).toBe("steps");
             if (plan.kind !== "steps") return;
-            const first = plan.steps[0];
+            expect(plan.steps.length).toBeGreaterThan(1);
+            const [first, second] = plan.steps;
             for (const cell of first.step.focus) {
                 expect(first.candidatesBefore[cell.row][cell.column].length).toBeGreaterThan(0);
             }
-            if (plan.steps.length > 1) {
-                const eliminated = first.step.eliminations[0];
-                const after = plan.steps[1].candidatesBefore[eliminated.cell.row][eliminated.cell.column];
-                expect(after).not.toContain(eliminated.digit);
-            }
+            const eliminated = first.step.eliminations[0];
+            const { row, column } = eliminated.cell;
+            expect(first.candidatesBefore[row][column]).toContain(eliminated.digit);
+            expect(second.candidatesBefore[row][column]).not.toContain(eliminated.digit);
         });
 
         it("planRevealHint should ignore the player's notes", () => {
