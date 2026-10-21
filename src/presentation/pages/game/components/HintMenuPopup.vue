@@ -16,11 +16,11 @@
                     <span class="text-foreground text-sm font-bold">{{ t("game.hints.title") }}</span>
                     <div class="flex items-center gap-1">
                         <div
-                            v-for="i in 3"
-                            :key="i"
+                            v-for="lightNumber in 3"
+                            :key="lightNumber"
                             :class="[
                                 'w-2 h-2 rounded-full',
-                                i <= remaining ? 'bg-primary' : 'border-[1.5px] border-border',
+                                lightNumber <= remaining ? 'bg-primary' : 'border-[1.5px] border-border',
                             ]"
                             data-testid="hint-light"
                         />
