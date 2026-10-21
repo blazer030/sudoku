@@ -491,6 +491,15 @@ describe("SolverWalkthrough", () => {
         expect(wrapper.find("[data-testid='step-counter']").text()).toMatch(/Step 1 of \d+/);
     });
 
+    it("should center the step counter", async () => {
+        const { wrapper } = mountWalkthrough();
+        await fillPuzzle(wrapper, singlesPuzzle);
+
+        await wrapper.find("[data-testid='solve-button']").trigger("click");
+
+        expect(wrapper.find("[data-testid='step-counter']").classes()).toContain("text-center");
+    });
+
     it("should describe a Naked Single step with technique, cell and digit", async () => {
         const { wrapper } = mountWalkthrough();
         await fillPuzzle(wrapper, singlesPuzzle);

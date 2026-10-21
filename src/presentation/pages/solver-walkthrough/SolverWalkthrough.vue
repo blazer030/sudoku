@@ -111,6 +111,7 @@
                     :current-step="currentStep"
                     :play-state="playState"
                     :total-steps="totalSteps"
+                    counter-align="center"
                     @seek="goToStep"
                 />
                 <PlaybackControls
