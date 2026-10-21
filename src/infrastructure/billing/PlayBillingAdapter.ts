@@ -1,5 +1,5 @@
 import { store, ProductType, Platform, ErrorCode, CdvPurchase } from "capacitor-plugin-cdv-purchase";
-import type { Product as CdvProduct, Transaction } from "capacitor-plugin-cdv-purchase";
+import type { Transaction } from "capacitor-plugin-cdv-purchase";
 import type { BillingService, Product, PurchaseResult } from "@/application/billing/BillingService";
 import type { DonateTier } from "@/application/analytics/AnalyticsService";
 
@@ -14,7 +14,6 @@ const PRODUCT_IDS = Array.from(TIER_META.keys());
 export class PlayBillingAdapter implements BillingService {
     private initialization: Promise<unknown> | null = null;
     private hasLoadedProducts = false;
-    private cachedProducts = new Map<string, Product>();
     private pendingPurchases = new Map<string, (result: PurchaseResult) => void>();
 
     private ensureSetup(): Promise<unknown> {
@@ -25,7 +24,6 @@ export class PlayBillingAdapter implements BillingService {
             platform: Platform.GOOGLE_PLAY,
         })));
         store.when()
-            .productUpdated((product) => { this.handleProductUpdated(product); })
             .approved((transaction) => { this.handleApproved(transaction); });
         // Only user-initiated retries call store.update(), so never throttle them
         store.minTimeBetweenUpdates = 0;
@@ -35,13 +33,31 @@ export class PlayBillingAdapter implements BillingService {
 
     async loadProducts(): Promise<Product[]> {
         await this.ensureSetup();
-        if (this.hasLoadedProducts && this.cachedProducts.size < PRODUCT_IDS.length) {
+        if (this.hasLoadedProducts && this.availableProducts().length < PRODUCT_IDS.length) {
             await store.update();
         }
         this.hasLoadedProducts = true;
+        return this.availableProducts();
+    }
+
+    // Read from the store directly: its productUpdated callbacks fire on a later tick than initialize() resolves
+    private availableProducts(): Product[] {
         return PRODUCT_IDS
-            .map((id) => this.cachedProducts.get(id))
+            .map((id) => this.toProduct(id))
             .filter((entry): entry is Product => entry !== undefined);
+    }
+
+    private toProduct(productId: string): Product | undefined {
+        const meta = TIER_META.get(productId);
+        const pricing = store.get(productId, Platform.GOOGLE_PLAY)?.pricing;
+        if (meta === undefined || pricing === undefined) return undefined;
+        return {
+            id: productId,
+            tier: meta.tier,
+            label: meta.label,
+            priceText: pricing.price,
+            amountUsd: pricing.priceMicros / 1_000_000,
+        };
     }
 
     purchase(productId: string): Promise<PurchaseResult> {
@@ -74,26 +90,12 @@ export class PlayBillingAdapter implements BillingService {
         }
     }
 
-    private handleProductUpdated(product: CdvProduct): void {
-        const meta = TIER_META.get(product.id);
-        if (meta === undefined) return;
-        const pricing = product.pricing;
-        if (pricing === undefined) return;
-        this.cachedProducts.set(product.id, {
-            id: product.id,
-            tier: meta.tier,
-            label: meta.label,
-            priceText: pricing.price,
-            amountUsd: pricing.priceMicros / 1_000_000,
-        });
-    }
-
     private handleApproved(transaction: Transaction): void {
         if (transaction.products.length === 0) return;
         const productId = transaction.products[0].id;
         void transaction.finish();
         const resolve = this.pendingPurchases.get(productId);
-        const product = this.cachedProducts.get(productId);
+        const product = this.toProduct(productId);
         if (resolve === undefined || product === undefined) return;
         this.pendingPurchases.delete(productId);
         resolve({ kind: "success", productId, tier: product.tier, amountUsd: product.amountUsd });

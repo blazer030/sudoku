@@ -154,6 +154,19 @@ describe("PlayBillingAdapter", () => {
         ]);
     });
 
+    it("loadProducts reads products from the store even before deferred productUpdated callbacks run", async () => {
+        mocks.initializeSpy.mockImplementation(() => {
+            mocks.productById.set("donate_coffee", buildProduct("donate_coffee", "$2.99", 2_990_000));
+            return Promise.resolve([]);
+        });
+
+        const adapter = new PlayBillingAdapter();
+
+        await expect(adapter.loadProducts()).resolves.toEqual([
+            { id: "donate_coffee", tier: "coffee", label: "Coffee", priceText: "$2.99", amountUsd: 2.99 },
+        ]);
+    });
+
     it("loadProducts asks the store to refresh unthrottled when retried after an incomplete load", async () => {
         const adapter = new PlayBillingAdapter();
         await expect(adapter.loadProducts()).resolves.toEqual([]);
