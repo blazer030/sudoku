@@ -1,3 +1,7 @@
+import type { TechniqueId } from "@/domain/solver/SolveStep";
+import type { Difficulty } from "@/domain/generator/SudokuGenerator";
+import type { DonateTier } from "@/application/analytics/AnalyticsService";
+
 export const en = {
     common: {
         back: "Back",
@@ -34,7 +38,7 @@ export const en = {
         about: "About",
         version: "Version",
     },
-    difficulty: { easy: "Easy", medium: "Medium", hard: "Hard" },
+    difficulty: { easy: "Easy", medium: "Medium", hard: "Hard" } satisfies Record<Difficulty, string>,
     technique: {
         nakedSingle: "Naked Single",
         hiddenSingle: "Hidden Single",
@@ -55,7 +59,7 @@ export const en = {
         wxyzWing: "WXYZ-Wing",
         xChain: "X-Chain",
         xyChain: "XY-Chain",
-    },
+    } satisfies Record<TechniqueId, string>,
     home: {
         title: "Sudoku",
         subtitle: "Train your brain",
@@ -142,12 +146,12 @@ export const en = {
         loadFailed: "Couldn't load donation options.",
         retry: "Retry",
         payments: "Payments handled by Google Play",
-        tiers: { coffee: "Coffee", lunch: "Lunch", coding_time: "Coding Time" },
+        tiers: { coffee: "Coffee", lunch: "Lunch", coding_time: "Coding Time" } satisfies Record<DonateTier, string>,
         thanks: {
             coffee: "Thank you for the Coffee!",
             lunch: "Thank you for the Lunch!",
             coding_time: "Thank you for the Coding Time!",
-        },
+        } satisfies Record<DonateTier, string>,
         done: "Done",
         cancelled: "Cancelled",
         purchaseFailed: "Purchase failed. Please try again.",
