@@ -10,6 +10,7 @@ import { useStatisticsStore } from "@/stores/statisticsStore";
 import type { CellState, GameState } from "@/application/GameState";
 import { i18n } from "@/presentation/i18n";
 import { knownAnswer, knownPuzzle } from "@/__tests__/fixtures/knownPuzzle";
+import { ANALYTICS_KEY, type AnalyticsService } from "@/application/analytics/AnalyticsService";
 
 vi.mock("@/application/PuzzleGenerationService", () => ({
     generatePuzzleAsync: vi.fn(() => Promise.resolve({
@@ -39,7 +40,7 @@ const createTestRouter = () => {
     });
 };
 
-const mountHome = ({ savedGame }: { savedGame?: GameState } = {}) => {
+const mountHome = ({ savedGame, analytics }: { savedGame?: GameState; analytics?: AnalyticsService } = {}) => {
     const router = createTestRouter();
     const pinia = createPinia();
     setActivePinia(pinia);
@@ -47,7 +48,10 @@ const mountHome = ({ savedGame }: { savedGame?: GameState } = {}) => {
         useGameStore().persistGame(savedGame);
     }
     const wrapper = mount(Home, {
-        global: { plugins: [router, pinia] },
+        global: {
+            plugins: [router, pinia],
+            provide: analytics === undefined ? {} : { [ANALYTICS_KEY as symbol]: analytics },
+        },
     });
     return { wrapper, router, pinia };
 };
@@ -293,6 +297,63 @@ describe("Home", () => {
 
             expect(wrapper.find("[data-testid='new-game-confirm-dialog']").exists()).toBe(false);
             expect(router.currentRoute.value.path).toBe(ROUTER_PATH.game);
+        });
+    });
+
+    describe("game_abandon analytics", () => {
+        const createAnalytics = () => ({ logEvent: vi.fn(() => Promise.resolve()) });
+
+        const savedGameWithEntries: GameState = {
+            ...dummySave,
+            difficulty: "hard",
+            answer: knownAnswer.map(row => [...row]),
+            cells: knownAnswer.map((row, rowIndex) => row.map((value, columnIndex): CellState => {
+                if (rowIndex === 0 && columnIndex < 2) return { clue: 0, entry: value, notes: [] };
+                if (rowIndex === 0 && columnIndex < 4) return { clue: 0, entry: value % 9 + 1, notes: [] };
+                return { clue: 0, entry: 0, notes: [] };
+            })),
+        };
+
+        it("should log game_abandon with difficulty and progress when giving up the saved game", async () => {
+            const analytics = createAnalytics();
+            const { wrapper, router } = mountHome({ savedGame: savedGameWithEntries, analytics });
+            await router.push("/");
+            await router.isReady();
+
+            await wrapper.find("[data-testid='new-game-button']").trigger("click");
+            await wrapper.find("[data-testid='give-up-and-start-new-button']").trigger("click");
+            await flushPromises();
+
+            expect(analytics.logEvent).toHaveBeenCalledWith({
+                name: "game_abandon",
+                difficulty: "hard",
+                progress_pct: 5,
+                correct_pct: 2,
+                incorrect_pct: 2,
+            });
+        });
+
+        it("should not log game_abandon when cancelling the dialog", async () => {
+            const analytics = createAnalytics();
+            const { wrapper } = mountHome({ savedGame: savedGameWithEntries, analytics });
+
+            await wrapper.find("[data-testid='new-game-button']").trigger("click");
+            await wrapper.find("[data-testid='new-game-cancel-button']").trigger("click");
+            await flushPromises();
+
+            expect(analytics.logEvent).not.toHaveBeenCalledWith(expect.objectContaining({ name: "game_abandon" }));
+        });
+
+        it("should not log game_abandon when starting a new game without a saved game", async () => {
+            const analytics = createAnalytics();
+            const { wrapper, router } = mountHome({ analytics });
+            await router.push("/");
+            await router.isReady();
+
+            await wrapper.find("[data-testid='new-game-button']").trigger("click");
+            await flushPromises();
+
+            expect(analytics.logEvent).not.toHaveBeenCalledWith(expect.objectContaining({ name: "game_abandon" }));
         });
     });
 });

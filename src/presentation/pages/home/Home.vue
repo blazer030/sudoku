@@ -89,7 +89,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from "vue";
+import { inject, ref } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { ChartBar, Plus, Settings, Wand2 } from "lucide-vue-next";
@@ -97,6 +97,8 @@ import { ROUTER_PATH } from "@/router";
 import type { Difficulty } from "@/domain";
 import { useGameStore } from "@/stores/gameStore";
 import { useStatisticsStore } from "@/stores/statisticsStore";
+import { ANALYTICS_KEY } from "@/application/analytics/AnalyticsService";
+import { computeAbandonProgress } from "@/application/analytics/computeAbandonProgress";
 
 import ContinueButton from "@/presentation/components/continue-button/ContinueButton.vue";
 import DifficultySwitcher from "@/presentation/components/difficulty-switcher/DifficultySwitcher.vue";
@@ -111,6 +113,7 @@ const gameStore = useGameStore();
 const statisticsStore = useStatisticsStore();
 const newGameDialog = provideNewGameDialog();
 const puzzleLoader = usePuzzleLoader();
+const analytics = inject(ANALYTICS_KEY);
 
 const difficulty = ref<Difficulty>("easy");
 
@@ -119,6 +122,14 @@ const handleNewGame = async () => {
         const result = await newGameDialog.open();
         if (result === "cancel") return;
         const saved = gameStore.savedGame;
+        const { progressPct, correctPct, incorrectPct } = computeAbandonProgress(saved.cells, saved.answer);
+        void analytics?.logEvent({
+            name: "game_abandon",
+            difficulty: saved.difficulty,
+            progress_pct: progressPct,
+            correct_pct: correctPct,
+            incorrect_pct: incorrectPct,
+        });
         statisticsStore.recordGame({
             difficulty: saved.difficulty,
             elapsedSeconds: saved.elapsedSeconds,
