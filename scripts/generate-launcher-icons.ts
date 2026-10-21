@@ -2,24 +2,10 @@ import sharp from "sharp";
 import { mkdirSync, writeFileSync } from "fs";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
-import { iconSvg } from "./iconArtwork";
+import { ICON_THEMES, iconSvg, type IconTheme } from "./iconArtwork";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-
-interface ThemeDef {
-    id: string;
-    primary: string;
-}
-
-const THEMES: ThemeDef[] = [
-    { id: "green",  primary: "#3D8A5A" },
-    { id: "blue",   primary: "#4A7AB5" },
-    { id: "purple", primary: "#7B5EA7" },
-    { id: "orange", primary: "#C08040" },
-    { id: "pink",   primary: "#B5607A" },
-    { id: "teal",   primary: "#4A9A9A" },
-];
 
 interface DensityDef {
     name: string;
@@ -63,7 +49,7 @@ const tilesForegroundSvg = (svgContent: string): string => {
     ].join("\n");
 };
 
-const adaptiveIconXml = (theme: ThemeDef): string => `<?xml version="1.0" encoding="utf-8"?>
+const adaptiveIconXml = (theme: IconTheme): string => `<?xml version="1.0" encoding="utf-8"?>
 <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
     <background android:drawable="@color/ic_launcher_${theme.id}_background"/>
     <foreground android:drawable="@mipmap/${FOREGROUND_BASE_NAME}"/>
@@ -73,13 +59,13 @@ const adaptiveIconXml = (theme: ThemeDef): string => `<?xml version="1.0" encodi
 
 const themeColorsXml = (): string => `<?xml version="1.0" encoding="utf-8"?>
 <resources>
-${THEMES.map((theme) => `    <color name="ic_launcher_${theme.id}_background">${theme.primary}</color>`).join("\n")}
+${ICON_THEMES.map((theme) => `    <color name="ic_launcher_${theme.id}_background">${theme.primary}</color>`).join("\n")}
 </resources>
 `;
 
 const generateAdaptiveIcons = async () => {
     // The foreground keeps only the tiles, so the primary passed here does not show
-    const foregroundSvg = Buffer.from(tilesForegroundSvg(iconSvg(THEMES[0].primary)));
+    const foregroundSvg = Buffer.from(tilesForegroundSvg(iconSvg(ICON_THEMES[0].primary)));
     for (const density of FOREGROUND_DENSITIES) {
         const outDir = resolve(RES_ROOT, density.name);
         mkdirSync(outDir, { recursive: true });
@@ -91,7 +77,7 @@ const generateAdaptiveIcons = async () => {
 
     const xmlDir = resolve(RES_ROOT, "mipmap-anydpi-v26");
     mkdirSync(xmlDir, { recursive: true });
-    for (const theme of THEMES) {
+    for (const theme of ICON_THEMES) {
         const xml = adaptiveIconXml(theme);
         writeFileSync(resolve(xmlDir, `ic_launcher_${theme.id}.xml`), xml);
         writeFileSync(resolve(xmlDir, `ic_launcher_${theme.id}_round.xml`), xml);
@@ -103,7 +89,7 @@ const generateAdaptiveIcons = async () => {
 const main = async () => {
     await generateAdaptiveIcons();
 
-    for (const theme of THEMES) {
+    for (const theme of ICON_THEMES) {
         const svgBuffer = Buffer.from(iconSvg(theme.primary));
 
         for (const density of DENSITIES) {
@@ -123,7 +109,7 @@ const main = async () => {
         console.log(`Generated launcher icons for theme: ${theme.id}`);
     }
 
-    console.log(`Done! ${THEMES.length * DENSITIES.length * 2} launcher PNGs generated.`);
+    console.log(`Done! ${ICON_THEMES.length * DENSITIES.length * 2} launcher PNGs generated.`);
 };
 
 main().catch((err: unknown) => {

@@ -2,35 +2,15 @@ import sharp from "sharp";
 import { writeFileSync, mkdirSync } from "fs";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
-import { iconSvg } from "./iconArtwork";
+import { ICON_THEMES, iconSvg, type IconTheme } from "./iconArtwork";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-
-interface ThemeDef {
-    id: string;
-    primary: string;
-}
-
-// IMPORTANT: When adding a new theme, also update:
-//   1. ColorThemeId in src/application/SettingsStorage.ts
-//   2. THEMES in src/theme/themeConfig.ts
-// The themeConfig.test.ts will catch mismatches between (1) and (2).
-const THEMES: ThemeDef[] = [
-    { id: "green",  primary: "#3D8A5A" },
-    { id: "blue",   primary: "#4A7AB5" },
-    { id: "purple", primary: "#7B5EA7" },
-    { id: "orange", primary: "#C08040" },
-    { id: "pink",   primary: "#B5607A" },
-    { id: "teal",   primary: "#4A9A9A" },
-];
 
 const MANIFEST_TEMPLATE = {
     name: "Sudoku",
     short_name: "Sudoku",
     description: "Train your brain with Sudoku puzzles",
-    background_color: "#F5F5F0",
-    display: "standalone" as const,
 };
 
 const PUBLIC_DIR = resolve(__dirname, "../public");
@@ -38,15 +18,17 @@ const PUBLIC_DIR = resolve(__dirname, "../public");
 const generatePngFromSvg = async (svg: string, size: number): Promise<Buffer> =>
     sharp(Buffer.from(svg)).resize(size, size).png().toBuffer();
 
-const generateManifest = (id: string, primary: string): string =>
+const generateManifest = (theme: IconTheme): string =>
     JSON.stringify(
         {
             ...MANIFEST_TEMPLATE,
-            theme_color: primary,
+            background_color: theme.background,
+            display: "standalone",
+            theme_color: theme.primary,
             icons: [
-                { src: `pwa-192x192-${id}.png`, sizes: "192x192", type: "image/png" },
-                { src: `pwa-512x512-${id}.png`, sizes: "512x512", type: "image/png" },
-                { src: `pwa-512x512-${id}.png`, sizes: "512x512", type: "image/png", purpose: "maskable" },
+                { src: `pwa-192x192-${theme.id}.png`, sizes: "192x192", type: "image/png" },
+                { src: `pwa-512x512-${theme.id}.png`, sizes: "512x512", type: "image/png" },
+                { src: `pwa-512x512-${theme.id}.png`, sizes: "512x512", type: "image/png", purpose: "maskable" },
             ],
         },
         null,
@@ -56,7 +38,7 @@ const generateManifest = (id: string, primary: string): string =>
 const main = async () => {
     mkdirSync(PUBLIC_DIR, { recursive: true });
 
-    for (const theme of THEMES) {
+    for (const theme of ICON_THEMES) {
         const svg = iconSvg(theme.primary);
 
         // Write themed SVG favicon
@@ -74,7 +56,7 @@ const main = async () => {
         // Write manifest
         writeFileSync(
             resolve(PUBLIC_DIR, `manifest-${theme.id}.webmanifest`),
-            generateManifest(theme.id, theme.primary),
+            generateManifest(theme),
         );
 
         console.log(`Generated assets for theme: ${theme.id}`);

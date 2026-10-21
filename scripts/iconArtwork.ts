@@ -1,5 +1,20 @@
 // The app icon: a 3×3 block of tiles on a rounded square in the theme's primary.
 // public/sudoku-<theme>.svg and every launcher and PWA icon are rendered from this.
+import { getPalette, STYLES } from "../src/theme/palettes";
+
+export interface IconTheme {
+    id: string;
+    primary: string;
+    background: string;
+}
+
+// Icons use the minimal style's light palette, whatever style the app is set to
+const ICON_STYLE = "minimal";
+
+export const ICON_THEMES: IconTheme[] = STYLES[ICON_STYLE].themes.map((theme) => {
+    const palette = getPalette(ICON_STYLE, theme.id, "light");
+    return { id: theme.id, primary: palette.primary, background: palette.background };
+});
 
 const TILE_ORIGINS = [48, 100, 152];
 const TILE_SIZE = 40;

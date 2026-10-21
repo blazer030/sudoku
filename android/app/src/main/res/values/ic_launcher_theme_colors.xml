@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="ic_launcher_green_background">#3D8A5A</color>
-    <color name="ic_launcher_blue_background">#4A7AB5</color>
-    <color name="ic_launcher_purple_background">#7B5EA7</color>
-    <color name="ic_launcher_orange_background">#C08040</color>
-    <color name="ic_launcher_pink_background">#B5607A</color>
-    <color name="ic_launcher_teal_background">#4A9A9A</color>
+    <color name="ic_launcher_green_background">#176037</color>
+    <color name="ic_launcher_blue_background">#2C5689</color>
+    <color name="ic_launcher_purple_background">#614887</color>
+    <color name="ic_launcher_orange_background">#7D4800</color>
+    <color name="ic_launcher_pink_background">#863C55</color>
+    <color name="ic_launcher_teal_background">#0A5E5F</color>
 </resources>
