@@ -143,6 +143,7 @@ const retryLoad = async () => {
 
 const dismissSuccess = () => {
     successTier.value = null;
+    router.back();
 };
 
 watch(() => store.lastResult, (result) => {

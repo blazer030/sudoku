@@ -25,6 +25,7 @@ const mountDonate = (analytics: AnalyticsService, billing: BillingService) => {
         history: createMemoryHistory(),
         routes: [
             { path: "/", component: { template: "<div />" } },
+            { path: "/settings", component: { template: "<div />" } },
             { path: "/donate", component: Donate },
         ],
     });
@@ -155,5 +156,23 @@ describe("Donate.vue purchase feedback", () => {
 
         expect(wrapper.find("[data-testid='donate-toast']").text()).toBe("Purchase failed. Please try again.");
         expect(consoleError).toHaveBeenCalledWith("Donate purchase failed:", "Service disconnected");
+    });
+});
+
+describe("Donate.vue success screen", () => {
+    it("returns to Settings when Done is tapped", async () => {
+        const billing = buildBilling({ kind: "success", productId: "donate_coffee", tier: "coffee", amountUsd: 2.99 });
+        const wrapper = mountDonate({ logEvent: vi.fn().mockResolvedValue(undefined) }, billing);
+        const router = wrapper.vm.$router;
+        await router.push("/settings");
+        await router.push("/donate");
+        await flushPromises();
+
+        await wrapper.find("[data-testid='donate-tier-coffee']").trigger("click");
+        await flushPromises();
+        await wrapper.find("[data-testid='donate-success-done']").trigger("click");
+        await flushPromises();
+
+        expect(router.currentRoute.value.path).toBe("/settings");
     });
 });
