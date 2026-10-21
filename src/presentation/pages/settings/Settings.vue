@@ -30,7 +30,16 @@
         <div class="flex flex-col gap-2">
             <span class="text-foreground-muted text-xs font-semibold tracking-wider uppercase px-1">{{ t("settings.appearance") }}</span>
             <div class="bg-card rounded-2xl px-4 py-4 shadow-card-sm flex flex-col">
-                <span class="text-foreground text-[15px] font-medium">{{ t("settings.colorTheme") }}</span>
+                <span class="text-foreground text-[15px] font-medium">{{ t("settings.colorMode.label") }}</span>
+                <SegmentedControl
+                    :model-value="settingsStore.appearance"
+                    :options="appearanceOptions"
+                    class="mt-3"
+                    data-testid="appearance-switcher"
+                    test-id-prefix="appearance"
+                    @update:model-value="settingsStore.setAppearance"
+                />
+                <span class="text-foreground text-[15px] font-medium mt-5">{{ t("settings.colorTheme") }}</span>
                 <div class="grid grid-cols-6 gap-3 mt-3 justify-items-center">
                     <button
                         v-for="color in THEMES"
@@ -172,7 +181,7 @@ import { useDonateStore } from "@/stores/donateStore";
 import { usePlatform } from "@/presentation/composables/usePlatform";
 import { appVersion } from "@/utils/appVersion";
 import { ROUTER_PATH } from "@/router";
-import type { LanguagePreference } from "@/application/SettingsStorage";
+import type { Appearance, LanguagePreference } from "@/application/SettingsStorage";
 import { THEMES } from "@/theme/themeConfig";
 import SegmentedControl from "@/presentation/components/segmented-control/SegmentedControl.vue";
 
@@ -192,6 +201,13 @@ const languageOptions = computed((): { value: LanguagePreference; label: string 
     { value: "system", label: t("settings.language.system") },
     { value: "en", label: t("settings.language.english") },
     { value: "zh-Hant", label: t("settings.language.traditionalChinese") },
+]);
+
+// Temporary until the stage 3 settings redesign
+const appearanceOptions = computed((): { value: Appearance; label: string }[] => [
+    { value: "system", label: t("settings.colorMode.system") },
+    { value: "light", label: t("settings.colorMode.light") },
+    { value: "dark", label: t("settings.colorMode.dark") },
 ]);
 
 const toggles = computed(() => [

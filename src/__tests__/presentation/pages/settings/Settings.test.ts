@@ -191,3 +191,38 @@ describe("Settings.vue language switcher", () => {
         }
     });
 });
+
+describe("Settings.vue color mode switcher", () => {
+    beforeEach(() => {
+        localStorage.clear();
+        vi.mocked(Capacitor.isNativePlatform).mockReturnValue(false);
+    });
+
+    it("should label the modes in English and Chinese", async () => {
+        const wrapper = mountSettings();
+        const labels = () => ["system", "light", "dark"].map(mode => wrapper.get(`[data-testid='appearance-${mode}']`).text());
+
+        expect(labels()).toEqual(["System", "Light", "Dark"]);
+
+        i18n.global.locale.value = "zh-Hant";
+        await nextTick();
+
+        expect(labels()).toEqual(["跟隨系統", "淺色", "深色"]);
+    });
+
+    it("should mark system as selected by default", () => {
+        const wrapper = mountSettings();
+
+        expect(wrapper.get("[data-testid='appearance-system']").attributes("aria-pressed")).toBe("true");
+    });
+
+    it("should store dark when dark is chosen", async () => {
+        const wrapper = mountSettings();
+
+        await wrapper.get("[data-testid='appearance-dark']").trigger("click");
+
+        expect(useSettingsStore().appearance).toBe("dark");
+        const stored = JSON.parse(localStorage.getItem("sudoku-settings") ?? "{}") as Record<string, unknown>;
+        expect(stored.appearance).toBe("dark");
+    });
+});

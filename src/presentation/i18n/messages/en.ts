@@ -19,6 +19,12 @@ export const en = {
             traditionalChinese: "繁體中文",
         },
         appearance: "Appearance",
+        colorMode: {
+            label: "Color mode",
+            system: "System",
+            light: "Light",
+            dark: "Dark",
+        },
         colorTheme: "Color theme",
         matchLauncherIcon: "Match launcher icon to theme",
         matchLauncherIconNote: "The icon updates after you leave the app",
