@@ -15,4 +15,5 @@ config.global.plugins.push(i18n);
 
 afterEach(() => {
     i18n.global.locale.value = "en";
+    document.documentElement.lang = "";
 });

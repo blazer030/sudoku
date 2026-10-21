@@ -136,17 +136,19 @@ describe("Settings.vue language switcher", () => {
         const wrapper = mountSettings();
         const { language } = storeToRefs(useSettingsStore());
         const stopLocaleSync = startLocaleSync(language);
+        try {
+            await wrapper.find("[data-testid='language-zh-Hant']").trigger("click");
+            await nextTick();
 
-        await wrapper.find("[data-testid='language-zh-Hant']").trigger("click");
-        await nextTick();
-
-        expect(i18n.global.locale.value).toBe("zh-Hant");
-        expect(wrapper.text()).toContain("設定");
-        expect(wrapper.text()).toContain("跟隨系統");
-        expect(wrapper.text()).toContain("標示相同數字");
-        expect(wrapper.find("[data-testid='language-zh-Hant']").text()).toBe("繁體中文");
-        expect(wrapper.find("[data-testid='language-en']").text()).toBe("English");
-        expect(wrapper.find("[data-testid='language-zh-Hant']").attributes("aria-pressed")).toBe("true");
-        stopLocaleSync();
+            expect(i18n.global.locale.value).toBe("zh-Hant");
+            expect(wrapper.text()).toContain("設定");
+            expect(wrapper.text()).toContain("跟隨系統");
+            expect(wrapper.text()).toContain("標示相同數字");
+            expect(wrapper.find("[data-testid='language-zh-Hant']").text()).toBe("繁體中文");
+            expect(wrapper.find("[data-testid='language-en']").text()).toBe("English");
+            expect(wrapper.find("[data-testid='language-zh-Hant']").attributes("aria-pressed")).toBe("true");
+        } finally {
+            stopLocaleSync();
+        }
     });
 });
