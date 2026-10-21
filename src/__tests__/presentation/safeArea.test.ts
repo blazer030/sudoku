@@ -29,7 +29,8 @@ describe("safe area", () => {
 
         expect(wrapper.classes()).toContain("app-safe-area");
         for (const side of ["top", "right", "bottom", "left"]) {
-            expect(rule).toContain(`padding-${side}: env(safe-area-inset-${side})`);
+            // Capacitor injects --safe-area-inset-* on Android WebViews whose env() values are wrong
+            expect(rule).toContain(`padding-${side}: var(--safe-area-inset-${side}, env(safe-area-inset-${side}))`);
         }
     });
 
@@ -51,5 +52,7 @@ describe("safe area", () => {
             expect(source, path).toContain("bottom-safe-24");
             expect(source, path).not.toMatch(/\bbottom-24\b/);
         }
+        expect(readFileSync("src/style/index.css", "utf8"))
+            .toContain("bottom: calc(6rem + var(--safe-area-inset-bottom, env(safe-area-inset-bottom)))");
     });
 });
