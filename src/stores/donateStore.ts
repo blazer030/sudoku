@@ -15,8 +15,12 @@ export const useDonateStore = defineStore("donate", () => {
 
     const loadProducts = async () => {
         if (billing === null) return;
-        await billing.consumeAll();
-        products.value = await billing.loadProducts();
+        try {
+            await billing.consumeAll();
+            products.value = await billing.loadProducts();
+        } catch {
+            products.value = [];
+        }
         loadFailed.value = products.value.length === 0;
     };
 

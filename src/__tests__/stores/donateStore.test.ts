@@ -53,6 +53,16 @@ describe("donateStore", () => {
         expect(store.loadFailed).toBe(true);
     });
 
+    it("marks loading as failed instead of throwing when billing rejects", async () => {
+        const store = useDonateStore();
+        store.setBilling(mockBilling({ consumeAll: vi.fn().mockRejectedValue(new Error("Billing unavailable")) }));
+
+        await expect(store.loadProducts()).resolves.toBeUndefined();
+
+        expect(store.loadFailed).toBe(true);
+        expect(store.products).toEqual([]);
+    });
+
     it("purchase resolves to success and stores the result", async () => {
         const store = useDonateStore();
         store.setBilling(mockBilling());
