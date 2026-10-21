@@ -1097,4 +1097,21 @@ describe("Game", () => {
             expect(replay?.steps).toEqual([]);
         });
     });
+
+    describe("quick input", () => {
+        it("should toggle a note when a cell is long-pressed in Normal mode with a digit selected", async () => {
+            vi.useFakeTimers();
+            const wrapper = mountGame();
+            await wrapper.find("[data-testid='number-4']").trigger("click");
+            const cell = wrapper.find("[data-testid='cell-0-2']");
+
+            await cell.trigger("pointerdown");
+            vi.advanceTimersByTime(400);
+            await cell.trigger("pointerup");
+            await cell.trigger("click");
+
+            expect(wrapper.findComponent<typeof Cell>("[data-testid='cell-0-2']").props("puzzleCell").notes).toEqual([4]);
+            expect(wrapper.findComponent<typeof Cell>("[data-testid='cell-0-2']").props("puzzleCell").entry).toBe(0);
+        });
+    });
 });
