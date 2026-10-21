@@ -8,8 +8,9 @@
         />
         <ControlButton
             :icon="Pencil"
-            :label="noteActive ? t('game.controls.notesOn') : t('game.controls.notes')"
+            :label="t('game.controls.notes')"
             :pressed="noteActive"
+            :visible-text="noteActive ? t('game.controls.notesOn') : undefined"
             data-testid="note-button"
             @click="emit('toggleNoteMode')"
         />

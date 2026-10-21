@@ -21,7 +21,7 @@
         <span
             :class="pressed ? 'text-primary font-semibold' : 'text-foreground-secondary font-medium'"
             class="text-[11px] leading-none whitespace-nowrap"
-        >{{ label }}</span>
+        >{{ visibleText ?? label }}</span>
     </button>
 </template>
 
@@ -31,10 +31,13 @@ import { vPress } from "@/presentation/directives/press";
 
 withDefaults(defineProps<{
     icon: Component;
+    /** The accessible name; it stays fixed so a toggle's state is carried by aria-pressed alone. */
     label: string;
+    /** On-screen text when it differs from the accessible name (e.g. "Notes on"). */
+    visibleText?: string;
     /** A toggle's state; null for a plain action button. */
     pressed?: boolean | null;
-}>(), { pressed: null });
+}>(), { pressed: null, visibleText: undefined });
 
 defineEmits<{ click: [] }>();
 </script>

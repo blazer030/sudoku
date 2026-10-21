@@ -1537,11 +1537,13 @@ describe("Game", () => {
             await noteButton().trigger("click");
 
             expect(noteButton().text()).toBe("Notes on");
+            expect(noteButton().attributes("aria-label")).toBe("Notes");
             expect(noteButton().attributes("aria-pressed")).toBe("true");
             expect(noteButton().find("[data-testid='control-tile']").classes()).toContain("bg-primary");
             i18n.global.locale.value = "zh-Hant";
             await nextTick();
             expect(noteButton().text()).toBe("筆記 開");
+            expect(noteButton().attributes("aria-label")).toBe("筆記");
         });
 
         it("should name each digit key with what it does and how many are left", async () => {
