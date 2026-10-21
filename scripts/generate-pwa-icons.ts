@@ -1,7 +1,8 @@
 import sharp from "sharp";
-import { readFileSync, writeFileSync, mkdirSync } from "fs";
+import { writeFileSync, mkdirSync } from "fs";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
+import { iconSvg } from "./iconArtwork";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -33,10 +34,6 @@ const MANIFEST_TEMPLATE = {
 };
 
 const PUBLIC_DIR = resolve(__dirname, "../public");
-const SVG_TEMPLATE_PATH = resolve(PUBLIC_DIR, "sudoku-green.svg");
-
-const generateThemedSvg = (svgContent: string, primary: string): string =>
-    svgContent.replace(/fill="#3D8A5A"/g, `fill="${primary}"`);
 
 const generatePngFromSvg = async (svg: string, size: number): Promise<Buffer> =>
     sharp(Buffer.from(svg)).resize(size, size).png().toBuffer();
@@ -59,11 +56,8 @@ const generateManifest = (id: string, primary: string): string =>
 const main = async () => {
     mkdirSync(PUBLIC_DIR, { recursive: true });
 
-    // Read the green SVG as the template (it has fill="#3D8A5A")
-    const baseSvg = readFileSync(SVG_TEMPLATE_PATH, "utf-8");
-
     for (const theme of THEMES) {
-        const svg = generateThemedSvg(baseSvg, theme.primary);
+        const svg = iconSvg(theme.primary);
 
         // Write themed SVG favicon
         writeFileSync(resolve(PUBLIC_DIR, `sudoku-${theme.id}.svg`), svg);

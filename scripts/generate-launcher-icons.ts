@@ -1,7 +1,8 @@
 import sharp from "sharp";
-import { readFileSync, mkdirSync, writeFileSync } from "fs";
+import { mkdirSync, writeFileSync } from "fs";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
+import { iconSvg } from "./iconArtwork";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -33,9 +34,7 @@ const DENSITIES: DensityDef[] = [
     { name: "mipmap-xxxhdpi", size: 192 },
 ];
 
-const PUBLIC_DIR = resolve(__dirname, "../public");
 const RES_ROOT = resolve(__dirname, "../android/app/src/main/res");
-const SVG_TEMPLATE_PATH = resolve(PUBLIC_DIR, "sudoku-green.svg");
 
 const FOREGROUND_LAYER_DP = 108;
 const FOREGROUND_GRID_DP = 43.2;
@@ -50,9 +49,6 @@ const FOREGROUND_DENSITIES: DensityDef[] = [
     { name: "mipmap-xxhdpi",  size: 324 },
     { name: "mipmap-xxxhdpi", size: 432 },
 ];
-
-const themedSvg = (svgContent: string, primary: string): string =>
-    svgContent.replace(/fill="#3D8A5A"/g, `fill="${primary}"`);
 
 const tilesForegroundSvg = (svgContent: string): string => {
     const tiles = svgContent.match(/<rect x="\d+" y="\d+"[^>]*\/>/g) ?? [];
@@ -81,8 +77,9 @@ ${THEMES.map((theme) => `    <color name="ic_launcher_${theme.id}_background">${
 </resources>
 `;
 
-const generateAdaptiveIcons = async (baseSvg: string) => {
-    const foregroundSvg = Buffer.from(tilesForegroundSvg(baseSvg));
+const generateAdaptiveIcons = async () => {
+    // The foreground keeps only the tiles, so the primary passed here does not show
+    const foregroundSvg = Buffer.from(tilesForegroundSvg(iconSvg(THEMES[0].primary)));
     for (const density of FOREGROUND_DENSITIES) {
         const outDir = resolve(RES_ROOT, density.name);
         mkdirSync(outDir, { recursive: true });
@@ -104,11 +101,10 @@ const generateAdaptiveIcons = async (baseSvg: string) => {
 };
 
 const main = async () => {
-    const baseSvg = readFileSync(SVG_TEMPLATE_PATH, "utf-8");
-    await generateAdaptiveIcons(baseSvg);
+    await generateAdaptiveIcons();
 
     for (const theme of THEMES) {
-        const svgBuffer = Buffer.from(themedSvg(baseSvg, theme.primary));
+        const svgBuffer = Buffer.from(iconSvg(theme.primary));
 
         for (const density of DENSITIES) {
             const outDir = resolve(RES_ROOT, density.name);
