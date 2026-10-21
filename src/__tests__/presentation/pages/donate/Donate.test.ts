@@ -224,6 +224,15 @@ describe("Donate.vue zh-Hant", () => {
         await nextTick();
     };
 
+    it("shows the two-line intro in Chinese", async () => {
+        await useChinese();
+        const wrapper = mountDonate({ logEvent: vi.fn().mockResolvedValue(undefined) }, buildBilling({ kind: "cancelled" }));
+        await flushPromises();
+
+        expect(wrapper.text()).toContain("數獨完全免費，沒有廣告。");
+        expect(wrapper.text()).toContain("如果你想支持開發：");
+    });
+
     it("shows the tier name in Chinese while keeping the Google Play price text", async () => {
         await useChinese();
         const wrapper = mountDonate({ logEvent: vi.fn().mockResolvedValue(undefined) }, buildBilling({ kind: "cancelled" }));
