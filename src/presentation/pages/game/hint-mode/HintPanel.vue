@@ -174,7 +174,7 @@
                         tag="span"
                     >
                         <template #digit>
-                            <span class="w-6 h-6 rounded-md bg-on-primary/20 flex items-center justify-center text-[15px] font-semibold leading-none">{{ digit }}</span>
+                            <span class="w-6 h-6 rounded-md bg-on-primary/10 flex items-center justify-center text-[15px] font-semibold leading-none">{{ digit }}</span>
                         </template>
                     </i18n-t>
                     <template v-else>

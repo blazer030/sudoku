@@ -8,7 +8,7 @@
     >
         <Play :size="20" />
         <span class="text-base font-semibold">{{ t("home.continueGame") }}</span>
-        <span class="bg-on-primary/20 rounded-full px-2.5 py-1 text-xs font-medium">
+        <span class="bg-on-primary/10 rounded-full px-2.5 py-1 text-xs font-medium">
             {{ savedTimeLabel }}
         </span>
     </button>
