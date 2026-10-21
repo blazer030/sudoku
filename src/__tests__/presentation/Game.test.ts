@@ -1165,6 +1165,28 @@ describe("Game", () => {
             expect(wrapper.findAll("[data-testid^='hint-dot-']")).toHaveLength(0);
         });
 
+        it("should lift the panel over the board when its buttons would not fit below", async () => {
+            // The input area starts 120px above the bottom edge, leaving 104px under the 16px gap,
+            // and the panel's smallest layout is 190px tall
+            vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockReturnValue({ top: window.innerHeight - 120 } as DOMRect);
+            Object.defineProperty(HTMLElement.prototype, "scrollHeight", {
+                configurable: true,
+                get(this: HTMLElement) { return this.dataset.testid === "hint-panel" ? 190 : 0; },
+            });
+            try {
+                const wrapper = mountGameWith(createMultiStepSudoku());
+
+                await openRevealCell(wrapper);
+                await flushPromises();
+
+                const panel = wrapper.find<HTMLElement>("[data-testid='hint-panel']");
+                expect(panel.element.style.maxHeight).toBe("190px");
+                expect(wrapper.find<HTMLElement>("[data-testid='hint-panel-position']").element.style.top).toBe("-86px");
+            } finally {
+                Reflect.deleteProperty(HTMLElement.prototype, "scrollHeight");
+            }
+        });
+
         it("should hand the cells the same hint views when only the timer ticks", async () => {
             vi.useFakeTimers({ toFake: ["setInterval", "clearInterval"] });
             const wrapper = mountGameWith(createMultiStepSudoku());

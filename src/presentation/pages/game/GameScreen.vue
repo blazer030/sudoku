@@ -75,14 +75,18 @@
                 </div>
 
                 <Transition name="hint-panel">
+                    <!-- On short screens the panel rises over the bottom of the board, so its buttons stay on screen. -->
                     <div
                         v-if="hintMode.active.value"
-                        class="absolute top-0 inset-x-0 z-10"
+                        ref="hintPanelPosition"
+                        :style="{ top: `${-hintPanelLift}px` }"
+                        class="absolute inset-x-0 z-10"
+                        data-testid="hint-panel-position"
                     >
                         <HintPanel
                             :digit="hintMode.answer.value?.digit ?? null"
                             :is-last-step="hintMode.isLastStep.value"
-                            :max-height="roomBelowInputArea"
+                            :max-height="hintPanelMaxHeight"
                             :phase="hintMode.phase.value"
                             :step="hintMode.currentStep.value"
                             :step-index="hintMode.stepIndex.value"
@@ -113,7 +117,7 @@
 </template>
 
 <script lang="ts" setup>
-import { useTemplateRef, watch } from "vue";
+import { computed, nextTick, ref, useTemplateRef, watch } from "vue";
 import GameHeader from "@/presentation/pages/game/components/GameHeader.vue";
 import GameCompleteModal from "@/presentation/pages/game/components/GameCompleteModal.vue";
 import LeaveGameDialog from "@/presentation/pages/game/components/LeaveGameDialog.vue";
@@ -125,6 +129,7 @@ import Cell from "@/presentation/pages/game/components/Cell.vue";
 import HintLinkOverlay from "@/presentation/pages/game/hint-mode/HintLinkOverlay.vue";
 import HintPanel from "@/presentation/pages/game/hint-mode/HintPanel.vue";
 import { useRoomBelow } from "@/presentation/pages/game/hint-mode/useRoomBelow";
+import { minimumPanelHeight, panelLift } from "@/presentation/pages/game/hint-mode/panelLift";
 import { InputMode } from "@/presentation/pages/game/InputMode";
 import { useGameInteraction } from "@/presentation/pages/game/useGameInteraction";
 import { useGameSession } from "@/presentation/pages/game/useGameSession";
@@ -160,6 +165,26 @@ const { room: roomBelowInputArea, measure: measureRoomBelowInputArea } = useRoom
 watch(() => hintMode.active.value, (active) => {
     if (active) measureRoomBelowInputArea();
 });
+
+const hintPanelPosition = useTemplateRef<HTMLElement>("hintPanelPosition");
+const hintPanelLift = ref(0);
+const hintPanelMaxHeight = computed(() =>
+    roomBelowInputArea.value === null ? null : roomBelowInputArea.value + hintPanelLift.value);
+
+const measureHintPanelLift = () => {
+    const panel = hintPanelPosition.value?.querySelector<HTMLElement>("[data-testid='hint-panel']");
+    if (!panel || roomBelowInputArea.value === null) {
+        hintPanelLift.value = 0;
+        return;
+    }
+    hintPanelLift.value = panelLift(roomBelowInputArea.value, minimumPanelHeight(panel));
+};
+
+// Re-measured once the panel shows each step, and whenever the room changes
+watch(
+    () => [hintMode.active.value, hintMode.stepIndex.value, hintMode.phase.value, roomBelowInputArea.value],
+    () => { void nextTick(measureHintPanelLift); },
+);
 
 const {
     selectedDigit,
