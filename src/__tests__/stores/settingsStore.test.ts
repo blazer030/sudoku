@@ -45,6 +45,27 @@ describe("settingsStore", () => {
         expect(useSettingsStore().appearance).toBe("dark");
     });
 
+    it("should persist highlightScope and restore it in a new store", () => {
+        const store = useSettingsStore();
+
+        store.setHighlightScope(false);
+
+        const stored = JSON.parse(localStorage.getItem("sudoku-settings") ?? "{}") as Record<string, unknown>;
+        expect(stored.highlightScope).toBe(false);
+        setActivePinia(createPinia());
+        expect(useSettingsStore().highlightScope).toBe(false);
+    });
+
+    it("should remember that the long-press tip was seen", () => {
+        const store = useSettingsStore();
+
+        store.markLongPressTipSeen();
+
+        expect(store.seenLongPressTip).toBe(true);
+        const stored = JSON.parse(localStorage.getItem("sudoku-settings") ?? "{}") as Record<string, unknown>;
+        expect(stored.seenLongPressTip).toBe(true);
+    });
+
     it("should persist language change and restore it in a new store", () => {
         const store = useSettingsStore();
 

@@ -20,6 +20,8 @@ export interface Settings {
     language: LanguagePreference;
     appearance: Appearance;
     style: StyleId;
+    highlightScope: boolean;
+    seenLongPressTip: boolean;
 }
 
 // index.html's inline script reads these fields too (style, colorTheme, appearance) before first paint
@@ -35,6 +37,8 @@ const DEFAULT_SETTINGS: Settings = {
     language: "system",
     appearance: "system",
     style: "minimal",
+    highlightScope: true,
+    seenLongPressTip: false,
 };
 
 export const loadSettings = (): Settings => {

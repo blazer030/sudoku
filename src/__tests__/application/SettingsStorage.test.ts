@@ -19,6 +19,8 @@ describe("SettingsStorage", () => {
                 language: "system",
                 appearance: "system",
                 style: "minimal",
+                highlightScope: true,
+                seenLongPressTip: false,
             });
         });
 
@@ -33,6 +35,8 @@ describe("SettingsStorage", () => {
                 language: "zh-Hant",
                 appearance: "dark",
                 style: "minimal",
+                highlightScope: false,
+                seenLongPressTip: true,
             });
 
             const settings = loadSettings();
@@ -56,6 +60,15 @@ describe("SettingsStorage", () => {
             expect(settings.appearance).toBe("system");
             expect(settings.style).toBe("minimal");
             expect(settings.colorTheme).toBe("blue");
+        });
+
+        it("should default highlightScope and seenLongPressTip for settings saved before they existed", () => {
+            localStorage.setItem("sudoku-settings", JSON.stringify({ colorTheme: "blue" }));
+
+            const settings = loadSettings();
+
+            expect(settings.highlightScope).toBe(true);
+            expect(settings.seenLongPressTip).toBe(false);
         });
 
         it("should normalize an unknown stored appearance to system", () => {

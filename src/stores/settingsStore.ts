@@ -15,6 +15,8 @@ export const useSettingsStore = defineStore("settings", () => {
     const language = ref<LanguagePreference>(settings.language);
     const appearance = ref<Appearance>(settings.appearance);
     const style = ref<StyleId>(settings.style);
+    const highlightScope = ref(settings.highlightScope);
+    const seenLongPressTip = ref(settings.seenLongPressTip);
     let iconService: IconService | null = null;
 
     const applyColorTheme = () => {
@@ -35,6 +37,8 @@ export const useSettingsStore = defineStore("settings", () => {
             language: language.value,
             appearance: appearance.value,
             style: style.value,
+            highlightScope: highlightScope.value,
+            seenLongPressTip: seenLongPressTip.value,
         });
     };
 
@@ -86,6 +90,16 @@ export const useSettingsStore = defineStore("settings", () => {
         persistAll();
     };
 
+    const setHighlightScope = (value: boolean) => {
+        highlightScope.value = value;
+        persistAll();
+    };
+
+    const markLongPressTipSeen = () => {
+        seenLongPressTip.value = true;
+        persistAll();
+    };
+
     const setIconService = (service: IconService) => {
         iconService = service;
     };
@@ -102,6 +116,8 @@ export const useSettingsStore = defineStore("settings", () => {
         language,
         appearance,
         style,
+        highlightScope,
+        seenLongPressTip,
         setColorTheme,
         setHighlightSameDigit,
         setCompletionFlash,
@@ -110,6 +126,8 @@ export const useSettingsStore = defineStore("settings", () => {
         setMatchLauncherIconToTheme,
         setLanguage,
         setAppearance,
+        setHighlightScope,
+        markLongPressTipSeen,
         setIconService,
     };
 });
