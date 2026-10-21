@@ -14,6 +14,22 @@ const sudokuBoard = new SudokuBoard();
 const generator = new SudokuGenerator();
 const solver = new SudokuSolver();
 
+// Asks for the next reveal hint the way `Sudoku.planRevealHint` does, rebuilding the solver state
+// from the givens plus the cells filled so far, and fills its answer until the board is complete.
+const walkRevealHintsToCompletion = ({ puzzle, answer }: { puzzle: number[][]; answer: number[][] }) => {
+    const technique = new TechniqueSolver();
+    const board = puzzle.map(row => [...row]);
+    let remaining = board.flat().filter(cell => cell === 0).length;
+    while (remaining > 0) {
+        const steps = technique.stepsToNextAssignment(BoardState.fromPuzzle(board));
+        expect(steps.length).toBeGreaterThan(0);
+        const { cell, digit } = steps[steps.length - 1].assignments[0];
+        expect(digit).toBe(answer[cell.row][cell.column]);
+        board[cell.row][cell.column] = digit;
+        remaining--;
+    }
+};
+
 describe("SudokuGenerator", () => {
     it.skip("should generate different boards on multiple calls", () => {
         const boards = Array.from({ length: 5 }, () => generator.generateFullBoard());
@@ -101,24 +117,12 @@ describe("SudokuGenerator", () => {
     });
 
     it.skip.each(["easy", "medium", "hard"] as const)("should keep every generated %s puzzle solvable step by step", { timeout: 180000 }, (difficulty) => {
-        const technique = new TechniqueSolver();
         for (let round = 0; round < 2; round++) {
-            const { puzzle } = generator.generatePuzzle(difficulty);
-            let state = BoardState.fromPuzzle(puzzle);
-            let remaining = puzzle.flat().filter(cell => cell === 0).length;
-            while (remaining > 0) {
-                const steps = technique.stepsToNextAssignment(state);
-                expect(steps.length).toBeGreaterThan(0);
-                for (const step of steps) {
-                    for (const elimination of step.eliminations) {
-                        state = state.eliminate(elimination.cell.row, elimination.cell.column, elimination.digit);
-                    }
-                    for (const assignment of step.assignments) {
-                        state = state.assign(assignment.cell.row, assignment.cell.column, assignment.digit);
-                        remaining--;
-                    }
-                }
-            }
+            walkRevealHintsToCompletion(generator.generatePuzzle(difficulty));
         }
+    });
+
+    it("should keep a generated medium puzzle solvable one reveal hint at a time", { timeout: 30000 }, () => {
+        walkRevealHintsToCompletion(generator.generatePuzzle("medium"));
     });
 });
