@@ -1,6 +1,6 @@
 import { ref } from "vue";
 import { defineStore } from "pinia";
-import { loadSettings, saveSettings, type ColorThemeId } from "@/application/SettingsStorage";
+import { loadSettings, saveSettings, type ColorThemeId, type LanguagePreference } from "@/application/SettingsStorage";
 import { updateMetaThemeColor, updateFavicon, updateManifestLink, updateAppleTouchIcon } from "@/application/PwaThemeUpdater";
 import type { IconService } from "@/application/icon/IconService";
 
@@ -12,6 +12,7 @@ export const useSettingsStore = defineStore("settings", () => {
     const autoRemoveNotes = ref(settings.autoRemoveNotes);
     const showRemainingCount = ref(settings.showRemainingCount);
     const matchLauncherIconToTheme = ref(settings.matchLauncherIconToTheme);
+    const language = ref<LanguagePreference>(settings.language);
     let iconService: IconService | null = null;
 
     const applyColorTheme = () => {
@@ -31,6 +32,7 @@ export const useSettingsStore = defineStore("settings", () => {
             autoRemoveNotes: autoRemoveNotes.value,
             showRemainingCount: showRemainingCount.value,
             matchLauncherIconToTheme: matchLauncherIconToTheme.value,
+            language: language.value,
         });
     };
 
@@ -72,6 +74,11 @@ export const useSettingsStore = defineStore("settings", () => {
         }
     };
 
+    const setLanguage = (value: LanguagePreference) => {
+        language.value = value;
+        persistAll();
+    };
+
     const setIconService = (service: IconService) => {
         iconService = service;
     };
@@ -85,12 +92,14 @@ export const useSettingsStore = defineStore("settings", () => {
         autoRemoveNotes,
         showRemainingCount,
         matchLauncherIconToTheme,
+        language,
         setColorTheme,
         setHighlightSameDigit,
         setCompletionFlash,
         setAutoRemoveNotes,
         setShowRemainingCount,
         setMatchLauncherIconToTheme,
+        setLanguage,
         setIconService,
     };
 });

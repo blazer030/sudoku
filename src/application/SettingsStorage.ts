@@ -9,6 +9,7 @@ export interface Settings {
     autoRemoveNotes: boolean;
     showRemainingCount: boolean;
     matchLauncherIconToTheme: boolean;
+    language: LanguagePreference;
 }
 
 const STORAGE_KEY = "sudoku-settings";
@@ -20,6 +21,7 @@ const DEFAULT_SETTINGS: Settings = {
     autoRemoveNotes: true,
     showRemainingCount: true,
     matchLauncherIconToTheme: false,
+    language: "system",
 };
 
 export const loadSettings = (): Settings => {
