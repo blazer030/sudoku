@@ -10,7 +10,7 @@ import { useDonateStore } from "@/stores/donateStore";
 import type { BillingService, Product, PurchaseResult } from "@/application/billing/BillingService";
 
 const fakeProducts: Product[] = [
-    { id: "donate_coffee", tier: "coffee", label: "Coffee", priceText: "$2.99", amountUsd: 2.99 },
+    { id: "donate_coffee", tier: "coffee", priceText: "$2.99", amountUsd: 2.99 },
 ];
 
 const buildBilling = (purchaseResult: PurchaseResult): BillingService => ({
