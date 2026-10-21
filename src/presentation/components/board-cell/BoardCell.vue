@@ -127,16 +127,17 @@ const positionClasses = computed(() => {
     if (props.row === 8 && props.column === 0) classes.push("rounded-bl-lg");
     if (props.row === 8 && props.column === 8) classes.push("rounded-br-lg");
 
+    // Thin lines are translucent ink rather than the border token, so they still show on clue cells
     if (props.column === 2 || props.column === 5) {
         classes.push("border-r-3 border-r-foreground/20");
     } else if (props.column < 8) {
-        classes.push("border-r border-r-border");
+        classes.push("border-r border-r-foreground/12");
     }
 
     if (props.row === 2 || props.row === 5) {
         classes.push("border-b-3 border-b-foreground/20");
     } else if (props.row < 8) {
-        classes.push("border-b border-b-border");
+        classes.push("border-b border-b-foreground/12");
     }
 
     return classes.join(" ");

@@ -103,6 +103,14 @@ describe("BoardCell", () => {
         expect(wrapperCol5.classes()).toContain("border-r-3");
     });
 
+    it("should draw thin grid lines in translucent ink so they show between clue cells", () => {
+        const wrapper = mountCell({ row: 0, column: 0, variant: "clue" });
+
+        expect(wrapper.classes()).toContain("border-r-foreground/12");
+        expect(wrapper.classes()).toContain("border-b-foreground/12");
+        expect(wrapper.classes()).not.toContain("border-r-border");
+    });
+
     it("should apply thick bottom border at box boundary rows (2, 5)", () => {
         const wrapperRow2 = mount(BoardCell, { props: { row: 2, column: 0, value: 0 } });
         const wrapperRow5 = mount(BoardCell, { props: { row: 5, column: 0, value: 0 } });
