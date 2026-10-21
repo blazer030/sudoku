@@ -9,7 +9,14 @@
         :value-font-weight="valueFontWeight"
         :highlighted-note="highlightedNote"
         :flashing="flashing"
-        :class="puzzleCell.isClue ? '' : 'cursor-pointer'"
+        :class="[puzzleCell.isClue ? '' : 'cursor-pointer', 'select-none [-webkit-touch-callout:none]']"
+        @click="handleClick"
+        @contextmenu.prevent
+        @pointerdown="longPress.onPointerdown"
+        @pointermove="longPress.onPointermove"
+        @pointerup="longPress.onPointerup"
+        @pointercancel="longPress.onPointercancel"
+        @pointerleave="longPress.onPointerleave"
     />
 </template>
 
@@ -17,6 +24,7 @@
 import { computed } from "vue";
 import BoardCell, { type CellVariant, type ValueTextColor, type ValueFontWeight } from "@/presentation/components/board-cell/BoardCell.vue";
 import { PuzzleCell } from "@/domain";
+import { useLongPress } from "@/presentation/composables/useLongPress";
 
 const props = withDefaults(defineProps<{
     puzzleCell: PuzzleCell;
@@ -31,6 +39,19 @@ const props = withDefaults(defineProps<{
     selectedDigit: null,
     highlightSameDigit: true,
 });
+
+const emit = defineEmits<{
+    click: [];
+    longPress: [];
+}>();
+
+const longPress = useLongPress({ onLongPress: () => { emit("longPress"); } });
+
+// The click that follows a long press must not trigger a second, normal input.
+const handleClick = () => {
+    if (longPress.consumeClickSuppression()) return;
+    emit("click");
+};
 
 const isSameDigit = computed(() => {
     if (!props.highlightSameDigit) return false;

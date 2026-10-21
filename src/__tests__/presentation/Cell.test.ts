@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { mount } from "@vue/test-utils";
 import Cell from "@/presentation/pages/game/components/Cell.vue";
 import { PuzzleCell } from "@/domain/board/PuzzleCell";
@@ -25,5 +25,57 @@ describe("Cell", () => {
 
         expect(wrapper.classes()).not.toContain("bg-error-light");
         expect(wrapper.find("[data-testid='cell-value']").classes()).not.toContain("text-error");
+    });
+
+    describe("click handling", () => {
+        beforeEach(() => {
+            vi.useFakeTimers();
+        });
+
+        afterEach(() => {
+            vi.useRealTimers();
+        });
+
+        const pointerdown = (wrapper: { element: Element }) => {
+            const event = new Event("pointerdown", { bubbles: true });
+            Object.assign(event, { isPrimary: true, pointerType: "touch", button: 0, clientX: 5, clientY: 5 });
+            wrapper.element.dispatchEvent(event);
+        };
+
+        it("should emit click for a normal tap", async () => {
+            const wrapper = mountCell({ puzzleCell: new PuzzleCell(0) });
+
+            pointerdown(wrapper);
+            await wrapper.trigger("pointerup");
+            await wrapper.trigger("click");
+
+            expect(wrapper.emitted("click")).toHaveLength(1);
+            expect(wrapper.emitted("longPress")).toBeUndefined();
+        });
+
+        it("should emit longPress and suppress the following click", async () => {
+            const wrapper = mountCell({ puzzleCell: new PuzzleCell(0) });
+
+            pointerdown(wrapper);
+            vi.advanceTimersByTime(400);
+            await wrapper.trigger("pointerup");
+            await wrapper.trigger("click");
+
+            expect(wrapper.emitted("longPress")).toHaveLength(1);
+            expect(wrapper.emitted("click")).toBeUndefined();
+        });
+
+        it("should emit click for a tap after a long press that had no click", async () => {
+            const wrapper = mountCell({ puzzleCell: new PuzzleCell(0) });
+
+            pointerdown(wrapper);
+            vi.advanceTimersByTime(400);
+            await wrapper.trigger("pointerup");
+            pointerdown(wrapper);
+            await wrapper.trigger("pointerup");
+            await wrapper.trigger("click");
+
+            expect(wrapper.emitted("click")).toHaveLength(1);
+        });
     });
 });

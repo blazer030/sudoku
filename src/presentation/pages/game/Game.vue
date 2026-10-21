@@ -31,6 +31,7 @@
                             :row="rowIndex"
                             :selected="isSelected(rowIndex, columnIndex)"
                             @click="clickCell(rowIndex, columnIndex)"
+                            @long-press="longPressCell(rowIndex, columnIndex)"
                         />
                     </div>
                 </div>
@@ -100,6 +101,7 @@ const {
     selectedDigit,
     inputMode,
     clickCell,
+    longPressCell,
     selectDigit,
     toggleNoteMode,
     toggleEraseMode,
