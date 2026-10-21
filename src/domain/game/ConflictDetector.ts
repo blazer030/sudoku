@@ -18,6 +18,8 @@ export class ConflictDetector {
                 const value = cell.entry;
                 const cellConflicts = this.findConflicts(board, row, column, value);
                 for (const conflict of cellConflicts) {
+                    // Clues are given, so only the player's own entries are marked
+                    if (puzzle[conflict.row][conflict.column].isClue) continue;
                     const key = `${conflict.row},${conflict.column}`;
                     if (!seen.has(key)) {
                         seen.add(key);
