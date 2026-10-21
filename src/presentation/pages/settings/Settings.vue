@@ -157,7 +157,7 @@
         </div>
 
         <div
-            v-if="platform.isNative"
+            v-if="platform.isNative && donateStore.products.length > 0"
             class="flex flex-col gap-2"
         >
             <span class="text-foreground-muted text-xs font-semibold tracking-wider uppercase px-1">{{ t("settings.support") }}</span>
@@ -201,11 +201,12 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { ChevronLeft, ChevronRight, Check } from "lucide-vue-next";
 import { useSettingsStore } from "@/stores/settingsStore";
+import { useDonateStore } from "@/stores/donateStore";
 import { usePlatform } from "@/presentation/composables/usePlatform";
 import { appVersion } from "@/utils/appVersion";
 import { ROUTER_PATH } from "@/router";
@@ -216,6 +217,13 @@ const { t } = useI18n();
 const router = useRouter();
 const settingsStore = useSettingsStore();
 const platform = usePlatform();
+const donateStore = useDonateStore();
+
+// The donate entry only appears once Google Play actually returns products;
+// load in the background so the page renders immediately.
+onMounted(() => {
+    if (platform.isNative) void donateStore.loadProducts();
+});
 
 const languageOptions = computed((): { value: LanguagePreference; label: string }[] => [
     { value: "system", label: t("settings.language.system") },

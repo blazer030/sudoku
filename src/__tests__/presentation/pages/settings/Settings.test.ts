@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { nextTick } from "vue";
-import { mount } from "@vue/test-utils";
+import { flushPromises, mount } from "@vue/test-utils";
 import { storeToRefs } from "pinia";
 import { createPinia, setActivePinia } from "pinia";
 import { createRouter, createMemoryHistory } from "vue-router";
@@ -23,10 +23,23 @@ import { Capacitor } from "@capacitor/core";
 import { i18n } from "@/presentation/i18n";
 import { startLocaleSync } from "@/presentation/i18n/localeSync";
 import { useSettingsStore } from "@/stores/settingsStore";
+import { useDonateStore } from "@/stores/donateStore";
+import type { BillingService, Product } from "@/application/billing/BillingService";
 import Settings from "@/presentation/pages/settings/Settings.vue";
 
-const mountSettings = () => {
+const fakeProducts: Product[] = [
+    { id: "donate_coffee", tier: "coffee", priceText: "$2.99", amountUsd: 2.99 },
+];
+
+const buildBilling = (loadProducts: BillingService["loadProducts"]): BillingService => ({
+    loadProducts,
+    purchase: vi.fn(),
+    consumeAll: vi.fn().mockResolvedValue(undefined),
+});
+
+const mountSettings = (billing?: BillingService) => {
     setActivePinia(createPinia());
+    if (billing !== undefined) useDonateStore().setBilling(billing);
     const router = createRouter({
         history: createMemoryHistory(),
         routes: [
@@ -45,16 +58,34 @@ describe("Settings.vue Support section", () => {
         vi.mocked(Capacitor.isNativePlatform).mockReset();
     });
 
-    it("hides Support section on web", () => {
+    it("hides the donate entry on web and never loads products", async () => {
         vi.mocked(Capacitor.isNativePlatform).mockReturnValue(false);
-        const wrapper = mountSettings();
+        const loadProducts = vi.fn().mockResolvedValue(fakeProducts);
+        const wrapper = mountSettings(buildBilling(loadProducts));
+        await flushPromises();
+        expect(wrapper.find("[data-testid='donate-link']").exists()).toBe(false);
+        expect(loadProducts).not.toHaveBeenCalled();
+    });
+
+    it("shows the donate entry on native when Play returns products", async () => {
+        vi.mocked(Capacitor.isNativePlatform).mockReturnValue(true);
+        const wrapper = mountSettings(buildBilling(vi.fn().mockResolvedValue(fakeProducts)));
+        await flushPromises();
+        expect(wrapper.find("[data-testid='donate-link']").exists()).toBe(true);
+    });
+
+    it("hides the donate entry on native when Play returns no products", async () => {
+        vi.mocked(Capacitor.isNativePlatform).mockReturnValue(true);
+        const wrapper = mountSettings(buildBilling(vi.fn().mockResolvedValue([])));
+        await flushPromises();
         expect(wrapper.find("[data-testid='donate-link']").exists()).toBe(false);
     });
 
-    it("shows Support section on native", () => {
+    it("hides the donate entry on native when loading products fails", async () => {
         vi.mocked(Capacitor.isNativePlatform).mockReturnValue(true);
-        const wrapper = mountSettings();
-        expect(wrapper.find("[data-testid='donate-link']").exists()).toBe(true);
+        const wrapper = mountSettings(buildBilling(vi.fn().mockRejectedValue(new Error("unavailable"))));
+        await flushPromises();
+        expect(wrapper.find("[data-testid='donate-link']").exists()).toBe(false);
     });
 });
 
