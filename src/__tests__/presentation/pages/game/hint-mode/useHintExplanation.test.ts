@@ -6,7 +6,9 @@ import { useHintExplanation } from "@/presentation/pages/game/hint-mode/useHintE
 
 type Explain = ReturnType<typeof useHintExplanation>;
 
-const mountExplanation = (): Explain => {
+type ExplainTechnique = (technique: TechniqueId) => string;
+
+const mountExplanation = (): ExplainTechnique => {
     let explain!: Explain;
     const Host = defineComponent({
         setup() {
@@ -15,7 +17,7 @@ const mountExplanation = (): Explain => {
         },
     });
     mount(Host);
-    return explain;
+    return (technique) => explain(STEPS[technique], candidatesBefore(technique));
 };
 
 const useChinese = async (): Promise<void> => {
@@ -47,7 +49,7 @@ const STEPS: Record<TechniqueId, SolveStep> = {
         technique: "nakedPair",
         focus: [cell(0, 1), cell(0, 6)],
         assignments: [],
-        eliminations: [...removing(3, cell(0, 3)), ...removing(5, cell(0, 4))],
+        eliminations: removing(3, cell(0, 3), cell(0, 4)),
         scopes: [{ kind: "row", row: 0 }],
     },
     nakedTriple: {
@@ -202,6 +204,24 @@ const STEPS: Record<TechniqueId, SolveStep> = {
     },
 };
 
+// Candidates of the cells each explanation reads, before the step; every other cell is empty.
+const CANDIDATES: Partial<Record<TechniqueId, [CellReference, number[]][]>> = {
+    nakedPair: [[cell(0, 1), [3, 8]], [cell(0, 6), [3, 8]]],
+    nakedTriple: [[cell(1, 0), [1, 6]], [cell(4, 0), [6, 9]], [cell(7, 0), [1, 9]]],
+    nakedQuad: [[cell(0, 0), [2, 4]], [cell(0, 2), [4, 7]], [cell(2, 0), [7, 9]], [cell(2, 2), [2, 9]]],
+    hiddenPair: [[cell(5, 2), [1, 4, 7]], [cell(5, 8), [1, 6, 7]]],
+    hiddenTriple: [[cell(0, 3), [2, 3, 5]], [cell(4, 3), [1, 3, 5]], [cell(8, 3), [2, 5]]],
+    hiddenQuad: [[cell(6, 6), [3, 6]], [cell(6, 8), [6, 8]], [cell(7, 7), [2, 3, 9]], [cell(8, 6), [8, 9]]],
+    xyWing: [[cell(0, 0), [1, 5]], [cell(0, 5), [1, 3]], [cell(4, 0), [3, 5]]],
+    wWing: [[cell(1, 1), [5, 7]], [cell(6, 7), [5, 7]]],
+};
+
+const candidatesBefore = (technique: TechniqueId): number[][][] => {
+    const grid = Array.from({ length: 9 }, () => Array.from({ length: 9 }, (): number[] => []));
+    for (const [reference, digits] of CANDIDATES[technique] ?? []) grid[reference.row][reference.column] = digits;
+    return grid;
+};
+
 const TECHNIQUES = Object.keys(STEPS) as TechniqueId[];
 
 const stepCells = (step: SolveStep): CellReference[] => [
@@ -224,7 +244,7 @@ describe("useHintExplanation", () => {
         it("should name a cell of the step in English", () => {
             const explain = mountExplanation();
 
-            const sentence = explain(step);
+            const sentence = explain(technique);
 
             expect(sentence.length).toBeGreaterThan(0);
             expect(stepCells(step).some((reference) => sentence.includes(englishPosition(reference)))).toBe(true);
@@ -234,7 +254,7 @@ describe("useHintExplanation", () => {
             const explain = mountExplanation();
             await useChinese();
 
-            const sentence = explain(step);
+            const sentence = explain(technique);
 
             expect(sentence.length).toBeGreaterThan(0);
             expect(stepCells(step).some((reference) => sentence.includes(chinesePosition(reference)))).toBe(true);
@@ -244,7 +264,7 @@ describe("useHintExplanation", () => {
     it("should give every technique its own English sentence", () => {
         const explain = mountExplanation();
 
-        const sentences = TECHNIQUES.map((technique) => explain(STEPS[technique]));
+        const sentences = TECHNIQUES.map(explain);
 
         expect(new Set(sentences).size).toBe(TECHNIQUES.length);
     });
@@ -253,7 +273,7 @@ describe("useHintExplanation", () => {
         const explain = mountExplanation();
         await useChinese();
 
-        const sentences = TECHNIQUES.map((technique) => explain(STEPS[technique]));
+        const sentences = TECHNIQUES.map(explain);
 
         expect(new Set(sentences).size).toBe(TECHNIQUES.length);
     });
@@ -262,52 +282,90 @@ describe("useHintExplanation", () => {
         const explain = mountExplanation();
         await useChinese();
 
-        expect(explain(STEPS.nakedSingle)).toBe("第 3 列第 5 欄只剩 7 這個候選數，所以填入 7。");
+        expect(explain("nakedSingle")).toBe("第 3 列第 5 欄只剩 7 這個候選數，所以填入 7。");
     });
 
     it("should number boxes from the top left to the bottom right", async () => {
         const explain = mountExplanation();
 
-        expect(explain(STEPS.hiddenSingle)).toContain("box 6");
-        expect(explain(STEPS.pointing)).toContain("box 4");
+        expect(explain("hiddenSingle")).toContain("box 6");
+        expect(explain("pointing")).toContain("box 4");
 
         await useChinese();
 
-        expect(explain(STEPS.hiddenSingle)).toContain("第 6 宮");
-        expect(explain(STEPS.claiming)).toContain("第 3 宮");
+        expect(explain("hiddenSingle")).toContain("第 6 宮");
+        expect(explain("claiming")).toContain("第 3 宮");
     });
 
     it("should name the base and cover lines of a fish", async () => {
         const explain = mountExplanation();
 
-        const english = explain(STEPS.xWing);
+        const english = explain("xWing");
         expect(english).toContain("rows 2 and 6");
         expect(english).toContain("columns 3 and 8");
 
         await useChinese();
 
-        const chinese = explain(STEPS.swordfish);
+        const chinese = explain("swordfish");
         expect(chinese).toContain("第 1、5、9 欄");
         expect(chinese).toContain("第 2、4、7 列");
     });
 
-    it("should list the removed digits of a subset", async () => {
+    it("should name the digits a naked subset is limited to and the digits it removes", async () => {
         const explain = mountExplanation();
 
-        expect(explain(STEPS.nakedPair)).toContain("3 and 5");
+        expect(explain("nakedPair")).toContain("can only be 3 or 8");
+        expect(explain("nakedPair")).toContain("Remove 3 from the rest of row 1");
+        expect(explain("nakedTriple")).toContain("can only be 1, 6 or 9");
 
         await useChinese();
 
-        expect(explain(STEPS.hiddenPair)).toContain("4、6");
+        expect(explain("nakedPair")).toContain("只能是 3 或 8");
+        expect(explain("nakedPair")).toContain("第 1 列其他格的 3 可以刪去");
+    });
+
+    it("should name the hidden digits of a hidden subset and its other candidates", async () => {
+        const explain = mountExplanation();
+
+        expect(explain("hiddenPair")).toContain("The only spots for 1 and 7 in row 6");
+        expect(explain("hiddenPair")).toContain("(4 and 6)");
+        expect(explain("hiddenTriple")).toContain("The only spots for 2, 3 and 5 in column 4");
+
+        await useChinese();
+
+        expect(explain("hiddenPair")).toContain("第 6 列中 1、7 只能放在");
+        expect(explain("hiddenPair")).toContain("（4、6）");
+    });
+
+    it("should name the pair and the link digit of a W-Wing", async () => {
+        const explain = mountExplanation();
+
+        expect(explain("wWing")).toContain("can only be 5 or 7");
+        expect(explain("wWing")).toContain("7 has just two spots in column 5");
+
+        await useChinese();
+
+        expect(explain("wWing")).toContain("只能是 5 或 7");
+        expect(explain("wWing")).toContain("第 5 欄的 7 只有兩個位置");
+    });
+
+    it("should name the two digits of an XY-Wing pivot", async () => {
+        const explain = mountExplanation();
+
+        expect(explain("xyWing")).toContain("Row 1, Col 1 is 1 or 5");
+
+        await useChinese();
+
+        expect(explain("xyWing")).toContain("第 1 列第 1 欄是 1 或 5");
     });
 
     it("should name the first target and count the rest when many cells lose a candidate", async () => {
         const explain = mountExplanation();
 
-        expect(explain(STEPS.xWing)).toContain("Row 1, Col 3 and 2 other cells");
+        expect(explain("xWing")).toContain("Row 1, Col 3 and 2 other cells");
 
         await useChinese();
 
-        expect(explain(STEPS.xWing)).toContain("第 1 列第 3 欄等 3 格");
+        expect(explain("xWing")).toContain("第 1 列第 3 欄等 3 格");
     });
 });

@@ -29,14 +29,21 @@ const scopeNumber = (scope: Scope): number => {
     return scope.boxRow + scope.boxColumn / BOX_SIZE + 1;
 };
 
-/** Returns a function that explains a solver step in plain words, in the current locale. */
-export const useHintExplanation = (): ((step: SolveStep) => string) => {
+type ListEnding = "hintMode.list.last" | "hintMode.list.or";
+
+/**
+ * Returns a function that explains a solver step in plain words, in the current locale.
+ * `candidatesBefore` is the board's candidates before the step, indexed [row][column].
+ */
+export const useHintExplanation = (): ((step: SolveStep, candidatesBefore: number[][][]) => string) => {
     const { t } = useI18n();
 
-    const joinAll = (items: string[]): string =>
+    const joinAll = (items: string[], ending: ListEnding = "hintMode.list.last"): string =>
         items.reduce((previous, next, position) =>
-            t(position === items.length - 1 ? "hintMode.list.last" : "hintMode.list.join", { previous, next }),
+            t(position === items.length - 1 ? ending : "hintMode.list.join", { previous, next }),
         );
+
+    const digitsName = (digits: number[], ending?: ListEnding): string => joinAll(digits.map(String), ending);
 
     const cellName = (cell: CellReference): string =>
         t("hintMode.place.cell", { row: cell.row + 1, column: cell.column + 1 });
@@ -66,7 +73,11 @@ export const useHintExplanation = (): ((step: SolveStep) => string) => {
         targets: cellsName(step.eliminations.map((elimination) => elimination.cell)),
     });
 
-    const parametersFor = (step: SolveStep): ExplanationParameters => {
+    const parametersFor = (step: SolveStep, candidatesBefore: number[][][]): ExplanationParameters => {
+        const candidatesOf = (cells: CellReference[]): number[] =>
+            uniqueDigits(cells.flatMap((cell) => candidatesBefore[cell.row][cell.column]));
+        const eliminatedDigits = uniqueDigits(step.eliminations.map((elimination) => elimination.digit));
+
         switch (step.technique) {
         case "nakedSingle": {
             const [assignment] = step.assignments;
@@ -79,14 +90,24 @@ export const useHintExplanation = (): ((step: SolveStep) => string) => {
         case "nakedPair":
         case "nakedTriple":
         case "nakedQuad":
-        case "hiddenPair":
-        case "hiddenTriple":
-        case "hiddenQuad":
             return {
                 cells: cellsName(step.focus),
                 house: houseName(step.scopes[0]),
-                digits: joinAll(uniqueDigits(step.eliminations.map((elimination) => elimination.digit)).map(String)),
+                subsetDigits: digitsName(candidatesOf(step.focus), "hintMode.list.or"),
+                digits: digitsName(eliminatedDigits),
             };
+        case "hiddenPair":
+        case "hiddenTriple":
+        case "hiddenQuad": {
+            // The hidden digits are what stays in the focus cells once the other candidates go.
+            const hiddenDigits = candidatesOf(step.focus).filter((digit) => !eliminatedDigits.includes(digit));
+            return {
+                cells: cellsName(step.focus),
+                house: houseName(step.scopes[0]),
+                hiddenDigits: digitsName(hiddenDigits),
+                digits: digitsName(eliminatedDigits),
+            };
+        }
         case "pointing":
         case "claiming": {
             const [box] = step.scopes.filter((scope) => scope.kind === "box");
@@ -113,22 +134,28 @@ export const useHintExplanation = (): ((step: SolveStep) => string) => {
         case "xyzWing":
         case "wxyzWing": {
             const [pivot, pincerOne, pincerTwo] = step.focus;
-            return {
+            const wing = {
                 ...eliminationParameters(step),
                 pivot: cellName(pivot),
                 pincerOne: cellName(pincerOne),
                 pincerTwo: cellName(pincerTwo),
             };
+            // Only the XY-Wing pivot is short enough to name its digits in the sentence.
+            if (step.technique !== "xyWing") return wing;
+            return { ...wing, pivotDigits: digitsName(candidatesOf([pivot]), "hintMode.list.or") };
         }
         case "wWing": {
+            // Both endpoints hold the same pair; the pair digit that is not removed forms the link.
             const [endpointOne, endpointTwo] = step.focus;
-            const [supporterOne, supporterTwo] = step.supporters ?? [];
+            const pair = candidatesOf([endpointOne]);
+            const linkDigit = pair.find((digit) => digit !== step.eliminations[0].digit) ?? "";
             return {
                 ...eliminationParameters(step),
                 endpointOne: cellName(endpointOne),
                 endpointTwo: cellName(endpointTwo),
-                supporterOne: cellName(supporterOne),
-                supporterTwo: cellName(supporterTwo),
+                pair: digitsName(pair, "hintMode.list.or"),
+                linkDigit,
+                linkHouse: houseName(step.scopes[0]),
             };
         }
         case "xChain":
@@ -141,5 +168,6 @@ export const useHintExplanation = (): ((step: SolveStep) => string) => {
         }
     };
 
-    return (step) => t(`hintMode.explanation.${step.technique}`, parametersFor(step));
+    return (step, candidatesBefore) =>
+        t(`hintMode.explanation.${step.technique}`, parametersFor(step, candidatesBefore));
 };
