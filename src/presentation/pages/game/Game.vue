@@ -152,8 +152,10 @@ const {
 const settingsStore = useSettingsStore();
 
 // The panel opens over the controls; keep its buttons on screen when an explanation runs long.
+// It stops this many pixels short of the screen's bottom edge.
+const HINT_PANEL_BOTTOM_GAP = 16;
 const inputAreaElement = useTemplateRef<HTMLElement>("inputArea");
-const { room: roomBelowInputArea, measure: measureRoomBelowInputArea } = useRoomBelow(inputAreaElement, 16);
+const { room: roomBelowInputArea, measure: measureRoomBelowInputArea } = useRoomBelow(inputAreaElement, HINT_PANEL_BOTTOM_GAP);
 watch(() => hintMode.active.value, (active) => {
     if (active) measureRoomBelowInputArea();
 });
