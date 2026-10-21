@@ -44,6 +44,7 @@ export const useLeaveGame = ({ sudoku, difficulty, completed, getElapsedSeconds,
                 difficulty: difficulty.value,
                 elapsedSeconds: getElapsedSeconds(),
                 completed: completed.value,
+                replay: getReplayData(),
             });
             gameStore.persistGame(state);
             leavingConfirmed.value = true;

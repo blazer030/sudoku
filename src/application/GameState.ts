@@ -1,5 +1,6 @@
 import { Sudoku, PuzzleCell } from "@/domain";
 import type { Difficulty } from "@/domain";
+import type { GameReplayData } from "@/application/statistics/StatisticsRepository";
 
 export interface CellState {
     clue: number;
@@ -14,12 +15,15 @@ export interface GameState {
     elapsedSeconds: number;
     completed: boolean;
     hintsUsed: number;
+    // Absent in saves from 2.0.0 and earlier
+    replay?: GameReplayData;
 }
 
 interface GameMeta {
     difficulty: Difficulty;
     elapsedSeconds: number;
     completed: boolean;
+    replay?: GameReplayData;
 }
 
 export const GameStateConverter = {
