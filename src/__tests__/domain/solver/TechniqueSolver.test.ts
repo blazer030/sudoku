@@ -1,7 +1,25 @@
 import { BoardState } from "@/domain/solver/BoardState";
+import type { SolveStep } from "@/domain/solver/SolveStep";
 import { TechniqueSolver } from "@/domain/solver/TechniqueSolver";
 import { singlesPuzzle, singlesSolution } from "@/__tests__/fixtures/singlesPuzzle";
 import { TEST_PUZZLE_PRESETS } from "@/presentation/pages/solver-walkthrough/testPuzzles";
+
+// Unique solution, but after its last assignment the solver finds two X-Chain eliminations and then stalls.
+const stallingPuzzle: number[][] = [
+    [0, 0, 0, 6, 7, 0, 9, 0, 0],
+    [6, 7, 2, 1, 0, 0, 0, 0, 0],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 5, 0, 0, 0, 0, 0, 0, 0],
+    [4, 0, 0, 0, 0, 0, 0, 0, 1],
+    [7, 0, 3, 0, 0, 4, 0, 5, 6],
+    [0, 0, 0, 5, 0, 7, 0, 0, 4],
+    [0, 8, 0, 4, 0, 0, 6, 3, 5],
+    [3, 0, 0, 0, 8, 0, 0, 0, 0],
+];
+
+afterEach(() => {
+    vi.restoreAllMocks();
+});
 
 describe("TechniqueSolver", () => {
     it("nextStep should find the first applicable technique", () => {
@@ -249,6 +267,46 @@ describe("TechniqueSolver", () => {
                 expect(step.eliminations.length).toBeGreaterThan(0);
             }
             expect(steps[steps.length - 1].assignments.length).toBeGreaterThan(0);
+        });
+
+        it("should return an empty list when the solver stalls after some eliminations", () => {
+            const solver = new TechniqueSolver();
+            const initialState = BoardState.fromPuzzle(stallingPuzzle);
+            const { steps, stuck } = solver.solveWithTechniques(initialState);
+            const lastAssignmentIndex = steps.map((step) => step.assignments.length > 0).lastIndexOf(true);
+            expect(stuck).toBe(true);
+            expect(lastAssignmentIndex).toBeLessThan(steps.length - 1);
+            let state = initialState;
+            for (const step of steps.slice(0, lastAssignmentIndex + 1)) {
+                for (const assignment of step.assignments) {
+                    state = state.assign(assignment.cell.row, assignment.cell.column, assignment.digit);
+                }
+                for (const elimination of step.eliminations) {
+                    state = state.eliminate(elimination.cell.row, elimination.cell.column, elimination.digit);
+                }
+            }
+
+            expect(solver.stepsToNextAssignment(state)).toEqual([]);
+        });
+
+        it("should keep going through more than twenty elimination-only steps", () => {
+            const solver = new TechniqueSolver();
+            const eliminationStepCount = 25;
+            let calls = 0;
+            vi.spyOn(solver, "nextStep").mockImplementation((): SolveStep => {
+                const cell = { row: Math.floor(calls / 9), column: calls % 9 };
+                calls++;
+                if (calls > eliminationStepCount) {
+                    return { technique: "nakedSingle", focus: [cell], assignments: [{ cell, digit: 1 }], eliminations: [], scopes: [] };
+                }
+                return { technique: "pointing", focus: [], assignments: [], eliminations: [{ cell, digit: 1 }], scopes: [] };
+            });
+            const state = BoardState.fromPuzzle(Array.from({ length: 9 }, () => Array<number>(9).fill(0)));
+
+            const steps = solver.stepsToNextAssignment(state);
+
+            expect(steps).toHaveLength(eliminationStepCount + 1);
+            expect(steps[eliminationStepCount].assignments).toHaveLength(1);
         });
 
         it("should return an empty list when no technique applies", () => {

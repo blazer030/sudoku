@@ -45,7 +45,9 @@ export interface SolveResult {
     stuck: boolean;
 }
 
-const MAX_ASSIGNMENT_ITERATIONS = 20;
+// Every elimination-only step removes at least one of the board's 729 candidates, so the search for
+// the next assignment ends within this many steps; the bound only guards against a technique bug.
+const MAX_ASSIGNMENT_ITERATIONS = BOARD_SIZE * BOARD_SIZE * BOARD_SIZE;
 
 export class TechniqueSolver {
     public nextStep(state: BoardState): SolveStep | null {
