@@ -43,6 +43,7 @@ const TEXT_PAIRS: readonly ContrastPair[] = [
     pair("accent", "card"),
     pair("danger", "background"),
     pair("danger", "card"),
+    pair("error", "background"),
     pair("error", "card"),
     pair("error", "error-surface"),
     // Statistics and review badges, the hint step button
