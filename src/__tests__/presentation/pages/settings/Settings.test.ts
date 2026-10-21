@@ -1,5 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { nextTick } from "vue";
 import { mount } from "@vue/test-utils";
+import { storeToRefs } from "pinia";
 import { createPinia, setActivePinia } from "pinia";
 import { createRouter, createMemoryHistory } from "vue-router";
 
@@ -18,6 +20,9 @@ vi.mock("@/application/PwaThemeUpdater", () => ({
 }));
 
 import { Capacitor } from "@capacitor/core";
+import { i18n } from "@/presentation/i18n";
+import { startLocaleSync } from "@/presentation/i18n/localeSync";
+import { useSettingsStore } from "@/stores/settingsStore";
 import Settings from "@/presentation/pages/settings/Settings.vue";
 
 const mountSettings = () => {
@@ -104,5 +109,44 @@ describe("Settings.vue match-launcher-icon toggle", () => {
         expect(wrapper.find("[data-testid='icon-dialog-confirm']").exists()).toBe(false);
         const { useSettingsStore } = await import("@/stores/settingsStore");
         expect(useSettingsStore().matchLauncherIconToTheme).toBe(false);
+    });
+});
+
+describe("Settings.vue language switcher", () => {
+    beforeEach(() => {
+        localStorage.clear();
+        vi.mocked(Capacitor.isNativePlatform).mockReset();
+        vi.mocked(Capacitor.isNativePlatform).mockReturnValue(false);
+    });
+
+    it("should render language options with native names", () => {
+        const wrapper = mountSettings();
+        expect(wrapper.find("[data-testid='language-en']").text()).toBe("English");
+        expect(wrapper.find("[data-testid='language-zh-Hant']").text()).toBe("繁體中文");
+        expect(wrapper.find("[data-testid='language-system']").text()).toBe("System");
+    });
+
+    it("should mark system as selected by default", () => {
+        const wrapper = mountSettings();
+        expect(wrapper.find("[data-testid='language-system']").attributes("aria-pressed")).toBe("true");
+        expect(wrapper.find("[data-testid='language-en']").attributes("aria-pressed")).toBe("false");
+    });
+
+    it("should switch the whole page to Chinese immediately when 繁體中文 is chosen", async () => {
+        const wrapper = mountSettings();
+        const { language } = storeToRefs(useSettingsStore());
+        const stopLocaleSync = startLocaleSync(language);
+
+        await wrapper.find("[data-testid='language-zh-Hant']").trigger("click");
+        await nextTick();
+
+        expect(i18n.global.locale.value).toBe("zh-Hant");
+        expect(wrapper.text()).toContain("設定");
+        expect(wrapper.text()).toContain("跟隨系統");
+        expect(wrapper.text()).toContain("標示相同數字");
+        expect(wrapper.find("[data-testid='language-zh-Hant']").text()).toBe("繁體中文");
+        expect(wrapper.find("[data-testid='language-en']").text()).toBe("English");
+        expect(wrapper.find("[data-testid='language-zh-Hant']").attributes("aria-pressed")).toBe("true");
+        stopLocaleSync();
     });
 });

@@ -5,4 +5,32 @@ export const zhHant: MessageSchema = {
         back: "返回",
         cancel: "取消",
     },
+    settings: {
+        title: "設定",
+        language: {
+            label: "語言",
+            system: "跟隨系統",
+            english: "English",
+            traditionalChinese: "繁體中文",
+        },
+        appearance: "外觀",
+        colorTheme: "色彩主題",
+        matchLauncherIcon: "App 圖示配合主題",
+        matchLauncherIconNote: "變更時 App 會短暫重新啟動",
+        iconDialog: {
+            message: "變更 App 圖示會讓 App 短暫重新啟動，要啟用嗎？",
+            enable: "啟用",
+        },
+        gameplay: "遊戲",
+        toggles: {
+            highlightSameDigit: { label: "標示相同數字", description: "選取數字時，標示相同的數字與筆記" },
+            completionFlash: { label: "完成動畫", description: "完成一列、一欄或一個九宮格時閃爍提示" },
+            autoRemoveNotes: { label: "自動移除筆記", description: "填入數字時，移除同列、同欄、同宮格的相同筆記" },
+            showRemainingCount: { label: "剩餘數量", description: "在數字按鈕上顯示剩餘數量" },
+        },
+        support: "支持開發",
+        donate: "贊助",
+        about: "關於",
+        version: "版本",
+    },
 };
