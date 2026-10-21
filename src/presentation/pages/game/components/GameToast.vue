@@ -2,7 +2,7 @@
     <Transition name="toast">
         <div
             v-if="content"
-            class="fixed left-1/2 -translate-x-1/2 bottom-safe-24 z-50 w-max bg-toast text-on-toast text-sm px-4 py-3 rounded-xl shadow-lg max-w-[90%]"
+            class="fixed left-1/2 -translate-x-1/2 bottom-safe-24 z-50 w-max bg-toast text-on-toast text-sm text-balance px-4 py-3 rounded-xl shadow-lg max-w-[90%]"
             data-testid="game-toast"
         >
             <span>

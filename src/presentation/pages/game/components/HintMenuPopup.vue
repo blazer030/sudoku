@@ -10,18 +10,19 @@
                 @click="close('close')"
             />
             <div
-                class="absolute bottom-safe-24 left-1/2 -translate-x-1/2 bg-card rounded-popup shadow-popup w-55 z-10 flex flex-col gap-1 py-4 px-3"
+                class="absolute bottom-safe-24 left-1/2 -translate-x-1/2 bg-card rounded-popup shadow-popup w-72 z-10 flex flex-col gap-1 py-4 px-3"
+                data-testid="hint-menu"
             >
                 <div class="flex flex-col px-3 pb-1">
                     <span class="text-foreground text-sm font-bold">{{ t("game.hints.title") }}</span>
                     <span
                         v-if="remaining > 0"
-                        class="text-[13px] text-foreground-secondary"
+                        class="text-[13px] text-foreground-secondary text-balance"
                         data-testid="hint-remaining"
                     >{{ t("game.hints.remaining", { count: remaining }, remaining) }}</span>
                     <span
                         v-else
-                        class="text-[13px] text-foreground-secondary"
+                        class="text-[13px] text-foreground-secondary text-balance"
                         data-testid="hint-used-up"
                     >{{ t("game.hints.usedUp", { max: MAX_HINTS }) }}</span>
                 </div>
@@ -62,7 +63,7 @@
                     <span class="flex flex-col items-start text-left">
                         <span>{{ t("game.hints.checkConflicts") }}</span>
                         <span
-                            class="text-[12px] text-foreground-secondary font-normal"
+                            class="text-[12px] text-foreground-secondary font-normal text-balance"
                             data-testid="hint-check-conflicts-description"
                         >{{ t("game.hints.checkConflictsDescription") }}</span>
                     </span>

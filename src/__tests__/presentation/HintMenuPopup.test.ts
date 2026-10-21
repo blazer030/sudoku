@@ -80,6 +80,14 @@ describe("HintMenuPopup", () => {
         expect(usedWrapper.find("[data-testid='hint-free-note']").exists()).toBe(false);
     });
 
+    it("should be wide enough and balance its wrapped lines so short words are not left alone", () => {
+        const wrapper = mountPopup({ remaining: 0, firstHintFree: false });
+
+        expect(wrapper.find("[data-testid='hint-menu']").classes()).toContain("w-72");
+        expect(wrapper.find("[data-testid='hint-used-up']").classes()).toContain("text-balance");
+        expect(wrapper.find("[data-testid='hint-check-conflicts-description']").classes()).toContain("text-balance");
+    });
+
     it("should say why the options are off when no hints are left", () => {
         const wrapper = mountPopup({ remaining: 0, firstHintFree: false });
 

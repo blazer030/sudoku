@@ -9,4 +9,10 @@ describe("GameToast", () => {
         expect(toast.classes()).toContain("bg-toast");
         expect(toast.classes()).toContain("text-on-toast");
     });
+
+    it("should balance a long message over its lines", () => {
+        const wrapper = mount(GameToast, { props: { content: { kind: "longPressTip" } } });
+
+        expect(wrapper.get("[data-testid='game-toast']").classes()).toContain("text-balance");
+    });
 });

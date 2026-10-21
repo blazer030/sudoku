@@ -36,10 +36,11 @@
                         <span class="text-base font-semibold text-on-primary">{{ t("game.leave.saveAndLeave") }}</span>
                     </button>
 
-                    <div class="grid grid-cols-2 gap-2">
+                    <!-- Equal halves, unless a longer label needs more room to stay on one line -->
+                    <div class="flex gap-2">
                         <button
                             v-press
-                            class="h-11 flex items-center justify-center cursor-pointer rounded-button text-foreground text-[15px] font-semibold transition-all duration-200 hover:bg-foreground/5"
+                            class="flex-1 h-11 px-3 whitespace-nowrap flex items-center justify-center cursor-pointer rounded-button text-foreground text-[15px] font-semibold transition-all duration-200 hover:bg-foreground/5"
                             data-testid="leave-cancel-button"
                             @click="close('cancel')"
                         >
@@ -47,7 +48,7 @@
                         </button>
                         <button
                             v-press
-                            class="h-11 flex items-center justify-center cursor-pointer rounded-button text-danger text-[15px] font-semibold transition-all duration-200 hover:bg-foreground/5"
+                            class="flex-1 h-11 px-3 whitespace-nowrap flex items-center justify-center cursor-pointer rounded-button text-danger text-[15px] font-semibold transition-all duration-200 hover:bg-foreground/5"
                             data-testid="give-up-and-leave-button"
                             @click="close('giveUp')"
                         >

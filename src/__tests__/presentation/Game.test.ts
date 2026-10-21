@@ -1441,6 +1441,14 @@ describe("Game", () => {
             expect(giveUp.classes()).not.toContain("bg-danger");
         });
 
+        it("should keep the give-up label on one line beside Cancel", async () => {
+            const wrapper = await openLeaveDialog();
+
+            for (const testId of ["leave-cancel-button", "give-up-and-leave-button"]) {
+                expect(wrapper.find(`[data-testid='${testId}']`).classes()).toEqual(expect.arrayContaining(["flex-1", "whitespace-nowrap"]));
+            }
+        });
+
         it("should spell out what giving up costs", async () => {
             const wrapper = await openLeaveDialog();
 
