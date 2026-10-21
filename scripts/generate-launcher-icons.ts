@@ -1,5 +1,5 @@
 import sharp from "sharp";
-import { readFileSync, mkdirSync } from "fs";
+import { readFileSync, mkdirSync, writeFileSync } from "fs";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
 
@@ -37,11 +37,75 @@ const PUBLIC_DIR = resolve(__dirname, "../public");
 const RES_ROOT = resolve(__dirname, "../android/app/src/main/res");
 const SVG_TEMPLATE_PATH = resolve(PUBLIC_DIR, "sudoku-green.svg");
 
+const FOREGROUND_LAYER_DP = 108;
+const FOREGROUND_GRID_DP = 43.2;
+const SOURCE_GRID_START = 48;
+const SOURCE_GRID_SIZE = 144;
+const FOREGROUND_BASE_NAME = "ic_launcher_tiles_foreground";
+
+const FOREGROUND_DENSITIES: DensityDef[] = [
+    { name: "mipmap-mdpi",    size: 108 },
+    { name: "mipmap-hdpi",    size: 162 },
+    { name: "mipmap-xhdpi",   size: 216 },
+    { name: "mipmap-xxhdpi",  size: 324 },
+    { name: "mipmap-xxxhdpi", size: 432 },
+];
+
 const themedSvg = (svgContent: string, primary: string): string =>
     svgContent.replace(/fill="#3D8A5A"/g, `fill="${primary}"`);
 
+const tilesForegroundSvg = (svgContent: string): string => {
+    const tiles = svgContent.match(/<rect x="\d+" y="\d+"[^>]*\/>/g) ?? [];
+    const scale = FOREGROUND_GRID_DP / SOURCE_GRID_SIZE;
+    const offset = (FOREGROUND_LAYER_DP - FOREGROUND_GRID_DP) / 2;
+    return [
+        `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${FOREGROUND_LAYER_DP} ${FOREGROUND_LAYER_DP}">`,
+        `<g transform="translate(${offset} ${offset}) scale(${scale}) translate(-${SOURCE_GRID_START} -${SOURCE_GRID_START})">`,
+        ...tiles,
+        "</g>",
+        "</svg>",
+    ].join("\n");
+};
+
+const adaptiveIconXml = (theme: ThemeDef): string => `<?xml version="1.0" encoding="utf-8"?>
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@color/ic_launcher_${theme.id}_background"/>
+    <foreground android:drawable="@mipmap/${FOREGROUND_BASE_NAME}"/>
+    <monochrome android:drawable="@mipmap/${FOREGROUND_BASE_NAME}"/>
+</adaptive-icon>
+`;
+
+const themeColorsXml = (): string => `<?xml version="1.0" encoding="utf-8"?>
+<resources>
+${THEMES.map((theme) => `    <color name="ic_launcher_${theme.id}_background">${theme.primary}</color>`).join("\n")}
+</resources>
+`;
+
+const generateAdaptiveIcons = async (baseSvg: string) => {
+    const foregroundSvg = Buffer.from(tilesForegroundSvg(baseSvg));
+    for (const density of FOREGROUND_DENSITIES) {
+        const outDir = resolve(RES_ROOT, density.name);
+        mkdirSync(outDir, { recursive: true });
+        await sharp(foregroundSvg)
+            .resize(density.size, density.size)
+            .png()
+            .toFile(resolve(outDir, `${FOREGROUND_BASE_NAME}.png`));
+    }
+
+    const xmlDir = resolve(RES_ROOT, "mipmap-anydpi-v26");
+    mkdirSync(xmlDir, { recursive: true });
+    for (const theme of THEMES) {
+        const xml = adaptiveIconXml(theme);
+        writeFileSync(resolve(xmlDir, `ic_launcher_${theme.id}.xml`), xml);
+        writeFileSync(resolve(xmlDir, `ic_launcher_${theme.id}_round.xml`), xml);
+    }
+    writeFileSync(resolve(RES_ROOT, "values/ic_launcher_theme_colors.xml"), themeColorsXml());
+    console.log("Generated adaptive launcher icons and theme colors.");
+};
+
 const main = async () => {
     const baseSvg = readFileSync(SVG_TEMPLATE_PATH, "utf-8");
+    await generateAdaptiveIcons(baseSvg);
 
     for (const theme of THEMES) {
         const svgBuffer = Buffer.from(themedSvg(baseSvg, theme.primary));

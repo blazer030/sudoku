@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { nextTick } from "vue";
-import { mount } from "@vue/test-utils";
+import { flushPromises, mount } from "@vue/test-utils";
 import { storeToRefs } from "pinia";
 import { createPinia, setActivePinia } from "pinia";
 import { createRouter, createMemoryHistory } from "vue-router";
@@ -23,10 +23,23 @@ import { Capacitor } from "@capacitor/core";
 import { i18n } from "@/presentation/i18n";
 import { startLocaleSync } from "@/presentation/i18n/localeSync";
 import { useSettingsStore } from "@/stores/settingsStore";
+import { useDonateStore } from "@/stores/donateStore";
+import type { BillingService, Product } from "@/application/billing/BillingService";
 import Settings from "@/presentation/pages/settings/Settings.vue";
 
-const mountSettings = () => {
+const fakeProducts: Product[] = [
+    { id: "donate_coffee", tier: "coffee", priceText: "$2.99", amountUsd: 2.99 },
+];
+
+const buildBilling = (loadProducts: BillingService["loadProducts"]): BillingService => ({
+    loadProducts,
+    purchase: vi.fn(),
+    consumeAll: vi.fn().mockResolvedValue(undefined),
+});
+
+const mountSettings = (billing?: BillingService) => {
     setActivePinia(createPinia());
+    if (billing !== undefined) useDonateStore().setBilling(billing);
     const router = createRouter({
         history: createMemoryHistory(),
         routes: [
@@ -45,16 +58,34 @@ describe("Settings.vue Support section", () => {
         vi.mocked(Capacitor.isNativePlatform).mockReset();
     });
 
-    it("hides Support section on web", () => {
+    it("hides the donate entry on web and never loads products", async () => {
         vi.mocked(Capacitor.isNativePlatform).mockReturnValue(false);
-        const wrapper = mountSettings();
+        const loadProducts = vi.fn().mockResolvedValue(fakeProducts);
+        const wrapper = mountSettings(buildBilling(loadProducts));
+        await flushPromises();
+        expect(wrapper.find("[data-testid='donate-link']").exists()).toBe(false);
+        expect(loadProducts).not.toHaveBeenCalled();
+    });
+
+    it("shows the donate entry on native when Play returns products", async () => {
+        vi.mocked(Capacitor.isNativePlatform).mockReturnValue(true);
+        const wrapper = mountSettings(buildBilling(vi.fn().mockResolvedValue(fakeProducts)));
+        await flushPromises();
+        expect(wrapper.find("[data-testid='donate-link']").exists()).toBe(true);
+    });
+
+    it("hides the donate entry on native when Play returns no products", async () => {
+        vi.mocked(Capacitor.isNativePlatform).mockReturnValue(true);
+        const wrapper = mountSettings(buildBilling(vi.fn().mockResolvedValue([])));
+        await flushPromises();
         expect(wrapper.find("[data-testid='donate-link']").exists()).toBe(false);
     });
 
-    it("shows Support section on native", () => {
+    it("hides the donate entry on native when loading products fails", async () => {
         vi.mocked(Capacitor.isNativePlatform).mockReturnValue(true);
-        const wrapper = mountSettings();
-        expect(wrapper.find("[data-testid='donate-link']").exists()).toBe(true);
+        const wrapper = mountSettings(buildBilling(vi.fn().mockRejectedValue(new Error("unavailable"))));
+        await flushPromises();
+        expect(wrapper.find("[data-testid='donate-link']").exists()).toBe(false);
     });
 });
 
@@ -70,45 +101,53 @@ describe("Settings.vue match-launcher-icon toggle", () => {
         expect(wrapper.find("[data-testid='toggle-matchLauncherIconToTheme']").exists()).toBe(false);
     });
 
-    it("shows confirm dialog when tapping the toggle while OFF", async () => {
+    it("enables the setting immediately without a confirm dialog", async () => {
         vi.mocked(Capacitor.isNativePlatform).mockReturnValue(true);
         const wrapper = mountSettings();
         await wrapper.find("[data-testid='toggle-matchLauncherIconToTheme']").trigger("click");
-        expect(wrapper.find("[data-testid='icon-dialog-confirm']").exists()).toBe(true);
-    });
 
-    it("enables the setting only after the user confirms", async () => {
-        vi.mocked(Capacitor.isNativePlatform).mockReturnValue(true);
-        const wrapper = mountSettings();
-        await wrapper.find("[data-testid='toggle-matchLauncherIconToTheme']").trigger("click");
-        await wrapper.find("[data-testid='icon-dialog-confirm']").trigger("click");
-
-        const { useSettingsStore } = await import("@/stores/settingsStore");
+        expect(wrapper.find("[data-testid='icon-dialog-confirm']").exists()).toBe(false);
         expect(useSettingsStore().matchLauncherIconToTheme).toBe(true);
-        expect(wrapper.find("[data-testid='icon-dialog-confirm']").exists()).toBe(false);
     });
 
-    it("keeps the setting OFF when the user cancels the dialog", async () => {
+    it("asks the icon service to apply the current theme when enabled", async () => {
+        vi.mocked(Capacitor.isNativePlatform).mockReturnValue(true);
+        const wrapper = mountSettings();
+        const setIcon = vi.fn().mockResolvedValue(undefined);
+        const settingsStore = useSettingsStore();
+        settingsStore.setIconService({ setIcon });
+        await wrapper.find("[data-testid='toggle-matchLauncherIconToTheme']").trigger("click");
+
+        expect(setIcon).toHaveBeenCalledWith(settingsStore.colorTheme);
+    });
+
+    it("disables the setting when toggling from ON", async () => {
         vi.mocked(Capacitor.isNativePlatform).mockReturnValue(true);
         const wrapper = mountSettings();
         await wrapper.find("[data-testid='toggle-matchLauncherIconToTheme']").trigger("click");
-        await wrapper.find("[data-testid='icon-dialog-cancel']").trigger("click");
+        await wrapper.find("[data-testid='toggle-matchLauncherIconToTheme']").trigger("click");
 
-        const { useSettingsStore } = await import("@/stores/settingsStore");
         expect(useSettingsStore().matchLauncherIconToTheme).toBe(false);
-        expect(wrapper.find("[data-testid='icon-dialog-confirm']").exists()).toBe(false);
     });
 
-    it("disables without a dialog when toggling from ON", async () => {
+    it("explains that the icon updates after leaving the app", () => {
         vi.mocked(Capacitor.isNativePlatform).mockReturnValue(true);
         const wrapper = mountSettings();
-        await wrapper.find("[data-testid='toggle-matchLauncherIconToTheme']").trigger("click");
-        await wrapper.find("[data-testid='icon-dialog-confirm']").trigger("click");
-        await wrapper.find("[data-testid='toggle-matchLauncherIconToTheme']").trigger("click");
+        expect(wrapper.text()).toContain("The icon updates after you leave the app");
+    });
 
-        expect(wrapper.find("[data-testid='icon-dialog-confirm']").exists()).toBe(false);
-        const { useSettingsStore } = await import("@/stores/settingsStore");
-        expect(useSettingsStore().matchLauncherIconToTheme).toBe(false);
+    it("shows the note in Chinese", async () => {
+        vi.mocked(Capacitor.isNativePlatform).mockReturnValue(true);
+        const wrapper = mountSettings();
+        const { language } = storeToRefs(useSettingsStore());
+        const stopLocaleSync = startLocaleSync(language);
+        try {
+            await wrapper.find("[data-testid='language-zh-Hant']").trigger("click");
+            await nextTick();
+            expect(wrapper.text()).toContain("離開 App 後圖示才會更新");
+        } finally {
+            stopLocaleSync();
+        }
     });
 });
 

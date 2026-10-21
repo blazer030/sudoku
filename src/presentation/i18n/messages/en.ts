@@ -21,11 +21,7 @@ export const en = {
         appearance: "Appearance",
         colorTheme: "Color theme",
         matchLauncherIcon: "Match launcher icon to theme",
-        matchLauncherIconNote: "App will briefly restart when changed",
-        iconDialog: {
-            message: "Changing the launcher icon will briefly restart the app. Enable?",
-            enable: "Enable",
-        },
+        matchLauncherIconNote: "The icon updates after you leave the app",
         gameplay: "Gameplay",
         toggles: {
             highlightSameDigit: { label: "Highlight Same Numbers", description: "Highlight matching numbers and notes when selected" },

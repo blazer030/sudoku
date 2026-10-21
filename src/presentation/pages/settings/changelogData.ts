@@ -8,6 +8,30 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
     {
+        version: "2.1.1",
+        date: "2026-10-21",
+        changes: {
+            en: [
+                "Traditional Chinese support; choose the language in Settings",
+                "Walkthrough chain lines and gridlines stay aligned on narrow screens",
+                "Walkthrough step counter is centered",
+                "Game Review keeps the full history after you leave and resume a game",
+                "Games abandoned by starting a new one can now be reviewed in Statistics",
+                "Changing the launcher icon no longer closes the app; the new icon appears after you leave it (App)",
+                "Theme launcher icons now fill the icon shape instead of sitting on a white circle (App)",
+            ],
+            "zh-Hant": [
+                "支援繁體中文，可在設定中切換語言",
+                "修正解題演示在窄螢幕上連線與格線對不齊的問題",
+                "解題演示的步數改為置中",
+                "離開後再繼續的遊戲，遊戲回顧會保留完整紀錄",
+                "因開始新遊戲而放棄的遊戲，也能在統計中回顧",
+                "更換 App 圖示時不會再直接關閉 App，離開 App 後就會換成新圖示（App）",
+                "主題 App 圖示改為滿版顯示，不再縮在白色圓底裡（App）",
+            ],
+        },
+    },
+    {
         version: "2.0.0",
         date: "2026-10-21",
         changes: {
