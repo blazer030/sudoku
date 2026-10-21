@@ -2,6 +2,7 @@ import { ref } from "vue";
 import { defineStore } from "pinia";
 import { loadSettings, saveSettings, type ColorThemeId } from "@/application/SettingsStorage";
 import { updateMetaThemeColor, updateFavicon, updateManifestLink, updateAppleTouchIcon } from "@/application/PwaThemeUpdater";
+import type { IconService } from "@/application/icon/IconService";
 
 export const useSettingsStore = defineStore("settings", () => {
     const settings = loadSettings();
@@ -10,6 +11,8 @@ export const useSettingsStore = defineStore("settings", () => {
     const completionFlash = ref(settings.completionFlash);
     const autoRemoveNotes = ref(settings.autoRemoveNotes);
     const showRemainingCount = ref(settings.showRemainingCount);
+    const matchLauncherIconToTheme = ref(settings.matchLauncherIconToTheme);
+    let iconService: IconService | null = null;
 
     const applyColorTheme = () => {
         const id = colorTheme.value;
@@ -27,6 +30,7 @@ export const useSettingsStore = defineStore("settings", () => {
             completionFlash: completionFlash.value,
             autoRemoveNotes: autoRemoveNotes.value,
             showRemainingCount: showRemainingCount.value,
+            matchLauncherIconToTheme: matchLauncherIconToTheme.value,
         });
     };
 
@@ -34,6 +38,9 @@ export const useSettingsStore = defineStore("settings", () => {
         colorTheme.value = id;
         applyColorTheme();
         persistAll();
+        if (matchLauncherIconToTheme.value && iconService !== null) {
+            void iconService.setIcon(id);
+        }
     };
 
     const setHighlightSameDigit = (value: boolean) => {
@@ -56,6 +63,19 @@ export const useSettingsStore = defineStore("settings", () => {
         persistAll();
     };
 
+    const setMatchLauncherIconToTheme = (value: boolean) => {
+        const wasOn = matchLauncherIconToTheme.value;
+        matchLauncherIconToTheme.value = value;
+        persistAll();
+        if (!wasOn && value && iconService !== null) {
+            void iconService.setIcon(colorTheme.value);
+        }
+    };
+
+    const setIconService = (service: IconService) => {
+        iconService = service;
+    };
+
     applyColorTheme();
 
     return {
@@ -64,10 +84,13 @@ export const useSettingsStore = defineStore("settings", () => {
         completionFlash,
         autoRemoveNotes,
         showRemainingCount,
+        matchLauncherIconToTheme,
         setColorTheme,
         setHighlightSameDigit,
         setCompletionFlash,
         setAutoRemoveNotes,
         setShowRemainingCount,
+        setMatchLauncherIconToTheme,
+        setIconService,
     };
 });

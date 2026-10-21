@@ -8,8 +8,7 @@ import type { GameState } from "@/application/GameState";
 import Cell from "@/presentation/pages/game/components/Cell.vue";
 import { useGameStore } from "@/stores/gameStore";
 import type { Difficulty } from "@/domain/generator/SudokuGenerator";
-import { getGameHistory } from "@/application/Statistics";
-import { hasSavedGame, loadGame, saveGame } from "@/application/GameStorage";
+import { useStatisticsStore } from "@/stores/statisticsStore";
 
 const createTestRouter = () => {
     return createRouter({
@@ -28,10 +27,10 @@ const mountGame = (difficulty: Difficulty = "easy") => {
 };
 
 const mountContinueGame = (savedState: GameState) => {
-    saveGame(savedState);
     const pinia = createPinia();
     const router = createTestRouter();
     const gameStore = useGameStore(pinia);
+    gameStore.persistGame(savedState);
     gameStore.loadSavedGame(savedState);
     return mount(Game, { global: { plugins: [pinia, router] } });
 };
@@ -755,7 +754,7 @@ describe("Game", () => {
             }
         }
 
-        const history = getGameHistory();
+        const history = useStatisticsStore().history;
         expect(history).toHaveLength(1);
         expect(history[0].completed).toBe(true);
         expect(history[0].difficulty).toBe("easy");
@@ -778,7 +777,7 @@ describe("Game", () => {
             hintsUsed: 0,
         };
         const wrapper = mountContinueGame(savedState);
-        expect(hasSavedGame()).toBe(true);
+        expect(useGameStore().savedGame).not.toBeNull();
 
         for (let row = 0; row < 9; row++) {
             for (let column = 0; column < 9; column++) {
@@ -793,7 +792,7 @@ describe("Game", () => {
         }
 
         expect(wrapper.find("[data-testid='game-complete-modal']").exists()).toBe(true);
-        expect(hasSavedGame()).toBe(false);
+        expect(useGameStore().savedGame).toBeNull();
     });
 
     it("should render 9x9 grid with clue cells showing their numbers", () => {
@@ -943,7 +942,7 @@ describe("Game", () => {
             await wrapper.find("[data-testid='save-and-leave-button']").trigger("click");
             await flushPromises();
 
-            const saved = loadGame();
+            const saved = useGameStore().savedGame;
             expect(saved?.hintsUsed).toBe(2);
         });
 

@@ -22,6 +22,14 @@ Vue 3 + TypeScript Sudoku game following **Domain-Driven Design (DDD)**:
 
 IMPORTANT: Domain layer must never import from `presentation/`, `stores/`, or `application/`. Dependencies flow inward only.
 
+## Specs & Plans
+
+Design specs and implementation plans live under `docs/` — never in a root `plan.md`.
+
+## Release
+
+Follow `docs/release.md` (git flow, web + Android). Bump the version only on the release/hotfix branch; `package.json` is the single source and Android derives `versionName` / `versionCode` from it.
+
 ## Code Style
 
 - **Composition API** with `<script setup>` and arrow functions — no Options API

@@ -1,6 +1,7 @@
 import { createPinia, setActivePinia } from "pinia";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { updateMetaThemeColor, updateFavicon, updateManifestLink, updateAppleTouchIcon } from "@/application/PwaThemeUpdater";
+import type { IconService } from "@/application/icon/IconService";
 
 vi.mock("@/application/PwaThemeUpdater", () => ({
     updateMetaThemeColor: vi.fn(),
@@ -27,6 +28,7 @@ describe("settingsStore", () => {
         expect(store.completionFlash).toBe(true);
         expect(store.autoRemoveNotes).toBe(true);
         expect(store.showRemainingCount).toBe(true);
+        expect(store.matchLauncherIconToTheme).toBe(false);
     });
 
     it("should persist colorTheme change to localStorage", () => {
@@ -80,5 +82,62 @@ describe("settingsStore", () => {
         expect(updateFavicon).toHaveBeenCalledWith("blue");
         expect(updateManifestLink).toHaveBeenCalledWith("blue");
         expect(updateAppleTouchIcon).toHaveBeenCalledWith("blue");
+    });
+
+    describe("icon sync", () => {
+        const buildIconService = (): { service: IconService; setIcon: ReturnType<typeof vi.fn> } => {
+            const setIcon = vi.fn().mockResolvedValue(undefined);
+            return { service: { setIcon }, setIcon };
+        };
+
+        it("calls IconService.setIcon when theme changes and toggle is ON", async () => {
+            const { service, setIcon } = buildIconService();
+            const store = useSettingsStore();
+            store.setIconService(service);
+            store.setMatchLauncherIconToTheme(true);
+            setIcon.mockClear();
+
+            store.setColorTheme("blue");
+            await Promise.resolve();
+
+            expect(setIcon).toHaveBeenCalledWith("blue");
+        });
+
+        it("does NOT call IconService.setIcon when theme changes and toggle is OFF", async () => {
+            const { service, setIcon } = buildIconService();
+            const store = useSettingsStore();
+            store.setIconService(service);
+
+            store.setColorTheme("blue");
+            await Promise.resolve();
+
+            expect(setIcon).not.toHaveBeenCalled();
+        });
+
+        it("calls IconService.setIcon when toggle transitions OFF → ON (sync to current theme)", async () => {
+            const { service, setIcon } = buildIconService();
+            const store = useSettingsStore();
+            store.setIconService(service);
+            store.setColorTheme("purple");
+            setIcon.mockClear();
+
+            store.setMatchLauncherIconToTheme(true);
+            await Promise.resolve();
+
+            expect(setIcon).toHaveBeenCalledWith("purple");
+        });
+
+        it("does not call IconService.setIcon when toggle transitions ON → OFF", async () => {
+            const { service, setIcon } = buildIconService();
+            const store = useSettingsStore();
+            store.setIconService(service);
+            store.setMatchLauncherIconToTheme(true);
+            setIcon.mockClear();
+
+            store.setMatchLauncherIconToTheme(false);
+            await Promise.resolve();
+
+            expect(setIcon).not.toHaveBeenCalled();
+        });
     });
 });

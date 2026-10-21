@@ -2,10 +2,12 @@ import { type Ref, ref } from "vue";
 import { onBeforeRouteLeave, useRouter } from "vue-router";
 import type { Difficulty } from "@/domain";
 import type { Sudoku } from "@/domain/game/Sudoku";
-import { deleteSavedGame, saveGame } from "@/application/GameStorage";
 import { GameStateConverter } from "@/application/GameState";
-import { recordGameResult, type GameReplayData } from "@/application/Statistics";
+import { useGameStore } from "@/stores/gameStore";
+import { useStatisticsStore } from "@/stores/statisticsStore";
+import type { GameReplayData } from "@/application/statistics/StatisticsRepository";
 import { provideLeaveDialog } from "@/presentation/pages/game/components/useLeaveDialog";
+import type { AnalyticsService } from "@/application/analytics/AnalyticsService";
 
 interface LeaveGameOptions {
     sudoku: Sudoku;
@@ -13,12 +15,27 @@ interface LeaveGameOptions {
     completed: Ref<boolean>;
     getElapsedSeconds: () => number;
     getReplayData: () => GameReplayData;
+    analytics?: AnalyticsService;
 }
 
-export const useLeaveGame = ({ sudoku, difficulty, completed, getElapsedSeconds, getReplayData }: LeaveGameOptions) => {
+const TOTAL_CELLS = 81;
+
+const computeProgressPct = (sudoku: Sudoku): number => {
+    let filled = 0;
+    for (const row of sudoku.puzzle) {
+        for (const cell of row) {
+            if (cell.isClue || cell.hasEntry) filled += 1;
+        }
+    }
+    return Math.round((filled / TOTAL_CELLS) * 100);
+};
+
+export const useLeaveGame = ({ sudoku, difficulty, completed, getElapsedSeconds, getReplayData, analytics }: LeaveGameOptions) => {
     const router = useRouter();
     const leaveDialog = provideLeaveDialog();
     const leavingConfirmed = ref(false);
+    const statisticsStore = useStatisticsStore();
+    const gameStore = useGameStore();
 
     const showLeaveDialog = async () => {
         const result = await leaveDialog.open();
@@ -28,18 +45,23 @@ export const useLeaveGame = ({ sudoku, difficulty, completed, getElapsedSeconds,
                 elapsedSeconds: getElapsedSeconds(),
                 completed: completed.value,
             });
-            saveGame(state);
+            gameStore.persistGame(state);
             leavingConfirmed.value = true;
             router.back();
         } else if (result === "giveUp") {
-            recordGameResult({
+            void analytics?.logEvent({
+                name: "game_abandon",
+                difficulty: difficulty.value,
+                progress_pct: computeProgressPct(sudoku),
+            });
+            statisticsStore.recordGame({
                 difficulty: difficulty.value,
                 elapsedSeconds: getElapsedSeconds(),
                 completed: false,
                 hintsUsed: sudoku.hintTracker.recordedUsed,
                 replay: getReplayData(),
             });
-            deleteSavedGame();
+            void gameStore.clearSavedGame();
             leavingConfirmed.value = true;
             router.back();
         }
