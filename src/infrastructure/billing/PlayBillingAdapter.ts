@@ -3,10 +3,10 @@ import type { Transaction } from "capacitor-plugin-cdv-purchase";
 import type { BillingService, Product, PurchaseResult } from "@/application/billing/BillingService";
 import type { DonateTier } from "@/application/analytics/AnalyticsService";
 
-const TIER_META = new Map<string, { tier: DonateTier; label: string }>([
-    ["donate_coffee",      { tier: "coffee",      label: "Coffee" }],
-    ["donate_lunch",       { tier: "lunch",       label: "Lunch" }],
-    ["donate_coding_time", { tier: "coding_time", label: "Coding Time" }],
+const TIER_META = new Map<string, { tier: DonateTier }>([
+    ["donate_coffee",      { tier: "coffee" }],
+    ["donate_lunch",       { tier: "lunch" }],
+    ["donate_coding_time", { tier: "coding_time" }],
 ]);
 
 const PRODUCT_IDS = Array.from(TIER_META.keys());
@@ -67,7 +67,6 @@ export class PlayBillingAdapter implements BillingService {
         return {
             id: productId,
             tier: meta.tier,
-            label: meta.label,
             priceText: pricing.price,
             amountUsd: pricing.priceMicros / 1_000_000,
         };

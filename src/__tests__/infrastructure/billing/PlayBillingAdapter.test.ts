@@ -139,9 +139,9 @@ describe("PlayBillingAdapter", () => {
         fireAllProductsUpdated(buildProduct("donate_coffee", "$2.99", 2_990_000));
 
         await expect(promise).resolves.toEqual([
-            { id: "donate_coffee",      tier: "coffee",      label: "Coffee",      priceText: "$2.99", amountUsd: 2.99 },
-            { id: "donate_lunch",       tier: "lunch",       label: "Lunch",       priceText: "$5.99", amountUsd: 5.99 },
-            { id: "donate_coding_time", tier: "coding_time", label: "Coding Time", priceText: "$9.99", amountUsd: 9.99 },
+            { id: "donate_coffee",      tier: "coffee",      priceText: "$2.99", amountUsd: 2.99 },
+            { id: "donate_lunch",       tier: "lunch",       priceText: "$5.99", amountUsd: 5.99 },
+            { id: "donate_coding_time", tier: "coding_time", priceText: "$9.99", amountUsd: 9.99 },
         ]);
     });
 
@@ -154,7 +154,7 @@ describe("PlayBillingAdapter", () => {
         const adapter = new PlayBillingAdapter();
 
         await expect(adapter.loadProducts()).resolves.toEqual([
-            { id: "donate_lunch", tier: "lunch", label: "Lunch", priceText: "$5.99", amountUsd: 5.99 },
+            { id: "donate_lunch", tier: "lunch", priceText: "$5.99", amountUsd: 5.99 },
         ]);
     });
 
@@ -167,7 +167,7 @@ describe("PlayBillingAdapter", () => {
         const adapter = new PlayBillingAdapter();
 
         await expect(adapter.loadProducts()).resolves.toEqual([
-            { id: "donate_coffee", tier: "coffee", label: "Coffee", priceText: "$2.99", amountUsd: 2.99 },
+            { id: "donate_coffee", tier: "coffee", priceText: "$2.99", amountUsd: 2.99 },
         ]);
     });
 

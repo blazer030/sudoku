@@ -15,10 +15,10 @@
 
                 <div class="flex flex-col items-center gap-2">
                     <h2 class="text-2xl font-bold text-foreground tracking-tight">
-                        Clear All Records?
+                        {{ t("statistics.clearDialog.title") }}
                     </h2>
                     <p class="text-sm text-foreground-secondary text-center">
-                        All your game history, statistics and best times will be permanently deleted. This action cannot be undone.
+                        {{ t("statistics.clearDialog.message") }}
                     </p>
                 </div>
 
@@ -28,7 +28,7 @@
                         data-testid="clear-records-confirm-button"
                         @click="close('confirm')"
                     >
-                        <span class="text-base font-semibold text-white">Clear All Records</span>
+                        <span class="text-base font-semibold text-white">{{ t("statistics.clearRecords") }}</span>
                     </button>
 
                     <button
@@ -36,7 +36,7 @@
                         data-testid="clear-records-cancel-button"
                         @click="close('cancel')"
                     >
-                        <span class="text-base font-semibold text-foreground">Cancel</span>
+                        <span class="text-base font-semibold text-foreground">{{ t("common.cancel") }}</span>
                     </button>
                 </div>
             </div>
@@ -45,8 +45,10 @@
 </template>
 
 <script lang="ts" setup>
+import { useI18n } from "vue-i18n";
 import { Trash2 } from "lucide-vue-next";
 import { useClearRecordsDialog } from "@/presentation/pages/statistics/useClearRecordsDialog";
 
+const { t } = useI18n();
 const { visible, close } = useClearRecordsDialog();
 </script>

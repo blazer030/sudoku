@@ -81,4 +81,18 @@ describe("StepRecorder", () => {
         expect(recorder.steps[1].action).toBe("undo");
         expect(recorder.steps[1].board[0][0].entry).toBe(0);
     });
+
+    it("should keep appending after steps restored from a saved game", () => {
+        const puzzle = createPuzzle();
+        const previous = new StepRecorder();
+        puzzle[0][0].entry = 1;
+        previous.record(puzzle, "fill", 0, 0, 1);
+
+        const recorder = new StepRecorder();
+        recorder.restore(previous.steps);
+        puzzle[1][1].entry = 2;
+        recorder.record(puzzle, "fill", 1, 1, 2);
+
+        expect(recorder.steps.map(step => [step.row, step.column])).toEqual([[0, 0], [1, 1]]);
+    });
 });

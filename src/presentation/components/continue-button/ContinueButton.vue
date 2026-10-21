@@ -6,7 +6,7 @@
         @click="$emit('continue')"
     >
         <Play :size="20" />
-        <span class="text-base font-semibold">Continue Game</span>
+        <span class="text-base font-semibold">{{ t("home.continueGame") }}</span>
         <span class="bg-white/20 rounded-full px-2.5 py-1 text-xs font-medium">
             {{ savedTimeLabel }}
         </span>
@@ -16,8 +16,11 @@
 <script lang="ts" setup>
 import { computed } from "vue";
 import { Play } from "lucide-vue-next";
+import { useI18n } from "vue-i18n";
 import { useGameStore } from "@/stores/gameStore";
 import { formatTime } from "@/utils/formatTime";
+
+const { t } = useI18n();
 
 defineEmits<{ continue: [] }>();
 

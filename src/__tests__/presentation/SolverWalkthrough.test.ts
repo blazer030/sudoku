@@ -1,4 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { nextTick } from "vue";
+import { i18n } from "@/presentation/i18n";
 import { flushPromises, mount, type VueWrapper } from "@vue/test-utils";
 import { createMemoryHistory, createRouter } from "vue-router";
 import SolverWalkthrough from "@/presentation/pages/solver-walkthrough/SolverWalkthrough.vue";
@@ -10,6 +12,9 @@ import { TEST_PUZZLE_PRESETS } from "@/presentation/pages/solver-walkthrough/tes
 const mediumPreset = TEST_PUZZLE_PRESETS.find((preset) => preset.label === "Medium");
 if (!mediumPreset) throw new Error("expected Medium preset to exist");
 const mediumPuzzle = mediumPreset.puzzle;
+const hardPreset = TEST_PUZZLE_PRESETS.find((preset) => preset.label === "Hard");
+if (!hardPreset) throw new Error("expected Hard preset to exist");
+const hardPuzzle = hardPreset.puzzle;
 
 const fillPuzzle = async (wrapper: VueWrapper, puzzle: number[][]) => {
     for (let row = 0; row < 9; row++) {
@@ -486,6 +491,15 @@ describe("SolverWalkthrough", () => {
         expect(wrapper.find("[data-testid='step-counter']").text()).toMatch(/Step 1 of \d+/);
     });
 
+    it("should center the step counter", async () => {
+        const { wrapper } = mountWalkthrough();
+        await fillPuzzle(wrapper, singlesPuzzle);
+
+        await wrapper.find("[data-testid='solve-button']").trigger("click");
+
+        expect(wrapper.find("[data-testid='step-counter']").classes()).toContain("text-center");
+    });
+
     it("should describe a Naked Single step with technique, cell and digit", async () => {
         const { wrapper } = mountWalkthrough();
         await fillPuzzle(wrapper, singlesPuzzle);
@@ -524,5 +538,78 @@ describe("SolverWalkthrough", () => {
                 }
             }
         }
+    });
+
+    describe("step description", () => {
+        const solveSteps = (puzzle: number[][]) => new TechniqueSolver().solveWithTechniques(BoardState.fromPuzzle(puzzle)).steps;
+
+        const stepsToReach = (puzzle: number[][], predicate: (step: ReturnType<typeof solveSteps>[number]) => boolean) => {
+            const index = solveSteps(puzzle).findIndex(predicate);
+            if (index === -1) throw new Error("expected a matching step to exist");
+            return index + 1;
+        };
+
+        const advance = async (wrapper: VueWrapper, count: number) => {
+            await wrapper.find("[data-testid='solve-button']").trigger("click");
+            for (let step = 0; step < count; step++) {
+                await wrapper.find("[data-testid='next-step-button']").trigger("click");
+            }
+            return wrapper.find("[data-testid='step-description']");
+        };
+
+        const useChinese = async () => {
+            i18n.global.locale.value = "zh-Hant";
+            await nextTick();
+        };
+
+        it("should describe the initial board and buttons in Traditional Chinese", async () => {
+            await useChinese();
+            const { wrapper } = mountWalkthrough();
+            await fillPuzzle(wrapper, singlesPuzzle);
+
+            expect(wrapper.find("[data-testid='reset-button']").text()).toBe("重設");
+            expect(wrapper.find("[data-testid='solve-button']").text()).toBe("解題");
+            const description = await advance(wrapper, 0);
+
+            expect(description.text()).toBe("初始盤面");
+        });
+
+        it("should describe an assignment step in Traditional Chinese", async () => {
+            await useChinese();
+            const { wrapper } = mountWalkthrough();
+            await fillPuzzle(wrapper, singlesPuzzle);
+
+            const description = await advance(wrapper, 1);
+
+            expect(description.text()).toMatch(/^唯一候選數：第 \d 列第 \d 欄 = \d$/);
+        });
+
+        it("should describe an elimination step in Traditional Chinese", async () => {
+            await useChinese();
+            const { wrapper } = mountWalkthrough();
+            await fillPuzzle(wrapper, hardPuzzle);
+            const target = stepsToReach(hardPuzzle, (step) => step.assignments.length === 0 && step.eliminations.length > 0);
+
+            const description = await advance(wrapper, target);
+
+            expect(description.text()).toMatch(/刪去 \d+ 個候選數/);
+        });
+
+        it.each([
+            ["1 elimination", (count: number) => count === 1],
+            ["eliminations", (count: number) => count > 1],
+        ])("should pluralize elimination steps in English (%s)", async (expected, matchesCount) => {
+            const { wrapper } = mountWalkthrough();
+            await fillPuzzle(wrapper, hardPuzzle);
+            const steps = solveSteps(hardPuzzle);
+            const target = steps.findIndex((step) => step.assignments.length === 0 && matchesCount(step.eliminations.length)) + 1;
+            if (target === 0) throw new Error("expected a matching step to exist");
+            const count = steps[target - 1].eliminations.length;
+
+            const description = await advance(wrapper, target);
+
+            expect(description.text()).toContain(`${count} ${expected === "1 elimination" ? "elimination" : "eliminations"}`);
+            expect(description.text()).not.toContain(count === 1 ? "eliminations" : "1 elimination:");
+        });
     });
 });

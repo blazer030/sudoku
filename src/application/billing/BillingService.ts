@@ -4,7 +4,6 @@ import type { DonateTier } from "@/application/analytics/AnalyticsService";
 export interface Product {
     id: string;          // Play SKU e.g. "donate_coffee"
     tier: DonateTier;    // "coffee" | "lunch" | "coding_time"
-    label: string;       // "Coffee"
     priceText: string;   // "$2.99" or localized equivalent
     amountUsd: number;   // 2.99
 }

@@ -16,20 +16,20 @@
 
                 <div class="flex flex-col items-center gap-2">
                     <h2 class="text-[28px] font-bold text-foreground tracking-tight">
-                        Congratulations!
+                        {{ t("game.complete.title") }}
                     </h2>
                     <p class="text-base text-foreground-secondary">
-                        You solved the puzzle!
+                        {{ t("game.complete.message") }}
                     </p>
                 </div>
 
-                <div class="grid grid-cols-3 w-full">
+                <div class="grid grid-cols-3 gap-2 w-full">
                     <div class="flex flex-col items-center gap-1">
                         <span class="text-[32px] font-bold text-primary tracking-tighter">
                             {{ formatTime(params?.elapsedSeconds ?? 0) }}
                         </span>
                         <span class="text-[13px] font-medium text-foreground-secondary">
-                            Time
+                            {{ t("game.complete.time") }}
                         </span>
                     </div>
                     <div class="flex flex-col items-center gap-1">
@@ -37,7 +37,7 @@
                             {{ difficultyLabel }}
                         </span>
                         <span class="text-[13px] font-medium text-foreground-secondary">
-                            Difficulty
+                            {{ t("game.complete.difficulty") }}
                         </span>
                     </div>
                     <div class="flex flex-col items-center gap-1">
@@ -48,7 +48,7 @@
                             {{ params?.hintsUsed ?? 0 }}
                         </span>
                         <span class="text-[13px] font-medium text-foreground-secondary">
-                            Hints
+                            {{ t("game.complete.hints") }}
                         </span>
                     </div>
                 </div>
@@ -63,7 +63,7 @@
                         class="text-white"
                     />
                     <span class="text-base font-semibold text-white">
-                        Back to Home
+                        {{ t("game.complete.backToHome") }}
                     </span>
                 </button>
             </div>
@@ -75,15 +75,18 @@
 import { Trophy, Home } from "lucide-vue-next";
 import { useRouter } from "vue-router";
 import { formatTime } from "@/utils/formatTime";
-import { DifficultyLabels } from "@/domain";
+import { useDifficultyLabel } from "@/presentation/labels/difficultyLabels";
 import { computed } from "vue";
+import { useI18n } from "vue-i18n";
 import { useGameCompleteModal } from "@/presentation/pages/game/components/useGameCompleteModal";
 import FireworkCanvas from "@/presentation/pages/game/components/FireworkCanvas.vue";
 
+const { t } = useI18n();
 const router = useRouter();
 const { visible, params, close } = useGameCompleteModal();
 
-const difficultyLabel = computed(() => DifficultyLabels[params.value?.difficulty ?? "easy"]);
+const difficultyText = useDifficultyLabel();
+const difficultyLabel = computed(() => difficultyText(params.value?.difficulty ?? "easy"));
 
 const goHome = () => {
     router.back();

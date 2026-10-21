@@ -16,6 +16,7 @@ describe("SettingsStorage", () => {
                 autoRemoveNotes: true,
                 showRemainingCount: true,
                 matchLauncherIconToTheme: false,
+                language: "system",
             });
         });
 
@@ -27,6 +28,7 @@ describe("SettingsStorage", () => {
                 autoRemoveNotes: false,
                 showRemainingCount: false,
                 matchLauncherIconToTheme: true,
+                language: "zh-Hant",
             });
 
             const settings = loadSettings();
@@ -37,6 +39,29 @@ describe("SettingsStorage", () => {
             expect(settings.autoRemoveNotes).toBe(false);
             expect(settings.showRemainingCount).toBe(false);
             expect(settings.matchLauncherIconToTheme).toBe(true);
+            expect(settings.language).toBe("zh-Hant");
+        });
+
+        it("should default language to system for settings saved before it existed", () => {
+            localStorage.setItem("sudoku-settings", JSON.stringify({
+                colorTheme: "blue",
+                highlightSameDigit: true,
+                completionFlash: true,
+                autoRemoveNotes: true,
+                showRemainingCount: true,
+                matchLauncherIconToTheme: false,
+            }));
+
+            const settings = loadSettings();
+
+            expect(settings.language).toBe("system");
+            expect(settings.colorTheme).toBe("blue");
+        });
+
+        it("should normalize an unknown stored language to system", () => {
+            localStorage.setItem("sudoku-settings", JSON.stringify({ language: "fr" }));
+
+            expect(loadSettings().language).toBe("system");
         });
 
         it("should fill missing fields with defaults for backward compatibility", () => {

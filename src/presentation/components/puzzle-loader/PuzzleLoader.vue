@@ -24,7 +24,7 @@
                     />
                 </div>
                 <p class="text-sm text-white/80 font-medium">
-                    {{ message }}
+                    {{ message ?? t("home.generatingPuzzle") }}
                 </p>
             </div>
         </div>
@@ -33,7 +33,10 @@
 
 <script lang="ts" setup>
 import { Vue3Lottie } from "vue3-lottie";
+import { useI18n } from "vue-i18n";
 import animationData from "@/assets/lottie/sudoku-loader.json";
+
+const { t } = useI18n();
 
 withDefaults(defineProps<{
     visible: boolean;
@@ -43,7 +46,7 @@ withDefaults(defineProps<{
 }>(), {
     themeColor: "var(--color-primary)",
     size: 140,
-    message: "Generating puzzle…",
+    message: undefined,
 });
 </script>
 

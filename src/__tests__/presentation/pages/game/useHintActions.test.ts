@@ -45,13 +45,21 @@ const buildPartialSudoku = (): Sudoku => {
 
 type HintApi = ReturnType<typeof useHintActions>;
 
-const mountHintHarness = (analytics: AnalyticsService) => {
+interface HarnessParts {
+    sudoku?: Sudoku;
+    stepRecorder?: StepRecorder;
+}
+
+const mountHintHarness = (
+    analytics: AnalyticsService,
+    { sudoku = buildPartialSudoku(), stepRecorder = new StepRecorder() }: HarnessParts = {},
+) => {
     const captured: { api: HintApi | undefined } = { api: undefined };
     const Harness = defineComponent({
         setup() {
             captured.api = useHintActions({
-                sudoku: buildPartialSudoku(),
-                stepRecorder: new StepRecorder(),
+                sudoku,
+                stepRecorder,
                 onRevealComplete: () => { /* noop */ },
                 analytics,
             });
@@ -85,5 +93,21 @@ describe("useHintActions — analytics", () => {
         const logEvent = vi.fn().mockResolvedValue(undefined);
         await runAction("close", { logEvent });
         expect(logEvent).not.toHaveBeenCalled();
+    });
+});
+
+describe("useHintActions — step recording", () => {
+    it("records the free first Auto Notes as a replay step", async () => {
+        openHintDialog.mockResolvedValue("autoNotes");
+        const sudoku = buildPartialSudoku();
+        const stepRecorder = new StepRecorder();
+        const api = mountHintHarness({ logEvent: vi.fn().mockResolvedValue(undefined) }, { sudoku, stepRecorder });
+
+        await api.openHintMenu();
+
+        // The first hint is free: it is not counted, but it is still a move in the replay
+        expect(sudoku.hintTracker.recordedUsed).toBe(0);
+        expect(stepRecorder.steps).toHaveLength(1);
+        expect(stepRecorder.steps[0].action).toBe("autoNotes");
     });
 });

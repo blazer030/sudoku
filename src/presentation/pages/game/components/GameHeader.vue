@@ -10,7 +10,7 @@
                 class="text-foreground"
             />
             <span class="text-foreground text-base font-medium">
-                Back
+                {{ t("common.back") }}
             </span>
         </button>
         <div class="flex items-center gap-1.5">
@@ -37,12 +37,16 @@
 import { ChevronLeft, Timer } from "lucide-vue-next";
 import { useGameStore } from "@/stores/gameStore";
 import { formatTime } from "@/utils/formatTime";
-import { DifficultyLabels } from "@/domain";
+import { computed } from "vue";
+import { useI18n } from "vue-i18n";
+import { useDifficultyLabel } from "@/presentation/labels/difficultyLabels";
 
 defineProps<{ elapsedSeconds: number }>();
 const emit = defineEmits<{ back: [] }>();
 
+const { t } = useI18n();
 const gameStore = useGameStore();
 
-const difficultyLabel = DifficultyLabels[gameStore.difficulty ?? "easy"];
+const difficultyText = useDifficultyLabel();
+const difficultyLabel = computed(() => difficultyText(gameStore.difficulty ?? "easy"));
 </script>

@@ -12,8 +12,8 @@
 
 @theme {
   --container-2xl: 1400px;
-  --font-sans: "Outfit", sans-serif;
-  --font-mono: "Roboto Mono", monospace;
+  --font-sans: "Outfit", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+  --font-mono: "Roboto Mono", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", monospace;
 
   --color-primary: #3D8A5A;
   --color-primary-light: #C8F0D8;
@@ -234,4 +234,9 @@
 }
 *::-webkit-scrollbar-thumb:hover {
     background: var(--scrollbar-thumb-hover);
+}
+
+/* CJK glyphs are already evenly spaced; Latin-style tracking looks loose */
+html:lang(zh-Hant) [class*="tracking-"] {
+    letter-spacing: normal;
 }

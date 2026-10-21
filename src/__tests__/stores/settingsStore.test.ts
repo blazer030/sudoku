@@ -29,6 +29,18 @@ describe("settingsStore", () => {
         expect(store.autoRemoveNotes).toBe(true);
         expect(store.showRemainingCount).toBe(true);
         expect(store.matchLauncherIconToTheme).toBe(false);
+        expect(store.language).toBe("system");
+    });
+
+    it("should persist language change and restore it in a new store", () => {
+        const store = useSettingsStore();
+
+        store.setLanguage("zh-Hant");
+
+        const stored = JSON.parse(localStorage.getItem("sudoku-settings") ?? "{}") as Record<string, unknown>;
+        expect(stored.language).toBe("zh-Hant");
+        setActivePinia(createPinia());
+        expect(useSettingsStore().language).toBe("zh-Hant");
     });
 
     it("should persist colorTheme change to localStorage", () => {

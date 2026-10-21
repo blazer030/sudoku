@@ -1,3 +1,5 @@
+import { nextTick } from "vue";
+import { i18n } from "@/presentation/i18n";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { flushPromises, mount } from "@vue/test-utils";
 import { createPinia } from "pinia";
@@ -47,6 +49,16 @@ afterEach(() => {
 });
 
 describe("Game", () => {
+    it("should update the difficulty pill when the language changes", async () => {
+        const wrapper = mountGame("medium");
+        expect(wrapper.text()).toContain("Medium");
+
+        i18n.global.locale.value = "zh-Hant";
+        await nextTick();
+
+        expect(wrapper.text()).toContain("中等");
+    });
+
     it("should redirect to home when store has no active game", async () => {
         const pinia = createPinia();
         const router = createTestRouter();
@@ -900,6 +912,26 @@ describe("Game", () => {
             expect(toast.text()).toMatch(/Single|Pair|Triple|Quad|Pointing|Claiming|Wing/);
         });
 
+        it("should show the toast position in Chinese after Reveal Cell", async () => {
+            const wrapper = mountGame();
+            i18n.global.locale.value = "zh-Hant";
+            await nextTick();
+
+            await wrapper.find("[data-testid='hint-button']").trigger("click");
+            await wrapper.find("[data-testid='hint-reveal-cell']").trigger("click");
+
+            expect(wrapper.find("[data-testid='hint-result-toast']").text()).toMatch(/第 \d 列第 \d 欄 = \d/);
+        });
+
+        it("should size the hint toast to its content so Chinese positions do not wrap early", async () => {
+            const wrapper = mountGame();
+
+            await wrapper.find("[data-testid='hint-button']").trigger("click");
+            await wrapper.find("[data-testid='hint-reveal-cell']").trigger("click");
+
+            expect(wrapper.find("[data-testid='hint-result-toast']").classes()).toContain("w-max");
+        });
+
         it("should reveal a random cell with correct answer", async () => {
             const wrapper = mountGame();
 
@@ -1001,4 +1033,68 @@ describe("Game", () => {
         });
     });
 
+    describe("Replay across Save & Leave", () => {
+        const visitGame = (pinia: ReturnType<typeof createPinia>) =>
+            mount(Game, { global: { plugins: [pinia, createTestRouter()] } });
+
+        const giveUp = async (wrapper: ReturnType<typeof visitGame>) => {
+            await wrapper.find("[data-testid='back-button']").trigger("click");
+            await wrapper.find("[data-testid='give-up-and-leave-button']").trigger("click");
+            await flushPromises();
+        };
+
+        it("should keep the moves made before Save & Leave in the replay of a continued game", async () => {
+            const pinia = createPinia();
+            const gameStore = useGameStore(pinia);
+            gameStore.sudoku = createKnownSudoku();
+            gameStore.setDifficulty("easy");
+
+            const firstVisit = visitGame(pinia);
+            await firstVisit.find("[data-testid='hint-button']").trigger("click");
+            await firstVisit.find("[data-testid='hint-auto-notes']").trigger("click");
+            await firstVisit.find("[data-testid='back-button']").trigger("click");
+            await firstVisit.find("[data-testid='save-and-leave-button']").trigger("click");
+            await flushPromises();
+            firstVisit.unmount();
+
+            // Continue Game from the home page
+            const saved = gameStore.savedGame;
+            if (saved === null) throw new Error("Save & Leave did not save the game");
+            gameStore.loadSavedGame(saved);
+            const secondVisit = visitGame(pinia);
+            await secondVisit.find("[data-testid='cell-0-2']").trigger("click");
+            await secondVisit.find("[data-testid='number-4']").trigger("click");
+            await giveUp(secondVisit);
+
+            const replay = useStatisticsStore(pinia).history[0].replay;
+            // The initial board is the original puzzle, before Auto Notes
+            expect(replay?.initialBoard.flat().every(cell => cell.notes.length === 0)).toBe(true);
+            expect(replay?.steps.map(step => step.action)).toEqual(["autoNotes", "fill"]);
+            expect(replay?.steps[1]).toMatchObject({ row: 0, column: 2, value: 4 });
+        });
+
+        it("should start the replay from the resumed board when the save has no replay", async () => {
+            const savedState: GameState = {
+                difficulty: "easy",
+                answer: knownAnswer.map(row => [...row]),
+                cells: knownPuzzle.map((row, rowIndex) =>
+                    row.map((puzzleValue, columnIndex) => ({
+                        clue: puzzleValue,
+                        entry: rowIndex === 0 && columnIndex === 2 ? 4 : 0,
+                        notes: [],
+                    }))
+                ),
+                elapsedSeconds: 10,
+                completed: false,
+                hintsUsed: 0,
+            };
+            const wrapper = mountContinueGame(savedState);
+
+            await giveUp(wrapper);
+
+            const replay = useStatisticsStore().history[0].replay;
+            expect(replay?.initialBoard[0][2].entry).toBe(4);
+            expect(replay?.steps).toEqual([]);
+        });
+    });
 });
