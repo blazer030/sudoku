@@ -54,6 +54,7 @@
                 </div>
 
                 <button
+                    v-press
                     class="w-full h-[52px] rounded-button bg-primary flex items-center justify-center gap-2 shadow-primary cursor-pointer transition-all duration-200 hover:bg-primary-hover hover:shadow-primary-lg"
                     data-testid="back-to-home-button"
                     @click="goHome"
@@ -80,6 +81,7 @@ import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import { useGameCompleteModal } from "@/presentation/pages/game/components/useGameCompleteModal";
 import FireworkCanvas from "@/presentation/pages/game/components/FireworkCanvas.vue";
+import { vPress } from "@/presentation/directives/press";
 
 const { t } = useI18n();
 const router = useRouter();

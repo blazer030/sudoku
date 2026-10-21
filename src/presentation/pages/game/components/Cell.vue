@@ -1,5 +1,6 @@
 <template>
     <BoardCell
+        v-press:tint
         :row="row"
         :column="column"
         :value="value"
@@ -30,6 +31,7 @@ import BoardCell, { type CellVariant, type ValueTextColor, type ValueFontWeight 
 import { PuzzleCell } from "@/domain";
 import { useLongPress } from "@/presentation/composables/useLongPress";
 import type { HintCellView, HintHighlight } from "@/presentation/pages/game/hint-mode/useHintMode";
+import { vPress } from "@/presentation/directives/press";
 
 const props = withDefaults(defineProps<{
     puzzleCell: PuzzleCell;

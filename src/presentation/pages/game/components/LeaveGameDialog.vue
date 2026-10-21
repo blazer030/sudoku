@@ -24,6 +24,7 @@
 
                 <div class="flex flex-col gap-3 w-full">
                     <button
+                        v-press
                         class="w-full h-[52px] rounded-button bg-primary flex items-center justify-center gap-2 shadow-primary cursor-pointer transition-all duration-200 hover:bg-primary-hover hover:shadow-primary-lg"
                         data-testid="save-and-leave-button"
                         @click="close('save')"
@@ -36,6 +37,7 @@
                     </button>
 
                     <button
+                        v-press
                         class="w-full h-[52px] rounded-button bg-danger flex items-center justify-center gap-2 shadow-danger cursor-pointer transition-all duration-200 hover:bg-danger-hover hover:shadow-primary-lg"
                         data-testid="give-up-and-leave-button"
                         @click="close('giveUp')"
@@ -44,6 +46,7 @@
                     </button>
 
                     <button
+                        v-press
                         class="w-full h-[44px] flex items-center justify-center cursor-pointer rounded-button transition-all duration-200 hover:bg-foreground/5"
                         data-testid="leave-cancel-button"
                         @click="close('cancel')"
@@ -60,6 +63,7 @@
 import { Save } from "lucide-vue-next";
 import { useI18n } from "vue-i18n";
 import { useLeaveDialog } from "@/presentation/pages/game/components/useLeaveDialog";
+import { vPress } from "@/presentation/directives/press";
 
 const { t } = useI18n();
 const { visible, close } = useLeaveDialog();

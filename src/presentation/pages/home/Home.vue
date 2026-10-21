@@ -32,6 +32,7 @@
             <DifficultySwitcher v-model="difficulty" />
 
             <button
+                v-press
                 class="flex items-center justify-center gap-2.5 h-14 w-full bg-card rounded-2xl shadow-card cursor-pointer transition-all duration-200 hover:bg-foreground/3 hover:shadow-card-lg"
                 data-testid="new-game-button"
                 @click="handleNewGame"
@@ -48,6 +49,7 @@
 
         <div class="flex items-center justify-center gap-10">
             <button
+                v-press
                 class="flex flex-col items-center gap-1 cursor-pointer"
                 data-testid="settings-button"
                 @click="goToSettings"
@@ -59,6 +61,7 @@
                 <span class="text-foreground-muted text-[11px] font-medium">{{ t("settings.title") }}</span>
             </button>
             <button
+                v-press
                 class="flex flex-col items-center gap-1 cursor-pointer"
                 data-testid="walkthrough-button"
                 @click="goToWalkthrough"
@@ -70,6 +73,7 @@
                 <span class="text-foreground-muted text-[11px] font-medium">{{ t("home.walkthrough") }}</span>
             </button>
             <button
+                v-press
                 class="flex flex-col items-center gap-1 cursor-pointer"
                 data-testid="statistics-button"
                 @click="goToStatistics"
@@ -106,6 +110,7 @@ import NewGameDialog from "@/presentation/components/new-game-dialog/NewGameDial
 import { provideNewGameDialog } from "@/presentation/components/new-game-dialog/useNewGameDialog";
 import PuzzleLoader from "@/presentation/components/puzzle-loader/PuzzleLoader.vue";
 import { usePuzzleLoader } from "@/presentation/components/puzzle-loader/usePuzzleLoader";
+import { vPress } from "@/presentation/directives/press";
 
 const { t } = useI18n();
 const router = useRouter();

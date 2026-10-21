@@ -4,6 +4,7 @@
         @click="$emit('click')"
     >
         <span
+            v-press
             :class="active
                 ? 'bg-accent/15 border-2 border-accent'
                 : 'bg-card shadow-card-sm hover:bg-foreground/5'"
@@ -20,6 +21,7 @@
 
 <script lang="ts" setup>
 import type { Component } from "vue";
+import { vPress } from "@/presentation/directives/press";
 
 withDefaults(defineProps<{
     icon: Component;

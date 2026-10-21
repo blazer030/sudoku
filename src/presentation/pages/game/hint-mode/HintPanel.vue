@@ -33,6 +33,7 @@
             </p>
             <div class="flex gap-2.5 pt-1">
                 <button
+                    v-press
                     class="hint-secondary"
                     data-testid="hint-close"
                     @click="emit('close')"
@@ -40,6 +41,7 @@
                     {{ t("hintMode.panel.close") }}
                 </button>
                 <button
+                    v-press
                     class="hint-primary"
                     data-testid="hint-clear"
                     @click="emit('clear')"
@@ -71,6 +73,7 @@
                 </Transition>
                 <div class="flex items-center gap-1 shrink-0">
                     <button
+                        v-press
                         :aria-label="t('hintMode.panel.previousStep')"
                         :disabled="stepIndex === 0"
                         class="hint-arrow"
@@ -110,6 +113,7 @@
                         />
                     </div>
                     <button
+                        v-press
                         :aria-label="t('hintMode.panel.nextStep')"
                         :disabled="isLastStep"
                         class="hint-arrow"
@@ -149,6 +153,7 @@
 
             <div class="flex gap-2.5">
                 <button
+                    v-press
                     class="hint-secondary"
                     data-testid="hint-cancel"
                     @click="emit('cancel')"
@@ -156,6 +161,7 @@
                     {{ t("common.cancel") }}
                 </button>
                 <button
+                    v-press
                     class="hint-primary"
                     data-testid="hint-primary"
                     @click="isLastStep ? emit('fill') : emit('next')"
@@ -201,6 +207,7 @@ import type { CellReference } from "@/domain/solver/SolveStep";
 import type { HintPhase } from "@/presentation/pages/game/hint-mode/useHintMode";
 import { useHintExplanation } from "@/presentation/pages/game/hint-mode/useHintExplanation";
 import { useTechniqueLabel } from "@/presentation/labels/techniqueLabels";
+import { vPress } from "@/presentation/directives/press";
 
 const props = withDefaults(defineProps<{
     phase: HintPhase | null;
@@ -278,11 +285,11 @@ const dotClass = (index: number): string => {
 }
 
 .hint-primary {
-    @apply flex-[1.6] flex items-center justify-center gap-1.5 py-2.5 rounded-2xl bg-primary text-on-primary text-[15px] font-semibold cursor-pointer shadow-primary transition-all duration-200 hover:bg-primary-hover active:scale-[0.98];
+    @apply flex-[1.6] flex items-center justify-center gap-1.5 py-2.5 rounded-2xl bg-primary text-on-primary text-[15px] font-semibold cursor-pointer shadow-primary transition-all duration-200 hover:bg-primary-hover;
 }
 
 .hint-secondary {
-    @apply flex-1 py-2.5 rounded-2xl bg-foreground/5 text-foreground text-[15px] font-medium cursor-pointer transition-all duration-200 hover:bg-foreground/10 active:scale-[0.98];
+    @apply flex-1 py-2.5 rounded-2xl bg-foreground/5 text-foreground text-[15px] font-medium cursor-pointer transition-all duration-200 hover:bg-foreground/10;
 }
 
 .hint-arrow {

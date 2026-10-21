@@ -24,6 +24,7 @@
 
                 <div class="flex flex-col gap-3 w-full">
                     <button
+                        v-press
                         class="w-full h-[52px] rounded-button bg-danger flex items-center justify-center gap-2 shadow-danger cursor-pointer transition-all duration-200 hover:bg-danger-hover hover:shadow-primary-lg"
                         data-testid="clear-records-confirm-button"
                         @click="close('confirm')"
@@ -32,6 +33,7 @@
                     </button>
 
                     <button
+                        v-press
                         class="w-full h-[44px] flex items-center justify-center cursor-pointer rounded-button transition-all duration-200 hover:bg-foreground/5"
                         data-testid="clear-records-cancel-button"
                         @click="close('cancel')"
@@ -48,6 +50,7 @@
 import { useI18n } from "vue-i18n";
 import { Trash2 } from "lucide-vue-next";
 import { useClearRecordsDialog } from "@/presentation/pages/statistics/useClearRecordsDialog";
+import { vPress } from "@/presentation/directives/press";
 
 const { t } = useI18n();
 const { visible, close } = useClearRecordsDialog();

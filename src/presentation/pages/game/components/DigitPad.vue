@@ -7,6 +7,7 @@
                 class="relative"
             >
                 <button
+                    v-press:bounce
                     :class="digitButtonClasses(digit)"
                     :data-testid="`number-${digit}`"
                     :disabled="isDigitDisabled(digit)"
@@ -34,6 +35,7 @@
                 class="relative"
             >
                 <button
+                    v-press:bounce
                     :class="digitButtonClasses(digit)"
                     :data-testid="`number-${digit}`"
                     :disabled="isDigitDisabled(digit)"
@@ -54,6 +56,7 @@
                 </span>
             </div>
             <button
+                v-press:bounce
                 :class="eraseButtonClasses"
                 :disabled="eraseDisabled"
                 class="w-14 h-14 rounded-xl flex items-center justify-center transition-all cursor-pointer disabled:cursor-default"
@@ -69,6 +72,7 @@
 <script lang="ts" setup>
 import { computed } from "vue";
 import { Eraser } from "lucide-vue-next";
+import { vPress } from "@/presentation/directives/press";
 
 const props = withDefaults(defineProps<{
     selectedDigit: number | null;

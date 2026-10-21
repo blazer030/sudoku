@@ -1372,4 +1372,82 @@ describe("Game", () => {
             expect(wrapper.findComponent<typeof Cell>("[data-testid='cell-0-2']").props("puzzleCell").entry).toBe(0);
         });
     });
+
+    describe("press feedback", () => {
+        // jsdom has no PointerEvent, so build a plain event carrying the pointer fields.
+        const pressDown = (element: Element) => {
+            const pointerdown = new Event("pointerdown", { bubbles: true });
+            Object.assign(pointerdown, { isPrimary: true, pointerType: "touch", button: 0, clientX: 10, clientY: 10 });
+            element.dispatchEvent(pointerdown);
+        };
+
+        const releaseOnWindow = () => {
+            window.dispatchEvent(new Event("pointerup"));
+        };
+
+        afterEach(() => {
+            releaseOnWindow();
+        });
+
+        it("should press and bounce a digit key", async () => {
+            const wrapper = mountGame();
+            const digitKey = wrapper.find("[data-testid='number-4']");
+
+            pressDown(digitKey.element);
+            await nextTick();
+            expect(digitKey.classes()).toContain("is-pressed");
+            expect(digitKey.classes()).toContain("press-motion");
+
+            releaseOnWindow();
+            expect(digitKey.classes()).toContain("press-bounce-release");
+        });
+
+        it("should tint a cell without motion", () => {
+            const wrapper = mountGame();
+            const cell = wrapper.find("[data-testid='cell-0-2']");
+
+            pressDown(cell.element);
+
+            expect(cell.classes()).toContain("is-pressed");
+            expect(cell.classes()).not.toContain("press-motion");
+        });
+
+        it("should still long-press a cell with press feedback", async () => {
+            vi.useFakeTimers();
+            const wrapper = mountGame();
+            await wrapper.find("[data-testid='number-4']").trigger("click");
+            const cell = wrapper.find("[data-testid='cell-0-2']");
+
+            pressDown(cell.element);
+            vi.advanceTimersByTime(400);
+            await cell.trigger("pointerup");
+            releaseOnWindow();
+            await cell.trigger("click");
+
+            const cellComponent = wrapper.findComponent<typeof Cell>("[data-testid='cell-0-2']");
+            expect(cellComponent.emitted("longPress")).toHaveLength(1);
+            expect(cellComponent.props("puzzleCell").notes).toEqual([4]);
+            expect(cellComponent.props("puzzleCell").entry).toBe(0);
+        });
+
+        it("should register quick taps on two cells", async () => {
+            vi.useFakeTimers();
+            const wrapper = mountGame();
+            const firstCell = wrapper.find("[data-testid='cell-0-2']");
+            const secondCell = wrapper.find("[data-testid='cell-0-3']");
+
+            pressDown(firstCell.element);
+            await firstCell.trigger("pointerup");
+            releaseOnWindow();
+            await firstCell.trigger("click");
+            vi.advanceTimersByTime(20);
+            pressDown(secondCell.element);
+            await secondCell.trigger("pointerup");
+            releaseOnWindow();
+            await secondCell.trigger("click");
+
+            expect(wrapper.findComponent<typeof Cell>("[data-testid='cell-0-3']").props("selected")).toBe(true);
+            expect(wrapper.findComponent<typeof Cell>("[data-testid='cell-0-2']").props("selected")).toBe(false);
+        });
+    });
 });

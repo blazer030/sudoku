@@ -32,6 +32,7 @@
                 </span>
 
                 <button
+                    v-press
                     :disabled="!params?.canUseHint"
                     class="hint-option"
                     data-testid="hint-auto-notes"
@@ -45,6 +46,7 @@
                 </button>
 
                 <button
+                    v-press
                     :disabled="!params?.canUseHint"
                     class="hint-option"
                     data-testid="hint-check-conflicts"
@@ -60,6 +62,7 @@
                 <div class="h-px bg-border mx-3" />
 
                 <button
+                    v-press
                     :disabled="!params?.canUseHint"
                     class="hint-option"
                     data-testid="hint-reveal-cell"
@@ -81,6 +84,7 @@ import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import { Eye, ScanSearch, Sparkles } from "lucide-vue-next";
 import { useHintMenu } from "@/presentation/pages/game/components/useHintMenu";
+import { vPress } from "@/presentation/directives/press";
 
 const { t } = useI18n();
 const { visible, params, close } = useHintMenu();

@@ -356,4 +356,14 @@ describe("Home", () => {
             expect(analytics.logEvent).not.toHaveBeenCalledWith(expect.objectContaining({ name: "game_abandon" }));
         });
     });
+
+    it("should show press feedback on the new game button", async () => {
+        const { wrapper } = mountHome();
+        const button = wrapper.find("[data-testid='new-game-button']");
+
+        await button.trigger("pointerdown");
+
+        expect(button.classes()).toContain("is-pressed");
+        window.dispatchEvent(new Event("pointerup"));
+    });
 });
