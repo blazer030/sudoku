@@ -30,6 +30,19 @@ describe("settingsStore", () => {
         expect(store.showRemainingCount).toBe(true);
         expect(store.matchLauncherIconToTheme).toBe(false);
         expect(store.language).toBe("system");
+        expect(store.appearance).toBe("system");
+        expect(store.style).toBe("minimal");
+    });
+
+    it("should persist appearance change and restore it in a new store", () => {
+        const store = useSettingsStore();
+
+        store.setAppearance("dark");
+
+        const stored = JSON.parse(localStorage.getItem("sudoku-settings") ?? "{}") as Record<string, unknown>;
+        expect(stored.appearance).toBe("dark");
+        setActivePinia(createPinia());
+        expect(useSettingsStore().appearance).toBe("dark");
     });
 
     it("should persist language change and restore it in a new store", () => {

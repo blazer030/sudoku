@@ -1,6 +1,6 @@
 import { ref } from "vue";
 import { defineStore } from "pinia";
-import { loadSettings, saveSettings, type ColorThemeId, type LanguagePreference } from "@/application/SettingsStorage";
+import { loadSettings, saveSettings, type Appearance, type ColorThemeId, type LanguagePreference, type StyleId } from "@/application/SettingsStorage";
 import { updateMetaThemeColor, updateFavicon, updateManifestLink, updateAppleTouchIcon } from "@/application/PwaThemeUpdater";
 import type { IconService } from "@/application/icon/IconService";
 
@@ -13,6 +13,8 @@ export const useSettingsStore = defineStore("settings", () => {
     const showRemainingCount = ref(settings.showRemainingCount);
     const matchLauncherIconToTheme = ref(settings.matchLauncherIconToTheme);
     const language = ref<LanguagePreference>(settings.language);
+    const appearance = ref<Appearance>(settings.appearance);
+    const style = ref<StyleId>(settings.style);
     let iconService: IconService | null = null;
 
     const applyColorTheme = () => {
@@ -33,6 +35,8 @@ export const useSettingsStore = defineStore("settings", () => {
             showRemainingCount: showRemainingCount.value,
             matchLauncherIconToTheme: matchLauncherIconToTheme.value,
             language: language.value,
+            appearance: appearance.value,
+            style: style.value,
         });
     };
 
@@ -79,6 +83,11 @@ export const useSettingsStore = defineStore("settings", () => {
         persistAll();
     };
 
+    const setAppearance = (value: Appearance) => {
+        appearance.value = value;
+        persistAll();
+    };
+
     const setIconService = (service: IconService) => {
         iconService = service;
     };
@@ -93,6 +102,8 @@ export const useSettingsStore = defineStore("settings", () => {
         showRemainingCount,
         matchLauncherIconToTheme,
         language,
+        appearance,
+        style,
         setColorTheme,
         setHighlightSameDigit,
         setCompletionFlash,
@@ -100,6 +111,7 @@ export const useSettingsStore = defineStore("settings", () => {
         setShowRemainingCount,
         setMatchLauncherIconToTheme,
         setLanguage,
+        setAppearance,
         setIconService,
     };
 });

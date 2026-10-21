@@ -17,6 +17,8 @@ describe("SettingsStorage", () => {
                 showRemainingCount: true,
                 matchLauncherIconToTheme: false,
                 language: "system",
+                appearance: "system",
+                style: "minimal",
             });
         });
 
@@ -29,6 +31,8 @@ describe("SettingsStorage", () => {
                 showRemainingCount: false,
                 matchLauncherIconToTheme: true,
                 language: "zh-Hant",
+                appearance: "dark",
+                style: "minimal",
             });
 
             const settings = loadSettings();
@@ -40,6 +44,36 @@ describe("SettingsStorage", () => {
             expect(settings.showRemainingCount).toBe(false);
             expect(settings.matchLauncherIconToTheme).toBe(true);
             expect(settings.language).toBe("zh-Hant");
+            expect(settings.appearance).toBe("dark");
+            expect(settings.style).toBe("minimal");
+        });
+
+        it("should default appearance and style for settings saved before they existed", () => {
+            localStorage.setItem("sudoku-settings", JSON.stringify({ colorTheme: "blue", language: "en" }));
+
+            const settings = loadSettings();
+
+            expect(settings.appearance).toBe("system");
+            expect(settings.style).toBe("minimal");
+            expect(settings.colorTheme).toBe("blue");
+        });
+
+        it("should normalize an unknown stored appearance to system", () => {
+            localStorage.setItem("sudoku-settings", JSON.stringify({ appearance: "sepia" }));
+
+            expect(loadSettings().appearance).toBe("system");
+        });
+
+        it("should normalize an unknown stored style to minimal", () => {
+            localStorage.setItem("sudoku-settings", JSON.stringify({ style: "neon" }));
+
+            expect(loadSettings().style).toBe("minimal");
+        });
+
+        it("should normalize an unknown stored colorTheme to green", () => {
+            localStorage.setItem("sudoku-settings", JSON.stringify({ colorTheme: "red" }));
+
+            expect(loadSettings().colorTheme).toBe("green");
         });
 
         it("should default language to system for settings saved before it existed", () => {
