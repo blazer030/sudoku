@@ -71,9 +71,9 @@ describe("ProgressBar", () => {
         expect(wrapper.find("[data-testid='review-step-counter']").exists()).toBe(true);
     });
 
-    it("should apply text-center to step counter when counterAlign='center'", () => {
+    it("should apply text-center to step counter", () => {
         const wrapper = mount(ProgressBar, {
-            props: { currentStep: 1, totalSteps: 5, playState: noopPlayState(), counterAlign: "center" },
+            props: { currentStep: 1, totalSteps: 5, playState: noopPlayState() },
         });
 
         expect(wrapper.find("[data-testid='step-counter']").classes()).toContain("text-center");

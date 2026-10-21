@@ -20,8 +20,7 @@
             </div>
         </div>
         <span
-            :class="counterAlign === 'center' ? 'text-center' : ''"
-            class="text-xs text-foreground-muted"
+            class="text-xs text-center text-foreground-muted"
             :data-testid="`${testidPrefix}step-counter`"
         >
             {{ t("playback.step", { current: currentStep, total: totalSteps }) }}
@@ -45,10 +44,8 @@ const props = withDefaults(defineProps<{
         startPlay: () => void;
     };
     testidPrefix?: string;
-    counterAlign?: "left" | "center";
 }>(), {
     testidPrefix: "",
-    counterAlign: "left",
 });
 
 const emit = defineEmits<{

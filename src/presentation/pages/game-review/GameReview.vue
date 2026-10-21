@@ -113,7 +113,6 @@
             :total-steps="totalSteps"
             :play-state="playState"
             testid-prefix="review-"
-            counter-align="center"
             @seek="goToStep"
         />
 
