@@ -1,7 +1,7 @@
 <template>
     <svg
         v-if="chainLinks.length > 0"
-        class="absolute inset-0 pointer-events-none text-primary"
+        class="absolute inset-0 w-full h-full pointer-events-none text-primary"
         :viewBox="`0 0 ${BOARD_SIZE} ${BOARD_SIZE}`"
         preserveAspectRatio="none"
         data-testid="chain-overlay"
