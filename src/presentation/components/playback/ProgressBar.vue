@@ -20,18 +20,20 @@
             </div>
         </div>
         <span
-            :class="counterAlign === 'center' ? 'text-center' : ''"
-            class="text-xs text-foreground-muted"
+            class="text-xs text-center text-foreground-muted"
             :data-testid="`${testidPrefix}step-counter`"
         >
-            Step {{ currentStep }} of {{ totalSteps }}
+            {{ t("playback.step", { current: currentStep, total: totalSteps }) }}
         </span>
     </div>
 </template>
 
 <script lang="ts" setup>
 import { computed, ref, toRef, type Ref } from "vue";
+import { useI18n } from "vue-i18n";
 import { useProgressDrag } from "@/presentation/components/playback/useProgressDrag";
+
+const { t } = useI18n();
 
 const props = withDefaults(defineProps<{
     currentStep: number;
@@ -42,10 +44,8 @@ const props = withDefaults(defineProps<{
         startPlay: () => void;
     };
     testidPrefix?: string;
-    counterAlign?: "left" | "center";
 }>(), {
     testidPrefix: "",
-    counterAlign: "left",
 });
 
 const emit = defineEmits<{

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { mount } from "@vue/test-utils";
-import { defineComponent } from "vue";
+import { defineComponent, nextTick } from "vue";
+import { i18n } from "@/presentation/i18n";
 import HintMenuPopup from "@/presentation/pages/game/components/HintMenuPopup.vue";
 import { provideHintMenu } from "@/presentation/pages/game/components/useHintMenu";
 import type { HintParams } from "@/presentation/pages/game/components/useHintMenu";
@@ -26,6 +27,17 @@ describe("HintMenuPopup", () => {
         expect(wrapper.find("[data-testid='hint-check-conflicts']").exists()).toBe(true);
         expect(wrapper.find("[data-testid='hint-check-errors']").exists()).toBe(true);
         expect(wrapper.find("[data-testid='hint-reveal-cell']").exists()).toBe(true);
+    });
+
+    it("should render the hint options in Traditional Chinese", async () => {
+        const wrapper = mountPopup();
+        i18n.global.locale.value = "zh-Hant";
+        await nextTick();
+
+        expect(wrapper.find("[data-testid='hint-auto-notes']").text()).toBe("自動筆記");
+        expect(wrapper.find("[data-testid='hint-check-conflicts']").text()).toBe("檢查衝突");
+        expect(wrapper.find("[data-testid='hint-check-errors']").text()).toBe("檢查錯誤");
+        expect(wrapper.find("[data-testid='hint-reveal-cell']").text()).toBe("揭示一格");
     });
 
     it("should display 3 hint lights matching usage count", () => {

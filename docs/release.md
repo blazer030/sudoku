@@ -30,7 +30,7 @@ These are gitignored and must exist before building a release AAB:
    git flow release start <x.y.z>
    npm version <x.y.z> --no-git-tag-version
    ```
-3. **Update the changelog** — add an entry (version, release date, user-facing changes) at the top of `src/presentation/pages/settings/changelogData.ts`; mark Android-only items with `(App)`.
+3. **Update the changelog** — add an entry (version, release date, user-facing changes) at the top of `src/presentation/pages/settings/changelogData.ts`. Write the changes in both languages (`en` and `zh-Hant`) with the same number of bullets; mark Android-only items with `(App)` in English and `（App）` in Chinese.
    Commit: `🚧 chore: release <x.y.z>`.
 4. **Build and smoke-test Android**
    ```bash
@@ -40,6 +40,12 @@ These are gitignored and must exist before building a release AAB:
    Output: `android/app/build/outputs/bundle/release/app-release.aab`.
    Upload to Play Console → Testing → **Internal testing**, install on a device and check: game start / complete, saved game survives an app restart, statistics, donate purchase (License Tester account), launcher icon toggle.
    Fixes found here are committed on the release branch; rebuild and re-upload after each fix.
+   Play rejects a `versionCode` it has already received, so once an AAB from this release branch has been uploaded, every re-upload needs a patch bump first:
+   ```bash
+   git branch -m release/<x.y.z> release/<x.y.z+1>
+   npm version <x.y.z+1> --no-git-tag-version
+   ```
+   Also change the version of the top changelog entry to the new number (the skipped version was never public, so it gets no entry of its own). Commit: `🚧 chore: bump release to <x.y.z+1>`.
 5. **Finish the release**
    ```bash
    git flow release finish <x.y.z>

@@ -1,5 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
+import { nextTick } from "vue";
 import { mount } from "@vue/test-utils";
+import { i18n } from "@/presentation/i18n";
 import PuzzleLoader from "@/presentation/components/puzzle-loader/PuzzleLoader.vue";
 
 vi.mock("vue3-lottie", () => ({
@@ -34,5 +36,17 @@ describe("PuzzleLoader", () => {
 
         expect(wrapper.find("[data-testid='lottie-stub']").exists()).toBe(true);
         expect(wrapper.text()).toContain("Generating…");
+    });
+
+    it("should show the default message and follow the language when no message is passed", async () => {
+        const wrapper = mount(PuzzleLoader, {
+            props: { visible: true },
+        });
+        expect(wrapper.text()).toContain("Generating puzzle…");
+
+        i18n.global.locale.value = "zh-Hant";
+        await nextTick();
+
+        expect(wrapper.text()).toContain("正在產生題目…");
     });
 });

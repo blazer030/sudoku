@@ -7,11 +7,14 @@ import { GameStateConverter, type GameState } from "@/application/GameState";
 import { generatePuzzleAsync } from "@/application/PuzzleGenerationService";
 import type { AnalyticsService } from "@/application/analytics/AnalyticsService";
 import type { GameRepository } from "@/application/game/GameRepository";
+import type { GameReplayData } from "@/application/statistics/StatisticsRepository";
 
 export const useGameStore = defineStore("game", () => {
     const difficulty = ref<Difficulty | null>(null);
     const sudoku = shallowRef<Sudoku | null>(null);
     const elapsedSeconds = ref(0);
+    // Replay recorded before the active game was saved; null for a new game or an old save
+    const replay = shallowRef<GameReplayData | null>(null);
     const hasActiveGame = computed(() => sudoku.value !== null);
     const savedGame = ref<GameState | null>(null);
     let analytics: AnalyticsService | null = null;
@@ -53,6 +56,7 @@ export const useGameStore = defineStore("game", () => {
         sudoku.value = Sudoku.restoreSave(answer, puzzleCells);
         difficulty.value = newDifficulty;
         elapsedSeconds.value = 0;
+        replay.value = null;
         void analytics?.logEvent({ name: "game_start", difficulty: newDifficulty });
     };
 
@@ -60,6 +64,7 @@ export const useGameStore = defineStore("game", () => {
         sudoku.value = GameStateConverter.toSudoku(state);
         difficulty.value = state.difficulty;
         elapsedSeconds.value = state.elapsedSeconds;
+        replay.value = state.replay ?? null;
     };
 
     return {
@@ -70,6 +75,7 @@ export const useGameStore = defineStore("game", () => {
         startNewGame,
         loadSavedGame,
         elapsedSeconds,
+        replay,
         setAnalytics,
         savedGame,
         setGameRepository,

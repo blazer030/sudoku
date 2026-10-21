@@ -1,5 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { mount, flushPromises } from "@vue/test-utils";
+import { nextTick } from "vue";
+import { i18n } from "@/presentation/i18n";
 import { createPinia, setActivePinia } from "pinia";
 import { createRouter, createMemoryHistory } from "vue-router";
 import Donate from "@/presentation/pages/donate/Donate.vue";
@@ -8,7 +10,7 @@ import { useDonateStore } from "@/stores/donateStore";
 import type { BillingService, Product, PurchaseResult } from "@/application/billing/BillingService";
 
 const fakeProducts: Product[] = [
-    { id: "donate_coffee", tier: "coffee", label: "Coffee", priceText: "$2.99", amountUsd: 2.99 },
+    { id: "donate_coffee", tier: "coffee", priceText: "$2.99", amountUsd: 2.99 },
 ];
 
 const buildBilling = (purchaseResult: PurchaseResult): BillingService => ({
@@ -213,5 +215,54 @@ describe("Donate.vue success screen", () => {
         await flushPromises();
 
         expect(router.currentRoute.value.path).toBe("/settings");
+    });
+});
+
+describe("Donate.vue zh-Hant", () => {
+    const useChinese = async () => {
+        i18n.global.locale.value = "zh-Hant";
+        await nextTick();
+    };
+
+    it("shows the two-line intro in Chinese", async () => {
+        await useChinese();
+        const wrapper = mountDonate({ logEvent: vi.fn().mockResolvedValue(undefined) }, buildBilling({ kind: "cancelled" }));
+        await flushPromises();
+
+        expect(wrapper.text()).toContain("數獨完全免費，沒有廣告。");
+        expect(wrapper.text()).toContain("如果你想支持開發：");
+    });
+
+    it("shows the tier name in Chinese while keeping the Google Play price text", async () => {
+        await useChinese();
+        const wrapper = mountDonate({ logEvent: vi.fn().mockResolvedValue(undefined) }, buildBilling({ kind: "cancelled" }));
+        await flushPromises();
+
+        const tier = wrapper.find("[data-testid='donate-tier-coffee']");
+        expect(tier.text()).toContain("一杯咖啡");
+        expect(tier.text()).toContain("$2.99");
+    });
+
+    it("shows the cancelled toast in Chinese", async () => {
+        await useChinese();
+        const wrapper = mountDonate({ logEvent: vi.fn().mockResolvedValue(undefined) }, buildBilling({ kind: "cancelled" }));
+        await flushPromises();
+
+        await wrapper.find("[data-testid='donate-tier-coffee']").trigger("click");
+        await flushPromises();
+
+        expect(wrapper.find("[data-testid='donate-toast']").text()).toBe("已取消");
+    });
+
+    it("shows the thank-you sentence in Chinese on the success screen", async () => {
+        await useChinese();
+        const billing = buildBilling({ kind: "success", productId: "donate_coffee", tier: "coffee", amountUsd: 2.99 });
+        const wrapper = mountDonate({ logEvent: vi.fn().mockResolvedValue(undefined) }, billing);
+        await flushPromises();
+
+        await wrapper.find("[data-testid='donate-tier-coffee']").trigger("click");
+        await flushPromises();
+
+        expect(wrapper.text()).toContain("謝謝你請我喝咖啡！");
     });
 });

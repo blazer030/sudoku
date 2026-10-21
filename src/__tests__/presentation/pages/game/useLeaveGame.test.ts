@@ -6,6 +6,7 @@ import { createPinia, setActivePinia } from "pinia";
 import { Sudoku } from "@/domain/game/Sudoku";
 import { PuzzleCell } from "@/domain/board/PuzzleCell";
 import { useLeaveGame } from "@/presentation/pages/game/useLeaveGame";
+import { useGameStore } from "@/stores/gameStore";
 import type { AnalyticsService } from "@/application/analytics/AnalyticsService";
 import type { GameReplayData } from "@/application/statistics/StatisticsRepository";
 
@@ -114,5 +115,19 @@ describe("useLeaveGame — analytics", () => {
         await api.showLeaveDialog();
 
         expect(logEvent).not.toHaveBeenCalled();
+    });
+});
+
+describe("useLeaveGame — save", () => {
+    it("saves the session's replay with the game", async () => {
+        const api = mountLeaveHarness({
+            sudoku: buildSudokuWithFilledCount(10),
+            analytics: { logEvent: vi.fn().mockResolvedValue(undefined) },
+        });
+        vi.spyOn(api.leaveDialog, "open").mockResolvedValue("save");
+
+        await api.showLeaveDialog();
+
+        expect(useGameStore().savedGame?.replay).toEqual(emptyReplay());
     });
 });

@@ -13,14 +13,14 @@
                 class="absolute bottom-24 left-1/2 -translate-x-1/2 bg-card rounded-popup shadow-popup w-55 z-10 flex flex-col gap-1 py-4 px-3"
             >
                 <div class="flex items-center justify-between px-3 pb-1">
-                    <span class="text-foreground text-sm font-bold">Hints</span>
+                    <span class="text-foreground text-sm font-bold">{{ t("game.hints.title") }}</span>
                     <div class="flex items-center gap-1">
                         <div
-                            v-for="i in 3"
-                            :key="i"
+                            v-for="lightNumber in 3"
+                            :key="lightNumber"
                             :class="[
                                 'w-2 h-2 rounded-full',
-                                i <= remaining ? 'bg-primary' : 'border-[1.5px] border-border',
+                                lightNumber <= remaining ? 'bg-primary' : 'border-[1.5px] border-border',
                             ]"
                             data-testid="hint-light"
                         />
@@ -28,7 +28,7 @@
                 </div>
 
                 <span class="text-foreground-muted text-[11px] mb-1 text-center">
-                    First use is free and won't be recorded.
+                    {{ t("game.hints.freeNote") }}
                 </span>
 
                 <button
@@ -41,7 +41,7 @@
                         :size="20"
                         class="text-foreground shrink-0"
                     />
-                    <span>Auto Notes</span>
+                    <span>{{ t("game.hints.autoNotes") }}</span>
                 </button>
 
                 <button
@@ -54,7 +54,7 @@
                         :size="20"
                         class="text-foreground shrink-0"
                     />
-                    <span>Check Conflicts</span>
+                    <span>{{ t("game.hints.checkConflicts") }}</span>
                 </button>
 
                 <button
@@ -67,7 +67,7 @@
                         :size="20"
                         class="text-foreground shrink-0"
                     />
-                    <span>Check Errors</span>
+                    <span>{{ t("game.hints.checkErrors") }}</span>
                 </button>
 
                 <div class="h-px bg-border mx-3" />
@@ -82,7 +82,7 @@
                         :size="20"
                         class="text-primary shrink-0"
                     />
-                    <span class="text-primary font-semibold">Reveal Cell</span>
+                    <span class="text-primary font-semibold">{{ t("game.hints.revealCell") }}</span>
                 </button>
             </div>
         </div>
@@ -91,9 +91,11 @@
 
 <script lang="ts" setup>
 import { computed } from "vue";
+import { useI18n } from "vue-i18n";
 import { CircleAlert, Eye, ScanSearch, Sparkles } from "lucide-vue-next";
 import { useHintMenu } from "@/presentation/pages/game/components/useHintMenu";
 
+const { t } = useI18n();
 const { visible, params, close } = useHintMenu();
 
 const remaining = computed(() => 3 - (params.value?.recordedUsed ?? 0));

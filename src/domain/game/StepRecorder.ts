@@ -14,6 +14,10 @@ export class StepRecorder {
         });
     }
 
+    public restore(steps: GameStep[]): void {
+        this._steps = [...steps];
+    }
+
     public get steps(): GameStep[] {
         return [...this._steps];
     }

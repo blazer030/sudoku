@@ -35,6 +35,15 @@ describe("ChainOverlay", () => {
         expect(wrapper.find("[data-testid='chain-overlay']").exists()).toBe(false);
     });
 
+    it("should stretch to the full board height rather than its square viewBox", () => {
+        // An absolutely positioned SVG ignores `bottom` and sizes itself from the viewBox ratio,
+        // so on narrow screens (cells taller than wide) the lines drift above the cell centres.
+        const wrapper = mount(ChainOverlay, { props: { chainLinks: [makeLink(0, 0, 8, 0, 1, "strong")] } });
+        const overlay = wrapper.find("[data-testid='chain-overlay']");
+
+        expect(overlay.classes()).toEqual(expect.arrayContaining(["w-full", "h-full"]));
+    });
+
     it("should apply dashed stroke only to weak links", () => {
         const chainLinks: ChainLink[] = [
             makeLink(0, 0, 0, 5, 1, "strong"),

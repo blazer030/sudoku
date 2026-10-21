@@ -95,6 +95,60 @@ describe("gameStore", () => {
         });
     });
 
+    describe("replay of a continued game", () => {
+        const replay = {
+            initialBoard: sampleState.cells,
+            steps: [{
+                board: sampleState.cells.map(row => row.map(cell => ({ entry: cell.entry, notes: [1, 2] }))),
+                action: "autoNotes" as const,
+                row: 0,
+                column: 0,
+                value: 0,
+            }],
+        };
+
+        it("round-trips the replay through save and load", async () => {
+            let stored: GameState | null = null;
+            const repo = buildGameRepo({
+                save: vi.fn((state: GameState) => {
+                    stored = JSON.parse(JSON.stringify(state)) as GameState;
+                    return Promise.resolve();
+                }),
+                load: vi.fn(() => Promise.resolve(stored)),
+            });
+            const savingStore = useGameStore();
+            savingStore.setGameRepository(repo);
+            savingStore.persistGame({ ...sampleState, replay });
+
+            setActivePinia(createPinia());
+            const loadingStore = useGameStore();
+            loadingStore.setGameRepository(repo);
+            await loadingStore.loadFromRepository();
+            const saved = loadingStore.savedGame;
+            if (saved === null) throw new Error("savedGame was not loaded");
+            loadingStore.loadSavedGame(saved);
+
+            expect(loadingStore.replay).toEqual(replay);
+        });
+
+        it("has no replay after loading a save from before replays were saved", () => {
+            const store = useGameStore();
+
+            store.loadSavedGame(sampleState);
+
+            expect(store.replay).toBeNull();
+        });
+
+        it("drops the continued game's replay when a new game starts", async () => {
+            const store = useGameStore();
+            store.loadSavedGame({ ...sampleState, replay });
+
+            await store.startNewGame("easy");
+
+            expect(store.replay).toBeNull();
+        });
+    });
+
     describe("saved game persistence", () => {
         it("savedGame starts as null", () => {
             const store = useGameStore();

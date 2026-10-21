@@ -10,9 +10,9 @@
                     :size="24"
                     class="text-foreground"
                 />
-                <span class="text-foreground text-base font-medium">Back</span>
+                <span class="text-foreground text-base font-medium">{{ t("common.back") }}</span>
             </button>
-            <span class="text-foreground text-lg font-semibold">Game Review</span>
+            <span class="text-foreground text-lg font-semibold">{{ t("review.title") }}</span>
             <div class="w-15" />
         </div>
 
@@ -38,7 +38,7 @@
                         {{ difficultyLabel(game.difficulty) }}
                     </span>
                     <span class="text-[11px] text-foreground-muted">
-                        {{ formatDate(game.date) }}
+                        {{ formatDate(game.date, appLocale) }}
                     </span>
                 </div>
             </div>
@@ -47,7 +47,7 @@
                     :class="game.completed ? 'text-primary' : 'text-accent'"
                     class="text-base font-semibold font-mono"
                 >
-                    {{ game.completed ? formatTime(game.elapsedSeconds) : "Gave up" }}
+                    {{ game.completed ? formatTime(game.elapsedSeconds) : t("statistics.gaveUp") }}
                 </span>
                 <span class="flex items-center gap-0.75 text-[11px] font-medium text-foreground-muted font-mono">
                     <Lightbulb :size="11" />
@@ -83,24 +83,28 @@
                     :size="16"
                     class="text-foreground-muted shrink-0"
                 />
-                <span class="text-sm text-foreground">
-                    <template
-                        v-for="(part, i) in description"
-                        :key="i"
-                    >
-                        <span
-                            v-if="part.bold"
-                            class="font-semibold"
-                        >{{ part.text }}</span>
-                        <template v-else>{{ part.text }}</template>
+                <i18n-t
+                    :keypath="description.keypath"
+                    tag="span"
+                    scope="global"
+                    class="text-sm text-foreground"
+                >
+                    <template #value>
+                        <span class="font-semibold">{{ description.params.value }}</span>
                     </template>
-                </span>
+                    <template #row>
+                        <span class="font-semibold">{{ description.params.row }}</span>
+                    </template>
+                    <template #column>
+                        <span class="font-semibold">{{ description.params.column }}</span>
+                    </template>
+                </i18n-t>
             </template>
             <span
                 v-else
                 class="text-sm text-foreground-muted"
             >
-                Initial board
+                {{ t("review.initialBoard") }}
             </span>
         </div>
 
@@ -109,7 +113,6 @@
             :total-steps="totalSteps"
             :play-state="playState"
             testid-prefix="review-"
-            counter-align="center"
             @seek="goToStep"
         />
 
@@ -136,8 +139,10 @@ import { ChevronLeft, Eraser, Lightbulb, Pencil, Sparkles, StickyNote, Trophy, U
 import { ROUTER_PATH } from "@/router";
 import { useStatisticsStore } from "@/stores/statisticsStore";
 import { formatTime } from "@/utils/formatTime";
-import { formatDate } from "@/utils/formatDate";
-import { type Difficulty, DifficultyLabels } from "@/domain";
+import { useI18n } from "vue-i18n";
+import { useAppLocale } from "@/presentation/i18n/useAppLocale";
+import { formatDate } from "@/presentation/i18n/formatDate";
+import { useDifficultyLabel } from "@/presentation/labels/difficultyLabels";
 import Cell from "@/presentation/pages/game/components/Cell.vue";
 import PlaybackControls from "@/presentation/components/playback/PlaybackControls.vue";
 import ProgressBar from "@/presentation/components/playback/ProgressBar.vue";
@@ -147,6 +152,8 @@ const props = defineProps<{
     index: string;
 }>();
 
+const { t } = useI18n();
+const appLocale = useAppLocale();
 const router = useRouter();
 const history = useStatisticsStore().history;
 const gameIndex = Number(props.index);
@@ -201,7 +208,7 @@ const isActiveCell = (row: number, column: number): boolean => {
     return step.row === row && step.column === column;
 };
 
-const difficultyLabel = (difficulty: Difficulty): string => DifficultyLabels[difficulty];
+const difficultyLabel = useDifficultyLabel();
 
 const goBack = () => {
     void router.push(ROUTER_PATH.statistics);

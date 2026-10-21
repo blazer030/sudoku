@@ -11,11 +11,11 @@
                     class="text-foreground"
                 />
                 <span class="text-foreground text-base font-medium">
-                    Back
+                    {{ t("common.back") }}
                 </span>
             </button>
             <span class="text-foreground text-lg font-semibold">
-                Walkthrough
+                {{ t("home.walkthrough") }}
             </span>
             <div class="w-18" />
         </div>
@@ -28,10 +28,12 @@
                 ]"
             >
                 <div class="flex flex-col border-3 border-foreground/20 rounded-xl">
-                    <div class="relative aspect-square grid grid-cols-9 grid-rows-9">
-                        <template
+                    <div class="relative flex flex-col">
+                        <div
                             v-for="rowIndex in BOARD_SIZE"
                             :key="`row-${rowIndex - 1}`"
+                            :data-testid="`solver-row-${rowIndex - 1}`"
+                            class="flex"
                         >
                             <BoardCell
                                 v-for="columnIndex in BOARD_SIZE"
@@ -46,7 +48,7 @@
                                 class="cursor-pointer"
                                 @click="selectCell(rowIndex - 1, columnIndex - 1)"
                             />
-                        </template>
+                        </div>
                         <ChainOverlay :chain-links="currentStepChainLinks" />
                     </div>
                 </div>
@@ -71,14 +73,14 @@
                     data-testid="reset-button"
                     @click="resetBoard"
                 >
-                    Reset
+                    {{ t("walkthrough.reset") }}
                 </button>
                 <button
                     class="px-6 py-3 bg-primary text-white rounded-2xl font-semibold cursor-pointer shadow-primary transition-all duration-200 hover:bg-primary-hover hover:shadow-primary-lg"
                     data-testid="solve-button"
                     @click="runSolver"
                 >
-                    Solve
+                    {{ t("walkthrough.solve") }}
                 </button>
             </div>
             <div
@@ -130,13 +132,14 @@
 <script lang="ts" setup>
 import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
 import { ChevronLeft } from "lucide-vue-next";
 import PlaybackControls from "@/presentation/components/playback/PlaybackControls.vue";
 import { ROUTER_PATH } from "@/router";
 import { BOARD_SIZE } from "@/domain/board/constants";
 import { BoardState } from "@/domain/solver/BoardState";
 import { type SolveResult, TechniqueSolver } from "@/domain/solver/TechniqueSolver";
-import { TECHNIQUE_LABELS } from "@/presentation/labels/techniqueLabels";
+import { useTechniqueLabel } from "@/presentation/labels/techniqueLabels";
 import DigitPad from "@/presentation/pages/game/components/DigitPad.vue";
 import BoardCell, { type CellVariant } from "@/presentation/components/board-cell/BoardCell.vue";
 import ChainOverlay from "@/presentation/pages/solver-walkthrough/components/ChainOverlay.vue";
@@ -154,6 +157,8 @@ const createEmptyBoard = (): number[][] =>
     Array.from({ length: BOARD_SIZE }, () => Array.from({ length: BOARD_SIZE }, () => 0));
 
 const router = useRouter();
+const { t } = useI18n();
+const techniqueLabel = useTechniqueLabel();
 const userValues = ref<number[][]>(createEmptyBoard());
 const state = computed(() => BoardState.fromPuzzle(userValues.value));
 const selectedCell = ref<CellPosition | null>(null);
@@ -221,15 +226,16 @@ const playState = { isPlaying, stopPlay, startPlay };
 
 const stepDescription = computed(() => {
     if (solveResult.value === null) return "";
-    if (currentStep.value === 0) return "Initial board";
+    if (currentStep.value === 0) return t("walkthrough.initialBoard");
     const step = solveResult.value.steps[currentStep.value - 1];
-    const label = TECHNIQUE_LABELS[step.technique];
+    const label = techniqueLabel(step.technique);
     if (step.assignments.length > 0) {
         const { cell, digit } = step.assignments[0];
-        return `${label}: Row ${cell.row + 1}, Col ${cell.column + 1} = ${digit}`;
+        const position = t("position.cell", { row: cell.row + 1, column: cell.column + 1, value: digit });
+        return t("game.hintResult", { technique: label, position });
     }
     const eliminationCount = step.eliminations.length;
-    return `${label}: ${eliminationCount} elimination${eliminationCount === 1 ? "" : "s"}`;
+    return t("walkthrough.eliminations", { technique: label, count: eliminationCount }, eliminationCount);
 });
 
 const currentStepFocus = computed(() => {

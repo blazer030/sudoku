@@ -1,9 +1,11 @@
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { nextTick } from "vue";
 import { flushPromises, mount } from "@vue/test-utils";
 import { createPinia, setActivePinia, getActivePinia } from "pinia";
 import { createRouter, createMemoryHistory } from "vue-router";
 import Statistics from "@/presentation/pages/statistics/Statistics.vue";
 import { useStatisticsStore, type RecordGameInput } from "@/stores/statisticsStore";
+import { i18n } from "@/presentation/i18n";
 
 const createTestRouter = () => {
     return createRouter({
@@ -36,9 +38,48 @@ beforeEach(() => {
 
 afterEach(() => {
     localStorage.clear();
+    vi.useRealTimers();
 });
 
 describe("Statistics", () => {
+    it("should show Traditional Chinese labels and dates when the language is zh-Hant", async () => {
+        vi.useFakeTimers();
+        vi.setSystemTime(new Date(2026, 9, 21, 15, 5));
+        recordGames([{ difficulty: "hard", elapsedSeconds: 500, completed: false }]);
+        const { wrapper } = mountStatistics();
+
+        i18n.global.locale.value = "zh-Hant";
+        await nextTick();
+
+        const text = wrapper.text();
+        for (const label of ["統計", "總覽", "連續遊玩天數", "最佳時間", "最近遊戲", "已放棄", "困難", "今天 15:05", "清除所有紀錄"]) {
+            expect(text).toContain(label);
+        }
+        expect(text).not.toContain("Gave up");
+    });
+
+    it("should keep overview card padding tight so the longest zh label fits on one line", () => {
+        recordGames([{ difficulty: "easy", elapsedSeconds: 100, completed: true }]);
+        const { wrapper } = mountStatistics();
+
+        for (const testid of ["games-won", "win-rate", "day-streak"]) {
+            expect(wrapper.find(`[data-testid='${testid}']`).classes()).toContain("px-2");
+        }
+        expect(wrapper.find("[data-testid='day-streak'] span:last-child").classes()).toContain("text-center");
+    });
+
+    it("should show the clear records dialog in Traditional Chinese", async () => {
+        recordGames([{ difficulty: "easy", elapsedSeconds: 100, completed: true }]);
+        const { wrapper } = mountStatistics();
+        i18n.global.locale.value = "zh-Hant";
+        await wrapper.find("[data-testid='clear-records-button']").trigger("click");
+        await nextTick();
+
+        const dialog = wrapper.find("[data-testid='clear-records-dialog']");
+        expect(dialog.text()).toContain("要清除所有紀錄嗎？");
+        expect(dialog.text()).toContain("取消");
+    });
+
     it("should display overview cards with games won, win rate, and day streak", () => {
         recordGames([
             { difficulty: "easy", elapsedSeconds: 120, completed: true },

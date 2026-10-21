@@ -34,8 +34,12 @@ export const useGameSession = () => {
         return reactive(new Sudoku());
     })();
 
+    const savedReplay = gameStore.replay;
     const stepRecorder = new StepRecorder();
-    const initialBoard = captureInitialBoard(sudoku.raw());
+    if (savedReplay) {
+        stepRecorder.restore(savedReplay.steps);
+    }
+    const initialBoard = savedReplay?.initialBoard ?? captureInitialBoard(sudoku.raw());
 
     const getReplayData = (): GameReplayData => ({
         initialBoard,
