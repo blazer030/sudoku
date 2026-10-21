@@ -107,3 +107,22 @@ describe("Donate.vue analytics", () => {
         expect(successCalls).toHaveLength(0);
     });
 });
+
+describe("Donate.vue product loading", () => {
+    it("offers a retry when no products load, and shows the tiers once a retry succeeds", async () => {
+        const billing: BillingService = {
+            ...buildBilling({ kind: "cancelled" }),
+            loadProducts: vi.fn().mockResolvedValueOnce([]).mockResolvedValue(fakeProducts),
+        };
+        const wrapper = mountDonate({ logEvent: vi.fn().mockResolvedValue(undefined) }, billing);
+        await flushPromises();
+
+        expect(wrapper.find("[data-testid='donate-tier-coffee']").exists()).toBe(false);
+
+        await wrapper.find("[data-testid='donate-retry']").trigger("click");
+        await flushPromises();
+
+        expect(wrapper.find("[data-testid='donate-tier-coffee']").exists()).toBe(true);
+        expect(wrapper.find("[data-testid='donate-retry']").exists()).toBe(false);
+    });
+});

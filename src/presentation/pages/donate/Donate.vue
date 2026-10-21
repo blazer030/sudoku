@@ -25,7 +25,26 @@
             If you'd like to support development:
         </p>
 
-        <div class="bg-card rounded-2xl shadow-card-sm divide-y divide-border">
+        <div
+            v-if="store.loadFailed"
+            class="flex flex-col items-center gap-3 bg-card rounded-2xl shadow-card-sm px-4 py-6"
+        >
+            <span class="text-foreground-muted text-[15px]">
+                Couldn't load donation options.
+            </span>
+            <button
+                class="px-5 py-2 rounded-button bg-primary text-white text-[15px] font-medium cursor-pointer hover:bg-primary-hover"
+                data-testid="donate-retry"
+                @click="retryLoad"
+            >
+                Retry
+            </button>
+        </div>
+
+        <div
+            v-else
+            class="bg-card rounded-2xl shadow-card-sm divide-y divide-border"
+        >
             <button
                 v-for="product in store.products"
                 :key="product.id"
@@ -93,6 +112,10 @@ const goBack = () => {
 const onTap = async (product: Product) => {
     void analytics?.logEvent({ name: "donate_tap", tier: product.tier });
     await store.purchase(product.id);
+};
+
+const retryLoad = async () => {
+    await store.loadProducts();
 };
 
 const dismissSuccess = () => {
