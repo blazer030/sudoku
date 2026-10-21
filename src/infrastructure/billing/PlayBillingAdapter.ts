@@ -12,15 +12,12 @@ const TIER_META = new Map<string, { tier: DonateTier; label: string }>([
 const PRODUCT_IDS = Array.from(TIER_META.keys());
 
 export class PlayBillingAdapter implements BillingService {
-    private setupComplete = false;
+    private initialization: Promise<unknown> | null = null;
     private cachedProducts = new Map<string, Product>();
-    private productsReady: Promise<Product[]> | null = null;
-    private resolveProductsWhenReady: ((products: Product[]) => void) | null = null;
     private pendingPurchases = new Map<string, (result: PurchaseResult) => void>();
 
-    private ensureSetup(): void {
-        if (this.setupComplete) return;
-        this.setupComplete = true;
+    private ensureSetup(): Promise<unknown> {
+        if (this.initialization !== null) return this.initialization;
         store.register(PRODUCT_IDS.map((id) => ({
             id,
             type: ProductType.CONSUMABLE,
@@ -29,20 +26,19 @@ export class PlayBillingAdapter implements BillingService {
         store.when()
             .productUpdated((product) => { this.handleProductUpdated(product); })
             .approved((transaction) => { this.handleApproved(transaction); });
-        void store.initialize([Platform.GOOGLE_PLAY]);
+        this.initialization = store.initialize([Platform.GOOGLE_PLAY]);
+        return this.initialization;
     }
 
-    loadProducts(): Promise<Product[]> {
-        this.ensureSetup();
-        this.productsReady ??= new Promise<Product[]>((resolve) => {
-            this.resolveProductsWhenReady = resolve;
-            this.maybeResolveProducts();
-        });
-        return this.productsReady;
+    async loadProducts(): Promise<Product[]> {
+        await this.ensureSetup();
+        return PRODUCT_IDS
+            .map((id) => this.cachedProducts.get(id))
+            .filter((entry): entry is Product => entry !== undefined);
     }
 
     purchase(productId: string): Promise<PurchaseResult> {
-        this.ensureSetup();
+        void this.ensureSetup();
         const product = store.get(productId, Platform.GOOGLE_PLAY);
         const offer = product?.getOffer();
         if (offer === undefined) {
@@ -63,7 +59,7 @@ export class PlayBillingAdapter implements BillingService {
     }
 
     async consumeAll(): Promise<void> {
-        this.ensureSetup();
+        void this.ensureSetup();
         for (const transaction of store.localTransactions) {
             if (transaction.state === CdvPurchase.TransactionState.APPROVED) {
                 await transaction.finish();
@@ -83,17 +79,6 @@ export class PlayBillingAdapter implements BillingService {
             priceText: pricing.price,
             amountUsd: pricing.priceMicros / 1_000_000,
         });
-        this.maybeResolveProducts();
-    }
-
-    private maybeResolveProducts(): void {
-        if (this.resolveProductsWhenReady === null) return;
-        if (this.cachedProducts.size < PRODUCT_IDS.length) return;
-        const ordered = PRODUCT_IDS
-            .map((id) => this.cachedProducts.get(id))
-            .filter((entry): entry is Product => entry !== undefined);
-        this.resolveProductsWhenReady(ordered);
-        this.resolveProductsWhenReady = null;
     }
 
     private handleApproved(transaction: Transaction): void {

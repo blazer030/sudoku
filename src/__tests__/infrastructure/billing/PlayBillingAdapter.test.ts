@@ -134,6 +134,19 @@ describe("PlayBillingAdapter", () => {
         ]);
     });
 
+    it("loadProducts resolves with whatever loaded once initialization finishes, even if some SKUs never arrive", async () => {
+        mocks.initializeSpy.mockImplementation(() => {
+            fireProductUpdated(buildProduct("donate_lunch", "$5.99", 5_990_000));
+            return Promise.resolve([]);
+        });
+
+        const adapter = new PlayBillingAdapter();
+
+        await expect(adapter.loadProducts()).resolves.toEqual([
+            { id: "donate_lunch", tier: "lunch", label: "Lunch", priceText: "$5.99", amountUsd: 5.99 },
+        ]);
+    });
+
     it("purchase resolves with success after the approved callback finishes the transaction", async () => {
         const adapter = new PlayBillingAdapter();
         const productsPromise = adapter.loadProducts();
