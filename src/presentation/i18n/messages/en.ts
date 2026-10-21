@@ -72,8 +72,9 @@ export const en = {
         walkthrough: "Walkthrough",
         generatingPuzzle: "Generating puzzle…",
         giveUp: {
-            title: "Give Up Current Game?",
-            message: "Starting a new game will abandon your current progress. This action cannot be undone.",
+            title: "Unfinished Game",
+            summary: "{difficulty} · {time} played",
+            continue: "Continue That Game",
             confirm: "Give Up & Start New",
         },
     },

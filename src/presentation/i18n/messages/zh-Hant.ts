@@ -70,9 +70,10 @@ export const zhHant: MessageSchema = {
         walkthrough: "解題演示",
         generatingPuzzle: "正在產生題目…",
         giveUp: {
-            title: "放棄目前的遊戲？",
-            message: "開始新遊戲會放棄目前的進度，且無法復原。",
-            confirm: "放棄並開始新遊戲",
+            title: "還有一局沒完成",
+            summary: "{difficulty}・已玩 {time}",
+            continue: "繼續原本那局",
+            confirm: "放棄並開新局",
         },
     },
     game: {

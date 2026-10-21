@@ -124,8 +124,12 @@ const difficulty = ref<Difficulty>("easy");
 
 const handleNewGame = async () => {
     if (gameStore.savedGame !== null) {
-        const result = await newGameDialog.open();
-        if (result === "cancel") return;
+        const unfinished = gameStore.savedGame;
+        const result = await newGameDialog.open({ difficulty: unfinished.difficulty, elapsedSeconds: unfinished.elapsedSeconds });
+        if (result === "continue") {
+            continueGame();
+            return;
+        }
         const saved = gameStore.savedGame;
         const { progressPct, correctPct, incorrectPct } = computeAbandonProgress(saved.cells, saved.answer);
         void analytics?.logEvent({

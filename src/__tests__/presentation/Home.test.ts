@@ -204,7 +204,29 @@ describe("Home", () => {
             await wrapper.find("[data-testid='new-game-button']").trigger("click");
 
             expect(wrapper.find("[data-testid='new-game-confirm-dialog']").exists()).toBe(true);
-            expect(wrapper.find("[data-testid='new-game-confirm-dialog']").text()).toContain("Give Up Current Game?");
+            expect(wrapper.find("[data-testid='new-game-confirm-dialog']").text()).toContain("Unfinished Game");
+        });
+
+        it("should show which game would be given up and what that costs", async () => {
+            const { wrapper } = mountHome({ savedGame: dummySave });
+
+            await wrapper.find("[data-testid='new-game-button']").trigger("click");
+
+            expect(wrapper.find("[data-testid='new-game-saved-summary']").text()).toBe("Easy · 03:24 played");
+            expect(wrapper.find("[data-testid='new-game-give-up-note']").text()).toBe("Giving up counts as an unfinished game and lowers your win rate.");
+        });
+
+        it("should make continuing the primary choice and giving up a quiet text button", async () => {
+            const { wrapper } = mountHome({ savedGame: dummySave });
+
+            await wrapper.find("[data-testid='new-game-button']").trigger("click");
+
+            const continueButton = wrapper.find("[data-testid='new-game-continue-button']");
+            expect(continueButton.text()).toBe("Continue That Game");
+            expect(continueButton.classes()).toContain("bg-primary");
+            const giveUp = wrapper.find("[data-testid='give-up-and-start-new-button']");
+            expect(giveUp.classes()).toContain("text-danger");
+            expect(giveUp.classes()).not.toContain("bg-danger");
         });
 
         it("should show the confirm dialog in Traditional Chinese when the language is zh-Hant", async () => {
@@ -215,9 +237,10 @@ describe("Home", () => {
             await wrapper.find("[data-testid='new-game-button']").trigger("click");
 
             const dialog = wrapper.find("[data-testid='new-game-confirm-dialog']");
-            expect(dialog.text()).toContain("放棄目前的遊戲？");
+            expect(dialog.text()).toContain("還有一局沒完成");
             expect(dialog.text()).not.toContain("Give Up");
-            expect(dialog.find("[data-testid='new-game-cancel-button']").text()).toBe("取消");
+            expect(dialog.find("[data-testid='new-game-saved-summary']").text()).toBe("簡單・已玩 03:24");
+            expect(dialog.find("[data-testid='new-game-continue-button']").text()).toBe("繼續原本那局");
         });
 
         it("should record gave up and start new game when clicking Give Up & Start New", async () => {
@@ -276,15 +299,22 @@ describe("Home", () => {
             expect(history[0].replay).toBeUndefined();
         });
 
-        it("should close dialog when clicking Cancel", async () => {
-            const { wrapper } = mountHome({ savedGame: dummySave });
+        it("should continue the saved game from the dialog", async () => {
+            const analytics = { logEvent: vi.fn(() => Promise.resolve()) };
+            const { wrapper, router, pinia } = mountHome({ savedGame: dummySave, analytics });
+            await router.push("/");
+            await router.isReady();
 
             await wrapper.find("[data-testid='new-game-button']").trigger("click");
-            expect(wrapper.find("[data-testid='new-game-confirm-dialog']").exists()).toBe(true);
+            await wrapper.find("[data-testid='new-game-continue-button']").trigger("click");
+            await flushPromises();
 
-            await wrapper.find("[data-testid='new-game-cancel-button']").trigger("click");
-
-            expect(wrapper.find("[data-testid='new-game-confirm-dialog']").exists()).toBe(false);
+            expect(router.currentRoute.value.path).toBe(ROUTER_PATH.game);
+            const gameStore = useGameStore(pinia);
+            expect(gameStore.hasActiveGame).toBe(true);
+            expect(gameStore.elapsedSeconds).toBe(204);
+            expect(useStatisticsStore(pinia).history).toHaveLength(0);
+            expect(analytics.logEvent).not.toHaveBeenCalledWith(expect.objectContaining({ name: "game_abandon" }));
         });
 
         it("should start game directly when no saved game exists", async () => {
@@ -331,17 +361,6 @@ describe("Home", () => {
                 correct_pct: 2,
                 incorrect_pct: 2,
             });
-        });
-
-        it("should not log game_abandon when cancelling the dialog", async () => {
-            const analytics = createAnalytics();
-            const { wrapper } = mountHome({ savedGame: savedGameWithEntries, analytics });
-
-            await wrapper.find("[data-testid='new-game-button']").trigger("click");
-            await wrapper.find("[data-testid='new-game-cancel-button']").trigger("click");
-            await flushPromises();
-
-            expect(analytics.logEvent).not.toHaveBeenCalledWith(expect.objectContaining({ name: "game_abandon" }));
         });
 
         it("should not log game_abandon when starting a new game without a saved game", async () => {
