@@ -1,4 +1,17 @@
+import groovy.json.JsonSlurper
+
 apply plugin: 'com.android.application'
+
+// 版號以 package.json 為唯一來源；versionCode = major * 10000 + minor * 100 + patch
+def packageVersion = new JsonSlurper().parse(rootProject.file('../package.json')).version
+def versionMatch = packageVersion =~ /^(\d+)\.(\d+)\.(\d+)$/
+if (!versionMatch.matches()) {
+    throw new GradleException("package.json version '${packageVersion}' is not plain MAJOR.MINOR.PATCH")
+}
+def (major, minor, patch) = (1..3).collect { versionMatch.group(it).toInteger() }
+if (minor > 99 || patch > 99) {
+    throw new GradleException("package.json version '${packageVersion}': minor and patch must be at most 99 to fit versionCode")
+}
 
 def keystoreProperties = new Properties()
 def keystorePropertiesFile = rootProject.file('key.properties')
@@ -13,8 +26,8 @@ android {
         applicationId "io.github.blazer030.sudoku"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "2.0.0"
+        versionCode major * 10000 + minor * 100 + patch
+        versionName packageVersion
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
