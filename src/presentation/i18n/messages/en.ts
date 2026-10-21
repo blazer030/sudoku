@@ -97,6 +97,11 @@ export const en = {
             hint: "Hint",
             erase: "Erase",
         },
+        cell: {
+            empty: "Row {row}, column {column}, empty",
+            value: "Row {row}, column {column}, {value}",
+            notes: "Row {row}, column {column}, notes {notes}",
+        },
         digitPad: {
             fill: "Fill {digit}, {count} left",
             note: "Note {digit}, {count} left",

@@ -95,6 +95,11 @@ export const zhHant: MessageSchema = {
             hint: "提示",
             erase: "擦除",
         },
+        cell: {
+            empty: "第 {row} 列第 {column} 欄，空白",
+            value: "第 {row} 列第 {column} 欄，{value}",
+            notes: "第 {row} 列第 {column} 欄，筆記 {notes}",
+        },
         digitPad: {
             fill: "填入 {digit}，還剩 {count} 個",
             note: "筆記 {digit}，還剩 {count} 個",

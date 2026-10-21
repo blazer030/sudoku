@@ -1,6 +1,7 @@
 <template>
     <BoardCell
         v-press:tint
+        :aria-label="spokenLabel"
         :row="row"
         :column="column"
         :value="value"
@@ -15,6 +16,7 @@
         :emphasized-digits="hint?.emphasized ?? []"
         :popping="revealed"
         :class="[interactionClass, 'select-none [-webkit-touch-callout:none]']"
+        role="button"
         @click="handleClick"
         @contextmenu.prevent
         @pointerdown="longPress.onPointerdown"
@@ -27,6 +29,7 @@
 
 <script lang="ts" setup>
 import { computed } from "vue";
+import { useI18n } from "vue-i18n";
 import BoardCell, { type CellVariant, type ValueTextColor, type ValueFontWeight } from "@/presentation/components/board-cell/BoardCell.vue";
 import { PuzzleCell } from "@/domain";
 import { useLongPress } from "@/presentation/composables/useLongPress";
@@ -67,6 +70,8 @@ const emit = defineEmits<{
     longPress: [];
 }>();
 
+const { t } = useI18n();
+
 const longPress = useLongPress({ onLongPress: () => { emit("longPress"); } });
 
 // The click that follows a long press must not trigger a second, normal input.
@@ -91,6 +96,13 @@ const value = computed(() => {
 const notes = computed(() => {
     if (props.hint?.candidates) return props.hint.candidates;
     return props.puzzleCell.hasNotes ? props.puzzleCell.notes : [];
+});
+
+const spokenLabel = computed(() => {
+    const place = { row: props.row + 1, column: props.column + 1 };
+    if (value.value !== 0) return t("game.cell.value", { ...place, value: value.value });
+    if (notes.value.length > 0) return t("game.cell.notes", { ...place, notes: notes.value.join(" ") });
+    return t("game.cell.empty", place);
 });
 
 // Colour changes animate only while hinting, so normal selection stays instant.
