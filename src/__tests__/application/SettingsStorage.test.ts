@@ -58,6 +58,12 @@ describe("SettingsStorage", () => {
             expect(settings.colorTheme).toBe("blue");
         });
 
+        it("should normalize an unknown stored language to system", () => {
+            localStorage.setItem("sudoku-settings", JSON.stringify({ language: "fr" }));
+
+            expect(loadSettings().language).toBe("system");
+        });
+
         it("should fill missing fields with defaults for backward compatibility", () => {
             localStorage.setItem("sudoku-settings", JSON.stringify({ colorTheme: "purple" }));
 
