@@ -54,7 +54,12 @@ export const useHintActions = ({ sudoku, stepRecorder, onRevealComplete, onGroup
             errorCells.value = sudoku.checkErrors();
             break;
         case "revealCell": {
-            const outcome = sudoku.revealCellWithTechnique();
+            const target = sudoku.revealRandomCell();
+            const outcome: RevealOutcome | null = target === null ? null : {
+                cell: { row: target.row, column: target.column },
+                value: sudoku.answer[target.row][target.column],
+                fallback: true,
+            };
             if (outcome) {
                 stepRecorder.record(sudoku.puzzle, "hint", outcome.cell.row, outcome.cell.column, outcome.value);
                 onHintReveal?.(outcome);

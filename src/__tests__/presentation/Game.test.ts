@@ -901,7 +901,7 @@ describe("Game", () => {
             expect(wrapper.find("[data-testid='cell-0-2']").classes()).not.toContain("bg-error-light");
         });
 
-        it("should show a hint result toast with the technique name after Reveal Cell", async () => {
+        it("should show a random-reveal toast after Reveal Cell", async () => {
             const wrapper = mountGame();
 
             await wrapper.find("[data-testid='hint-button']").trigger("click");
@@ -909,7 +909,7 @@ describe("Game", () => {
 
             const toast = wrapper.find("[data-testid='hint-result-toast']");
             expect(toast.exists()).toBe(true);
-            expect(toast.text()).toMatch(/Single|Pair|Triple|Quad|Pointing|Claiming|Wing/);
+            expect(toast.text()).toMatch(/^Random reveal: /);
         });
 
         it("should show the toast position in Chinese after Reveal Cell", async () => {
