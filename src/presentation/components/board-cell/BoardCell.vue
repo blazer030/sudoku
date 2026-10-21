@@ -4,6 +4,7 @@
             backgroundClass,
             positionClasses,
             flashing ? 'animate-completion-flash' : '',
+            popping ? 'animate-hint-reveal-glow' : '',
         ]"
         class="flex justify-center items-center flex-1 aspect-square"
     >

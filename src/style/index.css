@@ -228,6 +228,21 @@
   }
 }
 
+/* The answer cell keeps the hint's highlight for a beat, then fades back, so the fill
+   reads clearly while the panel slides away. Defined after the completion flash so it
+   wins on the answer cell when the fill also completes a row, column or box.
+   It is only a colour change, so it stays on under reduced motion. */
+@keyframes hint-reveal-glow {
+  0%, 45% {
+    background-color: var(--color-primary-light);
+    box-shadow: inset 0 0 0 2px var(--color-primary);
+  }
+}
+
+.animate-hint-reveal-glow {
+  animation: hint-reveal-glow 1000ms ease-out;
+}
+
 /* Subtle, thin scrollbars so the centered max-w-sm layout doesn't get
    a chunky default scrollbar floating in the middle of wide viewports. */
 :root {

@@ -1202,6 +1202,23 @@ describe("Game", () => {
             expect(boardOf(wrapper).every((cell) => cell.notes.length === 0)).toBe(true);
         });
 
+        it("should keep the filled answer glowing for about a second, then settle", async () => {
+            const plan = multiStepPlan();
+            const wrapper = mountGameWith(createMultiStepSudoku());
+            await openRevealCell(wrapper);
+            await pressPrimaryUntilLastStep(wrapper, plan.steps.length);
+            vi.useFakeTimers();
+            const answerCell = () => wrapper.find(`[data-testid='cell-${plan.target.row}-${plan.target.column}']`);
+
+            await wrapper.find("[data-testid='hint-primary']").trigger("click");
+
+            expect(answerCell().classes()).toContain("animate-hint-reveal-glow");
+            await vi.advanceTimersByTimeAsync(900);
+            expect(answerCell().classes()).toContain("animate-hint-reveal-glow");
+            await vi.advanceTimersByTimeAsync(400);
+            expect(answerCell().classes()).not.toContain("animate-hint-reveal-glow");
+        });
+
         it("should undo the whole hint in one step", async () => {
             const plan = multiStepPlan();
             const wrapper = mountGameWith(createMultiStepSudoku());

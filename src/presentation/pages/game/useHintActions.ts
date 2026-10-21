@@ -25,8 +25,8 @@ const HINT_TYPE_EVENT: Record<Exclude<HintAction, "close">, HintUsedEvent["hint_
     revealCell:     "reveal_cell",
 };
 
-// Long enough for the pop animation on the filled answer to finish.
-const REVEALED_CELL_DURATION_MS = 500;
+// Long enough for the pop and glow animations on the filled answer to finish.
+const REVEALED_CELL_DURATION_MS = 1100;
 
 export const useHintActions = ({
     sudoku,
