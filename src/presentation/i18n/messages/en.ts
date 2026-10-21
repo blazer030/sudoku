@@ -160,6 +160,42 @@ export const en = {
     position: {
         cell: "Row {row}, Col {column} = {value}",
     },
+    hintMode: {
+        place: {
+            cell: "Row {row}, Col {column}",
+            row: "row {number}",
+            column: "column {number}",
+            box: "box {number}",
+            rows: "rows {numbers}",
+            columns: "columns {numbers}",
+        },
+        list: {
+            join: "{previous}, {next}",
+            last: "{previous} and {next}",
+            more: "{first} and {others} other cells",
+        },
+        explanation: {
+            nakedSingle: "{cell} has only one candidate left, {digit}, so fill in {digit}.",
+            hiddenSingle: "{cell} is the only cell in {house} that can take {digit}, so fill in {digit}.",
+            nakedPair: "{cells} share just two candidates, so those two digits must go in these two cells. Remove {digits} from the rest of {house}.",
+            nakedTriple: "{cells} share just three candidates, so those three digits must go in these three cells. Remove {digits} from the rest of {house}.",
+            nakedQuad: "{cells} share just four candidates, so those four digits must go in these four cells. Remove {digits} from the rest of {house}.",
+            hiddenPair: "Two digits in {house} fit only in {cells}, so these two cells must hold them. Remove {digits} from these cells.",
+            hiddenTriple: "Three digits in {house} fit only in {cells}, so these three cells must hold them. Remove {digits} from these cells.",
+            hiddenQuad: "Four digits in {house} fit only in {cells}, so these four cells must hold them. Remove {digits} from these cells.",
+            pointing: "Every spot for {digit} in {box} lies in {line} ({cells}), so remove {digit} from the rest of {line}.",
+            claiming: "Every spot for {digit} in {line} lies inside {box} ({cells}), so remove {digit} from the rest of {box}.",
+            xWing: "In {baseLines}, the only spots for {digit} line up in {coverLines}, forming a rectangle. Its corners must hold the {digit}s of {coverLines}, so remove {digit} from {targets}.",
+            swordfish: "In {baseLines}, the only spots for {digit} fall within {coverLines}. Each of those three lines needs a {digit}, and together they fill {coverLines}, so remove {digit} from {targets}.",
+            jellyfish: "In {baseLines}, the only spots for {digit} fall within {coverLines}. Each of those four lines needs a {digit}, and together they fill {coverLines}, so remove {digit} from {targets}.",
+            xyWing: "Whichever digit {pivot} takes, either {pincerOne} or {pincerTwo} ends up as {digit}. So remove {digit} from {targets}, where it would clash with both.",
+            wWing: "{endpointOne} and {endpointTwo} have the same two candidates, and the link through {supporterOne} and {supporterTwo} makes one of the pair {digit}. So remove {digit} from {targets}, where it would clash with both.",
+            xyzWing: "{pivot} works with {pincerOne} and {pincerTwo}: one of these three cells must turn out to be {digit}. So remove {digit} from {targets}, where it would clash with all three.",
+            wxyzWing: "{pivot} works with three partner cells: one of these four cells must turn out to be {digit}. So remove {digit} from {targets}, where it would clash with them.",
+            xChain: "Following the chain of {digit}s, either {head} or {tail} must be {digit}. So remove {digit} from {targets}, where it would clash with both ends.",
+            xyChain: "Following the chain of two-candidate cells, either {head} or {tail} must be {digit}. So remove {digit} from {targets}, where it would clash with both ends.",
+        } satisfies Record<TechniqueId, string>,
+    },
 };
 
 export type MessageSchema = typeof en;
