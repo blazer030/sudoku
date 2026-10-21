@@ -90,7 +90,6 @@
                             :step-index="hintMode.stepIndex.value"
                             :total-steps="hintMode.steps.value.length"
                             :wrong-cell="hintMode.wrongCell.value"
-                            @cancel="hintMode.cancel"
                             @clear="hintMode.clearWrongEntry"
                             @close="hintMode.cancel"
                             @fill="hintMode.fill"

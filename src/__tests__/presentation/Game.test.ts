@@ -1224,7 +1224,7 @@ describe("Game", () => {
             expect(wrapper.find("[data-testid='hint-auto-notes']").exists()).toBe(false);
             expect(wrapper.find("[data-testid='hint-panel']").exists()).toBe(true);
 
-            await wrapper.find("[data-testid='hint-cancel']").trigger("click");
+            await wrapper.find("[data-testid='hint-close']").trigger("click");
             await wrapper.find("[data-testid='cell-0-3']").trigger("click");
             await wrapper.find("[data-testid='number-6']").trigger("click");
             expect(wrapper.find("[data-testid='cell-0-3']").text()).toBe("6");

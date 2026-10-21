@@ -155,10 +155,10 @@
                 <button
                     v-press
                     class="hint-secondary"
-                    data-testid="hint-cancel"
-                    @click="emit('cancel')"
+                    data-testid="hint-close"
+                    @click="emit('close')"
                 >
-                    {{ t("common.cancel") }}
+                    {{ t("hintMode.panel.close") }}
                 </button>
                 <button
                     v-press
@@ -223,7 +223,6 @@ const props = withDefaults(defineProps<{
 const emit = defineEmits<{
     close: [];
     clear: [];
-    cancel: [];
     previous: [];
     next: [];
     goTo: [index: number];
