@@ -169,6 +169,26 @@ describe("useHintMode", () => {
             expect(views.some((view) => view.candidates !== null && view.candidates.length === 0)).toBe(true);
         });
 
+        it("cellViews holds every cell's view for the current step and clears when the hint ends", () => {
+            const sudoku = createMultiStepSudoku();
+            const { hintMode } = setup(sudoku);
+            const expectedViews = () => Array.from({ length: 9 }, (_, row) =>
+                Array.from({ length: 9 }, (__, column) => hintMode.cellView(row, column)));
+            expect(hintMode.cellViews.value).toBeNull();
+
+            hintMode.start(planSteps(sudoku));
+            const firstViews = hintMode.cellViews.value;
+            expect(firstViews).toEqual(expectedViews());
+            expect(hintMode.cellViews.value).toBe(firstViews);
+
+            hintMode.next();
+            expect(hintMode.cellViews.value).not.toBe(firstViews);
+            expect(hintMode.cellViews.value).toEqual(expectedViews());
+
+            hintMode.cancel();
+            expect(hintMode.cellViews.value).toBeNull();
+        });
+
         it("cellView marks the answer cell and circles the digit on the last step only", () => {
             const sudoku = createMultiStepSudoku();
             const plan = planSteps(sudoku);

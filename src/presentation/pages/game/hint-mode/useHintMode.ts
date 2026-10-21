@@ -218,6 +218,14 @@ export const useHintMode = (sudoku: Sudoku, { autoRemoveNotes, onApplied, record
         return view;
     };
 
+    // One 9×9 grid per phase and step, so re-renders that change neither (the timer tick) hand the cells
+    // the same view objects instead of 81 new ones.
+    const cellViews = computed<HintCellView[][] | null>(() => {
+        if (phase.value === null) return null;
+        return Array.from({ length: BOARD_SIZE }, (_, row) =>
+            Array.from({ length: BOARD_SIZE }, (__, column) => cellView(row, column)));
+    });
+
     return {
         active,
         phase,
@@ -236,5 +244,6 @@ export const useHintMode = (sudoku: Sudoku, { autoRemoveNotes, onApplied, record
         clearWrongEntry,
         fill,
         cellView,
+        cellViews,
     };
 };

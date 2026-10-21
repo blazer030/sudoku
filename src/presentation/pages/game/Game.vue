@@ -30,7 +30,7 @@
                             :error="isError(rowIndex, columnIndex)"
                             :flashing="isFlashing(rowIndex, columnIndex)"
                             :highlight-same-digit="settingsStore.highlightSameDigit"
-                            :hint="hintMode.active.value ? hintMode.cellView(rowIndex, columnIndex) : null"
+                            :hint="hintMode.cellViews.value?.[rowIndex][columnIndex] ?? null"
                             :puzzle-cell="puzzleCell.raw()"
                             :revealed="isRevealed(rowIndex, columnIndex)"
                             :selected-digit="selectedDigit"

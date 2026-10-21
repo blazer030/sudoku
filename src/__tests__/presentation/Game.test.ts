@@ -1116,6 +1116,20 @@ describe("Game", () => {
             expect(wrapper.findAll("[data-testid^='hint-dot-']")).toHaveLength(0);
         });
 
+        it("should hand the cells the same hint views when only the timer ticks", async () => {
+            vi.useFakeTimers({ toFake: ["setInterval", "clearInterval"] });
+            const wrapper = mountGameWith(createMultiStepSudoku());
+            await openRevealCell(wrapper);
+            const timerBefore = wrapper.find("[data-testid='timer']").text();
+            const viewsBefore = wrapper.findAllComponents(Cell).map((cell) => cell.props("hint"));
+
+            await vi.advanceTimersByTimeAsync(1000);
+
+            expect(wrapper.find("[data-testid='timer']").text()).not.toBe(timerBefore);
+            const viewsAfter = wrapper.findAllComponents(Cell).map((cell) => cell.props("hint"));
+            viewsAfter.forEach((view, index) => { expect(view).toBe(viewsBefore[index]); });
+        });
+
         it("should step with Next and fill the answer on the last step", async () => {
             const plan = multiStepPlan();
             const wrapper = mountGameWith(createMultiStepSudoku());
