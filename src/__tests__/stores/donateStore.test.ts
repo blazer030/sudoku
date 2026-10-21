@@ -44,6 +44,15 @@ describe("donateStore", () => {
         expect(store.products).toEqual(sampleProducts);
     });
 
+    it("marks loading as failed when billing returns no products", async () => {
+        const store = useDonateStore();
+        store.setBilling(mockBilling({ loadProducts: vi.fn().mockResolvedValue([]) }));
+
+        await store.loadProducts();
+
+        expect(store.loadFailed).toBe(true);
+    });
+
     it("purchase resolves to success and stores the result", async () => {
         const store = useDonateStore();
         store.setBilling(mockBilling());
