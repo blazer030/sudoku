@@ -15,10 +15,10 @@
 
                 <div class="flex flex-col items-center gap-2">
                     <h2 class="text-2xl font-bold text-foreground tracking-tight">
-                        Give Up Current Game?
+                        {{ t("home.giveUp.title") }}
                     </h2>
                     <p class="text-sm text-foreground-secondary text-center">
-                        Starting a new game will abandon your current progress. This action cannot be undone.
+                        {{ t("home.giveUp.message") }}
                     </p>
                 </div>
 
@@ -28,7 +28,7 @@
                         data-testid="give-up-and-start-new-button"
                         @click="close('giveUp')"
                     >
-                        <span class="text-base font-semibold text-white">Give Up & Start New</span>
+                        <span class="text-base font-semibold text-white">{{ t("home.giveUp.confirm") }}</span>
                     </button>
 
                     <button
@@ -36,7 +36,7 @@
                         data-testid="new-game-cancel-button"
                         @click="close('cancel')"
                     >
-                        <span class="text-base font-semibold text-foreground">Cancel</span>
+                        <span class="text-base font-semibold text-foreground">{{ t("common.cancel") }}</span>
                     </button>
                 </div>
             </div>
@@ -46,7 +46,9 @@
 
 <script lang="ts" setup>
 import { TriangleAlert } from "lucide-vue-next";
+import { useI18n } from "vue-i18n";
 import { useNewGameDialog } from "@/presentation/components/new-game-dialog/useNewGameDialog";
 
+const { t } = useI18n();
 const { visible, close } = useNewGameDialog();
 </script>

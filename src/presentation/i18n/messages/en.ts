@@ -53,6 +53,20 @@ export const en = {
         xChain: "X-Chain",
         xyChain: "XY-Chain",
     },
+    home: {
+        title: "Sudoku",
+        subtitle: "Train your brain",
+        newGame: "New Game",
+        continueGame: "Continue Game",
+        statistics: "Statistics",
+        walkthrough: "Walkthrough",
+        generatingPuzzle: "Generating puzzle…",
+        giveUp: {
+            title: "Give Up Current Game?",
+            message: "Starting a new game will abandon your current progress. This action cannot be undone.",
+            confirm: "Give Up & Start New",
+        },
+    },
     position: {
         cell: "Row {row}, Col {column} = {value}",
     },

@@ -55,6 +55,20 @@ export const zhHant: MessageSchema = {
         xChain: "X 鏈",
         xyChain: "XY 鏈",
     },
+    home: {
+        title: "數獨",
+        subtitle: "動動腦，練練推理",
+        newGame: "新遊戲",
+        continueGame: "繼續遊戲",
+        statistics: "統計",
+        walkthrough: "解題演示",
+        generatingPuzzle: "正在產生題目…",
+        giveUp: {
+            title: "放棄目前的遊戲？",
+            message: "開始新遊戲會放棄目前的進度，且無法復原。",
+            confirm: "放棄並開始新遊戲",
+        },
+    },
     position: {
         cell: "第 {row} 列第 {column} 欄 = {value}",
     },

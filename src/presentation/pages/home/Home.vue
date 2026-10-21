@@ -17,10 +17,10 @@
                 </div>
             </div>
             <h1 class="text-foreground text-4xl font-bold tracking-[-1px]">
-                Sudoku
+                {{ t("home.title") }}
             </h1>
             <p class="text-foreground-secondary text-sm">
-                Train your brain
+                {{ t("home.subtitle") }}
             </p>
         </div>
 
@@ -40,7 +40,7 @@
                     :size="20"
                     class="text-foreground"
                 />
-                <span class="text-foreground text-base font-semibold">New Game</span>
+                <span class="text-foreground text-base font-semibold">{{ t("home.newGame") }}</span>
             </button>
         </div>
 
@@ -56,7 +56,7 @@
                     :size="24"
                     class="text-foreground-muted"
                 />
-                <span class="text-foreground-muted text-[11px] font-medium">Settings</span>
+                <span class="text-foreground-muted text-[11px] font-medium">{{ t("settings.title") }}</span>
             </button>
             <button
                 class="flex flex-col items-center gap-1 cursor-pointer"
@@ -67,7 +67,7 @@
                     :size="24"
                     class="text-foreground-muted"
                 />
-                <span class="text-foreground-muted text-[11px] font-medium">Walkthrough</span>
+                <span class="text-foreground-muted text-[11px] font-medium">{{ t("home.walkthrough") }}</span>
             </button>
             <button
                 class="flex flex-col items-center gap-1 cursor-pointer"
@@ -78,7 +78,7 @@
                     :size="24"
                     class="text-foreground-muted"
                 />
-                <span class="text-foreground-muted text-[11px] font-medium">Statistics</span>
+                <span class="text-foreground-muted text-[11px] font-medium">{{ t("home.statistics") }}</span>
             </button>
         </div>
 
@@ -91,6 +91,7 @@
 <script lang="ts" setup>
 import { ref } from "vue";
 import { useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
 import { ChartBar, Plus, Settings, Wand2 } from "lucide-vue-next";
 import { ROUTER_PATH } from "@/router";
 import type { Difficulty } from "@/domain";
@@ -104,6 +105,7 @@ import { provideNewGameDialog } from "@/presentation/components/new-game-dialog/
 import PuzzleLoader from "@/presentation/components/puzzle-loader/PuzzleLoader.vue";
 import { usePuzzleLoader } from "@/presentation/components/puzzle-loader/usePuzzleLoader";
 
+const { t } = useI18n();
 const router = useRouter();
 const gameStore = useGameStore();
 const statisticsStore = useStatisticsStore();

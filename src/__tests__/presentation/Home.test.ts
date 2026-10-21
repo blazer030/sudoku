@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { nextTick } from "vue";
 import { flushPromises, mount } from "@vue/test-utils";
 import { createPinia, setActivePinia } from "pinia";
 import { createRouter, createMemoryHistory } from "vue-router";
@@ -7,6 +8,7 @@ import { ROUTER_PATH } from "@/router";
 import { useGameStore } from "@/stores/gameStore";
 import { useStatisticsStore } from "@/stores/statisticsStore";
 import type { CellState, GameState } from "@/application/GameState";
+import { i18n } from "@/presentation/i18n";
 import { knownAnswer, knownPuzzle } from "@/__tests__/fixtures/knownPuzzle";
 
 vi.mock("@/application/PuzzleGenerationService", () => ({
@@ -66,6 +68,19 @@ afterEach(() => {
 });
 
 describe("Home", () => {
+    it("should show Traditional Chinese labels when the language is zh-Hant", async () => {
+        const { wrapper } = mountHome({ savedGame: dummySave });
+
+        i18n.global.locale.value = "zh-Hant";
+        await nextTick();
+
+        const text = wrapper.text();
+        for (const label of ["數獨", "新遊戲", "繼續遊戲", "統計", "解題演示", "設定"]) {
+            expect(text).toContain(label);
+        }
+        expect(text).not.toContain("Train your brain");
+    });
+
     it("should navigate to game page when clicking New Game button without saved game", async () => {
         const { wrapper, router } = mountHome();
         await router.push("/");
@@ -186,6 +201,19 @@ describe("Home", () => {
 
             expect(wrapper.find("[data-testid='new-game-confirm-dialog']").exists()).toBe(true);
             expect(wrapper.find("[data-testid='new-game-confirm-dialog']").text()).toContain("Give Up Current Game?");
+        });
+
+        it("should show the confirm dialog in Traditional Chinese when the language is zh-Hant", async () => {
+            const { wrapper } = mountHome({ savedGame: dummySave });
+            i18n.global.locale.value = "zh-Hant";
+            await nextTick();
+
+            await wrapper.find("[data-testid='new-game-button']").trigger("click");
+
+            const dialog = wrapper.find("[data-testid='new-game-confirm-dialog']");
+            expect(dialog.text()).toContain("放棄目前的遊戲？");
+            expect(dialog.text()).not.toContain("Give Up");
+            expect(dialog.find("[data-testid='new-game-cancel-button']").text()).toBe("取消");
         });
 
         it("should record gave up and start new game when clicking Give Up & Start New", async () => {
