@@ -20,6 +20,10 @@ export const useGameInteraction = ({ sudoku, stepRecorder, clearErrors, checkAnd
 
     const clickCell = (row: number, column: number) => {
         clearErrors();
+        if (sudoku.puzzle[row][column].isClue) {
+            pickClueDigit(sudoku.puzzle[row][column].clue);
+            return;
+        }
         if (inputMode.value === InputMode.Erase) {
             eraseCell(row, column);
             return;
@@ -33,6 +37,12 @@ export const useGameInteraction = ({ sudoku, stepRecorder, clearErrors, checkAnd
             return;
         }
         toggleSelectCell(row, column);
+    };
+
+    const pickClueDigit = (digit: number) => {
+        if (inputMode.value === InputMode.Erase) inputMode.value = InputMode.Normal;
+        selectedCell.value = null;
+        selectedDigit.value = selectedDigit.value === digit ? null : digit;
     };
 
     const noteToCell = (row: number, column: number, value: number) => {
