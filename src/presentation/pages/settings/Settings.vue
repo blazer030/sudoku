@@ -18,24 +18,13 @@
 
         <div class="flex flex-col gap-2">
             <span class="text-foreground-muted text-xs font-semibold tracking-wider uppercase px-1">{{ t("settings.language.label") }}</span>
-            <div
-                class="flex h-12 w-full bg-card rounded-button shadow-card p-1"
+            <SegmentedControl
+                :model-value="settingsStore.language"
+                :options="languageOptions"
                 data-testid="language-switcher"
-            >
-                <button
-                    v-for="option in languageOptions"
-                    :key="option.value"
-                    :aria-pressed="settingsStore.language === option.value"
-                    :class="settingsStore.language === option.value
-                        ? 'bg-primary text-on-primary font-semibold shadow-primary-sm'
-                        : 'text-foreground-secondary font-medium hover:bg-foreground/5'"
-                    :data-testid="`language-${option.value}`"
-                    class="flex-1 h-full rounded-icon flex items-center justify-center text-sm transition-all cursor-pointer"
-                    @click="settingsStore.setLanguage(option.value)"
-                >
-                    {{ option.label }}
-                </button>
-            </div>
+                test-id-prefix="language"
+                @update:model-value="settingsStore.setLanguage"
+            />
         </div>
 
         <div class="flex flex-col gap-2">
@@ -185,6 +174,7 @@ import { appVersion } from "@/utils/appVersion";
 import { ROUTER_PATH } from "@/router";
 import type { LanguagePreference } from "@/application/SettingsStorage";
 import { THEMES } from "@/theme/themeConfig";
+import SegmentedControl from "@/presentation/components/segmented-control/SegmentedControl.vue";
 
 const { t } = useI18n();
 const router = useRouter();

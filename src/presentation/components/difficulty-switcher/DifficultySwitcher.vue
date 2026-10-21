@@ -1,30 +1,23 @@
 <template>
-    <div
-        class="flex h-12 w-full bg-card rounded-button shadow-card p-1"
+    <SegmentedControl
+        :model-value="modelValue"
+        :options="options"
         data-testid="difficulty-switcher"
-    >
-        <button
-            v-for="difficulty in difficulties"
-            :key="difficulty"
-            :class="modelValue === difficulty
-                ? 'bg-primary text-on-primary font-semibold shadow-primary-sm'
-                : 'text-foreground-secondary font-medium hover:bg-foreground/5'"
-            :data-testid="`difficulty-${difficulty}`"
-            class="flex-1 h-full rounded-icon flex items-center justify-center text-sm transition-all cursor-pointer"
-            @click="$emit('update:modelValue', difficulty)"
-        >
-            {{ difficultyLabel(difficulty) }}
-        </button>
-    </div>
+        test-id-prefix="difficulty"
+        @update:model-value="emit('update:modelValue', $event)"
+    />
 </template>
 
 <script lang="ts" setup>
+import { computed } from "vue";
 import { type Difficulty } from "@/domain";
 import { useDifficultyLabel } from "@/presentation/labels/difficultyLabels";
+import SegmentedControl from "@/presentation/components/segmented-control/SegmentedControl.vue";
 
 defineProps<{ modelValue: Difficulty }>();
-defineEmits<{ "update:modelValue": [value: Difficulty] }>();
+const emit = defineEmits<{ "update:modelValue": [value: Difficulty] }>();
 
 const difficultyLabel = useDifficultyLabel();
 const difficulties: Difficulty[] = ["easy", "medium", "hard"];
+const options = computed(() => difficulties.map(difficulty => ({ value: difficulty, label: difficultyLabel(difficulty) })));
 </script>
