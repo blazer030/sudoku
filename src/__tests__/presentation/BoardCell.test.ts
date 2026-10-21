@@ -25,15 +25,43 @@ describe("BoardCell", () => {
     it.each([
         ["default", "bg-card"],
         ["clue", "bg-cell-clue"],
-        ["selected", "bg-primary-light"],
+        ["selected", "bg-cell-selected"],
         ["focus", "bg-cell-focus"],
         ["scope", "bg-cell-scope"],
         ["error", "bg-error-surface"],
         ["same-digit", "bg-highlight"],
+        ["peer", "bg-cell-peer"],
     ])("variant='%s' applies background class '%s'", (variant, expectedClass) => {
         const wrapper = mountCell({ variant });
 
         expect(wrapper.classes()).toContain(expectedClass);
+    });
+
+    it("should outline the selected cell inside its edges", () => {
+        const wrapper = mountCell({ variant: "selected" });
+
+        expect(wrapper.classes()).toEqual(expect.arrayContaining(["ring-2", "ring-inset", "ring-primary"]));
+    });
+
+    it("should keep player notes at least 10px", () => {
+        const wrapper = mountCell({ value: 0, notes: [4] });
+
+        const note = wrapper.findAll("span").find(span => span.text() === "4");
+        expect(note?.classes()).toContain("text-[clamp(10px,-0.49px+2.26vw,14px)]");
+        expect(note?.classes()).toContain("text-note");
+    });
+
+    it("should keep solver candidates at least 10px", () => {
+        const wrapper = mountCell({ value: 0, notes: [4], noteTone: "solver" });
+
+        const note = wrapper.findAll("span").find(span => span.text() === "4");
+        expect(note?.classes()).toContain("text-[clamp(10px,-0.49px+2.7vw,15px)]");
+    });
+
+    it("should render valueFontWeight bold", () => {
+        const wrapper = mountCell({ value: 5, valueFontWeight: "bold" });
+
+        expect(wrapper.find("[data-testid='cell-value']").classes()).toContain("font-bold");
     });
 
     it.each([

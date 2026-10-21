@@ -39,11 +39,11 @@
 <script lang="ts" setup>
 import { computed } from "vue";
 
-export type CellVariant = "default" | "clue" | "selected" | "focus" | "scope" | "error" | "same-digit" | "pattern" | "answer" | "wrong";
+export type CellVariant = "default" | "clue" | "selected" | "focus" | "scope" | "error" | "same-digit" | "pattern" | "answer" | "wrong" | "peer";
 /** Player notes are muted; solver candidates are bold in the theme colour so they never pass for the player's own. */
 export type NoteTone = "player" | "solver";
 export type ValueTextColor = "normal" | "error" | "primary";
-export type ValueFontWeight = "semibold" | "medium";
+export type ValueFontWeight = "bold" | "semibold" | "medium";
 
 const props = withDefaults(defineProps<{
     row: number;
@@ -75,7 +75,7 @@ const props = withDefaults(defineProps<{
 const VARIANT_BACKGROUNDS: Record<CellVariant, string> = {
     default: "bg-card",
     clue: "bg-cell-clue",
-    selected: "bg-primary-light",
+    selected: "bg-cell-selected ring-2 ring-inset ring-primary",
     focus: "bg-cell-focus",
     scope: "bg-cell-scope",
     error: "bg-error-surface",
@@ -83,6 +83,7 @@ const VARIANT_BACKGROUNDS: Record<CellVariant, string> = {
     pattern: "bg-cell-pattern",
     answer: "bg-primary-light ring-2 ring-inset ring-primary",
     wrong: "bg-error-surface ring-2 ring-inset ring-error",
+    peer: "bg-cell-peer",
 };
 
 const VALUE_TEXT_COLORS: Record<ValueTextColor, string> = {
@@ -92,6 +93,7 @@ const VALUE_TEXT_COLORS: Record<ValueTextColor, string> = {
 };
 
 const VALUE_FONT_WEIGHTS: Record<ValueFontWeight, string> = {
+    bold: "font-bold",
     semibold: "font-semibold",
     medium: "font-medium",
 };
@@ -103,8 +105,8 @@ const valueTextColorClass = computed(() => VALUE_TEXT_COLORS[props.valueTextColo
 const valueFontWeightClass = computed(() => VALUE_FONT_WEIGHTS[props.valueFontWeight]);
 
 const noteSizeClass = computed(() => (props.noteTone === "solver"
-    ? "text-[clamp(9.5px,-0.49px+2.7vw,15px)]"
-    : "text-[clamp(8px,-0.49px+2.26vw,14px)]"));
+    ? "text-[clamp(10px,-0.49px+2.7vw,15px)]"
+    : "text-[clamp(10px,-0.49px+2.26vw,14px)]"));
 
 const noteClass = (digit: number): string => {
     if (props.eliminatedDigits.includes(digit)) {
