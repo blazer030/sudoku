@@ -48,6 +48,23 @@ describe("HintPanel", () => {
         expect(wrapper.find("[data-testid='hint-wrong-entry-note']").text()).toBe("清除只會移除這格的數字。");
     });
 
+    it("should announce the wrong entry as soon as the panel shows it", () => {
+        const wrapper = mountWrongEntry();
+
+        expect(wrapper.find("[data-testid='hint-wrong-entry']").attributes("role")).toBe("alert");
+    });
+
+    it("should announce each new explanation through a live region that stays in place", async () => {
+        const wrapper = mountSteps(3, 0);
+        const region = wrapper.find("[data-testid='hint-explanation-region']");
+        expect(region.attributes("aria-live")).toBe("polite");
+        expect(wrapper.find("[data-testid='hint-explanation']").attributes("aria-live")).toBeUndefined();
+
+        await wrapper.setProps({ stepIndex: 1 });
+
+        expect(wrapper.find("[data-testid='hint-explanation-region']").element).toBe(region.element);
+    });
+
     it("should show one dot per step when the dots fit beside the longest technique name", () => {
         const wrapper = mountSteps(6, 2);
 

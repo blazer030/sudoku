@@ -12,9 +12,11 @@
                         class="text-error"
                     />
                 </span>
+                <!-- Shown with its content in place, so only an alert is sure to be read out. -->
                 <span
                     class="text-foreground text-[15px] font-semibold"
                     data-testid="hint-wrong-entry"
+                    role="alert"
                 >
                     {{ t("hintMode.panel.wrongEntry", { cell: cellName(wrongCell) }) }}
                 </span>
@@ -107,11 +109,14 @@
                 </div>
             </div>
 
-            <!-- The only part that gives way when a long explanation would push the buttons off screen. -->
+            <!-- The only part that gives way when a long explanation would push the buttons off screen.
+                 It stays mounted across steps, so it can announce each new explanation. -->
             <div
                 ref="explanationBox"
                 :class="explanationClipped ? 'hint-explanation-fade' : ''"
+                aria-live="polite"
                 class="hint-explanation-box min-h-[4.6rem] shrink! overflow-y-auto"
+                data-testid="hint-explanation-region"
                 @scroll="updateExplanationClipped"
             >
                 <Transition
@@ -123,7 +128,6 @@
                     <p
                         :key="`explanation-${stepIndex}`"
                         class="text-foreground text-[14.5px] leading-[1.6]"
-                        aria-live="polite"
                         data-testid="hint-explanation"
                     >
                         {{ explanation }}
