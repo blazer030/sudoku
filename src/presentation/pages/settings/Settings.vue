@@ -102,33 +102,6 @@
             </div>
         </div>
 
-        <div
-            v-if="showIconConfirmDialog"
-            class="fixed inset-0 bg-black/40 flex items-center justify-center z-40"
-        >
-            <div class="bg-card rounded-2xl p-6 max-w-xs mx-4">
-                <p class="text-foreground text-[15px] mb-4">
-                    {{ t("settings.iconDialog.message") }}
-                </p>
-                <div class="flex justify-end gap-3">
-                    <button
-                        class="px-4 py-2 text-foreground-muted cursor-pointer"
-                        data-testid="icon-dialog-cancel"
-                        @click="cancelEnableIcon"
-                    >
-                        {{ t("common.cancel") }}
-                    </button>
-                    <button
-                        class="px-4 py-2 bg-primary text-white rounded-xl cursor-pointer"
-                        data-testid="icon-dialog-confirm"
-                        @click="confirmEnableIcon"
-                    >
-                        {{ t("settings.iconDialog.enable") }}
-                    </button>
-                </div>
-            </div>
-        </div>
-
         <div class="flex flex-col gap-2">
             <span class="text-foreground-muted text-xs font-semibold tracking-wider uppercase px-1">{{ t("settings.gameplay") }}</span>
             <div class="bg-card rounded-2xl px-4 shadow-card-sm divide-y divide-border">
@@ -201,7 +174,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { ChevronLeft, ChevronRight, Check } from "lucide-vue-next";
@@ -274,22 +247,7 @@ const goToDonate = () => {
     void router.push(ROUTER_PATH.donate);
 };
 
-const showIconConfirmDialog = ref(false);
-
 const onToggleMatchIcon = () => {
-    if (settingsStore.matchLauncherIconToTheme) {
-        settingsStore.setMatchLauncherIconToTheme(false);
-    } else {
-        showIconConfirmDialog.value = true;
-    }
-};
-
-const confirmEnableIcon = () => {
-    settingsStore.setMatchLauncherIconToTheme(true);
-    showIconConfirmDialog.value = false;
-};
-
-const cancelEnableIcon = () => {
-    showIconConfirmDialog.value = false;
+    settingsStore.setMatchLauncherIconToTheme(!settingsStore.matchLauncherIconToTheme);
 };
 </script>

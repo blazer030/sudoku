@@ -19,11 +19,7 @@ export const zhHant: MessageSchema = {
         appearance: "外觀",
         colorTheme: "色彩主題",
         matchLauncherIcon: "App 圖示配合主題",
-        matchLauncherIconNote: "變更時 App 會短暫重新啟動",
-        iconDialog: {
-            message: "變更 App 圖示會讓 App 短暫重新啟動，要啟用嗎？",
-            enable: "啟用",
-        },
+        matchLauncherIconNote: "離開 App 後圖示才會更新",
         gameplay: "遊戲",
         toggles: {
             highlightSameDigit: { label: "標示相同數字", description: "選取數字時，標示相同的數字與筆記" },

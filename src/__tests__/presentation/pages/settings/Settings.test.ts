@@ -101,45 +101,53 @@ describe("Settings.vue match-launcher-icon toggle", () => {
         expect(wrapper.find("[data-testid='toggle-matchLauncherIconToTheme']").exists()).toBe(false);
     });
 
-    it("shows confirm dialog when tapping the toggle while OFF", async () => {
+    it("enables the setting immediately without a confirm dialog", async () => {
         vi.mocked(Capacitor.isNativePlatform).mockReturnValue(true);
         const wrapper = mountSettings();
         await wrapper.find("[data-testid='toggle-matchLauncherIconToTheme']").trigger("click");
-        expect(wrapper.find("[data-testid='icon-dialog-confirm']").exists()).toBe(true);
-    });
 
-    it("enables the setting only after the user confirms", async () => {
-        vi.mocked(Capacitor.isNativePlatform).mockReturnValue(true);
-        const wrapper = mountSettings();
-        await wrapper.find("[data-testid='toggle-matchLauncherIconToTheme']").trigger("click");
-        await wrapper.find("[data-testid='icon-dialog-confirm']").trigger("click");
-
-        const { useSettingsStore } = await import("@/stores/settingsStore");
+        expect(wrapper.find("[data-testid='icon-dialog-confirm']").exists()).toBe(false);
         expect(useSettingsStore().matchLauncherIconToTheme).toBe(true);
-        expect(wrapper.find("[data-testid='icon-dialog-confirm']").exists()).toBe(false);
     });
 
-    it("keeps the setting OFF when the user cancels the dialog", async () => {
+    it("asks the icon service to apply the current theme when enabled", async () => {
+        vi.mocked(Capacitor.isNativePlatform).mockReturnValue(true);
+        const wrapper = mountSettings();
+        const setIcon = vi.fn().mockResolvedValue(undefined);
+        const settingsStore = useSettingsStore();
+        settingsStore.setIconService({ setIcon });
+        await wrapper.find("[data-testid='toggle-matchLauncherIconToTheme']").trigger("click");
+
+        expect(setIcon).toHaveBeenCalledWith(settingsStore.colorTheme);
+    });
+
+    it("disables the setting when toggling from ON", async () => {
         vi.mocked(Capacitor.isNativePlatform).mockReturnValue(true);
         const wrapper = mountSettings();
         await wrapper.find("[data-testid='toggle-matchLauncherIconToTheme']").trigger("click");
-        await wrapper.find("[data-testid='icon-dialog-cancel']").trigger("click");
+        await wrapper.find("[data-testid='toggle-matchLauncherIconToTheme']").trigger("click");
 
-        const { useSettingsStore } = await import("@/stores/settingsStore");
         expect(useSettingsStore().matchLauncherIconToTheme).toBe(false);
-        expect(wrapper.find("[data-testid='icon-dialog-confirm']").exists()).toBe(false);
     });
 
-    it("disables without a dialog when toggling from ON", async () => {
+    it("explains that the icon updates after leaving the app", () => {
         vi.mocked(Capacitor.isNativePlatform).mockReturnValue(true);
         const wrapper = mountSettings();
-        await wrapper.find("[data-testid='toggle-matchLauncherIconToTheme']").trigger("click");
-        await wrapper.find("[data-testid='icon-dialog-confirm']").trigger("click");
-        await wrapper.find("[data-testid='toggle-matchLauncherIconToTheme']").trigger("click");
+        expect(wrapper.text()).toContain("The icon updates after you leave the app");
+    });
 
-        expect(wrapper.find("[data-testid='icon-dialog-confirm']").exists()).toBe(false);
-        const { useSettingsStore } = await import("@/stores/settingsStore");
-        expect(useSettingsStore().matchLauncherIconToTheme).toBe(false);
+    it("shows the note in Chinese", async () => {
+        vi.mocked(Capacitor.isNativePlatform).mockReturnValue(true);
+        const wrapper = mountSettings();
+        const { language } = storeToRefs(useSettingsStore());
+        const stopLocaleSync = startLocaleSync(language);
+        try {
+            await wrapper.find("[data-testid='language-zh-Hant']").trigger("click");
+            await nextTick();
+            expect(wrapper.text()).toContain("離開 App 後圖示才會更新");
+        } finally {
+            stopLocaleSync();
+        }
     });
 });
 
