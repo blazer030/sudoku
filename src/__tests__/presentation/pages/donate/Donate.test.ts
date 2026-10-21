@@ -182,6 +182,7 @@ describe("Donate.vue purchase feedback", () => {
         await flushPromises();
 
         expect(wrapper.find("[data-testid='donate-toast']").text()).toBe("Cancelled");
+        expect(wrapper.find("[data-testid='donate-toast']").classes()).toEqual(expect.arrayContaining(["bg-toast", "text-on-toast"]));
     });
 
     it("shows a generic error toast and logs the reason when the purchase fails", async () => {

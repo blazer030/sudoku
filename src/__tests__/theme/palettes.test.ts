@@ -1,5 +1,6 @@
 import { COLOR_THEME_IDS, type ColorThemeId } from "@/application/SettingsStorage";
 import { STYLES, getPalette } from "@/theme/palettes";
+import { contrastRatio } from "@/theme/contrast";
 
 describe("palettes", () => {
     it("should define every color theme for the minimal style in order", () => {
@@ -23,5 +24,12 @@ describe("palettes", () => {
 
     it("getPalette falls back to the style's first theme", () => {
         expect(getPalette("minimal", "red" as ColorThemeId, "light")).toEqual(getPalette("minimal", "green", "light"));
+    });
+
+    it("should keep the dark toast a dark surface rather than a light block", () => {
+        for (const theme of STYLES.minimal.themes) {
+            const { toast, background, foreground } = theme.dark;
+            expect(contrastRatio(toast, background)).toBeLessThan(contrastRatio(toast, foreground));
+        }
     });
 });

@@ -47,6 +47,7 @@ const TEXT_PAIRS: readonly ContrastPair[] = [
     pair("error", "error-surface"),
     // Statistics and review badges, the hint step button
     pair("primary", "primary-light"),
+    pair("on-toast", "toast"),
 ];
 
 const BOARD_SURFACES: readonly PaletteToken[] = [

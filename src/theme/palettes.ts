@@ -8,6 +8,7 @@ export const PALETTE_TOKENS = [
     "primary", "primary-hover", "primary-light", "accent", "highlight", "cell-clue",
     "danger", "danger-hover", "error", "error-surface", "shadow",
     "on-primary", "on-danger", "note", "cell-focus", "cell-scope", "cell-pattern", "scrim", "on-scrim",
+    "toast", "on-toast",
 ] as const;
 export type PaletteToken = typeof PALETTE_TOKENS[number];
 export type Palette = Record<PaletteToken, string>;
@@ -47,6 +48,8 @@ const MINIMAL_LIGHT_NEUTRALS: Omit<Palette, keyof LightThemeColors | DerivedToke
     "note": "#5E5D5B",
     "scrim": "#000000",
     "on-scrim": "#FFFFFF",
+    "toast": "#1A1918",
+    "on-toast": "#F5F4F1",
 };
 
 // Direction C neutrals; primaries are light tints, so text on them is dark
@@ -68,6 +71,9 @@ const MINIMAL_DARK_NEUTRALS: Omit<Palette, keyof DarkThemeColors | DerivedToken>
     "note": "#ADACA9",
     "scrim": "#000000",
     "on-scrim": "#FFFFFF",
+    // A raised dark surface, not an inverted light block
+    "toast": "#34342F",
+    "on-toast": "#F3F2EE",
 };
 
 // Board tints are the primary painted over the card at these strengths
