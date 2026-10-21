@@ -120,6 +120,8 @@ export const zhHant: MessageSchema = {
             hints: "提示",
             backToHome: "回到首頁",
             newRecord: "新紀錄！",
+            playAgain: "再玩一局",
+            review: "看這局回顧",
         },
     },
     playback: {

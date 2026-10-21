@@ -131,6 +131,8 @@ import { useGameSession } from "@/presentation/pages/game/useGameSession";
 import { useLongPressTip } from "@/presentation/pages/game/useLongPressTip";
 import { useSettingsStore } from "@/stores/settingsStore";
 
+const emit = defineEmits<{ playAgain: [] }>();
+
 const {
     sudoku,
     stepRecorder,
@@ -146,7 +148,7 @@ const {
     checkAndComplete,
     triggerFlash,
     isFlashing,
-} = useGameSession();
+} = useGameSession({ onPlayAgain: () => { emit("playAgain"); } });
 
 const settingsStore = useSettingsStore();
 

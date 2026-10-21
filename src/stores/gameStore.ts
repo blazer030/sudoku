@@ -17,6 +17,8 @@ export const useGameStore = defineStore("game", () => {
     const replay = shallowRef<GameReplayData | null>(null);
     const hasActiveGame = computed(() => sudoku.value !== null);
     const savedGame = ref<GameState | null>(null);
+    // Raised by every new game, so the game screen can remount for it without leaving the route
+    const gameSerial = ref(0);
     let analytics: AnalyticsService | null = null;
     let gameRepository: GameRepository | null = null;
 
@@ -57,6 +59,7 @@ export const useGameStore = defineStore("game", () => {
         difficulty.value = newDifficulty;
         elapsedSeconds.value = 0;
         replay.value = null;
+        gameSerial.value++;
         void analytics?.logEvent({ name: "game_start", difficulty: newDifficulty });
     };
 
@@ -72,6 +75,7 @@ export const useGameStore = defineStore("game", () => {
         setDifficulty,
         sudoku,
         hasActiveGame,
+        gameSerial,
         startNewGame,
         loadSavedGame,
         elapsedSeconds,

@@ -1,7 +1,10 @@
 import { computed, inject, reactive } from "vue";
-import { provideGameCompleteModal } from "@/presentation/pages/game/components/useGameCompleteModal";
+import { provideGameCompleteModal, type GameCompleteAction } from "@/presentation/pages/game/components/useGameCompleteModal";
 import { BOARD_SIZE, Sudoku, StepRecorder } from "@/domain";
+import { useRouter } from "vue-router";
 import { useGameStore } from "@/stores/gameStore";
+import { useStatisticsStore } from "@/stores/statisticsStore";
+import { ROUTER_PATH } from "@/router";
 import { captureInitialBoard } from "@/application/GameState";
 import type { GameReplayData } from "@/application/statistics/StatisticsRepository";
 import { useGameTimer } from "@/presentation/pages/game/useGameTimer";
@@ -13,7 +16,13 @@ import { useCompletionFlash } from "@/presentation/pages/game/useCompletionFlash
 import { useSettingsStore } from "@/stores/settingsStore";
 import { ANALYTICS_KEY } from "@/application/analytics/AnalyticsService";
 
-export const useGameSession = () => {
+interface GameSessionOptions {
+    /** The player chose Play Again on the completion modal. */
+    onPlayAgain: () => void;
+}
+
+export const useGameSession = ({ onPlayAgain }: GameSessionOptions) => {
+    const router = useRouter();
     const gameStore = useGameStore();
     const analytics = inject(ANALYTICS_KEY);
 
@@ -40,6 +49,22 @@ export const useGameSession = () => {
     });
 
     const gameCompleteModal = provideGameCompleteModal();
+    const statisticsStore = useStatisticsStore();
+
+    const handleCompleteAction = (action: GameCompleteAction) => {
+        switch (action) {
+        case "home":
+            router.back();
+            break;
+        case "review":
+            // Replace, so Back from the review does not land on the finished game
+            void router.replace(ROUTER_PATH.gameReviewFor(statisticsStore.history.length - 1));
+            break;
+        case "playAgain":
+            onPlayAgain();
+            break;
+        }
+    };
 
     const difficulty = computed(() => gameStore.difficulty ?? "easy");
 
@@ -62,7 +87,7 @@ export const useGameSession = () => {
                     difficulty: difficulty.value,
                     hintsUsed: sudoku.hintTracker.recordedUsed,
                     isNewRecord,
-                });
+                }).then(handleCompleteAction);
             });
         },
     });

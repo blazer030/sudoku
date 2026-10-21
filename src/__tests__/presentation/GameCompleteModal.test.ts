@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { mount } from "@vue/test-utils";
+import { flushPromises, mount } from "@vue/test-utils";
 import { defineComponent, nextTick } from "vue";
 import { i18n } from "@/presentation/i18n";
 import { createMemoryHistory, createRouter } from "vue-router";
@@ -7,7 +7,7 @@ import GameCompleteModal from "@/presentation/pages/game/components/GameComplete
 import { provideGameCompleteModal } from "@/presentation/pages/game/components/useGameCompleteModal";
 import type { GameCompleteParams } from "@/presentation/pages/game/components/useGameCompleteModal";
 
-const mountModal = (overrides: Partial<GameCompleteParams> = {}) => {
+const mountModal = (overrides: Partial<GameCompleteParams> = {}, onResult: (result: unknown) => void = () => { /* ignored */ }) => {
     const router = createRouter({
         history: createMemoryHistory(),
         routes: [{ path: "/", component: { template: "<div/>" } }],
@@ -16,7 +16,7 @@ const mountModal = (overrides: Partial<GameCompleteParams> = {}) => {
         components: { GameCompleteModal },
         setup() {
             const modal = provideGameCompleteModal();
-            void modal.open({ elapsedSeconds: 120, difficulty: "easy", hintsUsed: 0, isNewRecord: false, ...overrides });
+            void modal.open({ elapsedSeconds: 120, difficulty: "easy", hintsUsed: 0, isNewRecord: false, ...overrides }).then(onResult);
             return {};
         },
         template: "<GameCompleteModal />",
@@ -66,6 +66,30 @@ describe("GameCompleteModal", () => {
         const wrapper = mountModal({ isNewRecord: false });
 
         expect(wrapper.find("[data-testid='new-record-badge']").exists()).toBe(false);
+    });
+
+    it("should offer Play Again first, then this game's review and home", () => {
+        const wrapper = mountModal();
+
+        expect(wrapper.find("[data-testid='play-again-button']").text()).toBe("Play Again");
+        expect(wrapper.find("[data-testid='play-again-button']").classes()).toContain("bg-primary");
+        expect(wrapper.find("[data-testid='review-game-button']").text()).toBe("Review This Game");
+        expect(wrapper.find("[data-testid='back-to-home-button']").text()).toBe("Back to Home");
+    });
+
+    it.each([
+        ["play-again-button", "playAgain"],
+        ["review-game-button", "review"],
+        ["back-to-home-button", "home"],
+    ])("should resolve with the action of %s", async (testId, action) => {
+        let result: unknown = null;
+        const wrapper = mountModal({}, (resolved) => { result = resolved; });
+
+        await wrapper.find(`[data-testid='${testId}']`).trigger("click");
+        await flushPromises();
+
+        expect(result).toBe(action);
+        expect(wrapper.find("[data-testid='game-complete-modal']").exists()).toBe(false);
     });
 
     it("should display 0 hints when no hints used", () => {

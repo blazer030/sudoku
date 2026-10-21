@@ -122,6 +122,8 @@ export const en = {
             hints: "Hints",
             backToHome: "Back to Home",
             newRecord: "New record!",
+            playAgain: "Play Again",
+            review: "Review This Game",
         },
     },
     playback: {

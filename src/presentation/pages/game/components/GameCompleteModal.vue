@@ -59,28 +59,41 @@
                     </div>
                 </div>
 
-                <button
-                    v-press
-                    class="w-full h-[52px] rounded-button bg-primary flex items-center justify-center gap-2 shadow-primary cursor-pointer transition-all duration-200 hover:bg-primary-hover hover:shadow-primary-lg"
-                    data-testid="back-to-home-button"
-                    @click="goHome"
-                >
-                    <Home
-                        :size="20"
-                        class="text-on-primary"
-                    />
-                    <span class="text-base font-semibold text-on-primary">
+                <div class="flex flex-col gap-2.5 w-full">
+                    <button
+                        v-press
+                        class="w-full h-[52px] rounded-button bg-primary text-on-primary flex items-center justify-center gap-2 shadow-primary cursor-pointer transition-all duration-200 hover:bg-primary-hover hover:shadow-primary-lg"
+                        data-testid="play-again-button"
+                        @click="close('playAgain')"
+                    >
+                        <RotateCcw :size="20" />
+                        <span class="text-base font-semibold">{{ t("game.complete.playAgain") }}</span>
+                    </button>
+                    <button
+                        v-press
+                        class="w-full h-[52px] rounded-button bg-card border border-border text-foreground flex items-center justify-center gap-2 cursor-pointer transition-all duration-200 hover:bg-foreground/5"
+                        data-testid="review-game-button"
+                        @click="close('review')"
+                    >
+                        <History :size="20" />
+                        <span class="text-base font-semibold">{{ t("game.complete.review") }}</span>
+                    </button>
+                    <button
+                        v-press
+                        class="w-full h-11 rounded-button text-foreground-secondary text-[15px] font-medium flex items-center justify-center cursor-pointer transition-all duration-200 hover:bg-foreground/5"
+                        data-testid="back-to-home-button"
+                        @click="close('home')"
+                    >
                         {{ t("game.complete.backToHome") }}
-                    </span>
-                </button>
+                    </button>
+                </div>
             </div>
         </div>
     </Transition>
 </template>
 
 <script lang="ts" setup>
-import { Trophy, Home } from "lucide-vue-next";
-import { useRouter } from "vue-router";
+import { History, RotateCcw, Trophy } from "lucide-vue-next";
 import { formatTime } from "@/utils/formatTime";
 import { useDifficultyLabel } from "@/presentation/labels/difficultyLabels";
 import { computed } from "vue";
@@ -90,14 +103,8 @@ import FireworkCanvas from "@/presentation/pages/game/components/FireworkCanvas.
 import { vPress } from "@/presentation/directives/press";
 
 const { t } = useI18n();
-const router = useRouter();
 const { visible, params, close } = useGameCompleteModal();
 
 const difficultyText = useDifficultyLabel();
 const difficultyLabel = computed(() => difficultyText(params.value?.difficulty ?? "easy"));
-
-const goHome = () => {
-    router.back();
-    close();
-};
 </script>

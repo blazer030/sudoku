@@ -54,6 +54,15 @@ describe("gameStore", () => {
         expect(store.hasActiveGame).toBe(true);
     });
 
+    it("startNewGame should give each new game its own serial number", async () => {
+        const store = useGameStore();
+        expect(store.gameSerial).toBe(0);
+
+        await store.startNewGame("easy");
+
+        expect(store.gameSerial).toBe(1);
+    });
+
     it("loadSavedGame should restore a game from GameState", () => {
         const store = useGameStore();
         const state: GameState = {
