@@ -25,6 +25,7 @@ const REQUIRED_SELECTORS: Record<StyleId, readonly string[]> = {
         '[data-skin~="page"]',
         '[data-skin~="page-header"]',
         '[data-variant="selected"]::after',
+        '[data-note-highlight]::after',
         '[data-skin~="check"]',
         '[data-skin~="continue"]',
         '[data-skin~="new-game"]',

@@ -37,6 +37,7 @@
                 <span
                     v-if="notes.includes(noteDigit) || eliminatedDigits.includes(noteDigit)"
                     :class="[noteClass(noteDigit), noteSizeClass, 'font-note']"
+                    :data-note-highlight="isNoteHighlighted(noteDigit) ? '' : undefined"
                     :data-testid="eliminatedDigits.includes(noteDigit) ? `eliminated-note-${noteDigit}` : undefined"
                 >
                     {{ noteDigit }}
@@ -134,11 +135,15 @@ const noteSizeClass = computed(() => (props.noteTone === "solver"
     ? "text-[length:calc(clamp(10px,-0.49px+2.7vw,15px)*var(--note-scale,1))]"
     : "text-[length:calc(clamp(10px,-0.49px+2.26vw,14px)*var(--note-scale,1))]"));
 
+// The selected digit's note, or a hint's emphasised candidate; a style may redraw it
+const isNoteHighlighted = (digit: number): boolean =>
+    !props.eliminatedDigits.includes(digit) && (props.highlightedNote === digit || props.emphasizedDigits.includes(digit));
+
 const noteClass = (digit: number): string => {
     if (props.eliminatedDigits.includes(digit)) {
         return props.noteTone === "solver" ? "text-error font-semibold strike-diagonal" : "text-error strike-diagonal";
     }
-    if (props.highlightedNote === digit || props.emphasizedDigits.includes(digit)) {
+    if (isNoteHighlighted(digit)) {
         return "aspect-square max-w-5 max-h-5 w-full rounded-full bg-primary text-on-primary font-semibold flex items-center justify-center";
     }
     if (props.noteTone === "solver") return "text-primary font-semibold";

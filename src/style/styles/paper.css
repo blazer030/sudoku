@@ -118,6 +118,26 @@
     animation: paper-circle-draw 220ms ease-out;
 }
 
+/* The selected digit's notes are circled with the same pen instead of sitting on a filled disc,
+   which buried the thin handwritten digit */
+[data-style="paper"] [data-note-highlight] {
+    position: relative;
+    background-color: transparent;
+    color: var(--color-primary);
+    font-weight: 700;
+}
+
+[data-style="paper"] [data-note-highlight]::after {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    pointer-events: none;
+    background-color: var(--color-primary);
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpath d='M30 7.5C23 3.5 11 4.5 6 11.5S3.5 29 11 33.5 30 37.5 35 30 37 13 27 6.8' fill='none' stroke='currentColor' stroke-width='3.2' stroke-linecap='round'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpath d='M30 7.5C23 3.5 11 4.5 6 11.5S3.5 29 11 33.5 30 37.5 35 30 37 13 27 6.8' fill='none' stroke='currentColor' stroke-width='3.2' stroke-linecap='round'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+    rotate: -4deg;
+}
+
 /* An option tile's tick is drawn as a pen stroke when it appears */
 @keyframes paper-check-draw {
     from { stroke-dashoffset: 24; }

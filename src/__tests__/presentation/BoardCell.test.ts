@@ -205,6 +205,14 @@ describe("BoardCell", () => {
         expect(highlightedSpan?.classes()).toContain("text-on-primary");
     });
 
+    it("should mark the highlighted note so a style can redraw it", () => {
+        const wrapper = mountCell({ value: 0, notes: [1, 2, 3], highlightedNote: 2 });
+        const note = (digit: number) => wrapper.findAll("span").find(span => span.text() === `${digit}`);
+
+        expect(note(2)?.attributes("data-note-highlight")).toBeDefined();
+        expect(note(1)?.attributes("data-note-highlight")).toBeUndefined();
+    });
+
     it("should apply top-left corner rounding at (0, 0)", () => {
         const wrapper = mountCell({ row: 0, column: 0 });
 
