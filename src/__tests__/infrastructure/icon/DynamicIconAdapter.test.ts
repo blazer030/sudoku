@@ -9,6 +9,7 @@ vi.mock("@capacitor-community/app-icon", () => ({ AppIcon: { change } }));
 vi.mock("@capacitor/app", () => ({ App: { addListener } }));
 
 import { DynamicIconAdapter } from "@/infrastructure/icon/DynamicIconAdapter";
+import { LAUNCHER_ICONS } from "@/theme/launcherIcon";
 
 describe("DynamicIconAdapter", () => {
     let triggerPause: () => void;
@@ -38,9 +39,21 @@ describe("DynamicIconAdapter", () => {
         expect(change).toHaveBeenCalledTimes(1);
         expect(change).toHaveBeenCalledWith({
             name: "blue",
-            disable: ["green", "purple", "orange", "pink", "teal"],
+            disable: LAUNCHER_ICONS.map(icon => icon.key).filter(key => key !== "blue"),
             suppressNotification: false,
         });
+    });
+
+    it("disables every other alias, light and dark, when applying a dark icon", async () => {
+        const adapter = new DynamicIconAdapter();
+        await adapter.setIcon("paperRedInkDark");
+        triggerPause();
+        const { name, disable } = change.mock.calls[0][0] as { name: string; disable: string[] };
+        expect(name).toBe("paperRedInkDark");
+        expect(disable).toHaveLength(LAUNCHER_ICONS.length - 1);
+        expect(disable).toContain("green");
+        expect(disable).toContain("minimalGreenDark");
+        expect(disable).not.toContain("paperRedInkDark");
     });
 
     it("applies only the last requested icon", async () => {

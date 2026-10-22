@@ -1,24 +1,38 @@
 import { computed, watch, type Ref } from "vue";
-import { iconThemeFor } from "@/theme/iconTheme";
-import type { ColorThemeId, StyleId } from "@/application/SettingsStorage";
+import { launcherIconKey } from "@/theme/launcherIcon";
+import { resolveColorMode } from "@/presentation/theme/appearanceSync";
+import { watchSystemDark } from "@/presentation/theme/useColorMode";
+import type { Appearance, ColorThemeId, StyleId } from "@/application/SettingsStorage";
 import type { IconService } from "@/application/icon/IconService";
 
 export interface LauncherIconSources {
     style: Ref<StyleId>;
     colorTheme: Ref<ColorThemeId>;
+    appearance: Ref<Appearance>;
     matchLauncherIconToTheme: Ref<boolean>;
 }
 
 /**
- * Asks the icon service for the launcher icon that matches the theme whenever that icon changes
- * while matching is on, and once when matching is turned on. Turning it off leaves the icon as it is.
+ * While matching is on, asks the icon service for the current theme's icon in the light or dark the
+ * app shows: on start (the mode may have changed while the app was closed), whenever that icon
+ * changes, and when matching is turned on. Turning matching off leaves the icon as it is.
  */
 export const startLauncherIconSync = (sources: LauncherIconSources, iconService: IconService): (() => void) => {
-    // Only six icons exist; any other theme shows the nearest of them
-    const iconTheme = computed(() => iconThemeFor(sources.style.value, sources.colorTheme.value));
+    const { systemPrefersDark, stop: stopWatchingSystem } = watchSystemDark();
+    const icon = computed(() => launcherIconKey(
+        sources.style.value,
+        sources.colorTheme.value,
+        resolveColorMode(sources.appearance.value, systemPrefersDark.value),
+    ));
 
-    return watch([iconTheme, sources.matchLauncherIconToTheme], ([icon, matching], [previousIcon, wasMatching]) => {
+    // On the immediate first run the previous values are undefined
+    const stopWatching = watch([icon, sources.matchLauncherIconToTheme], ([key, matching], [previousKey, wasMatching]) => {
         if (!matching) return;
-        if (icon !== previousIcon || !wasMatching) void iconService.setIcon(icon);
-    });
+        if (key !== previousKey || wasMatching !== true) void iconService.setIcon(key);
+    }, { immediate: true });
+
+    return () => {
+        stopWatching();
+        stopWatchingSystem();
+    };
 };
