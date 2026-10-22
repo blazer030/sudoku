@@ -29,4 +29,20 @@ describe("backDismissal", () => {
         await expect(result).resolves.toBe("cancel");
         expect(dialog.visible.value).toBe(false);
     });
+
+    it("should go back a page when no dialog is open and there is a page to go back to", () => {
+        const back = vi.spyOn(window.history, "back").mockImplementation(() => undefined);
+
+        handleBackButton(true);
+
+        expect(back).toHaveBeenCalledTimes(1);
+    });
+
+    it("should do nothing on the first page when no dialog is open", () => {
+        const back = vi.spyOn(window.history, "back").mockImplementation(() => undefined);
+
+        handleBackButton(false);
+
+        expect(back).not.toHaveBeenCalled();
+    });
 });
