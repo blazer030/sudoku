@@ -13,6 +13,23 @@ const mountControl = (modelValue: string) => mount(SegmentedControl, {
 });
 
 describe("SegmentedControl", () => {
+    it("should use the raised card track by default", () => {
+        const wrapper = mountControl("small");
+
+        expect(wrapper.classes()).toContain("bg-card");
+        expect(wrapper.classes()).toContain("shadow-card");
+    });
+
+    it("should render a recessed track without shadow when inset", () => {
+        const wrapper = mount(SegmentedControl, {
+            props: { options: OPTIONS, modelValue: "small", testIdPrefix: "size", inset: true },
+        });
+
+        expect(wrapper.classes()).toContain("bg-background");
+        expect(wrapper.classes()).not.toContain("bg-card");
+        expect(wrapper.classes()).not.toContain("shadow-card");
+    });
+
     it("should render a labelled button per option", () => {
         const wrapper = mountControl("small");
 

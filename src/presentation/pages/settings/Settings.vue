@@ -105,6 +105,7 @@
                 :options="appearanceOptions"
                 class="mt-3"
                 data-testid="appearance-switcher"
+                inset
                 test-id-prefix="appearance"
                 @update:model-value="settingsStore.setAppearance"
             />
@@ -130,6 +131,7 @@
             <SegmentedControl
                 :model-value="settingsStore.language"
                 :options="languageOptions"
+                inset
                 data-testid="language-switcher"
                 test-id-prefix="language"
                 @update:model-value="settingsStore.setLanguage"

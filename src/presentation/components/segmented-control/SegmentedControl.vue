@@ -1,5 +1,8 @@
 <template>
-    <div class="relative flex h-12 w-full bg-card rounded-button shadow-card p-1">
+    <div
+        :class="inset ? 'bg-background' : 'bg-card shadow-card'"
+        class="relative flex h-12 w-full rounded-button p-1"
+    >
         <div
             v-if="selectedIndex >= 0"
             :class="{ 'segmented-indicator-motion': withMotion }"
@@ -41,6 +44,8 @@ const props = defineProps<{
     options: readonly SegmentedOption<Value>[];
     modelValue: Value;
     testIdPrefix: string;
+    // Recessed track for use on a card surface: background tone, no shadow
+    inset?: boolean;
 }>();
 
 const emit = defineEmits<{ "update:modelValue": [value: Value] }>();
