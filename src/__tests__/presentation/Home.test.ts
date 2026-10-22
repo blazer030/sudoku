@@ -87,6 +87,24 @@ describe("Home", () => {
         expect(text).not.toContain("Train your brain");
     });
 
+    it("should set a Chinese title as one plate per character, reading as before", async () => {
+        const { wrapper } = mountHome();
+        i18n.global.locale.value = "zh-Hant";
+        await nextTick();
+
+        const glyphs = wrapper.findAll("[data-testid='home-title-glyph']");
+        expect(glyphs.map(glyph => glyph.text())).toEqual(["數", "獨"]);
+        expect(wrapper.get("h1").text()).toBe("數獨");
+        for (const glyph of glyphs) expect(glyph.attributes("data-skin")).toBe("title-glyph");
+    });
+
+    it("should keep an English title whole", () => {
+        const { wrapper } = mountHome();
+
+        expect(wrapper.findAll("[data-testid='home-title-glyph']").map(glyph => glyph.text())).toEqual(["Sudoku"]);
+        expect(wrapper.get("h1").text()).toBe("Sudoku");
+    });
+
     it("should navigate to game page when clicking New Game button without saved game", async () => {
         const { wrapper, router } = mountHome();
         await router.push("/");

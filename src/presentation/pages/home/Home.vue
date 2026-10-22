@@ -23,7 +23,13 @@
                 class="text-foreground text-4xl font-bold tracking-[-1px]"
                 data-skin="title"
             >
-                {{ t("home.title") }}
+                <!-- One span per plate; the heading's text is unchanged, so it reads as before -->
+                <span
+                    v-for="(glyph, glyphIndex) in titleGlyphs(t('home.title'))"
+                    :key="glyphIndex"
+                    data-skin="title-glyph"
+                    data-testid="home-title-glyph"
+                >{{ glyph }}</span>
             </h1>
             <p class="text-foreground-secondary text-sm">
                 {{ t("home.subtitle") }}
@@ -117,6 +123,7 @@ import { provideNewGameDialog } from "@/presentation/components/new-game-dialog/
 import PuzzleLoader from "@/presentation/components/puzzle-loader/PuzzleLoader.vue";
 import { usePuzzleLoader } from "@/presentation/components/puzzle-loader/usePuzzleLoader";
 import { vPress } from "@/presentation/directives/press";
+import { titleGlyphs } from "@/presentation/pages/home/titleGlyphs";
 
 const { t } = useI18n();
 const router = useRouter();
