@@ -186,10 +186,66 @@ describe("Settings.vue language switcher", () => {
             expect(wrapper.find("[data-testid='language-zh-Hant']").text()).toBe("繁體中文");
             expect(wrapper.find("[data-testid='language-en']").text()).toBe("English");
             expect(wrapper.find("[data-testid='language-zh-Hant']").attributes("aria-pressed")).toBe("true");
+            const gameplay = wrapper.get("[data-testid='settings-group-gameplay']").text();
+            expect(gameplay).toContain("遊戲");
+            expect(gameplay).toContain("標示同列、欄、宮");
         } finally {
             stopLocaleSync();
         }
     });
+});
+
+const readStoredSettings = () => JSON.parse(localStorage.getItem("sudoku-settings") ?? "{}") as Record<string, unknown>;
+
+describe("Settings.vue groups", () => {
+    beforeEach(() => {
+        localStorage.clear();
+        vi.mocked(Capacitor.isNativePlatform).mockReturnValue(false);
+    });
+
+    it("should show the groups in order", () => {
+        const wrapper = mountSettings();
+
+        expect(wrapper.findAll("[data-testid^='settings-group-']").map(group => group.attributes("data-testid")))
+            .toEqual(["settings-group-gameplay", "settings-group-appearance", "settings-group-language", "settings-group-about"]);
+    });
+
+    it("should show five gameplay tiles in order", () => {
+        const wrapper = mountSettings();
+
+        const tiles = wrapper.get("[data-testid='settings-group-gameplay']").findAll("[data-testid^='toggle-']");
+
+        expect(tiles.map(tile => tile.attributes("data-testid"))).toEqual([
+            "toggle-highlightSameDigit",
+            "toggle-highlightScope",
+            "toggle-completionFlash",
+            "toggle-autoRemoveNotes",
+            "toggle-showRemainingCount",
+        ]);
+        expect(tiles.map(tile => tile.attributes("aria-pressed"))).toEqual(["true", "true", "true", "true", "true"]);
+    });
+
+    it("should turn row, column and box highlighting off from its tile", async () => {
+        const wrapper = mountSettings();
+
+        await wrapper.get("[data-testid='toggle-highlightScope']").trigger("click");
+
+        expect(useSettingsStore().highlightScope).toBe(false);
+        expect(wrapper.get("[data-testid='toggle-highlightScope']").attributes("aria-pressed")).toBe("false");
+        expect(readStoredSettings().highlightScope).toBe(false);
+    });
+
+    it.each(["highlightSameDigit", "completionFlash", "autoRemoveNotes", "showRemainingCount"] as const)(
+        "should sync the %s tile with its setting",
+        async (key) => {
+            const wrapper = mountSettings();
+
+            await wrapper.get(`[data-testid='toggle-${key}']`).trigger("click");
+
+            expect(useSettingsStore()[key]).toBe(false);
+            expect(wrapper.get(`[data-testid='toggle-${key}']`).attributes("aria-pressed")).toBe("false");
+        },
+    );
 });
 
 describe("Settings.vue color mode switcher", () => {

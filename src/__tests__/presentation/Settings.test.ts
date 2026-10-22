@@ -4,6 +4,7 @@ import { createRouter, createMemoryHistory } from "vue-router";
 import Settings from "@/presentation/pages/settings/Settings.vue";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { getPalette } from "@/theme/palettes";
+import { appVersion } from "@/utils/appVersion";
 
 const createTestRouter = () => {
     return createRouter({
@@ -62,11 +63,11 @@ describe("Settings Page", () => {
         expect(store.colorTheme).toBe("blue");
     });
 
-    it("should render 4 toggle switches", () => {
+    it("should render 5 toggle tiles", () => {
         const { wrapper } = mountSettings();
 
         const toggles = wrapper.findAll("[data-testid^='toggle-']");
-        expect(toggles).toHaveLength(4);
+        expect(toggles).toHaveLength(5);
     });
 
     it("should toggle highlightSameDigit setting", async () => {
@@ -104,6 +105,6 @@ describe("Settings Page", () => {
     it("should display app version", () => {
         const { wrapper } = mountSettings();
 
-        expect(wrapper.text()).toContain("v");
+        expect(wrapper.get("[data-testid='version-link']").text()).toContain(appVersion);
     });
 });
