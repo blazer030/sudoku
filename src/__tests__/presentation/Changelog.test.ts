@@ -4,6 +4,7 @@ import { createMemoryHistory, createRouter } from "vue-router";
 import Changelog from "@/presentation/pages/settings/Changelog.vue";
 import { i18n } from "@/presentation/i18n";
 import { CHANGELOG } from "@/presentation/pages/settings/changelogData";
+import { APP_LOCALES } from "@/application/SettingsStorage";
 
 const mountChangelog = () => {
     const router = createRouter({
@@ -34,7 +35,7 @@ describe("Changelog", () => {
         const entry = wrapper.find(`[data-testid='changelog-entry-${latest.version}']`);
 
         expect(entry.text()).toContain(latest.date);
-        for (const change of latest.changes.en) {
+        for (const change of latest.changes.map(change => change.text.en)) {
             expect(entry.text()).toContain(change);
         }
     });
@@ -44,10 +45,10 @@ describe("Changelog", () => {
 
         for (const entry of CHANGELOG) {
             const text = wrapper.find(`[data-testid='changelog-entry-${entry.version}']`).text();
-            for (const change of entry.changes.en) {
+            for (const change of entry.changes.map(change => change.text.en)) {
                 expect(text).toContain(change);
             }
-            for (const change of entry.changes["zh-Hant"]) {
+            for (const change of entry.changes.map(change => change.text["zh-Hant"])) {
                 expect(text).not.toContain(change);
             }
         }
@@ -61,10 +62,10 @@ describe("Changelog", () => {
 
         for (const entry of CHANGELOG) {
             const text = wrapper.find(`[data-testid='changelog-entry-${entry.version}']`).text();
-            for (const change of entry.changes["zh-Hant"]) {
+            for (const change of entry.changes.map(change => change.text["zh-Hant"])) {
                 expect(text).toContain(change);
             }
-            for (const change of entry.changes.en) {
+            for (const change of entry.changes.map(change => change.text.en)) {
                 expect(text).not.toContain(change);
             }
         }
@@ -73,7 +74,9 @@ describe("Changelog", () => {
 
     it("should have the same number of changes in every language", () => {
         for (const entry of CHANGELOG) {
-            expect(entry.changes["zh-Hant"]).toHaveLength(entry.changes.en.length);
+            for (const locale of APP_LOCALES) {
+                expect(entry.changes.filter(change => change.text[locale].trim() !== "")).toHaveLength(entry.changes.length);
+            }
         }
     });
 });

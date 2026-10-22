@@ -29,11 +29,11 @@
                 </div>
                 <ul class="flex flex-col gap-1.5">
                     <li
-                        v-for="(change, index) in entry.changes[appLocale]"
+                        v-for="(change, index) in entry.changes"
                         :key="index"
                         class="text-foreground-muted text-[13px] leading-relaxed pl-3 relative before:absolute before:left-0 before:top-[0.5em] before:w-1 before:h-1 before:rounded-full before:bg-foreground-muted"
                     >
-                        {{ change }}
+                        {{ change.text[appLocale] }}
                     </li>
                 </ul>
             </div>
