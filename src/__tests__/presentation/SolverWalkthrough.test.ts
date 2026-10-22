@@ -11,6 +11,7 @@ import { TechniqueSolver } from "@/domain/solver/TechniqueSolver";
 import { singlesPuzzle, singlesSolution } from "@/__tests__/fixtures/singlesPuzzle";
 import { openNoSolutionPuzzle } from "@/__tests__/fixtures/openPuzzles";
 import { SAMPLE_PUZZLES } from "@/presentation/pages/solver-walkthrough/samplePuzzles";
+import { expectKeyRowsToShrinkToFit } from "@/__tests__/fixtures/digitKeyRows";
 
 const samplePuzzle = (id: string): number[][] => {
     const sample = SAMPLE_PUZZLES.find((candidate) => candidate.id === id);
@@ -192,6 +193,12 @@ describe("SolverWalkthrough", () => {
                     expect(rowElement.find(`[data-testid='solver-cell-${row}-${column}']`).exists()).toBe(true);
                 }
             }
+        });
+
+        it("should fit the digit keys to a narrow window instead of clipping the outer ones", async () => {
+            const { wrapper } = await mountEntering();
+
+            expectKeyRowsToShrinkToFit(wrapper);
         });
 
         it("should leave empty cells blank while entering a puzzle", async () => {

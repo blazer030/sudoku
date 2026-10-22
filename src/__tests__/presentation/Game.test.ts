@@ -16,6 +16,7 @@ import { Sudoku } from "@/domain/game/Sudoku";
 import type { PuzzleCell } from "@/domain/board/PuzzleCell";
 import { createMultiStepSudoku } from "@/__tests__/fixtures/multiStepPuzzle";
 import { ANALYTICS_KEY, type AnalyticsService } from "@/application/analytics/AnalyticsService";
+import { expectKeyRowsToShrinkToFit } from "@/__tests__/fixtures/digitKeyRows";
 
 const createTestRouter = () => {
     return createRouter({
@@ -1602,6 +1603,15 @@ describe("Game", () => {
             await wrapper.find("[data-testid='note-button']").trigger("click");
 
             expect(wrapper.get("[data-testid='number-8']").classes()).toContain("leading-none");
+        });
+    });
+
+    describe("narrow windows", () => {
+        // A letterboxed window can be narrower than a 312px row of five keys
+        it("should fit the digit keys to the window instead of clipping the outer ones", () => {
+            const wrapper = mountGame();
+
+            expectKeyRowsToShrinkToFit(wrapper);
         });
     });
 

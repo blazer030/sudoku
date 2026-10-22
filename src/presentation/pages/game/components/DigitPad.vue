@@ -1,6 +1,11 @@
 <template>
     <div class="flex flex-col gap-3">
-        <div class="flex justify-center gap-2">
+        <!-- Each row is five square keys of at most 56px; in a window narrower than the
+             312px row they shrink together instead of the outer keys being cut off -->
+        <div
+            class="grid grid-cols-[repeat(5,minmax(0,3.5rem))] justify-center gap-2"
+            data-testid="digit-key-row"
+        >
             <div
                 v-for="digit in 5"
                 :key="`num-${digit}`"
@@ -14,7 +19,7 @@
                     :class="[digitButtonClasses(digit), digitSizeClasses]"
                     :data-testid="`number-${digit}`"
                     :disabled="isDigitDisabled(digit)"
-                    class="w-14 h-14 rounded-xl flex justify-center font-key font-semibold leading-none transition-all cursor-pointer disabled:cursor-default"
+                    class="w-full aspect-square rounded-xl flex justify-center font-key font-semibold leading-none transition-all cursor-pointer disabled:cursor-default"
                     @click="emit('selectDigit', digit)"
                 >
                     {{ digit }}
@@ -31,7 +36,10 @@
                 </span>
             </div>
         </div>
-        <div class="flex justify-center gap-2">
+        <div
+            class="grid grid-cols-[repeat(5,minmax(0,3.5rem))] justify-center gap-2"
+            data-testid="digit-key-row"
+        >
             <div
                 v-for="digit in [6, 7, 8, 9]"
                 :key="`num-${digit}`"
@@ -45,7 +53,7 @@
                     :class="[digitButtonClasses(digit), digitSizeClasses]"
                     :data-testid="`number-${digit}`"
                     :disabled="isDigitDisabled(digit)"
-                    class="w-14 h-14 rounded-xl flex justify-center font-key font-semibold leading-none transition-all cursor-pointer disabled:cursor-default"
+                    class="w-full aspect-square rounded-xl flex justify-center font-key font-semibold leading-none transition-all cursor-pointer disabled:cursor-default"
                     @click="emit('selectDigit', digit)"
                 >
                     {{ digit }}
@@ -68,7 +76,7 @@
                 :aria-pressed="eraseActive"
                 :class="eraseButtonClasses"
                 :disabled="eraseDisabled"
-                class="w-14 h-14 rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all cursor-pointer disabled:cursor-default"
+                class="w-full aspect-square rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all cursor-pointer disabled:cursor-default"
                 data-testid="erase-button"
                 @click="emit('toggleEraseMode')"
             >
