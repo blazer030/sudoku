@@ -2,13 +2,20 @@ import { createPinia, setActivePinia } from "pinia";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { updateFavicon, updateManifestLink, updateAppleTouchIcon } from "@/application/PwaThemeUpdater";
 import type { IconService } from "@/application/icon/IconService";
+import { ICON_THEME_IDS, STYLE_IDS, THEME_IDS_BY_STYLE } from "@/application/SettingsStorage";
 
-vi.mock("@/application/PwaThemeUpdater", () => ({
-    updateMetaThemeColor: vi.fn(),
-    updateFavicon: vi.fn(),
-    updateManifestLink: vi.fn(),
-    updateAppleTouchIcon: vi.fn(),
-}));
+// Spies that still update the page links, so tests can read the hrefs too
+vi.mock("@/application/PwaThemeUpdater", async (importOriginal) => {
+    const actual = await importOriginal<typeof import("@/application/PwaThemeUpdater")>();
+    return {
+        updateMetaThemeColor: vi.fn(),
+        updateFavicon: vi.fn(actual.updateFavicon),
+        updateManifestLink: vi.fn(actual.updateManifestLink),
+        updateAppleTouchIcon: vi.fn(actual.updateAppleTouchIcon),
+    };
+});
+
+const ICON_LINK_RELS = ["icon", "manifest", "apple-touch-icon"] as const;
 
 describe("settingsStore", () => {
     beforeEach(() => {
@@ -199,6 +206,45 @@ describe("settingsStore", () => {
             await Promise.resolve();
 
             expect(setIcon).not.toHaveBeenCalled();
+        });
+
+        describe("with the page's icon links", () => {
+            beforeEach(() => {
+                for (const rel of ICON_LINK_RELS) {
+                    const link = document.createElement("link");
+                    link.rel = rel;
+                    document.head.appendChild(link);
+                }
+            });
+
+            afterEach(() => {
+                for (const rel of ICON_LINK_RELS) document.head.querySelector(`link[rel="${rel}"]`)?.remove();
+            });
+
+            const linkHref = (rel: string): string => document.head.querySelector<HTMLLinkElement>(`link[rel="${rel}"]`)?.href ?? "";
+            const ICON_FILE_PATTERN = new RegExp(`-(?:${ICON_THEME_IDS.join("|")})\\.(?:svg|webmanifest|png)$`);
+
+            it("should never hand a non-icon id to the icon or the page links", () => {
+                const { service, setIcon } = buildIconService();
+                const store = useSettingsStore();
+                store.setIconService(service);
+                store.setMatchLauncherIconToTheme(true);
+
+                for (const style of STYLE_IDS) {
+                    store.setStyle(style);
+                    for (const theme of THEME_IDS_BY_STYLE[style]) {
+                        store.setColorTheme(theme);
+                        for (const rel of ICON_LINK_RELS) {
+                            expect(linkHref(rel), `${style}/${theme} ${rel}`).toMatch(ICON_FILE_PATTERN);
+                        }
+                    }
+                }
+
+                expect(setIcon.mock.calls.length).toBeGreaterThan(0);
+                for (const [iconTheme] of setIcon.mock.calls) {
+                    expect(ICON_THEME_IDS).toContain(iconTheme);
+                }
+            });
         });
     });
 });

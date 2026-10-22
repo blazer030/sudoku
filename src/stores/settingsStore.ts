@@ -2,6 +2,7 @@ import { ref } from "vue";
 import { defineStore } from "pinia";
 import { loadSettings, saveSettings, type Appearance, type ColorThemeId, type LanguagePreference, type RememberedThemes, type StyleId } from "@/application/SettingsStorage";
 import { rememberedThemeFor } from "@/theme/palettes";
+import { iconThemeFor } from "@/theme/iconTheme";
 import { updateFavicon, updateManifestLink, updateAppleTouchIcon } from "@/application/PwaThemeUpdater";
 import type { IconService } from "@/application/icon/IconService";
 
@@ -21,11 +22,14 @@ export const useSettingsStore = defineStore("settings", () => {
     const colorThemeByStyle = ref<RememberedThemes>(settings.colorThemeByStyle);
     let iconService: IconService | null = null;
 
+    // Only six icons exist; any other theme shows the nearest of them
+    const currentIconTheme = () => iconThemeFor(style.value, colorTheme.value);
+
     const applyColorTheme = () => {
-        const id = colorTheme.value;
-        updateFavicon(id);
-        updateManifestLink(id);
-        updateAppleTouchIcon(id);
+        const iconTheme = currentIconTheme();
+        updateFavicon(iconTheme);
+        updateManifestLink(iconTheme);
+        updateAppleTouchIcon(iconTheme);
     };
 
     const persistAll = () => {
@@ -51,7 +55,7 @@ export const useSettingsStore = defineStore("settings", () => {
         applyColorTheme();
         persistAll();
         if (matchLauncherIconToTheme.value && iconService !== null) {
-            void iconService.setIcon(id);
+            void iconService.setIcon(currentIconTheme());
         }
     };
 
@@ -86,7 +90,7 @@ export const useSettingsStore = defineStore("settings", () => {
         matchLauncherIconToTheme.value = value;
         persistAll();
         if (!wasOn && value && iconService !== null) {
-            void iconService.setIcon(colorTheme.value);
+            void iconService.setIcon(currentIconTheme());
         }
     };
 
