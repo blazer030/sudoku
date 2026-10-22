@@ -1,22 +1,22 @@
-import type { ColorMode, IconThemeId } from "@/application/SettingsStorage";
+import type { LauncherIconKey } from "@/theme/launcherIcon";
 
 export const updateMetaThemeColor = (color: string): void => {
     const meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
     if (meta) meta.content = color;
 };
 
-// Dark mode gets the dark palette's lighter icon, drawn by scripts/generate-pwa-icons.ts
-export const updateFavicon = (iconTheme: IconThemeId, mode: ColorMode): void => {
+// The files are drawn by scripts/generate-pwa-icons.ts, one set per icon key
+export const updateFavicon = (icon: LauncherIconKey): void => {
     const link = document.querySelector<HTMLLinkElement>('link[rel="icon"]');
-    if (link) link.href = `${import.meta.env.BASE_URL}sudoku-${iconTheme}${mode === "dark" ? "-dark" : ""}.svg`;
+    if (link) link.href = `${import.meta.env.BASE_URL}sudoku-${icon}.svg`;
 };
 
-export const updateManifestLink = (iconTheme: IconThemeId): void => {
+export const updateManifestLink = (icon: LauncherIconKey): void => {
     const link = document.querySelector<HTMLLinkElement>('link[rel="manifest"]');
-    if (link) link.href = `${import.meta.env.BASE_URL}manifest-${iconTheme}.webmanifest`;
+    if (link) link.href = `${import.meta.env.BASE_URL}manifest-${icon}.webmanifest`;
 };
 
-export const updateAppleTouchIcon = (iconTheme: IconThemeId): void => {
+export const updateAppleTouchIcon = (icon: LauncherIconKey): void => {
     const link = document.querySelector<HTMLLinkElement>('link[rel="apple-touch-icon"]');
-    if (link) link.href = `${import.meta.env.BASE_URL}apple-touch-icon-${iconTheme}.png`;
+    if (link) link.href = `${import.meta.env.BASE_URL}apple-touch-icon-${icon}.png`;
 };

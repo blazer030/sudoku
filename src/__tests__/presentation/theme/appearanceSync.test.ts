@@ -84,19 +84,23 @@ describe("startAppearanceSync", () => {
 
             sources.appearance.value = "dark";
             await nextTick();
-            expect(favicon.href).toMatch(/\/sudoku-blue-dark\.svg$/);
+            expect(favicon.href).toMatch(/\/sudoku-minimalBlueDark\.svg$/);
 
-            // Other styles' themes take the nearest of the six icons
+            // Every style's theme has its own icon
             sources.style.value = "tactile";
             sources.colorTheme.value = "rust";
             await nextTick();
-            expect(favicon.href).toMatch(/\/sudoku-orange-dark\.svg$/);
+            expect(favicon.href).toMatch(/\/sudoku-tactileRustDark\.svg$/);
+
+            sources.appearance.value = "light";
+            await nextTick();
+            expect(favicon.href).toMatch(/\/sudoku-tactileRust\.svg$/);
         });
 
         it("should follow the system's light or dark when the appearance is system", () => {
             const setSystemDark = mockSystemDark(true);
             stop = startAppearanceSync(buildSources("teal", "system"), systemBar, appearanceBridge);
-            expect(favicon.href).toMatch(/\/sudoku-teal-dark\.svg$/);
+            expect(favicon.href).toMatch(/\/sudoku-minimalTealDark\.svg$/);
 
             setSystemDark(false);
             expect(favicon.href).toMatch(/\/sudoku-teal\.svg$/);

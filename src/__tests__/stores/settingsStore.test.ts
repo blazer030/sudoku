@@ -1,7 +1,8 @@
 import { createPinia, setActivePinia } from "pinia";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { updateManifestLink, updateAppleTouchIcon } from "@/application/PwaThemeUpdater";
-import { ICON_THEME_IDS, STYLE_IDS, THEME_IDS_BY_STYLE } from "@/application/SettingsStorage";
+import { STYLE_IDS, THEME_IDS_BY_STYLE } from "@/application/SettingsStorage";
+import { launcherIconKey } from "@/theme/launcherIcon";
 
 // Spies that still update the page links, so tests can read the hrefs too
 vi.mock("@/application/PwaThemeUpdater", async (importOriginal) => {
@@ -164,29 +165,29 @@ describe("settingsStore", () => {
         });
 
         const linkHref = (rel: string): string => document.head.querySelector<HTMLLinkElement>(`link[rel="${rel}"]`)?.href ?? "";
-        const ICON_FILE_PATTERN = new RegExp(`-(?:${ICON_THEME_IDS.join("|")})\\.(?:svg|webmanifest|png)$`);
 
-        it("should point the links at the nearest icon when the style changes", () => {
+        it("should point the links at the style's own light icon when the style changes", () => {
             const store = useSettingsStore();
             store.setColorTheme("teal");
 
             store.setStyle("tactile");
-            expect(linkHref("manifest")).toMatch(/manifest-green\.webmanifest$/);
+            expect(linkHref("manifest")).toMatch(/manifest-tactileGreen\.webmanifest$/);
+            expect(linkHref("apple-touch-icon")).toMatch(/apple-touch-icon-tactileGreen\.png$/);
 
             store.setColorTheme("rust");
-            expect(linkHref("manifest")).toMatch(/manifest-orange\.webmanifest$/);
+            expect(linkHref("manifest")).toMatch(/manifest-tactileRust\.webmanifest$/);
         });
 
-        it("should never point the page links at a non-icon id", () => {
+        it("should point the page links at every theme's own light icon", () => {
             const store = useSettingsStore();
 
             for (const style of STYLE_IDS) {
                 store.setStyle(style);
                 for (const theme of THEME_IDS_BY_STYLE[style]) {
                     store.setColorTheme(theme);
-                    for (const rel of ICON_LINK_RELS) {
-                        expect(linkHref(rel), `${style}/${theme} ${rel}`).toMatch(ICON_FILE_PATTERN);
-                    }
+                    const key = launcherIconKey(style, theme, "light");
+                    expect(linkHref("manifest"), `${style}/${theme}`).toMatch(new RegExp(`/manifest-${key}\\.webmanifest$`));
+                    expect(linkHref("apple-touch-icon"), `${style}/${theme}`).toMatch(new RegExp(`/apple-touch-icon-${key}\\.png$`));
                 }
             }
         });

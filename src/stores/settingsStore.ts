@@ -2,7 +2,7 @@ import { ref } from "vue";
 import { defineStore } from "pinia";
 import { loadSettings, saveSettings, type Appearance, type ColorThemeId, type LanguagePreference, type RememberedThemes, type StyleId } from "@/application/SettingsStorage";
 import { rememberedThemeFor } from "@/theme/palettes";
-import { iconThemeFor } from "@/theme/iconTheme";
+import { launcherIconKey } from "@/theme/launcherIcon";
 import { updateManifestLink, updateAppleTouchIcon } from "@/application/PwaThemeUpdater";
 
 export const useSettingsStore = defineStore("settings", () => {
@@ -20,14 +20,11 @@ export const useSettingsStore = defineStore("settings", () => {
     const seenLongPressTip = ref(settings.seenLongPressTip);
     const colorThemeByStyle = ref<RememberedThemes>(settings.colorThemeByStyle);
 
-    // Only six icons exist; any other theme shows the nearest of them
-    const currentIconTheme = () => iconThemeFor(style.value, colorTheme.value);
-
-    // The favicon also depends on light or dark, so appearanceSync keeps it
+    // Installed web apps keep the light icon; the favicon also follows light or dark, so appearanceSync keeps it
     const applyColorTheme = () => {
-        const iconTheme = currentIconTheme();
-        updateManifestLink(iconTheme);
-        updateAppleTouchIcon(iconTheme);
+        const icon = launcherIconKey(style.value, colorTheme.value, "light");
+        updateManifestLink(icon);
+        updateAppleTouchIcon(icon);
     };
 
     const persistAll = () => {

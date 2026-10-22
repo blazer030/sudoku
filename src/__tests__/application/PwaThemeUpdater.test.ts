@@ -33,15 +33,15 @@ describe("PwaThemeUpdater", () => {
             link.href = "/sudoku-green.svg";
             document.head.appendChild(link);
 
-            updateFavicon("purple", "light");
+            updateFavicon("purple");
             expect(link.href).toMatch(/\/sudoku-purple\.svg$/);
 
-            updateFavicon("purple", "dark");
-            expect(link.href).toMatch(/\/sudoku-purple-dark\.svg$/);
+            updateFavicon("paperRedInkDark");
+            expect(link.href).toMatch(/\/sudoku-paperRedInkDark\.svg$/);
         });
 
         it("should not throw when icon link is missing", () => {
-            expect(() => { updateFavicon("blue", "light"); }).not.toThrow();
+            expect(() => { updateFavicon("blue"); }).not.toThrow();
         });
     });
 

@@ -1,6 +1,6 @@
 export const STYLE_IDS = ["minimal", "tactile", "paper"] as const;
 export type StyleId = typeof STYLE_IDS[number];
-/** Launcher aliases and PWA icon sets exist for these six only. */
+/** Minimal's themes; their light launcher aliases are named by these bare ids (src/theme/launcherIcon.ts). */
 export const ICON_THEME_IDS = ["green", "blue", "purple", "orange", "pink", "teal"] as const;
 export type IconThemeId = typeof ICON_THEME_IDS[number];
 /** Each style's own colour themes, in the order the picker shows them; the first is the style's default. */

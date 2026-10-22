@@ -1,13 +1,15 @@
 import { readFileSync } from "fs";
 import sharp from "sharp";
-import { getPalette, STYLES } from "@/theme/palettes";
+import { getPalette } from "@/theme/palettes";
+import { LAUNCHER_ICONS } from "@/theme/launcherIcon";
 
 // The PWA icons are generated files (npm run generate:icons); they must be regenerated whenever
 // a primary changes. The Android launcher icons are checked in launcherIconAssets.test.ts.
 
-const ICON_STYLE = "minimal";
-const themes = STYLES[ICON_STYLE].themes.map(theme => ({ id: theme.id, palette: getPalette(ICON_STYLE, theme.id, "light") }));
-const darkThemes = STYLES[ICON_STYLE].themes.map(theme => ({ id: theme.id, palette: getPalette(ICON_STYLE, theme.id, "dark") }));
+// Every theme's icon in both modes is a favicon; installed PWAs only use the light ones
+const icons = LAUNCHER_ICONS.map(icon => ({ key: icon.key, palette: getPalette(icon.style, icon.themeId, icon.mode) }));
+const lightIcons = LAUNCHER_ICONS.filter(icon => icon.mode === "light")
+    .map(icon => ({ key: icon.key, palette: getPalette(icon.style, icon.themeId, "light") }));
 
 const hexOf = (red: number, green: number, blue: number): string =>
     `#${[red, green, blue].map(channel => channel.toString(16).padStart(2, "0")).join("")}`.toUpperCase();
@@ -20,31 +22,25 @@ const backgroundPixel = async (path: string): Promise<string> => {
 };
 
 describe("icon assets", () => {
-    it.each(themes)("should fill the $id favicon with the theme's light primary", ({ id, palette }) => {
-        const svg = readFileSync(`public/sudoku-${id}.svg`, "utf8");
+    it.each(icons)("should fill the $key favicon with its primary and on-primary tiles", ({ key, palette }) => {
+        const svg = readFileSync(`public/sudoku-${key}.svg`, "utf8");
 
         expect(svg).toContain(`<rect width="240" height="240" rx="60" fill="${palette.primary}"/>`);
+        expect(svg).toContain(`rx="12" fill="${palette["on-primary"]}"/>`);
     });
 
-    it.each(darkThemes)("should fill the $id dark favicon with the dark primary and dark tiles", ({ id, palette }) => {
-        const svg = readFileSync(`public/sudoku-${id}-dark.svg`, "utf8");
-
-        expect(svg).toContain(`<rect width="240" height="240" rx="60" fill="${palette.primary}"/>`);
-        expect(svg).toContain(`fill="${palette["on-primary"]}"/>`);
-    });
-
-    it.each(themes)("should give the $id web manifest the light primary and page background", ({ id, palette }) => {
-        const manifest = JSON.parse(readFileSync(`public/manifest-${id}.webmanifest`, "utf8")) as Record<string, unknown>;
+    it.each(lightIcons)("should give the $key web manifest the light primary and page background", ({ key, palette }) => {
+        const manifest = JSON.parse(readFileSync(`public/manifest-${key}.webmanifest`, "utf8")) as Record<string, unknown>;
 
         expect(manifest.theme_color).toBe(palette.primary);
         expect(manifest.background_color).toBe(palette.background);
     });
 
-    it.each(themes)("should render the $id PWA icons in the light primary", async ({ id, palette }) => {
+    it.each(lightIcons)("should render the $key PWA icons in the light primary", async ({ key, palette }) => {
         const paths = [
-            `public/pwa-192x192-${id}.png`,
-            `public/pwa-512x512-${id}.png`,
-            `public/apple-touch-icon-${id}.png`,
+            `public/pwa-192x192-${key}.png`,
+            `public/pwa-512x512-${key}.png`,
+            `public/apple-touch-icon-${key}.png`,
         ];
 
         for (const path of paths) {

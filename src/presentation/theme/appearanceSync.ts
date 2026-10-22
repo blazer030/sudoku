@@ -1,7 +1,7 @@
 import { watch, type Ref } from "vue";
 import { getPalette, systemBarColor } from "@/theme/palettes";
 import { updateFavicon, updateMetaThemeColor } from "@/application/PwaThemeUpdater";
-import { iconThemeFor } from "@/theme/iconTheme";
+import { launcherIconKey } from "@/theme/launcherIcon";
 import { syncPaperFonts } from "@/presentation/theme/paperFonts";
 import type { Appearance, ColorMode, ColorThemeId, StyleId } from "@/application/SettingsStorage";
 import type { SystemBarService } from "@/application/systemBar/SystemBarService";
@@ -53,7 +53,7 @@ export const startAppearanceSync = (
         root.dataset.colorTheme = sources.colorTheme.value;
         syncPaperFonts(sources.style.value === "paper");
         updateMetaThemeColor(systemBarColor(sources.style.value, sources.colorTheme.value, mode));
-        updateFavicon(iconThemeFor(sources.style.value, sources.colorTheme.value), mode);
+        updateFavicon(launcherIconKey(sources.style.value, sources.colorTheme.value, mode));
         void systemBar.apply(mode);
         void appearanceBridge.setSystemBarColors({
             background: getPalette(sources.style.value, sources.colorTheme.value, mode).background,

@@ -1,7 +1,6 @@
 // The app icon: a 3×3 block of tiles on a rounded square in the theme's primary.
-// public/sudoku-<theme>.svg and every launcher and PWA icon are rendered from this.
-import { getPalette, STYLES } from "../src/theme/palettes";
-import type { ColorMode } from "../src/application/SettingsStorage";
+// Every favicon, launcher and PWA icon is rendered from this, one per style's theme and mode.
+import { getPalette } from "../src/theme/palettes";
 import { LAUNCHER_ICONS } from "../src/theme/launcherIcon";
 
 export interface IconTheme {
@@ -10,19 +9,6 @@ export interface IconTheme {
     onPrimary: string;
     background: string;
 }
-
-// Icons use the minimal style's light palette, whatever style the app is set to
-const ICON_STYLE = "minimal";
-
-const iconThemesIn = (mode: ColorMode): IconTheme[] => STYLES[ICON_STYLE].themes.map((theme) => {
-    const palette = getPalette(ICON_STYLE, theme.id, mode);
-    return { id: theme.id, primary: palette.primary, onPrimary: palette["on-primary"], background: palette.background };
-});
-
-export const ICON_THEMES: IconTheme[] = iconThemesIn("light");
-
-// The dark palette's lighter primary with dark tiles
-export const DARK_ICON_THEMES: IconTheme[] = iconThemesIn("dark");
 
 /** Every style's theme in light and dark, each in its own palette's primary and on-primary. */
 export const ICON_VARIANTS: IconTheme[] = LAUNCHER_ICONS.map(({ key, style, themeId, mode }) => {

@@ -2,7 +2,8 @@ import sharp from "sharp";
 import { writeFileSync, mkdirSync } from "fs";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
-import { DARK_ICON_THEMES, ICON_THEMES, iconSvg, type IconTheme } from "./iconArtwork";
+import { ICON_VARIANTS, iconSvg, type IconTheme } from "./iconArtwork";
+import { LAUNCHER_ICONS } from "../src/theme/launcherIcon";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -35,39 +36,28 @@ const generateManifest = (theme: IconTheme): string =>
         2,
     );
 
+// Installed web apps keep the light icon, so only the light variants get a manifest and PNGs
+const LIGHT_KEYS = new Set(LAUNCHER_ICONS.filter(icon => icon.mode === "light").map(icon => icon.key));
+
 const main = async () => {
     mkdirSync(PUBLIC_DIR, { recursive: true });
 
-    for (const theme of ICON_THEMES) {
-        const svg = iconSvg(theme);
+    for (const variant of ICON_VARIANTS) {
+        const svg = iconSvg(variant);
+        writeFileSync(resolve(PUBLIC_DIR, `sudoku-${variant.id}.svg`), svg);
+        if (!LIGHT_KEYS.has(variant.id)) continue;
 
-        // Write themed SVG favicon
-        writeFileSync(resolve(PUBLIC_DIR, `sudoku-${theme.id}.svg`), svg);
-
-        // Generate PNGs
         const [png192, png512] = await Promise.all([
             generatePngFromSvg(svg, 192),
             generatePngFromSvg(svg, 512),
         ]);
-        writeFileSync(resolve(PUBLIC_DIR, `pwa-192x192-${theme.id}.png`), png192);
-        writeFileSync(resolve(PUBLIC_DIR, `pwa-512x512-${theme.id}.png`), png512);
-        writeFileSync(resolve(PUBLIC_DIR, `apple-touch-icon-${theme.id}.png`), png512);
-
-        // Write manifest
-        writeFileSync(
-            resolve(PUBLIC_DIR, `manifest-${theme.id}.webmanifest`),
-            generateManifest(theme),
-        );
-
-        console.log(`Generated assets for theme: ${theme.id}`);
+        writeFileSync(resolve(PUBLIC_DIR, `pwa-192x192-${variant.id}.png`), png192);
+        writeFileSync(resolve(PUBLIC_DIR, `pwa-512x512-${variant.id}.png`), png512);
+        writeFileSync(resolve(PUBLIC_DIR, `apple-touch-icon-${variant.id}.png`), png512);
+        writeFileSync(resolve(PUBLIC_DIR, `manifest-${variant.id}.webmanifest`), generateManifest(variant));
     }
 
-    // The tab icon in dark mode; installed PWA icons stay light
-    for (const theme of DARK_ICON_THEMES) {
-        writeFileSync(resolve(PUBLIC_DIR, `sudoku-${theme.id}-dark.svg`), iconSvg(theme));
-    }
-
-    console.log("Done! All themed PWA assets generated.");
+    console.log(`Done! ${ICON_VARIANTS.length} favicons and ${LIGHT_KEYS.size} PWA icon sets generated.`);
 };
 
 main().catch((err: unknown) => {
