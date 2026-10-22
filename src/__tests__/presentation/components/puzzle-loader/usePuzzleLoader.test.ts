@@ -77,6 +77,20 @@ describe("usePuzzleLoader", () => {
         expect(visible.value).toBe(false);
     });
 
+    it("cancel after the task finished, while the minimum time runs out, should still reject as cancelled", async () => {
+        const { visible, runWithLoader, cancel } = usePuzzleLoader();
+        const task = vi.fn(() => Promise.resolve("done"));
+
+        const promise = runWithLoader(task, 5000);
+        await vi.waitFor(() => {
+            expect(task).toHaveBeenCalled();
+        });
+        cancel();
+
+        await expect(promise).rejects.toMatchObject({ name: "AbortError" });
+        expect(visible.value).toBe(false);
+    });
+
     it("cancel with nothing running should do nothing", () => {
         const { visible, cancel } = usePuzzleLoader();
 

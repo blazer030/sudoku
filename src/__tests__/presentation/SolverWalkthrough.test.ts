@@ -937,6 +937,23 @@ describe("SolverWalkthrough", () => {
             expect(wrapper.find("[data-testid='walkthrough-dialog']").exists()).toBe(false);
         });
 
+        it("should cancel on Back even after the check has answered, while the loader is still up", async () => {
+            const { wrapper, router } = mountWalkthrough({ initialPuzzle: singlesPuzzle });
+            await router.push("/solver");
+
+            await pressSolve(wrapper);
+            await vi.advanceTimersByTimeAsync(100);
+            expect(loader(wrapper).exists()).toBe(true);
+            await wrapper.find("[data-testid='back-button']").trigger("click");
+            await vi.advanceTimersByTimeAsync(PUZZLE_LOADER_MINIMUM_MS * 2);
+            await flushPromises();
+
+            expect(loader(wrapper).exists()).toBe(false);
+            expect(router.currentRoute.value.path).toBe("/solver");
+            expect(wrapper.find("[data-testid='walkthrough-panel']").exists()).toBe(false);
+            expect(wrapper.find("[data-testid='walkthrough-inputs']").attributes("inert")).toBeUndefined();
+        });
+
         it("should cancel the check on the system Back key and stay to edit", async () => {
             const router = createTestRouter();
             await router.push("/");

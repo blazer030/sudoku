@@ -10,6 +10,8 @@ export interface PuzzleLoaderController {
 
 export const PUZZLE_LOADER_MINIMUM_MS = 1000;
 
+const cancelledError = () => new DOMException("The loader was cancelled", "AbortError");
+
 export const usePuzzleLoader = (): PuzzleLoaderController => {
     const visible = ref(false);
     let currentRun: AbortController | null = null;
@@ -32,6 +34,8 @@ export const usePuzzleLoader = (): PuzzleLoaderController => {
         minDurationMs: number = PUZZLE_LOADER_MINIMUM_MS,
     ): Promise<T> => {
         const run = new AbortController();
+        // Read through a call: cancel() can flip it between any two awaits.
+        const cancelled = (): boolean => run.signal.aborted;
         currentRun = run;
         visible.value = true;
         await nextTick();
@@ -41,9 +45,10 @@ export const usePuzzleLoader = (): PuzzleLoaderController => {
             });
         });
         const startTime = performance.now();
+        let result: T;
         try {
-            if (run.signal.aborted) throw new DOMException("The loader was cancelled", "AbortError");
-            return await task(run.signal);
+            if (cancelled()) throw cancelledError();
+            result = await task(run.signal);
         } finally {
             const elapsed = performance.now() - startTime;
             if (elapsed < minDurationMs) {
@@ -54,6 +59,9 @@ export const usePuzzleLoader = (): PuzzleLoaderController => {
                 visible.value = false;
             }
         }
+        // Cancelled while the minimum time ran out: the answer came too late to use.
+        if (cancelled()) throw cancelledError();
+        return result;
     };
 
     const cancel = () => {
