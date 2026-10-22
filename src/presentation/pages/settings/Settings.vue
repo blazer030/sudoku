@@ -53,7 +53,7 @@
                     :data-testid="`style-option-${styleId}`"
                     class="flex flex-col items-center gap-1.5 p-1.5 rounded-xl border-2 bg-card cursor-pointer"
                     type="button"
-                    @click="settingsStore.setStyle(styleId)"
+                    @click="onSelectStyle(styleId)"
                 >
                     <!-- Thumbnails stand for the style, not the current mode, so they always use the light palette -->
                     <StyleThumbnail :palette="getPalette(styleId, rememberedThemeFor(styleId, settingsStore.colorThemeByStyle), 'light')" />
@@ -73,7 +73,7 @@
                     :data-testid="`color-theme-${swatch.id}`"
                     class="relative aspect-square w-full max-w-15 rounded-full cursor-pointer overflow-hidden"
                     type="button"
-                    @click="settingsStore.setColorTheme(swatch.id)"
+                    @click="onSelectColorTheme(swatch.id)"
                 >
                     <div class="absolute inset-0 flex">
                         <div
@@ -228,7 +228,7 @@ import { usePlatform } from "@/presentation/composables/usePlatform";
 import { appVersion } from "@/utils/appVersion";
 import { PRIVACY_POLICY_URL } from "@/presentation/pages/settings/externalLinks";
 import { ROUTER_PATH } from "@/router";
-import { STYLE_IDS, type Appearance, type LanguagePreference } from "@/application/SettingsStorage";
+import { STYLE_IDS, type Appearance, type ColorThemeId, type LanguagePreference, type StyleId } from "@/application/SettingsStorage";
 import { STYLES, getPalette, rememberedThemeFor } from "@/theme/palettes";
 import { vPress } from "@/presentation/directives/press";
 import SegmentedControl from "@/presentation/components/segmented-control/SegmentedControl.vue";
@@ -324,6 +324,19 @@ const goBack = () => {
 
 const goToChangelog = () => {
     void router.push(ROUTER_PATH.changelog);
+};
+
+// Re-selecting the current choice must not re-run side effects such as the launcher-icon change
+const onSelectStyle = (styleId: StyleId) => {
+    // Compared as plain strings: with a single style today the literal types always match, which lint rejects
+    const currentStyle: string = settingsStore.style;
+    if (styleId === currentStyle) return;
+    settingsStore.setStyle(styleId);
+};
+
+const onSelectColorTheme = (themeId: ColorThemeId) => {
+    if (themeId === settingsStore.colorTheme) return;
+    settingsStore.setColorTheme(themeId);
 };
 
 const goToDonate = () => {

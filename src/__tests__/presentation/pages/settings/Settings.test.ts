@@ -299,15 +299,23 @@ describe("Settings.vue appearance group", () => {
         expect(wrapper.get("[data-testid='style-option-minimal']").text()).toContain("極簡動態");
     });
 
-    it("should apply a style through the store", async () => {
-        setActivePinia(createPinia());
-        const setStyle = vi.spyOn(useSettingsStore(), "setStyle");
-        const router = createRouter({ history: createMemoryHistory(), routes: [{ path: "/", component: Settings }] });
-        const wrapper = mount(Settings, { global: { plugins: [router] } });
+    it("should not re-apply the style or theme that is already selected", async () => {
+        vi.mocked(Capacitor.isNativePlatform).mockReturnValue(true);
+        const wrapper = mountSettings();
+        const settingsStore = useSettingsStore();
+        const setIcon = vi.fn().mockResolvedValue(undefined);
+        settingsStore.setIconService({ setIcon });
+        settingsStore.setMatchLauncherIconToTheme(true);
+        setIcon.mockClear();
+        const setStyle = vi.spyOn(settingsStore, "setStyle");
+        const setColorTheme = vi.spyOn(settingsStore, "setColorTheme");
 
-        await wrapper.get("[data-testid='style-option-minimal']").trigger("click");
+        await wrapper.get(`[data-testid='style-option-${settingsStore.style}']`).trigger("click");
+        await wrapper.get(`[data-testid='color-theme-${settingsStore.colorTheme}']`).trigger("click");
 
-        expect(setStyle).toHaveBeenCalledWith("minimal");
+        expect(setStyle).not.toHaveBeenCalled();
+        expect(setColorTheme).not.toHaveBeenCalled();
+        expect(setIcon).not.toHaveBeenCalled();
     });
 
     it("should list the current style's themes with names and state", () => {
