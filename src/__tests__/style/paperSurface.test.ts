@@ -5,7 +5,7 @@ import postcss, { type Rule } from "postcss";
 // body, the app root and every page root and sticky header. Each lays the whole surface down on
 // the page colour, so where they overlap the lamp is never painted twice.
 
-const PAPER_CSS = readFileSync("src/style/styles/paper.css", "utf8");
+const PAPER_CSS = readFileSync("src/style/styles/paper/skin.css", "utf8");
 
 const declarationsBySelector = (): Map<string, Map<string, string>> => {
     const bySelector = new Map<string, Map<string, string>>();

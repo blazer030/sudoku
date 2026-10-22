@@ -24,7 +24,7 @@ const reducedMotionBlocks = (css: string): string[] => {
 
 describe("reduced motion", () => {
     const css = readFileSync("src/style/index.css", "utf8");
-    const minimalCss = readFileSync("src/style/styles/minimal.css", "utf8");
+    const minimalCss = readFileSync("src/style/styles/minimal/skin.css", "utf8");
 
     it("should keep every reduced-motion rule in one block", () => {
         expect(reducedMotionBlocks(css)).toHaveLength(1);

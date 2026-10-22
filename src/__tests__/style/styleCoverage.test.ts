@@ -37,7 +37,7 @@ const REQUIRED_SELECTORS: Record<StyleId, readonly string[]> = {
 
 const selectorsOf = (style: StyleId): string[] => {
     const selectors: string[] = [];
-    postcss.parse(readFileSync(`src/style/styles/${style}.css`, "utf8")).walkRules((rule) => {
+    postcss.parse(readFileSync(`src/style/styles/${style}/skin.css`, "utf8")).walkRules((rule) => {
         selectors.push(...rule.selectors);
     });
     return selectors;

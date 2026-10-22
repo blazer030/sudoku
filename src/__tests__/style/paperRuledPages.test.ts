@@ -4,7 +4,7 @@ import postcss, { type Rule } from "postcss";
 // Paper rules every page: the ruled lines and red margin line run behind each page's content, while
 // cards, the board's sheet and sticky headers sit on top of them.
 
-const PAPER_CSS = readFileSync("src/style/styles/paper.css", "utf8");
+const PAPER_CSS = readFileSync("src/style/styles/paper/skin.css", "utf8");
 
 const declarationsOf = (selector: string): Map<string, string> => {
     const declarations = new Map<string, string>();

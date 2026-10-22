@@ -5,7 +5,7 @@ import postcss, { type Rule } from "postcss";
 // in the theme's ink, printed clue squares shaded in graphite and every highlight a translucent wash,
 // so the grain (and at night the lamp) shows through. The colours are checked in paletteContrast.
 
-const PAPER_CSS = readFileSync("src/style/styles/paper.css", "utf8");
+const PAPER_CSS = readFileSync("src/style/styles/paper/skin.css", "utf8");
 const BOARD = '[data-style="paper"] [data-skin~="board"]';
 
 const declarationsOf = (selector: string): Map<string, string> => {

@@ -1,10 +1,10 @@
 @import "tailwindcss";
 @import "./themes.generated.css";
 @import "./fonts.css";
-/* One stylesheet per style, each scoped by [data-style="<id>"]: material, shape, type and motion only */
-@import "./styles/minimal.css";
-@import "./styles/tactile.css";
-@import "./styles/paper.css";
+/* One stylesheet per style, in styles/<id>/skin.css, each scoped by [data-style="<id>"]: material, shape, type and motion only */
+@import "./styles/minimal/skin.css";
+@import "./styles/tactile/skin.css";
+@import "./styles/paper/skin.css";
 
 @variant dark (&:where(.dark, .dark *));
 

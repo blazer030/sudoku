@@ -72,7 +72,7 @@ describe("tactile title plates", () => {
     });
 
     it("should end each plate above the subtitle", () => {
-        const reaches = plateReachesBelow(readFileSync("src/style/styles/tactile.css", "utf8"));
+        const reaches = plateReachesBelow(readFileSync("src/style/styles/tactile/skin.css", "utf8"));
 
         expect(reaches.length).toBeGreaterThan(0);
         for (const reach of reaches) expect(reach).toBeLessThan(TITLE_TO_SUBTITLE_PX);

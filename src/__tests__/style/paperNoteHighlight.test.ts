@@ -3,7 +3,7 @@ import postcss from "postcss";
 
 const declarationsOf = (selector: string): Map<string, string> => {
     const declarations = new Map<string, string>();
-    postcss.parse(readFileSync("src/style/styles/paper.css", "utf8")).walkRules((rule) => {
+    postcss.parse(readFileSync("src/style/styles/paper/skin.css", "utf8")).walkRules((rule) => {
         if (rule.parent?.type === "atrule" || !rule.selectors.includes(selector)) return;
         rule.walkDecls((declaration) => {
             declarations.set(declaration.prop, declaration.value.trim());

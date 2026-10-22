@@ -55,7 +55,7 @@ describe("useArrivalMotion", () => {
 
     it("should outlast every style's arrival animation", () => {
         for (const style of STYLE_IDS) {
-            postcss.parse(readFileSync(`src/style/styles/${style}.css`, "utf8")).walkDecls("animation", (declaration) => {
+            postcss.parse(readFileSync(`src/style/styles/${style}/skin.css`, "utf8")).walkDecls("animation", (declaration) => {
                 const rule = declaration.parent;
                 if (rule?.type !== "rule" || !(rule as postcss.Rule).selector.includes(".value-arrive")) return;
                 const durations = [...declaration.value.matchAll(/(\d+(?:\.\d+)?)(ms|s)\b/g)]

@@ -6,7 +6,7 @@ import postcss, { type Rule } from "postcss";
 // Caveat is in use (paperFonts.ts marks it ready) paper nudges the handwritten digits back by the
 // mean overhang with the translate property, which moves the ink without changing any box.
 
-const PAPER_CSS = readFileSync("src/style/styles/paper.css", "utf8");
+const PAPER_CSS = readFileSync("src/style/styles/paper/skin.css", "utf8");
 const READY = '[data-style="paper"][data-paper-fonts="ready"]';
 const HAND_DIGITS = [`${READY} .font-entry`, `${READY} .font-note`, `${READY} .font-key > span`];
 

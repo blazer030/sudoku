@@ -95,7 +95,7 @@ const TINTED_PAIRS: readonly ContrastPair[] = [
 // --paper-lamp: radial-gradient(<w>vw <h>vh at 50% <c>px, <lamp at n%> [<p>%], ..., transparent <end>%)
 interface Stop { position: number; amount: number }
 
-const PAPER_CSS = readFileSync("src/style/styles/paper.css", "utf8");
+const PAPER_CSS = readFileSync("src/style/styles/paper/skin.css", "utf8");
 
 const nightDeclaration = (name: string): string => {
     const nightBlock = /:root\.dark\[data-style="paper"\]\s*\{([^}]*)\}/.exec(PAPER_CSS)?.[1] ?? "";

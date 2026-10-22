@@ -4,7 +4,7 @@ import postcss from "postcss";
 const ON_TILE = '[data-style="tactile"] [data-skin~="tile"][aria-pressed="true"]';
 
 const declarationsOf = (selector: string): Map<string, string> => {
-    const root = postcss.parse(readFileSync("src/style/styles/tactile.css", "utf8"));
+    const root = postcss.parse(readFileSync("src/style/styles/tactile/skin.css", "utf8"));
     const declarations = new Map<string, string>();
     root.walkRules(rule => {
         if (!rule.selectors.includes(selector)) return;

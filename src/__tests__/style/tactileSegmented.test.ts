@@ -4,7 +4,7 @@ import postcss from "postcss";
 // The transition a style sheet gives the segmented control's sliding indicator
 const indicatorTransition = (style: string): string | undefined => {
     let transition: string | undefined;
-    postcss.parse(readFileSync(`src/style/styles/${style}.css`, "utf8")).walkRules((rule) => {
+    postcss.parse(readFileSync(`src/style/styles/${style}/skin.css`, "utf8")).walkRules((rule) => {
         const inReducedMotion = rule.parent?.type === "atrule";
         if (inReducedMotion || !rule.selector.endsWith(".segmented-indicator-motion")) return;
         rule.walkDecls("transition", (declaration) => {

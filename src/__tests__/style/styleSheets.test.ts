@@ -1,8 +1,8 @@
-import { readdirSync, readFileSync } from "fs";
+import { existsSync, readdirSync, readFileSync } from "fs";
 import { STYLE_IDS, type StyleId } from "@/application/SettingsStorage";
 import { findLayoutDeclarations, findScalesOutOfRange, findUnguardedMotion, findUnscopedSelectors } from "./styleSheetRules";
 
-const sheetOf = (style: StyleId): string => readFileSync(`src/style/styles/${style}.css`, "utf8");
+const sheetOf = (style: StyleId): string => readFileSync(`src/style/styles/${style}/skin.css`, "utf8");
 
 describe("style sheet rules", () => {
     it("should flag layout properties but not placed decorations", () => {
@@ -58,9 +58,12 @@ describe("style sheet rules", () => {
         const indexCss = readFileSync("src/style/index.css", "utf8");
 
         for (const style of STYLE_IDS) {
-            expect(indexCss).toContain(`@import "./styles/${style}.css";`);
+            expect(indexCss).toContain(`@import "./styles/${style}/skin.css";`);
         }
-        expect(readdirSync("src/style/styles").filter(name => name.endsWith(".css")).sort())
-            .toEqual(STYLE_IDS.map(style => `${style}.css`).sort());
+        const folders = readdirSync("src/style/styles", { withFileTypes: true }).filter(entry => entry.isDirectory());
+        expect(folders.map(folder => folder.name).sort()).toEqual([...STYLE_IDS].sort());
+        for (const style of STYLE_IDS) {
+            expect(existsSync(`src/style/styles/${style}/skin.css`)).toBe(true);
+        }
     });
 });

@@ -1,4 +1,4 @@
-// Static checks over the per-style stylesheets (src/style/styles/<id>.css). A style may change
+// Static checks over the per-style stylesheets (src/style/styles/<id>/skin.css). A style may change
 // material, shape, thickness, shadow, texture, type and motion, never layout; it stays inside its
 // own [data-style] scope; and every movement it adds stops under reduced motion.
 import postcss, { type AtRule, type ChildNode, type Declaration, type Node, type Rule } from "postcss";

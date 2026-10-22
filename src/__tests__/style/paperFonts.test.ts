@@ -14,7 +14,7 @@ const themeFonts = (): Map<string, string> => {
 
 const paperDeclarations = (): Map<string, string> => {
     const declarations = new Map<string, string>();
-    postcss.parse(readFileSync("src/style/styles/paper.css", "utf8")).walkDecls((declaration) => {
+    postcss.parse(readFileSync("src/style/styles/paper/skin.css", "utf8")).walkDecls((declaration) => {
         declarations.set(declaration.prop, declaration.value.trim());
     });
     return declarations;
@@ -23,7 +23,7 @@ const paperDeclarations = (): Map<string, string> => {
 // "selector → value" for every declaration of a property in paper.css
 const paperDeclarationsOf = (property: string): Map<string, string> => {
     const declarations = new Map<string, string>();
-    postcss.parse(readFileSync("src/style/styles/paper.css", "utf8")).walkDecls(property, (declaration) => {
+    postcss.parse(readFileSync("src/style/styles/paper/skin.css", "utf8")).walkDecls(property, (declaration) => {
         const selector = declaration.parent?.type === "rule" ? (declaration.parent as Rule).selector : "";
         declarations.set(selector.replace(/\s+/g, " "), declaration.value.trim());
     });
