@@ -183,6 +183,10 @@ export const zhHant: MessageSchema = {
                 title: "不只一個解",
                 message: "這題不只一個解，解題結果可能不完整",
             },
+            solutionCountUnknown: {
+                title: "無法確認題目",
+                message: "這題空格太多，無法確認是否只有一個解，解題結果可能不完整",
+            },
             solveAnyway: "仍要解題",
             keepEditing: "返回修改",
         },

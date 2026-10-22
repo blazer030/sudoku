@@ -186,6 +186,10 @@ export const en = {
                 title: "More Than One Solution",
                 message: "This puzzle has more than one solution, so the steps may not be complete.",
             },
+            solutionCountUnknown: {
+                title: "Couldn't Check This Puzzle",
+                message: "This puzzle is too open to confirm it has exactly one solution, so the steps may not be complete.",
+            },
             solveAnyway: "Solve Anyway",
             keepEditing: "Keep Editing",
         },

@@ -206,7 +206,7 @@ import { useI18n } from "vue-i18n";
 import { ChevronLeft, Info, ListFilter, Pencil, PencilLine, RotateCcw, Wand2 } from "lucide-vue-next";
 import { ROUTER_PATH } from "@/router";
 import { BOARD_SIZE } from "@/domain/board/constants";
-import { SudokuSolver } from "@/domain/generator/SudokuSolver";
+import { SudokuSolver, UNKNOWN_SOLUTION_COUNT } from "@/domain/generator/SudokuSolver";
 import { buildSolvePath } from "@/domain/solver/SolvePath";
 import { useTechniqueLabel } from "@/presentation/labels/techniqueLabels";
 import Cell from "@/presentation/pages/game/components/Cell.vue";
@@ -376,16 +376,21 @@ const toggleEraseMode = () => {
 };
 
 const solutionCounter = new SudokuSolver();
+// Bounds the check to roughly a tenth of a second on a desktop; a board it can't settle in time gets a warning.
+const SOLUTION_COUNT_NODE_BUDGET = 40000;
 
-// No solution stops here; more than one asks first. The solver then shows what it can, even nothing.
+// No solution stops here; more than one, or a count too costly to settle, asks first.
+// The solver then shows what it can, even nothing.
 const runSolver = async () => {
     const values = userValues.value;
-    const solutionCount = solutionCounter.countSolutions(values, 2);
+    const solutionCount = solutionCounter.countSolutions(values, 2, { maxNodes: SOLUTION_COUNT_NODE_BUDGET });
     if (solutionCount === 0) {
         await openDialog("noSolution");
         return;
     }
-    if (solutionCount > 1 && await openDialog("multipleSolutions") !== "confirm") return;
+    if (solutionCount === UNKNOWN_SOLUTION_COUNT) {
+        if (await openDialog("solutionCountUnknown") !== "confirm") return;
+    } else if (solutionCount > 1 && await openDialog("multipleSolutions") !== "confirm") return;
     selectedCell.value = null;
     start(buildSolvePath(values));
 };

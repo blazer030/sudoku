@@ -9,6 +9,7 @@ import { buildSolvePath } from "@/domain/solver/SolvePath";
 import { scopeCells } from "@/presentation/components/step-presentation/stepCellView";
 import { TechniqueSolver } from "@/domain/solver/TechniqueSolver";
 import { singlesPuzzle, singlesSolution } from "@/__tests__/fixtures/singlesPuzzle";
+import { openNoSolutionPuzzle } from "@/__tests__/fixtures/openPuzzles";
 import { SAMPLE_PUZZLES } from "@/presentation/pages/solver-walkthrough/samplePuzzles";
 
 const samplePuzzle = (id: string): number[][] => {
@@ -688,6 +689,44 @@ describe("SolverWalkthrough", () => {
 
         it("should keep editing when the warning is declined", async () => {
             const { wrapper } = mountWalkthrough({ initialPuzzle: twoSolutionPuzzle() });
+
+            await solve(wrapper);
+            await wrapper.find("[data-testid='walkthrough-dialog-cancel']").trigger("click");
+            await flushPromises();
+
+            expect(wrapper.find("[data-testid='walkthrough-panel']").exists()).toBe(false);
+            expect(wrapper.find("[data-testid='walkthrough-inputs']").attributes("inert")).toBeUndefined();
+        });
+
+        it("should answer promptly and warn when the count can't be checked, still allowing solving", async () => {
+            const { wrapper } = mountWalkthrough({ initialPuzzle: openNoSolutionPuzzle });
+
+            const started = performance.now();
+            await solve(wrapper);
+
+            expect(performance.now() - started).toBeLessThan(2000);
+            expect(wrapper.find("[data-testid='walkthrough-dialog-title']").text()).toBe("Couldn't Check This Puzzle");
+            expect(wrapper.find("[data-testid='walkthrough-dialog-message']").text()).toBe(
+                "This puzzle is too open to confirm it has exactly one solution, so the steps may not be complete.",
+            );
+            expect(wrapper.find("[data-testid='walkthrough-dialog-confirm']").text()).toBe("Solve Anyway");
+            expect(wrapper.find("[data-testid='walkthrough-dialog-cancel']").text()).toBe("Keep Editing");
+
+            i18n.global.locale.value = "zh-Hant";
+            await nextTick();
+            expect(wrapper.find("[data-testid='walkthrough-dialog-title']").text()).toBe("無法確認題目");
+            expect(wrapper.find("[data-testid='walkthrough-dialog-message']").text()).toBe("這題空格太多，無法確認是否只有一個解，解題結果可能不完整");
+            expect(wrapper.find("[data-testid='walkthrough-dialog-confirm']").text()).toBe("仍要解題");
+            expect(wrapper.find("[data-testid='walkthrough-dialog-cancel']").text()).toBe("返回修改");
+
+            await wrapper.find("[data-testid='walkthrough-dialog-confirm']").trigger("click");
+            await flushPromises();
+
+            expect(wrapper.find("[data-testid='walkthrough-panel']").exists()).toBe(true);
+        });
+
+        it("should keep editing when the unchecked-count warning is declined", async () => {
+            const { wrapper } = mountWalkthrough({ initialPuzzle: openNoSolutionPuzzle });
 
             await solve(wrapper);
             await wrapper.find("[data-testid='walkthrough-dialog-cancel']").trigger("click");

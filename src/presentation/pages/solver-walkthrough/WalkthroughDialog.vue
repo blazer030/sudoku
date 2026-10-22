@@ -107,6 +107,14 @@ const CONTENT: Record<WalkthroughDialogKind, DialogContent> = {
         confirmTone: "primary",
         cancelKey: "walkthrough.dialog.keepEditing",
     },
+    solutionCountUnknown: {
+        icon: CircleHelp,
+        titleKey: "walkthrough.dialog.solutionCountUnknown.title",
+        messageKey: "walkthrough.dialog.solutionCountUnknown.message",
+        confirmKey: "walkthrough.dialog.solveAnyway",
+        confirmTone: "primary",
+        cancelKey: "walkthrough.dialog.keepEditing",
+    },
 };
 
 const { t } = useI18n();
