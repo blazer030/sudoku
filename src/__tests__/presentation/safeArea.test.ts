@@ -50,13 +50,19 @@ describe("safe area", () => {
     it("should let pages that do not scroll themselves grow, so their bottom padding stays reachable", () => {
         // A fixed-height page that overflows leaves its own bottom padding out of the scroll range
         const pageRoots = collectVueFiles("src/presentation/pages")
-            .map(path => ({ path, root: /<template>\s*<div class="([^"]*)"/.exec(readFileSync(path, "utf8"))?.[1] }))
+            .map(path => ({ path, root: /<template>\s*<div\s+class="([^"]*)"/.exec(readFileSync(path, "utf8"))?.[1] }))
             .filter((page): page is { path: string; root: string } => page.root !== undefined);
         const fixedButNotScrolling = pageRoots
-            .filter(({ root }) => /(?:^|\s)h-full(?:\s|$)/.test(root) && !root.includes("overflow-y-auto"))
+            // overflow-hidden marks a page that pins its parts and scrolls inside, like Game Review
+            .filter(({ root }) => /(?:^|\s)h-full(?:\s|$)/.test(root)
+                && !root.includes("overflow-y-auto") && !root.includes("overflow-hidden"))
             .map(({ path }) => path);
 
-        expect(pageRoots.length).toBeGreaterThan(5);
+        // The check must reach the pages themselves, not only their pieces
+        expect(pageRoots.map(({ path }) => path)).toEqual(expect.arrayContaining(
+            ["home/Home.vue", "game/GameScreen.vue", "settings/Settings.vue", "statistics/Statistics.vue"]
+                .map(page => join("src/presentation/pages", page)),
+        ));
         expect(fixedButNotScrolling).toEqual([]);
     });
 
