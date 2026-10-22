@@ -213,6 +213,17 @@
     background-color: var(--color-error);
 }
 
+/* A cell showing candidates instead of a digit gets pen brackets hugging its sides: a circle over the
+   3×3 note grid always crossed some candidates, the brackets clear them */
+[data-style="paper"] [data-variant="selected"]:has(.font-note)::after,
+[data-style="paper"] [data-variant="answer"]:has(.font-note)::after,
+[data-style="paper"] [data-variant="wrong"]:has(.font-note)::after {
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpath d='M2 4C0.8 13 0.8 27 2 36M38 4C39.2 13 39.2 27 38 36' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpath d='M2 4C0.8 13 0.8 27 2 36M38 4C39.2 13 39.2 27 38 36' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+    inset: 0;
+    rotate: 0deg;
+}
+
 /* The selected digit's notes are circled with the same pen instead of sitting on a filled disc,
    which buried the thin handwritten digit */
 [data-style="paper"] [data-note-highlight] {

@@ -117,6 +117,18 @@ describe("paper single-cell outlines", () => {
         expect(declarationsOf('[data-style="paper"] [data-variant="answer"] [data-note-highlight]').get("text-shadow")).toContain("var(--color-card)");
     });
 
+    it.each(Object.keys(CIRCLED))("should mark a %s cell showing candidates with pen brackets at its sides, which clear the note grid", (variant) => {
+        // A circle over a 3×3 note grid always crosses some candidates; brackets hugging the cell's
+        // sides do not. A cell showing a digit keeps the circle.
+        const circle = declarationsOf(`[data-style="paper"] [data-variant="${variant}"]::after`);
+        const brackets = declarationsOf(`[data-style="paper"] [data-variant="${variant}"]:has(.font-note)::after`);
+
+        expect(brackets.get("mask")).toContain("data:image/svg+xml");
+        expect(brackets.get("mask")).not.toBe(circle.get("mask"));
+        expect(brackets.get("-webkit-mask")).toBe(brackets.get("mask"));
+        expect(brackets.get("rotate")).toBe("0deg");
+    });
+
     it("should stop drawing every circle under reduced motion", () => {
         const stopped: string[] = [];
         postcss.parse(PAPER_CSS).walkAtRules("media", (atRule) => {
