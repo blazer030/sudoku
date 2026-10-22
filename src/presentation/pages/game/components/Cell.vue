@@ -33,7 +33,7 @@ import { useI18n } from "vue-i18n";
 import BoardCell, { type CellVariant, type ValueTextColor, type ValueFontWeight } from "@/presentation/components/board-cell/BoardCell.vue";
 import { PuzzleCell } from "@/domain";
 import { useLongPress } from "@/presentation/composables/useLongPress";
-import type { HintCellView, HintHighlight } from "@/presentation/pages/game/hint-mode/useHintMode";
+import type { StepCellView, StepHighlight } from "@/presentation/components/step-presentation/stepCellView";
 import { vPress } from "@/presentation/directives/press";
 
 const props = withDefaults(defineProps<{
@@ -48,7 +48,7 @@ const props = withDefaults(defineProps<{
     flashing?: boolean;
     highlightSameDigit?: boolean;
     /** While hint mode is on, how the hint wants this cell shown; it replaces the normal highlights. */
-    hint?: HintCellView | null;
+    hint?: StepCellView | null;
     revealed?: boolean;
 }>(), {
     peer: false,
@@ -58,7 +58,7 @@ const props = withDefaults(defineProps<{
     revealed: false,
 });
 
-const HINT_VARIANTS: Record<Exclude<HintHighlight, "none">, CellVariant> = {
+const HINT_VARIANTS: Record<Exclude<StepHighlight, "none">, CellVariant> = {
     scope: "scope",
     pattern: "pattern",
     answer: "answer",

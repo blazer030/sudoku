@@ -3,7 +3,7 @@
         v-if="links.length > 0"
         :viewBox="`0 0 ${BOARD_SIZE} ${BOARD_SIZE}`"
         class="absolute inset-0 w-full h-full pointer-events-none text-primary"
-        data-testid="hint-link-overlay"
+        data-testid="step-link-overlay"
         preserveAspectRatio="none"
     >
         <line

@@ -100,6 +100,20 @@
   opacity: 0;
 }
 
+/* A step's tag and explanation swap out, then in, as the step changes */
+.step-swap-enter-active,
+.step-swap-leave-active {
+  transition: opacity 160ms ease, transform 160ms ease;
+}
+.step-swap-enter-from {
+  opacity: 0;
+  transform: translateY(4px);
+}
+.step-swap-leave-to {
+  opacity: 0;
+  transform: translateY(-4px);
+}
+
 /* Diagonal strike-through for eliminated candidates (top-left to bottom-right) */
 .strike-diagonal {
     position: relative;

@@ -54,102 +54,30 @@
 
         <template v-else-if="phase === 'steps' && step">
             <div class="flex items-center justify-between gap-2">
-                <Transition
-                    mode="out-in"
-                    name="hint-step"
-                >
-                    <span
-                        :key="`technique-${stepIndex}`"
-                        :class="isLastStep ? 'bg-primary text-on-primary' : 'bg-primary-light text-primary'"
-                        class="inline-flex items-center gap-1.5 rounded-full text-[13px] font-semibold pl-2 pr-2.5 py-1 leading-none whitespace-nowrap"
-                        data-testid="hint-technique"
-                    >
-                        <component
-                            :is="isLastStep ? PencilLine : ListFilter"
-                            :size="14"
-                        />
-                        {{ techniqueLabel(step.step.technique) }}
-                    </span>
-                </Transition>
-                <div class="flex items-center gap-1 shrink-0">
-                    <button
-                        v-press
-                        :aria-label="t('hintMode.panel.previousStep')"
-                        :disabled="stepIndex === 0"
-                        class="hint-arrow"
-                        data-testid="hint-previous"
-                        @click="emit('previous')"
-                    >
-                        <ChevronLeft :size="20" />
-                    </button>
-                    <template v-if="totalSteps > MAX_STEP_DOTS">
-                        <span
-                            aria-hidden="true"
-                            class="min-w-11 text-center text-[13px] font-semibold tabular-nums text-foreground-secondary"
-                            data-testid="hint-step-counter"
-                        >
-                            {{ t("hintMode.panel.stepCount", { current: stepIndex + 1, total: totalSteps }) }}
-                        </span>
-                        <span
-                            class="sr-only"
-                            data-testid="hint-step-counter-label"
-                        >
-                            {{ t("hintMode.panel.stepCounter", { current: stepIndex + 1, total: totalSteps }) }}
-                        </span>
-                    </template>
-                    <div
-                        v-else
-                        class="flex items-center gap-1 px-0.5"
-                    >
-                        <button
-                            v-for="index in totalSteps"
-                            :key="`dot-${index}`"
-                            :aria-current="index - 1 === stepIndex ? 'step' : undefined"
-                            :aria-label="t('hintMode.panel.stepCounter', { current: index, total: totalSteps })"
-                            :class="dotClass(index - 1)"
-                            :data-testid="`hint-dot-${index - 1}`"
-                            class="h-2 rounded-full transition-all duration-300 cursor-pointer"
-                            @click="emit('goTo', index - 1)"
-                        />
-                    </div>
-                    <button
-                        v-press
-                        :aria-label="t('hintMode.panel.nextStep')"
-                        :disabled="isLastStep"
-                        class="hint-arrow"
-                        data-testid="hint-next"
-                        @click="emit('next')"
-                    >
-                        <ChevronRight :size="20" />
-                    </button>
-                </div>
+                <StepTag
+                    :icon="isLastStep ? PencilLine : ListFilter"
+                    :label="techniqueLabel(step.step.technique)"
+                    :step-key="stepIndex"
+                    :strong="isLastStep"
+                    test-id="hint-technique"
+                />
+                <StepNavigator
+                    :step-index="stepIndex"
+                    :total-steps="totalSteps"
+                    test-id-prefix="hint"
+                    @go-to="emit('goTo', $event)"
+                    @next="emit('next')"
+                    @previous="emit('previous')"
+                />
             </div>
 
-            <!-- The only part that gives way when a long explanation would push the buttons off screen.
-                 It stays mounted across steps, so it can announce each new explanation. -->
-            <div
-                ref="explanationBox"
-                :class="explanationClipped ? 'hint-explanation-fade' : ''"
-                aria-live="polite"
-                class="hint-explanation-box min-h-[4.6rem] shrink! overflow-y-auto"
-                data-testid="hint-explanation-region"
-                @scroll="updateExplanationClipped"
+            <StepExplanation
+                ref="explanation"
+                :step-key="stepIndex"
+                test-id-prefix="hint"
             >
-                <Transition
-                    mode="out-in"
-                    name="hint-step"
-                    @before-enter="scrollExplanationToTop"
-                    @after-enter="updateExplanationClipped"
-                >
-                    <p
-                        :key="`explanation-${stepIndex}`"
-                        class="text-foreground text-[14.5px] leading-[1.6]"
-                        data-testid="hint-explanation"
-                    >
-                        {{ explanation }}
-                    </p>
-                </Transition>
-            </div>
+                {{ explanation }}
+            </StepExplanation>
 
             <div class="flex gap-2.5">
                 <button
@@ -199,14 +127,17 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, nextTick, onMounted, ref, useTemplateRef, watch } from "vue";
+import { computed, nextTick, onMounted, useTemplateRef, watch } from "vue";
 import { useI18n } from "vue-i18n";
-import { ChevronLeft, ChevronRight, CircleAlert, Eraser, EyeOff, ListFilter, PencilLine } from "lucide-vue-next";
+import { ChevronRight, CircleAlert, Eraser, EyeOff, ListFilter, PencilLine } from "lucide-vue-next";
 import type { RevealHintStep } from "@/domain/game/RevealHint";
 import type { CellReference } from "@/domain/solver/SolveStep";
 import type { HintPhase } from "@/presentation/pages/game/hint-mode/useHintMode";
 import { useHintExplanation } from "@/presentation/pages/game/hint-mode/useHintExplanation";
 import { useTechniqueLabel } from "@/presentation/labels/techniqueLabels";
+import StepTag from "@/presentation/components/step-presentation/StepTag.vue";
+import StepNavigator from "@/presentation/components/step-presentation/StepNavigator.vue";
+import StepExplanation from "@/presentation/components/step-presentation/StepExplanation.vue";
 import { vPress } from "@/presentation/directives/press";
 
 const props = withDefaults(defineProps<{
@@ -239,49 +170,19 @@ const cellName = (cell: CellReference): string =>
 const explanation = computed(() =>
     props.step === null ? "" : explain(props.step.step, props.step.candidatesBefore));
 
-// When the panel is height-capped, fade the cut-off edge so a long explanation reads as scrollable.
-const explanationBox = useTemplateRef<HTMLElement>("explanationBox");
-const explanationClipped = ref(false);
-
-const updateExplanationClipped = () => {
-    const box = explanationBox.value;
-    if (box === null) return;
-    explanationClipped.value = box.scrollTop + box.clientHeight < box.scrollHeight - 1;
-};
-
-const scrollExplanationToTop = () => {
-    if (explanationBox.value !== null) explanationBox.value.scrollTop = 0;
-};
-
 // The controls underneath turn inert while the panel is open, so take keyboard focus with it.
 const panel = useTemplateRef<HTMLElement>("panel");
+const explanationRegion = useTemplateRef<InstanceType<typeof StepExplanation>>("explanation");
 
 onMounted(() => {
     panel.value?.focus({ preventScroll: true });
-    updateExplanationClipped();
 });
-watch(() => [props.maxHeight, explanation.value], () => { void nextTick(updateExplanationClipped); });
-
-// Beyond this many steps the dots, the arrows and the longest technique name no longer fit
-// one row of a 360px-wide panel, so a "3 / 8" counter takes the dots' place.
-const MAX_STEP_DOTS = 6;
-
-const dotClass = (index: number): string => {
-    if (index === props.stepIndex) return "w-5 bg-primary";
-    if (index < props.stepIndex) return "w-2 bg-primary/40";
-    return "w-2 bg-border";
-};
+// A new height cap can clip the explanation, or stop clipping it.
+watch(() => props.maxHeight, () => { void nextTick(() => { explanationRegion.value?.updateClipped(); }); });
 </script>
 
 <style scoped>
 @reference "../../../../style/index.css";
-
-/* Short screens let the explanation shrink to one line, so the buttons and the caption stay on screen. */
-@media (max-height: 700px) {
-    .hint-explanation-box {
-        min-height: 1.45rem;
-    }
-}
 
 .hint-primary {
     @apply flex-[1.6] flex items-center justify-center gap-1.5 py-2.5 rounded-2xl bg-primary text-on-primary text-[15px] font-semibold cursor-pointer shadow-primary transition-all duration-200 hover:bg-primary-hover;
@@ -289,29 +190,5 @@ const dotClass = (index: number): string => {
 
 .hint-secondary {
     @apply flex-1 py-2.5 rounded-2xl bg-foreground/5 text-foreground text-[15px] font-medium cursor-pointer transition-all duration-200 hover:bg-foreground/10;
-}
-
-.hint-arrow {
-    @apply w-8 h-8 rounded-full flex items-center justify-center text-foreground cursor-pointer transition-all duration-200 hover:bg-foreground/5 disabled:opacity-25 disabled:cursor-default;
-}
-
-.hint-explanation-fade {
-    /* The mask only reads alpha, so any opaque token works */
-    mask-image: linear-gradient(to bottom, var(--color-foreground) calc(100% - 1.5rem), transparent);
-}
-
-.hint-step-enter-active,
-.hint-step-leave-active {
-    transition: opacity 160ms ease, transform 160ms ease;
-}
-
-.hint-step-enter-from {
-    opacity: 0;
-    transform: translateY(4px);
-}
-
-.hint-step-leave-to {
-    opacity: 0;
-    transform: translateY(-4px);
 }
 </style>

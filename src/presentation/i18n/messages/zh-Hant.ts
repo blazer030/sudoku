@@ -217,6 +217,12 @@ export const zhHant: MessageSchema = {
     position: {
         cell: "第 {row} 列第 {column} 欄 = {value}",
     },
+    stepPanel: {
+        previousStep: "上一步",
+        nextStep: "下一步",
+        stepCounter: "第 {current} 步，共 {total} 步",
+        stepCount: "{current} / {total}",
+    },
     hintMode: {
         badge: "提示模式",
         panel: {
@@ -225,10 +231,6 @@ export const zhHant: MessageSchema = {
             clear: "清除",
             close: "關閉",
             next: "下一步",
-            previousStep: "上一步",
-            nextStep: "下一步",
-            stepCounter: "第 {current} 步，共 {total} 步",
-            stepCount: "{current} / {total}",
             fill: "{digit} 填入答案",
             notesHidden: "顯示盤面算出的候選數，你的筆記暫時隱藏",
         },

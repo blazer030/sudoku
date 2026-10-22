@@ -219,6 +219,12 @@ export const en = {
     position: {
         cell: "Row {row}, Col {column} = {value}",
     },
+    stepPanel: {
+        previousStep: "Previous step",
+        nextStep: "Next step",
+        stepCounter: "Step {current} of {total}",
+        stepCount: "{current} / {total}",
+    },
     hintMode: {
         badge: "Hint mode",
         panel: {
@@ -227,10 +233,6 @@ export const en = {
             clear: "Clear",
             close: "Close",
             next: "Next",
-            previousStep: "Previous step",
-            nextStep: "Next step",
-            stepCounter: "Step {current} of {total}",
-            stepCount: "{current} / {total}",
             fill: "Fill in {digit}",
             notesHidden: "Board candidates shown; your notes are hidden for now",
         },

@@ -1,20 +1,19 @@
 import { computed, ref, shallowRef } from "vue";
-import { BOARD_SIZE, BOX_SIZE } from "@/domain/board/constants";
+import { BOARD_SIZE } from "@/domain/board/constants";
 import type { Sudoku } from "@/domain/game/Sudoku";
 import type { RevealHintPlan, RevealHintStep } from "@/domain/game/RevealHint";
-import type { CellReference, ChainLink, Scope, SolveStep } from "@/domain/solver/SolveStep";
+import type { CellReference, ChainLink } from "@/domain/solver/SolveStep";
+import {
+    cellKey,
+    type StepBoard,
+    type StepCellView,
+    stepCellView,
+    stepCellViews,
+    stepLinks,
+    touchedCellKeys,
+} from "@/presentation/components/step-presentation/stepCellView";
 
 export type HintPhase = "wrongEntry" | "steps";
-
-export type HintHighlight = "none" | "scope" | "pattern" | "answer" | "wrong";
-
-export interface HintCellView {
-    highlight: HintHighlight;
-    /** The solver's candidates to show instead of the player's notes; null keeps the player's own content. */
-    candidates: number[] | null;
-    eliminated: number[];
-    emphasized: number[];
-}
 
 export interface HintAnswer {
     cell: CellReference;
@@ -29,63 +28,8 @@ interface HintModeOptions {
 
 type StepsPlan = Extract<RevealHintPlan, { kind: "steps" }>;
 
-const cellKey = (cell: CellReference): string => `${cell.row}-${cell.column}`;
-
 const sameCell = (left: CellReference, right: CellReference): boolean =>
     left.row === right.row && left.column === right.column;
-
-const scopeCells = (scope: Scope): CellReference[] => {
-    const cells: CellReference[] = [];
-    if (scope.kind === "row") {
-        for (let column = 0; column < BOARD_SIZE; column++) cells.push({ row: scope.row, column });
-    } else if (scope.kind === "column") {
-        for (let row = 0; row < BOARD_SIZE; row++) cells.push({ row, column: scope.column });
-    } else {
-        for (let row = scope.boxRow; row < scope.boxRow + BOX_SIZE; row++) {
-            for (let column = scope.boxColumn; column < scope.boxColumn + BOX_SIZE; column++) {
-                cells.push({ row, column });
-            }
-        }
-    }
-    return cells;
-};
-
-// Wings carry no chain links of their own, so draw the relationships that make them work.
-const wingLinks = ({ step, candidatesBefore }: RevealHintStep): ChainLink[] => {
-    const candidatesOf = (cell: CellReference): number[] => candidatesBefore[cell.row][cell.column];
-    const eliminatedDigit = step.eliminations.length > 0 ? step.eliminations[0].digit : 0;
-
-    if (step.technique === "xyWing" || step.technique === "xyzWing" || step.technique === "wxyzWing") {
-        const [pivot, ...pincers] = step.focus;
-        return pincers.map((pincer) => {
-            const shared = candidatesOf(pincer).filter((digit) => candidatesOf(pivot).includes(digit));
-            // Anchor the line on the digit the pivot hands to the pincer, not on the eliminated one.
-            const digit = shared.find((candidate) => candidate !== eliminatedDigit) ?? (shared.length > 0 ? shared[0] : 0);
-            return { from: pivot, to: pincer, digit, type: "strong" };
-        });
-    }
-
-    if (step.technique === "wWing" && step.supporters) {
-        // Endpoint – supporter – strong link – supporter – endpoint, all on the pair digit that is kept.
-        const [endpointOne, endpointTwo] = step.focus;
-        const [supporterOne, supporterTwo] = step.supporters;
-        const linkDigit = candidatesOf(endpointOne).find((digit) => digit !== eliminatedDigit) ?? 0;
-        return [
-            { from: endpointOne, to: supporterOne, digit: linkDigit, type: "weak" },
-            { from: supporterOne, to: supporterTwo, digit: linkDigit, type: "strong" },
-            { from: supporterTwo, to: endpointTwo, digit: linkDigit, type: "weak" },
-        ];
-    }
-
-    return [];
-};
-
-const patternDigits = (step: SolveStep, candidates: number[], eliminatedHere: number[]): number[] => {
-    if (step.technique.startsWith("naked")) return candidates;
-    if (step.technique.startsWith("hidden")) return candidates.filter((digit) => !eliminatedHere.includes(digit));
-    const eliminationDigits = new Set(step.eliminations.map((elimination) => elimination.digit));
-    return candidates.filter((digit) => eliminationDigits.has(digit));
-};
 
 /**
  * Temporary, unsaved hint state on the game board: either one wrong entry to point out, or the solver
@@ -104,35 +48,18 @@ export const useHintMode = (sudoku: Sudoku, { autoRemoveNotes, onApplied, record
     const answer = computed<HintAnswer | null>(() =>
         stepsPlan.value === null ? null : { cell: stepsPlan.value.target, digit: stepsPlan.value.digit });
 
-    const links = computed<ChainLink[]>(() => {
-        const current = currentStep.value;
-        if (current === null) return [];
-        if (current.step.chainLinks && current.step.chainLinks.length > 0) return current.step.chainLinks;
-        return wingLinks(current);
-    });
+    const links = computed<ChainLink[]>(() => (currentStep.value === null ? [] : stepLinks(currentStep.value)));
 
     // Every cell any step touches shows the solver's candidates, so they stay put while paging.
-    const involvedKeys = computed(() => {
-        const keys = new Set<string>();
-        const add = (cell: CellReference) => keys.add(cellKey(cell));
-        for (const { step } of steps.value) {
-            step.focus.forEach(add);
-            step.supporters?.forEach(add);
-            step.eliminations.forEach((elimination) => add(elimination.cell));
-            step.assignments.forEach((assignment) => add(assignment.cell));
-            step.chainLinks?.forEach((link) => { add(link.from); add(link.to); });
-            step.scopes.flatMap(scopeCells).forEach(add);
-        }
-        return keys;
-    });
+    const involvedKeys = computed(() => touchedCellKeys(steps.value));
 
-    const scopeKeys = computed(() =>
-        new Set((currentStep.value?.step.scopes ?? []).flatMap(scopeCells).map(cellKey)));
-
-    const linkDigitsAt = (cell: CellReference): number[] =>
-        links.value
-            .filter((link) => sameCell(link.from, cell) || sameCell(link.to, cell))
-            .map((link) => link.digit);
+    const board: StepBoard = {
+        isEmpty: (row, column) => {
+            const puzzleCell = sudoku.puzzle[row][column];
+            return !puzzleCell.isClue && !puzzleCell.hasEntry;
+        },
+        showsCandidates: (row, column) => involvedKeys.value.has(cellKey({ row, column })),
+    };
 
     const end = () => {
         phase.value = null;
@@ -178,50 +105,24 @@ export const useHintMode = (sudoku: Sudoku, { autoRemoveNotes, onApplied, record
         onApplied(plan.target);
     };
 
-    const cellView = (row: number, column: number): HintCellView => {
-        const cell = { row, column };
-        const view: HintCellView = { highlight: "none", candidates: null, eliminated: [], emphasized: [] };
-
+    const cellView = (row: number, column: number): StepCellView => {
         if (phase.value === "wrongEntry") {
-            if (wrongCell.value !== null && sameCell(wrongCell.value, cell)) view.highlight = "wrong";
+            const view: StepCellView = { highlight: "none", candidates: null, eliminated: [], emphasized: [] };
+            if (wrongCell.value !== null && sameCell(wrongCell.value, { row, column })) view.highlight = "wrong";
             return view;
         }
 
         const current = currentStep.value;
-        if (current === null) return view;
-        const { step, candidatesBefore } = current;
-
-        const puzzleCell = sudoku.puzzle[row][column];
-        const isEmpty = !puzzleCell.isClue && !puzzleCell.hasEntry;
-        const candidates = isEmpty && involvedKeys.value.has(cellKey(cell)) ? candidatesBefore[row][column] : [];
-        const eliminated = step.eliminations
-            .filter((elimination) => sameCell(elimination.cell, cell))
-            .map((elimination) => elimination.digit);
-        if (isEmpty) {
-            view.candidates = candidates;
-            view.eliminated = eliminated;
-        }
-
-        const assignment = step.assignments.find((item) => sameCell(item.cell, cell));
-        if (assignment) {
-            view.highlight = "answer";
-            view.emphasized = [assignment.digit];
-        } else if (step.focus.some((focus) => sameCell(focus, cell))) {
-            view.highlight = "pattern";
-            if (step.assignments.length === 0) view.emphasized = patternDigits(step, candidates, eliminated);
-        } else if (step.supporters?.some((supporter) => sameCell(supporter, cell))) {
-            view.highlight = "pattern";
-            view.emphasized = candidates.filter((digit) => linkDigitsAt(cell).includes(digit));
-        } else if (scopeKeys.value.has(cellKey(cell))) {
-            view.highlight = "scope";
-        }
-        return view;
+        if (current === null) return { highlight: "none", candidates: null, eliminated: [], emphasized: [] };
+        return stepCellView(current, row, column, board);
     };
 
     // One 9×9 grid per phase and step, so re-renders that change neither (the timer tick) hand the cells
     // the same view objects instead of 81 new ones.
-    const cellViews = computed<HintCellView[][] | null>(() => {
+    const cellViews = computed<StepCellView[][] | null>(() => {
         if (phase.value === null) return null;
+        const current = currentStep.value;
+        if (phase.value === "steps" && current !== null) return stepCellViews(current, board);
         return Array.from({ length: BOARD_SIZE }, (_, row) =>
             Array.from({ length: BOARD_SIZE }, (__, column) => cellView(row, column)));
     });
