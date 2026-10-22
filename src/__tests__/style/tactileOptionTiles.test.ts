@@ -23,6 +23,12 @@ describe("tactile option tiles", () => {
         expect(declarationsOf('[data-style="tactile"]').get("--tactile-edge-on-primary")).toMatch(/var\(--color-primary\)/);
     });
 
+    it("should keep a tile that is on at least 3px thick, so its edge reads as a shadow", () => {
+        const edge = /0 (\d+)px 0 var\(--tactile-edge-on-primary\)/.exec(declarationsOf(ON_TILE).get("box-shadow") ?? "");
+
+        expect(Number(edge?.[1])).toBeGreaterThanOrEqual(3);
+    });
+
     it("should not draw the lit top line across a tile that is on", () => {
         expect(declarationsOf(ON_TILE).get("box-shadow")).not.toContain("var(--tactile-highlight)");
     });

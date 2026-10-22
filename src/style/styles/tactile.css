@@ -9,7 +9,7 @@
     --tactile-highlight: color-mix(in srgb, var(--color-card) 60%, transparent);
     --tactile-drop-shadow: color-mix(in srgb, var(--color-shadow) 14%, transparent);
     /* A solid primary tile needs its own darker edge; the neutral one blends into it */
-    --tactile-edge-on-primary: color-mix(in srgb, var(--color-primary) 62%, var(--color-shadow));
+    --tactile-edge-on-primary: color-mix(in srgb, var(--color-primary) 40%, var(--color-shadow));
 }
 
 /* Thickness: a lit top edge, a solid bottom edge and a soft shadow under it */
@@ -25,10 +25,10 @@
 
 /* An option tile that is on rests half pressed. It does not move, so it stays under reduced motion. */
 [data-style="tactile"] [data-skin~="tile"][aria-pressed="true"] {
-    transform: translateY(calc(var(--tactile-depth) - 2px));
+    transform: translateY(calc(var(--tactile-depth) - 3px));
     box-shadow:
-        0 2px 0 var(--tactile-edge-on-primary),
-        0 3px 4px var(--tactile-drop-shadow);
+        0 3px 0 var(--tactile-edge-on-primary),
+        0 4px 6px var(--tactile-drop-shadow);
 }
 
 /* Press feedback. vPress sets the data attributes; input never waits for them.
