@@ -27,6 +27,8 @@
      figures sink 3, 4, 5, 7 and 9 below the line. */
   --font-hand: "Caveat", "LXGW WenKai TC", "Outfit", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
   --font-wenkai: "LXGW WenKai TC", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+  /* Paper's mono stack: Chinese inside mono text (「已放棄」) is written in WenKai too */
+  --font-mono-paper: "Roboto Mono", "LXGW WenKai TC", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", monospace;
   --font-print: "Times New Roman", "Noto Serif TC", "Songti TC", "PMingLiU", serif;
   /* Board, key and timer faces; a style may point them at its own stacks */
   --font-clue: var(--font-sans);

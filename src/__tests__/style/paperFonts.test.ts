@@ -54,6 +54,12 @@ describe("paper fonts", () => {
         expect(themeFonts().get("--font-default")).toMatch(/^"Outfit", /);
     });
 
+    it("should write Chinese in mono text in WenKai under paper", () => {
+        // 「已放棄」 in the statistics and review is font-mono; without WenKai it fell to the system font
+        expect(paperDeclarations().get("--font-mono")).toBe("var(--font-mono-paper)");
+        expect(themeFonts().get("--font-mono-paper")).toMatch(/^"Roboto Mono", "LXGW WenKai TC", /);
+    });
+
     it("should not use old-style figures for clues", () => {
         expect(themeFonts().get("--font-print")).toBeDefined();
         expect(themeFonts().get("--font-print")).not.toContain("Georgia");

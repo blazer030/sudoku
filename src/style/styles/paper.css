@@ -4,6 +4,7 @@
 /* Type: the interface in WenKai, clues printed, entries, notes and keys by hand. */
 [data-style="paper"] {
     --font-sans: var(--font-wenkai);
+    --font-mono: var(--font-mono-paper);
     --font-clue: var(--font-print);
     --font-entry: var(--font-hand);
     --font-note: var(--font-hand);
