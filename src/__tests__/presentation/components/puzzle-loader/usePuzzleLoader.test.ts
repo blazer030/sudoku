@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { usePuzzleLoader } from "@/presentation/components/puzzle-loader/usePuzzleLoader";
 
 describe("usePuzzleLoader", () => {
@@ -38,6 +38,50 @@ describe("usePuzzleLoader", () => {
         await expect(
             runWithLoader(() => Promise.reject(new Error("boom")), 50),
         ).rejects.toThrow("boom");
+        expect(visible.value).toBe(false);
+    });
+
+    it("cancel should abort the running task and hide at once, skipping the minimum time", async () => {
+        const { visible, runWithLoader, cancel } = usePuzzleLoader();
+        const seen: { signal: AbortSignal | null } = { signal: null };
+
+        const startTime = performance.now();
+        const promise = runWithLoader((signal) => {
+            seen.signal = signal;
+            return new Promise<never>((_resolve, reject) => {
+                signal.addEventListener("abort", () => {
+                    reject(new DOMException("cancelled", "AbortError"));
+                });
+            });
+        }, 5000);
+        await vi.waitFor(() => {
+            expect(seen.signal).not.toBeNull();
+        });
+        cancel();
+
+        await expect(promise).rejects.toMatchObject({ name: "AbortError" });
+        expect(visible.value).toBe(false);
+        expect(seen.signal?.aborted).toBe(true);
+        expect(performance.now() - startTime).toBeLessThan(1000);
+    });
+
+    it("cancel before the task starts should never run it", async () => {
+        const { visible, runWithLoader, cancel } = usePuzzleLoader();
+        const task = vi.fn(() => Promise.resolve("done"));
+
+        const promise = runWithLoader(task, 5000);
+        cancel();
+
+        await expect(promise).rejects.toMatchObject({ name: "AbortError" });
+        expect(task).not.toHaveBeenCalled();
+        expect(visible.value).toBe(false);
+    });
+
+    it("cancel with nothing running should do nothing", () => {
+        const { visible, cancel } = usePuzzleLoader();
+
+        cancel();
+
         expect(visible.value).toBe(false);
     });
 });
