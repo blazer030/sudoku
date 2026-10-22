@@ -1,6 +1,7 @@
 import { watch, type Ref } from "vue";
 import { getPalette, systemBarColor } from "@/theme/palettes";
 import { updateMetaThemeColor } from "@/application/PwaThemeUpdater";
+import { syncPaperFontLinks } from "@/presentation/theme/paperFonts";
 import type { Appearance, ColorMode, ColorThemeId, StyleId } from "@/application/SettingsStorage";
 import type { SystemBarService } from "@/application/systemBar/SystemBarService";
 import type { AppearanceBridgeService } from "@/application/appearanceBridge/AppearanceBridgeService";
@@ -32,8 +33,8 @@ const listenForChanges = (query: MediaQueryList, listener: () => void): (() => v
 };
 
 /**
- * Owns the <html> theme attributes, the dark class, the theme-color meta and the system bars,
- * and keeps the Android shell told of the appearance for its next cold start.
+ * Owns the <html> theme attributes, the dark class, the theme-color meta, the system bars and
+ * paper's font stylesheets, and keeps the Android shell told of the appearance for its next cold start.
  */
 export const startAppearanceSync = (
     sources: AppearanceSources,
@@ -49,6 +50,7 @@ export const startAppearanceSync = (
         root.classList.toggle("dark", mode === "dark");
         root.dataset.style = sources.style.value;
         root.dataset.colorTheme = sources.colorTheme.value;
+        syncPaperFontLinks(sources.style.value === "paper");
         updateMetaThemeColor(systemBarColor(sources.style.value, sources.colorTheme.value, mode));
         void systemBar.apply(mode);
         void appearanceBridge.setSystemBarColors({

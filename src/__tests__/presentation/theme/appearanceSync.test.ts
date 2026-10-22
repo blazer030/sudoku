@@ -2,6 +2,7 @@ import { nextTick, ref } from "vue";
 import type { Mock } from "vitest";
 import { resolveColorMode, startAppearanceSync } from "@/presentation/theme/appearanceSync";
 import { getPalette } from "@/theme/palettes";
+import { PAPER_FONT_URLS } from "@/presentation/theme/paperFonts";
 import type { Appearance, ColorMode, ColorThemeId, StyleId } from "@/application/SettingsStorage";
 import type { SystemBarService } from "@/application/systemBar/SystemBarService";
 import type { AppearanceBridgeService, SystemBarColors } from "@/application/appearanceBridge/AppearanceBridgeService";
@@ -38,6 +39,9 @@ describe("startAppearanceSync", () => {
 
     const isDark = () => document.documentElement.classList.contains("dark");
 
+    const stylesheetHrefs = (): string[] =>
+        [...document.head.querySelectorAll<HTMLLinkElement>('link[rel="stylesheet"]')].map(link => link.getAttribute("href") ?? "");
+
     beforeEach(() => {
         const apply = vi.fn<(mode: ColorMode) => Promise<void>>().mockResolvedValue(undefined);
         systemBar = { apply };
@@ -54,6 +58,7 @@ describe("startAppearanceSync", () => {
         stop?.();
         stop = undefined;
         meta.remove();
+        document.head.querySelectorAll('link[rel="stylesheet"]').forEach((link) => { link.remove(); });
         vi.unstubAllGlobals();
         document.documentElement.className = "";
         delete document.documentElement.dataset.style;
@@ -230,5 +235,40 @@ describe("startAppearanceSync", () => {
         listeners.forEach((listener) => { listener({ matches: true } as MediaQueryListEvent); });
 
         expect(isDark()).toBe(true);
+    });
+
+    describe("paper fonts", () => {
+        it("should load the paper fonts only while paper is the style", async () => {
+            const sources = buildSources();
+            stop = startAppearanceSync(sources, systemBar, appearanceBridge);
+            expect(stylesheetHrefs()).toEqual([]);
+
+            sources.style.value = "paper";
+            await nextTick();
+            expect(stylesheetHrefs()).toEqual([...PAPER_FONT_URLS]);
+
+            sources.style.value = "tactile";
+            await nextTick();
+            expect(stylesheetHrefs()).toEqual([]);
+        });
+
+        it("should keep the links the inline script added instead of adding them again", async () => {
+            for (const url of PAPER_FONT_URLS) {
+                const link = document.createElement("link");
+                link.rel = "stylesheet";
+                link.href = url;
+                link.setAttribute("data-paper-font-link", "");
+                document.head.appendChild(link);
+            }
+            const sources = buildSources();
+            sources.style.value = "paper";
+
+            stop = startAppearanceSync(sources, systemBar, appearanceBridge);
+            sources.colorTheme.value = "redInk";
+            sources.appearance.value = "dark";
+            await nextTick();
+
+            expect(stylesheetHrefs()).toEqual([...PAPER_FONT_URLS]);
+        });
     });
 });
