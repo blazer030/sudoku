@@ -195,7 +195,7 @@ export const zhHant: MessageSchema = {
         title: "遊戲回顧",
         initialBoard: "遊戲開始時的盤面",
         fill: "在第 {row} 列第 {column} 欄填入 {value}",
-        erase: "清除第 {row} 列第 {column} 欄",
+        erase: "擦除第 {row} 列第 {column} 欄",
         toggleNote: "在第 {row} 列第 {column} 欄切換筆記 {value}",
         hint: "在第 {row} 列第 {column} 欄揭示 {value}",
         autoNotes: "為所有空格填上筆記",

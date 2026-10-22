@@ -88,6 +88,16 @@ describe("GameReview", () => {
         expect(wrapper.text()).toContain("在第 1 列第 2 欄揭示 5");
     });
 
+    it("should describe an erase step in Traditional Chinese with the same verb as its label", async () => {
+        const wrapper = await mountReview({ action: "erase" });
+
+        i18n.global.locale.value = "zh-Hant";
+        await nextTick();
+
+        expect(wrapper.find("[data-testid='review-action']").text()).toBe("擦除");
+        expect(wrapper.find("[data-testid='review-explanation']").text()).toBe("擦除第 1 列第 2 欄");
+    });
+
     it("should label the final step of a completed game in Traditional Chinese", async () => {
         const wrapper = await mountReview({ completed: true, nextClicks: 2 });
 
