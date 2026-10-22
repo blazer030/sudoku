@@ -242,8 +242,8 @@ describe("GameReview", () => {
             const wrapper = await mountReview({ nextClicks: 1 });
 
             expect(wrapper.find("[data-testid='review-action']").text()).toBe("Fill");
-            // 50px to bring its bottom edge in, and 8px of room past the edge
-            expect(scrollBy).toHaveBeenCalledExactlyOnceWith({ top: 58, behavior: "smooth" });
+            // 50px to bring its bottom edge in, and 12px more so the board's frame below a bottom-row cell shows
+            expect(scrollBy).toHaveBeenCalledExactlyOnceWith({ top: 62, behavior: "smooth" });
         });
 
         it("should scroll a changed cell hidden behind the sticky header down into view", async () => {
@@ -251,7 +251,15 @@ describe("GameReview", () => {
 
             await mountReview({ nextClicks: 1 });
 
-            expect(scrollBy).toHaveBeenCalledExactlyOnceWith({ top: -36, behavior: "smooth" });
+            expect(scrollBy).toHaveBeenCalledExactlyOnceWith({ top: -40, behavior: "smooth" });
+        });
+
+        it("should nudge a changed cell that shows but touches the panel, so the board's frame shows too", async () => {
+            placeChangedCell({ top: 365, bottom: 398 });
+
+            await mountReview({ nextClicks: 1 });
+
+            expect(scrollBy).toHaveBeenCalledExactlyOnceWith({ top: 10, behavior: "smooth" });
         });
 
         it("should not scroll when the changed cell is already in view", async () => {
@@ -286,7 +294,7 @@ describe("GameReview", () => {
 
             await mountReview({ nextClicks: 1 });
 
-            expect(scrollBy).toHaveBeenCalledExactlyOnceWith({ top: 58, behavior: "instant" });
+            expect(scrollBy).toHaveBeenCalledExactlyOnceWith({ top: 62, behavior: "instant" });
         });
     });
 
