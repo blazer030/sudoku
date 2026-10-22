@@ -368,6 +368,26 @@ describe("Settings.vue appearance group", () => {
         expect(names()).toEqual(["極簡動態", "實體方塊", "紙本筆記"]);
     });
 
+    it("should draw each thumbnail in its own style's faces whatever style is active", () => {
+        // Paper points --font-sans at WenKai on <html>; the other thumbnails must not inherit it
+        const expectedSans: Record<string, string> = {
+            minimal: "--font-sans: var(--font-default)",
+            tactile: "--font-sans: var(--font-default)",
+            paper: "--font-sans: var(--font-wenkai)",
+        };
+        for (const activeStyle of STYLE_IDS) {
+            localStorage.setItem("sudoku-settings", JSON.stringify({ style: activeStyle }));
+            const wrapper = mountSettings();
+            expect(useSettingsStore().style).toBe(activeStyle);
+
+            for (const style of STYLE_IDS) {
+                const thumbnail = wrapper.get(`[data-testid='style-option-${style}'] [data-testid='style-thumbnail']`);
+                expect(thumbnail.attributes("style"), `${style} while ${activeStyle} is active`).toContain(expectedSans[style]);
+            }
+            wrapper.unmount();
+        }
+    });
+
     it("should keep style hooks out of thumbnails", () => {
         const wrapper = mountSettings();
 

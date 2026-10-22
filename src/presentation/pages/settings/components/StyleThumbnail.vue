@@ -3,7 +3,7 @@
     <div
         :class="look.page"
         :data-thumbnail-style="styleId"
-        :style="paletteVariables"
+        :style="thumbnailVariables"
         aria-hidden="true"
         class="flex flex-col items-center justify-center gap-1.5 w-full aspect-[3/2] rounded-lg bg-background"
         data-testid="style-thumbnail"
@@ -66,6 +66,8 @@ import { PALETTE_TOKENS, type Palette } from "@/theme/palettes";
 const props = defineProps<{ styleId: StyleId; palette: Palette }>();
 
 interface ThumbnailLook {
+    /** The style's interface face, pinned on the thumbnail so the active style's never leaks in */
+    sansFont: string;
     page: string;
     board: string;
     /** Added to every cell; the fill comes from the cell's role */
@@ -83,6 +85,7 @@ interface ThumbnailLook {
 // Each style's look as plain token classes, drawn with the thumbnail's own palette
 const THUMBNAIL_LOOKS: Record<StyleId, ThumbnailLook> = {
     minimal: {
+        sansFont: "var(--font-default)",
         page: "",
         board: "bg-border",
         cell: "",
@@ -95,6 +98,7 @@ const THUMBNAIL_LOOKS: Record<StyleId, ThumbnailLook> = {
         pill: "",
     },
     tactile: {
+        sansFont: "var(--font-default)",
         page: "",
         board: "bg-background shadow-[inset_0_1px_2px_color-mix(in_srgb,var(--color-shadow)_22%,transparent)]",
         cell: "shadow-[inset_0_-1px_0_color-mix(in_srgb,var(--color-shadow)_16%,transparent)]",
@@ -107,6 +111,7 @@ const THUMBNAIL_LOOKS: Record<StyleId, ThumbnailLook> = {
         pill: "shadow-[0_2px_0_color-mix(in_srgb,var(--color-shadow)_28%,var(--color-background))]",
     },
     paper: {
+        sansFont: "var(--font-wenkai)",
         page: "bg-[repeating-linear-gradient(to_bottom,transparent_0,transparent_7px,var(--color-rule)_7px,var(--color-rule)_8px)]",
         board: "bg-border",
         cell: "",
@@ -128,8 +133,11 @@ const ENTERED_CELL = 5;
 
 const look = computed(() => THUMBNAIL_LOOKS[props.styleId]);
 
-const paletteVariables = computed(() =>
-    Object.fromEntries(PALETTE_TOKENS.map(token => [`--color-${token}`, props.palette[token]])));
+// The thumbnail's own palette and interface face; the hand and print faces belong to no style
+const thumbnailVariables = computed(() => ({
+    ...Object.fromEntries(PALETTE_TOKENS.map(token => [`--color-${token}`, props.palette[token]])),
+    "--font-sans": look.value.sansFont,
+}));
 
 const cellClasses = (cell: number): string[] => {
     if (cell === SELECTED_CELL) return [look.value.cell, "bg-cell-selected", look.value.selected];
