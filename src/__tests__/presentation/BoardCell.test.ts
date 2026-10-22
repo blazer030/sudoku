@@ -1,5 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { nextTick } from "vue";
 import { mount } from "@vue/test-utils";
+import { ARRIVAL_SETTLE_MS } from "@/presentation/components/board-cell/useArrivalMotion";
 import BoardCell from "@/presentation/components/board-cell/BoardCell.vue";
 
 describe("BoardCell", () => {
@@ -78,6 +80,24 @@ describe("BoardCell", () => {
 
             await value.trigger("animationend");
             expect(wrapper.get("[data-testid='cell-value']").classes()).not.toContain("value-arrive");
+        });
+
+        it("should drop the arriving mark when the active style has no arrival animation", async () => {
+            // Minimal and paper never animate value-arrive, so no animationend ever comes
+            vi.useFakeTimers();
+            try {
+                stubReducedMotion(false);
+                const wrapper = mountCell({ value: 0 });
+                await wrapper.setProps({ value: 5 });
+                expect(wrapper.get("[data-testid='cell-value']").classes()).toContain("value-arrive");
+
+                vi.advanceTimersByTime(ARRIVAL_SETTLE_MS);
+                await nextTick();
+
+                expect(wrapper.get("[data-testid='cell-value']").classes()).not.toContain("value-arrive");
+            } finally {
+                vi.useRealTimers();
+            }
         });
 
         it("should not animate digits present on mount", () => {

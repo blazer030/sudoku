@@ -113,7 +113,7 @@ const VALUE_FONT_WEIGHTS: Record<ValueFontWeight, string> = {
     medium: "font-medium",
 };
 
-// Only a style sheet gives value-arrive a look; minimal has none
+// Only a style sheet gives value-arrive a look; in styles without one it settles on a timer
 const { arriving, settle } = useArrivalMotion(toRef(props, "value"), toRef(props, "popping"));
 
 const backgroundClass = computed(() => VARIANT_BACKGROUNDS[props.variant]);
