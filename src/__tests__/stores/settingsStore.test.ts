@@ -41,26 +41,17 @@ describe("settingsStore", () => {
         expect(store.style).toBe("minimal");
     });
 
-    it("should persist appearance change and restore it in a new store", () => {
-        const store = useSettingsStore();
-
-        store.setAppearance("dark");
-
-        const stored = JSON.parse(localStorage.getItem("sudoku-settings") ?? "{}") as Record<string, unknown>;
-        expect(stored.appearance).toBe("dark");
-        setActivePinia(createPinia());
-        expect(useSettingsStore().appearance).toBe("dark");
-    });
-
-    it("should persist highlightScope and restore it in a new store", () => {
-        const store = useSettingsStore();
-
-        store.setHighlightScope(false);
+    it.each([
+        ["appearance", (store: ReturnType<typeof useSettingsStore>) => { store.setAppearance("dark"); }, "dark"],
+        ["highlightScope", (store: ReturnType<typeof useSettingsStore>) => { store.setHighlightScope(false); }, false],
+        ["language", (store: ReturnType<typeof useSettingsStore>) => { store.setLanguage("zh-Hant"); }, "zh-Hant"],
+    ] as const)("should persist a %s change and restore it in a new store", (key, change, expected) => {
+        change(useSettingsStore());
 
         const stored = JSON.parse(localStorage.getItem("sudoku-settings") ?? "{}") as Record<string, unknown>;
-        expect(stored.highlightScope).toBe(false);
+        expect(stored[key]).toBe(expected);
         setActivePinia(createPinia());
-        expect(useSettingsStore().highlightScope).toBe(false);
+        expect(useSettingsStore()[key]).toBe(expected);
     });
 
     it("should remember the theme chosen for the current style", () => {
@@ -91,17 +82,6 @@ describe("settingsStore", () => {
 
         const stored = JSON.parse(localStorage.getItem("sudoku-settings") ?? "{}") as Record<string, unknown>;
         expect(stored.style).toBe("minimal");
-    });
-
-    it("should persist language change and restore it in a new store", () => {
-        const store = useSettingsStore();
-
-        store.setLanguage("zh-Hant");
-
-        const stored = JSON.parse(localStorage.getItem("sudoku-settings") ?? "{}") as Record<string, unknown>;
-        expect(stored.language).toBe("zh-Hant");
-        setActivePinia(createPinia());
-        expect(useSettingsStore().language).toBe("zh-Hant");
     });
 
     it("should persist colorTheme change to localStorage", () => {

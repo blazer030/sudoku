@@ -25,10 +25,10 @@ const mountModal = (overrides: Partial<GameCompleteParams> = {}, onResult: (resu
 };
 
 describe("GameCompleteModal", () => {
-    it("should display Hints stat with recordedUsed count", () => {
-        const wrapper = mountModal({ hintsUsed: 2 });
+    it.each([2, 0])("should show %i hints used in the Hints stat", (hintsUsed) => {
+        const wrapper = mountModal({ hintsUsed });
 
-        expect(wrapper.text()).toContain("2");
+        expect(wrapper.get("[data-testid='hints-count']").text()).toBe(String(hintsUsed));
         expect(wrapper.text()).toContain("Hints");
     });
 
@@ -90,11 +90,5 @@ describe("GameCompleteModal", () => {
 
         expect(result).toBe(action);
         expect(wrapper.find("[data-testid='game-complete-modal']").exists()).toBe(false);
-    });
-
-    it("should display 0 hints when no hints used", () => {
-        const wrapper = mountModal({ hintsUsed: 0 });
-
-        expect(wrapper.find("[data-testid='hints-count']").text()).toBe("0");
     });
 });

@@ -102,24 +102,6 @@ describe("SettingsStorage", () => {
             expect(settings.style).toBe("minimal");
         });
 
-        it("should default appearance and style for settings saved before they existed", () => {
-            localStorage.setItem("sudoku-settings", JSON.stringify({ colorTheme: "blue", language: "en" }));
-
-            const settings = loadSettings();
-
-            expect(settings.appearance).toBe("system");
-            expect(settings.style).toBe("minimal");
-            expect(settings.colorTheme).toBe("blue");
-        });
-
-        it("should default highlightScope for settings saved before they existed", () => {
-            localStorage.setItem("sudoku-settings", JSON.stringify({ colorTheme: "blue" }));
-
-            const settings = loadSettings();
-
-            expect(settings.highlightScope).toBe(true);
-        });
-
         it("should drop the retired seenLongPressTip flag from older stored settings", () => {
             localStorage.setItem("sudoku-settings", JSON.stringify({ colorTheme: "blue", seenLongPressTip: true }));
 
@@ -129,57 +111,32 @@ describe("SettingsStorage", () => {
             expect(settings.colorTheme).toBe("blue");
         });
 
-        it("should normalize an unknown stored appearance to system", () => {
-            localStorage.setItem("sudoku-settings", JSON.stringify({ appearance: "sepia" }));
+        it.each([
+            ["appearance", "sepia", "system"],
+            ["style", "neon", "minimal"],
+            ["colorTheme", "red", "green"],
+            ["language", "fr", "system"],
+        ] as const)("should normalize an unknown stored %s to its default", (key, stored, expected) => {
+            localStorage.setItem("sudoku-settings", JSON.stringify({ [key]: stored }));
 
-            expect(loadSettings().appearance).toBe("system");
+            expect(loadSettings()[key]).toBe(expected);
         });
 
-        it("should normalize an unknown stored style to minimal", () => {
-            localStorage.setItem("sudoku-settings", JSON.stringify({ style: "neon" }));
-
-            expect(loadSettings().style).toBe("minimal");
-        });
-
-        it("should normalize an unknown stored colorTheme to green", () => {
-            localStorage.setItem("sudoku-settings", JSON.stringify({ colorTheme: "red" }));
-
-            expect(loadSettings().colorTheme).toBe("green");
-        });
-
-        it("should default language to system for settings saved before it existed", () => {
-            localStorage.setItem("sudoku-settings", JSON.stringify({
-                colorTheme: "blue",
-                highlightSameDigit: true,
-                completionFlash: true,
-                autoRemoveNotes: true,
-                showRemainingCount: true,
-                matchLauncherIconToTheme: false,
-            }));
-
-            const settings = loadSettings();
-
-            expect(settings.language).toBe("system");
-            expect(settings.colorTheme).toBe("blue");
-        });
-
-        it("should normalize an unknown stored language to system", () => {
-            localStorage.setItem("sudoku-settings", JSON.stringify({ language: "fr" }));
-
-            expect(loadSettings().language).toBe("system");
-        });
-
-        it("should fill missing fields with defaults for backward compatibility", () => {
+        it("should fill fields added since a setting was saved with their defaults, keeping the saved ones", () => {
             localStorage.setItem("sudoku-settings", JSON.stringify({ colorTheme: "purple" }));
 
             const settings = loadSettings();
 
             expect(settings.colorTheme).toBe("purple");
             expect(settings.highlightSameDigit).toBe(true);
+            expect(settings.highlightScope).toBe(true);
             expect(settings.completionFlash).toBe(true);
             expect(settings.autoRemoveNotes).toBe(true);
             expect(settings.showRemainingCount).toBe(true);
             expect(settings.matchLauncherIconToTheme).toBe(false);
+            expect(settings.language).toBe("system");
+            expect(settings.appearance).toBe("system");
+            expect(settings.style).toBe("minimal");
         });
     });
 });
