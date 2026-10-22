@@ -198,6 +198,16 @@ describe("GameReview", () => {
         expect(panelDock.find("[data-testid='review-panel']").exists()).toBe(true);
     });
 
+    it("should size the board so it ends a steady gap above the pinned panel", async () => {
+        const wrapper = await mountReview({ nextClicks: 0 });
+
+        // Review explanations fit one line, so the panel keeps a steady, short height
+        expect(wrapper.get("[data-testid='review-explanation-region']").classes()).toContain("min-h-[1.45rem]");
+        // The scroll area ends 16px below the board, the game page's spacing; the rest of the page
+        // takes less than the shared cap leaves, so a capped board keeps at least that gap
+        expect(wrapper.get("[data-testid='review-scroll-area']").classes()).toContain("pb-4");
+    });
+
     it("should never scroll sideways, though the board reaches into the page gutter", async () => {
         const wrapper = await mountReview({ nextClicks: 0 });
 

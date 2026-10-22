@@ -6,12 +6,12 @@
         <!-- The step panel stays pinned at the bottom; the header, summary and board scroll above it -->
         <div
             ref="scrollArea"
-            class="flex-1 min-h-0 overflow-y-auto overflow-x-hidden overscroll-y-contain flex flex-col gap-4 px-5 pb-3"
+            class="flex-1 min-h-0 overflow-y-auto overflow-x-hidden overscroll-y-contain flex flex-col gap-4 px-5 pb-4"
             data-testid="review-scroll-area"
         >
             <div
                 ref="header"
-                class="flex items-center justify-between sticky top-0 bg-background -mx-5 px-5 pt-6 pb-3 z-10"
+                class="flex items-center justify-between sticky top-0 bg-background -mx-5 px-5 pt-6 pb-1 z-10"
                 data-skin="page-header"
                 data-testid="review-header"
             >
@@ -30,7 +30,7 @@
                 <div class="w-15" />
             </div>
 
-            <div class="flex items-center justify-between bg-card rounded-xl py-2.5 px-4 shadow-card-sm">
+            <div class="flex items-center justify-between bg-card rounded-xl py-2 px-4 shadow-card-sm">
                 <div class="flex items-center gap-3">
                     <div
                         :class="game.completed
@@ -70,6 +70,8 @@
                 </div>
             </div>
 
+            <!-- Everything else here (header, summary, gaps, panel and the room under it) takes 326px,
+                 within the 331px the shared cap leaves, so a capped board ends 16px or more above the panel -->
             <div
                 data-skin="board"
                 class="bg-card rounded-2xl shadow-card-lg p-2 self-center w-[calc(100%+1.5rem)] max-w-board-fit pointer-events-none"
@@ -108,6 +110,7 @@
                 :label="t('review.title')"
                 :play-state="playState"
                 :step-index="currentStep"
+                compact-explanation
                 :total-steps="positionCount"
                 test-id-prefix="review"
                 @go-to="goToStep"
