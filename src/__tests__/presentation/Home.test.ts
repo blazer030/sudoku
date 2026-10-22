@@ -162,6 +162,39 @@ describe("Home", () => {
         expect(wrapper.get("[data-testid='continue-progress']").text()).toBe("33% filled");
     });
 
+    it("should put the difficulty picker inside the new game card, right above its button", () => {
+        const { wrapper } = mountHome();
+        const card = wrapper.get("[data-testid='new-game-card']");
+
+        expect(card.find("[data-testid='difficulty-switcher']").exists()).toBe(true);
+        expect(wrapper.get("[data-testid='difficulty-switcher']").element.nextElementSibling)
+            .toBe(wrapper.get("[data-testid='new-game-button']").element);
+    });
+
+    it("should keep continue apart from the new game card", () => {
+        const { wrapper } = mountHome({ savedGame: dummySave });
+        const card = wrapper.get("[data-testid='new-game-card']");
+        const continueButton = wrapper.get("[data-testid='continue-button']");
+
+        expect(card.find("[data-testid='continue-button']").exists()).toBe(false);
+        expect(continueButton.element.compareDocumentPosition(card.element) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    });
+
+    it("should show only the new game card without a save", () => {
+        const { wrapper } = mountHome();
+
+        expect(wrapper.find("[data-testid='continue-button']").exists()).toBe(false);
+        expect(wrapper.get("[data-testid='new-game-button']").classes()).toContain("bg-primary");
+    });
+
+    it("should make new game secondary while a save exists", () => {
+        const { wrapper } = mountHome({ savedGame: dummySave });
+        const classes = wrapper.get("[data-testid='new-game-button']").classes();
+
+        expect(classes).toContain("bg-primary-light");
+        expect(classes).not.toContain("bg-primary");
+    });
+
     it("should navigate to game page when clicking Continue", async () => {
         const { wrapper, router } = mountHome({ savedGame: dummySave });
         await router.push("/");

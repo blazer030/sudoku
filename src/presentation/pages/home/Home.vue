@@ -29,20 +29,27 @@
         <div class="flex flex-col gap-3 w-full">
             <ContinueButton @continue="continueGame" />
 
-            <DifficultySwitcher v-model="difficulty" />
-
-            <button
-                v-press
-                class="flex items-center justify-center gap-2.5 h-14 w-full bg-card rounded-2xl shadow-card cursor-pointer transition-all duration-200 hover:bg-foreground/3 hover:shadow-card-lg"
-                data-testid="new-game-button"
-                @click="handleNewGame"
+            <div
+                class="flex flex-col gap-3 bg-card rounded-2xl shadow-card p-3"
+                data-testid="new-game-card"
             >
-                <Plus
-                    :size="20"
-                    class="text-foreground"
-                />
-                <span class="text-foreground text-base font-semibold">{{ t("home.newGame") }}</span>
-            </button>
+                <DifficultySwitcher v-model="difficulty" />
+
+                <!-- The main action without a save; secondary to Continue while one exists -->
+                <button
+                    v-press
+                    :class="gameStore.savedGame === null
+                        ? 'bg-primary text-on-primary shadow-primary'
+                        : 'bg-primary-light text-primary'"
+                    class="flex items-center justify-center gap-2.5 h-14 w-full rounded-2xl cursor-pointer"
+                    data-testid="new-game-button"
+                    type="button"
+                    @click="handleNewGame"
+                >
+                    <Plus :size="20" />
+                    <span class="text-base font-semibold">{{ t("home.newGame") }}</span>
+                </button>
+            </div>
         </div>
 
         <div class="flex-1" />
