@@ -11,7 +11,7 @@
         >
             <div
                 ref="header"
-                class="flex items-center justify-between sticky top-0 bg-background pt-6 pb-3 z-10"
+                class="flex items-center justify-between sticky top-0 bg-background -mx-5 px-5 pt-6 pb-3 z-10"
                 data-skin="page-header"
                 data-testid="review-header"
             >

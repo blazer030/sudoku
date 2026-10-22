@@ -198,6 +198,16 @@ describe("GameReview", () => {
         expect(panelDock.find("[data-testid='review-panel']").exists()).toBe(true);
     });
 
+    it("should run the sticky header across the page gutter, so cards scrolling under it stay hidden", async () => {
+        const wrapper = await mountReview({ nextClicks: 0 });
+
+        // The summary card's shadow reaches past the content box; a header only as wide as the
+        // content would let it show at both sides
+        const header = wrapper.get("[data-testid='review-header']");
+        expect(header.classes()).toEqual(expect.arrayContaining(["sticky", "top-0", "-mx-5", "px-5"]));
+        expect(wrapper.get("[data-testid='review-scroll-area']").classes()).toContain("px-5");
+    });
+
     describe("keeping the changed cell in view", () => {
         // The scroll area shows y 0–400 and its sticky header covers y 0–68
         const SCROLL_AREA = { top: 0, bottom: 400 };
