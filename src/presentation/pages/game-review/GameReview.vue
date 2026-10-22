@@ -6,7 +6,7 @@
         <!-- The step panel stays pinned at the bottom; the header, summary and board scroll above it -->
         <div
             ref="scrollArea"
-            class="flex-1 min-h-0 overflow-y-auto overscroll-y-contain flex flex-col gap-5 px-5 pb-5"
+            class="flex-1 min-h-0 overflow-y-auto overscroll-y-contain flex flex-col gap-4 px-5 pb-3"
             data-testid="review-scroll-area"
         >
             <div
@@ -30,7 +30,7 @@
                 <div class="w-15" />
             </div>
 
-            <div class="flex items-center justify-between bg-card rounded-xl py-3 px-4 shadow-card-sm">
+            <div class="flex items-center justify-between bg-card rounded-xl py-2.5 px-4 shadow-card-sm">
                 <div class="flex items-center gap-3">
                     <div
                         :class="game.completed
@@ -101,7 +101,7 @@
         </div>
 
         <div
-            class="shrink-0 px-5 pb-4"
+            class="shrink-0 px-5 pb-3"
             data-testid="review-panel-dock"
         >
             <StepPlaybackPanel
