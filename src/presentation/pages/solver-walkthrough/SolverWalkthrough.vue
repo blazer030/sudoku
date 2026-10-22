@@ -100,7 +100,7 @@
                         class="flex gap-2"
                     >
                         <button
-                            v-for="preset in TEST_PUZZLE_PRESETS"
+                            v-for="preset in SAMPLE_PUZZLES"
                             :key="preset.label"
                             :data-testid="`load-preset-${preset.label.toLowerCase()}`"
                             class="px-3 py-1.5 bg-card border border-border rounded-lg text-xs text-foreground-muted cursor-pointer hover:bg-foreground/5"
@@ -170,7 +170,7 @@ import { useWalkthroughPlayback } from "@/presentation/pages/solver-walkthrough/
 import { provideWalkthroughDialog } from "@/presentation/pages/solver-walkthrough/useWalkthroughDialog";
 import WalkthroughDialog from "@/presentation/pages/solver-walkthrough/WalkthroughDialog.vue";
 import { vPress } from "@/presentation/directives/press";
-import { TEST_PUZZLE_PRESETS } from "@/presentation/pages/solver-walkthrough/testPuzzles";
+import { SAMPLE_PUZZLES } from "@/presentation/pages/solver-walkthrough/samplePuzzles";
 import { isFeatureEnabled } from "@/utils/featureToggle";
 
 interface CellPosition {

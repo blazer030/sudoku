@@ -2,14 +2,14 @@ import { Sudoku } from "@/domain/game/Sudoku";
 import { PuzzleCell } from "@/domain/board/PuzzleCell";
 import { BoardState } from "@/domain/solver/BoardState";
 import { TechniqueSolver } from "@/domain/solver/TechniqueSolver";
-import { TEST_PUZZLE_PRESETS } from "@/presentation/pages/solver-walkthrough/testPuzzles";
+import { SAMPLE_PUZZLES } from "@/presentation/pages/solver-walkthrough/samplePuzzles";
 
 /**
  * Returns the "Hard" walkthrough puzzle, played forward with correct entries until the next
  * Reveal Cell hint needs elimination steps before its assignment.
  */
 export const createMultiStepSudoku = (): Sudoku => {
-    const hardPreset = TEST_PUZZLE_PRESETS.find((preset) => preset.label === "Hard");
+    const hardPreset = SAMPLE_PUZZLES.find((preset) => preset.label === "Hard");
     if (!hardPreset) throw new Error("Hard preset missing");
     const solved = new TechniqueSolver().solveWithTechniques(BoardState.fromPuzzle(hardPreset.puzzle));
     const answer = hardPreset.puzzle.map((rowValues, row) =>

@@ -9,12 +9,12 @@ import { buildSolvePath } from "@/domain/solver/SolvePath";
 import { scopeCells } from "@/presentation/components/step-presentation/stepCellView";
 import { TechniqueSolver } from "@/domain/solver/TechniqueSolver";
 import { singlesPuzzle, singlesSolution } from "@/__tests__/fixtures/singlesPuzzle";
-import { TEST_PUZZLE_PRESETS } from "@/presentation/pages/solver-walkthrough/testPuzzles";
+import { SAMPLE_PUZZLES } from "@/presentation/pages/solver-walkthrough/samplePuzzles";
 
-const mediumPreset = TEST_PUZZLE_PRESETS.find((preset) => preset.label === "Medium");
+const mediumPreset = SAMPLE_PUZZLES.find((preset) => preset.label === "Medium");
 if (!mediumPreset) throw new Error("expected Medium preset to exist");
 const mediumPuzzle = mediumPreset.puzzle;
-const hardPreset = TEST_PUZZLE_PRESETS.find((preset) => preset.label === "Hard");
+const hardPreset = SAMPLE_PUZZLES.find((preset) => preset.label === "Hard");
 if (!hardPreset) throw new Error("expected Hard preset to exist");
 const hardPuzzle = hardPreset.puzzle;
 

@@ -2,7 +2,7 @@ import { BoardState } from "@/domain/solver/BoardState";
 import type { SolveStep } from "@/domain/solver/SolveStep";
 import { TechniqueSolver } from "@/domain/solver/TechniqueSolver";
 import { singlesPuzzle, singlesSolution } from "@/__tests__/fixtures/singlesPuzzle";
-import { TEST_PUZZLE_PRESETS } from "@/presentation/pages/solver-walkthrough/testPuzzles";
+import { SAMPLE_PUZZLES } from "@/presentation/pages/solver-walkthrough/samplePuzzles";
 
 // Unique solution, but after its last assignment the solver finds two X-Chain eliminations and then stalls.
 const stallingPuzzle: number[][] = [
@@ -242,7 +242,7 @@ describe("TechniqueSolver", () => {
         });
 
         it("should return elimination steps before the assignment", () => {
-            const hardPreset = TEST_PUZZLE_PRESETS.find((preset) => preset.label === "Hard");
+            const hardPreset = SAMPLE_PUZZLES.find((preset) => preset.label === "Hard");
             if (!hardPreset) throw new Error("Hard preset missing");
             const hardPuzzle = hardPreset.puzzle;
             const solver = new TechniqueSolver();

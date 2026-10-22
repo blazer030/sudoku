@@ -1,9 +1,9 @@
-export interface TestPuzzlePreset {
+export interface SamplePuzzle {
     label: string;
     puzzle: number[][];
 }
 
-export const TEST_PUZZLE_PRESETS: TestPuzzlePreset[] = [
+export const SAMPLE_PUZZLES: SamplePuzzle[] = [
     {
         label: "Singles",
         puzzle: [
