@@ -158,17 +158,18 @@ const positionClasses = computed(() => {
     if (props.row === 8 && props.column === 0) classes.push("rounded-bl-lg");
     if (props.row === 8 && props.column === 8) classes.push("rounded-br-lg");
 
-    // Thin lines are translucent ink rather than the border token, so they still show on clue cells
+    // Thin lines are translucent ink rather than the border token, so they still show on clue cells.
+    // Their colours are custom properties (index.css), so a style can redraw the grid.
     if (props.column === 2 || props.column === 5) {
-        classes.push("border-r-3 border-r-foreground/20");
+        classes.push("border-r-3 border-r-(color:--board-box-line)");
     } else if (props.column < 8) {
-        classes.push("border-r border-r-foreground/12");
+        classes.push("border-r border-r-(color:--board-line)");
     }
 
     if (props.row === 2 || props.row === 5) {
-        classes.push("border-b-3 border-b-foreground/20");
+        classes.push("border-b-3 border-b-(color:--board-box-line)");
     } else if (props.row < 8) {
-        classes.push("border-b border-b-foreground/12");
+        classes.push("border-b border-b-(color:--board-line)");
     }
 
     return classes.join(" ");

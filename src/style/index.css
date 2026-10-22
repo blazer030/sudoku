@@ -87,6 +87,12 @@
 }
 
 @layer base {
+  /* The board's grid lines. Defaults sit in a layer, so a style's sheet can redraw them. */
+  :root {
+    --board-line: color-mix(in oklab, var(--color-foreground) 12%, transparent);
+    --board-box-line: color-mix(in oklab, var(--color-foreground) 20%, transparent);
+  }
+
   body {
     @apply bg-background text-foreground font-sans;
     overscroll-behavior-y: contain;

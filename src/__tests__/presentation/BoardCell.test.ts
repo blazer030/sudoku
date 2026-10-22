@@ -1,3 +1,4 @@
+import { readFileSync } from "fs";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { nextTick } from "vue";
 import { mount } from "@vue/test-utils";
@@ -233,12 +234,22 @@ describe("BoardCell", () => {
         expect(wrapperCol5.classes()).toContain("border-r-3");
     });
 
-    it("should draw thin grid lines in translucent ink so they show between clue cells", () => {
+    it("should draw grid lines in the board's line colours, which a style can redraw", () => {
         const wrapper = mountCell({ row: 0, column: 0, variant: "clue" });
+        const boxEdge = mountCell({ row: 2, column: 2 });
 
-        expect(wrapper.classes()).toContain("border-r-foreground/12");
-        expect(wrapper.classes()).toContain("border-b-foreground/12");
+        expect(wrapper.classes()).toContain("border-r-(color:--board-line)");
+        expect(wrapper.classes()).toContain("border-b-(color:--board-line)");
         expect(wrapper.classes()).not.toContain("border-r-border");
+        expect(boxEdge.classes()).toContain("border-r-(color:--board-box-line)");
+        expect(boxEdge.classes()).toContain("border-b-(color:--board-box-line)");
+    });
+
+    it("should default the board's line colours to translucent ink, so they still show on clue cells", () => {
+        const indexCss = readFileSync("src/style/index.css", "utf8");
+
+        expect(indexCss).toContain("--board-line: color-mix(in oklab, var(--color-foreground) 12%, transparent);");
+        expect(indexCss).toContain("--board-box-line: color-mix(in oklab, var(--color-foreground) 20%, transparent);");
     });
 
     it("should apply thick bottom border at box boundary rows (2, 5)", () => {
