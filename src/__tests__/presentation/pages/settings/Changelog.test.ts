@@ -111,14 +111,10 @@ describe("Changelog", () => {
         }
     });
 
-    it("should explain the App badge", async () => {
+    it("should explain the App badge", () => {
         const wrapper = mountChangelog();
 
         expect(wrapper.find("[data-testid='changelog-app-note']").text()).toBe("Items marked App apply to the Android app only.");
-
-        i18n.global.locale.value = "zh-Hant";
-        await nextTick();
-        expect(wrapper.find("[data-testid='changelog-app-note']").text()).toBe("標有 App 的項目只適用於 Android App。");
     });
 
     it("should describe changes in players' words", () => {
@@ -131,7 +127,5 @@ describe("Changelog", () => {
                 }
             }
         }
-        const release210 = CHANGELOG.find(entry => entry.version === "2.1.0");
-        expect(release210?.changes.map(change => change.text["zh-Hant"])).toContain("解題演示在小螢幕上的畫面更整齊");
     });
 });

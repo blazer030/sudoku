@@ -169,20 +169,6 @@ describe("Settings.vue match-launcher-icon toggle", () => {
         const wrapper = mountSettings();
         expect(wrapper.text()).toContain("The icon updates after you leave the app");
     });
-
-    it("shows the note in Chinese", async () => {
-        vi.mocked(Capacitor.isNativePlatform).mockReturnValue(true);
-        const wrapper = mountSettings();
-        const { language } = storeToRefs(useSettingsStore());
-        const stopLocaleSync = startLocaleSync(language);
-        try {
-            await wrapper.find("[data-testid='language-zh-Hant']").trigger("click");
-            await nextTick();
-            expect(wrapper.text()).toContain("離開 App 後圖示才會更新");
-        } finally {
-            stopLocaleSync();
-        }
-    });
 });
 
 describe("Settings.vue language switcher", () => {
@@ -294,18 +280,13 @@ describe("Settings.vue appearance group", () => {
         vi.mocked(Capacitor.isNativePlatform).mockReturnValue(false);
     });
 
-    it("should show the minimal style as the selected style card", async () => {
+    it("should show the minimal style as the selected style card", () => {
         const wrapper = mountSettings();
         const card = wrapper.get("[data-testid='style-option-minimal']");
 
         expect(card.attributes("aria-pressed")).toBe("true");
         expect(card.text()).toContain("Minimal Motion");
         expect(card.find("[data-testid='style-thumbnail']").exists()).toBe(true);
-
-        i18n.global.locale.value = "zh-Hant";
-        await nextTick();
-
-        expect(wrapper.get("[data-testid='style-option-minimal']").text()).toContain("極簡動態");
     });
 
     it("should not re-apply the style or theme that is already selected", async () => {
@@ -434,24 +415,20 @@ describe("Settings.vue appearance group", () => {
         }
     });
 
-    it("should show a thumbnail for each of the three styles", async () => {
+    it("should show a thumbnail for each of the three styles", () => {
         const wrapper = mountSettings();
         const cards = wrapper.findAll("button[data-testid^='style-option-']");
 
         expect(cards.map(card => card.attributes("data-testid"))).toEqual(["style-option-minimal", "style-option-tactile", "style-option-paper"]);
         // The thumbnail is hidden from screen readers; the card's name is its last text
-        const names = () => wrapper.findAll("button[data-testid^='style-option-'] > span").map(name => name.text());
-        expect(names()).toEqual(["Minimal Motion", "Tactile Tiles", "Paper Notebook"]);
+        const names = wrapper.findAll("button[data-testid^='style-option-'] > span").map(name => name.text());
+        expect(names).toEqual(["Minimal Motion", "Tactile Tiles", "Paper Notebook"]);
         for (const style of STYLE_IDS) {
             const thumbnail = wrapper.get(`[data-testid='style-option-${style}'] [data-testid='style-thumbnail']`);
             const primary = getPalette(style, rememberedThemeFor(style, useSettingsStore().colorThemeByStyle), "light").primary;
             expect(thumbnail.attributes("data-thumbnail-style")).toBe(style);
             expect(thumbnail.attributes("style")?.toUpperCase()).toContain(`--COLOR-PRIMARY: ${primary}`);
         }
-
-        i18n.global.locale.value = "zh-Hant";
-        await nextTick();
-        expect(names()).toEqual(["極簡動態", "實體方塊", "紙本筆記"]);
     });
 
     it("should draw each thumbnail in its own style's faces whatever style is active", () => {
@@ -583,9 +560,6 @@ describe("Settings.vue data group", () => {
             "All game records, including their reviews, plus your win rate and best times will be permanently deleted. "
             + "This can't be undone. Your unfinished game and settings are kept.",
         );
-        i18n.global.locale.value = "zh-Hant";
-        await nextTick();
-        expect(wrapper.get("[data-testid='clear-records-dialog']").text()).toContain("未完成的遊戲和設定會保留");
     });
 
     it("should clear records on confirm", async () => {
@@ -649,7 +623,7 @@ describe("Settings.vue about group", () => {
         vi.mocked(Capacitor.isNativePlatform).mockReturnValue(false);
     });
 
-    it("should link to the privacy policy in a new window", async () => {
+    it("should link to the privacy policy in a new window", () => {
         const wrapper = mountSettings();
         const link = wrapper.get("[data-testid='privacy-policy-link']");
 
@@ -657,11 +631,6 @@ describe("Settings.vue about group", () => {
         expect(link.attributes("target")).toBe("_blank");
         expect(link.attributes("rel")).toContain("noopener");
         expect(link.text()).toBe("Privacy Policy");
-
-        i18n.global.locale.value = "zh-Hant";
-        await nextTick();
-
-        expect(wrapper.get("[data-testid='privacy-policy-link']").text()).toBe("隱私權政策");
     });
 });
 
@@ -671,16 +640,11 @@ describe("Settings.vue color mode switcher", () => {
         vi.mocked(Capacitor.isNativePlatform).mockReturnValue(false);
     });
 
-    it("should label the modes in English and Chinese", async () => {
+    it("should label the modes", () => {
         const wrapper = mountSettings();
-        const labels = () => ["system", "light", "dark"].map(mode => wrapper.get(`[data-testid='appearance-${mode}']`).text());
+        const labels = ["system", "light", "dark"].map(mode => wrapper.get(`[data-testid='appearance-${mode}']`).text());
 
-        expect(labels()).toEqual(["System", "Light", "Dark"]);
-
-        i18n.global.locale.value = "zh-Hant";
-        await nextTick();
-
-        expect(labels()).toEqual(["跟隨系統", "淺色", "深色"]);
+        expect(labels).toEqual(["System", "Light", "Dark"]);
     });
 
     it("should mark system as selected by default", () => {

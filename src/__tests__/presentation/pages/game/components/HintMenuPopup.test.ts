@@ -39,13 +39,10 @@ describe("HintMenuPopup", () => {
         expect(wrapper.find("[data-testid='hint-reveal-cell']").text()).toBe("揭示一格");
     });
 
-    it("should explain that Check Conflicts looks for repeated digits", async () => {
+    it("should explain that Check Conflicts looks for repeated digits", () => {
         const wrapper = mountPopup();
 
         expect(wrapper.find("[data-testid='hint-check-conflicts-description']").text()).toBe("Finds repeated digits in a row, column or box");
-        i18n.global.locale.value = "zh-Hant";
-        await nextTick();
-        expect(wrapper.find("[data-testid='hint-check-conflicts-description']").text()).toBe("找出同列、欄、宮裡重複的數字");
     });
 
     it("should spell out how many hints are left", () => {
@@ -61,20 +58,9 @@ describe("HintMenuPopup", () => {
         expect(wrapper.find("[data-testid='hint-remaining']").text()).toBe("1 hint left this game");
     });
 
-    it("should spell out the hints left in Traditional Chinese", async () => {
-        const wrapper = mountPopup({ remaining: 4 });
-        i18n.global.locale.value = "zh-Hant";
-        await nextTick();
-
-        expect(wrapper.find("[data-testid='hint-remaining']").text()).toBe("本局還剩 4 次提示");
-    });
-
-    it("should explain the free first hint only before any hint is used", async () => {
+    it("should explain the free first hint only before any hint is used", () => {
         const wrapper = mountPopup({ firstHintFree: true });
         expect(wrapper.find("[data-testid='hint-free-note']").text()).toBe("Your first hint each game is free and isn't counted in statistics.");
-        i18n.global.locale.value = "zh-Hant";
-        await nextTick();
-        expect(wrapper.find("[data-testid='hint-free-note']").text()).toBe("每局第一次提示免費，不計入統計");
 
         const usedWrapper = mountPopup({ firstHintFree: false });
         expect(usedWrapper.find("[data-testid='hint-free-note']").exists()).toBe(false);

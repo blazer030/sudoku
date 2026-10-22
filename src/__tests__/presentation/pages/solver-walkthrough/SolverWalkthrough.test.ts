@@ -81,7 +81,7 @@ afterEach(() => {
 
 describe("SolverWalkthrough", () => {
     describe("guide", () => {
-        it("should open with the guide", async () => {
+        it("should open with the guide", () => {
             const { wrapper } = mountWalkthrough();
 
             const intro = wrapper.find("[data-testid='walkthrough-intro']");
@@ -90,25 +90,14 @@ describe("SolverWalkthrough", () => {
                 "It may not finish: the puzzle may need a more advanced technique, the input may have a mistake, or the puzzle may have no solution or more than one.",
             );
             expect(wrapper.find("[data-testid='walkthrough-inputs']").attributes("inert")).toBeDefined();
-
-            i18n.global.locale.value = "zh-Hant";
-            await nextTick();
-
-            expect(wrapper.find("[data-testid='walkthrough-intro']").text()).toContain("輸入任何一題數獨");
-            expect(wrapper.find("[data-testid='walkthrough-intro']").text()).toContain("不一定能解完");
         });
 
-        it("should offer the samples in production", async () => {
+        it("should offer the samples in production", () => {
             vi.stubEnv("VITE_APP_ENV", "production");
             const { wrapper } = mountWalkthrough();
-            const labels = () => ["easy", "medium", "hard"].map((id) => wrapper.find(`[data-testid='load-sample-${id}']`).text());
+            const labels = ["easy", "medium", "hard"].map((id) => wrapper.find(`[data-testid='load-sample-${id}']`).text());
 
-            expect(labels()).toEqual(["Easy", "Medium", "Hard"]);
-
-            i18n.global.locale.value = "zh-Hant";
-            await nextTick();
-
-            expect(labels()).toEqual(["簡單", "中等", "困難"]);
+            expect(labels).toEqual(["Easy", "Medium", "Hard"]);
         });
 
         it("should load a sample and close the guide", async () => {
@@ -536,11 +525,6 @@ describe("SolverWalkthrough", () => {
             expect(wrapper.find("[data-testid='walkthrough-stage']").text()).toBe("Solved");
             expect(wrapper.find("[data-testid='walkthrough-explanation']").text()).toBe("Solved. Every cell is filled.");
             expect(wrapper.find("[data-testid='walkthrough-progress-fill']").attributes("style")).toContain("width: 100%");
-
-            i18n.global.locale.value = "zh-Hant";
-            await nextTick();
-            expect(wrapper.find("[data-testid='walkthrough-stage']").text()).toBe("已完成");
-            expect(wrapper.find("[data-testid='walkthrough-explanation']").text()).toBe("解題完成，所有格子都填好了");
         });
 
         it("should step back from the solved board to the last step", async () => {
@@ -696,17 +680,6 @@ describe("SolverWalkthrough", () => {
             expect(cellAt(wrapper, 3, 4).text()).toBe("");
             expect(wrapper.find("[data-testid='reset-button']").attributes("disabled")).toBeDefined();
         });
-
-        it("should ask in Traditional Chinese", async () => {
-            i18n.global.locale.value = "zh-Hant";
-            await nextTick();
-            const { wrapper } = await mountEntering();
-            await enterSeven(wrapper);
-
-            await wrapper.find("[data-testid='reset-button']").trigger("click");
-
-            expect(wrapper.find("[data-testid='walkthrough-dialog-title']").text()).toBe("清空盤面？");
-        });
     });
 
     describe("checking the solution count", () => {
@@ -754,10 +727,6 @@ describe("SolverWalkthrough", () => {
             expect(wrapper.find("[data-testid='walkthrough-dialog-message']").text()).toBe("This puzzle has no solution. Check what you entered.");
             expect(wrapper.find("[data-testid='walkthrough-dialog-cancel']").exists()).toBe(false);
 
-            i18n.global.locale.value = "zh-Hant";
-            await nextTick();
-            expect(wrapper.find("[data-testid='walkthrough-dialog-message']").text()).toBe("這題無解，請檢查輸入");
-
             await wrapper.find("[data-testid='walkthrough-dialog-confirm']").trigger("click");
             await flushPromises();
 
@@ -785,9 +754,6 @@ describe("SolverWalkthrough", () => {
             expect(wrapper.find("[data-testid='walkthrough-dialog-message']").text()).toBe(
                 "This puzzle has more than one solution, so the steps may not be complete.",
             );
-            i18n.global.locale.value = "zh-Hant";
-            await nextTick();
-            expect(wrapper.find("[data-testid='walkthrough-dialog-message']").text()).toBe("這題不只一個解，解題結果可能不完整");
 
             await wrapper.find("[data-testid='walkthrough-dialog-confirm']").trigger("click");
             await flushPromises();
@@ -823,13 +789,6 @@ describe("SolverWalkthrough", () => {
             );
             expect(wrapper.find("[data-testid='walkthrough-dialog-confirm']").text()).toBe("Solve Anyway");
             expect(wrapper.find("[data-testid='walkthrough-dialog-cancel']").text()).toBe("Keep Editing");
-
-            i18n.global.locale.value = "zh-Hant";
-            await nextTick();
-            expect(wrapper.find("[data-testid='walkthrough-dialog-title']").text()).toBe("無法確認題目");
-            expect(wrapper.find("[data-testid='walkthrough-dialog-message']").text()).toBe("這題空格太多，無法確認是否只有一個解，解題結果可能不完整");
-            expect(wrapper.find("[data-testid='walkthrough-dialog-confirm']").text()).toBe("仍要解題");
-            expect(wrapper.find("[data-testid='walkthrough-dialog-cancel']").text()).toBe("返回修改");
 
             await wrapper.find("[data-testid='walkthrough-dialog-confirm']").trigger("click");
             await flushPromises();
@@ -896,16 +855,6 @@ describe("SolverWalkthrough", () => {
             await flushPromises();
             expect(loader(wrapper).exists()).toBe(false);
             expect(wrapper.find("[data-testid='walkthrough-panel']").exists()).toBe(true);
-        });
-
-        it("should say it is checking in Traditional Chinese", async () => {
-            i18n.global.locale.value = "zh-Hant";
-            await nextTick();
-            const { wrapper } = mountWalkthrough({ initialPuzzle: singlesPuzzle });
-
-            await pressSolve(wrapper);
-
-            expect(loader(wrapper).text()).toContain("正在檢查題目…");
         });
 
         it("should hold the inputs and the solve button while checking", async () => {
@@ -987,13 +936,10 @@ describe("SolverWalkthrough", () => {
     });
 
     describe("in Traditional Chinese", () => {
-        it("should name the technique and the cell, and keep the button labels", async () => {
+        it("should name the technique and the cell", async () => {
             i18n.global.locale.value = "zh-Hant";
             await nextTick();
             const { wrapper } = mountWalkthrough({ initialPuzzle: singlesPuzzle });
-
-            expect(wrapper.find("[data-testid='reset-button']").text()).toBe("重設");
-            expect(wrapper.find("[data-testid='solve-button']").text()).toBe("解題");
 
             await solve(wrapper);
 

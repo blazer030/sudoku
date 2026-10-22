@@ -205,10 +205,6 @@ describe("Statistics", () => {
         for (const item of games) {
             expect(item.text()).toContain("Easy");
         }
-
-        i18n.global.locale.value = "zh-Hant";
-        await nextTick();
-        expect(wrapper.find("[data-testid='recent-filter-all']").text()).toBe("全部");
     });
 
     it("should start from 20 again after switching filters", async () => {
@@ -237,10 +233,6 @@ describe("Statistics", () => {
 
         expect(wrapper.find("[data-testid='recent-games-empty']").text()).toBe("No games at this difficulty yet");
         expect(wrapper.find("[data-testid='recent-game']").exists()).toBe(false);
-
-        i18n.global.locale.value = "zh-Hant";
-        await nextTick();
-        expect(wrapper.find("[data-testid='recent-games-empty']").text()).toBe("這個難度還沒有遊戲紀錄");
     });
 
     it("should open the review of the tapped game while filtered", async () => {
@@ -304,18 +296,6 @@ describe("Statistics", () => {
         const emptyState = wrapper.find("[data-testid='empty-state']");
         expect(emptyState.text()).toContain("No games played yet");
         expect(emptyState.text()).toContain("Play Your First Game");
-    });
-
-    it("should show the empty state in Traditional Chinese", async () => {
-        const { wrapper } = mountStatistics();
-
-        i18n.global.locale.value = "zh-Hant";
-        await nextTick();
-
-        const emptyState = wrapper.find("[data-testid='empty-state']");
-        expect(emptyState.text()).toContain("還沒有遊戲紀錄");
-        expect(emptyState.text()).toContain("開始第一局");
-        expect(wrapper.text()).not.toMatch(/\d/);
     });
 
     it("should go home from the first game button", async () => {

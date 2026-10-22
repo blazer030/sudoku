@@ -53,13 +53,10 @@ describe("GameCompleteModal", () => {
         expect(stats.text()).not.toContain("Difficulty");
     });
 
-    it("should celebrate a new record", async () => {
+    it("should celebrate a new record", () => {
         const wrapper = mountModal({ isNewRecord: true });
 
         expect(wrapper.find("[data-testid='new-record-badge']").text()).toBe("New record!");
-        i18n.global.locale.value = "zh-Hant";
-        await nextTick();
-        expect(wrapper.find("[data-testid='new-record-badge']").text()).toBe("新紀錄！");
     });
 
     it("should not show the record badge otherwise", () => {

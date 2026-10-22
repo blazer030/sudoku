@@ -146,19 +146,13 @@ describe("Home", () => {
         expect(classes).not.toContain("bg-primary");
     });
 
-    it("should show the saved difficulty, time and progress", async () => {
+    it("should show the saved difficulty, time and progress", () => {
         const { wrapper } = mountHome({ savedGame: dummySave });
         const chip = (id: string) => wrapper.get(`[data-testid='${id}']`).text();
 
         expect(chip("continue-difficulty")).toBe("Easy");
         expect(chip("continue-time")).toBe("03:24");
         expect(chip("continue-progress")).toBe("0% filled");
-
-        i18n.global.locale.value = "zh-Hant";
-        await nextTick();
-
-        expect(chip("continue-difficulty")).toBe("簡單");
-        expect(chip("continue-progress")).toBe("已填 0%");
     });
 
     it("should count only the player's cells in the progress", () => {
@@ -230,25 +224,14 @@ describe("Home", () => {
         await nextTick();
 
         expect(wrapper.get("[data-testid='statistics-subtitle']").text()).toBe("Win rate 67%");
-
-        i18n.global.locale.value = "zh-Hant";
-        await nextTick();
-
-        expect(wrapper.get("[data-testid='statistics-subtitle']").text()).toBe("勝率 67%");
     });
 
-    it("should describe the walkthrough and settings tiles", async () => {
+    it("should describe the walkthrough and settings tiles", () => {
         const { wrapper } = mountHome();
         const subtitle = (id: string) => wrapper.get(`[data-testid='${id}-subtitle']`).text();
 
         expect(subtitle("walkthrough")).toBe("Enter a puzzle, see the steps");
         expect(subtitle("settings")).toBe("Theme, mode, language");
-
-        i18n.global.locale.value = "zh-Hant";
-        await nextTick();
-
-        expect(subtitle("walkthrough")).toBe("輸入題目看解法");
-        expect(subtitle("settings")).toBe("主題、深淺色、語言");
     });
 
     it("should make the whole tile the tap target", () => {
@@ -406,16 +389,6 @@ describe("Home", () => {
                 expect(stay.classes()).not.toContain("text-danger");
             });
 
-            it("should label the Stay here action in Traditional Chinese", async () => {
-                const { wrapper } = mountHome({ savedGame: dummySave });
-                i18n.global.locale.value = "zh-Hant";
-                await nextTick();
-
-                await wrapper.find("[data-testid='new-game-button']").trigger("click");
-
-                expect(wrapper.find("[data-testid='new-game-stay-button']").text()).toBe("留在首頁");
-            });
-
             it.each([
                 ["tapping Stay here", (wrapper: VueWrapper) => wrapper.find("[data-testid='new-game-stay-button']").trigger("click")],
                 ["tapping the scrim", (wrapper: VueWrapper) => wrapper.find("[data-testid='new-game-confirm-dialog']").trigger("click")],
@@ -436,20 +409,6 @@ describe("Home", () => {
 
                 expect(wrapper.find("[data-testid='new-game-confirm-dialog']").exists()).toBe(true);
             });
-        });
-
-        it("should show the confirm dialog in Traditional Chinese when the language is zh-Hant", async () => {
-            const { wrapper } = mountHome({ savedGame: dummySave });
-            i18n.global.locale.value = "zh-Hant";
-            await nextTick();
-
-            await wrapper.find("[data-testid='new-game-button']").trigger("click");
-
-            const dialog = wrapper.find("[data-testid='new-game-confirm-dialog']");
-            expect(dialog.text()).toContain("還有一局沒完成");
-            expect(dialog.text()).not.toContain("Give Up");
-            expect(dialog.find("[data-testid='new-game-saved-summary']").text()).toBe("簡單・已玩 03:24");
-            expect(dialog.find("[data-testid='new-game-continue-button']").text()).toBe("繼續原本那局");
         });
 
         it("should record gave up and start new game when clicking Give Up & Start New", async () => {

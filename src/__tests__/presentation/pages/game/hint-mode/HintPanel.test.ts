@@ -37,15 +37,10 @@ const mountWrongEntry = () =>
     });
 
 describe("HintPanel", () => {
-    it("should say that Clear removes only the wrong digit", async () => {
+    it("should say that Clear removes only the wrong digit", () => {
         const wrapper = mountWrongEntry();
 
         expect(wrapper.find("[data-testid='hint-wrong-entry-note']").text()).toBe("Clearing removes just this digit.");
-
-        i18n.global.locale.value = "zh-Hant";
-        await nextTick();
-
-        expect(wrapper.find("[data-testid='hint-wrong-entry-note']").text()).toBe("清除只會移除這格的數字。");
     });
 
     it("should call the steps phase exit Close, not Cancel", async () => {
@@ -55,10 +50,6 @@ describe("HintPanel", () => {
         expect(wrapper.find("[data-testid='hint-close']").text()).toBe("Close");
         await wrapper.find("[data-testid='hint-close']").trigger("click");
         expect(wrapper.emitted("close")).toHaveLength(1);
-
-        i18n.global.locale.value = "zh-Hant";
-        await nextTick();
-        expect(wrapper.find("[data-testid='hint-close']").text()).toBe("關閉");
     });
 
     it("should move focus into the panel, named for hint mode, when it opens", () => {

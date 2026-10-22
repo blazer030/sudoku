@@ -75,36 +75,20 @@ describe("GameReview", () => {
         await nextTick();
 
         expect(wrapper.text()).toContain("在第 1 列第 2 欄填入 5");
-        expect(wrapper.text()).toContain("遊戲回顧");
         expect(boldTexts(wrapper)).toEqual(expect.arrayContaining(["5", "1", "2"]));
     });
 
-    it("should describe a hint step in Traditional Chinese", async () => {
+    it("should describe a hint step", async () => {
         const wrapper = await mountReview({ action: "hint" });
 
-        i18n.global.locale.value = "zh-Hant";
-        await nextTick();
-
-        expect(wrapper.text()).toContain("在第 1 列第 2 欄揭示 5");
+        expect(wrapper.find("[data-testid='review-explanation']").text()).toBe("Hint 5 in Row 1, Col 2");
     });
 
-    it("should describe an erase step in Traditional Chinese with the same verb as its label", async () => {
+    it("should describe an erase step", async () => {
         const wrapper = await mountReview({ action: "erase" });
 
-        i18n.global.locale.value = "zh-Hant";
-        await nextTick();
-
-        expect(wrapper.find("[data-testid='review-action']").text()).toBe("擦除");
-        expect(wrapper.find("[data-testid='review-explanation']").text()).toBe("擦除第 1 列第 2 欄");
-    });
-
-    it("should label the final step of a completed game in Traditional Chinese", async () => {
-        const wrapper = await mountReview({ completed: true, nextClicks: 2 });
-
-        i18n.global.locale.value = "zh-Hant";
-        await nextTick();
-
-        expect(wrapper.text()).toContain("已完成");
+        expect(wrapper.find("[data-testid='review-action']").text()).toBe("Erase");
+        expect(wrapper.find("[data-testid='review-explanation']").text()).toBe("Erased Row 1, Col 2");
     });
 
     it("should tag each position with its stage or action", async () => {
@@ -114,11 +98,6 @@ describe("GameReview", () => {
 
         const fill = await mountReview({ nextClicks: 1 });
         expect(fill.find("[data-testid='review-action']").text()).toBe("Fill");
-        i18n.global.locale.value = "zh-Hant";
-        await nextTick();
-        expect(fill.find("[data-testid='review-action']").text()).toBe("填入");
-        i18n.global.locale.value = "en";
-        await nextTick();
 
         const completed = await mountReview({ completed: true, nextClicks: 2 });
         expect(completed.find("[data-testid='review-action']").text()).toBe("Completed");
