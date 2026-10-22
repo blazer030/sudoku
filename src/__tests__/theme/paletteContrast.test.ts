@@ -301,10 +301,6 @@ describe("palette contrast", () => {
         expect(new Set(CASES.map(contrastCase => contrastCase.prefix))).toEqual(new Set(expected));
     });
 
-    it("should check 26 style, theme and mode combinations", () => {
-        expect(new Set(CASES.map(contrastCase => contrastCase.prefix)).size).toBe(2 * (6 + 4 + 3));
-    });
-
     it("should model the night lamp at its on-screen peak, 29%", () => {
         // The glow's centre is below the top-edge fade, so the full centre alpha shows there
         expect(LAMP_PEAK).toBeCloseTo(0.29, 3);

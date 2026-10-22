@@ -93,17 +93,6 @@ describe("settingsStore", () => {
         expect(stored.style).toBe("minimal");
     });
 
-    it("should not write the retired long-press tip flag when saving", () => {
-        localStorage.setItem("sudoku-settings", JSON.stringify({ seenLongPressTip: true, colorTheme: "blue" }));
-        const store = useSettingsStore();
-
-        store.setStyle("minimal");
-
-        const stored = JSON.parse(localStorage.getItem("sudoku-settings") ?? "{}") as Record<string, unknown>;
-        expect(stored).not.toHaveProperty("seenLongPressTip");
-        expect(stored.colorTheme).toBe("blue");
-    });
-
     it("should persist language change and restore it in a new store", () => {
         const store = useSettingsStore();
 

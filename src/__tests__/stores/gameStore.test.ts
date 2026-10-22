@@ -34,15 +34,13 @@ describe("gameStore", () => {
         setActivePinia(createPinia());
     });
 
-    it("should have null as default difficulty", () => {
+    it("should start with no game, difficulty or save", () => {
         const store = useGameStore();
-        expect(store.difficulty).toBeNull();
-    });
 
-    it("should have no active game by default", () => {
-        const store = useGameStore();
         expect(store.sudoku).toBeNull();
         expect(store.hasActiveGame).toBe(false);
+        expect(store.difficulty).toBeNull();
+        expect(store.savedGame).toBeNull();
     });
 
     it("startNewGame should create a new game in store", async () => {
@@ -159,11 +157,6 @@ describe("gameStore", () => {
     });
 
     describe("saved game persistence", () => {
-        it("savedGame starts as null", () => {
-            const store = useGameStore();
-            expect(store.savedGame).toBeNull();
-        });
-
         it("loadFromRepository hydrates savedGame from repository", async () => {
             const repo = buildGameRepo({ load: vi.fn().mockResolvedValue(sampleState) });
             const store = useGameStore();

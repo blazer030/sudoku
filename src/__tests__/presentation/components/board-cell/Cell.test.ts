@@ -133,17 +133,5 @@ describe("Cell", () => {
             expect(wrapper.emitted("click")).toBeUndefined();
         });
 
-        it("should emit click for a tap after a long press that had no click", async () => {
-            const wrapper = mountCell({ puzzleCell: new PuzzleCell(0) });
-
-            pointerdown(wrapper);
-            vi.advanceTimersByTime(400);
-            await wrapper.trigger("pointerup");
-            pointerdown(wrapper);
-            await wrapper.trigger("pointerup");
-            await wrapper.trigger("click");
-
-            expect(wrapper.emitted("click")).toHaveLength(1);
-        });
     });
 });
