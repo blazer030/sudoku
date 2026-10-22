@@ -29,4 +29,13 @@ describe("board geometry", () => {
         expect(wrapper.classes()).not.toContain("flex-1");
         expect(wrapper.classes()).toContain("aspect-square");
     });
+
+    it("should give the game board more of the screen width than the page gutter", () => {
+        const source = readFileSync("src/presentation/pages/game/GameScreen.vue", "utf8");
+        const boardTag = [...source.matchAll(/<\w+\b(?:[^>"']|"[^"]*"|'[^']*')*>/g)].map(([tag]) => tag)
+            .find(tag => tag.includes('data-testid="game-board"'));
+
+        // The page keeps its 20px gutter for the header and controls; the board reaches 8px from the edge
+        expect(boardTag).toMatch(/class="[^"]*\B-mx-3\b/);
+    });
 });
