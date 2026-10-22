@@ -224,6 +224,24 @@ describe("settingsStore", () => {
             const linkHref = (rel: string): string => document.head.querySelector<HTMLLinkElement>(`link[rel="${rel}"]`)?.href ?? "";
             const ICON_FILE_PATTERN = new RegExp(`-(?:${ICON_THEME_IDS.join("|")})\\.(?:svg|webmanifest|png)$`);
 
+            it("should send the nearest icon when the style changes", async () => {
+                const { service, setIcon } = buildIconService();
+                const store = useSettingsStore();
+                store.setIconService(service);
+                store.setColorTheme("teal");
+                store.setMatchLauncherIconToTheme(true);
+                setIcon.mockClear();
+
+                store.setStyle("tactile");
+                await Promise.resolve();
+                expect(setIcon).toHaveBeenLastCalledWith("green");
+
+                store.setColorTheme("rust");
+                await Promise.resolve();
+                expect(setIcon).toHaveBeenLastCalledWith("orange");
+                expect(linkHref("icon")).toMatch(/sudoku-orange\.svg$/);
+            });
+
             it("should never hand a non-icon id to the icon or the page links", () => {
                 const { service, setIcon } = buildIconService();
                 const store = useSettingsStore();

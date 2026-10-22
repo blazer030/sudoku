@@ -30,7 +30,7 @@ export const zhHant: MessageSchema = {
         colorTheme: "色彩主題",
         style: {
             label: "風格",
-            names: { minimal: "極簡動態" },
+            names: { minimal: "極簡動態", tactile: "實體方塊" },
         },
         colorThemes: {
             green: "綠",
@@ -39,6 +39,8 @@ export const zhHant: MessageSchema = {
             orange: "橘",
             pink: "粉紅",
             teal: "青綠",
+            rust: "紅褐",
+            slate: "灰藍",
         },
         matchLauncherIcon: "App 圖示配合主題",
         matchLauncherIconNote: "離開 App 後圖示才會更新",

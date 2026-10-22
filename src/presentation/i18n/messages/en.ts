@@ -33,7 +33,7 @@ export const en = {
         colorTheme: "Color theme",
         style: {
             label: "Style",
-            names: { minimal: "Minimal Motion" },
+            names: { minimal: "Minimal Motion", tactile: "Tactile Tiles" },
         },
         colorThemes: {
             green: "Green",
@@ -42,6 +42,8 @@ export const en = {
             orange: "Orange",
             pink: "Pink",
             teal: "Teal",
+            rust: "Rust",
+            slate: "Slate Blue",
         },
         matchLauncherIcon: "Match launcher icon to theme",
         matchLauncherIconNote: "The icon updates after you leave the app",

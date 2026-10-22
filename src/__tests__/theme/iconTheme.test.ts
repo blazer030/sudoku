@@ -29,6 +29,15 @@ describe("iconTheme", () => {
         }
     });
 
+    it.each([
+        ["green", "green"],
+        ["blue", "blue"],
+        ["rust", "orange"],
+        ["slate", "blue"],
+    ] as const)("should show the %s tactile theme with the %s icon", (theme, expected) => {
+        expect(iconThemeFor("tactile", theme)).toBe(expected);
+    });
+
     it("should match the icon generator scripts", () => {
         // The scripts draw every launcher and PWA icon in the minimal style's light primary
         const artwork = readFileSync("scripts/iconArtwork.ts", "utf8");

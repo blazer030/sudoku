@@ -49,6 +49,26 @@ describe("SettingsStorage", () => {
             expect(loadSettings().colorThemeByStyle).toEqual({ minimal: "teal" });
         });
 
+        it("should move a theme from another style to that style's remembered theme", () => {
+            localStorage.setItem("sudoku-settings", JSON.stringify({ style: "tactile", colorTheme: "teal" }));
+            expect(loadSettings().colorTheme).toBe("green");
+
+            localStorage.setItem("sudoku-settings", JSON.stringify({
+                style: "tactile",
+                colorTheme: "teal",
+                colorThemeByStyle: { tactile: "rust" },
+            }));
+            const settings = loadSettings();
+            expect(settings.colorTheme).toBe("rust");
+            expect(settings.colorThemeByStyle.tactile).toBe("rust");
+        });
+
+        it("should drop a remembered theme that belongs to another style", () => {
+            localStorage.setItem("sudoku-settings", JSON.stringify({ colorThemeByStyle: { tactile: "purple", minimal: "blue" } }));
+
+            expect(loadSettings().colorThemeByStyle).toEqual({ minimal: "green" });
+        });
+
         it("should not share the remembered theme map between loads", () => {
             loadSettings().colorThemeByStyle.minimal = "teal";
 

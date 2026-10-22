@@ -17,6 +17,10 @@
                 minimal: {
                     dark: "#111110",
                     light: { green: "#176037", blue: "#2C5689", purple: "#614887", orange: "#7D4800", pink: "#863C55", teal: "#0A5E5F" }
+                },
+                tactile: {
+                    dark: "#1A1C1F",
+                    light: { green: "#1F5C3A", blue: "#24508A", rust: "#782F16", slate: "#34506E" }
                 }
             };
             // END theme-color data
@@ -30,7 +34,12 @@
             var root = document.documentElement;
             var style = has(barColors, settings.style) ? settings.style : "minimal";
             var lightColors = barColors[style].light;
-            var colorTheme = has(lightColors, settings.colorTheme) ? settings.colorTheme : "green";
+            // A theme of another style falls back to the style's remembered theme, then its first
+            // (key order follows THEME_IDS_BY_STYLE), as loadSettings() does
+            var remembered = settings.colorThemeByStyle || {};
+            var colorTheme = has(lightColors, settings.colorTheme) ? settings.colorTheme
+                : has(lightColors, remembered[style]) ? remembered[style]
+                    : Object.keys(lightColors)[0];
             root.setAttribute("data-style", style);
             root.setAttribute("data-color-theme", colorTheme);
             var systemDark = typeof window.matchMedia === "function"

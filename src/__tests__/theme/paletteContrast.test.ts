@@ -1,3 +1,4 @@
+import { THEME_IDS_BY_STYLE, STYLE_IDS } from "@/application/SettingsStorage";
 import { contrastRatio, mixColors } from "@/theme/contrast";
 import { STYLES, type Palette, type PaletteToken } from "@/theme/palettes";
 
@@ -82,12 +83,20 @@ const TINTED_PAIRS: readonly ContrastPair[] = [
 const CASES = Object.values(STYLES).flatMap(style => style.themes.flatMap(theme =>
     (["light", "dark"] as const).flatMap(mode =>
         [...TEXT_PAIRS, ...BOARD_PAIRS, ...SURFACE_PAIRS, ...TINTED_PAIRS].map(contrastPair => ({
+            prefix: `${style.id}/${theme.id}/${mode}`,
             label: `${style.id}/${theme.id}/${mode}: ${contrastPair.name} ≥ ${contrastPair.minimum}`,
             palette: theme[mode],
             contrastPair,
         })))));
 
 describe("palette contrast", () => {
+    it("should check every style, theme and mode", () => {
+        const expected = STYLE_IDS.flatMap(style => THEME_IDS_BY_STYLE[style].flatMap(theme =>
+            ["light", "dark"].map(mode => `${style}/${theme}/${mode}`)));
+
+        expect(new Set(CASES.map(contrastCase => contrastCase.prefix))).toEqual(new Set(expected));
+    });
+
     it.each(CASES)("$label", ({ palette, contrastPair }) => {
         const ratio = contrastRatio(contrastPair.foreground(palette), contrastPair.background(palette));
 

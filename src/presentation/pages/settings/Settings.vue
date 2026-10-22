@@ -328,9 +328,7 @@ const goToChangelog = () => {
 
 // Re-selecting the current choice must not re-run side effects such as the launcher-icon change
 const onSelectStyle = (styleId: StyleId) => {
-    // Compared as plain strings: with a single style today the literal types always match, which lint rejects
-    const currentStyle: string = settingsStore.style;
-    if (styleId === currentStyle) return;
+    if (styleId === settingsStore.style) return;
     settingsStore.setStyle(styleId);
 };
 

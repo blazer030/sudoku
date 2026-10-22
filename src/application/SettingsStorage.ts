@@ -1,4 +1,4 @@
-export const STYLE_IDS = ["minimal"] as const;
+export const STYLE_IDS = ["minimal", "tactile"] as const;
 export type StyleId = typeof STYLE_IDS[number];
 /** Launcher aliases and PWA icon sets exist for these six only. */
 export const ICON_THEME_IDS = ["green", "blue", "purple", "orange", "pink", "teal"] as const;
@@ -6,6 +6,8 @@ export type IconThemeId = typeof ICON_THEME_IDS[number];
 /** Each style's own colour themes, in the order the picker shows them; the first is the style's default. */
 export const THEME_IDS_BY_STYLE = {
     minimal: ICON_THEME_IDS,
+    // Tactile's green and blue are its own palettes; a theme is always looked up within its style
+    tactile: ["green", "blue", "rust", "slate"],
 } as const satisfies Record<StyleId, readonly string[]>;
 export type ColorThemeId = typeof THEME_IDS_BY_STYLE[StyleId][number];
 /** Every style's theme ids together, in first-seen order. */
@@ -57,13 +59,16 @@ const DEFAULT_SETTINGS: Settings = {
 const isPlainObject = (value: unknown): value is Record<string, unknown> =>
     typeof value === "object" && value !== null && !Array.isArray(value);
 
-// Keeps only known style keys mapped to known theme ids; anything else is dropped
+const isThemeOf = (style: StyleId, theme: unknown): theme is ColorThemeId =>
+    (THEME_IDS_BY_STYLE[style] as readonly unknown[]).includes(theme);
+
+// Keeps only known style keys mapped to one of that style's own theme ids; anything else is dropped
 const usableRememberedThemes = (stored: unknown): RememberedThemes => {
     const remembered: RememberedThemes = {};
     if (!isPlainObject(stored)) return remembered;
     for (const style of STYLE_IDS) {
         const theme = stored[style];
-        if (COLOR_THEME_IDS.includes(theme as ColorThemeId)) remembered[style] = theme as ColorThemeId;
+        if (isThemeOf(style, theme)) remembered[style] = theme;
     }
     return remembered;
 };
@@ -78,9 +83,14 @@ export const loadSettings = (): Settings => {
     // Unknown appearance, style or theme ids (hand-edited, or from a future version) fall back too
     if (!APPEARANCES.includes(settings.appearance)) settings.appearance = "system";
     if (!STYLE_IDS.includes(settings.style)) settings.style = "minimal";
-    if (!COLOR_THEME_IDS.includes(settings.colorTheme)) settings.colorTheme = "green";
+    const remembered = usableRememberedThemes(settings.colorThemeByStyle);
+    // A theme of another style (or an unknown one) falls back to the style's remembered theme, then its
+    // first, the same rule as rememberedThemeFor; index.html's inline script mirrors it
+    if (!isThemeOf(settings.style, settings.colorTheme)) {
+        settings.colorTheme = remembered[settings.style] ?? THEME_IDS_BY_STYLE[settings.style][0];
+    }
     // The current theme is the truth for the current style, which also seeds settings saved before the map existed
-    settings.colorThemeByStyle = { ...usableRememberedThemes(settings.colorThemeByStyle), [settings.style]: settings.colorTheme };
+    settings.colorThemeByStyle = { ...remembered, [settings.style]: settings.colorTheme };
     return settings;
 };
 

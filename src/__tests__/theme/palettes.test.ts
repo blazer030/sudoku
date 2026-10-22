@@ -49,9 +49,11 @@ describe("palettes", () => {
     });
 
     it("should keep the dark toast a dark surface rather than a light block", () => {
-        for (const theme of STYLES.minimal.themes) {
-            const { toast, background, foreground } = theme.dark;
-            expect(contrastRatio(toast, background)).toBeLessThan(contrastRatio(toast, foreground));
+        for (const style of Object.values(STYLES)) {
+            for (const theme of style.themes) {
+                const { toast, background, foreground } = theme.dark;
+                expect(contrastRatio(toast, background), `${style.id}/${theme.id}`).toBeLessThan(contrastRatio(toast, foreground));
+            }
         }
     });
 });

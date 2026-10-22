@@ -50,8 +50,6 @@ const isIconTheme = (id: ColorThemeId): id is IconThemeId => (ICON_THEME_IDS as 
 
 /** The launcher icon for a theme: minimal's themes are the icons; others take the nearest by their light primary. */
 export const iconThemeFor = (style: StyleId, themeId: ColorThemeId): IconThemeId => {
-    // Widened to string while minimal is the only style, when the comparison is always true
-    const styleName: string = style;
-    if (styleName === ICON_STYLE && isIconTheme(themeId)) return themeId;
+    if (style === ICON_STYLE && isIconTheme(themeId)) return themeId;
     return nearestIconTheme(getPalette(style, themeId, "light").primary);
 };

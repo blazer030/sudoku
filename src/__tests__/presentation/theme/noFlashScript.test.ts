@@ -1,5 +1,5 @@
 import { readFileSync } from "fs";
-import { COLOR_THEME_IDS, STYLE_IDS } from "@/application/SettingsStorage";
+import { STYLE_IDS, THEME_IDS_BY_STYLE } from "@/application/SettingsStorage";
 import { systemBarColor } from "@/theme/palettes";
 
 const extractInlineScript = (): string => {
@@ -113,22 +113,39 @@ describe("index.html no-flash script", () => {
 
     it("should accept every color theme id the app knows", () => {
         stubSystemDark(false);
-        for (const themeId of COLOR_THEME_IDS) {
-            storeSettings({ colorTheme: themeId });
-            runInlineScript();
-            expect(root.dataset.colorTheme).toBe(themeId);
+        for (const style of STYLE_IDS) {
+            for (const themeId of THEME_IDS_BY_STYLE[style]) {
+                storeSettings({ style, colorTheme: themeId });
+                runInlineScript();
+                expect(root.dataset.colorTheme, `${style}/${themeId}`).toBe(themeId);
+            }
         }
     });
 
     it("should set the theme-color meta for every theme and mode", () => {
         stubSystemDark(false);
-        for (const themeId of COLOR_THEME_IDS) {
-            for (const mode of ["light", "dark"] as const) {
-                storeSettings({ colorTheme: themeId, appearance: mode });
-                runInlineScript();
-                expect(meta.content, `${themeId}/${mode}`).toBe(systemBarColor("minimal", themeId, mode));
+        for (const style of STYLE_IDS) {
+            for (const themeId of THEME_IDS_BY_STYLE[style]) {
+                for (const mode of ["light", "dark"] as const) {
+                    storeSettings({ style, colorTheme: themeId, appearance: mode });
+                    runInlineScript();
+                    expect(meta.content, `${style}/${themeId}/${mode}`).toBe(systemBarColor(style, themeId, mode));
+                }
             }
         }
+    });
+
+    it("should fall back like loadSettings when the theme belongs to another style", () => {
+        stubSystemDark(false);
+        storeSettings({ style: "tactile", colorTheme: "teal", colorThemeByStyle: { tactile: "slate" } });
+        runInlineScript();
+        expect(root.dataset.colorTheme).toBe("slate");
+        expect(meta.content).toBe(systemBarColor("tactile", "slate", "light"));
+
+        storeSettings({ style: "tactile", colorTheme: "teal" });
+        runInlineScript();
+        expect(root.dataset.colorTheme).toBe("green");
+        expect(meta.content).toBe(systemBarColor("tactile", "green", "light"));
     });
 
     it("should use the default theme's colour for an unknown theme", () => {
