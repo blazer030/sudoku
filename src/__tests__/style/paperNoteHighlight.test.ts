@@ -24,4 +24,19 @@ describe("paper note highlight", () => {
         expect(circle.get("background-color")).toBe("var(--color-primary)");
         expect(circle.get("mask")).toContain("data:image/svg+xml");
     });
+
+    it("should size the circle to the glyph, not to the note's slot", () => {
+        // The slot shrinks with the cell (at 304px a handwritten 2 was wider than its slot and the
+        // stroke cut it); an em-based square centred on the digit always clears it
+        const note = declarationsOf('[data-style="paper"] [data-note-highlight]');
+        expect(note.get("overflow")).toBe("visible");
+
+        const circle = declarationsOf('[data-style="paper"] [data-note-highlight]::after');
+        expect(circle.get("inset")).toBeUndefined();
+        expect(circle.get("width")).toBe("1.15em");
+        expect(circle.get("height")).toBe("1.15em");
+        expect(circle.get("top")).toBe("50%");
+        expect(circle.get("left")).toBe("50%");
+        expect(circle.get("translate")).toBe("-50% -50%");
+    });
 });
