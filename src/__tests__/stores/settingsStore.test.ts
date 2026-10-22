@@ -1,6 +1,6 @@
 import { createPinia, setActivePinia } from "pinia";
 import { useSettingsStore } from "@/stores/settingsStore";
-import { updateFavicon, updateManifestLink, updateAppleTouchIcon } from "@/application/PwaThemeUpdater";
+import { updateManifestLink, updateAppleTouchIcon } from "@/application/PwaThemeUpdater";
 import type { IconService } from "@/application/icon/IconService";
 import { ICON_THEME_IDS, STYLE_IDS, THEME_IDS_BY_STYLE } from "@/application/SettingsStorage";
 
@@ -9,13 +9,13 @@ vi.mock("@/application/PwaThemeUpdater", async (importOriginal) => {
     const actual = await importOriginal<typeof import("@/application/PwaThemeUpdater")>();
     return {
         updateMetaThemeColor: vi.fn(),
-        updateFavicon: vi.fn(actual.updateFavicon),
         updateManifestLink: vi.fn(actual.updateManifestLink),
         updateAppleTouchIcon: vi.fn(actual.updateAppleTouchIcon),
     };
 });
 
-const ICON_LINK_RELS = ["icon", "manifest", "apple-touch-icon"] as const;
+// The favicon also depends on light or dark, so appearanceSync owns it (appearanceSync.test.ts)
+const ICON_LINK_RELS = ["manifest", "apple-touch-icon"] as const;
 
 describe("settingsStore", () => {
     beforeEach(() => {
@@ -147,7 +147,6 @@ describe("settingsStore", () => {
 
         store.setColorTheme("blue");
 
-        expect(updateFavicon).toHaveBeenCalledWith("blue");
         expect(updateManifestLink).toHaveBeenCalledWith("blue");
         expect(updateAppleTouchIcon).toHaveBeenCalledWith("blue");
     });
@@ -239,7 +238,7 @@ describe("settingsStore", () => {
                 store.setColorTheme("rust");
                 await Promise.resolve();
                 expect(setIcon).toHaveBeenLastCalledWith("orange");
-                expect(linkHref("icon")).toMatch(/sudoku-orange\.svg$/);
+                expect(linkHref("manifest")).toMatch(/manifest-orange\.webmanifest$/);
             });
 
             it("should never hand a non-icon id to the icon or the page links", () => {

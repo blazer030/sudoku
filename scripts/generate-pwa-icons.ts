@@ -2,7 +2,7 @@ import sharp from "sharp";
 import { writeFileSync, mkdirSync } from "fs";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
-import { ICON_THEMES, iconSvg, type IconTheme } from "./iconArtwork";
+import { DARK_ICON_THEMES, ICON_THEMES, iconSvg, type IconTheme } from "./iconArtwork";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -60,6 +60,11 @@ const main = async () => {
         );
 
         console.log(`Generated assets for theme: ${theme.id}`);
+    }
+
+    // The tab icon in dark mode; installed PWA icons stay light
+    for (const theme of DARK_ICON_THEMES) {
+        writeFileSync(resolve(PUBLIC_DIR, `sudoku-${theme.id}-dark.svg`), iconSvg(theme));
     }
 
     console.log("Done! All themed PWA assets generated.");

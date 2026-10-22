@@ -35,6 +35,13 @@ describe("icon assets", () => {
         expect(svg).toContain(`<rect width="240" height="240" rx="60" fill="${palette.primary}"/>`);
     });
 
+    it.each(darkThemes)("should fill the $id dark favicon with the dark primary and dark tiles", ({ id, palette }) => {
+        const svg = readFileSync(`public/sudoku-${id}-dark.svg`, "utf8");
+
+        expect(svg).toContain(`<rect width="240" height="240" rx="60" fill="${palette.primary}"/>`);
+        expect(svg).toContain(`fill="${palette["on-primary"]}"/>`);
+    });
+
     it.each(themes)("should give the $id web manifest the light primary and page background", ({ id, palette }) => {
         const manifest = JSON.parse(readFileSync(`public/manifest-${id}.webmanifest`, "utf8")) as Record<string, unknown>;
 

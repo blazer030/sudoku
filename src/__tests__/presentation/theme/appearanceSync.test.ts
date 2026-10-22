@@ -64,6 +64,45 @@ describe("startAppearanceSync", () => {
         delete document.documentElement.dataset.colorTheme;
     });
 
+    describe("favicon", () => {
+        let favicon: HTMLLinkElement;
+
+        beforeEach(() => {
+            favicon = document.createElement("link");
+            favicon.rel = "icon";
+            document.head.appendChild(favicon);
+        });
+
+        afterEach(() => {
+            favicon.remove();
+        });
+
+        it("should show the theme's icon in the mode on screen", async () => {
+            const sources = buildSources("blue", "light");
+            stop = startAppearanceSync(sources, systemBar, appearanceBridge);
+            expect(favicon.href).toMatch(/\/sudoku-blue\.svg$/);
+
+            sources.appearance.value = "dark";
+            await nextTick();
+            expect(favicon.href).toMatch(/\/sudoku-blue-dark\.svg$/);
+
+            // Other styles' themes take the nearest of the six icons
+            sources.style.value = "tactile";
+            sources.colorTheme.value = "rust";
+            await nextTick();
+            expect(favicon.href).toMatch(/\/sudoku-orange-dark\.svg$/);
+        });
+
+        it("should follow the system's light or dark when the appearance is system", () => {
+            const setSystemDark = mockSystemDark(true);
+            stop = startAppearanceSync(buildSources("teal", "system"), systemBar, appearanceBridge);
+            expect(favicon.href).toMatch(/\/sudoku-teal-dark\.svg$/);
+
+            setSystemDark(false);
+            expect(favicon.href).toMatch(/\/sudoku-teal\.svg$/);
+        });
+    });
+
     it("should set data-color-theme on start", () => {
         stop = startAppearanceSync(buildSources(), systemBar, appearanceBridge);
 
