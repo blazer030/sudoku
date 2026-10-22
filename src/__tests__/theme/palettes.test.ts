@@ -48,6 +48,17 @@ describe("palettes", () => {
         }
     });
 
+    it("should keep featured equal to primary outside paper", () => {
+        for (const style of [STYLES.minimal, STYLES.tactile]) {
+            for (const theme of style.themes) {
+                for (const mode of ["light", "dark"] as const) {
+                    expect(theme[mode].featured, `${style.id}/${theme.id}/${mode}`).toBe(theme[mode].primary);
+                    expect(theme[mode]["on-featured"], `${style.id}/${theme.id}/${mode}`).toBe(theme[mode]["on-primary"]);
+                }
+            }
+        }
+    });
+
     it("should keep the dark toast a dark surface rather than a light block", () => {
         for (const style of Object.values(STYLES)) {
             for (const theme of style.themes) {

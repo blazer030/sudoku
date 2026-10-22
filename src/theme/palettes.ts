@@ -8,7 +8,7 @@ export const PALETTE_TOKENS = [
     "primary", "primary-hover", "primary-light", "accent", "highlight", "cell-clue",
     "danger", "danger-hover", "error", "error-surface", "shadow",
     "on-primary", "on-danger", "note", "cell-focus", "cell-scope", "cell-pattern", "scrim", "on-scrim",
-    "toast", "on-toast", "cell-selected", "cell-peer",
+    "toast", "on-toast", "cell-selected", "cell-peer", "featured", "on-featured",
 ] as const;
 export type PaletteToken = typeof PALETTE_TOKENS[number];
 export type Palette = Record<PaletteToken, string>;
@@ -29,7 +29,7 @@ type LightThemeColors = Pick<Palette, "primary" | "primary-hover" | "primary-lig
 type DarkThemeColors = Pick<Palette, "primary" | "primary-hover" | "accent">;
 type DerivedToken = "primary-light" | "highlight" | "cell-focus" | "cell-scope" | "cell-pattern" | "cell-peer";
 // Tokens that repeat another token of the same palette
-type AliasToken = "note" | "cell-selected";
+type AliasToken = "note" | "cell-selected" | "featured" | "on-featured";
 type Neutrals<ThemeColors> = Omit<Palette, keyof ThemeColors | DerivedToken | AliasToken>;
 
 // Values are tuned so every pair in paletteContrast.test.ts meets WCAG AA. The board layers
@@ -89,11 +89,14 @@ const tintsOf = <Token extends DerivedToken>(primary: string, card: string, stre
     Object.fromEntries(Object.entries<number>(strengths).map(([token, alpha]) =>
         [token, mixColors(primary, alpha, card)])) as Record<Token, string>;
 
-// Notes use the secondary text colour; the selected cell uses the primary tint
+// Notes use the secondary text colour; the selected cell uses the primary tint;
+// the continue card is a primary surface
 const withAliases = (palette: Omit<Palette, AliasToken>): Palette => ({
     ...palette,
     "note": palette["foreground-secondary"],
     "cell-selected": palette["primary-light"],
+    "featured": palette.primary,
+    "on-featured": palette["on-primary"],
 });
 
 // A style's theme builder: its own neutrals under each theme's colours and tints

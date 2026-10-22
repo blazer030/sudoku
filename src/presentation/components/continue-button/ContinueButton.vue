@@ -2,7 +2,7 @@
     <button
         v-if="savedGame !== null"
         v-press
-        class="flex flex-col items-start gap-2.5 w-full bg-primary text-on-primary rounded-2xl shadow-primary px-5 py-4 cursor-pointer"
+        class="flex flex-col items-start gap-2.5 w-full bg-featured text-on-featured rounded-2xl shadow-primary px-5 py-4 cursor-pointer"
         data-testid="continue-button"
         type="button"
         @click="$emit('continue')"
@@ -13,15 +13,15 @@
         </span>
         <span class="flex flex-wrap gap-1.5">
             <span
-                class="text-sm bg-on-primary/20 rounded-full px-2.5 py-0.5"
+                class="text-sm bg-on-featured/20 rounded-full px-2.5 py-0.5"
                 data-testid="continue-difficulty"
             >{{ difficultyLabel(savedGame.difficulty) }}</span>
             <span
-                class="text-sm bg-on-primary/20 rounded-full px-2.5 py-0.5"
+                class="text-sm bg-on-featured/20 rounded-full px-2.5 py-0.5"
                 data-testid="continue-time"
             >{{ formatTime(savedGame.elapsedSeconds) }}</span>
             <span
-                class="text-sm bg-on-primary/20 rounded-full px-2.5 py-0.5"
+                class="text-sm bg-on-featured/20 rounded-full px-2.5 py-0.5"
                 data-testid="continue-progress"
             >{{ t("home.continueProgress", { percent: progressPercent }) }}</span>
         </span>

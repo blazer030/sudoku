@@ -50,6 +50,8 @@ const TEXT_PAIRS: readonly ContrastPair[] = [
     // Statistics and review badges, the hint step button
     pair("primary", "primary-light"),
     pair("on-toast", "toast"),
+    // The continue card
+    pair("on-featured", "featured"),
 ];
 
 const BOARD_SURFACES: readonly PaletteToken[] = [
@@ -74,8 +76,10 @@ const TINTED_PAIRS: readonly ContrastPair[] = [
     tinted("accent", "accent", 0.1, "card", TEXT),
     tinted("accent", "accent", 0.15, "card", LARGE_OR_ICON),
     tinted("danger", "danger", 0.1, "card", LARGE_OR_ICON),
-    // The continue button's time label and the hint panel's digit chip
+    // The hint panel's digit chip
     tinted("on-primary", "on-primary", 0.1, "primary", TEXT),
+    // The continue card's chips
+    tinted("on-featured", "on-featured", 0.2, "featured", TEXT),
     // Loader text over stacked overlays
     tinted("on-scrim", "scrim", 0.65, "background", TEXT),
 ];

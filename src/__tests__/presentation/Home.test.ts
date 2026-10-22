@@ -123,6 +123,15 @@ describe("Home", () => {
         expect(wrapper.find("[data-testid='continue-button']").exists()).toBe(true);
     });
 
+    it("should paint Continue with its own featured surface", () => {
+        const { wrapper } = mountHome({ savedGame: dummySave });
+        const classes = wrapper.get("[data-testid='continue-button']").classes();
+
+        expect(classes).toContain("bg-featured");
+        expect(classes).toContain("text-on-featured");
+        expect(classes).not.toContain("bg-primary");
+    });
+
     it("should not show Continue button when no saved game exists", () => {
         const { wrapper } = mountHome();
 
