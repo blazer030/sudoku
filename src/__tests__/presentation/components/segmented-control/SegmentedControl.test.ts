@@ -50,6 +50,13 @@ describe("SegmentedControl", () => {
         }
     });
 
+    it("should keep its layered options inside its own stacking context", () => {
+        const wrapper = mountControl("small");
+
+        // The options sit above the indicator with z-10; without isolation they also rise above a page's sticky z-10 header
+        expect(wrapper.classes()).toContain("isolate");
+    });
+
     it("should mark only the selected option as pressed", () => {
         const wrapper = mountControl("medium");
 

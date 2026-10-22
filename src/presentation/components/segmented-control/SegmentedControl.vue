@@ -1,7 +1,7 @@
 <template>
     <div
         :class="inset ? 'bg-background' : 'bg-card shadow-card'"
-        class="relative flex h-12 w-full rounded-button px-1"
+        class="relative isolate flex h-12 w-full rounded-button px-1"
     >
         <div
             v-if="selectedIndex >= 0"
