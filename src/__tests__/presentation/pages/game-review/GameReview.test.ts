@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { nextTick } from "vue";
 import { flushPromises, mount } from "@vue/test-utils";
 import { createPinia, getActivePinia, setActivePinia } from "pinia";
@@ -43,7 +43,7 @@ const mountReview = async (options: { action?: GameStep["action"]; completed?: b
     });
     await flushPromises();
     for (let click = 0; click < nextClicks; click++) {
-        await wrapper.find("[data-testid='review-next-step-button']").trigger("click");
+        await wrapper.find("[data-testid='review-next']").trigger("click");
     }
     return wrapper;
 };
@@ -54,6 +54,7 @@ beforeEach(() => {
 
 afterEach(() => {
     localStorage.clear();
+    vi.useRealTimers();
 });
 
 const boldTexts = (wrapper: Awaited<ReturnType<typeof mountReview>>) =>
@@ -94,5 +95,72 @@ describe("GameReview", () => {
         await nextTick();
 
         expect(wrapper.text()).toContain("已完成");
+    });
+
+    it("should tag each position with its stage or action", async () => {
+        const initial = await mountReview({ nextClicks: 0 });
+        expect(initial.find("[data-testid='review-action']").text()).toBe("Initial Board");
+        expect(initial.find("[data-testid='review-explanation']").text()).toBe("The board when the game began");
+
+        const fill = await mountReview({ nextClicks: 1 });
+        expect(fill.find("[data-testid='review-action']").text()).toBe("Fill");
+        i18n.global.locale.value = "zh-Hant";
+        await nextTick();
+        expect(fill.find("[data-testid='review-action']").text()).toBe("填入");
+        i18n.global.locale.value = "en";
+        await nextTick();
+
+        const completed = await mountReview({ completed: true, nextClicks: 2 });
+        expect(completed.find("[data-testid='review-action']").text()).toBe("Completed");
+
+        const gaveUp = await mountReview({ completed: false, nextClicks: 2 });
+        expect(gaveUp.find("[data-testid='review-action']").text()).toBe("Gave Up");
+    });
+
+    it("should outline the cell the step changed", async () => {
+        const wrapper = await mountReview({ nextClicks: 1 });
+
+        expect(wrapper.find("[data-testid='review-cell-0-1']").classes()).toContain("ring-primary");
+        expect(wrapper.find("[data-testid='review-cell-0-0']").classes()).not.toContain("ring-primary");
+    });
+
+    it.each(["autoNotes", "undo"] as const)("should not outline any cell for auto notes or undo (%s)", async (action) => {
+        const wrapper = await mountReview({ action, nextClicks: 1 });
+
+        const cells = wrapper.findAll("[data-testid^='review-cell-']");
+        expect(cells).toHaveLength(81);
+        expect(cells.filter((cell) => cell.classes().includes("ring-primary"))).toHaveLength(0);
+    });
+
+    it("should count positions with dots for a short game", async () => {
+        const wrapper = await mountReview({ nextClicks: 1 });
+
+        for (let index = 0; index < 3; index++) {
+            expect(wrapper.find(`[data-testid='review-dot-${index}']`).exists()).toBe(true);
+        }
+        expect(wrapper.find("[data-testid='review-dot-3']").exists()).toBe(false);
+        expect(wrapper.find("[data-testid='review-dot-1']").attributes("aria-current")).toBe("step");
+    });
+
+    it("should auto-play to the end and stop", async () => {
+        vi.useFakeTimers({ shouldAdvanceTime: true });
+        const wrapper = await mountReview({ nextClicks: 0 });
+
+        await wrapper.find("[data-testid='review-play']").trigger("click");
+
+        await vi.advanceTimersByTimeAsync(800);
+        expect(wrapper.find("[data-testid='review-action']").text()).toBe("Fill");
+
+        await vi.advanceTimersByTimeAsync(800);
+        expect(wrapper.find("[data-testid='review-action']").text()).toBe("Gave Up");
+        expect(wrapper.find("[data-testid='review-play']").attributes("aria-label")).toBe("Play");
+    });
+
+    it("should keep the seek bar and play button inside the panel", async () => {
+        const wrapper = await mountReview({ nextClicks: 0 });
+
+        const panel = wrapper.find("[data-testid='review-panel']");
+        expect(panel.find("[data-testid='review-progress-bar']").exists()).toBe(true);
+        expect(panel.find("[data-testid='review-play']").exists()).toBe(true);
     });
 });

@@ -1,6 +1,7 @@
 import type { TechniqueId } from "@/domain/solver/SolveStep";
 import type { Difficulty } from "@/domain/generator/SudokuGenerator";
 import type { DonateTier } from "@/application/analytics/AnalyticsService";
+import type { GameStepAction } from "@/domain/game/GameStep";
 
 export const en = {
     common: {
@@ -171,15 +172,28 @@ export const en = {
     },
     review: {
         title: "Game Review",
-        initialBoard: "Initial board",
+        initialBoard: "The board when the game began",
         fill: "Filled {value} in Row {row}, Col {column}",
         erase: "Erased Row {row}, Col {column}",
         toggleNote: "Note {value} in Row {row}, Col {column}",
         hint: "Hint {value} in Row {row}, Col {column}",
-        autoNotes: "Auto Notes",
-        undo: "Undo",
-        completed: "Completed",
-        gaveUp: "Gave up",
+        autoNotes: "Filled in notes for every empty cell",
+        undo: "Took back the previous move",
+        completed: "Every cell is filled in correctly",
+        gaveUp: "The board when you gave up",
+        actions: {
+            fill: "Fill",
+            erase: "Erase",
+            toggleNote: "Note",
+            hint: "Hint",
+            autoNotes: "Auto Notes",
+            undo: "Undo",
+        } satisfies Record<GameStepAction, string>,
+        stages: {
+            initial: "Initial Board",
+            completed: "Completed",
+            gaveUp: "Gave Up",
+        },
     },
     statistics: {
         overview: "Overview",

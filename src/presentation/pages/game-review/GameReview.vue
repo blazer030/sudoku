@@ -1,5 +1,5 @@
 <template>
-    <div class="flex flex-col gap-5 px-5 bg-background overflow-y-auto h-full">
+    <div class="flex flex-col gap-5 px-5 pb-6 bg-background overflow-y-auto h-full">
         <div class="flex items-center justify-between sticky top-0 bg-background pt-6 pb-3 z-10">
             <button
                 class="flex items-center gap-2 cursor-pointer"
@@ -56,7 +56,10 @@
             </div>
         </div>
 
-        <div class="bg-card rounded-2xl shadow-card-lg p-2 w-full pointer-events-none">
+        <div
+            class="bg-card rounded-2xl shadow-card-lg p-2 w-full pointer-events-none"
+            data-testid="review-board"
+        >
             <div class="flex flex-col border-3 border-foreground/20 rounded-xl">
                 <div
                     v-for="(row, rowIndex) in board"
@@ -67,76 +70,61 @@
                         v-for="(puzzleCell, columnIndex) in row"
                         :key="`cell-${rowIndex}-${columnIndex}`"
                         :column="columnIndex"
+                        :data-testid="`review-cell-${rowIndex}-${columnIndex}`"
+                        :highlight-same-digit="false"
                         :puzzle-cell="puzzleCell"
                         :row="rowIndex"
-                        :selected="isActiveCell(rowIndex, columnIndex)"
-                        :highlight-same-digit="false"
+                        :selected="isChanged(rowIndex, columnIndex)"
                     />
                 </div>
             </div>
         </div>
 
-        <div class="bg-card rounded-lg py-2.5 px-4 shadow-card-sm min-h-9 flex items-center gap-2">
-            <template v-if="description && stepIcon">
-                <component
-                    :is="stepIcon"
-                    :size="16"
-                    class="text-foreground-muted shrink-0"
-                />
-                <i18n-t
-                    :keypath="description.keypath"
-                    tag="span"
-                    scope="global"
-                    class="text-sm text-foreground"
-                >
-                    <template #value>
-                        <span class="font-semibold">{{ description.params.value }}</span>
-                    </template>
-                    <template #row>
-                        <span class="font-semibold">{{ description.params.row }}</span>
-                    </template>
-                    <template #column>
-                        <span class="font-semibold">{{ description.params.column }}</span>
-                    </template>
-                </i18n-t>
-            </template>
-            <span
-                v-else
-                class="text-sm text-foreground-muted"
-            >
-                {{ t("review.initialBoard") }}
-            </span>
-        </div>
-
-        <ProgressBar
-            :current-step="currentStep"
-            :total-steps="totalSteps"
+        <StepPlaybackPanel
+            :label="t('review.title')"
             :play-state="playState"
-            testid-prefix="review-"
-            @seek="goToStep"
-        />
-
-        <div class="pb-8">
-            <PlaybackControls
-                :can-go-next="currentStep < totalSteps"
-                :can-go-prev="currentStep > 0"
-                :is-playing="isPlaying"
-                testid-prefix="review-"
-                @first="goToFirst"
-                @prev="previous"
-                @toggle-play="togglePlay"
-                @next="next"
-                @last="goToLast"
-            />
-        </div>
+            :step-index="currentStep"
+            :total-steps="positionCount"
+            test-id-prefix="review"
+            @go-to="goToStep"
+            @next="next"
+            @previous="previous"
+            @toggle-play="togglePlay"
+        >
+            <template #tag>
+                <StepTag
+                    :icon="tag.icon"
+                    :label="tag.label"
+                    :step-key="currentStep"
+                    :strong="stage === 'final'"
+                    test-id="review-action"
+                />
+            </template>
+            <i18n-t
+                :keypath="description.keypath"
+                scope="global"
+                tag="span"
+            >
+                <template #value>
+                    <span class="font-semibold">{{ description.params.value }}</span>
+                </template>
+                <template #row>
+                    <span class="font-semibold">{{ description.params.row }}</span>
+                </template>
+                <template #column>
+                    <span class="font-semibold">{{ description.params.column }}</span>
+                </template>
+            </i18n-t>
+        </StepPlaybackPanel>
     </div>
 </template>
 
 <script lang="ts" setup>
-import { computed } from "vue";
+import { computed, type Component } from "vue";
 import { useRouter } from "vue-router";
-import { ChevronLeft, Eraser, Lightbulb, Pencil, Sparkles, StickyNote, Trophy, Undo2, X } from "lucide-vue-next";
+import { ChevronLeft, Eraser, LayoutGrid, Lightbulb, Pencil, Sparkles, StickyNote, Trophy, Undo2, X } from "lucide-vue-next";
 import { ROUTER_PATH } from "@/router";
+import type { GameStepAction } from "@/domain/game/GameStep";
 import { useStatisticsStore } from "@/stores/statisticsStore";
 import { formatTime } from "@/utils/formatTime";
 import { useI18n } from "vue-i18n";
@@ -144,8 +132,8 @@ import { useAppLocale } from "@/presentation/i18n/useAppLocale";
 import { formatDate } from "@/presentation/i18n/formatDate";
 import { useDifficultyLabel } from "@/presentation/labels/difficultyLabels";
 import Cell from "@/presentation/pages/game/components/Cell.vue";
-import PlaybackControls from "@/presentation/components/playback/PlaybackControls.vue";
-import ProgressBar from "@/presentation/components/playback/ProgressBar.vue";
+import StepPlaybackPanel from "@/presentation/components/step-presentation/StepPlaybackPanel.vue";
+import StepTag from "@/presentation/components/step-presentation/StepTag.vue";
 import { useGameReview } from "@/presentation/pages/game-review/useGameReview";
 
 const props = defineProps<{
@@ -166,25 +154,20 @@ if (!replayData) {
 
 const {
     currentStep,
-    totalSteps,
-    isAtFinalStep,
+    positionCount,
+    stage,
     board,
     gameStep,
+    changedCell,
     description,
-    isPlaying,
+    playState,
     next,
     previous,
-    goToFirst,
-    goToLast,
     goToStep,
     togglePlay,
-    stopPlay,
-    startPlay,
 } = useGameReview(replayData ?? { initialBoard: [], steps: [] }, game.completed);
 
-const playState = { isPlaying, stopPlay, startPlay };
-
-const ACTION_ICONS: Record<string, typeof Pencil> = {
+const ACTION_ICONS: Record<GameStepAction, Component> = {
     fill: Pencil,
     erase: Eraser,
     toggleNote: StickyNote,
@@ -193,19 +176,20 @@ const ACTION_ICONS: Record<string, typeof Pencil> = {
     undo: Undo2,
 };
 
-const stepIcon = computed(() => {
-    if (isAtFinalStep.value) {
-        return game.completed ? Trophy : X;
+const tag = computed((): { label: string; icon: Component } => {
+    if (stage.value === "final") {
+        return game.completed
+            ? { label: t("review.stages.completed"), icon: Trophy }
+            : { label: t("review.stages.gaveUp"), icon: X };
     }
     const step = gameStep.value;
-    if (!step) return null;
-    return ACTION_ICONS[step.action];
+    if (stage.value === "initial" || step === null) return { label: t("review.stages.initial"), icon: LayoutGrid };
+    return { label: t(`review.actions.${step.action}`), icon: ACTION_ICONS[step.action] };
 });
 
-const isActiveCell = (row: number, column: number): boolean => {
-    const step = gameStep.value;
-    if (!step) return false;
-    return step.row === row && step.column === column;
+const isChanged = (row: number, column: number): boolean => {
+    const cell = changedCell.value;
+    return cell !== null && cell.row === row && cell.column === column;
 };
 
 const difficultyLabel = useDifficultyLabel();
