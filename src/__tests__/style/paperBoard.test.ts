@@ -91,3 +91,40 @@ describe("paper board", () => {
         expect(declarationsOf(`${BOARD} [data-variant]`).get("border-radius")).toBe("0");
     });
 });
+
+describe("paper single-cell outlines", () => {
+    // The selection, a hint's or walkthrough's answer cell and a wrong entry each mark one cell;
+    // paper circles all of them with the same pen instead of a square ring
+    const CIRCLED: Record<string, string> = { selected: "var(--color-primary)", answer: "var(--color-primary)", wrong: "var(--color-error)" };
+
+    it.each(Object.entries(CIRCLED))("should circle the %s cell by hand instead of ringing it", (variant, ink) => {
+        const cell = declarationsOf(`[data-style="paper"] [data-variant="${variant}"]`);
+        const circle = declarationsOf(`[data-style="paper"] [data-variant="${variant}"]::after`);
+
+        expect(cell.get("--tw-ring-shadow")).toBe("0 0 transparent");
+        expect(cell.get("position")).toBe("relative");
+        expect(circle.get("mask")).toContain("data:image/svg+xml");
+        expect(circle.get("background-color")).toBe(ink);
+    });
+
+    it("should leave the answer's candidate uncircled inside the circled answer cell, so the two pens never cross", () => {
+        // The candidate keeps the highlighted note's bold primary ink; only its own small circle goes
+        expect(declarationsOf('[data-style="paper"] [data-variant="answer"] [data-note-highlight]::after').get("content")).toBe("none");
+    });
+
+    it("should stop drawing every circle under reduced motion", () => {
+        const stopped: string[] = [];
+        postcss.parse(PAPER_CSS).walkAtRules("media", (atRule) => {
+            if (!atRule.params.includes("prefers-reduced-motion: reduce")) return;
+            atRule.walkRules((rule) => {
+                if (rule.nodes.some(node => node.type === "decl" && node.prop === "animation" && node.value === "none")) {
+                    stopped.push(...rule.selectors.map(item => item.replace(/\s+/g, " ").trim()));
+                }
+            });
+        });
+
+        for (const variant of Object.keys(CIRCLED)) {
+            expect(stopped).toContain(`[data-style="paper"] [data-variant="${variant}"]::after`);
+        }
+    });
+});

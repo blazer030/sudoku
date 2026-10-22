@@ -167,8 +167,11 @@
 [data-style="paper"] [data-skin~="board"] [data-variant="error"] { --paper-cell-wash: var(--paper-wash-error); }
 [data-style="paper"] [data-skin~="board"] [data-variant="wrong"] { --paper-cell-wash: var(--paper-wash-wrong); }
 
-/* The selected cell is circled by hand instead of outlined */
-[data-style="paper"] [data-variant="selected"] {
+/* A single marked cell is circled by hand instead of outlined: the selection, a hint's or the
+   walkthrough's answer, and a wrong entry (in the error ink) */
+[data-style="paper"] [data-variant="selected"],
+[data-style="paper"] [data-variant="answer"],
+[data-style="paper"] [data-variant="wrong"] {
     position: relative;
     --tw-ring-shadow: 0 0 transparent;
 }
@@ -179,7 +182,9 @@
 }
 
 /* A slightly open ellipse; the SVG is only a mask, the ink is the primary */
-[data-style="paper"] [data-variant="selected"]::after {
+[data-style="paper"] [data-variant="selected"]::after,
+[data-style="paper"] [data-variant="answer"]::after,
+[data-style="paper"] [data-variant="wrong"]::after {
     content: "";
     position: absolute;
     inset: 1px;
@@ -189,6 +194,10 @@
     mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpath d='M30 7.5C23 3.5 11 4.5 6 11.5S3.5 29 11 33.5 30 37.5 35 30 37 13 27 6.8' fill='none' stroke='currentColor' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
     rotate: -4deg;
     animation: paper-circle-draw 220ms ease-out;
+}
+
+[data-style="paper"] [data-variant="wrong"]::after {
+    background-color: var(--color-error);
 }
 
 /* The selected digit's notes are circled with the same pen instead of sitting on a filled disc,
@@ -215,6 +224,12 @@
     -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpath d='M30 7.5C23 3.5 11 4.5 6 11.5S3.5 29 11 33.5 30 37.5 35 30 37 13 27 6.8' fill='none' stroke='currentColor' stroke-width='3.2' stroke-linecap='round'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
     mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpath d='M30 7.5C23 3.5 11 4.5 6 11.5S3.5 29 11 33.5 30 37.5 35 30 37 13 27 6.8' fill='none' stroke='currentColor' stroke-width='3.2' stroke-linecap='round'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
     rotate: -4deg;
+}
+
+/* Inside a circled answer cell the answer's candidate keeps its bold ink but not its own circle,
+   which crossed the cell's in the corner slots */
+[data-style="paper"] [data-variant="answer"] [data-note-highlight]::after {
+    content: none;
 }
 
 /* An option tile's tick is drawn as a pen stroke when it appears */
@@ -308,6 +323,8 @@
     }
 
     [data-style="paper"] [data-variant="selected"]::after,
+    [data-style="paper"] [data-variant="answer"]::after,
+    [data-style="paper"] [data-variant="wrong"]::after,
     [data-style="paper"] [data-skin~="check"] svg {
         animation: none;
     }
