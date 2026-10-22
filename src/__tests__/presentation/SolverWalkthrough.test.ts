@@ -570,6 +570,7 @@ describe("SolverWalkthrough", () => {
 
             await wrapper.find("[data-testid='reset-button']").trigger("click");
 
+            expect(wrapper.find("[data-testid='walkthrough-dialog-title']").text()).toBe("Clear the Board?");
             expect(wrapper.find("[data-testid='walkthrough-dialog-message']").text()).toBe("Every digit you entered will be removed.");
             expect(cellAt(wrapper, 3, 4).text()).toBe("7");
         });

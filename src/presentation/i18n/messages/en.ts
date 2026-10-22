@@ -174,7 +174,7 @@ export const en = {
         },
         dialog: {
             reset: {
-                title: "Clear the board?",
+                title: "Clear the Board?",
                 message: "Every digit you entered will be removed.",
                 confirm: "Clear",
             },
