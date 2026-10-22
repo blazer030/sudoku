@@ -133,6 +133,35 @@ describe("Home", () => {
         expect(wrapper.find("[data-testid='continue-button']").text()).toContain("03:24");
     });
 
+    it("should show the saved difficulty, time and progress", async () => {
+        const { wrapper } = mountHome({ savedGame: dummySave });
+        const chip = (id: string) => wrapper.get(`[data-testid='${id}']`).text();
+
+        expect(chip("continue-difficulty")).toBe("Easy");
+        expect(chip("continue-time")).toBe("03:24");
+        expect(chip("continue-progress")).toBe("0% filled");
+
+        i18n.global.locale.value = "zh-Hant";
+        await nextTick();
+
+        expect(chip("continue-difficulty")).toBe("簡單");
+        expect(chip("continue-progress")).toBe("已填 0%");
+    });
+
+    it("should count only the player's cells in the progress", () => {
+        let entriesLeft = 17;
+        const cells = knownPuzzle.map((row, rowIndex) => row.map((clue, columnIndex): CellState => {
+            if (clue !== 0) return { clue, entry: 0, notes: [] };
+            if (entriesLeft === 0) return { clue: 0, entry: 0, notes: [] };
+            entriesLeft -= 1;
+            return { clue: 0, entry: knownAnswer[rowIndex][columnIndex], notes: [] };
+        }));
+        expect(knownPuzzle.flat().filter(clue => clue !== 0)).toHaveLength(30);
+        const { wrapper } = mountHome({ savedGame: { ...dummySave, cells, answer: knownAnswer.map(row => [...row]) } });
+
+        expect(wrapper.get("[data-testid='continue-progress']").text()).toBe("33% filled");
+    });
+
     it("should navigate to game page when clicking Continue", async () => {
         const { wrapper, router } = mountHome({ savedGame: dummySave });
         await router.push("/");

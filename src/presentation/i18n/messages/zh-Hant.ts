@@ -90,6 +90,7 @@ export const zhHant: MessageSchema = {
         subtitle: "動動腦，練練推理",
         newGame: "新遊戲",
         continueGame: "繼續遊戲",
+        continueProgress: "已填 {percent}%",
         statistics: "統計",
         walkthrough: "解題演示",
         generatingPuzzle: "正在產生題目…",

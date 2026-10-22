@@ -92,6 +92,7 @@ export const en = {
         subtitle: "Train your brain",
         newGame: "New Game",
         continueGame: "Continue Game",
+        continueProgress: "{percent}% filled",
         statistics: "Statistics",
         walkthrough: "Walkthrough",
         generatingPuzzle: "Generating puzzle…",
