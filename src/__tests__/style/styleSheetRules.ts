@@ -139,3 +139,16 @@ export const findScalesOutOfRange = (css: string): string[] => {
     });
     return hits;
 };
+
+/** The declarations of the top-level rules that list `selector`, with whitespace collapsed. */
+export const declarationsOf = (css: string, selector: string): Map<string, string> => {
+    const declarations = new Map<string, string>();
+    postcss.parse(css).walkRules((rule: Rule) => {
+        if (rule.parent?.type === "atrule") return;
+        if (!rule.selectors.map(item => item.replace(/\s+/g, " ").trim()).includes(selector)) return;
+        rule.walkDecls((declaration) => {
+            declarations.set(declaration.prop, declaration.value.replace(/\s+/g, " ").trim());
+        });
+    });
+    return declarations;
+};

@@ -1,25 +1,13 @@
 import { readFileSync } from "fs";
-import postcss, { type Rule } from "postcss";
+import { declarationsOf } from "@/__tests__/style/styleSheetRules";
 
 // Paper rules every page: the ruled lines and red margin line run behind each page's content, while
 // cards, the board's sheet and sticky headers sit on top of them.
 
 const PAPER_CSS = readFileSync("src/style/styles/paper/skin.css", "utf8");
 
-const declarationsOf = (selector: string): Map<string, string> => {
-    const declarations = new Map<string, string>();
-    postcss.parse(PAPER_CSS).walkRules((rule: Rule) => {
-        if (rule.parent?.type === "atrule") return;
-        if (!rule.selectors.map(item => item.replace(/\s+/g, " ").trim()).includes(selector)) return;
-        rule.walkDecls((declaration) => {
-            declarations.set(declaration.prop, declaration.value.replace(/\s+/g, " ").trim());
-        });
-    });
-    return declarations;
-};
-
 const isRuled = (selector: string): boolean => {
-    const image = declarationsOf(selector).get("background-image") ?? "";
+    const image = declarationsOf(PAPER_CSS, selector).get("background-image") ?? "";
     return image.includes("var(--color-rule)") && image.includes("var(--color-margin-line)");
 };
 
