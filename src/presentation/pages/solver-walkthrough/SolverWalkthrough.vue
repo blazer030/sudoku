@@ -100,11 +100,15 @@
                 <Transition name="walkthrough-overlay">
                     <div
                         v-if="introOpen && !inPlayback"
-                        class="absolute top-0 inset-x-0 z-10"
+                        ref="introPosition"
+                        :style="{ top: `${-introLift}px` }"
+                        class="absolute inset-x-0 z-10"
+                        data-testid="walkthrough-intro-position"
                     >
+                        <!-- On short screens the guide rises over the empty board, so its actions stay on screen. -->
                         <section
                             :aria-label="t('home.walkthrough')"
-                            :style="roomBelowInputArea === null ? undefined : { maxHeight: `${roomBelowInputArea}px` }"
+                            :style="introMaxHeight === null ? undefined : { maxHeight: `${introMaxHeight}px` }"
                             class="bg-card rounded-2xl shadow-card-lg p-4 w-full flex flex-col gap-4 overflow-y-auto"
                             data-testid="walkthrough-intro"
                         >
@@ -196,7 +200,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, useTemplateRef, watch } from "vue";
+import { computed, nextTick, ref, useTemplateRef, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { ChevronLeft, Info, ListFilter, Pencil, PencilLine, RotateCcw, Wand2 } from "lucide-vue-next";
@@ -212,6 +216,7 @@ import StepPlaybackPanel from "@/presentation/components/step-presentation/StepP
 import StepTag from "@/presentation/components/step-presentation/StepTag.vue";
 import { useHintExplanation } from "@/presentation/pages/game/hint-mode/useHintExplanation";
 import { useRoomBelow } from "@/presentation/pages/game/hint-mode/useRoomBelow";
+import { panelLift } from "@/presentation/pages/game/hint-mode/panelLift";
 import { useWalkthroughPlayback } from "@/presentation/pages/solver-walkthrough/useWalkthroughPlayback";
 import { provideWalkthroughDialog } from "@/presentation/pages/solver-walkthrough/useWalkthroughDialog";
 import WalkthroughDialog from "@/presentation/pages/solver-walkthrough/WalkthroughDialog.vue";
@@ -278,6 +283,22 @@ const { room: roomBelowInputArea, measure: measureRoomBelowInputArea } = useRoom
 watch(inPlayback, (playing) => {
     if (playing) measureRoomBelowInputArea();
 });
+
+const introPosition = useTemplateRef<HTMLElement>("introPosition");
+const introLift = ref(0);
+const introMaxHeight = computed(() =>
+    roomBelowInputArea.value === null ? null : roomBelowInputArea.value + introLift.value);
+
+const measureIntroLift = () => {
+    const intro = introPosition.value?.querySelector<HTMLElement>("[data-testid='walkthrough-intro']");
+    if (!intro || roomBelowInputArea.value === null) {
+        introLift.value = 0;
+        return;
+    }
+    introLift.value = panelLift(roomBelowInputArea.value, intro.scrollHeight);
+};
+
+watch([introOpen, inPlayback, roomBelowInputArea], () => { void nextTick(measureIntroLift); }, { immediate: true });
 
 const conflictsWithPeers = (row: number, column: number, digit: number): boolean => {
     for (let otherColumn = 0; otherColumn < BOARD_SIZE; otherColumn++) {

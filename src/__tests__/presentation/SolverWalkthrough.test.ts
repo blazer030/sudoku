@@ -130,6 +130,27 @@ describe("SolverWalkthrough", () => {
             expect(wrapper.find("[data-testid='walkthrough-inputs']").attributes("inert")).toBeDefined();
         });
 
+        it("should lift the guide over the board when it would not fit below", async () => {
+            // The input area starts 120px above the bottom edge, leaving 96px under the 24px gap,
+            // and the guide is 300px tall
+            vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockReturnValue({ top: window.innerHeight - 120 } as DOMRect);
+            Object.defineProperty(HTMLElement.prototype, "scrollHeight", {
+                configurable: true,
+                get(this: HTMLElement) { return this.dataset.testid === "walkthrough-intro" ? 300 : 0; },
+            });
+            try {
+                const { wrapper } = mountWalkthrough();
+                await flushPromises();
+
+                const intro = wrapper.find<HTMLElement>("[data-testid='walkthrough-intro']");
+                expect(intro.element.style.maxHeight).toBe("300px");
+                expect(wrapper.find<HTMLElement>("[data-testid='walkthrough-intro-position']").element.style.top).toBe("-204px");
+            } finally {
+                Reflect.deleteProperty(HTMLElement.prototype, "scrollHeight");
+                vi.restoreAllMocks();
+            }
+        });
+
         it("should start from a puzzle passed in", () => {
             const { wrapper } = mountWalkthrough({ initialPuzzle: singlesPuzzle });
 
