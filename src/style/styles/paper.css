@@ -94,7 +94,10 @@
 }
 
 /* Ruled pages: a line every 32px and a red margin line 14px in, inside the page gutter so no
-   text crosses it. The lines scroll with the content; the page background stays put. */
+   text crosses it. Every page is ruled: page roots that scroll on their own, and the app's page
+   scroller behind the pages that do not. The lines scroll with the content; the page background
+   stays put. Cards, the board's sheet and sticky headers sit on top of them. */
+[data-style="paper"] [data-skin~="page"],
 [data-style="paper"] [data-skin~="page-ruled"] {
     background-color: var(--color-background);
     background-image:
@@ -132,13 +135,16 @@
     --paper-clue-hatch: repeating-linear-gradient(-45deg, var(--paper-hatch) 0 1px, transparent 1px 4px);
 }
 
+/* The sheet lies on its own patch of the page surface (page colour, grain and lamp, but no ruled
+   lines), so the lines behind the board never show through it */
 [data-style="paper"] [data-skin~="board"] {
     border-radius: 6px;
-    background-color: var(--paper-sheet);
-    background-image: var(--paper-texture);
-    background-size: 9px 9px, 13px 13px;
-    background-position: 0 0, 4px 6px;
-    background-repeat: repeat, repeat;
+    background-color: var(--color-background);
+    background-image: var(--paper-texture), linear-gradient(var(--paper-sheet), var(--paper-sheet)), var(--paper-lamp-fade), var(--paper-lamp), var(--paper-texture);
+    background-size: 9px 9px, 13px 13px, 100% 100%, 100% 100%, 100% 100%, 9px 9px, 13px 13px;
+    background-position: 0 0, 4px 6px, 0 0, 0 0, 0 0, 0 0, 4px 6px;
+    background-repeat: repeat, repeat, no-repeat, no-repeat, no-repeat, repeat, repeat;
+    background-attachment: scroll, scroll, scroll, fixed, fixed, fixed, fixed;
     --tw-shadow: 0 0 transparent;
 }
 

@@ -35,8 +35,11 @@ describe("paper board", () => {
     it("should lay the board on a sheet of the page's paper with its grain, not a card with a shadow", () => {
         const board = declarationsOf(BOARD);
 
-        expect(board.get("background-color")).toBe("var(--paper-sheet)");
-        expect(board.get("background-image")).toContain("var(--paper-texture)");
+        // Its own page surface under the sheet, so the ruled lines behind the board never show through
+        expect(board.get("background-color")).toBe("var(--color-background)");
+        expect(board.get("background-image")).toBe(
+            "var(--paper-texture), linear-gradient(var(--paper-sheet), var(--paper-sheet)), var(--paper-lamp-fade), var(--paper-lamp), var(--paper-texture)");
+        expect(board.get("background-attachment")).toBe("scroll, scroll, scroll, fixed, fixed, fixed, fixed");
         expect(board.get("--tw-shadow")).toBe("0 0 transparent");
         expect(declarationsOf('[data-style="paper"]').get("--paper-sheet")).toMatch(/^color-mix\(in srgb, var\(--color-card\) \d+%, transparent\)$/);
     });
