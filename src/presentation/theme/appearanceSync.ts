@@ -12,7 +12,7 @@ export interface AppearanceSources {
     colorTheme: Ref<ColorThemeId>;
 }
 
-const DARK_SCHEME_QUERY = "(prefers-color-scheme: dark)";
+export const DARK_SCHEME_QUERY = "(prefers-color-scheme: dark)";
 
 // index.html's inline script resolves the mode the same way before first paint
 export const resolveColorMode = (appearance: Appearance, systemPrefersDark: boolean): ColorMode => {
@@ -21,7 +21,7 @@ export const resolveColorMode = (appearance: Appearance, systemPrefersDark: bool
 };
 
 // Older WebViews only offer the deprecated addListener / removeListener pair
-const listenForChanges = (query: MediaQueryList, listener: () => void): (() => void) => {
+export const listenForChanges = (query: MediaQueryList, listener: () => void): (() => void) => {
     if (typeof query.addEventListener === "function") {
         query.addEventListener("change", listener);
         return () => { query.removeEventListener("change", listener); };

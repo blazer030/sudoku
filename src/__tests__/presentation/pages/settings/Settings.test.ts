@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { nextTick } from "vue";
 import { flushPromises, mount } from "@vue/test-utils";
 import { storeToRefs } from "pinia";
@@ -327,6 +327,82 @@ describe("Settings.vue appearance group", () => {
         expect(blue.attributes("aria-label")).toBe("Blue");
         expect(blue.attributes("aria-pressed")).toBe("false");
         expect(wrapper.get("[data-testid='color-theme-green']").attributes("aria-pressed")).toBe("true");
+    });
+
+    describe("colour-theme swatches", () => {
+        // jsdom reports inline colours as rgb(); run the expected hex through the same parser
+        const cssColor = (hex: string): string => {
+            const probe = document.createElement("div");
+            probe.style.color = hex;
+            return probe.style.color;
+        };
+
+        const stubSystemDark = (initial: boolean) => {
+            let matches = initial;
+            const listeners = new Set<(event: MediaQueryListEvent) => void>();
+            vi.stubGlobal("matchMedia", (query: string) => ({
+                get matches() { return query === "(prefers-color-scheme: dark)" && matches; },
+                media: query,
+                addEventListener: (_type: string, listener: (event: MediaQueryListEvent) => void) => { listeners.add(listener); },
+                removeEventListener: (_type: string, listener: (event: MediaQueryListEvent) => void) => { listeners.delete(listener); },
+            }));
+            return (value: boolean) => {
+                matches = value;
+                listeners.forEach((listener) => { listener({ matches: value } as MediaQueryListEvent); });
+            };
+        };
+
+        afterEach(() => {
+            vi.unstubAllGlobals();
+        });
+
+        const expectSwatchesIn = (wrapper: ReturnType<typeof mountSettings>, mode: "light" | "dark") => {
+            const settingsStore = useSettingsStore();
+            for (const theme of STYLES[settingsStore.style].themes) {
+                const palette = getPalette(settingsStore.style, theme.id, mode);
+                const swatch = wrapper.get(`[data-testid='color-theme-${theme.id}']`);
+                const label = `${settingsStore.style} ${theme.id} in ${mode}`;
+                expect((swatch.element as HTMLElement).style.backgroundColor, label).toBe(cssColor(palette.primary));
+                // One solid colour: no second half in the accent
+                expect(swatch.html(), label).not.toContain(cssColor(palette.accent));
+                expect(swatch.findAll("[style*='background']"), label).toHaveLength(0);
+            }
+            const check = wrapper.get("[data-testid='color-theme-check']");
+            const selected = getPalette(settingsStore.style, settingsStore.colorTheme, mode);
+            expect((check.element as HTMLElement).style.color).toBe(cssColor(selected["on-primary"]));
+        };
+
+        it("should fill each swatch with its light primary in light mode", () => {
+            stubSystemDark(true);
+            localStorage.setItem("sudoku-settings", JSON.stringify({ appearance: "light" }));
+
+            expectSwatchesIn(mountSettings(), "light");
+        });
+
+        it("should fill each swatch with its dark primary in dark mode, for every style", async () => {
+            stubSystemDark(false);
+            const wrapper = mountSettings();
+            const settingsStore = useSettingsStore();
+            settingsStore.setAppearance("dark");
+
+            for (const style of STYLE_IDS) {
+                settingsStore.setStyle(style);
+                await nextTick();
+                expectSwatchesIn(wrapper, "dark");
+            }
+        });
+
+        it("should follow the system's light or dark when the appearance is system", async () => {
+            const setSystemDark = stubSystemDark(true);
+            const wrapper = mountSettings();
+            expect(useSettingsStore().appearance).toBe("system");
+
+            expectSwatchesIn(wrapper, "dark");
+
+            setSystemDark(false);
+            await nextTick();
+            expectSwatchesIn(wrapper, "light");
+        });
     });
 
     it("should switch light and dark live", async () => {

@@ -81,20 +81,11 @@
                     :aria-pressed="swatch.id === settingsStore.colorTheme"
                     :class="swatch.id === settingsStore.colorTheme ? 'ring-2 ring-offset-2 ring-offset-card ring-primary' : ''"
                     :data-testid="`color-theme-${swatch.id}`"
+                    :style="{ backgroundColor: swatch.palette.primary }"
                     class="relative aspect-square w-full max-w-15 rounded-full cursor-pointer overflow-hidden"
                     type="button"
                     @click="onSelectColorTheme(swatch.id)"
                 >
-                    <div class="absolute inset-0 flex">
-                        <div
-                            :style="{ backgroundColor: swatch.palette.primary }"
-                            class="w-1/2 h-full"
-                        />
-                        <div
-                            :style="{ backgroundColor: swatch.palette.accent }"
-                            class="w-1/2 h-full"
-                        />
-                    </div>
                     <div
                         v-if="swatch.id === settingsStore.colorTheme"
                         :style="{ color: swatch.palette['on-primary'] }"
@@ -230,6 +221,7 @@
 import { computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
+import { storeToRefs } from "pinia";
 import { ChevronLeft, ChevronRight, Check, Crosshair, Database, Eraser, ExternalLink, Gamepad2, Hash, Highlighter, Info, Languages, Palette, Smartphone, Sparkles, Trash2 } from "lucide-vue-next";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { useDonateStore } from "@/stores/donateStore";
@@ -241,6 +233,7 @@ import { ROUTER_PATH } from "@/router";
 import { STYLE_IDS, type Appearance, type ColorThemeId, type LanguagePreference, type StyleId } from "@/application/SettingsStorage";
 import { STYLES, getPalette, rememberedThemeFor } from "@/theme/palettes";
 import { vPress } from "@/presentation/directives/press";
+import { useColorMode } from "@/presentation/theme/useColorMode";
 import SegmentedControl from "@/presentation/components/segmented-control/SegmentedControl.vue";
 import OptionTile from "@/presentation/components/option-tile/OptionTile.vue";
 import SettingsGroup from "@/presentation/pages/settings/components/SettingsGroup.vue";
@@ -274,10 +267,13 @@ const appearanceOptions = computed((): { value: Appearance; label: string }[] =>
     { value: "dark", label: t("settings.colorMode.dark") },
 ]);
 
-// The current style's own themes; swatches show their light colours in every mode
+const { appearance } = storeToRefs(settingsStore);
+const colorMode = useColorMode(appearance);
+
+// The current style's own themes, each a solid circle of the primary the app would show in the current mode
 const swatches = computed(() => STYLES[settingsStore.style].themes.map(theme => ({
     id: theme.id,
-    palette: getPalette(settingsStore.style, theme.id, "light"),
+    palette: getPalette(settingsStore.style, theme.id, colorMode.value),
 })));
 
 const toggles = computed(() => [
