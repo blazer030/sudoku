@@ -69,6 +69,12 @@ describe("paper fonts", () => {
         }
     });
 
+    it("should keep the default interface stack under its own name so thumbnails can pin it", () => {
+        // Paper repoints --font-sans on <html>; the style picker's other thumbnails pin it back
+        expect(themeFonts().get("--font-sans")).toBe("var(--font-default)");
+        expect(themeFonts().get("--font-default")).toMatch(/^"Outfit", /);
+    });
+
     it("should not use old-style figures for clues", () => {
         expect(themeFonts().get("--font-print")).toBeDefined();
         expect(themeFonts().get("--font-print")).not.toContain("Georgia");
