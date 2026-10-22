@@ -115,18 +115,17 @@ describe("useStatisticsStore", () => {
             ...overrides,
         });
 
-        it("returns zeroed difficulty stats and empty recent games when history is empty", () => {
+        it("returns zeroed difficulty stats when history is empty", () => {
             const store = useStatisticsStore();
             expect(store.statistics).toEqual({
                 easy: { gamesWon: 0, gamesPlayed: 0, bestTime: null, averageTime: null },
                 medium: { gamesWon: 0, gamesPlayed: 0, bestTime: null, averageTime: null },
                 hard: { gamesWon: 0, gamesPlayed: 0, bestTime: null, averageTime: null },
                 overall: { gamesWon: 0, gamesPlayed: 0, winRate: 0 },
-                recentGames: [],
             });
         });
 
-        it("computes best, average, win rate and reverse-ordered recent games", async () => {
+        it("computes best, average and win rate", async () => {
             const repo = buildRepo({
                 load: vi.fn().mockResolvedValue([
                     game({ difficulty: "easy", elapsedSeconds: 100, completed: true }),
@@ -157,8 +156,6 @@ describe("useStatisticsStore", () => {
                 gamesPlayed: 4,
                 winRate: 0.75,
             });
-            expect(stats.recentGames).toHaveLength(4);
-            expect(stats.recentGames[0].difficulty).toBe("hard");
         });
         it("should round the average to whole seconds", () => {
             const store = useStatisticsStore();

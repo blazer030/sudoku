@@ -94,12 +94,12 @@
                 class="flex flex-col gap-2"
             >
                 <button
-                    v-for="(game, index) in stats.recentGames"
-                    :key="index"
+                    v-for="{ game, historyIndex } in recentGames"
+                    :key="historyIndex"
                     :class="game.replay ? 'cursor-pointer' : 'cursor-default'"
                     class="flex items-center justify-between bg-card rounded-xl py-3 px-4 shadow-card-sm text-left"
                     data-testid="recent-game"
-                    @click="openReview(game, index)"
+                    @click="openReview(game, historyIndex)"
                 >
                     <div class="flex items-center gap-3">
                         <div
@@ -180,6 +180,7 @@ import type { Difficulty } from "@/domain";
 import type { GameResult } from "@/application/statistics/StatisticsRepository";
 import { formatTime } from "@/utils/formatTime";
 import { countPlayStreak } from "@/application/statistics/playStreak";
+import { listRecentGames } from "@/presentation/pages/statistics/recentGames";
 import { useI18n } from "vue-i18n";
 import { useAppLocale } from "@/presentation/i18n/useAppLocale";
 import { formatDate } from "@/presentation/i18n/formatDate";
@@ -211,9 +212,10 @@ const formatOptionalTime = (seconds: number | null): string => {
 
 const difficultyLabel = useDifficultyLabel();
 
-const openReview = (game: GameResult, displayIndex: number) => {
+const recentGames = computed(() => listRecentGames(statisticsStore.history));
+
+const openReview = (game: GameResult, historyIndex: number) => {
     if (!game.replay) return;
-    const historyIndex = stats.value.recentGames.length - 1 - displayIndex;
     void router.push(ROUTER_PATH.gameReviewFor(historyIndex));
 };
 

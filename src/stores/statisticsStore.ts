@@ -33,7 +33,6 @@ export interface Statistics {
     medium: DifficultyStats;
     hard: DifficultyStats;
     overall: OverallStats;
-    recentGames: GameResult[];
 }
 
 const computeDifficultyStats = (games: GameResult[]): DifficultyStats => {
@@ -104,7 +103,6 @@ export const useStatisticsStore = defineStore("statistics", () => {
                 gamesPlayed: games.length,
                 winRate: games.length > 0 ? totalWon / games.length : 0,
             },
-            recentGames: [...games].reverse(),
         };
     });
 
