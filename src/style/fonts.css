@@ -1,0 +1,46 @@
+/* The app's web fonts, bundled so every style reads the same offline. Generated subsets: run
+   npm run generate:fonts after adding copy with new Chinese characters. A browser downloads a face
+   only when text uses it, so only paper ever fetches Caveat and LXGW WenKai TC. Each family's
+   licence (SIL Open Font License) sits beside its files. */
+
+@font-face {
+    font-family: "Outfit";
+    font-style: normal;
+    font-weight: 400 700;
+    font-display: swap;
+    src: url("../assets/fonts/outfit.woff2") format("woff2");
+}
+
+@font-face {
+    font-family: "Roboto Mono";
+    font-style: normal;
+    font-weight: 500 700;
+    font-display: swap;
+    src: url("../assets/fonts/roboto-mono.woff2") format("woff2");
+}
+
+/* Paper's handwritten digits */
+@font-face {
+    font-family: "Caveat";
+    font-style: normal;
+    font-weight: 500 700;
+    font-display: swap;
+    src: url("../assets/fonts/caveat.woff2") format("woff2");
+}
+
+/* Paper's interface and handwritten Chinese, cut to the characters the app writes */
+@font-face {
+    font-family: "LXGW WenKai TC";
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url("../assets/fonts/lxgw-wenkai-tc-regular.woff2") format("woff2");
+}
+
+@font-face {
+    font-family: "LXGW WenKai TC";
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url("../assets/fonts/lxgw-wenkai-tc-bold.woff2") format("woff2");
+}

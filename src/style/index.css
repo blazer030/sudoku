@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "./themes.generated.css";
+@import "./fonts.css";
 /* One stylesheet per style, each scoped by [data-style="<id>"]: material, shape, type and motion only */
 @import "./styles/minimal.css";
 @import "./styles/tactile.css";
@@ -22,7 +23,7 @@
   --font-sans: var(--font-default);
   --font-mono: "Roboto Mono", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", monospace;
   /* Paper's stacks. Each ends in a system CJK face and a generic family, never cursive, so a
-     blocked Google Fonts request still reads clearly. Times, not Georgia: Georgia's old-style
+     character outside the bundled subsets still reads clearly. Times, not Georgia: Georgia's old-style
      figures sink 3, 4, 5, 7 and 9 below the line. */
   --font-hand: "Caveat", "LXGW WenKai TC", "Outfit", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
   --font-wenkai: "LXGW WenKai TC", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;

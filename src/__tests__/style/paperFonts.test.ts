@@ -1,6 +1,5 @@
 import { readFileSync } from "fs";
 import postcss, { type Rule } from "postcss";
-import { PAPER_FONT_URLS } from "@/presentation/theme/paperFonts";
 
 // The font tokens declared in index.css's @theme
 const themeFonts = (): Map<string, string> => {
@@ -34,26 +33,6 @@ const paperDeclarationsOf = (property: string): Map<string, string> => {
 const FONTS_READY = '[data-style="paper"][data-paper-fonts="ready"]';
 
 describe("paper fonts", () => {
-    it("should keep every style's always-loaded font stylesheet free of paper's fonts", () => {
-        const html = readFileSync("index.html", "utf8");
-        const hrefs = [...html.matchAll(/<link href="(https:\/\/fonts\.googleapis\.com\/[^"]+)" rel="stylesheet"/g)].map(match => match[1]);
-
-        // The stylesheet from before paper existed; WenKai's CSS alone is about 70 KB gzipped
-        expect(hrefs).toEqual(["https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Roboto+Mono:wght@500;600;700&display=swap"]);
-        expect(html).not.toMatch(/<link[^>]+(?:Caveat|WenKai)/);
-    });
-
-    it("should load Caveat for digits only and LXGW WenKai TC, both with swap", () => {
-        const [caveat, wenkai] = PAPER_FONT_URLS;
-
-        expect(PAPER_FONT_URLS).toHaveLength(2);
-        expect(caveat).toContain("family=Caveat:wght@500;700");
-        expect(caveat).toContain("text=0123456789");
-        expect(caveat).not.toContain("WenKai");
-        expect(wenkai).toContain("family=LXGW+WenKai+TC:wght@400;700");
-        for (const url of PAPER_FONT_URLS) expect(url).toContain("display=swap");
-    });
-
     it("should fall back to the app's own stacks and never to cursive", () => {
         const fonts = themeFonts();
         const literalStacks = [...fonts].filter(([, value]) => !value.startsWith("var("));

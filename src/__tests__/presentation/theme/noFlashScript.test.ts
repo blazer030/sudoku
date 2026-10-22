@@ -1,7 +1,6 @@
 import { readFileSync } from "fs";
 import { STYLE_IDS, THEME_IDS_BY_STYLE } from "@/application/SettingsStorage";
 import { systemBarColor } from "@/theme/palettes";
-import { PAPER_FONT_URLS } from "@/presentation/theme/paperFonts";
 
 const extractInlineScript = (): string => {
     const html = readFileSync("index.html", "utf8");
@@ -163,33 +162,12 @@ describe("index.html no-flash script", () => {
         expect(meta.content).toBe(systemBarColor("minimal", "green", "light"));
     });
 
-    describe("paper fonts", () => {
-        it("should load the paper fonts before first paint when paper is stored", () => {
-            stubSystemDark(false);
-            storeSettings({ style: "paper" });
+    it.each(["paper", "minimal", "tactile", undefined])("should add no font stylesheet for style %s, since the fonts are bundled", (style) => {
+        stubSystemDark(false);
+        storeSettings({ style });
 
-            runInlineScript();
+        runInlineScript();
 
-            expect(stylesheetHrefs()).toEqual([...PAPER_FONT_URLS]);
-        });
-
-        it("should add them once however often it runs", () => {
-            stubSystemDark(false);
-            storeSettings({ style: "paper" });
-
-            runInlineScript();
-            runInlineScript();
-
-            expect(stylesheetHrefs()).toEqual([...PAPER_FONT_URLS]);
-        });
-
-        it.each(["minimal", "tactile", undefined])("should not load them for style %s", (style) => {
-            stubSystemDark(false);
-            storeSettings({ style });
-
-            runInlineScript();
-
-            expect(stylesheetHrefs()).toEqual([]);
-        });
+        expect(stylesheetHrefs()).toEqual([]);
     });
 });

@@ -2,7 +2,6 @@ import { nextTick, ref } from "vue";
 import type { Mock } from "vitest";
 import { resolveColorMode, startAppearanceSync } from "@/presentation/theme/appearanceSync";
 import { getPalette } from "@/theme/palettes";
-import { PAPER_FONT_URLS } from "@/presentation/theme/paperFonts";
 import type { Appearance, ColorMode, ColorThemeId, StyleId } from "@/application/SettingsStorage";
 import type { SystemBarService } from "@/application/systemBar/SystemBarService";
 import type { AppearanceBridgeService, SystemBarColors } from "@/application/appearanceBridge/AppearanceBridgeService";
@@ -238,48 +237,30 @@ describe("startAppearanceSync", () => {
     });
 
     describe("paper fonts", () => {
-        it("should load the paper fonts only while paper is the style", async () => {
+        it("should add no font stylesheet whatever the style, since the fonts are bundled", async () => {
             const sources = buildSources();
             stop = startAppearanceSync(sources, systemBar, appearanceBridge);
-            expect(stylesheetHrefs()).toEqual([]);
 
-            sources.style.value = "paper";
-            await nextTick();
-            expect(stylesheetHrefs()).toEqual([...PAPER_FONT_URLS]);
-
-            sources.style.value = "tactile";
-            await nextTick();
-            expect(stylesheetHrefs()).toEqual([]);
-        });
-
-        it("should keep the links the inline script added instead of adding them again", async () => {
-            for (const url of PAPER_FONT_URLS) {
-                const link = document.createElement("link");
-                link.rel = "stylesheet";
-                link.href = url;
-                link.setAttribute("data-paper-font-link", "");
-                document.head.appendChild(link);
+            for (const style of ["paper", "tactile", "minimal"] as const) {
+                sources.style.value = style;
+                await nextTick();
+                expect(stylesheetHrefs(), style).toEqual([]);
             }
-            const sources = buildSources();
-            sources.style.value = "paper";
-
-            stop = startAppearanceSync(sources, systemBar, appearanceBridge);
-            sources.colorTheme.value = "redInk";
-            sources.appearance.value = "dark";
-            await nextTick();
-
-            expect(stylesheetHrefs()).toEqual([...PAPER_FONT_URLS]);
         });
 
+        // load() resolves once finishLoadingFonts() runs, as the browser would after fetching Caveat
+        let finishLoading: (() => void)[] = [];
         const stubFontLoading = (matchedFaces: number) => {
-            const load = vi.fn((_font: string, _text?: string) =>
-                Promise.resolve(Array.from({ length: matchedFaces }, () => ({ status: "loaded" }))));
+            const load = vi.fn((_font: string, _text?: string) => new Promise((resolve) => {
+                finishLoading.push(() => { resolve(Array.from({ length: matchedFaces }, () => ({ status: "loaded" }))); });
+            }));
             Object.defineProperty(document, "fonts", { configurable: true, value: { load } });
             return load;
         };
 
-        const finishLoadingStylesheets = async () => {
-            document.head.querySelectorAll('link[rel="stylesheet"]').forEach((link) => { link.dispatchEvent(new Event("load")); });
+        const finishLoadingFonts = async () => {
+            finishLoading.forEach((finish) => { finish(); });
+            finishLoading = [];
             await new Promise((resolve) => { setTimeout(resolve, 0); });
         };
 
@@ -297,20 +278,20 @@ describe("startAppearanceSync", () => {
             stop = startAppearanceSync(sources, systemBar, appearanceBridge);
             expect(fontsState()).toBeUndefined();
 
-            await finishLoadingStylesheets();
+            await finishLoadingFonts();
 
             expect(load).toHaveBeenCalledWith(expect.stringMatching(/^700 .*Caveat/), "0123456789");
             expect(fontsState()).toBe("ready");
         });
 
         it("should leave paper at the fallback size when no Caveat face loads", async () => {
-            // Blocked or offline: the stylesheet never registers a face, so load() matches nothing
+            // A WebView that cannot read the bundled face: load() matches nothing
             stubFontLoading(0);
             const sources = buildSources();
             sources.style.value = "paper";
             stop = startAppearanceSync(sources, systemBar, appearanceBridge);
 
-            await finishLoadingStylesheets();
+            await finishLoadingFonts();
 
             expect(fontsState()).toBeUndefined();
         });
@@ -320,7 +301,7 @@ describe("startAppearanceSync", () => {
             const sources = buildSources();
             sources.style.value = "paper";
             stop = startAppearanceSync(sources, systemBar, appearanceBridge);
-            await finishLoadingStylesheets();
+            await finishLoadingFonts();
 
             sources.style.value = "minimal";
             await nextTick();
@@ -333,12 +314,10 @@ describe("startAppearanceSync", () => {
             const sources = buildSources();
             sources.style.value = "paper";
             stop = startAppearanceSync(sources, systemBar, appearanceBridge);
-            const caveatLink = document.head.querySelector('link[rel="stylesheet"]');
 
             sources.style.value = "tactile";
             await nextTick();
-            caveatLink?.dispatchEvent(new Event("load"));
-            await new Promise((resolve) => { setTimeout(resolve, 0); });
+            await finishLoadingFonts();
 
             expect(fontsState()).toBeUndefined();
         });

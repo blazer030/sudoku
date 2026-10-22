@@ -52,28 +52,9 @@
             if (dark) root.classList.add("dark");
             var meta = document.querySelector('meta[name="theme-color"]');
             if (meta) meta.setAttribute("content", dark ? barColors[style].dark : lightColors[colorTheme]);
-            // Only paper uses Caveat and LXGW WenKai TC; the same URLs as PAPER_FONT_URLS (paperFonts.ts),
-            // which appearance sync adds and removes on a style switch. noFlashScript.test.ts keeps them in sync.
-            if (style === "paper" && !document.querySelector("link[data-paper-font-link]")) {
-                var paperFontUrls = [
-                    "https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&text=0123456789&display=swap",
-                    "https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&display=swap"
-                ];
-                for (var index = 0; index < paperFontUrls.length; index++) {
-                    var link = document.createElement("link");
-                    link.rel = "stylesheet";
-                    link.href = paperFontUrls[index];
-                    link.setAttribute("data-paper-font-link", "");
-                    document.head.appendChild(link);
-                }
-            }
         })();
     </script>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <!-- Paper's fonts load separately, only while paper is the style (see the inline script above).
-         Offline (the Android app without network) every stack falls back to system fonts at the same sizes. -->
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Roboto+Mono:wght@500;600;700&display=swap" rel="stylesheet" />
+    <!-- Fonts are bundled (src/style/fonts.css), so every style reads the same offline -->
     <title>Sudoku</title>
 </head>
 <body>
