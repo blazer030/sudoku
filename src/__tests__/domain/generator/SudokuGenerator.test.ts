@@ -30,7 +30,6 @@ const walkRevealHintsToCompletion = ({ puzzle, answer }: { puzzle: number[][]; a
     }
 };
 
-
 // A small seeded generator (mulberry32), so a run of `Math.random` can be replayed exactly.
 const seededRandom = (seed: number) => {
     let state = seed >>> 0;
@@ -51,8 +50,11 @@ const SEEDED_PUZZLES = {
     hard: "000000960430020700060800100000000000500007000090563070028050006000700003900004000",
 } as const;
 
+const GENERATION_SEEDS = [1, 20261022, 424242];
+const CLUE_RANGES = { easy: [36, 45], medium: [27, 35], hard: [22, 26] } as const;
+
 describe("SudokuGenerator", () => {
-    it.skip("should generate different boards on multiple calls", () => {
+    it("should generate different boards on multiple calls", () => {
         const boards = Array.from({ length: 5 }, () => generator.generateFullBoard());
         const serialized = boards.map(board => JSON.stringify(board));
         const unique = new Set(serialized);
@@ -60,47 +62,29 @@ describe("SudokuGenerator", () => {
         expect(unique.size).toBeGreaterThan(1);
     });
 
-    it.skip("should return a puzzle and its answer", () => {
-        const { puzzle, answer } = generator.generatePuzzle("easy");
+    // Real generation, rating and uniqueness checks; fixed seeds keep every run the same puzzles
+    it.each((["easy", "medium", "hard"] as const).flatMap(difficulty => GENERATION_SEEDS.map(seed => [difficulty, seed] as const)))(
+        "should generate a puzzle of %s difficulty from seed %i with one solution, its clue count and a step-by-step path",
+        (difficulty, seed) => {
+            vi.spyOn(Math, "random").mockImplementation(seededRandom(seed));
 
-        expect(sudokuBoard.isValidSolution(answer)).toBe(true);
-        puzzle.flat().forEach((cell, index) => {
-            if (cell !== 0) {
-                const row = Math.floor(index / 9);
-                const column = index % 9;
-                expect(cell).toBe(answer[row][column]);
-            }
-        });
-    });
+            const generated = new SudokuGenerator().generatePuzzle(difficulty);
 
-    it.skip("should generate an easy puzzle with 36-45 clues", () => {
-        const { puzzle } = generator.generatePuzzle("easy");
-        const filledCells = puzzle.flat().filter(cell => cell !== 0).length;
+            const { puzzle, answer } = generated;
+            expect(sudokuBoard.isValidSolution(answer)).toBe(true);
+            puzzle.flat().forEach((cell, index) => {
+                if (cell !== 0) expect(cell).toBe(answer[Math.floor(index / 9)][index % 9]);
+            });
+            const [min, max] = CLUE_RANGES[difficulty];
+            const clueCount = puzzle.flat().filter(cell => cell !== 0).length;
+            expect(clueCount).toBeGreaterThanOrEqual(min);
+            expect(clueCount).toBeLessThanOrEqual(max);
+            expect(solver.countSolutions(puzzle)).toBe(1);
+            walkRevealHintsToCompletion(generated);
+        },
+    );
 
-        expect(filledCells).toBeGreaterThanOrEqual(36);
-        expect(filledCells).toBeLessThanOrEqual(45);
-    });
-
-    it.skip("should generate a medium puzzle with 27-35 clues", () => {
-        const { puzzle } = generator.generatePuzzle("medium");
-        const filledCells = puzzle.flat().filter(cell => cell !== 0).length;
-
-        expect(filledCells).toBeGreaterThanOrEqual(27);
-        expect(filledCells).toBeLessThanOrEqual(35);
-    });
-
-    it.skip.each(["easy", "medium", "hard"] as const)("should generate a %s puzzle with unique solution and valid clue count", { timeout: 180000 }, (difficulty) => {
-        const { puzzle } = generator.generatePuzzle(difficulty);
-        const clueCount = puzzle.flat().filter(cell => cell !== 0).length;
-        const ranges = { easy: [36, 45], medium: [27, 35], hard: [22, 26] };
-        const [min, max] = ranges[difficulty];
-
-        expect(clueCount).toBeGreaterThanOrEqual(min);
-        expect(clueCount).toBeLessThanOrEqual(max);
-        expect(solver.countSolutions(puzzle)).toBe(1);
-    });
-
-    it.skip("should generate a valid 9x9 board that satisfies all sudoku rules", () => {
+    it("should generate a valid 9x9 board that satisfies all sudoku rules", () => {
         const board = generator.generateFullBoard();
 
         expect(board).toHaveLength(9);
@@ -137,12 +121,6 @@ describe("SudokuGenerator", () => {
         expect(puzzle).toBe(rateSpy.mock.calls[solvableIndex][0]);
     });
 
-    it.skip.each(["easy", "medium", "hard"] as const)("should keep every generated %s puzzle solvable step by step", { timeout: 180000 }, (difficulty) => {
-        for (let round = 0; round < 2; round++) {
-            walkRevealHintsToCompletion(generator.generatePuzzle(difficulty));
-        }
-    });
-
     it.each(["easy", "medium", "hard"] as const)("should generate the same %s puzzle from the same random numbers", (difficulty) => {
         vi.spyOn(Math, "random").mockImplementation(seededRandom(20261022));
         vi.spyOn(DifficultyRater.prototype, "matches").mockReturnValue(true);
@@ -163,9 +141,5 @@ describe("SudokuGenerator", () => {
         for (const call of countSpy.mock.calls) {
             expect(call).toHaveLength(2);
         }
-    });
-
-    it("should keep a generated medium puzzle solvable one reveal hint at a time", { timeout: 30000 }, () => {
-        walkRevealHintsToCompletion(generator.generatePuzzle("medium"));
     });
 });
