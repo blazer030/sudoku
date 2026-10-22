@@ -53,7 +53,8 @@ describe("board geometry", () => {
         expect(boardTag).toMatch(/class="[^"]*\bmax-w-board-fit\b/);
 
         const utility = /@utility max-w-board-fit \{([^}]*)\}/.exec(readFileSync("src/style/index.css", "utf8"))?.[1] ?? "";
-        expect(utility).toMatch(/max-width: calc\(100dvh - /);
+        // A short but wide window (a phone in landscape, split screen) keeps a usable board and scrolls
+        expect(utility).toMatch(/max-width: max\(17rem, calc\(100dvh - /);
         expect(utility).toContain("safe-area-inset-top");
         expect(utility).toContain("safe-area-inset-bottom");
     });
