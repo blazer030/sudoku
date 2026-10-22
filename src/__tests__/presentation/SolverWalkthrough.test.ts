@@ -183,12 +183,12 @@ describe("SolverWalkthrough", () => {
             }
         });
 
-        it("should lay the board out as flex rows like the game board so cells in a row share one height", () => {
+        it("should lay the board out as nine-column rows like the game board so every cell is the same square", () => {
             const { wrapper } = mountWalkthrough();
 
             for (let row = 0; row < 9; row++) {
                 const rowElement = wrapper.find(`[data-testid='solver-row-${row}']`);
-                expect(rowElement.classes()).toContain("flex");
+                expect(rowElement.classes()).toEqual(expect.arrayContaining(["grid", "grid-cols-9"]));
                 for (let column = 0; column < 9; column++) {
                     expect(rowElement.find(`[data-testid='solver-cell-${row}-${column}']`).exists()).toBe(true);
                 }

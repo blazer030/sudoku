@@ -32,7 +32,7 @@
                         v-for="(row, rowIndex) in puzzleCells"
                         :key="`row-${rowIndex}`"
                         :data-testid="`solver-row-${rowIndex}`"
-                        class="flex"
+                        class="grid grid-cols-9"
                     >
                         <Cell
                             v-for="(puzzleCell, columnIndex) in row"

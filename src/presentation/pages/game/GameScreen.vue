@@ -19,7 +19,7 @@
                     <div
                         v-for="(row, rowIndex) in sudoku.puzzle"
                         :key="rowIndex"
-                        class="flex"
+                        class="grid grid-cols-9"
                     >
                         <Cell
                             v-for="(puzzleCell, columnIndex) in row"
