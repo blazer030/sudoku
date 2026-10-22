@@ -436,7 +436,6 @@ describe("Home", () => {
 
                 expect(wrapper.find("[data-testid='new-game-confirm-dialog']").exists()).toBe(true);
             });
-
         });
 
         it("should show the confirm dialog in Traditional Chinese when the language is zh-Hant", async () => {
@@ -539,7 +538,6 @@ describe("Home", () => {
             expect(useStatisticsStore(pinia).history).toHaveLength(0);
             expect(analytics.logEvent).not.toHaveBeenCalledWith(expect.objectContaining({ name: "game_abandon" }));
         });
-
     });
 
     describe("game_abandon analytics", () => {

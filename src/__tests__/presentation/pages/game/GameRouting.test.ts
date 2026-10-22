@@ -95,6 +95,5 @@ describe("Game Routing", () => {
             expect(history[0].difficulty).toBe("easy");
             expect(useGameStore().savedGame).toBeNull();
         });
-
     });
 });

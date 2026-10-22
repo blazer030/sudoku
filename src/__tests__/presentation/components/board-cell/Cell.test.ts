@@ -132,6 +132,5 @@ describe("Cell", () => {
             expect(wrapper.emitted("longPress")).toHaveLength(1);
             expect(wrapper.emitted("click")).toBeUndefined();
         });
-
     });
 });
