@@ -135,6 +135,21 @@ const CASES = Object.values(STYLES).flatMap(style => style.themes.flatMap(theme 
             contrastPair,
         })))));
 
+// Text levels must stay apart, so notes and secondary text never read as bright as primary text.
+// Paper's night text cannot spread further: muted text must still reach 4.5 on the lamp over a dot.
+const TEXT_HIERARCHY = [
+    { name: "foreground over foreground-secondary", upper: "foreground", lower: "foreground-secondary", minimum: 1.3 },
+    { name: "foreground over foreground-muted", upper: "foreground", lower: "foreground-muted", minimum: 1.4 },
+    { name: "foreground-secondary over foreground-muted", upper: "foreground-secondary", lower: "foreground-muted", minimum: 1.05 },
+] as const;
+
+const HIERARCHY_CASES = Object.values(STYLES).flatMap(style => style.themes.flatMap(theme =>
+    (["light", "dark"] as const).flatMap(mode => TEXT_HIERARCHY.map(level => ({
+        label: `${style.id}/${theme.id}/${mode}: ${level.name} ≥ ${level.minimum}`,
+        palette: theme[mode],
+        level,
+    })))));
+
 describe("palette contrast", () => {
     it("should check every style, theme and mode", () => {
         const expected = STYLE_IDS.flatMap(style => THEME_IDS_BY_STYLE[style].flatMap(theme =>
@@ -150,6 +165,10 @@ describe("palette contrast", () => {
     it("should model the night lamp at its on-screen peak, about 29%", () => {
         // 35% at the glow's centre, 6% above the top edge, fading out by 65% of a 55%-tall ray
         expect(LAMP_PEAK).toBeCloseTo(0.291, 3);
+    });
+
+    it.each(HIERARCHY_CASES)("$label", ({ palette, level }) => {
+        expect(contrastRatio(palette[level.upper], palette[level.lower])).toBeGreaterThanOrEqual(level.minimum);
     });
 
     it.each(CASES)("$label", ({ palette, contrastPair }) => {

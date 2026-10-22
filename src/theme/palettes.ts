@@ -221,7 +221,9 @@ const TACTILE: StyleDefinition = {
 
 // Paper notebook: warm paper by day, a night desk by lamplight. Inks are the theme colours;
 // the continue card is a yellow sticky note. Muted text is darker than the reference so it
-// still reads where it crosses a ruled line.
+// still reads where it crosses a ruled line. At night every text level must reach 4.5 on the
+// lamp over a texture dot, which caps how dark muted text can go, so primary text is brighter
+// to keep the levels apart.
 const PAPER_LIGHT_NEUTRALS: Neutrals<LightThemeColors> = {
     "background": "#F4EDE0",
     "card": "#FBF7EF",
@@ -247,9 +249,9 @@ const PAPER_DARK_NEUTRALS: Neutrals<DarkThemeColors> = {
     "background": "#201D19",
     "card": "#2A2621",
     "border": "#3D372F",
-    "foreground": "#EDE4D3",
-    "foreground-secondary": "#E2D9C8",
-    "foreground-muted": "#DCD2C0",
+    "foreground": "#F9F3E8",
+    "foreground-secondary": "#DED5C5",
+    "foreground-muted": "#D5CCBC",
     "cell-clue": "#3B362E",
     "danger": "#E8846F",
     "danger-hover": "#EE917E",
