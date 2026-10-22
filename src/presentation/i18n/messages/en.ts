@@ -27,6 +27,18 @@ export const en = {
             dark: "Dark",
         },
         colorTheme: "Color theme",
+        style: {
+            label: "Style",
+            names: { minimal: "Minimal Motion" },
+        },
+        colorThemes: {
+            green: "Green",
+            blue: "Blue",
+            purple: "Purple",
+            orange: "Orange",
+            pink: "Pink",
+            teal: "Teal",
+        },
         matchLauncherIcon: "Match launcher icon to theme",
         matchLauncherIconNote: "The icon updates after you leave the app",
         gameplay: "Gameplay",

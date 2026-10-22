@@ -25,6 +25,18 @@ export const zhHant: MessageSchema = {
             dark: "深色",
         },
         colorTheme: "色彩主題",
+        style: {
+            label: "風格",
+            names: { minimal: "極簡動態" },
+        },
+        colorThemes: {
+            green: "綠",
+            blue: "藍",
+            purple: "紫",
+            orange: "橘",
+            pink: "粉紅",
+            teal: "青綠",
+        },
         matchLauncherIcon: "App 圖示配合主題",
         matchLauncherIconNote: "離開 App 後圖示才會更新",
         gameplay: "遊戲",

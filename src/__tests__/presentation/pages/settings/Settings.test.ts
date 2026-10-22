@@ -25,6 +25,8 @@ import { startLocaleSync } from "@/presentation/i18n/localeSync";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { useDonateStore } from "@/stores/donateStore";
 import type { BillingService, Product } from "@/application/billing/BillingService";
+import { startAppearanceSync } from "@/presentation/theme/appearanceSync";
+import { STYLES } from "@/theme/palettes";
 import Settings from "@/presentation/pages/settings/Settings.vue";
 
 const fakeProducts: Product[] = [
@@ -128,6 +130,15 @@ describe("Settings.vue match-launcher-icon toggle", () => {
         await wrapper.find("[data-testid='toggle-matchLauncherIconToTheme']").trigger("click");
 
         expect(useSettingsStore().matchLauncherIconToTheme).toBe(false);
+    });
+
+    it("shows the toggle as an unpressed tile inside the appearance group", () => {
+        vi.mocked(Capacitor.isNativePlatform).mockReturnValue(true);
+        const wrapper = mountSettings();
+
+        const tile = wrapper.get("[data-testid='settings-group-appearance']").get("[data-testid='toggle-matchLauncherIconToTheme']");
+
+        expect(tile.attributes("aria-pressed")).toBe("false");
     });
 
     it("explains that the icon updates after leaving the app", () => {
@@ -246,6 +257,74 @@ describe("Settings.vue groups", () => {
             expect(wrapper.get(`[data-testid='toggle-${key}']`).attributes("aria-pressed")).toBe("false");
         },
     );
+});
+
+describe("Settings.vue appearance group", () => {
+    beforeEach(() => {
+        localStorage.clear();
+        vi.mocked(Capacitor.isNativePlatform).mockReturnValue(false);
+    });
+
+    it("should show the minimal style as the selected style card", async () => {
+        const wrapper = mountSettings();
+        const card = wrapper.get("[data-testid='style-option-minimal']");
+
+        expect(card.attributes("aria-pressed")).toBe("true");
+        expect(card.text()).toContain("Minimal Motion");
+        expect(card.find("[data-testid='style-thumbnail']").exists()).toBe(true);
+
+        i18n.global.locale.value = "zh-Hant";
+        await nextTick();
+
+        expect(wrapper.get("[data-testid='style-option-minimal']").text()).toContain("極簡動態");
+    });
+
+    it("should apply a style through the store", async () => {
+        setActivePinia(createPinia());
+        const setStyle = vi.spyOn(useSettingsStore(), "setStyle");
+        const router = createRouter({ history: createMemoryHistory(), routes: [{ path: "/", component: Settings }] });
+        const wrapper = mount(Settings, { global: { plugins: [router] } });
+
+        await wrapper.get("[data-testid='style-option-minimal']").trigger("click");
+
+        expect(setStyle).toHaveBeenCalledWith("minimal");
+    });
+
+    it("should list the current style's themes with names and state", () => {
+        const wrapper = mountSettings();
+
+        expect(wrapper.findAll("button[data-testid^='color-theme-']")).toHaveLength(STYLES.minimal.themes.length);
+        const blue = wrapper.get("[data-testid='color-theme-blue']");
+        expect(blue.attributes("aria-label")).toBe("Blue");
+        expect(blue.attributes("aria-pressed")).toBe("false");
+        expect(wrapper.get("[data-testid='color-theme-green']").attributes("aria-pressed")).toBe("true");
+    });
+
+    it("should switch light and dark live", async () => {
+        const wrapper = mountSettings();
+        const stopAppearanceSync = startAppearanceSync(
+            storeToRefs(useSettingsStore()),
+            { apply: vi.fn().mockResolvedValue(undefined) },
+            { setAppearance: vi.fn().mockResolvedValue(undefined), setSystemBarColors: vi.fn().mockResolvedValue(undefined) },
+        );
+        try {
+            await wrapper.get("[data-testid='appearance-dark']").trigger("click");
+            expect(document.documentElement.classList.contains("dark")).toBe(true);
+
+            await wrapper.get("[data-testid='appearance-light']").trigger("click");
+            expect(document.documentElement.classList.contains("dark")).toBe(false);
+        } finally {
+            stopAppearanceSync();
+            document.documentElement.className = "";
+        }
+    });
+
+    it("should keep a single appearance control inside the appearance group", () => {
+        const wrapper = mountSettings();
+
+        expect(wrapper.findAll("[data-testid='appearance-switcher']")).toHaveLength(1);
+        expect(wrapper.get("[data-testid='settings-group-appearance']").find("[data-testid='appearance-switcher']").exists()).toBe(true);
+    });
 });
 
 describe("Settings.vue color mode switcher", () => {

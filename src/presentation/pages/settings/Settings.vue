@@ -42,44 +42,54 @@
             :icon="Palette"
             :title="t('settings.appearance')"
         >
-            <span class="text-foreground text-[15px] font-medium">{{ t("settings.colorMode.label") }}</span>
-            <SegmentedControl
-                :model-value="settingsStore.appearance"
-                :options="appearanceOptions"
-                class="mt-3"
-                data-testid="appearance-switcher"
-                test-id-prefix="appearance"
-                @update:model-value="settingsStore.setAppearance"
-            />
+            <span class="text-foreground text-[15px] font-medium">{{ t("settings.style.label") }}</span>
+            <div class="grid grid-cols-3 gap-2 mt-3">
+                <button
+                    v-for="styleId in STYLE_IDS"
+                    :key="styleId"
+                    v-press
+                    :aria-pressed="styleId === settingsStore.style"
+                    :class="styleId === settingsStore.style ? 'border-primary' : 'border-border'"
+                    :data-testid="`style-option-${styleId}`"
+                    class="flex flex-col items-center gap-1.5 p-1.5 rounded-xl border-2 bg-card cursor-pointer"
+                    type="button"
+                    @click="settingsStore.setStyle(styleId)"
+                >
+                    <!-- Thumbnails stand for the style, not the current mode, so they always use the light palette -->
+                    <StyleThumbnail :palette="getPalette(styleId, rememberedThemeFor(styleId, settingsStore.colorThemeByStyle), 'light')" />
+                    <span class="text-foreground text-xs font-medium text-center">{{ t(`settings.style.names.${styleId}`) }}</span>
+                </button>
+            </div>
+
             <span class="text-foreground text-[15px] font-medium mt-5">{{ t("settings.colorTheme") }}</span>
             <div class="grid grid-cols-6 gap-3 mt-3 justify-items-center">
                 <button
-                    v-for="color in THEMES"
-                    :key="color.id"
-                    class="relative aspect-square w-full max-w-15 rounded-full cursor-pointer transition-all duration-200 overflow-hidden"
-                    :class="[
-                        color.id === settingsStore.colorTheme
-                            ? 'ring-2 ring-offset-2 ring-primary scale-110'
-                            : 'hover:scale-105',
-                    ]"
-                    :data-testid="`color-theme-${color.id}`"
-                    @click="settingsStore.setColorTheme(color.id)"
+                    v-for="swatch in swatches"
+                    :key="swatch.id"
+                    v-press
+                    :aria-label="t(`settings.colorThemes.${swatch.id}`)"
+                    :aria-pressed="swatch.id === settingsStore.colorTheme"
+                    :class="swatch.id === settingsStore.colorTheme ? 'ring-2 ring-offset-2 ring-offset-card ring-primary' : ''"
+                    :data-testid="`color-theme-${swatch.id}`"
+                    class="relative aspect-square w-full max-w-15 rounded-full cursor-pointer overflow-hidden"
+                    type="button"
+                    @click="settingsStore.setColorTheme(swatch.id)"
                 >
                     <div class="absolute inset-0 flex">
                         <div
+                            :style="{ backgroundColor: swatch.palette.primary }"
                             class="w-1/2 h-full"
-                            :style="{ backgroundColor: color.primary }"
                         />
                         <div
+                            :style="{ backgroundColor: swatch.palette.accent }"
                             class="w-1/2 h-full"
-                            :style="{ backgroundColor: color.accent }"
                         />
                     </div>
                     <div
-                        v-if="color.id === settingsStore.colorTheme"
-                        data-testid="color-theme-check"
+                        v-if="swatch.id === settingsStore.colorTheme"
+                        :style="{ color: swatch.palette['on-primary'] }"
                         class="absolute inset-0 flex items-center justify-center"
-                        :style="{ color: color.onPrimary }"
+                        data-testid="color-theme-check"
                     >
                         <Check
                             :size="18"
@@ -89,26 +99,27 @@
                 </button>
             </div>
 
-            <button
+            <span class="text-foreground text-[15px] font-medium mt-5">{{ t("settings.colorMode.label") }}</span>
+            <SegmentedControl
+                :model-value="settingsStore.appearance"
+                :options="appearanceOptions"
+                class="mt-3"
+                data-testid="appearance-switcher"
+                test-id-prefix="appearance"
+                @update:model-value="settingsStore.setAppearance"
+            />
+
+            <OptionTile
                 v-if="platform.isNative"
-                class="flex items-center justify-between pt-4 mt-4 border-t border-border cursor-pointer w-full"
+                :description="t('settings.matchLauncherIconNote')"
+                :icon="Smartphone"
+                :label="t('settings.matchLauncherIcon')"
+                :pressed="settingsStore.matchLauncherIconToTheme"
+                class="mt-5"
                 data-testid="toggle-matchLauncherIconToTheme"
-                @click="onToggleMatchIcon"
-            >
-                <div class="flex flex-col gap-0.5">
-                    <span class="text-foreground text-[15px] font-medium text-left">{{ t("settings.matchLauncherIcon") }}</span>
-                    <span class="text-foreground-muted text-[13px] text-left">{{ t("settings.matchLauncherIconNote") }}</span>
-                </div>
-                <div
-                    class="relative w-11 h-6 rounded-full transition-colors duration-200 shrink-0 ml-4"
-                    :class="settingsStore.matchLauncherIconToTheme ? 'bg-primary' : 'bg-foreground-muted'"
-                >
-                    <div
-                        class="absolute top-0.5 w-5 h-5 bg-card rounded-full shadow-card-sm transition-transform duration-200"
-                        :class="settingsStore.matchLauncherIconToTheme ? 'translate-x-5.5' : 'translate-x-0.5'"
-                    />
-                </div>
-            </button>
+                wide
+                @toggle="onToggleMatchIcon"
+            />
         </SettingsGroup>
 
         <SettingsGroup
@@ -174,17 +185,19 @@
 import { computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
-import { ChevronLeft, ChevronRight, Check, Crosshair, Eraser, Gamepad2, Hash, Highlighter, Info, Languages, Palette, Sparkles } from "lucide-vue-next";
+import { ChevronLeft, ChevronRight, Check, Crosshair, Eraser, Gamepad2, Hash, Highlighter, Info, Languages, Palette, Smartphone, Sparkles } from "lucide-vue-next";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { useDonateStore } from "@/stores/donateStore";
 import { usePlatform } from "@/presentation/composables/usePlatform";
 import { appVersion } from "@/utils/appVersion";
 import { ROUTER_PATH } from "@/router";
-import type { Appearance, LanguagePreference } from "@/application/SettingsStorage";
-import { THEMES } from "@/theme/themeConfig";
+import { STYLE_IDS, type Appearance, type LanguagePreference } from "@/application/SettingsStorage";
+import { STYLES, getPalette, rememberedThemeFor } from "@/theme/palettes";
+import { vPress } from "@/presentation/directives/press";
 import SegmentedControl from "@/presentation/components/segmented-control/SegmentedControl.vue";
 import OptionTile from "@/presentation/components/option-tile/OptionTile.vue";
 import SettingsGroup from "@/presentation/pages/settings/components/SettingsGroup.vue";
+import StyleThumbnail from "@/presentation/pages/settings/components/StyleThumbnail.vue";
 
 const { t } = useI18n();
 const router = useRouter();
@@ -204,12 +217,17 @@ const languageOptions = computed((): { value: LanguagePreference; label: string 
     { value: "zh-Hant", label: t("settings.language.traditionalChinese") },
 ]);
 
-// Temporary until the stage 3 settings redesign
 const appearanceOptions = computed((): { value: Appearance; label: string }[] => [
     { value: "system", label: t("settings.colorMode.system") },
     { value: "light", label: t("settings.colorMode.light") },
     { value: "dark", label: t("settings.colorMode.dark") },
 ]);
+
+// The current style's own themes; swatches show their light colours in every mode
+const swatches = computed(() => STYLES[settingsStore.style].themes.map(theme => ({
+    id: theme.id,
+    palette: getPalette(settingsStore.style, theme.id, "light"),
+})));
 
 const toggles = computed(() => [
     {
