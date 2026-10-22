@@ -1,5 +1,6 @@
 import { computed, ref, type Ref } from "vue";
 import { BOARD_SIZE } from "@/domain/board/constants";
+import { ConflictDetector } from "@/domain/game/ConflictDetector";
 
 interface CellPosition {
     row: number;
@@ -12,25 +13,9 @@ export const useWalkthroughInput = (userValues: Ref<number[][]>, boardEditable: 
     const selectedDigit = ref<number | null>(null);
     const eraseMode = ref(false);
 
-    const conflictsWithPeers = (row: number, column: number, digit: number): boolean => {
-        for (let otherColumn = 0; otherColumn < BOARD_SIZE; otherColumn++) {
-            if (otherColumn === column) continue;
-            if (userValues.value[row][otherColumn] === digit) return true;
-        }
-        for (let otherRow = 0; otherRow < BOARD_SIZE; otherRow++) {
-            if (otherRow === row) continue;
-            if (userValues.value[otherRow][column] === digit) return true;
-        }
-        const boxStartRow = Math.floor(row / 3) * 3;
-        const boxStartColumn = Math.floor(column / 3) * 3;
-        for (let boxRow = boxStartRow; boxRow < boxStartRow + 3; boxRow++) {
-            for (let boxColumn = boxStartColumn; boxColumn < boxStartColumn + 3; boxColumn++) {
-                if (boxRow === row && boxColumn === column) continue;
-                if (userValues.value[boxRow][boxColumn] === digit) return true;
-            }
-        }
-        return false;
-    };
+    const conflictDetector = new ConflictDetector();
+    const conflictsWithPeers = (row: number, column: number, digit: number): boolean =>
+        conflictDetector.findConflicts(userValues.value, row, column, digit).length > 0;
 
     const eraseDisabledForSelectedCell = computed((): boolean => {
         if (selectedCell.value === null) return false;
