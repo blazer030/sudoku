@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <color name="ic_launcher_green_background">#7AC192</color>
-    <color name="ic_launcher_blue_background">#85B5EE</color>
-    <color name="ic_launcher_purple_background">#C1A5EE</color>
-    <color name="ic_launcher_orange_background">#E1A66C</color>
-    <color name="ic_launcher_pink_background">#ED9AB1</color>
-    <color name="ic_launcher_teal_background">#75BEBE</color>
-</resources>

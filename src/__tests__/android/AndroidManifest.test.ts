@@ -1,4 +1,5 @@
 import { readFileSync } from "fs";
+import { LAUNCHER_ICONS } from "@/theme/launcherIcon";
 
 // The layout is designed for portrait only: in landscape the board and the digit row
 // cannot both fit above the navigation bar.
@@ -17,7 +18,7 @@ describe("Android manifest", () => {
         // An activity-alias has no orientation of its own; it opens its target activity
         const aliases = readFileSync(MANIFEST_PATH, "utf8").match(/<activity-alias\b[^>]*>/g) ?? [];
 
-        expect(aliases).toHaveLength(6);
+        expect(aliases).toHaveLength(LAUNCHER_ICONS.length);
         for (const alias of aliases) {
             expect(alias).toContain('android:targetActivity=".MainActivity"');
         }

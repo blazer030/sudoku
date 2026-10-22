@@ -2,6 +2,7 @@
 // public/sudoku-<theme>.svg and every launcher and PWA icon are rendered from this.
 import { getPalette, STYLES } from "../src/theme/palettes";
 import type { ColorMode } from "../src/application/SettingsStorage";
+import { LAUNCHER_ICONS } from "../src/theme/launcherIcon";
 
 export interface IconTheme {
     id: string;
@@ -20,8 +21,14 @@ const iconThemesIn = (mode: ColorMode): IconTheme[] => STYLES[ICON_STYLE].themes
 
 export const ICON_THEMES: IconTheme[] = iconThemesIn("light");
 
-// Android's -night launcher resources: the dark palette's lighter primary with dark tiles
+// The dark palette's lighter primary with dark tiles
 export const DARK_ICON_THEMES: IconTheme[] = iconThemesIn("dark");
+
+/** Every style's theme in light and dark, each in its own palette's primary and on-primary. */
+export const ICON_VARIANTS: IconTheme[] = LAUNCHER_ICONS.map(({ key, style, themeId, mode }) => {
+    const palette = getPalette(style, themeId, mode);
+    return { id: key, primary: palette.primary, onPrimary: palette["on-primary"], background: palette.background };
+});
 
 const TILE_ORIGINS = [48, 100, 152];
 const TILE_SIZE = 40;
