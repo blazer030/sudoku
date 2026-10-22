@@ -164,6 +164,7 @@
                     <button
                         v-if="filteredRecentGames.length > visibleCount"
                         v-press
+                        data-skin="button"
                         class="w-full h-11 bg-card rounded-xl shadow-card-sm text-primary text-sm font-semibold cursor-pointer"
                         data-testid="show-more-button"
                         @click="showMore"
@@ -192,6 +193,7 @@
             <span class="text-sm text-foreground-secondary text-center">{{ t("statistics.empty.description") }}</span>
             <button
                 v-press
+                data-skin="button"
                 class="h-12 px-6 mt-2 bg-primary text-on-primary rounded-xl shadow-primary font-semibold cursor-pointer"
                 data-testid="start-first-game-button"
                 @click="goHome"

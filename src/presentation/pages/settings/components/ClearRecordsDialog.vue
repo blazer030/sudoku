@@ -25,6 +25,7 @@
                 <div class="flex flex-col gap-3 w-full">
                     <button
                         v-press
+                        data-skin="button"
                         class="w-full h-[52px] rounded-button bg-danger flex items-center justify-center gap-2 shadow-danger cursor-pointer transition-all duration-200 hover:bg-danger-hover hover:shadow-primary-lg"
                         data-testid="clear-records-confirm-button"
                         @click="close('confirm')"

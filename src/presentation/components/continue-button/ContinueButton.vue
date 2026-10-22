@@ -2,6 +2,7 @@
     <button
         v-if="savedGame !== null"
         v-press
+        data-skin="button continue"
         class="flex flex-col items-start gap-2.5 w-full bg-featured text-on-featured rounded-2xl shadow-primary px-5 py-4 cursor-pointer"
         data-testid="continue-button"
         type="button"

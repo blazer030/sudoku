@@ -7,6 +7,7 @@
     >
         <span
             v-press
+            data-skin="control"
             :class="pressed
                 ? 'bg-primary text-on-primary shadow-primary-active'
                 : 'bg-card text-foreground shadow-card-sm hover:bg-foreground/5'"

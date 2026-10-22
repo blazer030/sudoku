@@ -62,6 +62,7 @@
                 <div class="flex flex-col gap-2.5 w-full">
                     <button
                         v-press
+                        data-skin="button"
                         class="w-full h-[52px] rounded-button bg-primary text-on-primary flex items-center justify-center gap-2 shadow-primary cursor-pointer transition-all duration-200 hover:bg-primary-hover hover:shadow-primary-lg"
                         data-testid="play-again-button"
                         @click="close('playAgain')"
@@ -71,6 +72,7 @@
                     </button>
                     <button
                         v-press
+                        data-skin="button"
                         class="w-full h-[52px] rounded-button bg-card border border-border text-foreground flex items-center justify-center gap-2 cursor-pointer transition-all duration-200 hover:bg-foreground/5"
                         data-testid="review-game-button"
                         @click="close('review')"

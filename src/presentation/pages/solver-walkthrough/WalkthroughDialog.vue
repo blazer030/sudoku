@@ -41,6 +41,7 @@
                 <div class="flex flex-col gap-3 w-full">
                     <button
                         v-press
+                        data-skin="button"
                         :class="content.confirmTone === 'danger'
                             ? 'bg-danger text-on-danger shadow-danger hover:bg-danger-hover'
                             : 'bg-primary text-on-primary shadow-primary hover:bg-primary-hover'"

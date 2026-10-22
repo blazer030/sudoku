@@ -8,6 +8,7 @@
             >
                 <button
                     v-press:bounce
+                    data-skin="key"
                     :aria-label="digitLabel(digit)"
                     :aria-pressed="selectedDigit === digit"
                     :class="[digitButtonClasses(digit), digitSizeClasses]"
@@ -38,6 +39,7 @@
             >
                 <button
                     v-press:bounce
+                    data-skin="key"
                     :aria-label="digitLabel(digit)"
                     :aria-pressed="selectedDigit === digit"
                     :class="[digitButtonClasses(digit), digitSizeClasses]"
@@ -61,6 +63,7 @@
             </div>
             <button
                 v-press:bounce
+                data-skin="key"
                 :aria-label="t('game.controls.erase')"
                 :aria-pressed="eraseActive"
                 :class="eraseButtonClasses"

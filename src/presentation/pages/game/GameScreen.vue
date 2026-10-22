@@ -12,6 +12,8 @@
             <div
                 :class="hintMode.active.value ? 'ring-2 ring-primary/50' : 'ring-0 ring-transparent'"
                 class="bg-card rounded-2xl shadow-card-lg p-2 w-full transition-shadow duration-300"
+                data-skin="board"
+                data-testid="game-board"
             >
                 <div class="relative flex flex-col border-3 border-foreground/20 rounded-xl">
                     <div

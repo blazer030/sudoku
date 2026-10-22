@@ -34,6 +34,7 @@
             <div class="flex gap-2.5 pt-1">
                 <button
                     v-press
+                    data-skin="button"
                     class="hint-secondary"
                     data-testid="hint-close"
                     @click="emit('close')"
@@ -42,6 +43,7 @@
                 </button>
                 <button
                     v-press
+                    data-skin="button"
                     class="hint-primary"
                     data-testid="hint-clear"
                     @click="emit('clear')"
@@ -82,6 +84,7 @@
             <div class="flex gap-2.5">
                 <button
                     v-press
+                    data-skin="button"
                     class="hint-secondary"
                     data-testid="hint-close"
                     @click="emit('close')"
@@ -90,6 +93,7 @@
                 </button>
                 <button
                     v-press
+                    data-skin="button"
                     class="hint-primary"
                     data-testid="hint-primary"
                     @click="isLastStep ? emit('fill') : emit('next')"

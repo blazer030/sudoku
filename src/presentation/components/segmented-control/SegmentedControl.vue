@@ -1,5 +1,6 @@
 <template>
     <div
+        data-skin="segmented"
         :class="inset ? 'bg-background' : 'bg-card shadow-card'"
         class="relative isolate flex h-12 w-full rounded-button px-1"
     >
@@ -11,6 +12,7 @@
                 transform: `translateX(${selectedIndex * 100}%)`,
             }"
             class="absolute top-1 bottom-1 left-1 rounded-icon bg-primary shadow-primary-sm"
+            data-skin="segmented-indicator"
             data-testid="segmented-indicator"
         />
         <button

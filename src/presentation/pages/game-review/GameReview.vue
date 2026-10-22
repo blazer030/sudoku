@@ -57,6 +57,7 @@
         </div>
 
         <div
+            data-skin="board"
             class="bg-card rounded-2xl shadow-card-lg p-2 w-full pointer-events-none"
             data-testid="review-board"
         >

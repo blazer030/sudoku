@@ -35,6 +35,7 @@
                 <div class="flex flex-col gap-2 w-full">
                     <button
                         v-press
+                        data-skin="button"
                         class="w-full h-[52px] rounded-button bg-primary text-on-primary flex items-center justify-center gap-2 shadow-primary cursor-pointer transition-all duration-200 hover:bg-primary-hover hover:shadow-primary-lg"
                         data-testid="new-game-continue-button"
                         @click="close('continue')"

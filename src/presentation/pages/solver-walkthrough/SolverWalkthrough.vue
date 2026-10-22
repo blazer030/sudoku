@@ -22,6 +22,7 @@
         <div class="flex-1" />
         <div class="flex flex-col items-center gap-6">
             <div
+                data-skin="board"
                 :class="boardEditable ? '' : 'pointer-events-none'"
                 class="bg-card rounded-2xl shadow-card-lg p-2 w-full"
                 data-testid="walkthrough-board"
@@ -88,6 +89,7 @@
                         </button>
                         <button
                             v-press
+                            data-skin="button"
                             class="flex-1 h-12 bg-primary text-on-primary rounded-2xl font-semibold cursor-pointer shadow-primary transition-all duration-200 hover:bg-primary-hover hover:shadow-primary-lg"
                             data-testid="solve-button"
                             @click="runSolver"
@@ -122,6 +124,7 @@
                             </div>
                             <button
                                 v-press
+                                data-skin="button"
                                 class="w-full h-12 shrink-0 flex items-center justify-center gap-2 rounded-2xl bg-primary text-on-primary font-semibold cursor-pointer shadow-primary transition-all duration-200 hover:bg-primary-hover"
                                 data-testid="walkthrough-enter-own"
                                 @click="enterOwnPuzzle"
@@ -138,6 +141,7 @@
                                         v-for="sample in SAMPLE_PUZZLES"
                                         :key="sample.id"
                                         v-press
+                                        data-skin="button"
                                         :data-testid="`load-sample-${sample.id}`"
                                         class="h-11 rounded-xl bg-primary-light text-primary font-semibold cursor-pointer transition-all duration-200"
                                         @click="loadSample(sample.puzzle)"

@@ -1,5 +1,8 @@
 <template>
-    <div class="flex flex-col gap-5 h-full px-5 pb-6 bg-background overflow-y-auto">
+    <div
+        class="flex flex-col gap-5 h-full px-5 pb-6 bg-background overflow-y-auto"
+        data-skin="page-ruled"
+    >
         <div class="flex items-center justify-between sticky top-0 bg-background pt-6 pb-3 z-10">
             <button
                 class="flex items-center gap-2 cursor-pointer"
@@ -48,6 +51,7 @@
                     v-for="styleId in STYLE_IDS"
                     :key="styleId"
                     v-press
+                    data-skin="tile"
                     :aria-pressed="styleId === settingsStore.style"
                     :class="styleId === settingsStore.style ? 'border-primary' : 'border-border'"
                     :data-testid="`style-option-${styleId}`"

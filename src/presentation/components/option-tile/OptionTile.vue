@@ -1,6 +1,7 @@
 <template>
     <button
         v-press
+        data-skin="tile"
         :aria-pressed="pressed"
         :class="[
             pressed ? 'bg-primary border-primary text-on-primary' : 'bg-card border-border text-foreground',
@@ -25,6 +26,7 @@
         </span>
         <!-- The state is shown by this mark as well as by colour: a check in a filled circle, or an empty ring -->
         <span
+            data-skin="check"
             :class="[
                 pressed ? 'bg-on-primary text-primary' : 'border-2 border-border',
                 wide ? '' : 'absolute top-3 right-3',

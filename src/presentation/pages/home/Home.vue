@@ -1,5 +1,8 @@
 <template>
-    <div class="flex flex-col min-h-full items-center pt-20 pb-15 px-6">
+    <div
+        class="flex flex-col min-h-full items-center pt-20 pb-15 px-6"
+        data-skin="page-ruled"
+    >
         <div class="flex flex-col items-center gap-2">
             <div
                 class="w-20 h-20 bg-primary rounded-popup flex items-center justify-center shadow-primary-lg"
@@ -16,7 +19,10 @@
                     <div class="rounded-sm bg-on-primary/40" />
                 </div>
             </div>
-            <h1 class="text-foreground text-4xl font-bold tracking-[-1px]">
+            <h1
+                class="text-foreground text-4xl font-bold tracking-[-1px]"
+                data-skin="title"
+            >
                 {{ t("home.title") }}
             </h1>
             <p class="text-foreground-secondary text-sm">
@@ -38,6 +44,7 @@
                 <!-- The main action without a save; secondary to Continue while one exists -->
                 <button
                     v-press
+                    data-skin="button new-game"
                     :class="gameStore.savedGame === null
                         ? 'bg-primary text-on-primary shadow-primary'
                         : 'bg-primary-light text-primary'"
@@ -63,6 +70,7 @@
                 v-for="entry in entries"
                 :key="entry.id"
                 v-press
+                data-skin="tile"
                 :data-testid="`${entry.id}-button`"
                 class="flex flex-col items-center gap-1 min-h-22 bg-card rounded-2xl shadow-card px-2 py-3 cursor-pointer"
                 type="button"
