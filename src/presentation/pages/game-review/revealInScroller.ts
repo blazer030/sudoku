@@ -1,8 +1,8 @@
 import { prefersReducedMotion } from "@/presentation/composables/prefersReducedMotion";
 
-// How far a target must stay clear of the visible edges: a board cell's 3px border and 8px
-// padding, plus a pixel, so a bottom-row cell shows with the board's frame below it
-const EDGE_CLEARANCE = 12;
+// How far a target must stay clear of the visible edges: past a board cell's 3px border and 8px
+// padding, so a bottom-row cell shows with the board's frame and a little room below it
+const EDGE_CLEARANCE = 16;
 
 /**
  * Scrolls `scroller` by the least amount that shows all of `target`, clear of the edges, between
