@@ -15,4 +15,10 @@ describe("GameToast", () => {
 
         expect(wrapper.get("[data-testid='game-toast']").classes()).toContain("text-balance");
     });
+
+    it("should let taps through to the keys and panel underneath", () => {
+        const wrapper = mount(GameToast, { props: { content: { kind: "longPressTip" } } });
+
+        expect(wrapper.get("[data-testid='game-toast']").classes()).toContain("pointer-events-none");
+    });
 });
