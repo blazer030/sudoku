@@ -22,107 +22,122 @@
         <div class="flex-1" />
         <div class="flex flex-col items-center gap-6">
             <div
-                :class="[
-                    'bg-card rounded-2xl shadow-card-lg p-2 w-full',
-                    solveResult !== null ? 'pointer-events-none' : '',
-                ]"
+                :class="inPlayback ? 'pointer-events-none' : ''"
+                class="bg-card rounded-2xl shadow-card-lg p-2 w-full"
+                data-testid="walkthrough-board"
             >
-                <div class="flex flex-col border-3 border-foreground/20 rounded-xl">
-                    <div class="relative flex flex-col">
-                        <div
-                            v-for="rowIndex in BOARD_SIZE"
-                            :key="`row-${rowIndex - 1}`"
-                            :data-testid="`solver-row-${rowIndex - 1}`"
-                            class="flex"
-                        >
-                            <BoardCell
-                                v-for="columnIndex in BOARD_SIZE"
-                                :key="`cell-${rowIndex - 1}-${columnIndex - 1}`"
-                                :column="columnIndex - 1"
-                                :data-testid="`solver-cell-${rowIndex - 1}-${columnIndex - 1}`"
-                                :eliminated-digits="eliminatedDigitsAt(rowIndex - 1, columnIndex - 1)"
-                                :notes="preStepState.candidatesOf(rowIndex - 1, columnIndex - 1)"
-                                :row="rowIndex - 1"
-                                :value="displayState.valueAt(rowIndex - 1, columnIndex - 1)"
-                                :variant="cellVariant(rowIndex - 1, columnIndex - 1)"
-                                class="cursor-pointer"
-                                @click="selectCell(rowIndex - 1, columnIndex - 1)"
-                            />
-                        </div>
-                        <ChainOverlay :chain-links="currentStepChainLinks" />
+                <div class="relative flex flex-col border-3 border-foreground/20 rounded-xl">
+                    <div
+                        v-for="(row, rowIndex) in puzzleCells"
+                        :key="`row-${rowIndex}`"
+                        :data-testid="`solver-row-${rowIndex}`"
+                        class="flex"
+                    >
+                        <Cell
+                            v-for="(puzzleCell, columnIndex) in row"
+                            :key="`cell-${rowIndex}-${columnIndex}`"
+                            :column="columnIndex"
+                            :data-testid="`solver-cell-${rowIndex}-${columnIndex}`"
+                            :hint="cellViews?.[rowIndex][columnIndex] ?? null"
+                            :interactive="!inPlayback"
+                            :puzzle-cell="puzzleCell"
+                            :row="rowIndex"
+                            :selected="!inPlayback && isSelectedCell(rowIndex, columnIndex)"
+                            :selected-digit="inPlayback ? null : selectedDigit"
+                            @click="selectCell(rowIndex, columnIndex)"
+                        />
                     </div>
+                    <StepLinkOverlay
+                        v-if="inPlayback"
+                        :links="links"
+                    />
                 </div>
             </div>
-            <DigitPad
-                v-if="solveResult === null"
-                :digit-counts="emptyDigitCounts"
-                :disabled-digits="invalidDigitsForSelectedCell"
-                :erase-active="eraseMode"
-                :erase-disabled="eraseDisabledForSelectedCell"
-                :selected-digit="selectedDigit"
-                :show-remaining-count="false"
-                @select-digit="pickDigit"
-                @toggle-erase-mode="toggleEraseMode"
-            />
+
+            <!-- The playback panel covers the inputs in place, so the board never moves. -->
             <div
-                v-if="solveResult === null"
-                class="flex gap-3"
-            >
-                <button
-                    class="px-6 py-3 bg-danger text-on-danger rounded-2xl font-semibold cursor-pointer shadow-danger transition-all duration-200 hover:bg-danger-hover hover:shadow-primary-lg"
-                    data-testid="reset-button"
-                    @click="resetBoard"
-                >
-                    {{ t("walkthrough.reset") }}
-                </button>
-                <button
-                    class="px-6 py-3 bg-primary text-on-primary rounded-2xl font-semibold cursor-pointer shadow-primary transition-all duration-200 hover:bg-primary-hover hover:shadow-primary-lg"
-                    data-testid="solve-button"
-                    @click="runSolver"
-                >
-                    {{ t("walkthrough.solve") }}
-                </button>
-            </div>
-            <div
-                v-if="solveResult === null && testButtonsEnabled"
-                class="flex gap-2"
-            >
-                <button
-                    v-for="preset in TEST_PUZZLE_PRESETS"
-                    :key="preset.label"
-                    :data-testid="`load-preset-${preset.label.toLowerCase()}`"
-                    class="px-3 py-1.5 bg-card border border-border rounded-lg text-xs text-foreground-muted cursor-pointer hover:bg-foreground/5"
-                    @click="loadPreset(preset.puzzle)"
-                >
-                    {{ preset.label }}
-                </button>
-            </div>
-            <div
-                v-if="solveResult !== null"
-                class="flex flex-col items-center gap-3 w-full"
+                ref="inputArea"
+                class="relative w-full"
             >
                 <div
-                    class="bg-card rounded-lg py-2.5 px-4 shadow-card-sm min-h-9 flex items-center w-full"
-                    data-testid="step-description"
+                    :class="inPlayback ? 'opacity-0 pointer-events-none' : 'opacity-100 delay-100'"
+                    :inert="inPlayback || undefined"
+                    class="flex flex-col items-center gap-6 transition-opacity duration-200"
+                    data-testid="walkthrough-inputs"
                 >
-                    <span class="text-sm text-foreground-muted">{{ stepDescription }}</span>
+                    <DigitPad
+                        :digit-counts="emptyDigitCounts"
+                        :disabled-digits="invalidDigitsForSelectedCell"
+                        :erase-active="eraseMode"
+                        :erase-disabled="eraseDisabledForSelectedCell"
+                        :selected-digit="selectedDigit"
+                        :show-remaining-count="false"
+                        @select-digit="pickDigit"
+                        @toggle-erase-mode="toggleEraseMode"
+                    />
+                    <div class="flex gap-3">
+                        <button
+                            class="px-6 py-3 bg-danger text-on-danger rounded-2xl font-semibold cursor-pointer shadow-danger transition-all duration-200 hover:bg-danger-hover hover:shadow-primary-lg"
+                            data-testid="reset-button"
+                            @click="resetBoard"
+                        >
+                            {{ t("walkthrough.reset") }}
+                        </button>
+                        <button
+                            class="px-6 py-3 bg-primary text-on-primary rounded-2xl font-semibold cursor-pointer shadow-primary transition-all duration-200 hover:bg-primary-hover hover:shadow-primary-lg"
+                            data-testid="solve-button"
+                            @click="runSolver"
+                        >
+                            {{ t("walkthrough.solve") }}
+                        </button>
+                    </div>
+                    <div
+                        v-if="testButtonsEnabled"
+                        class="flex gap-2"
+                    >
+                        <button
+                            v-for="preset in TEST_PUZZLE_PRESETS"
+                            :key="preset.label"
+                            :data-testid="`load-preset-${preset.label.toLowerCase()}`"
+                            class="px-3 py-1.5 bg-card border border-border rounded-lg text-xs text-foreground-muted cursor-pointer hover:bg-foreground/5"
+                            @click="loadPreset(preset.puzzle)"
+                        >
+                            {{ preset.label }}
+                        </button>
+                    </div>
                 </div>
-                <ProgressBar
-                    :current-step="currentStep"
-                    :play-state="playState"
-                    :total-steps="totalSteps"
-                    @seek="goToStep"
-                />
-                <PlaybackControls
-                    :can-go-next="currentStep < totalSteps"
-                    :can-go-prev="currentStep > 0"
-                    :is-playing="isPlaying"
-                    @first="jumpToFirst"
-                    @last="jumpToLast"
-                    @next="advanceStep"
-                    @prev="reverseStep"
-                    @toggle-play="togglePlay"
-                />
+
+                <Transition name="walkthrough-overlay">
+                    <div
+                        v-if="inPlayback"
+                        class="absolute top-0 inset-x-0 z-10"
+                    >
+                        <StepPlaybackPanel
+                            :label="t('home.walkthrough')"
+                            :max-height="roomBelowInputArea"
+                            :play-state="playState"
+                            :step-index="stepIndex"
+                            :total-steps="stepCount"
+                            test-id-prefix="walkthrough"
+                            @go-to="goTo"
+                            @next="next"
+                            @previous="previous"
+                            @toggle-play="togglePlay"
+                        >
+                            <template #tag>
+                                <StepTag
+                                    v-if="currentStep"
+                                    :icon="currentStep.step.assignments.length > 0 ? PencilLine : ListFilter"
+                                    :label="techniqueLabel(currentStep.step.technique)"
+                                    :step-key="stepIndex"
+                                    :strong="currentStep.step.assignments.length > 0"
+                                    test-id="walkthrough-technique"
+                                />
+                            </template>
+                            {{ explanation }}
+                        </StepPlaybackPanel>
+                    </div>
+                </Transition>
             </div>
         </div>
         <div class="flex-1" />
@@ -130,22 +145,23 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from "vue";
+import { computed, ref, useTemplateRef, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
-import { ChevronLeft } from "lucide-vue-next";
-import PlaybackControls from "@/presentation/components/playback/PlaybackControls.vue";
+import { ChevronLeft, ListFilter, PencilLine } from "lucide-vue-next";
 import { ROUTER_PATH } from "@/router";
 import { BOARD_SIZE } from "@/domain/board/constants";
-import { BoardState } from "@/domain/solver/BoardState";
-import { type SolveResult, TechniqueSolver } from "@/domain/solver/TechniqueSolver";
+import { buildSolvePath } from "@/domain/solver/SolvePath";
 import { useTechniqueLabel } from "@/presentation/labels/techniqueLabels";
+import Cell from "@/presentation/pages/game/components/Cell.vue";
 import DigitPad from "@/presentation/pages/game/components/DigitPad.vue";
-import BoardCell, { type CellVariant } from "@/presentation/components/board-cell/BoardCell.vue";
-import ChainOverlay from "@/presentation/pages/solver-walkthrough/components/ChainOverlay.vue";
-import ProgressBar from "@/presentation/components/playback/ProgressBar.vue";
+import StepLinkOverlay from "@/presentation/components/step-presentation/StepLinkOverlay.vue";
+import StepPlaybackPanel from "@/presentation/components/step-presentation/StepPlaybackPanel.vue";
+import StepTag from "@/presentation/components/step-presentation/StepTag.vue";
+import { useHintExplanation } from "@/presentation/pages/game/hint-mode/useHintExplanation";
+import { useRoomBelow } from "@/presentation/pages/game/hint-mode/useRoomBelow";
+import { useWalkthroughPlayback } from "@/presentation/pages/solver-walkthrough/useWalkthroughPlayback";
 import { TEST_PUZZLE_PRESETS } from "@/presentation/pages/solver-walkthrough/testPuzzles";
-import { usePlaybackState } from "@/presentation/components/playback/usePlaybackState";
 import { isFeatureEnabled } from "@/utils/featureToggle";
 
 interface CellPosition {
@@ -159,14 +175,42 @@ const createEmptyBoard = (): number[][] =>
 const router = useRouter();
 const { t } = useI18n();
 const techniqueLabel = useTechniqueLabel();
+const explain = useHintExplanation();
 const userValues = ref<number[][]>(createEmptyBoard());
-const state = computed(() => BoardState.fromPuzzle(userValues.value));
 const selectedCell = ref<CellPosition | null>(null);
 const selectedDigit = ref<number | null>(null);
 const eraseMode = ref(false);
-const solveResult = ref<SolveResult | null>(null);
-const techniqueSolver = new TechniqueSolver();
 const emptyDigitCounts = Array.from({ length: 10 }, () => 0);
+
+const {
+    path,
+    start,
+    stop,
+    stepIndex,
+    stepCount,
+    currentStep,
+    playState,
+    next,
+    previous,
+    goTo,
+    togglePlay,
+    puzzleCells,
+    cellViews,
+    links,
+} = useWalkthroughPlayback(userValues);
+
+const inPlayback = computed(() => path.value !== null);
+
+const explanation = computed(() =>
+    currentStep.value === null ? "" : explain(currentStep.value.step, currentStep.value.candidatesBefore));
+
+// The panel opens over the inputs; keep it on screen when an explanation runs long.
+const PANEL_BOTTOM_GAP = 24;
+const inputAreaElement = useTemplateRef<HTMLElement>("inputArea");
+const { room: roomBelowInputArea, measure: measureRoomBelowInputArea } = useRoomBelow(inputAreaElement, PANEL_BOTTOM_GAP);
+watch(inPlayback, (playing) => {
+    if (playing) measureRoomBelowInputArea();
+});
 
 const conflictsWithPeers = (row: number, column: number, digit: number): boolean => {
     for (let otherColumn = 0; otherColumn < BOARD_SIZE; otherColumn++) {
@@ -207,115 +251,6 @@ const invalidDigitsForSelectedCell = computed((): number[] => {
 });
 const testButtonsEnabled = isFeatureEnabled("walkthroughTestButtons");
 
-const totalSteps = computed(() => solveResult.value?.steps.length ?? 0);
-
-const {
-    currentStep,
-    isPlaying,
-    next: advanceStep,
-    previous: reverseStep,
-    goToFirst: jumpToFirst,
-    goToLast: jumpToLast,
-    goToStep,
-    togglePlay,
-    startPlay,
-    stopPlay,
-} = usePlaybackState(totalSteps);
-
-const playState = { isPlaying, stopPlay, startPlay };
-
-const stepDescription = computed(() => {
-    if (solveResult.value === null) return "";
-    if (currentStep.value === 0) return t("walkthrough.initialBoard");
-    const step = solveResult.value.steps[currentStep.value - 1];
-    const label = techniqueLabel(step.technique);
-    if (step.assignments.length > 0) {
-        const { cell, digit } = step.assignments[0];
-        const position = t("position.cell", { row: cell.row + 1, column: cell.column + 1, value: digit });
-        return t("game.hintResult", { technique: label, position });
-    }
-    const eliminationCount = step.eliminations.length;
-    return t("walkthrough.eliminations", { technique: label, count: eliminationCount }, eliminationCount);
-});
-
-const currentStepFocus = computed(() => {
-    if (solveResult.value === null || currentStep.value === 0) return [];
-    return solveResult.value.steps[currentStep.value - 1].focus;
-});
-
-const currentStepChainLinks = computed(() => {
-    if (solveResult.value === null || currentStep.value === 0) return [];
-    return solveResult.value.steps[currentStep.value - 1].chainLinks ?? [];
-});
-
-const currentStepScopeCellKeys = computed(() => {
-    const keys = new Set<string>();
-    if (solveResult.value === null || currentStep.value === 0) return keys;
-    const scopes = solveResult.value.steps[currentStep.value - 1].scopes;
-    for (const scope of scopes) {
-        if (scope.kind === "row") {
-            for (let column = 0; column < BOARD_SIZE; column++) keys.add(`${scope.row}-${column}`);
-        } else if (scope.kind === "column") {
-            for (let row = 0; row < BOARD_SIZE; row++) keys.add(`${row}-${scope.column}`);
-        } else {
-            for (let row = scope.boxRow; row < scope.boxRow + 3; row++) {
-                for (let column = scope.boxColumn; column < scope.boxColumn + 3; column++) {
-                    keys.add(`${row}-${column}`);
-                }
-            }
-        }
-    }
-    return keys;
-});
-
-const eliminatedDigitsAt = (row: number, column: number): number[] => {
-    const preCandidates = preStepState.value.candidatesOf(row, column);
-    const postCandidates = displayState.value.candidatesOf(row, column);
-    return preCandidates.filter((digit) => !postCandidates.includes(digit));
-};
-
-const cellVariant = (row: number, column: number): CellVariant => {
-    if (currentStepFocus.value.some((c) => c.row === row && c.column === column)) return "focus";
-    if (currentStepScopeCellKeys.value.has(`${row}-${column}`)) return "scope";
-    if (isSelectedCell(row, column)) return "selected";
-    return "default";
-};
-
-const preStepState = computed(() => {
-    const baseState = BoardState.fromPuzzle(userValues.value);
-    if (solveResult.value === null || currentStep.value === 0) return baseState;
-    let currentState = baseState;
-    for (let stepIndex = 0; stepIndex < currentStep.value - 1; stepIndex++) {
-        const step = solveResult.value.steps[stepIndex];
-        for (const assignment of step.assignments) {
-            currentState = currentState.assign(assignment.cell.row, assignment.cell.column, assignment.digit);
-        }
-        for (const elimination of step.eliminations) {
-            currentState = currentState.eliminate(elimination.cell.row, elimination.cell.column, elimination.digit);
-        }
-    }
-    return currentState;
-});
-
-const displayState = computed(() => {
-    if (solveResult.value === null || currentStep.value === 0) return preStepState.value;
-    const step = solveResult.value.steps[currentStep.value - 1];
-    let currentState = preStepState.value;
-    for (const assignment of step.assignments) {
-        currentState = currentState.assign(assignment.cell.row, assignment.cell.column, assignment.digit);
-    }
-    for (const elimination of step.eliminations) {
-        currentState = currentState.eliminate(elimination.cell.row, elimination.cell.column, elimination.digit);
-    }
-    return currentState;
-});
-
-const exitSolveMode = () => {
-    stopPlay();
-    solveResult.value = null;
-    jumpToFirst();
-};
-
 const loadPreset = (puzzle: number[][]) => {
     selectedCell.value = null;
     selectedDigit.value = null;
@@ -344,13 +279,13 @@ const toggleEraseMode = () => {
 };
 
 const runSolver = () => {
-    solveResult.value = techniqueSolver.solveWithTechniques(state.value);
-    jumpToFirst();
+    selectedCell.value = null;
+    start(buildSolvePath(userValues.value));
 };
 
 const goBack = () => {
-    if (solveResult.value !== null) {
-        exitSolveMode();
+    if (inPlayback.value) {
+        stop();
         return;
     }
     void router.push(ROUTER_PATH.home);
@@ -363,7 +298,7 @@ const tryFillCell = (row: number, column: number, digit: number) => {
 };
 
 const selectCell = (row: number, column: number) => {
-    if (solveResult.value !== null) return;
+    if (inPlayback.value) return;
     if (eraseMode.value) {
         userValues.value[row][column] = 0;
         return;
@@ -395,3 +330,19 @@ const pickDigit = (digit: number) => {
     selectedDigit.value = selectedDigit.value === digit ? null : digit;
 };
 </script>
+
+<style scoped>
+.walkthrough-overlay-enter-active {
+    transition: opacity 220ms ease, transform 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.walkthrough-overlay-leave-active {
+    transition: opacity 150ms ease, transform 200ms ease;
+}
+
+.walkthrough-overlay-enter-from,
+.walkthrough-overlay-leave-to {
+    opacity: 0;
+    transform: translateY(16px);
+}
+</style>
