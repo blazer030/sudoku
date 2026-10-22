@@ -1,129 +1,140 @@
 <template>
     <div
-        class="flex flex-col gap-5 px-5 pb-6 bg-background overflow-y-auto h-full"
+        class="flex flex-col h-full overflow-hidden bg-background"
         data-skin="page"
     >
+        <!-- The step panel stays pinned at the bottom; the header, summary and board scroll above it -->
         <div
-            class="flex items-center justify-between sticky top-0 bg-background pt-6 pb-3 z-10"
-            data-skin="page-header"
+            class="flex-1 min-h-0 overflow-y-auto overscroll-y-contain flex flex-col gap-5 px-5 pb-5"
+            data-testid="review-scroll-area"
         >
-            <button
-                class="flex items-center gap-2 cursor-pointer"
-                data-testid="review-back-button"
-                @click="goBack"
+            <div
+                class="flex items-center justify-between sticky top-0 bg-background pt-6 pb-3 z-10"
+                data-skin="page-header"
             >
-                <ChevronLeft
-                    :size="24"
-                    class="text-foreground"
-                />
-                <span class="text-foreground text-base font-medium">{{ t("common.back") }}</span>
-            </button>
-            <span class="text-foreground text-lg font-semibold">{{ t("review.title") }}</span>
-            <div class="w-15" />
-        </div>
-
-        <div class="flex items-center justify-between bg-card rounded-xl py-3 px-4 shadow-card-sm">
-            <div class="flex items-center gap-3">
-                <div
-                    :class="game.completed
-                        ? 'bg-primary-light text-primary'
-                        : 'bg-accent/10 text-accent'"
-                    class="w-9 h-9 rounded-icon flex items-center justify-center"
+                <button
+                    class="flex items-center gap-2 cursor-pointer"
+                    data-testid="review-back-button"
+                    @click="goBack"
                 >
-                    <Trophy
-                        v-if="game.completed"
-                        :size="18"
+                    <ChevronLeft
+                        :size="24"
+                        class="text-foreground"
                     />
-                    <X
-                        v-else
-                        :size="18"
-                    />
+                    <span class="text-foreground text-base font-medium">{{ t("common.back") }}</span>
+                </button>
+                <span class="text-foreground text-lg font-semibold">{{ t("review.title") }}</span>
+                <div class="w-15" />
+            </div>
+
+            <div class="flex items-center justify-between bg-card rounded-xl py-3 px-4 shadow-card-sm">
+                <div class="flex items-center gap-3">
+                    <div
+                        :class="game.completed
+                            ? 'bg-primary-light text-primary'
+                            : 'bg-accent/10 text-accent'"
+                        class="w-9 h-9 rounded-icon flex items-center justify-center"
+                    >
+                        <Trophy
+                            v-if="game.completed"
+                            :size="18"
+                        />
+                        <X
+                            v-else
+                            :size="18"
+                        />
+                    </div>
+                    <div class="flex flex-col gap-0.5">
+                        <span class="text-sm font-semibold text-foreground">
+                            {{ difficultyLabel(game.difficulty) }}
+                        </span>
+                        <span class="text-[11px] text-foreground-muted">
+                            {{ formatDate(game.date, appLocale) }}
+                        </span>
+                    </div>
                 </div>
-                <div class="flex flex-col gap-0.5">
-                    <span class="text-sm font-semibold text-foreground">
-                        {{ difficultyLabel(game.difficulty) }}
+                <div class="flex flex-col items-end gap-0.5">
+                    <span
+                        :class="game.completed ? 'text-primary' : 'text-accent'"
+                        class="text-base font-semibold font-mono"
+                    >
+                        {{ game.completed ? formatTime(game.elapsedSeconds) : t("statistics.gaveUp") }}
                     </span>
-                    <span class="text-[11px] text-foreground-muted">
-                        {{ formatDate(game.date, appLocale) }}
+                    <span class="flex items-center gap-0.75 text-[11px] font-medium text-foreground-muted font-mono">
+                        <Lightbulb :size="11" />
+                        {{ game.hintsUsed }}
                     </span>
                 </div>
             </div>
-            <div class="flex flex-col items-end gap-0.5">
-                <span
-                    :class="game.completed ? 'text-primary' : 'text-accent'"
-                    class="text-base font-semibold font-mono"
-                >
-                    {{ game.completed ? formatTime(game.elapsedSeconds) : t("statistics.gaveUp") }}
-                </span>
-                <span class="flex items-center gap-0.75 text-[11px] font-medium text-foreground-muted font-mono">
-                    <Lightbulb :size="11" />
-                    {{ game.hintsUsed }}
-                </span>
+
+            <div
+                data-skin="board"
+                class="bg-card rounded-2xl shadow-card-lg p-2 self-center w-[calc(100%+1.5rem)] max-w-board-fit pointer-events-none"
+                data-testid="review-board"
+            >
+                <div class="flex flex-col border-3 border-foreground/20 rounded-xl">
+                    <div
+                        v-for="(row, rowIndex) in board"
+                        :key="rowIndex"
+                        class="grid grid-cols-9"
+                    >
+                        <Cell
+                            v-for="(puzzleCell, columnIndex) in row"
+                            :key="`cell-${rowIndex}-${columnIndex}`"
+                            :column="columnIndex"
+                            :data-testid="`review-cell-${rowIndex}-${columnIndex}`"
+                            :highlight-same-digit="false"
+                            :interactive="false"
+                            :puzzle-cell="puzzleCell"
+                            :row="rowIndex"
+                            :selected="isChanged(rowIndex, columnIndex)"
+                        />
+                    </div>
+                </div>
             </div>
         </div>
 
         <div
-            data-skin="board"
-            class="bg-card rounded-2xl shadow-card-lg p-2 self-center w-[calc(100%+1.5rem)] max-w-board-fit pointer-events-none"
-            data-testid="review-board"
+            class="shrink-0 px-5 pb-4"
+            data-testid="review-panel-dock"
         >
-            <div class="flex flex-col border-3 border-foreground/20 rounded-xl">
-                <div
-                    v-for="(row, rowIndex) in board"
-                    :key="rowIndex"
-                    class="grid grid-cols-9"
-                >
-                    <Cell
-                        v-for="(puzzleCell, columnIndex) in row"
-                        :key="`cell-${rowIndex}-${columnIndex}`"
-                        :column="columnIndex"
-                        :data-testid="`review-cell-${rowIndex}-${columnIndex}`"
-                        :highlight-same-digit="false"
-                        :interactive="false"
-                        :puzzle-cell="puzzleCell"
-                        :row="rowIndex"
-                        :selected="isChanged(rowIndex, columnIndex)"
-                    />
-                </div>
-            </div>
-        </div>
-
-        <StepPlaybackPanel
-            :label="t('review.title')"
-            :play-state="playState"
-            :step-index="currentStep"
-            :total-steps="positionCount"
-            test-id-prefix="review"
-            @go-to="goToStep"
-            @next="next"
-            @previous="previous"
-            @toggle-play="togglePlay"
-        >
-            <template #tag>
-                <StepTag
-                    :icon="tag.icon"
-                    :label="tag.label"
-                    :step-key="currentStep"
-                    :strong="stage === 'final'"
-                    test-id="review-action"
-                />
-            </template>
-            <i18n-t
-                :keypath="description.keypath"
-                scope="global"
-                tag="span"
+            <StepPlaybackPanel
+                :label="t('review.title')"
+                :play-state="playState"
+                :step-index="currentStep"
+                :total-steps="positionCount"
+                test-id-prefix="review"
+                @go-to="goToStep"
+                @next="next"
+                @previous="previous"
+                @toggle-play="togglePlay"
             >
-                <template #value>
-                    <span class="font-semibold">{{ description.params.value }}</span>
+                <template #tag>
+                    <StepTag
+                        :icon="tag.icon"
+                        :label="tag.label"
+                        :step-key="currentStep"
+                        :strong="stage === 'final'"
+                        test-id="review-action"
+                    />
                 </template>
-                <template #row>
-                    <span class="font-semibold">{{ description.params.row }}</span>
-                </template>
-                <template #column>
-                    <span class="font-semibold">{{ description.params.column }}</span>
-                </template>
-            </i18n-t>
-        </StepPlaybackPanel>
+                <i18n-t
+                    :keypath="description.keypath"
+                    scope="global"
+                    tag="span"
+                >
+                    <template #value>
+                        <span class="font-semibold">{{ description.params.value }}</span>
+                    </template>
+                    <template #row>
+                        <span class="font-semibold">{{ description.params.row }}</span>
+                    </template>
+                    <template #column>
+                        <span class="font-semibold">{{ description.params.column }}</span>
+                    </template>
+                </i18n-t>
+            </StepPlaybackPanel>
+        </div>
     </div>
 </template>
 
