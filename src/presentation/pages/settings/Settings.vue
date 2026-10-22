@@ -60,7 +60,10 @@
                     @click="onSelectStyle(styleId)"
                 >
                     <!-- Thumbnails stand for the style, not the current mode, so they always use the light palette -->
-                    <StyleThumbnail :palette="getPalette(styleId, rememberedThemeFor(styleId, settingsStore.colorThemeByStyle), 'light')" />
+                    <StyleThumbnail
+                        :palette="getPalette(styleId, rememberedThemeFor(styleId, settingsStore.colorThemeByStyle), 'light')"
+                        :style-id="styleId"
+                    />
                     <span class="text-foreground text-xs font-medium text-center">{{ t(`settings.style.names.${styleId}`) }}</span>
                 </button>
             </div>

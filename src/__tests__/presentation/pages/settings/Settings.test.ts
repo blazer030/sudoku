@@ -29,7 +29,8 @@ import { useStatisticsStore } from "@/stores/statisticsStore";
 import type { CellState, GameState } from "@/application/GameState";
 import type { BillingService, Product } from "@/application/billing/BillingService";
 import { startAppearanceSync } from "@/presentation/theme/appearanceSync";
-import { STYLES } from "@/theme/palettes";
+import { STYLES, getPalette, rememberedThemeFor } from "@/theme/palettes";
+import { STYLE_IDS } from "@/application/SettingsStorage";
 import Settings from "@/presentation/pages/settings/Settings.vue";
 
 const fakeProducts: Product[] = [
@@ -341,6 +342,76 @@ describe("Settings.vue appearance group", () => {
 
             await wrapper.get("[data-testid='appearance-light']").trigger("click");
             expect(document.documentElement.classList.contains("dark")).toBe(false);
+        } finally {
+            stopAppearanceSync();
+            document.documentElement.className = "";
+        }
+    });
+
+    it("should show a thumbnail for each of the three styles", async () => {
+        const wrapper = mountSettings();
+        const cards = wrapper.findAll("button[data-testid^='style-option-']");
+
+        expect(cards.map(card => card.attributes("data-testid"))).toEqual(["style-option-minimal", "style-option-tactile", "style-option-paper"]);
+        // The thumbnail is hidden from screen readers; the card's name is its last text
+        const names = () => wrapper.findAll("button[data-testid^='style-option-'] > span").map(name => name.text());
+        expect(names()).toEqual(["Minimal Motion", "Tactile Tiles", "Paper Notebook"]);
+        for (const style of STYLE_IDS) {
+            const thumbnail = wrapper.get(`[data-testid='style-option-${style}'] [data-testid='style-thumbnail']`);
+            const primary = getPalette(style, rememberedThemeFor(style, useSettingsStore().colorThemeByStyle), "light").primary;
+            expect(thumbnail.attributes("data-thumbnail-style")).toBe(style);
+            expect(thumbnail.attributes("style")?.toUpperCase()).toContain(`--COLOR-PRIMARY: ${primary}`);
+        }
+
+        i18n.global.locale.value = "zh-Hant";
+        await nextTick();
+        expect(names()).toEqual(["極簡動態", "實體方塊", "紙本筆記"]);
+    });
+
+    it("should keep style hooks out of thumbnails", () => {
+        const wrapper = mountSettings();
+
+        for (const thumbnail of wrapper.findAll("[data-testid='style-thumbnail']")) {
+            expect(thumbnail.findAll("[data-style], [data-skin]")).toHaveLength(0);
+            expect(thumbnail.attributes("data-style")).toBeUndefined();
+            expect(thumbnail.attributes("data-skin")).toBeUndefined();
+        }
+    });
+
+    it("should switch styles live and remember each style's theme", async () => {
+        const wrapper = mountSettings();
+        const stopAppearanceSync = startAppearanceSync(
+            storeToRefs(useSettingsStore()),
+            { apply: vi.fn().mockResolvedValue(undefined) },
+            { setAppearance: vi.fn().mockResolvedValue(undefined), setSystemBarColors: vi.fn().mockResolvedValue(undefined) },
+        );
+        const root = document.documentElement;
+        const swatchCount = () => wrapper.findAll("button[data-testid^='color-theme-']").length;
+        const pressed = (theme: string) => wrapper.get(`[data-testid='color-theme-${theme}']`).attributes("aria-pressed");
+        try {
+            await wrapper.get("[data-testid='style-option-tactile']").trigger("click");
+            expect(root.dataset.style).toBe("tactile");
+            expect(root.dataset.colorTheme).toBe("green");
+            expect(swatchCount()).toBe(4);
+            expect(wrapper.get("[data-testid='color-theme-rust']").attributes("aria-label")).toBe("Rust");
+
+            await wrapper.get("[data-testid='color-theme-rust']").trigger("click");
+
+            await wrapper.get("[data-testid='style-option-paper']").trigger("click");
+            expect(swatchCount()).toBe(3);
+            expect(pressed("blueInk")).toBe("true");
+            await wrapper.get("[data-testid='color-theme-redInk']").trigger("click");
+
+            await wrapper.get("[data-testid='style-option-tactile']").trigger("click");
+            expect(pressed("rust")).toBe("true");
+            expect(root.dataset.colorTheme).toBe("rust");
+
+            await wrapper.get("[data-testid='style-option-paper']").trigger("click");
+            expect(root.dataset.colorTheme).toBe("redInk");
+
+            await wrapper.get("[data-testid='style-option-minimal']").trigger("click");
+            expect(root.dataset.style).toBe("minimal");
+            expect(root.dataset.colorTheme).toBe("green");
         } finally {
             stopAppearanceSync();
             document.documentElement.className = "";
