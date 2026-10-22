@@ -39,7 +39,7 @@ const main = async () => {
     mkdirSync(PUBLIC_DIR, { recursive: true });
 
     for (const theme of ICON_THEMES) {
-        const svg = iconSvg(theme.primary);
+        const svg = iconSvg(theme);
 
         // Write themed SVG favicon
         writeFileSync(resolve(PUBLIC_DIR, `sudoku-${theme.id}.svg`), svg);

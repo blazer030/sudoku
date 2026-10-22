@@ -65,7 +65,7 @@ ${ICON_THEMES.map((theme) => `    <color name="ic_launcher_${theme.id}_backgroun
 
 const generateAdaptiveIcons = async () => {
     // The foreground keeps only the tiles, so the primary passed here does not show
-    const foregroundSvg = Buffer.from(tilesForegroundSvg(iconSvg(ICON_THEMES[0].primary)));
+    const foregroundSvg = Buffer.from(tilesForegroundSvg(iconSvg(ICON_THEMES[0])));
     for (const density of FOREGROUND_DENSITIES) {
         const outDir = resolve(RES_ROOT, density.name);
         mkdirSync(outDir, { recursive: true });
@@ -90,7 +90,7 @@ const main = async () => {
     await generateAdaptiveIcons();
 
     for (const theme of ICON_THEMES) {
-        const svgBuffer = Buffer.from(iconSvg(theme.primary));
+        const svgBuffer = Buffer.from(iconSvg(theme));
 
         for (const density of DENSITIES) {
             const outDir = resolve(RES_ROOT, density.name);
