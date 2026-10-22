@@ -1613,6 +1613,14 @@ describe("Game", () => {
 
             expectKeyRowsToShrinkToFit(wrapper);
         });
+
+        it("should not let a digit taller than a narrow cell stretch the board, so it keeps one height in every style", () => {
+            const wrapper = mountGame();
+
+            for (const cell of wrapper.findAllComponents(Cell)) {
+                expect(cell.classes()).toEqual(expect.arrayContaining(["aspect-square", "min-w-0", "min-h-0"]));
+            }
+        });
     });
 
     describe("quick input", () => {

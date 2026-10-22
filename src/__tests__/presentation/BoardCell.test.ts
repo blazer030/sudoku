@@ -22,6 +22,14 @@ describe("BoardCell", () => {
         expect(wrapper.find("[data-testid='cell-value']").classes()).toContain("leading-none");
     });
 
+    it("should not grow to fit a digit whose line box is taller than a narrow cell", () => {
+        // A square box grows to fit its content unless its minimum size is zero: in a 304px window a
+        // cell is about 27px, under paper's 28.6px entries, and the board grew taller in paper alone
+        const wrapper = mountCell({ value: 5, valueKind: "entered" });
+
+        expect(wrapper.classes()).toEqual(expect.arrayContaining(["aspect-square", "min-w-0", "min-h-0"]));
+    });
+
     it("should expose its variant for style sheets", () => {
         expect(mountCell({ variant: "selected" }).attributes("data-variant")).toBe("selected");
         expect(mountCell({}).attributes("data-variant")).toBe("default");

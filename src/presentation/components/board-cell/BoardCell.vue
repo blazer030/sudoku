@@ -8,7 +8,7 @@
         ]"
         :data-value-kind="value !== 0 ? valueKind : undefined"
         :data-variant="variant"
-        class="flex justify-center items-center flex-1 aspect-square"
+        class="flex justify-center items-center flex-1 aspect-square min-w-0 min-h-0"
     >
         <div
             v-if="value !== 0"
