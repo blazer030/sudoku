@@ -1,5 +1,6 @@
 import { BOARD_SIZE, BOX_SIZE } from "@/domain/board/constants";
 import type { CellReference, ChainLink, Scope, SolveStep } from "@/domain/solver/SolveStep";
+import { sameCell } from "@/domain/solver/cellRelations";
 
 export type StepHighlight = "none" | "scope" | "pattern" | "answer" | "wrong";
 
@@ -26,9 +27,6 @@ export interface StepBoard {
 }
 
 export const cellKey = (cell: CellReference): string => `${cell.row}-${cell.column}`;
-
-const sameCell = (left: CellReference, right: CellReference): boolean =>
-    left.row === right.row && left.column === right.column;
 
 export const scopeCells = (scope: Scope): CellReference[] => {
     const cells: CellReference[] = [];

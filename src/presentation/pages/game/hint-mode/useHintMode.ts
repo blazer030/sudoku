@@ -3,6 +3,7 @@ import { BOARD_SIZE } from "@/domain/board/constants";
 import type { Sudoku } from "@/domain/game/Sudoku";
 import type { RevealHintPlan, RevealHintStep } from "@/domain/game/RevealHint";
 import type { CellReference, ChainLink } from "@/domain/solver/SolveStep";
+import { sameCell } from "@/domain/solver/cellRelations";
 import {
     cellKey,
     type StepBoard,
@@ -27,9 +28,6 @@ interface HintModeOptions {
 }
 
 type StepsPlan = Extract<RevealHintPlan, { kind: "steps" }>;
-
-const sameCell = (left: CellReference, right: CellReference): boolean =>
-    left.row === right.row && left.column === right.column;
 
 /**
  * Temporary, unsaved hint state on the game board: either one wrong entry to point out, or the solver
