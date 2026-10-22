@@ -70,33 +70,37 @@
                 </div>
             </div>
 
-            <!-- Everything else here (header, summary, gaps, panel and the room under it) takes 326px,
-                 within the 331px the shared cap leaves, so a capped board ends 16px or more above the panel -->
-            <div
-                data-skin="board"
-                class="bg-card rounded-2xl shadow-card-lg p-2 self-center w-[calc(100%+1.5rem)] max-w-board-fit pointer-events-none"
-                data-testid="review-board"
-            >
+            <!-- The board reaches into the page gutter from inside this wrapper: as a direct child it would
+                 count the scroll area's end padding past it as sideways overflow -->
+            <div class="flex flex-col">
+                <!-- Everything else here (header, summary, gaps, panel and the room under it) takes 326px,
+                     within the 331px the shared cap leaves, so a capped board ends 16px or more above the panel -->
                 <div
-                    ref="boardGrid"
-                    class="flex flex-col border-3 border-foreground/20 rounded-xl"
+                    data-skin="board"
+                    class="bg-card rounded-2xl shadow-card-lg p-2 self-center w-[calc(100%+1.5rem)] max-w-board-fit pointer-events-none"
+                    data-testid="review-board"
                 >
                     <div
-                        v-for="(row, rowIndex) in board"
-                        :key="rowIndex"
-                        class="grid grid-cols-9"
+                        ref="boardGrid"
+                        class="flex flex-col border-3 border-foreground/20 rounded-xl"
                     >
-                        <Cell
-                            v-for="(puzzleCell, columnIndex) in row"
-                            :key="`cell-${rowIndex}-${columnIndex}`"
-                            :column="columnIndex"
-                            :data-testid="`review-cell-${rowIndex}-${columnIndex}`"
-                            :highlight-same-digit="false"
-                            :interactive="false"
-                            :puzzle-cell="puzzleCell"
-                            :row="rowIndex"
-                            :selected="isChanged(rowIndex, columnIndex)"
-                        />
+                        <div
+                            v-for="(row, rowIndex) in board"
+                            :key="rowIndex"
+                            class="grid grid-cols-9"
+                        >
+                            <Cell
+                                v-for="(puzzleCell, columnIndex) in row"
+                                :key="`cell-${rowIndex}-${columnIndex}`"
+                                :column="columnIndex"
+                                :data-testid="`review-cell-${rowIndex}-${columnIndex}`"
+                                :highlight-same-digit="false"
+                                :interactive="false"
+                                :puzzle-cell="puzzleCell"
+                                :row="rowIndex"
+                                :selected="isChanged(rowIndex, columnIndex)"
+                            />
+                        </div>
                     </div>
                 </div>
             </div>

@@ -211,8 +211,13 @@ describe("GameReview", () => {
     it("should never scroll sideways, though the board reaches into the page gutter", async () => {
         const wrapper = await mountReview({ nextClicks: 0 });
 
-        // A scroller counts its end padding past the widened board as overflow, 12px to scroll sideways
-        expect(wrapper.get("[data-testid='review-scroll-area']").classes()).toContain("overflow-x-hidden");
+        // A scroller counts its end padding past a widened child as overflow, 12px to scroll sideways,
+        // so the board widens inside a full-width wrapper instead, and the scroller clips sideways anyway
+        const scrollArea = wrapper.get("[data-testid='review-scroll-area']");
+        expect(scrollArea.classes()).toContain("overflow-x-hidden");
+        const boardWrapper = wrapper.get("[data-testid='review-board']").element.parentElement;
+        expect(boardWrapper?.parentElement).toBe(scrollArea.element);
+        expect(boardWrapper?.classList).toContain("flex-col");
     });
 
     it("should run the sticky header across the page gutter, so cards scrolling under it stay hidden", async () => {
