@@ -82,8 +82,12 @@ const difficultyLabel = useDifficultyLabel();
 const closeOnEscape = (event: KeyboardEvent) => {
     if (visible.value && event.key === "Escape") close("stay");
 };
-onMounted(() => document.addEventListener("keydown", closeOnEscape));
-onBeforeUnmount(() => document.removeEventListener("keydown", closeOnEscape));
+onMounted(() => {
+    document.addEventListener("keydown", closeOnEscape);
+});
+onBeforeUnmount(() => {
+    document.removeEventListener("keydown", closeOnEscape);
+});
 
 const summary = computed(() => {
     if (params.value === undefined) return "";

@@ -10,7 +10,8 @@ describe("useGameToast", () => {
     it("clears its pending timer when the owning scope is disposed", () => {
         vi.useFakeTimers();
         const scope = effectScope();
-        const toast = scope.run(() => useGameToast())!;
+        const toast = scope.run(() => useGameToast());
+        if (toast === undefined) throw new Error("scope did not run");
         toast.show({ kind: "noConflicts" });
         expect(vi.getTimerCount()).toBe(1);
 
