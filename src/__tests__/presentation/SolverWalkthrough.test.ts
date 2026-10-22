@@ -12,6 +12,7 @@ import { singlesPuzzle, singlesSolution } from "@/__tests__/fixtures/singlesPuzz
 import { openNoSolutionPuzzle } from "@/__tests__/fixtures/openPuzzles";
 import { SAMPLE_PUZZLES } from "@/presentation/pages/solver-walkthrough/samplePuzzles";
 import { expectKeyRowsToShrinkToFit } from "@/__tests__/fixtures/digitKeyRows";
+import { PUZZLE_LOADER_MINIMUM_MS } from "@/presentation/components/puzzle-loader/usePuzzleLoader";
 
 const samplePuzzle = (id: string): number[][] => {
     const sample = SAMPLE_PUZZLES.find((candidate) => candidate.id === id);
@@ -46,10 +47,16 @@ const mountEntering = async () => {
     return mounted;
 };
 
+// Solving first checks the puzzle behind the loader, which stays up for its minimum time.
+// The clock stays fake (and still ticks) for the rest of the test, so nothing scheduled meanwhile is dropped.
 const solve = async (wrapper: VueWrapper) => {
+    if (!vi.isFakeTimers()) vi.useFakeTimers({ shouldAdvanceTime: true });
     await wrapper.find("[data-testid='solve-button']").trigger("click");
+    await vi.advanceTimersByTimeAsync(PUZZLE_LOADER_MINIMUM_MS + 100);
     await flushPromises();
 };
+
+const loader = (wrapper: VueWrapper) => wrapper.find("[data-testid='puzzle-loader']");
 
 const clickNext = async (wrapper: VueWrapper, times: number) => {
     for (let click = 0; click < times; click++) {
@@ -790,6 +797,8 @@ describe("SolverWalkthrough", () => {
 
         it("should answer promptly and warn when the count can't be checked, still allowing solving", async () => {
             const { wrapper } = mountWalkthrough({ initialPuzzle: openNoSolutionPuzzle });
+            // The loader's wait runs on the fake clock; the check itself is timed on the real one.
+            vi.useFakeTimers({ shouldAdvanceTime: true, toFake: ["setTimeout", "clearTimeout", "requestAnimationFrame", "cancelAnimationFrame"] });
 
             const started = performance.now();
             await solve(wrapper);
@@ -848,6 +857,102 @@ describe("SolverWalkthrough", () => {
 
             expect(wrapper.find("[data-testid='walkthrough-dialog']").exists()).toBe(false);
             expect(wrapper.find("[data-testid='walkthrough-panel']").exists()).toBe(true);
+        });
+    });
+
+    describe("while checking the puzzle", () => {
+        const pressSolve = async (wrapper: VueWrapper) => {
+            vi.useFakeTimers();
+            await wrapper.find("[data-testid='solve-button']").trigger("click");
+            await nextTick();
+        };
+
+        it("should show the checking loader at once and keep it up for the minimum time", async () => {
+            const { wrapper } = mountWalkthrough({ initialPuzzle: singlesPuzzle });
+
+            await pressSolve(wrapper);
+
+            expect(loader(wrapper).exists()).toBe(true);
+            expect(loader(wrapper).text()).toContain("Checking the puzzle…");
+
+            await vi.advanceTimersByTimeAsync(PUZZLE_LOADER_MINIMUM_MS - 100);
+            expect(loader(wrapper).exists()).toBe(true);
+            expect(wrapper.find("[data-testid='walkthrough-panel']").exists()).toBe(false);
+
+            await vi.advanceTimersByTimeAsync(200);
+            await flushPromises();
+            expect(loader(wrapper).exists()).toBe(false);
+            expect(wrapper.find("[data-testid='walkthrough-panel']").exists()).toBe(true);
+        });
+
+        it("should say it is checking in Traditional Chinese", async () => {
+            i18n.global.locale.value = "zh-Hant";
+            await nextTick();
+            const { wrapper } = mountWalkthrough({ initialPuzzle: singlesPuzzle });
+
+            await pressSolve(wrapper);
+
+            expect(loader(wrapper).text()).toContain("正在檢查題目…");
+        });
+
+        it("should hold the inputs and the solve button while checking", async () => {
+            const { wrapper } = mountWalkthrough({ initialPuzzle: singlesPuzzle });
+
+            await pressSolve(wrapper);
+
+            expect(wrapper.find("[data-testid='solve-button']").attributes("disabled")).toBeDefined();
+            expect(wrapper.find("[data-testid='walkthrough-inputs']").attributes("inert")).toBeDefined();
+            expect(wrapper.findAll("[data-testid^='solver-cell-'][role='button']")).toHaveLength(0);
+        });
+
+        it("should show the dialog only after the loader is gone", async () => {
+            const { wrapper } = mountWalkthrough({ initialPuzzle: openNoSolutionPuzzle });
+
+            await pressSolve(wrapper);
+            expect(wrapper.find("[data-testid='walkthrough-dialog']").exists()).toBe(false);
+
+            await vi.advanceTimersByTimeAsync(PUZZLE_LOADER_MINIMUM_MS + 100);
+            await flushPromises();
+
+            expect(loader(wrapper).exists()).toBe(false);
+            expect(wrapper.find("[data-testid='walkthrough-dialog-title']").text()).toBe("Couldn't Check This Puzzle");
+        });
+
+        it("should cancel the check on Back and return to editing", async () => {
+            const { wrapper, router } = mountWalkthrough({ initialPuzzle: singlesPuzzle });
+            await router.push("/solver");
+
+            await pressSolve(wrapper);
+            await wrapper.find("[data-testid='back-button']").trigger("click");
+            await flushPromises();
+
+            expect(loader(wrapper).exists()).toBe(false);
+            expect(router.currentRoute.value.path).toBe("/solver");
+            expect(wrapper.find("[data-testid='walkthrough-inputs']").attributes("inert")).toBeUndefined();
+            expect(wrapper.find("[data-testid='solve-button']").attributes("disabled")).toBeUndefined();
+
+            await vi.advanceTimersByTimeAsync(PUZZLE_LOADER_MINIMUM_MS * 2);
+            await flushPromises();
+            expect(wrapper.find("[data-testid='walkthrough-panel']").exists()).toBe(false);
+            expect(wrapper.find("[data-testid='walkthrough-dialog']").exists()).toBe(false);
+        });
+
+        it("should cancel the check on the system Back key and stay to edit", async () => {
+            const router = createTestRouter();
+            await router.push("/");
+            await router.push("/solver");
+            await router.isReady();
+            const app = mount({ template: "<RouterView />" }, { global: { plugins: [router] } });
+            await app.find("[data-testid='walkthrough-enter-own']").trigger("click");
+
+            await pressSolve(app);
+            router.back();
+            await vi.advanceTimersByTimeAsync(50);
+            await flushPromises();
+
+            expect(router.currentRoute.value.path).toBe("/solver");
+            expect(loader(app).exists()).toBe(false);
+            expect(app.find("[data-testid='walkthrough-inputs']").attributes("inert")).toBeUndefined();
         });
     });
 

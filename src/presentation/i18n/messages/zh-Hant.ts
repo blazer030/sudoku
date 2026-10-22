@@ -168,6 +168,7 @@ export const zhHant: MessageSchema = {
     walkthrough: {
         reset: "重設",
         solve: "解題",
+        checking: "正在檢查題目…",
         completed: "解題完成，所有格子都填好了",
         stages: {
             completed: "已完成",

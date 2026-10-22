@@ -42,7 +42,7 @@ export const usePuzzleLoader = (): PuzzleLoaderController => {
         });
         const startTime = performance.now();
         try {
-            if (run.signal.aborted) throw run.signal.reason;
+            if (run.signal.aborted) throw new DOMException("The loader was cancelled", "AbortError");
             return await task(run.signal);
         } finally {
             const elapsed = performance.now() - startTime;

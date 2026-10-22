@@ -171,6 +171,7 @@ export const en = {
     walkthrough: {
         reset: "Reset",
         solve: "Solve",
+        checking: "Checking the puzzle…",
         completed: "Solved. Every cell is filled.",
         stages: {
             completed: "Solved",

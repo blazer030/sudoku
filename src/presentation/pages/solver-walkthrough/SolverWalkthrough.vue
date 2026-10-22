@@ -1,7 +1,9 @@
 <template>
     <div class="flex flex-col gap-2 min-h-full py-6 px-5">
         <div class="flex items-center justify-between">
+            <!-- Stays above the checking loader, so Back can cancel the check. -->
             <button
+                :class="checking ? 'relative z-60' : ''"
                 class="flex items-center gap-2 cursor-pointer"
                 data-testid="back-button"
                 @click="goBack"
@@ -62,7 +64,7 @@
             >
                 <div
                     :class="overlayShown ? 'opacity-0 pointer-events-none' : 'opacity-100 delay-100'"
-                    :inert="overlayShown || undefined"
+                    :inert="overlayShown || checking || undefined"
                     class="flex flex-col items-center gap-6 transition-opacity duration-200"
                     data-testid="walkthrough-inputs"
                 >
@@ -89,6 +91,7 @@
                         </button>
                         <button
                             v-press
+                            :disabled="checking"
                             data-skin="button"
                             class="flex-1 h-12 bg-primary text-on-primary rounded-2xl font-semibold cursor-pointer shadow-primary transition-all duration-200 hover:bg-primary-hover hover:shadow-primary-lg"
                             data-testid="solve-button"
@@ -200,18 +203,25 @@
         <div class="flex-1" />
 
         <WalkthroughDialog />
+        <PuzzleLoader
+            :message="t('walkthrough.checking')"
+            :visible="puzzleLoader.visible.value"
+        />
     </div>
 </template>
 
 <script lang="ts" setup>
-import { computed, nextTick, ref, useTemplateRef, watch, type Component } from "vue";
-import { useRouter } from "vue-router";
+import { computed, nextTick, onBeforeUnmount, ref, useTemplateRef, watch, type Component } from "vue";
+import { onBeforeRouteLeave, useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { ChevronLeft, Info, ListFilter, Pencil, PencilLine, RotateCcw, Trophy, Wand2 } from "lucide-vue-next";
 import { ROUTER_PATH } from "@/router";
 import { BOARD_SIZE } from "@/domain/board/constants";
-import { SudokuSolver, UNKNOWN_SOLUTION_COUNT } from "@/domain/generator/SudokuSolver";
-import { buildSolvePath } from "@/domain/solver/SolvePath";
+import { UNKNOWN_SOLUTION_COUNT } from "@/domain/generator/SudokuSolver";
+import { checkPuzzleAsync } from "@/application/puzzleCheck/PuzzleCheckService";
+import type { PuzzleCheck } from "@/application/puzzleCheck/checkPuzzle";
+import PuzzleLoader from "@/presentation/components/puzzle-loader/PuzzleLoader.vue";
+import { usePuzzleLoader } from "@/presentation/components/puzzle-loader/usePuzzleLoader";
 import { useTechniqueLabel } from "@/presentation/labels/techniqueLabels";
 import Cell from "@/presentation/pages/game/components/Cell.vue";
 import DigitPad from "@/presentation/pages/game/components/DigitPad.vue";
@@ -275,10 +285,14 @@ const {
     links,
 } = useWalkthroughPlayback(userValues);
 
+const puzzleLoader = usePuzzleLoader();
+// Solving checks the puzzle first, behind the same loader as a new game.
+const checking = puzzleLoader.visible;
+
 const inPlayback = computed(() => path.value !== null);
 const overlayShown = computed(() => inPlayback.value || introOpen.value);
-// Cells take input only while the player is entering a puzzle, not under the guide or during playback.
-const boardEditable = computed(() => !overlayShown.value);
+// Cells take input only while the player is entering a puzzle, not under the guide, while checking, or during playback.
+const boardEditable = computed(() => !overlayShown.value && !checking.value);
 
 // A solver step names its technique; the solved board, which ends a path that solves, gets a stage tag
 const tag = computed((): { label: string; icon: Component; strong: boolean; testId: string } | null => {
@@ -393,15 +407,25 @@ const toggleEraseMode = () => {
     eraseMode.value = !eraseMode.value;
 };
 
-const solutionCounter = new SudokuSolver();
-// Bounds the check to roughly a tenth of a second on a desktop; a board it can't settle in time gets a warning.
-const SOLUTION_COUNT_NODE_BUDGET = 40000;
+const isCancellation = (error: unknown): boolean => error instanceof DOMException && error.name === "AbortError";
+
+// Checks off the main thread behind the loader; null when Back cancels it.
+const checkBehindLoader = async (): Promise<PuzzleCheck | null> => {
+    try {
+        return await puzzleLoader.runWithLoader((signal) => checkPuzzleAsync(userValues.value, signal));
+    } catch (error) {
+        if (isCancellation(error)) return null;
+        throw error;
+    }
+};
 
 // No solution stops here; more than one, or a count too costly to settle, asks first.
 // The solver then shows what it can, even nothing.
 const runSolver = async () => {
-    const values = userValues.value;
-    const solutionCount = solutionCounter.countSolutions(values, 2, { maxNodes: SOLUTION_COUNT_NODE_BUDGET });
+    if (checking.value) return;
+    const check = await checkBehindLoader();
+    if (check === null) return;
+    const { solutionCount, path: solvePath } = check;
     if (solutionCount === 0) {
         await openDialog("noSolution");
         return;
@@ -410,10 +434,22 @@ const runSolver = async () => {
         if (await openDialog("solutionCountUnknown") !== "confirm") return;
     } else if (solutionCount > 1 && await openDialog("multipleSolutions") !== "confirm") return;
     selectedCell.value = null;
-    start(buildSolvePath(values));
+    start(solvePath);
 };
 
+// Back, in the app or from the system, cancels a running check and keeps the player editing.
+onBeforeRouteLeave(() => {
+    if (!checking.value) return true;
+    puzzleLoader.cancel();
+    return false;
+});
+onBeforeUnmount(puzzleLoader.cancel);
+
 const goBack = () => {
+    if (checking.value) {
+        puzzleLoader.cancel();
+        return;
+    }
     if (inPlayback.value) {
         stop();
         return;
