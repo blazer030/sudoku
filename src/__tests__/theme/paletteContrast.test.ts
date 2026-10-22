@@ -1,7 +1,7 @@
 import { readFileSync } from "fs";
 import { THEME_IDS_BY_STYLE, STYLE_IDS, type StyleId } from "@/application/SettingsStorage";
 import { contrastRatio, mixColors } from "@/theme/contrast";
-import { STYLES, type Palette, type PaletteToken } from "@/theme/palettes";
+import { STYLES, systemBarColor, type Palette, type PaletteToken } from "@/theme/palettes";
 
 const TEXT = 4.5;
 const LARGE_OR_ICON = 3;
@@ -87,18 +87,80 @@ const TINTED_PAIRS: readonly ContrastPair[] = [
     tinted("on-scrim", "scrim", 0.65, "background", TEXT),
 ];
 
-// The night lamp's strongest alpha on screen. Its glow is centred above the top edge, so the
-// brightest visible point is already part-way out along the gradient:
-// radial-gradient(<w> <h> at 50% <y>, lamp <alpha>, transparent <end>)
-const lampPeakAlpha = (): number => {
-    const css = readFileSync("src/style/styles/paper.css", "utf8");
-    const match = /radial-gradient\(\d+% (\d+)% at 50% (-?\d+)%, color-mix\(in srgb, var\(--color-lamp\) (\d+)%, transparent\), transparent (\d+)%\)/.exec(css);
-    if (match === null) throw new Error("paper.css has no night lamp gradient in the expected form");
-    const [height, centre, alpha, end] = match.slice(1).map(Number);
-    // How far along the gradient ray the top edge sits, as a fraction of the ray
-    const topEdge = Math.max(0, -centre) / height;
-    return (alpha / 100) * (1 - topEdge / (end / 100));
+// The night lamp as it shows down the middle of the screen: a radial glow centred <c>px below the
+// top edge and sized to the viewport, under a fade of the page colour that starts solid at the top
+// edge and is gone by <f>px. Both are piecewise linear between their colour stops:
+// --paper-lamp-fade: linear-gradient(var(--color-background), <page colour at n%> <p>px, ..., transparent <f>px)
+// --paper-lamp: radial-gradient(<w>vw <h>vh at 50% <c>px, <lamp at n%> [<p>%], ..., transparent <end>%)
+interface Stop { position: number; amount: number }
+
+const PAPER_CSS = readFileSync("src/style/styles/paper.css", "utf8");
+
+const nightDeclaration = (name: string): string => {
+    const nightBlock = /:root\.dark\[data-style="paper"\]\s*\{([^}]*)\}/.exec(PAPER_CSS)?.[1] ?? "";
+    const value = new RegExp(`${name}:\\s*([^;]*);`).exec(nightBlock)?.[1];
+    if (value === undefined) throw new Error(`paper.css sets no ${name} at night`);
+    return value.replace(/\s+/g, " ").replace(/\( /g, "(").replace(/ \)/g, ")").trim();
 };
+
+// "color-mix(in srgb, var(--color-<token>) 25%, transparent) 18%" or "transparent 48px"; a first
+// stop with no position sits at 0
+// Splits on the commas between stops, not those inside a stop's color-mix()
+const splitTopLevel = (list: string): string[] => {
+    const items = [""];
+    let depth = 0;
+    for (const character of list) {
+        if (character === "(") depth++;
+        if (character === ")") depth--;
+        if (character === "," && depth === 0) items.push("");
+        else items[items.length - 1] += character;
+    }
+    return items.map(item => item.trim());
+};
+
+const parseStops = (list: string, token: string): Stop[] => splitTopLevel(list)
+    .map((item, index) => {
+        const match = new RegExp(`^(?:color-mix\\(in srgb, var\\(--color-${token}\\) (\\d+)%, transparent\\)|var\\(--color-${token}\\)|(transparent))(?: (\\d+)(?:px|%))?$`).exec(item);
+        if (match === null) throw new Error(`unexpected colour stop: ${item}`);
+        // Groups that did not take part are undefined
+        const [, mixed, transparent, position] = match as (string | undefined)[];
+        if (position === undefined && index > 0) throw new Error(`colour stop without a position: ${item}`);
+        const amount = transparent === undefined ? Number(mixed ?? 100) / 100 : 0;
+        return { position: Number(position ?? 0), amount };
+    });
+
+const amountAt = (stops: Stop[], position: number): number => {
+    if (position <= stops[0].position) return stops[0].amount;
+    for (let index = 1; index < stops.length; index++) {
+        const [before, after] = [stops[index - 1], stops[index]];
+        if (position <= after.position) {
+            return before.amount + (after.amount - before.amount) * (position - before.position) / (after.position - before.position);
+        }
+    }
+    return stops[stops.length - 1].amount;
+};
+
+const parseLamp = () => {
+    const fade = /^linear-gradient\((.*)\)$/.exec(nightDeclaration("--paper-lamp-fade"))?.[1];
+    const glow = /^radial-gradient\(\d+vw (\d+)vh at 50% (\d+)px, (.*)\)$/.exec(nightDeclaration("--paper-lamp"));
+    if (fade === undefined || glow === null) throw new Error("paper.css has no night lamp in the expected form");
+    return { fade: parseStops(fade, "background"), height: Number(glow[1]), centre: Number(glow[2]), glow: parseStops(glow[3], "lamp") };
+};
+
+const LAMP = parseLamp();
+
+/** The lamp's alpha y px below the top edge of a viewport this many px tall. */
+const lampAlphaAt = (y: number, viewportHeight: number): number => {
+    const rayLength = LAMP.height / 100 * viewportHeight;
+    const glow = amountAt(LAMP.glow, Math.abs(y - LAMP.centre) / rayLength * 100);
+    return glow * (1 - amountAt(LAMP.fade, y));
+};
+
+const VIEWPORT_HEIGHTS = [560, 640, 720, 780, 860, 960];
+
+// The strongest alpha anywhere down the screen, on any of these phone heights
+const lampPeakAlpha = (): number => Math.max(...VIEWPORT_HEIGHTS.flatMap(viewportHeight =>
+    Array.from({ length: viewportHeight + 1 }, (_, y) => lampAlphaAt(y, viewportHeight))));
 
 const LAMP_PEAK = lampPeakAlpha();
 // The texture dots are the border colour at no more than 40%; the lamp is painted over them
@@ -162,9 +224,24 @@ describe("palette contrast", () => {
         expect(new Set(CASES.map(contrastCase => contrastCase.prefix)).size).toBe(2 * (6 + 4 + 3));
     });
 
-    it("should model the night lamp at its on-screen peak, about 29%", () => {
-        // 35% at the glow's centre, 6% above the top edge, fading out by 65% of a 55%-tall ray
-        expect(LAMP_PEAK).toBeCloseTo(0.291, 3);
+    it("should model the night lamp at its on-screen peak, 29%", () => {
+        // The glow's centre is below the top-edge fade, so the full centre alpha shows there
+        expect(LAMP_PEAK).toBeCloseTo(0.29, 3);
+    });
+
+    it("should fade the night lamp in from the page colour at the top edge, where the status bar meets it", () => {
+        // Below API 35 the status bar is painted flat in the page colour right above the page,
+        // and paper's dark system bar colour is that page colour
+        for (const theme of STYLES.paper.themes) {
+            expect(systemBarColor("paper", theme.id, "dark"), theme.id).toBe(theme.dark.background);
+        }
+        for (const viewportHeight of VIEWPORT_HEIGHTS) {
+            expect(lampAlphaAt(0, viewportHeight), `${viewportHeight}px`).toBe(0);
+            // and it rises without a step: no more than a 1.5% alpha change per px
+            for (let y = 1; y <= viewportHeight; y++) {
+                expect(Math.abs(lampAlphaAt(y, viewportHeight) - lampAlphaAt(y - 1, viewportHeight)), `${viewportHeight}px at ${y}px`).toBeLessThan(0.015);
+            }
+        }
     });
 
     it.each(HIERARCHY_CASES)("$label", ({ palette, level }) => {

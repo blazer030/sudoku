@@ -26,31 +26,51 @@
     font-weight: 700;
 }
 
-/* The page background, shared by the body and every page root and sticky header:
-   faint dots of the border colour, and at night a warm lamp glowing from the top edge. It has
+/* The page background, shared by the body, the app root and every page root and sticky header:
+   faint dots of the border colour, and at night a warm lamp hanging just below the top edge. It has
    no image, so the colour and contrast tests see it (inks are checked on the border at 40%, and
-   on the lamp at its on-screen peak, about 29%, alone and over a dot). By day the lamp layer is empty.
+   on the lamp at its on-screen peak, 29%, alone and over a dot). By day the lamp layers are empty.
    Each surface lays it on the page colour, so where one sits on another the lamp is not doubled. */
 [data-style="paper"] {
+    --paper-lamp-fade: linear-gradient(transparent, transparent);
     --paper-lamp: linear-gradient(transparent, transparent);
     --paper-texture:
         radial-gradient(circle, color-mix(in srgb, var(--color-border) 40%, transparent) 0.7px, transparent 1px),
         radial-gradient(circle, color-mix(in srgb, var(--color-border) 40%, transparent) 0.7px, transparent 1px);
 }
 
+/* The glow is sized to the viewport and set from the top edge, so every surface draws the same
+   one whatever its box. Over it the page colour fades in towards the top edge, so the glow meets
+   the status bar, painted flat in the page colour below API 35, without an edge. */
 :root.dark[data-style="paper"] {
-    --paper-lamp: radial-gradient(110% 55% at 50% -6%, color-mix(in srgb, var(--color-lamp) 35%, transparent), transparent 65%);
+    --paper-lamp-fade: linear-gradient(
+        var(--color-background),
+        color-mix(in srgb, var(--color-background) 45%, transparent) 14px,
+        color-mix(in srgb, var(--color-background) 12%, transparent) 32px,
+        transparent 48px
+    );
+    --paper-lamp: radial-gradient(
+        110vw 36vh at 50% 48px,
+        color-mix(in srgb, var(--color-lamp) 29%, transparent),
+        color-mix(in srgb, var(--color-lamp) 25%, transparent) 18%,
+        color-mix(in srgb, var(--color-lamp) 14%, transparent) 38%,
+        color-mix(in srgb, var(--color-lamp) 4%, transparent) 55%,
+        transparent 68%
+    );
 }
 
-/* Roots and headers attach it to the viewport, so it lines up with the body behind them */
+/* The app root paints it on its own box, which takes in the safe-area padding, so edge to edge it
+   runs on under the status bar. Page roots and headers, which scroll, attach it to the viewport,
+   so it lines up with the app root behind them. */
 [data-style="paper"] body,
+[data-style="paper"] .app-safe-area,
 [data-style="paper"] [data-skin~="page"],
 [data-style="paper"] [data-skin~="page-header"] {
     background-color: var(--color-background);
-    background-image: var(--paper-lamp), var(--paper-texture);
-    background-size: 100% 100%, 9px 9px, 13px 13px;
-    background-position: 0 0, 0 0, 4px 6px;
-    background-repeat: no-repeat, repeat, repeat;
+    background-image: var(--paper-lamp-fade), var(--paper-lamp), var(--paper-texture);
+    background-size: 100% 100%, 100% 100%, 9px 9px, 13px 13px;
+    background-position: 0 0, 0 0, 0 0, 4px 6px;
+    background-repeat: no-repeat, no-repeat, repeat, repeat;
 }
 
 [data-style="paper"] [data-skin~="page"],
@@ -65,12 +85,13 @@
     background-image:
         linear-gradient(to right, transparent 14px, var(--color-margin-line) 14px, var(--color-margin-line) 15.5px, transparent 15.5px),
         repeating-linear-gradient(to bottom, transparent 0, transparent 31px, var(--color-rule) 31px, var(--color-rule) 32px),
+        var(--paper-lamp-fade),
         var(--paper-lamp),
         var(--paper-texture);
-    background-size: auto, auto, 100% 100%, 9px 9px, 13px 13px;
-    background-position: 0 0, 0 0, 0 0, 0 0, 4px 6px;
-    background-repeat: repeat, repeat, no-repeat, repeat, repeat;
-    background-attachment: local, local, fixed, fixed, fixed;
+    background-size: auto, auto, 100% 100%, 100% 100%, 9px 9px, 13px 13px;
+    background-position: 0 0, 0 0, 0 0, 0 0, 0 0, 4px 6px;
+    background-repeat: repeat, repeat, no-repeat, no-repeat, repeat, repeat;
+    background-attachment: local, local, fixed, fixed, fixed, fixed;
 }
 
 /* The selected cell is circled by hand instead of outlined */

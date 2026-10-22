@@ -13,7 +13,7 @@ const declarationsBySelector = (): Map<string, Map<string, string>> => {
         for (const selector of rule.selectors.map(item => item.replace(/\s+/g, " ").trim())) {
             const declarations = bySelector.get(selector) ?? new Map<string, string>();
             rule.walkDecls((declaration) => {
-                declarations.set(declaration.prop, declaration.value.replace(/\s+/g, " ").trim());
+                declarations.set(declaration.prop, declaration.value.replace(/\s+/g, " ").replace(/\( /g, "(").replace(/ \)/g, ")").trim());
             });
             bySelector.set(selector, declarations);
         }
@@ -39,5 +39,37 @@ describe("paper surface", () => {
         for (const selector of selectors) {
             expect(bySelector.get(selector)?.get("background-color"), selector).toBe("var(--color-background)");
         }
+    });
+
+    it("should paint the surface on the app root, so it runs on under the status bar", () => {
+        // Edge to edge, the app root's top padding sits under the status bar; page roots start below
+        // it. The root lays the surface on its own box, which starts at the top of the screen.
+        const appRoot = '[data-style="paper"] .app-safe-area';
+
+        expect(surfaceSelectors()).toContain(appRoot);
+        expect(declarationsBySelector().get(appRoot)?.get("background-attachment") ?? "scroll").not.toContain("fixed");
+    });
+
+    it("should lay the lamp's top fade over the lamp on every surface", () => {
+        const bySelector = declarationsBySelector();
+
+        for (const selector of surfaceSelectors()) {
+            expect(bySelector.get(selector)?.get("background-image"), selector).toContain("var(--paper-lamp-fade), var(--paper-lamp), var(--paper-texture)");
+        }
+    });
+
+    it("should leave the lamp and its fade empty by day, so the dots run to the top edge", () => {
+        const paper = declarationsBySelector().get('[data-style="paper"]');
+
+        expect(paper?.get("--paper-lamp")).toBe("linear-gradient(transparent, transparent)");
+        expect(paper?.get("--paper-lamp-fade")).toBe("linear-gradient(transparent, transparent)");
+    });
+
+    it("should size the lamp to the viewport, so surfaces laid on different boxes draw the same glow", () => {
+        // The app root lays it on its own box, which is no wider than a small screen; page roots
+        // attach it to the viewport. Viewport units and offsets from the top edge agree on both.
+        const night = declarationsBySelector().get(':root.dark[data-style="paper"]');
+
+        expect(night?.get("--paper-lamp")).toMatch(/^radial-gradient\(\d+vw \d+vh at 50% \d+px, /);
     });
 });
