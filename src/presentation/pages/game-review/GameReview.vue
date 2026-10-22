@@ -5,12 +5,15 @@
     >
         <!-- The step panel stays pinned at the bottom; the header, summary and board scroll above it -->
         <div
+            ref="scrollArea"
             class="flex-1 min-h-0 overflow-y-auto overscroll-y-contain flex flex-col gap-5 px-5 pb-5"
             data-testid="review-scroll-area"
         >
             <div
+                ref="header"
                 class="flex items-center justify-between sticky top-0 bg-background pt-6 pb-3 z-10"
                 data-skin="page-header"
+                data-testid="review-header"
             >
                 <button
                     class="flex items-center gap-2 cursor-pointer"
@@ -72,7 +75,10 @@
                 class="bg-card rounded-2xl shadow-card-lg p-2 self-center w-[calc(100%+1.5rem)] max-w-board-fit pointer-events-none"
                 data-testid="review-board"
             >
-                <div class="flex flex-col border-3 border-foreground/20 rounded-xl">
+                <div
+                    ref="boardGrid"
+                    class="flex flex-col border-3 border-foreground/20 rounded-xl"
+                >
                     <div
                         v-for="(row, rowIndex) in board"
                         :key="rowIndex"
@@ -139,7 +145,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, type Component } from "vue";
+import { computed, useTemplateRef, watch, type Component } from "vue";
 import { useRouter } from "vue-router";
 import { ChevronLeft, Eraser, LayoutGrid, Lightbulb, Pencil, Sparkles, StickyNote, Trophy, Undo2, X } from "lucide-vue-next";
 import { ROUTER_PATH } from "@/router";
@@ -154,6 +160,7 @@ import Cell from "@/presentation/pages/game/components/Cell.vue";
 import StepPlaybackPanel from "@/presentation/components/step-presentation/StepPlaybackPanel.vue";
 import StepTag from "@/presentation/components/step-presentation/StepTag.vue";
 import { useGameReview } from "@/presentation/pages/game-review/useGameReview";
+import { revealInScroller } from "@/presentation/pages/game-review/revealInScroller";
 
 const props = defineProps<{
     index: string;
@@ -210,6 +217,18 @@ const isChanged = (row: number, column: number): boolean => {
     const cell = changedCell.value;
     return cell !== null && cell.row === row && cell.column === column;
 };
+
+// Each step brings the cell it changed into view above the pinned panel. Steps that touch no single
+// cell (auto notes, undo, the first and last boards) leave the scroll where the player put it.
+const scrollArea = useTemplateRef<HTMLElement>("scrollArea");
+const header = useTemplateRef<HTMLElement>("header");
+const boardGrid = useTemplateRef<HTMLElement>("boardGrid");
+watch(currentStep, () => {
+    const cell = changedCell.value;
+    const cellElement = cell === null ? null : boardGrid.value?.children[cell.row]?.children[cell.column];
+    if (!(cellElement instanceof HTMLElement) || !scrollArea.value) return;
+    revealInScroller(scrollArea.value, cellElement, header.value?.getBoundingClientRect().bottom ?? 0);
+}, { flush: "post" });
 
 const difficultyLabel = useDifficultyLabel();
 

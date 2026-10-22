@@ -198,6 +198,98 @@ describe("GameReview", () => {
         expect(panelDock.find("[data-testid='review-panel']").exists()).toBe(true);
     });
 
+    describe("keeping the changed cell in view", () => {
+        // The scroll area shows y 0–400 and its sticky header covers y 0–68
+        const SCROLL_AREA = { top: 0, bottom: 400 };
+        const HEADER = { top: 0, bottom: 68 };
+        let scrollBy: ReturnType<typeof vi.fn>;
+
+        const placeChangedCell = (cell: { top: number; bottom: number }) => {
+            const rects: Record<string, { top: number; bottom: number }> = {
+                "review-scroll-area": SCROLL_AREA,
+                "review-header": HEADER,
+                "review-cell-0-1": cell,
+            };
+            // Every other cell sits far below the fold, so only the changed one may be chased
+            vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function (this: HTMLElement) {
+                const rect = rects[this.dataset.testid ?? ""] ?? { top: 900, bottom: 930 };
+                return { ...rect, left: 0, right: 0, width: 0, height: rect.bottom - rect.top, x: 0, y: rect.top } as DOMRect;
+            });
+        };
+
+        const stubReducedMotion = (reduce: boolean) => {
+            vi.stubGlobal("matchMedia", (query: string) => ({
+                matches: reduce && query === "(prefers-reduced-motion: reduce)",
+                media: query,
+            }));
+        };
+
+        beforeEach(() => {
+            scrollBy = vi.fn();
+            Object.defineProperty(HTMLElement.prototype, "scrollBy", { value: scrollBy, configurable: true, writable: true });
+            stubReducedMotion(false);
+        });
+
+        afterEach(() => {
+            Reflect.deleteProperty(HTMLElement.prototype, "scrollBy");
+            vi.unstubAllGlobals();
+            vi.restoreAllMocks();
+        });
+
+        it("should scroll a changed cell hidden below the scroll area up into view, clear of the edge", async () => {
+            placeChangedCell({ top: 420, bottom: 450 });
+
+            const wrapper = await mountReview({ nextClicks: 1 });
+
+            expect(wrapper.find("[data-testid='review-action']").text()).toBe("Fill");
+            // 50px to bring its bottom edge in, and 8px of room past the edge
+            expect(scrollBy).toHaveBeenCalledExactlyOnceWith({ top: 58, behavior: "smooth" });
+        });
+
+        it("should scroll a changed cell hidden behind the sticky header down into view", async () => {
+            placeChangedCell({ top: 40, bottom: 70 });
+
+            await mountReview({ nextClicks: 1 });
+
+            expect(scrollBy).toHaveBeenCalledExactlyOnceWith({ top: -36, behavior: "smooth" });
+        });
+
+        it("should not scroll when the changed cell is already in view", async () => {
+            placeChangedCell({ top: 200, bottom: 230 });
+
+            await mountReview({ nextClicks: 1 });
+
+            expect(scrollBy).not.toHaveBeenCalled();
+        });
+
+        it.each(["autoNotes", "undo"] as const)("should not scroll for a step that changed no single cell (%s)", async (action) => {
+            placeChangedCell({ top: 420, bottom: 450 });
+
+            await mountReview({ action, nextClicks: 1 });
+
+            expect(scrollBy).not.toHaveBeenCalled();
+        });
+
+        it("should not scroll for the initial or final board", async () => {
+            placeChangedCell({ top: 420, bottom: 450 });
+
+            const wrapper = await mountReview({ nextClicks: 0 });
+            await wrapper.find("[data-testid='review-dot-2']").trigger("click");
+
+            expect(wrapper.find("[data-testid='review-action']").text()).toBe("Gave Up");
+            expect(scrollBy).not.toHaveBeenCalled();
+        });
+
+        it("should jump instead of gliding when the user asks for reduced motion", async () => {
+            stubReducedMotion(true);
+            placeChangedCell({ top: 420, bottom: 450 });
+
+            await mountReview({ nextClicks: 1 });
+
+            expect(scrollBy).toHaveBeenCalledExactlyOnceWith({ top: 58, behavior: "instant" });
+        });
+    });
+
     it("should show a board of cells that are not buttons", async () => {
         const wrapper = await mountReview({ nextClicks: 0 });
 
