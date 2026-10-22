@@ -35,23 +35,20 @@ describe("board geometry", () => {
             .find(tag => tag.includes(`data-testid="${testId}"`)) ?? "";
 
     it.each([
+        ["src/presentation/pages/game/GameScreen.vue", "game-board"],
         ["src/presentation/pages/game-review/GameReview.vue", "review-board"],
         ["src/presentation/pages/solver-walkthrough/SolverWalkthrough.vue", "walkthrough-board"],
-    ])("%s gives its board more of the screen width than the page gutter", (path, testId) => {
-        // The page keeps its 20px gutter for everything else; every board reaches 8px from the edge,
-        // so the board is the same width in the game, the review and the walkthrough
-        expect(boardTagOf(path, testId)).toMatch(/class="[^"]*\B-mx-3\b/);
-        expect(boardTagOf(path, testId)).not.toMatch(/class="[^"]*\bw-full\b/);
-    });
-
-    it("should widen the game board the same way, but no further than a short screen allows", () => {
-        // Centred and 24px wider than the page's content, like the other boards; on a short screen
-        // (360×640) it gives up width so the digit keys stay on screen
-        const boardTag = boardTagOf("src/presentation/pages/game/GameScreen.vue", "game-board");
+    ])("%s widens its board past the page gutter, but no further than a short screen allows", (path, testId) => {
+        // Centred and 24px wider than the page's content, so it reaches 8px from the screen edges;
+        // every board shares one cap, so the three match on a short screen (309px at 360×640)
+        const boardTag = boardTagOf(path, testId);
         expect(boardTag).toMatch(/class="[^"]*\bself-center\b/);
         expect(boardTag).toMatch(/class="[^"]*\bw-\[calc\(100%\+1\.5rem\)\]/);
         expect(boardTag).toMatch(/class="[^"]*\bmax-w-board-fit\b/);
+        expect(boardTag).not.toMatch(/class="[^"]*\b(?:w-full|-mx-3)\b/);
+    });
 
+    it("should cap the boards by the screen's height, with a floor for short but wide windows", () => {
         const utility = /@utility max-w-board-fit \{([^}]*)\}/.exec(readFileSync("src/style/index.css", "utf8"))?.[1] ?? "";
         // A short but wide window (a phone in landscape, split screen) keeps a usable board and scrolls
         expect(utility).toMatch(/max-width: max\(17rem, calc\(100dvh - /);

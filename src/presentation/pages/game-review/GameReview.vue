@@ -64,7 +64,7 @@
 
         <div
             data-skin="board"
-            class="bg-card rounded-2xl shadow-card-lg p-2 -mx-3 pointer-events-none"
+            class="bg-card rounded-2xl shadow-card-lg p-2 self-center w-[calc(100%+1.5rem)] max-w-board-fit pointer-events-none"
             data-testid="review-board"
         >
             <div class="flex flex-col border-3 border-foreground/20 rounded-xl">
