@@ -13,6 +13,7 @@ import { openNoSolutionPuzzle } from "@/__tests__/fixtures/openPuzzles";
 import { SAMPLE_PUZZLES } from "@/presentation/pages/solver-walkthrough/samplePuzzles";
 import { expectKeyRowsToShrinkToFit } from "@/__tests__/fixtures/digitKeyRows";
 import { PUZZLE_LOADER_MINIMUM_MS } from "@/presentation/components/puzzle-loader/usePuzzleLoader";
+import { handleBackButton } from "@/presentation/composables/backDismissal";
 
 const samplePuzzle = (id: string): number[][] => {
     const sample = SAMPLE_PUZZLES.find((candidate) => candidate.id === id);
@@ -666,6 +667,18 @@ describe("SolverWalkthrough", () => {
 
             await wrapper.find("[data-testid='reset-button']").trigger("click");
             await wrapper.find("[data-testid='walkthrough-dialog-cancel']").trigger("click");
+            await flushPromises();
+
+            expect(wrapper.find("[data-testid='walkthrough-dialog']").exists()).toBe(false);
+            expect(cellAt(wrapper, 3, 4).text()).toBe("7");
+        });
+
+        it("should keep the puzzle when Back closes the reset dialog", async () => {
+            const { wrapper } = await mountEntering();
+            await enterSeven(wrapper);
+
+            await wrapper.find("[data-testid='reset-button']").trigger("click");
+            handleBackButton(false);
             await flushPromises();
 
             expect(wrapper.find("[data-testid='walkthrough-dialog']").exists()).toBe(false);

@@ -33,6 +33,7 @@ import { startLauncherIconSync } from "@/presentation/theme/launcherIconSync";
 import { STYLES, getPalette, rememberedThemeFor } from "@/theme/palettes";
 import { STYLE_IDS } from "@/application/SettingsStorage";
 import Settings from "@/presentation/pages/settings/Settings.vue";
+import { handleBackButton } from "@/presentation/composables/backDismissal";
 
 const fakeProducts: Product[] = [
     { id: "donate_coffee", tier: "coffee", priceText: "$2.99", amountUsd: 2.99 },
@@ -606,6 +607,19 @@ describe("Settings.vue data group", () => {
         await wrapper.get("[data-testid='clear-records-cancel-button']").trigger("click");
         await flushPromises();
 
+        expect(useStatisticsStore().history).toHaveLength(1);
+    });
+
+    it("should keep records when Back closes the clear records dialog", async () => {
+        const wrapper = mountSettings();
+        recordOneGame();
+        await nextTick();
+
+        await wrapper.get("[data-testid='clear-records-button']").trigger("click");
+        handleBackButton(false);
+        await flushPromises();
+
+        expect(wrapper.find("[data-testid='clear-records-dialog']").exists()).toBe(false);
         expect(useStatisticsStore().history).toHaveLength(1);
     });
 
