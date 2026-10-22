@@ -17,7 +17,23 @@ export class SudokuSolver {
 
     public countSolutions(board: number[][], limit = 2): number {
         const puzzle = board.map(row => [...row]);
+        if (this.hasConflictingGivens(puzzle)) return 0;
         return this.countSolutionsRecursive(puzzle, limit);
+    }
+
+    // The search only checks the digits it places, so givens that already clash must be caught first.
+    private hasConflictingGivens(puzzle: number[][]): boolean {
+        for (let row = 0; row < BOARD_SIZE; row++) {
+            for (let column = 0; column < BOARD_SIZE; column++) {
+                const digit = puzzle[row][column];
+                if (digit === 0) continue;
+                puzzle[row][column] = 0;
+                const valid = this.board.isValidPlacement(puzzle, row, column, digit);
+                puzzle[row][column] = digit;
+                if (!valid) return true;
+            }
+        }
+        return false;
     }
 
     private countSolutionsRecursive(puzzle: number[][], limit: number): number {

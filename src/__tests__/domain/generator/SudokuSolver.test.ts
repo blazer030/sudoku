@@ -72,6 +72,19 @@ describe("SudokuSolver", () => {
         expect(solver.countSolutions(board)).toBe(0);
     });
 
+    it("should count no solutions when two givens already conflict", () => {
+        const emptyBoard = () => Array.from({ length: 9 }, () => Array.from({ length: 9 }, () => 0));
+        const sameRow = emptyBoard();
+        sameRow[0][0] = 5;
+        sameRow[0][4] = 5;
+        const sameBox = emptyBoard();
+        sameBox[0][0] = 5;
+        sameBox[1][1] = 5;
+
+        expect(solver.countSolutions(sameRow, 2)).toBe(0);
+        expect(solver.countSolutions(sameBox, 2)).toBe(0);
+    });
+
     it("should solve a standard difficulty puzzle", () => {
         const board = [
             [4, 9, 0, 0, 0, 0, 8, 0, 0],
