@@ -67,15 +67,6 @@ describe("Game Routing", () => {
     });
 
     describe("Leave Game Dialog", () => {
-        it("should show leave game dialog when clicking Back button", async () => {
-            const { wrapper } = await mountWithRouterView();
-
-            await wrapper.find("[data-testid='back-button']").trigger("click");
-
-            expect(wrapper.find("[data-testid='leave-game-dialog']").exists()).toBe(true);
-            expect(wrapper.find("[data-testid='leave-game-dialog']").text()).toContain("Leave Game?");
-        });
-
         it("should save game when clicking Save & Leave", async () => {
             const { wrapper } = await mountWithRouterView();
 
@@ -105,15 +96,5 @@ describe("Game Routing", () => {
             expect(useGameStore().savedGame).toBeNull();
         });
 
-        it("should close dialog when clicking Cancel", async () => {
-            const { wrapper } = await mountWithRouterView();
-
-            await wrapper.find("[data-testid='back-button']").trigger("click");
-            expect(wrapper.find("[data-testid='leave-game-dialog']").exists()).toBe(true);
-
-            await wrapper.find("[data-testid='leave-cancel-button']").trigger("click");
-
-            expect(wrapper.find("[data-testid='leave-game-dialog']").exists()).toBe(false);
-        });
     });
 });

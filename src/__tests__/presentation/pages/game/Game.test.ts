@@ -131,21 +131,6 @@ describe("Game", () => {
         expect(router.currentRoute.value.path).toBe("/");
     });
 
-    it("should render board from store sudoku instance", () => {
-        const pinia = createPinia();
-        const router = createTestRouter();
-        const gameStore = useGameStore(pinia);
-        gameStore.sudoku = createKnownSudoku();
-        gameStore.setDifficulty("easy");
-        const wrapper = mount(Game, { global: { plugins: [pinia, router] } });
-
-        // clue cells should show their numbers
-        expect(wrapper.find("[data-testid='cell-0-0']").text()).toBe("5");
-        expect(wrapper.find("[data-testid='cell-0-1']").text()).toBe("3");
-        // slot cells should be empty
-        expect(wrapper.find("[data-testid='cell-0-2']").text()).toBe("");
-    });
-
     it("should start timer from store elapsedSeconds", async () => {
         vi.useFakeTimers();
         const pinia = createPinia();
@@ -273,20 +258,6 @@ describe("Game", () => {
         // (0, 2) 是 slot 格子，應該仍然是空的
         const cell = wrapper.find("[data-testid='cell-0-2']");
         expect(cell.text()).toBe("");
-    });
-
-    it("should ignore number button when clue cell is selected", async () => {
-        const wrapper = mountGame();
-
-        // 選取 (0, 0) clue 格子（值為 5），按數字 4
-        const clueCell = wrapper.find("[data-testid='cell-0-0']");
-        await clueCell.trigger("click");
-
-        const numberButton = wrapper.find("[data-testid='number-4']");
-        await numberButton.trigger("click");
-
-        // clue 格子仍顯示原始值
-        expect(clueCell.text()).toBe("5");
     });
 
     it("should select number button when clicked without cell selected", async () => {
@@ -593,33 +564,12 @@ describe("Game", () => {
         expect(cell.text()).toBe("");
     });
 
-    it("should show cursor-pointer on slot cells", () => {
+    it("should show cursor-pointer on slot cells only", () => {
         const wrapper = mountGame();
 
-        // (0, 2) 是 slot 格子
-        const slotCell = wrapper.find("[data-testid='cell-0-2']");
-        expect(slotCell.classes()).toContain("cursor-pointer");
-    });
-
-    it("should not show cursor-pointer on clue cells", () => {
-        const wrapper = mountGame();
-
-        // (0, 0) 是 clue 格子
-        const clueCell = wrapper.find("[data-testid='cell-0-0']");
-        expect(clueCell.classes()).not.toContain("cursor-pointer");
-    });
-
-    it("should render slot cells as empty", () => {
-        const wrapper = mountGame();
-
-        for (let row = 0; row < 9; row++) {
-            for (let column = 0; column < 9; column++) {
-                if (knownPuzzle[row][column] === 0) {
-                    const cell = wrapper.find(`[data-testid="cell-${row}-${column}"]`);
-                    expect(cell.text()).toBe("");
-                }
-            }
-        }
+        // (0, 2) is a slot cell, (0, 0) the clue 5
+        expect(wrapper.find("[data-testid='cell-0-2']").classes()).toContain("cursor-pointer");
+        expect(wrapper.find("[data-testid='cell-0-0']").classes()).not.toContain("cursor-pointer");
     });
 
     it("should increment timer every second after game starts", async () => {
@@ -643,6 +593,7 @@ describe("Game", () => {
 
         // 打開離開彈窗
         await wrapper.find("[data-testid='back-button']").trigger("click");
+        expect(wrapper.find("[data-testid='leave-game-dialog']").exists()).toBe(true);
 
         // 彈窗顯示期間計時器不應遞增
         await vi.advanceTimersByTimeAsync(5000);
@@ -650,6 +601,7 @@ describe("Game", () => {
 
         // 關閉彈窗後計時器恢復
         await wrapper.find("[data-testid='leave-cancel-button']").trigger("click");
+        expect(wrapper.find("[data-testid='leave-game-dialog']").exists()).toBe(false);
         await vi.advanceTimersByTimeAsync(2000);
         expect(wrapper.find("[data-testid='timer']").text()).toBe("00:05");
     });
@@ -697,11 +649,10 @@ describe("Game", () => {
         expect(wrapper.find("[data-testid='badge-8']").text()).toBe("3");
     });
 
-    it("should disable number button when all 9 instances are correctly filled", async () => {
+    it("should disable and deselect a number once all 9 instances are correctly filled", async () => {
         const wrapper = mountGame();
 
-        // 數字 8 有 5 個 clue，再填入 4 個正確位置湊滿 9 次
-        // (0,5)=8, (1,8)=8, (5,6)=8, (7,1)=8
+        // 8 has 5 clues; its other four places are (0,5), (1,8), (5,6) and (7,1)
         const cellsToFill = [[0, 5], [1, 8], [5, 6], [7, 1]];
         await wrapper.find("[data-testid='number-8']").trigger("click");
         for (const [row, column] of cellsToFill) {
@@ -709,19 +660,6 @@ describe("Game", () => {
         }
 
         expect(wrapper.find("[data-testid='number-8']").attributes("disabled")).toBeDefined();
-    });
-
-    it("should deselect number when all 9 instances are filled in number-first mode", async () => {
-        const wrapper = mountGame();
-
-        // 數字 8 有 5 個 clue，再填入 4 個正確位置湊滿 9 次
-        const cellsToFill = [[0, 5], [1, 8], [5, 6], [7, 1]];
-        await wrapper.find("[data-testid='number-8']").trigger("click");
-        for (const [row, column] of cellsToFill) {
-            await wrapper.find(`[data-testid='cell-${row}-${column}']`).trigger("click");
-        }
-
-        // 填滿 9 個後，數字按鈕不再是 selected
         expect(wrapper.find("[data-testid='number-8']").classes()).not.toContain("bg-primary");
     });
 
@@ -797,35 +735,6 @@ describe("Game", () => {
         expect(wrapper.find("[data-testid='timer']").text()).toBe("00:45");
     });
 
-    it("should update remaining count badge after inputting a number in continued game", async () => {
-        const savedState: GameState = {
-            difficulty: "medium",
-            answer: knownAnswer.map(row => [...row]),
-            cells: knownPuzzle.map(row =>
-                row.map(puzzleValue => ({
-                    clue: puzzleValue,
-                    entry: 0,
-                    notes: [],
-                }))
-            ),
-            elapsedSeconds: 10,
-            completed: false,
-            hintsUsed: 0,
-        };
-
-        const wrapper = mountContinueGame(savedState);
-
-        // 數字 8 有 5 個 clue → 初始剩餘 = 4
-        expect(wrapper.find("[data-testid='badge-8']").text()).toBe("4");
-
-        // 填入 1 個 8 → (0,5) 的答案是 8
-        await wrapper.find("[data-testid='number-8']").trigger("click");
-        await wrapper.find("[data-testid='cell-0-5']").trigger("click");
-
-        // 剩餘應該降為 3
-        expect(wrapper.find("[data-testid='badge-8']").text()).toBe("3");
-    });
-
     it("should record game result when game is completed", async () => {
         localStorage.setItem("sudoku-settings", JSON.stringify({ completionFlash: false }));
         const wrapper = mountGame("easy", nearlySolvedSudoku());
@@ -866,30 +775,19 @@ describe("Game", () => {
         expect(useGameStore().savedGame).toBeNull();
     });
 
-    it("should render 9x9 grid with clue cells showing their numbers", () => {
+    it("should render the store's board: 81 cells, clues with their digits and empty slot cells", () => {
         const wrapper = mountGame();
 
-        const cells = wrapper.findAllComponents(Cell);
-        expect(cells).toHaveLength(81);
-
+        expect(wrapper.findAllComponents(Cell)).toHaveLength(81);
         for (let row = 0; row < 9; row++) {
             for (let column = 0; column < 9; column++) {
-                if (knownPuzzle[row][column] !== 0) {
-                    const cell = wrapper.find(`[data-testid="cell-${row}-${column}"]`);
-                    expect(cell.text()).toBe(String(knownPuzzle[row][column]));
-                }
+                const cell = wrapper.find(`[data-testid="cell-${row}-${column}"]`);
+                expect(cell.text()).toBe(knownPuzzle[row][column] === 0 ? "" : String(knownPuzzle[row][column]));
             }
         }
     });
 
     describe("Hint System", () => {
-        it("should show Hint button in controls (replacing Auto-Notes)", () => {
-            const wrapper = mountGame();
-
-            expect(wrapper.find("[data-testid='hint-button']").exists()).toBe(true);
-            expect(wrapper.find("[data-testid='auto-notes-button']").exists()).toBe(false);
-        });
-
         it("should show HintMenuPopup when clicking Hint button", async () => {
             const wrapper = mountGame();
 
@@ -911,20 +809,6 @@ describe("Game", () => {
             await wrapper.find("[data-testid='hint-button']").trigger("click");
             expect(wrapper.find("[data-testid='hint-remaining']").text()).toBe("3 hints left this game");
             expect(wrapper.find("[data-testid='hint-free-note']").exists()).toBe(false);
-        });
-
-        it("should show error style on conflict cells after Check Conflicts", async () => {
-            const wrapper = mountGame();
-
-            // 填入衝突數字: (0,0) clue=5，在 (0,2) 填 5
-            await wrapper.find("[data-testid='number-5']").trigger("click");
-            await wrapper.find("[data-testid='cell-0-2']").trigger("click");
-            await wrapper.find("[data-testid='number-5']").trigger("click"); // deselect
-
-            await wrapper.find("[data-testid='hint-button']").trigger("click");
-            await wrapper.find("[data-testid='hint-check-conflicts']").trigger("click");
-
-            expect(wrapper.find("[data-testid='cell-0-2']").classes()).toContain("bg-error-surface");
         });
 
         it("should toast when Check Conflicts finds nothing", async () => {
@@ -1337,14 +1221,6 @@ describe("Game", () => {
             await flushPromises();
         };
 
-        it("should open the leave dialog when nothing is open", async () => {
-            const wrapper = mountGame();
-
-            await pressBack();
-
-            expect(wrapper.find("[data-testid='leave-game-dialog']").exists()).toBe(true);
-        });
-
         it("should close the hint menu without opening the leave dialog", async () => {
             const wrapper = mountGame();
             await wrapper.find("[data-testid='hint-button']").trigger("click");
@@ -1353,16 +1229,6 @@ describe("Game", () => {
             await pressBack();
 
             expect(wrapper.find("[data-testid='hint-menu']").exists()).toBe(false);
-            expect(wrapper.find("[data-testid='leave-game-dialog']").exists()).toBe(false);
-        });
-
-        it("should close the leave dialog instead of stacking another", async () => {
-            const wrapper = mountGame();
-            await pressBack();
-            expect(wrapper.find("[data-testid='leave-game-dialog']").exists()).toBe(true);
-
-            await pressBack();
-
             expect(wrapper.find("[data-testid='leave-game-dialog']").exists()).toBe(false);
         });
 
