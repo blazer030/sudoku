@@ -230,7 +230,8 @@ export const en = {
         filteredEmpty: "No games at this difficulty yet",
         empty: {
             title: "No games played yet",
-            description: "Your game history will appear here",
+            description: "Finish or give up a game and your stats appear here",
+            action: "Play Your First Game",
         },
     },
     donate: {

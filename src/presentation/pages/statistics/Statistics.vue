@@ -4,7 +4,7 @@
             <button
                 class="flex items-center gap-2 cursor-pointer"
                 data-testid="stats-back-button"
-                @click="goBack"
+                @click="goHome"
             >
                 <ChevronLeft
                     :size="24"
@@ -16,179 +16,188 @@
             <div class="w-15" />
         </div>
 
-        <div class="flex flex-col gap-2 mt-2">
-            <span class="text-foreground-muted text-xs font-semibold tracking-wider uppercase px-1">{{ t("statistics.overview") }}</span>
-            <div class="flex gap-3">
-                <div
-                    class="flex-1 flex flex-col items-center gap-1 bg-card rounded-2xl px-2 py-4 shadow-card"
-                    data-testid="games-won"
-                >
-                    <span class="text-3xl font-bold text-primary font-mono">{{ stats.overall.gamesWon }}</span>
-                    <span class="text-xs font-medium text-foreground-secondary">{{ t("statistics.gamesWon") }}</span>
-                </div>
-                <div
-                    class="flex-1 flex flex-col items-center gap-1 bg-card rounded-2xl px-2 py-4 shadow-card"
-                    data-testid="win-rate"
-                >
-                    <span class="text-3xl font-bold text-primary font-mono">{{ winRateDisplay }}</span>
-                    <span class="text-xs font-medium text-foreground-secondary">{{ t("statistics.winRate") }}</span>
-                </div>
-                <div
-                    class="flex-1 flex flex-col items-center gap-1 bg-card rounded-2xl px-2 py-4 shadow-card"
-                    data-testid="day-streak"
-                >
-                    <span class="text-3xl font-bold text-foreground font-mono">{{ dayStreak }}</span>
-                    <span class="text-xs font-medium text-foreground-secondary text-center">{{ t("statistics.dayStreak") }}</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="flex flex-col gap-2 mt-5">
-            <span class="text-foreground-muted text-xs font-semibold tracking-wider uppercase px-1">{{ t("statistics.byDifficulty") }}</span>
-            <div class="bg-card rounded-2xl p-4 shadow-card flex flex-col divide-y divide-border">
-                <div
-                    v-for="difficulty in DIFFICULTIES"
-                    :key="difficulty"
-                    :data-testid="`difficulty-stats-${difficulty}`"
-                    class="flex items-center gap-2 py-3 first:pt-0 last:pb-0"
-                >
-                    <span class="text-base font-medium text-foreground w-16 shrink-0">{{ difficultyLabel(difficulty) }}</span>
+        <template v-if="hasRecords">
+            <div class="flex flex-col gap-2 mt-2">
+                <span class="text-foreground-muted text-xs font-semibold tracking-wider uppercase px-1">{{ t("statistics.overview") }}</span>
+                <div class="flex gap-3">
                     <div
-                        v-if="stats[difficulty].gamesPlayed > 0"
-                        class="grid grid-cols-3 flex-1"
+                        class="flex-1 flex flex-col items-center gap-1 bg-card rounded-2xl px-2 py-4 shadow-card"
+                        data-testid="games-won"
                     >
-                        <div
-                            :data-testid="`difficulty-best-${difficulty}`"
-                            class="flex flex-col items-center"
-                        >
-                            <span class="text-base font-semibold font-mono text-primary">{{ formatOptionalTime(stats[difficulty].bestTime) }}</span>
-                            <span class="text-[11px] text-foreground-secondary">{{ t("statistics.best") }}</span>
-                        </div>
-                        <div
-                            :data-testid="`difficulty-average-${difficulty}`"
-                            class="flex flex-col items-center"
-                        >
-                            <span class="text-base font-semibold font-mono text-foreground">{{ formatOptionalTime(stats[difficulty].averageTime) }}</span>
-                            <span class="text-[11px] text-foreground-secondary">{{ t("statistics.average") }}</span>
-                        </div>
-                        <div
-                            :data-testid="`difficulty-completed-${difficulty}`"
-                            class="flex flex-col items-center"
-                        >
-                            <span class="text-base font-semibold font-mono text-foreground">{{ `${stats[difficulty].gamesWon}/${stats[difficulty].gamesPlayed}` }}</span>
-                            <span class="text-[11px] text-foreground-secondary">{{ t("statistics.completed") }}</span>
-                        </div>
+                        <span class="text-3xl font-bold text-primary font-mono">{{ stats.overall.gamesWon }}</span>
+                        <span class="text-xs font-medium text-foreground-secondary">{{ t("statistics.gamesWon") }}</span>
                     </div>
-                    <span
-                        v-else
-                        class="text-sm text-foreground-muted"
-                    >{{ t("statistics.notPlayed") }}</span>
+                    <div
+                        class="flex-1 flex flex-col items-center gap-1 bg-card rounded-2xl px-2 py-4 shadow-card"
+                        data-testid="win-rate"
+                    >
+                        <span class="text-3xl font-bold text-primary font-mono">{{ winRateDisplay }}</span>
+                        <span class="text-xs font-medium text-foreground-secondary">{{ t("statistics.winRate") }}</span>
+                    </div>
+                    <div
+                        class="flex-1 flex flex-col items-center gap-1 bg-card rounded-2xl px-2 py-4 shadow-card"
+                        data-testid="day-streak"
+                    >
+                        <span class="text-3xl font-bold text-foreground font-mono">{{ dayStreak }}</span>
+                        <span class="text-xs font-medium text-foreground-secondary text-center">{{ t("statistics.dayStreak") }}</span>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="flex flex-col gap-2 mt-5">
-            <span class="text-foreground-muted text-xs font-semibold tracking-wider uppercase px-1">{{ t("statistics.recentGames") }}</span>
-            <SegmentedControl
-                v-if="hasRecords"
-                v-model="recentGamesFilter"
-                :options="recentGamesFilterOptions"
-                data-testid="recent-games-filter"
-                test-id-prefix="recent-filter"
-            />
-            <div
-                v-if="hasRecords"
-                class="flex flex-col gap-2"
-            >
-                <button
-                    v-for="{ game, historyIndex } in visibleRecentGames"
-                    :key="historyIndex"
-                    :class="game.replay ? 'cursor-pointer' : 'cursor-default'"
-                    class="flex items-center justify-between bg-card rounded-xl py-3 px-4 shadow-card-sm text-left"
-                    data-testid="recent-game"
-                    @click="openReview(game, historyIndex)"
-                >
-                    <div class="flex items-center gap-3">
+            <div class="flex flex-col gap-2 mt-5">
+                <span class="text-foreground-muted text-xs font-semibold tracking-wider uppercase px-1">{{ t("statistics.byDifficulty") }}</span>
+                <div class="bg-card rounded-2xl p-4 shadow-card flex flex-col divide-y divide-border">
+                    <div
+                        v-for="difficulty in DIFFICULTIES"
+                        :key="difficulty"
+                        :data-testid="`difficulty-stats-${difficulty}`"
+                        class="flex items-center gap-2 py-3 first:pt-0 last:pb-0"
+                    >
+                        <span class="text-base font-medium text-foreground w-16 shrink-0">{{ difficultyLabel(difficulty) }}</span>
                         <div
-                            :class="game.completed
-                                ? 'bg-primary-light text-primary'
-                                : 'bg-accent/10 text-accent'"
-                            class="w-9 h-9 rounded-icon flex items-center justify-center"
+                            v-if="stats[difficulty].gamesPlayed > 0"
+                            class="grid grid-cols-3 flex-1"
                         >
-                            <Trophy
-                                v-if="game.completed"
-                                :size="18"
-                            />
-                            <X
-                                v-else
-                                :size="18"
-                            />
-                        </div>
-                        <div class="flex flex-col gap-0.5">
-                            <span class="text-sm font-semibold text-foreground">
-                                {{ difficultyLabel(game.difficulty) }}
-                            </span>
-                            <span class="text-[11px] text-foreground-muted">
-                                {{ formatDate(game.date, appLocale) }}
-                            </span>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <div class="flex flex-col items-end gap-0.5">
-                            <span
-                                :class="game.completed ? 'text-primary' : 'text-accent'"
-                                class="text-base font-semibold font-mono"
+                            <div
+                                :data-testid="`difficulty-best-${difficulty}`"
+                                class="flex flex-col items-center"
                             >
-                                {{ game.completed ? formatTime(game.elapsedSeconds) : t("statistics.gaveUp") }}
-                            </span>
-                            <span
-                                class="flex items-center gap-0.75 text-[11px] font-medium text-foreground-muted font-mono"
-                                data-testid="hints-used"
+                                <span class="text-base font-semibold font-mono text-primary">{{ formatOptionalTime(stats[difficulty].bestTime) }}</span>
+                                <span class="text-[11px] text-foreground-secondary">{{ t("statistics.best") }}</span>
+                            </div>
+                            <div
+                                :data-testid="`difficulty-average-${difficulty}`"
+                                class="flex flex-col items-center"
                             >
-                                <Lightbulb :size="11" />
-                                {{ game.hintsUsed }}
-                            </span>
+                                <span class="text-base font-semibold font-mono text-foreground">{{ formatOptionalTime(stats[difficulty].averageTime) }}</span>
+                                <span class="text-[11px] text-foreground-secondary">{{ t("statistics.average") }}</span>
+                            </div>
+                            <div
+                                :data-testid="`difficulty-completed-${difficulty}`"
+                                class="flex flex-col items-center"
+                            >
+                                <span class="text-base font-semibold font-mono text-foreground">{{ `${stats[difficulty].gamesWon}/${stats[difficulty].gamesPlayed}` }}</span>
+                                <span class="text-[11px] text-foreground-secondary">{{ t("statistics.completed") }}</span>
+                            </div>
                         </div>
-                        <ChevronRight
-                            v-if="game.replay"
-                            :size="20"
-                            class="text-foreground-muted"
-                            data-testid="review-chevron"
-                        />
+                        <span
+                            v-else
+                            class="text-sm text-foreground-muted"
+                        >{{ t("statistics.notPlayed") }}</span>
                     </div>
-                </button>
-                <p
-                    v-if="filteredRecentGames.length === 0"
-                    class="text-sm text-foreground-muted text-center py-6"
-                    data-testid="recent-games-empty"
-                >
-                    {{ t("statistics.filteredEmpty") }}
-                </p>
-                <button
-                    v-if="filteredRecentGames.length > visibleCount"
-                    v-press
-                    class="w-full h-11 bg-card rounded-xl shadow-card-sm text-primary text-sm font-semibold cursor-pointer"
-                    data-testid="show-more-button"
-                    @click="showMore"
-                >
-                    {{ t("statistics.showMore") }}
-                </button>
+                </div>
             </div>
 
-            <div
-                v-if="!hasRecords"
-                class="flex flex-col items-center gap-2"
-                data-testid="empty-state"
-            >
-                <div class="w-16 h-16 rounded-full bg-card shadow-card flex items-center justify-center mb-2">
-                    <Trophy
-                        :size="28"
-                        class="text-foreground-muted"
-                    />
+            <div class="flex flex-col gap-2 mt-5">
+                <span class="text-foreground-muted text-xs font-semibold tracking-wider uppercase px-1">{{ t("statistics.recentGames") }}</span>
+                <SegmentedControl
+                    v-model="recentGamesFilter"
+                    :options="recentGamesFilterOptions"
+                    data-testid="recent-games-filter"
+                    test-id-prefix="recent-filter"
+                />
+                <div class="flex flex-col gap-2">
+                    <button
+                        v-for="{ game, historyIndex } in visibleRecentGames"
+                        :key="historyIndex"
+                        :class="game.replay ? 'cursor-pointer' : 'cursor-default'"
+                        class="flex items-center justify-between bg-card rounded-xl py-3 px-4 shadow-card-sm text-left"
+                        data-testid="recent-game"
+                        @click="openReview(game, historyIndex)"
+                    >
+                        <div class="flex items-center gap-3">
+                            <div
+                                :class="game.completed
+                                    ? 'bg-primary-light text-primary'
+                                    : 'bg-accent/10 text-accent'"
+                                class="w-9 h-9 rounded-icon flex items-center justify-center"
+                            >
+                                <Trophy
+                                    v-if="game.completed"
+                                    :size="18"
+                                />
+                                <X
+                                    v-else
+                                    :size="18"
+                                />
+                            </div>
+                            <div class="flex flex-col gap-0.5">
+                                <span class="text-sm font-semibold text-foreground">
+                                    {{ difficultyLabel(game.difficulty) }}
+                                </span>
+                                <span class="text-[11px] text-foreground-muted">
+                                    {{ formatDate(game.date, appLocale) }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="flex flex-col items-end gap-0.5">
+                                <span
+                                    :class="game.completed ? 'text-primary' : 'text-accent'"
+                                    class="text-base font-semibold font-mono"
+                                >
+                                    {{ game.completed ? formatTime(game.elapsedSeconds) : t("statistics.gaveUp") }}
+                                </span>
+                                <span
+                                    class="flex items-center gap-0.75 text-[11px] font-medium text-foreground-muted font-mono"
+                                    data-testid="hints-used"
+                                >
+                                    <Lightbulb :size="11" />
+                                    {{ game.hintsUsed }}
+                                </span>
+                            </div>
+                            <ChevronRight
+                                v-if="game.replay"
+                                :size="20"
+                                class="text-foreground-muted"
+                                data-testid="review-chevron"
+                            />
+                        </div>
+                    </button>
+                    <p
+                        v-if="filteredRecentGames.length === 0"
+                        class="text-sm text-foreground-muted text-center py-6"
+                        data-testid="recent-games-empty"
+                    >
+                        {{ t("statistics.filteredEmpty") }}
+                    </p>
+                    <button
+                        v-if="filteredRecentGames.length > visibleCount"
+                        v-press
+                        class="w-full h-11 bg-card rounded-xl shadow-card-sm text-primary text-sm font-semibold cursor-pointer"
+                        data-testid="show-more-button"
+                        @click="showMore"
+                    >
+                        {{ t("statistics.showMore") }}
+                    </button>
                 </div>
-                <span class="text-base font-semibold text-foreground">{{ t("statistics.empty.title") }}</span>
-                <span class="text-sm text-foreground-muted">{{ t("statistics.empty.description") }}</span>
             </div>
+        </template>
+
+        <div
+            v-else
+            class="flex-1 flex flex-col items-center justify-center gap-3 pb-16"
+            data-testid="empty-state"
+        >
+            <div
+                class="w-20 h-20 rounded-full bg-primary-light flex items-center justify-center"
+                aria-hidden="true"
+            >
+                <ChartBar
+                    :size="36"
+                    class="text-primary"
+                />
+            </div>
+            <span class="text-lg font-semibold text-foreground">{{ t("statistics.empty.title") }}</span>
+            <span class="text-sm text-foreground-secondary text-center">{{ t("statistics.empty.description") }}</span>
+            <button
+                v-press
+                class="h-12 px-6 mt-2 bg-primary text-on-primary rounded-xl shadow-primary font-semibold cursor-pointer"
+                data-testid="start-first-game-button"
+                @click="goHome"
+            >
+                {{ t("statistics.empty.action") }}
+            </button>
         </div>
     </div>
 </template>
@@ -196,7 +205,7 @@
 <script lang="ts" setup>
 import { computed, ref, watch } from "vue";
 import { useRouter } from "vue-router";
-import { ChevronLeft, ChevronRight, Lightbulb, Trophy, X } from "lucide-vue-next";
+import { ChartBar, ChevronLeft, ChevronRight, Lightbulb, Trophy, X } from "lucide-vue-next";
 import { ROUTER_PATH } from "@/router";
 import { useStatisticsStore } from "@/stores/statisticsStore";
 import type { Difficulty } from "@/domain";
@@ -266,7 +275,7 @@ const openReview = (game: GameResult, historyIndex: number) => {
     void router.push(ROUTER_PATH.gameReviewFor(historyIndex));
 };
 
-const goBack = () => {
+const goHome = () => {
     void router.push(ROUTER_PATH.home);
 };
 </script>

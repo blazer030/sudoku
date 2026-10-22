@@ -227,7 +227,8 @@ export const zhHant: MessageSchema = {
         filteredEmpty: "這個難度還沒有遊戲紀錄",
         empty: {
             title: "還沒有遊戲紀錄",
-            description: "你的遊戲紀錄會顯示在這裡",
+            description: "玩完或放棄一場遊戲後，統計就會出現在這裡",
+            action: "開始第一局",
         },
     },
     donate: {

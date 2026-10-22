@@ -288,13 +288,53 @@ describe("Statistics", () => {
         expect(games[0].find("[data-testid='hints-used']").text()).toContain("0");
     });
 
-    it("should show empty state when no games played", () => {
+    it("should show no numbers before the first game", () => {
         const { wrapper } = mountStatistics();
 
-        expect(wrapper.find("[data-testid='games-won']").text()).toContain("0");
-        expect(wrapper.find("[data-testid='win-rate']").text()).toContain("0%");
-        expect(wrapper.find("[data-testid='difficulty-stats-easy']").text()).toContain("Not played yet");
-        expect(wrapper.findAll("[data-testid='recent-game']")).toHaveLength(0);
+        for (const selector of [
+            "[data-testid='games-won']",
+            "[data-testid='win-rate']",
+            "[data-testid='day-streak']",
+            "[data-testid^='difficulty-stats-']",
+            "[data-testid='recent-games-filter']",
+        ]) {
+            expect(wrapper.find(selector).exists()).toBe(false);
+        }
+        expect(wrapper.text()).not.toMatch(/\d/);
+        const emptyState = wrapper.find("[data-testid='empty-state']");
+        expect(emptyState.text()).toContain("No games played yet");
+        expect(emptyState.text()).toContain("Play Your First Game");
+    });
+
+    it("should show the empty state in Traditional Chinese", async () => {
+        const { wrapper } = mountStatistics();
+
+        i18n.global.locale.value = "zh-Hant";
+        await nextTick();
+
+        const emptyState = wrapper.find("[data-testid='empty-state']");
+        expect(emptyState.text()).toContain("還沒有遊戲紀錄");
+        expect(emptyState.text()).toContain("開始第一局");
+        expect(wrapper.text()).not.toMatch(/\d/);
+    });
+
+    it("should go home from the first game button", async () => {
+        const { wrapper, router } = mountStatistics();
+        await router.push("/statistics");
+        await router.isReady();
+
+        await wrapper.find("[data-testid='start-first-game-button']").trigger("click");
+        await flushPromises();
+
+        expect(router.currentRoute.value.path).toBe("/");
+    });
+
+    it("should hide the empty state once a game is recorded", () => {
+        recordGames([{ difficulty: "easy", elapsedSeconds: 100, completed: true }]);
+        const { wrapper } = mountStatistics();
+
+        expect(wrapper.find("[data-testid='empty-state']").exists()).toBe(false);
+        expect(wrapper.find("[data-testid='games-won']").exists()).toBe(true);
     });
 
     it("should not offer clearing records", () => {
