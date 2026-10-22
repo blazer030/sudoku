@@ -105,6 +105,18 @@ describe("Home", () => {
         expect(wrapper.get("h1").text()).toBe("Sudoku");
     });
 
+    it("should let the new game button colour its icon and label", () => {
+        for (const savedGame of [undefined, dummySave]) {
+            const { wrapper } = mountHome({ savedGame });
+            const button = wrapper.get("[data-testid='new-game-button']");
+            const colourClasses = [button.get("svg"), button.get("span")]
+                .flatMap(element => element.classes())
+                .filter(name => /^text-(?!(?:xs|sm|base|lg|[2-9]?xl)$)/.test(name));
+
+            expect(colourClasses).toEqual([]);
+        }
+    });
+
     it("should navigate to game page when clicking New Game button without saved game", async () => {
         const { wrapper, router } = mountHome();
         await router.push("/");

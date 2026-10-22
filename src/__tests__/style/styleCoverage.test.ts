@@ -19,7 +19,15 @@ const REQUIRED_SELECTORS: Record<StyleId, readonly string[]> = {
         '[data-skin~="title-glyph"]',
         '[data-skin~="segmented-indicator"]',
     ],
-    paper: [],
+    paper: [
+        ...PRESS,
+        '[data-skin~="page-ruled"]',
+        '[data-variant="selected"]::after',
+        '[data-skin~="check"]',
+        '[data-skin~="continue"]',
+        '[data-skin~="new-game"]',
+        ':root.dark[data-style="paper"]',
+    ],
 };
 
 const selectorsOf = (style: StyleId): string[] => {

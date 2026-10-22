@@ -20,3 +20,157 @@
 [data-style="paper"] .font-key {
     font-weight: 700;
 }
+
+/* Texture: faint dots of the border colour, behind all content. No image, so the colour and
+   contrast tests see it (inks are checked on the border at 40% over the background). */
+[data-style="paper"] body {
+    background-image:
+        radial-gradient(circle, color-mix(in srgb, var(--color-border) 40%, transparent) 0.7px, transparent 1px),
+        radial-gradient(circle, color-mix(in srgb, var(--color-border) 40%, transparent) 0.7px, transparent 1px);
+    background-size: 9px 9px, 13px 13px;
+    background-position: 0 0, 4px 6px;
+}
+
+/* Night desk: a warm lamp glows from the top edge, as a background layer under the texture */
+:root.dark[data-style="paper"] body {
+    background-image:
+        radial-gradient(110% 55% at 50% -6%, color-mix(in srgb, var(--color-lamp) 35%, transparent), transparent 65%),
+        radial-gradient(circle, color-mix(in srgb, var(--color-border) 40%, transparent) 0.7px, transparent 1px),
+        radial-gradient(circle, color-mix(in srgb, var(--color-border) 40%, transparent) 0.7px, transparent 1px);
+    background-size: 100% 100%, 9px 9px, 13px 13px;
+    background-position: 0 0, 0 0, 4px 6px;
+    background-repeat: no-repeat, repeat, repeat;
+}
+
+/* Ruled pages: a line every 32px and a red margin line 14px in, inside the page gutter so no
+   text crosses it. Local attachment scrolls the lines with the content. */
+[data-style="paper"] [data-skin~="page-ruled"] {
+    background-image:
+        linear-gradient(to right, transparent 14px, var(--color-margin-line) 14px, var(--color-margin-line) 15.5px, transparent 15.5px),
+        repeating-linear-gradient(to bottom, transparent 0, transparent 31px, var(--color-rule) 31px, var(--color-rule) 32px);
+    background-attachment: local;
+}
+
+/* The selected cell is circled by hand instead of outlined */
+[data-style="paper"] [data-variant="selected"] {
+    position: relative;
+    --tw-ring-shadow: 0 0 transparent;
+}
+
+@keyframes paper-circle-draw {
+    from { clip-path: inset(0 100% 0 0); }
+    to { clip-path: inset(0 0 0 0); }
+}
+
+/* A slightly open ellipse; the SVG is only a mask, the ink is the primary */
+[data-style="paper"] [data-variant="selected"]::after {
+    content: "";
+    position: absolute;
+    inset: 1px;
+    pointer-events: none;
+    background-color: var(--color-primary);
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpath d='M30 7.5C23 3.5 11 4.5 6 11.5S3.5 29 11 33.5 30 37.5 35 30 37 13 27 6.8' fill='none' stroke='currentColor' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpath d='M30 7.5C23 3.5 11 4.5 6 11.5S3.5 29 11 33.5 30 37.5 35 30 37 13 27 6.8' fill='none' stroke='currentColor' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+    rotate: -4deg;
+    animation: paper-circle-draw 220ms ease-out;
+}
+
+/* An option tile's tick is drawn as a pen stroke when it appears */
+@keyframes paper-check-draw {
+    from { stroke-dashoffset: 24; }
+    to { stroke-dashoffset: 0; }
+}
+
+[data-style="paper"] [data-skin~="check"] svg {
+    stroke-dasharray: 24;
+    animation: paper-check-draw 300ms ease-out;
+}
+
+/* Presses land like a stamp. vPress sets the data attributes; input never waits for them.
+   The ink overlay is a colour change, so it stays on under reduced motion. */
+[data-style="paper"] [data-pressed] {
+    --press-overlay: color-mix(in srgb, var(--color-primary) 10%, transparent);
+    background-image: linear-gradient(var(--press-overlay), var(--press-overlay));
+}
+
+[data-style="paper"] [data-press-motion] {
+    transition-property: transform, background-color, color, box-shadow, opacity;
+    transition-duration: 340ms;
+    transition-timing-function: cubic-bezier(0.3, 1.7, 0.5, 1);
+}
+
+[data-style="paper"] [data-press-motion][data-pressed] {
+    transform: translate(1px, 1.5px) scale(0.965) rotate(-0.7deg);
+    transition-duration: 80ms;
+    transition-timing-function: ease-out;
+}
+
+@keyframes paper-stamp-settle {
+    0% { transform: translate(1px, 1.5px) scale(0.965) rotate(-0.7deg); }
+    55% { transform: translate(0, -0.5px) scale(1.01) rotate(0.3deg); }
+    100% { transform: none; }
+}
+
+[data-style="paper"] [data-press-bounce] {
+    animation: paper-stamp-settle 260ms ease-out;
+}
+
+/* Continue is a sticky note taped on: tilted, a hard paper shadow, a strip of tape on top.
+   The tilt uses the rotate property, so a press's transform adds to it. */
+[data-style="paper"] [data-skin~="continue"] {
+    position: relative;
+    rotate: -1deg;
+    border-radius: 4px;
+    box-shadow: 2px 4px 0 color-mix(in srgb, var(--color-shadow) 18%, transparent);
+}
+
+[data-style="paper"] [data-skin~="continue"]::before {
+    content: "";
+    position: absolute;
+    top: -8px;
+    left: calc(50% - 28px);
+    width: 56px;
+    height: 16px;
+    pointer-events: none;
+    background-color: color-mix(in srgb, var(--color-card) 60%, transparent);
+    rotate: 2deg;
+}
+
+/* New Game is a rubber stamp: no fill, the ink in a double ring */
+[data-style="paper"] [data-skin~="new-game"] {
+    background-color: transparent;
+    color: var(--color-primary);
+    box-shadow:
+        inset 0 0 0 2px var(--color-primary),
+        inset 0 0 0 4px var(--color-card),
+        inset 0 0 0 5px var(--color-primary);
+    rotate: -1.5deg;
+}
+
+/* The segmented selection stays filled, so its labels keep on-primary, and sits a little askew */
+[data-style="paper"] [data-skin~="segmented-indicator"] {
+    rotate: -0.6deg;
+}
+
+[data-style="paper"] .segmented-indicator-motion {
+    transition: transform 300ms ease-in-out;
+}
+
+/* Reduced motion: no stamping, settling, drawing or sliding; tilts and the ink overlay stay */
+@media (prefers-reduced-motion: reduce) {
+    [data-style="paper"] [data-press-motion],
+    [data-style="paper"] [data-press-motion][data-pressed],
+    [data-style="paper"] [data-press-bounce] {
+        transform: none;
+        animation: none;
+    }
+
+    [data-style="paper"] [data-variant="selected"]::after,
+    [data-style="paper"] [data-skin~="check"] svg {
+        animation: none;
+    }
+
+    [data-style="paper"] .segmented-indicator-motion {
+        transition: none;
+    }
+}
