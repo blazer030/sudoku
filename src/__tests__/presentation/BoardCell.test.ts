@@ -12,6 +12,14 @@ describe("BoardCell", () => {
         expect(wrapper.find("[data-testid='cell-value']").text()).toBe("5");
     });
 
+    it("should keep the digit's line box no taller than the digit, so a row under a box border keeps its height", () => {
+        // A 22px digit on the default 1.5 line height plus a 3px box border outgrows a square cell,
+        // which made the board taller once rows 3 or 6 held a digit.
+        const wrapper = mountCell({ value: 5, row: 2 });
+
+        expect(wrapper.find("[data-testid='cell-value']").classes()).toContain("leading-none");
+    });
+
     it("should render notes grid when value is zero and notes are provided", () => {
         const wrapper = mountCell({ value: 0, notes: [1, 3, 5] });
 

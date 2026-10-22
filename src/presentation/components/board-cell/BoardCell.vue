@@ -10,7 +10,7 @@
     >
         <div
             v-if="value !== 0"
-            :class="[valueTextColorClass, valueFontWeightClass, popping ? 'animate-hint-reveal-pop' : '', 'text-[22px]']"
+            :class="[valueTextColorClass, valueFontWeightClass, popping ? 'animate-hint-reveal-pop' : '', 'text-[22px] leading-none']"
             data-testid="cell-value"
         >
             {{ value }}
