@@ -55,8 +55,8 @@ src/
 │   ├── billing/       BillingService port
 │   └── icon/          IconService port
 ├── infrastructure/  Adapters implementing the ports
-│   ├── game/          IndexedDB / LocalStorage game repositories
-│   ├── statistics/    IndexedDB / LocalStorage statistics repositories
+│   ├── game/          IndexedDB game repository
+│   ├── statistics/    IndexedDB statistics repository
 │   ├── analytics/     Firebase / Noop adapters
 │   ├── billing/       Play Billing / Noop adapters
 │   └── icon/          Dynamic icon / Noop adapters
