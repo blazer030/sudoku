@@ -10,17 +10,12 @@ export interface NoConflictsToast {
     kind: "noConflicts";
 }
 
-export interface LongPressTipToast {
-    kind: "longPressTip";
-}
-
 /** One-off messages on the game screen; only one shows at a time. */
-export type ToastContent = RandomRevealToast | NoConflictsToast | LongPressTipToast;
+export type ToastContent = RandomRevealToast | NoConflictsToast;
 
 const TOAST_DURATION_MS: Record<ToastContent["kind"], number> = {
     randomReveal: 3000,
     noConflicts: 3000,
-    longPressTip: 5000,
 };
 
 export const useGameToast = () => {

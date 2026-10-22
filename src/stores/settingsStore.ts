@@ -17,7 +17,6 @@ export const useSettingsStore = defineStore("settings", () => {
     const appearance = ref<Appearance>(settings.appearance);
     const style = ref<StyleId>(settings.style);
     const highlightScope = ref(settings.highlightScope);
-    const seenLongPressTip = ref(settings.seenLongPressTip);
     const colorThemeByStyle = ref<RememberedThemes>(settings.colorThemeByStyle);
 
     // Installed web apps keep the light icon; the favicon also follows light or dark, so appearanceSync keeps it
@@ -39,7 +38,6 @@ export const useSettingsStore = defineStore("settings", () => {
             appearance: appearance.value,
             style: style.value,
             highlightScope: highlightScope.value,
-            seenLongPressTip: seenLongPressTip.value,
             colorThemeByStyle: { ...colorThemeByStyle.value },
         });
     };
@@ -97,11 +95,6 @@ export const useSettingsStore = defineStore("settings", () => {
         persistAll();
     };
 
-    const markLongPressTipSeen = () => {
-        seenLongPressTip.value = true;
-        persistAll();
-    };
-
     applyColorTheme();
 
     return {
@@ -115,7 +108,6 @@ export const useSettingsStore = defineStore("settings", () => {
         appearance,
         style,
         highlightScope,
-        seenLongPressTip,
         colorThemeByStyle,
         setColorTheme,
         setStyle,
@@ -127,6 +119,5 @@ export const useSettingsStore = defineStore("settings", () => {
         setLanguage,
         setAppearance,
         setHighlightScope,
-        markLongPressTipSeen,
     };
 });

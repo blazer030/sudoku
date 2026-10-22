@@ -34,7 +34,6 @@ export interface Settings {
     appearance: Appearance;
     style: StyleId;
     highlightScope: boolean;
-    seenLongPressTip: boolean;
     // The colour theme last chosen under each style, so switching styles comes back to it
     colorThemeByStyle: RememberedThemes;
 }
@@ -53,7 +52,6 @@ const DEFAULT_SETTINGS: Settings = {
     appearance: "system",
     style: "minimal",
     highlightScope: true,
-    seenLongPressTip: false,
     colorThemeByStyle: { minimal: "green" },
 };
 
@@ -80,6 +78,8 @@ export const loadSettings = (): Settings => {
     if (stored === null) return { ...DEFAULT_SETTINGS, colorThemeByStyle: { ...DEFAULT_SETTINGS.colorThemeByStyle } };
     const settings: Settings = { ...DEFAULT_SETTINGS, ...JSON.parse(stored) as Partial<Settings> };
     // A hand-edited unknown language falls back to following the system
+    // The one-time long-press tip is gone; older saves may still carry its flag
+    delete (settings as Partial<Record<"seenLongPressTip", unknown>>).seenLongPressTip;
     if (!LANGUAGE_PREFERENCES.includes(settings.language)) settings.language = "system";
     // Unknown appearance, style or theme ids (hand-edited, or from a future version) fall back too
     if (!APPEARANCES.includes(settings.appearance)) settings.appearance = "system";

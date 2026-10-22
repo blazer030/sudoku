@@ -24,7 +24,6 @@ describe("SettingsStorage", () => {
                 appearance: "system",
                 style: "minimal",
                 highlightScope: true,
-                seenLongPressTip: false,
                 colorThemeByStyle: { minimal: "green" },
             });
         });
@@ -87,7 +86,6 @@ describe("SettingsStorage", () => {
                 appearance: "dark",
                 style: "minimal",
                 highlightScope: false,
-                seenLongPressTip: true,
                 colorThemeByStyle: { minimal: "blue" },
             });
 
@@ -114,13 +112,21 @@ describe("SettingsStorage", () => {
             expect(settings.colorTheme).toBe("blue");
         });
 
-        it("should default highlightScope and seenLongPressTip for settings saved before they existed", () => {
+        it("should default highlightScope for settings saved before they existed", () => {
             localStorage.setItem("sudoku-settings", JSON.stringify({ colorTheme: "blue" }));
 
             const settings = loadSettings();
 
             expect(settings.highlightScope).toBe(true);
-            expect(settings.seenLongPressTip).toBe(false);
+        });
+
+        it("should drop the retired seenLongPressTip flag from older stored settings", () => {
+            localStorage.setItem("sudoku-settings", JSON.stringify({ colorTheme: "blue", seenLongPressTip: true }));
+
+            const settings = loadSettings();
+
+            expect(settings).not.toHaveProperty("seenLongPressTip");
+            expect(settings.colorTheme).toBe("blue");
         });
 
         it("should normalize an unknown stored appearance to system", () => {

@@ -32,8 +32,6 @@ const message = (content: ToastContent): string => {
         return t("game.randomReveal", { position: position(content.outcome) });
     case "noConflicts":
         return t("game.toast.noConflicts");
-    case "longPressTip":
-        return t("game.toast.longPressTip");
     }
 };
 </script>

@@ -132,7 +132,6 @@ export const en = {
         },
         toast: {
             noConflicts: "No repeated digits found",
-            longPressTip: "Long-press a cell to toggle a note directly (in note mode, it fills the digit)",
         },
         controls: {
             undo: "Undo",
