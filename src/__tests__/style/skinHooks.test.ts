@@ -17,6 +17,9 @@ const FILLED_SURFACE = /\bbg-(?:primary|primary-light|card)\b/;
 const openingTags = (source: string, names: string): string[] =>
     [...source.matchAll(new RegExp(`<(?:${names})\\b(?:[^>"']|"[^"]*"|'[^']*')*>`, "g"))].map(([tag]) => tag);
 
+const hasSkinToken = (tag: string, token: string): boolean =>
+    (/\bdata-skin="([^"]*)"/.exec(tag)?.[1] ?? "").split(/\s+/).includes(token);
+
 // Pressable buttons and links whose resting look is a filled surface, without a skin hook
 const findUnmarkedFilledButtons = (path: string, source: string): string[] =>
     openingTags(source, "button|a")
@@ -56,6 +59,16 @@ describe("skin hooks", () => {
             styledSkinTokens(readFileSync(path, "utf8")).filter(token => !markupTokens.has(token)).map(token => `${path}: ${token}`));
 
         expect(missing).toEqual([]);
+    });
+
+    it("should mark opaque page roots and sticky headers, so a style's page background reaches them", () => {
+        const offenders = VUE_FILES.flatMap(path => openingTags(readFileSync(path, "utf8"), "div")
+            .filter(tag => /\bbg-background\b/.test(tag))
+            .filter(tag => (/\bsticky\b/.test(tag) && !hasSkinToken(tag, "page-header"))
+                || (/\boverflow-y-auto\b/.test(tag) && !hasSkinToken(tag, "page")))
+            .map(tag => `${path}: ${tag.replace(/\s+/g, " ").slice(0, 90)}`));
+
+        expect(offenders).toEqual([]);
     });
 
     it("should keep the skin hooks GameScreen measures", () => {

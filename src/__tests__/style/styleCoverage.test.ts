@@ -22,6 +22,8 @@ const REQUIRED_SELECTORS: Record<StyleId, readonly string[]> = {
     paper: [
         ...PRESS,
         '[data-skin~="page-ruled"]',
+        '[data-skin~="page"]',
+        '[data-skin~="page-header"]',
         '[data-variant="selected"]::after',
         '[data-skin~="check"]',
         '[data-skin~="continue"]',

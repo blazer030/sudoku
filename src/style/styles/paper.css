@@ -21,34 +21,48 @@
     font-weight: 700;
 }
 
-/* Texture: faint dots of the border colour, behind all content. No image, so the colour and
-   contrast tests see it (inks are checked on the border at 40% over the background). */
-[data-style="paper"] body {
-    background-image:
+/* The page background, shared by the body and every opaque page root and sticky header:
+   faint dots of the border colour, and at night a warm lamp glowing from the top edge. It has
+   no image, so the colour and contrast tests see it (inks are checked on the border at 40% and
+   the lamp at 35% over the background). By day the lamp layer is empty. */
+[data-style="paper"] {
+    --paper-lamp: linear-gradient(transparent, transparent);
+    --paper-texture:
         radial-gradient(circle, color-mix(in srgb, var(--color-border) 40%, transparent) 0.7px, transparent 1px),
         radial-gradient(circle, color-mix(in srgb, var(--color-border) 40%, transparent) 0.7px, transparent 1px);
-    background-size: 9px 9px, 13px 13px;
-    background-position: 0 0, 4px 6px;
 }
 
-/* Night desk: a warm lamp glows from the top edge, as a background layer under the texture */
-:root.dark[data-style="paper"] body {
-    background-image:
-        radial-gradient(110% 55% at 50% -6%, color-mix(in srgb, var(--color-lamp) 35%, transparent), transparent 65%),
-        radial-gradient(circle, color-mix(in srgb, var(--color-border) 40%, transparent) 0.7px, transparent 1px),
-        radial-gradient(circle, color-mix(in srgb, var(--color-border) 40%, transparent) 0.7px, transparent 1px);
+:root.dark[data-style="paper"] {
+    --paper-lamp: radial-gradient(110% 55% at 50% -6%, color-mix(in srgb, var(--color-lamp) 35%, transparent), transparent 65%);
+}
+
+/* Roots and headers attach it to the viewport, so it lines up with the body behind them */
+[data-style="paper"] body,
+[data-style="paper"] [data-skin~="page"],
+[data-style="paper"] [data-skin~="page-header"] {
+    background-image: var(--paper-lamp), var(--paper-texture);
     background-size: 100% 100%, 9px 9px, 13px 13px;
     background-position: 0 0, 0 0, 4px 6px;
     background-repeat: no-repeat, repeat, repeat;
 }
 
+[data-style="paper"] [data-skin~="page"],
+[data-style="paper"] [data-skin~="page-header"] {
+    background-attachment: fixed;
+}
+
 /* Ruled pages: a line every 32px and a red margin line 14px in, inside the page gutter so no
-   text crosses it. Local attachment scrolls the lines with the content. */
+   text crosses it. The lines scroll with the content; the page background stays put. */
 [data-style="paper"] [data-skin~="page-ruled"] {
     background-image:
         linear-gradient(to right, transparent 14px, var(--color-margin-line) 14px, var(--color-margin-line) 15.5px, transparent 15.5px),
-        repeating-linear-gradient(to bottom, transparent 0, transparent 31px, var(--color-rule) 31px, var(--color-rule) 32px);
-    background-attachment: local;
+        repeating-linear-gradient(to bottom, transparent 0, transparent 31px, var(--color-rule) 31px, var(--color-rule) 32px),
+        var(--paper-lamp),
+        var(--paper-texture);
+    background-size: auto, auto, 100% 100%, 9px 9px, 13px 13px;
+    background-position: 0 0, 0 0, 0 0, 0 0, 4px 6px;
+    background-repeat: repeat, repeat, no-repeat, repeat, repeat;
+    background-attachment: local, local, fixed, fixed, fixed;
 }
 
 /* The selected cell is circled by hand instead of outlined */

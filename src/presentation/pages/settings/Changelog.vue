@@ -1,6 +1,12 @@
 <template>
-    <div class="flex flex-col gap-5 h-full px-5 bg-background overflow-y-auto">
-        <div class="flex items-center justify-between sticky top-0 bg-background pt-6 pb-3 z-10">
+    <div
+        class="flex flex-col gap-5 h-full px-5 bg-background overflow-y-auto"
+        data-skin="page"
+    >
+        <div
+            class="flex items-center justify-between sticky top-0 bg-background pt-6 pb-3 z-10"
+            data-skin="page-header"
+        >
             <button
                 class="flex items-center gap-2 cursor-pointer"
                 data-testid="back-button"
