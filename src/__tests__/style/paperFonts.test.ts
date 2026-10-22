@@ -1,5 +1,5 @@
 import { readFileSync } from "fs";
-import postcss from "postcss";
+import postcss, { type Rule } from "postcss";
 import { PAPER_FONT_URLS } from "@/presentation/theme/paperFonts";
 
 // The font tokens declared in index.css's @theme
@@ -20,6 +20,18 @@ const paperDeclarations = (): Map<string, string> => {
     });
     return declarations;
 };
+
+// "selector → value" for every declaration of a property in paper.css
+const paperDeclarationsOf = (property: string): Map<string, string> => {
+    const declarations = new Map<string, string>();
+    postcss.parse(readFileSync("src/style/styles/paper.css", "utf8")).walkDecls(property, (declaration) => {
+        const selector = declaration.parent?.type === "rule" ? (declaration.parent as Rule).selector : "";
+        declarations.set(selector.replace(/\s+/g, " "), declaration.value.trim());
+    });
+    return declarations;
+};
+
+const FONTS_READY = '[data-style="paper"][data-paper-fonts="ready"]';
 
 describe("paper fonts", () => {
     it("should keep every style's always-loaded font stylesheet free of paper's fonts", () => {
@@ -74,7 +86,15 @@ describe("paper fonts", () => {
     it("should set handwritten notes large enough to read like minimal's", () => {
         // Caveat's digits are about 15% shorter than Outfit's at the same size; measured in a browser at
         // 360px, notes at 1.15 had 85% of minimal's ink height, so they need at least 1.3
-        expect(Number(paperDeclarations().get("--note-scale"))).toBeGreaterThanOrEqual(1.3);
+        expect(Number(paperDeclarationsOf("--note-scale").get(FONTS_READY))).toBeGreaterThanOrEqual(1.3);
+    });
+
+    it.each(["--entry-scale", "--note-scale", "--key-scale"])("should enlarge %s only once the handwriting face has loaded", (scale) => {
+        // The fallback faces are full-size digits; enlarged they would read a third larger than minimal's
+        const declarations = paperDeclarationsOf(scale);
+
+        expect([...declarations.keys()]).toEqual([FONTS_READY]);
+        expect(Number(declarations.get(FONTS_READY))).toBeGreaterThan(1);
     });
 
     it("should keep the timer in a fixed-width face so it does not jitter", () => {

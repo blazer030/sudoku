@@ -270,5 +270,77 @@ describe("startAppearanceSync", () => {
 
             expect(stylesheetHrefs()).toEqual([...PAPER_FONT_URLS]);
         });
+
+        const stubFontLoading = (matchedFaces: number) => {
+            const load = vi.fn((_font: string, _text?: string) =>
+                Promise.resolve(Array.from({ length: matchedFaces }, () => ({ status: "loaded" }))));
+            Object.defineProperty(document, "fonts", { configurable: true, value: { load } });
+            return load;
+        };
+
+        const finishLoadingStylesheets = async () => {
+            document.head.querySelectorAll('link[rel="stylesheet"]').forEach((link) => { link.dispatchEvent(new Event("load")); });
+            await new Promise((resolve) => { setTimeout(resolve, 0); });
+        };
+
+        const fontsState = () => document.documentElement.dataset.paperFonts;
+
+        afterEach(() => {
+            Reflect.deleteProperty(document, "fonts");
+            delete document.documentElement.dataset.paperFonts;
+        });
+
+        it("should mark paper's fonts ready once Caveat's digits have loaded", async () => {
+            const load = stubFontLoading(1);
+            const sources = buildSources();
+            sources.style.value = "paper";
+            stop = startAppearanceSync(sources, systemBar, appearanceBridge);
+            expect(fontsState()).toBeUndefined();
+
+            await finishLoadingStylesheets();
+
+            expect(load).toHaveBeenCalledWith(expect.stringMatching(/^700 .*Caveat/), "0123456789");
+            expect(fontsState()).toBe("ready");
+        });
+
+        it("should leave paper at the fallback size when no Caveat face loads", async () => {
+            // Blocked or offline: the stylesheet never registers a face, so load() matches nothing
+            stubFontLoading(0);
+            const sources = buildSources();
+            sources.style.value = "paper";
+            stop = startAppearanceSync(sources, systemBar, appearanceBridge);
+
+            await finishLoadingStylesheets();
+
+            expect(fontsState()).toBeUndefined();
+        });
+
+        it("should drop the ready mark when leaving paper", async () => {
+            stubFontLoading(1);
+            const sources = buildSources();
+            sources.style.value = "paper";
+            stop = startAppearanceSync(sources, systemBar, appearanceBridge);
+            await finishLoadingStylesheets();
+
+            sources.style.value = "minimal";
+            await nextTick();
+
+            expect(fontsState()).toBeUndefined();
+        });
+
+        it("should not mark fonts ready after the player has left paper", async () => {
+            stubFontLoading(1);
+            const sources = buildSources();
+            sources.style.value = "paper";
+            stop = startAppearanceSync(sources, systemBar, appearanceBridge);
+            const caveatLink = document.head.querySelector('link[rel="stylesheet"]');
+
+            sources.style.value = "tactile";
+            await nextTick();
+            caveatLink?.dispatchEvent(new Event("load"));
+            await new Promise((resolve) => { setTimeout(resolve, 0); });
+
+            expect(fontsState()).toBeUndefined();
+        });
     });
 });

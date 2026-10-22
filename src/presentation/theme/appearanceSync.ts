@@ -1,7 +1,7 @@
 import { watch, type Ref } from "vue";
 import { getPalette, systemBarColor } from "@/theme/palettes";
 import { updateMetaThemeColor } from "@/application/PwaThemeUpdater";
-import { syncPaperFontLinks } from "@/presentation/theme/paperFonts";
+import { syncPaperFonts } from "@/presentation/theme/paperFonts";
 import type { Appearance, ColorMode, ColorThemeId, StyleId } from "@/application/SettingsStorage";
 import type { SystemBarService } from "@/application/systemBar/SystemBarService";
 import type { AppearanceBridgeService } from "@/application/appearanceBridge/AppearanceBridgeService";
@@ -50,7 +50,7 @@ export const startAppearanceSync = (
         root.classList.toggle("dark", mode === "dark");
         root.dataset.style = sources.style.value;
         root.dataset.colorTheme = sources.colorTheme.value;
-        syncPaperFontLinks(sources.style.value === "paper");
+        syncPaperFonts(sources.style.value === "paper");
         updateMetaThemeColor(systemBarColor(sources.style.value, sources.colorTheme.value, mode));
         void systemBar.apply(mode);
         void appearanceBridge.setSystemBarColors({
