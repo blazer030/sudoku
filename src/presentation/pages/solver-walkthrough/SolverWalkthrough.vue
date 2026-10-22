@@ -22,7 +22,7 @@
         <div class="flex-1" />
         <div class="flex flex-col items-center gap-6">
             <div
-                :class="inPlayback ? 'pointer-events-none' : ''"
+                :class="boardEditable ? '' : 'pointer-events-none'"
                 class="bg-card rounded-2xl shadow-card-lg p-2 w-full"
                 data-testid="walkthrough-board"
             >
@@ -39,11 +39,11 @@
                             :column="columnIndex"
                             :data-testid="`solver-cell-${rowIndex}-${columnIndex}`"
                             :hint="cellViews?.[rowIndex][columnIndex] ?? null"
-                            :interactive="!inPlayback"
+                            :interactive="boardEditable"
                             :puzzle-cell="puzzleCell"
                             :row="rowIndex"
-                            :selected="!inPlayback && isSelectedCell(rowIndex, columnIndex)"
-                            :selected-digit="inPlayback ? null : selectedDigit"
+                            :selected="boardEditable && isSelectedCell(rowIndex, columnIndex)"
+                            :selected-digit="boardEditable ? selectedDigit : null"
                             @click="selectCell(rowIndex, columnIndex)"
                         />
                     </div>
@@ -272,6 +272,8 @@ const {
 
 const inPlayback = computed(() => path.value !== null);
 const overlayShown = computed(() => inPlayback.value || introOpen.value);
+// Cells take input only while the player is entering a puzzle, not under the guide or during playback.
+const boardEditable = computed(() => !overlayShown.value);
 
 const explanation = computed(() =>
     currentStep.value === null ? "" : explain(currentStep.value.step, currentStep.value.candidatesBefore));
@@ -410,7 +412,7 @@ const tryFillCell = (row: number, column: number, digit: number) => {
 };
 
 const selectCell = (row: number, column: number) => {
-    if (inPlayback.value) return;
+    if (!boardEditable.value) return;
     if (eraseMode.value) {
         userValues.value[row][column] = 0;
         return;

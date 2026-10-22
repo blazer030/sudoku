@@ -110,6 +110,17 @@ describe("SolverWalkthrough", () => {
             expect(wrapper.find("[data-testid='walkthrough-inputs']").attributes("inert")).toBeUndefined();
         });
 
+        it("should keep the board cells inert while the guide is open", async () => {
+            const { wrapper } = mountWalkthrough();
+
+            expect(wrapper.findAll("[data-testid^='solver-cell-'][role='button']")).toHaveLength(0);
+            await cellAt(wrapper, 0, 0).trigger("click");
+            await wrapper.find("[data-testid='walkthrough-enter-own']").trigger("click");
+
+            expect(cellAt(wrapper, 0, 0).classes()).not.toContain("bg-cell-selected");
+            expect(wrapper.findAll("[data-testid^='solver-cell-'][role='button']")).toHaveLength(81);
+        });
+
         it("should close the guide to enter a puzzle", async () => {
             const { wrapper } = mountWalkthrough();
 
