@@ -112,4 +112,18 @@ describe("Changelog", () => {
         await nextTick();
         expect(wrapper.find("[data-testid='changelog-app-note']").text()).toBe("標有 App 的項目只適用於 Android App。");
     });
+
+    it("should describe changes in players' words", () => {
+        const technicalWords = /\b(PWA|manifest|launcher|gridlines?|modal|popup|toggles?|sticky|bug|solver)\b/i;
+        for (const entry of CHANGELOG) {
+            for (const change of entry.changes) {
+                expect(change.text.en).not.toMatch(technicalWords);
+                for (const word of ["PWA", "資訊清單", "格線", "對局"]) {
+                    expect(change.text["zh-Hant"]).not.toContain(word);
+                }
+            }
+        }
+        const release210 = CHANGELOG.find(entry => entry.version === "2.1.0");
+        expect(release210?.changes.map(change => change.text["zh-Hant"])).toContain("解題演示在小螢幕上的畫面更整齊");
+    });
 });
