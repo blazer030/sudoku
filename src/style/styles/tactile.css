@@ -124,10 +124,11 @@
     border-radius: 0.12em;
     background-color: var(--color-card);
     color: var(--color-foreground);
+    /* Thinner than a key's edge, so the plate stays clear of the subtitle 8px below the heading */
     box-shadow:
-        0 0 0 0.1em var(--color-card),
-        0 calc(0.1em + var(--tactile-depth)) 0 0.1em var(--tactile-edge),
-        0 calc(0.1em + var(--tactile-depth) + 2px) 8px 0.1em var(--tactile-drop-shadow);
+        0 0 0 0.06em var(--color-card),
+        0 3px 0 0.06em var(--tactile-edge),
+        0 4px 4px 0.06em var(--tactile-drop-shadow);
 }
 
 /* Reduced motion: no sinking, springing, popping, dropping or sliding; the overlay stays */
