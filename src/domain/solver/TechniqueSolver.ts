@@ -38,6 +38,9 @@ const techniques: Technique[] = [
     new XYChain(),
 ];
 
+/** Receives a step the solver takes, with the board just before it. */
+export type StepListener = (step: SolveStep, stateBefore: BoardState) => void;
+
 export interface SolveResult {
     steps: SolveStep[];
     finalState: BoardState;
@@ -82,7 +85,11 @@ export class TechniqueSolver {
         return [];
     }
 
-    public solveWithTechniques(initialState: BoardState): SolveResult {
+    /**
+     * Applies techniques from `initialState` until the board is solved or none applies.
+     * `onStep`, when given, sees each step with the board just before it.
+     */
+    public solveWithTechniques(initialState: BoardState, onStep?: StepListener): SolveResult {
         const steps: SolveStep[] = [];
         let currentState = initialState;
 
@@ -91,6 +98,7 @@ export class TechniqueSolver {
             if (!step) {
                 return { steps, finalState: currentState, solved: false, stuck: true };
             }
+            onStep?.(step, currentState);
             steps.push(step);
             for (const assignment of step.assignments) {
                 currentState = currentState.assign(assignment.cell.row, assignment.cell.column, assignment.digit);
