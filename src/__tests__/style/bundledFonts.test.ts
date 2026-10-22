@@ -1,7 +1,7 @@
 import { existsSync, readdirSync, readFileSync, statSync } from "fs";
 import { dirname, join, resolve } from "path";
 import postcss from "postcss";
-import { nameStrings } from "./woff2Tables";
+import { mappedCodePoints, nameStrings } from "./woff2Tables";
 
 const FONTS_CSS = "src/style/fonts.css";
 const BUNDLED_FONTS = ["outfit.woff2", "roboto-mono.woff2", "caveat.woff2", "lxgw-wenkai-tc-regular.woff2", "lxgw-wenkai-tc-bold.woff2"];
@@ -85,9 +85,18 @@ describe("bundled fonts", () => {
         expect(names.get(14), "licence URL").toMatch(/openfontlicense\.org|scripts\.sil\.org\/OFL/i);
     });
 
-    it("should cover every character the app writes in its WenKai subset (run npm run generate:fonts)", () => {
-        const covered = new Set(readFileSync("src/assets/fonts/lxgw-wenkai-tc-characters.txt", "utf8"));
-        const missing = [...sourceCharacters()].filter(character => !covered.has(character));
+    it("should read a font's character map", () => {
+        // Caveat was cut to digits: it maps 7 but neither a letter nor a Chinese character
+        const mapped = mappedCodePoints(readFileSync("src/assets/fonts/caveat.woff2"), [0x37, 0x41, 0x6578]);
+
+        expect([...mapped]).toEqual([0x37]);
+    });
+
+    it.each(["lxgw-wenkai-tc-regular.woff2", "lxgw-wenkai-tc-bold.woff2"])("%s maps every character the app writes (run npm run generate:fonts)", (file) => {
+        // Read from the font's own character map; emoji are left to the system's emoji font
+        const wanted = [...sourceCharacters()].filter(character => !/\p{Extended_Pictographic}/u.test(character));
+        const mapped = mappedCodePoints(readFileSync(`src/assets/fonts/${file}`), wanted.map(character => character.codePointAt(0) ?? 0));
+        const missing = wanted.filter(character => !mapped.has(character.codePointAt(0) ?? 0));
 
         expect(missing.join("")).toBe("");
     });
