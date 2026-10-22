@@ -33,7 +33,7 @@
                             :peer="settingsStore.highlightScope && isPeerOfSelected(rowIndex, columnIndex)"
                             :puzzle-cell="puzzleCell.raw()"
                             :revealed="isRevealed(rowIndex, columnIndex)"
-                            :selected-digit="selectedDigit"
+                            :selected-digit="highlightedDigit"
                             :row="rowIndex"
                             :selected="isSelected(rowIndex, columnIndex)"
                             @click="clickCell(rowIndex, columnIndex)"
@@ -190,6 +190,7 @@ watch(
 
 const {
     selectedDigit,
+    highlightedDigit,
     inputMode,
     clickCell,
     longPressCell,

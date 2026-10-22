@@ -32,7 +32,7 @@ export const useGameInteraction = ({
         if (isLocked()) return;
         clearErrors();
         if (sudoku.puzzle[row][column].isClue) {
-            pickClueDigit(row, column);
+            selectClue(row, column);
             return;
         }
         clearClueSelection();
@@ -69,22 +69,12 @@ export const useGameInteraction = ({
         }
     };
 
-    // A tapped clue picks its digit and shows the selection outline, but it never becomes an input target.
-    const pickClueDigit = (row: number, column: number) => {
-        const digit = sudoku.puzzle[row][column].clue;
+    // A tapped clue is only looked at: it takes the selection outline, drops any picked digit or Erase mode,
+    // and never becomes an input target.
+    const selectClue = (row: number, column: number) => {
         if (inputMode.value === InputMode.Erase) inputMode.value = InputMode.Normal;
-        // Tapping a different clue of the selected digit moves the outline; only the same one (or a digit-pad pick) toggles off.
-        const outlinedClue = selectedCell.value;
-        const movesOutline = selectedDigit.value === digit
-            && outlinedClue !== null
-            && (outlinedClue.row !== row || outlinedClue.column !== column)
-            && sudoku.puzzle[outlinedClue.row][outlinedClue.column].isClue;
-        if (movesOutline) {
-            selectedCell.value = { row, column };
-            return;
-        }
-        selectedDigit.value = selectedDigit.value === digit ? null : digit;
-        selectedCell.value = selectedDigit.value === digit ? { row, column } : null;
+        selectedDigit.value = null;
+        selectedCell.value = isSelected(row, column) ? null : { row, column };
     };
 
     const clearClueSelection = () => {
@@ -122,6 +112,15 @@ export const useGameInteraction = ({
         }
         selectedCell.value = { row, column };
     };
+
+    // The digit whose matching cells light up: the picked digit, else the value of the selected cell.
+    const highlightedDigit = computed(() => {
+        if (selectedDigit.value !== null) return selectedDigit.value;
+        if (selectedCell.value === null) return null;
+        const cell = sudoku.puzzle[selectedCell.value.row][selectedCell.value.column];
+        const value = cell.isClue ? cell.clue : cell.entry;
+        return value > 0 ? value : null;
+    });
 
     const isSelected = (row: number, column: number) => {
         if (selectedCell.value === null) return false;
@@ -205,6 +204,7 @@ export const useGameInteraction = ({
     return {
         selectedCell,
         selectedDigit,
+        highlightedDigit,
         inputMode,
         clickCell,
         longPressCell,

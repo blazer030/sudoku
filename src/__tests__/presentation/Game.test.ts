@@ -184,6 +184,21 @@ describe("Game", () => {
         expect(wrapper.find("[data-testid='cell-0-0']").text()).toBe("5");
     });
 
+    it("should not pick a digit when a clue is tapped, so the next tapped cell is not overwritten", async () => {
+        const wrapper = mountGame();
+        await wrapper.find("[data-testid='number-2']").trigger("click");
+        await wrapper.find("[data-testid='cell-0-2']").trigger("click");
+        await wrapper.find("[data-testid='number-2']").trigger("click");
+        expect(wrapper.find("[data-testid='cell-0-2']").text()).toBe("2");
+
+        await wrapper.find("[data-testid='cell-0-0']").trigger("click");
+        expect(wrapper.find("[data-testid='number-5']").attributes("aria-pressed")).toBe("false");
+        await wrapper.find("[data-testid='cell-0-2']").trigger("click");
+
+        expect(wrapper.find("[data-testid='cell-0-2']").text()).toBe("2");
+        expect(wrapper.findComponent<typeof Cell>("[data-testid='cell-0-2']").props("selected")).toBe(true);
+    });
+
     it("should tint the row, column and box of the selected cell", async () => {
         const wrapper = mountGame();
 
@@ -1532,14 +1547,6 @@ describe("Game", () => {
             expect(useSettingsStore().seenLongPressTip).toBe(true);
             const stored = JSON.parse(localStorage.getItem("sudoku-settings") ?? "{}") as Record<string, unknown>;
             expect(stored.seenLongPressTip).toBe(true);
-        });
-
-        it("should show the tip when the first digit comes from a clue", async () => {
-            const wrapper = mountGame();
-
-            await wrapper.find("[data-testid='cell-0-0']").trigger("click");
-
-            expect(wrapper.find("[data-testid='game-toast']").text()).toBe(LONG_PRESS_TIP);
         });
 
         it("should not show the tip twice in one game", async () => {
