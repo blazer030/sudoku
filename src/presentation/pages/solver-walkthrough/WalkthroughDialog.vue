@@ -69,7 +69,7 @@
 <script lang="ts" setup>
 import { computed, type Component, useId } from "vue";
 import { useI18n } from "vue-i18n";
-import { RotateCcw } from "lucide-vue-next";
+import { CircleAlert, CircleHelp, RotateCcw } from "lucide-vue-next";
 import { type WalkthroughDialogKind, useWalkthroughDialog } from "@/presentation/pages/solver-walkthrough/useWalkthroughDialog";
 import { vPress } from "@/presentation/directives/press";
 
@@ -90,6 +90,22 @@ const CONTENT: Record<WalkthroughDialogKind, DialogContent> = {
         confirmKey: "walkthrough.dialog.reset.confirm",
         confirmTone: "danger",
         cancelKey: "common.cancel",
+    },
+    noSolution: {
+        icon: CircleAlert,
+        titleKey: "walkthrough.dialog.noSolution.title",
+        messageKey: "walkthrough.dialog.noSolution.message",
+        confirmKey: "common.ok",
+        confirmTone: "primary",
+        cancelKey: null,
+    },
+    multipleSolutions: {
+        icon: CircleHelp,
+        titleKey: "walkthrough.dialog.multipleSolutions.title",
+        messageKey: "walkthrough.dialog.multipleSolutions.message",
+        confirmKey: "walkthrough.dialog.multipleSolutions.confirm",
+        confirmTone: "primary",
+        cancelKey: "walkthrough.dialog.multipleSolutions.cancel",
     },
 };
 

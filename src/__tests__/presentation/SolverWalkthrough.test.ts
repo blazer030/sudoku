@@ -577,6 +577,130 @@ describe("SolverWalkthrough", () => {
         });
     });
 
+    describe("checking the solution count", () => {
+        const emptyBoard = () => Array.from({ length: 9 }, () => Array.from({ length: 9 }, () => 0));
+
+        // Column 9 holds 1–8 and row 1 already has a 9, so the top-right cell has no candidate.
+        const noSolutionPuzzle = () => {
+            const board = emptyBoard();
+            for (let row = 1; row <= 8; row++) board[row][8] = row;
+            board[0][0] = 9;
+            return board;
+        };
+
+        // Blanks an unavoidable rectangle of the singles solution, plus one cell a naked single fills.
+        const twoSolutionPuzzle = () => {
+            const board = singlesSolution.map((rowValues) => [...rowValues]);
+            for (let rowOne = 0; rowOne < 9; rowOne++) {
+                for (let rowTwo = rowOne + 1; rowTwo < 9; rowTwo++) {
+                    if (Math.floor(rowOne / 3) !== Math.floor(rowTwo / 3)) continue;
+                    for (let columnOne = 0; columnOne < 9; columnOne++) {
+                        for (let columnTwo = columnOne + 1; columnTwo < 9; columnTwo++) {
+                            if (Math.floor(columnOne / 3) === Math.floor(columnTwo / 3)) continue;
+                            const first = board[rowOne][columnOne];
+                            const second = board[rowOne][columnTwo];
+                            if (board[rowTwo][columnTwo] !== first || board[rowTwo][columnOne] !== second) continue;
+                            for (const [row, column] of [[rowOne, columnOne], [rowOne, columnTwo], [rowTwo, columnOne], [rowTwo, columnTwo]]) {
+                                board[row][column] = 0;
+                            }
+                            const otherRow = [0, 1, 2, 3, 4, 5, 6, 7, 8].find((row) => row !== rowOne && row !== rowTwo) ?? 0;
+                            const otherColumn = [0, 1, 2, 3, 4, 5, 6, 7, 8].find((column) => column !== columnOne && column !== columnTwo) ?? 0;
+                            board[otherRow][otherColumn] = 0;
+                            return board;
+                        }
+                    }
+                }
+            }
+            throw new Error("expected an unavoidable rectangle in the singles solution");
+        };
+
+        it("should block solving a puzzle with no solution", async () => {
+            const { wrapper } = mountWalkthrough({ initialPuzzle: noSolutionPuzzle() });
+
+            await solve(wrapper);
+
+            expect(wrapper.find("[data-testid='walkthrough-dialog-message']").text()).toBe("This puzzle has no solution. Check what you entered.");
+            expect(wrapper.find("[data-testid='walkthrough-dialog-cancel']").exists()).toBe(false);
+
+            i18n.global.locale.value = "zh-Hant";
+            await nextTick();
+            expect(wrapper.find("[data-testid='walkthrough-dialog-message']").text()).toBe("這題無解，請檢查輸入");
+
+            await wrapper.find("[data-testid='walkthrough-dialog-confirm']").trigger("click");
+            await flushPromises();
+
+            expect(wrapper.find("[data-testid='walkthrough-dialog']").exists()).toBe(false);
+            expect(wrapper.find("[data-testid='walkthrough-panel']").exists()).toBe(false);
+            expect(wrapper.find("[data-testid='solve-button']").exists()).toBe(true);
+        });
+
+        it("should block a passed-in puzzle whose givens already conflict", async () => {
+            const board = emptyBoard();
+            board[0][0] = 5;
+            board[0][4] = 5;
+            const { wrapper } = mountWalkthrough({ initialPuzzle: board });
+
+            await solve(wrapper);
+
+            expect(wrapper.find("[data-testid='walkthrough-dialog-message']").text()).toBe("This puzzle has no solution. Check what you entered.");
+        });
+
+        it("should warn about more than one solution and still allow solving", async () => {
+            const { wrapper } = mountWalkthrough({ initialPuzzle: twoSolutionPuzzle() });
+
+            await solve(wrapper);
+
+            expect(wrapper.find("[data-testid='walkthrough-dialog-message']").text()).toBe(
+                "This puzzle has more than one solution, so the steps may not be complete.",
+            );
+            i18n.global.locale.value = "zh-Hant";
+            await nextTick();
+            expect(wrapper.find("[data-testid='walkthrough-dialog-message']").text()).toBe("這題不只一個解，解題結果可能不完整");
+
+            await wrapper.find("[data-testid='walkthrough-dialog-confirm']").trigger("click");
+            await flushPromises();
+
+            expect(wrapper.find("[data-testid='walkthrough-panel']").exists()).toBe(true);
+            expect(wrapper.find("[data-testid='walkthrough-dot-0']").exists()).toBe(true);
+            expect(wrapper.find("[data-testid='walkthrough-dot-1']").exists()).toBe(false);
+        });
+
+        it("should keep editing when the warning is declined", async () => {
+            const { wrapper } = mountWalkthrough({ initialPuzzle: twoSolutionPuzzle() });
+
+            await solve(wrapper);
+            await wrapper.find("[data-testid='walkthrough-dialog-cancel']").trigger("click");
+            await flushPromises();
+
+            expect(wrapper.find("[data-testid='walkthrough-panel']").exists()).toBe(false);
+            expect(wrapper.find("[data-testid='walkthrough-inputs']").attributes("inert")).toBeUndefined();
+        });
+
+        it("should enter playback with nothing to step through on an empty board", async () => {
+            const { wrapper } = await mountEntering();
+
+            await solve(wrapper);
+            await wrapper.find("[data-testid='walkthrough-dialog-confirm']").trigger("click");
+            await flushPromises();
+
+            expect(wrapper.find("[data-testid='walkthrough-panel']").exists()).toBe(true);
+            expect(wrapper.find("[data-testid='walkthrough-next']").attributes("disabled")).toBeDefined();
+            expect(wrapper.find("[data-testid='walkthrough-previous']").attributes("disabled")).toBeDefined();
+            expect(wrapper.find("[data-testid='walkthrough-play']").attributes("disabled")).toBeDefined();
+            expect(wrapper.find("[data-testid='walkthrough-technique']").exists()).toBe(false);
+            expect(wrapper.findAll("[data-testid^='solver-cell-']").every((cell) => cell.text() === "")).toBe(true);
+        });
+
+        it("should solve a unique puzzle without asking", async () => {
+            const { wrapper } = mountWalkthrough({ initialPuzzle: singlesPuzzle });
+
+            await solve(wrapper);
+
+            expect(wrapper.find("[data-testid='walkthrough-dialog']").exists()).toBe(false);
+            expect(wrapper.find("[data-testid='walkthrough-panel']").exists()).toBe(true);
+        });
+    });
+
     describe("in Traditional Chinese", () => {
         it("should name the technique and the cell, and keep the button labels", async () => {
             i18n.global.locale.value = "zh-Hant";

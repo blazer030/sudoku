@@ -7,6 +7,7 @@ export const en = {
     common: {
         back: "Back",
         cancel: "Cancel",
+        ok: "OK",
         giveUpConsequence: "Giving up counts as an unfinished game and lowers your win rate.",
     },
     changelog: {
@@ -174,6 +175,16 @@ export const en = {
                 title: "Clear the board?",
                 message: "Every digit you entered will be removed.",
                 confirm: "Clear",
+            },
+            noSolution: {
+                title: "Can't Solve",
+                message: "This puzzle has no solution. Check what you entered.",
+            },
+            multipleSolutions: {
+                title: "More Than One Solution",
+                message: "This puzzle has more than one solution, so the steps may not be complete.",
+                confirm: "Solve Anyway",
+                cancel: "Keep Editing",
             },
         },
     },

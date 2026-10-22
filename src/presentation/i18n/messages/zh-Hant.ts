@@ -4,6 +4,7 @@ export const zhHant: MessageSchema = {
     common: {
         back: "返回",
         cancel: "取消",
+        ok: "好",
         giveUpConsequence: "放棄會記為一場未完成，會影響勝率",
     },
     changelog: {
@@ -171,6 +172,16 @@ export const zhHant: MessageSchema = {
                 title: "清空盤面？",
                 message: "你輸入的數字會全部清除。",
                 confirm: "清空",
+            },
+            noSolution: {
+                title: "無法解題",
+                message: "這題無解，請檢查輸入",
+            },
+            multipleSolutions: {
+                title: "不只一個解",
+                message: "這題不只一個解，解題結果可能不完整",
+                confirm: "仍要解題",
+                cancel: "返回修改",
             },
         },
     },

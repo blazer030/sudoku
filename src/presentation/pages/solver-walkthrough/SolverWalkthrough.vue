@@ -202,6 +202,7 @@ import { useI18n } from "vue-i18n";
 import { ChevronLeft, Info, ListFilter, Pencil, PencilLine, RotateCcw, Wand2 } from "lucide-vue-next";
 import { ROUTER_PATH } from "@/router";
 import { BOARD_SIZE } from "@/domain/board/constants";
+import { SudokuSolver } from "@/domain/generator/SudokuSolver";
 import { buildSolvePath } from "@/domain/solver/SolvePath";
 import { useTechniqueLabel } from "@/presentation/labels/techniqueLabels";
 import Cell from "@/presentation/pages/game/components/Cell.vue";
@@ -353,9 +354,19 @@ const toggleEraseMode = () => {
     eraseMode.value = !eraseMode.value;
 };
 
-const runSolver = () => {
+const solutionCounter = new SudokuSolver();
+
+// No solution stops here; more than one asks first. The solver then shows what it can, even nothing.
+const runSolver = async () => {
+    const values = userValues.value;
+    const solutionCount = solutionCounter.countSolutions(values, 2);
+    if (solutionCount === 0) {
+        await openDialog("noSolution");
+        return;
+    }
+    if (solutionCount > 1 && await openDialog("multipleSolutions") !== "confirm") return;
     selectedCell.value = null;
-    start(buildSolvePath(userValues.value));
+    start(buildSolvePath(values));
 };
 
 const goBack = () => {
