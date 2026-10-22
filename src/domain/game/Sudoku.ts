@@ -161,10 +161,6 @@ export class Sudoku {
         }
     }
 
-    public check(row: number, column: number, value: number): boolean {
-        return this._answer[row][column] === value;
-    }
-
     public autoNotes(): void {
         this.snapshot();
         const currentBoard = this.getCurrentBoard();
@@ -266,10 +262,6 @@ export class Sudoku {
 
     public checkErrors(): Conflict[] {
         return this.conflictDetector.findErrors(this._puzzle, this._answer);
-    }
-
-    public findConflicts(row: number, column: number, value: number): Conflict[] {
-        return this.conflictDetector.findConflicts(this.getCurrentBoard(), row, column, value);
     }
 
     private snapshot(): void {

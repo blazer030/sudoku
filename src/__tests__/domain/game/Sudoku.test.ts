@@ -9,15 +9,6 @@ afterEach(() => {
 });
 
 describe("Sudoku", () => {
-    it("should correctly check answers against the solution", () => {
-        spyGeneratePuzzle();
-        const sudoku = new Sudoku();
-        sudoku.generate("easy");
-
-        expect(sudoku.check(0, 0, 5)).toBe(true);
-        expect(sudoku.check(0, 0, 3)).toBe(false);
-    });
-
     it("should allow inputting a number into a slot cell", () => {
         spyGeneratePuzzle();
         const sudoku = new Sudoku();

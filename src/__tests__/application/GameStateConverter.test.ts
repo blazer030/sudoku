@@ -93,8 +93,8 @@ describe("GameStateConverter", () => {
             expect(sudoku.puzzle[0][2].entry).toBe(4);
             // notes 還原
             expect(sudoku.puzzle[0][3].notes).toEqual([1, 6]);
-            // 可繼續操作
-            expect(sudoku.check(0, 2, 4)).toBe(true);
+            // answer 還原，可繼續操作
+            expect(sudoku.answer[0][2]).toBe(4);
             expect(sudoku.isCompleted()).toBe(false);
         });
 
