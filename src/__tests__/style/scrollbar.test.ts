@@ -3,7 +3,7 @@ import { readFileSync } from "fs";
 describe("custom scrollbar", () => {
     const css = readFileSync("src/style/index.css", "utf8");
 
-    it("should style webkit scrollbars only for fine pointers", () => {
+    it("should style scrollbars only for fine pointers", () => {
         const start = css.indexOf("@media (pointer: fine)");
         expect(start).toBeGreaterThan(-1);
         const open = css.indexOf("{", start);
@@ -19,5 +19,7 @@ describe("custom scrollbar", () => {
 
         expect(block).toContain("::-webkit-scrollbar");
         expect(outside).not.toContain("::-webkit-scrollbar");
+        expect(block).toContain("scrollbar-width");
+        expect(outside).not.toContain("scrollbar-width");
     });
 });

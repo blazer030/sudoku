@@ -228,12 +228,12 @@
     --scrollbar-thumb: color-mix(in srgb, var(--color-foreground) 18%, transparent);
     --scrollbar-thumb-hover: color-mix(in srgb, var(--color-foreground) 32%, transparent);
 }
-* {
-    scrollbar-width: thin;
-    scrollbar-color: var(--scrollbar-thumb) transparent;
-}
 /* Touch devices keep overlay scrollbars; a classic 8px gutter shifts content in Android WebView */
 @media (pointer: fine) {
+    * {
+        scrollbar-width: thin;
+        scrollbar-color: var(--scrollbar-thumb) transparent;
+    }
     *::-webkit-scrollbar {
         width: 8px;
         height: 8px;
