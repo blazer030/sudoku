@@ -114,8 +114,9 @@
         0 3px 0 var(--tactile-edge);
 }
 
+/* The cap slides with minimal's gentle elastic curve; the strong spring is kept for presses */
 [data-style="tactile"] .segmented-indicator-motion {
-    transition: transform 320ms cubic-bezier(0.2, 2.2, 0.4, 1);
+    transition: transform 250ms cubic-bezier(0.34, 1.4, 0.64, 1);
 }
 
 /* The Home title sits on plates; the spread shadow draws each plate's padding */
