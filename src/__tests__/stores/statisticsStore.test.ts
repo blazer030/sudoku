@@ -157,6 +157,7 @@ describe("useStatisticsStore", () => {
                 winRate: 0.75,
             });
         });
+
         it("should round the average to whole seconds", () => {
             const store = useStatisticsStore();
             store.recordGame({ difficulty: "easy", elapsedSeconds: 100, completed: true });
