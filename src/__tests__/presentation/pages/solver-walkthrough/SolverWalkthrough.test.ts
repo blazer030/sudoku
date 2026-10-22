@@ -49,9 +49,9 @@ const mountEntering = async () => {
 };
 
 // Solving first checks the puzzle behind the loader, which stays up for its minimum time.
-// The clock stays fake (and still ticks) for the rest of the test, so nothing scheduled meanwhile is dropped.
+// The clock stays fake for the rest of the test and only moves when the test moves it.
 const solve = async (wrapper: VueWrapper) => {
-    if (!vi.isFakeTimers()) vi.useFakeTimers({ shouldAdvanceTime: true });
+    if (!vi.isFakeTimers()) vi.useFakeTimers();
     await wrapper.find("[data-testid='solve-button']").trigger("click");
     await vi.advanceTimersByTimeAsync(PUZZLE_LOADER_MINIMUM_MS + 100);
     await flushPromises();
@@ -540,7 +540,7 @@ describe("SolverWalkthrough", () => {
         });
 
         it("should auto-play to the solved board and stop there", async () => {
-            vi.useFakeTimers({ shouldAdvanceTime: true });
+            vi.useFakeTimers();
             const { wrapper } = mountWalkthrough({ initialPuzzle: singlesPuzzle });
 
             await solve(wrapper);
@@ -571,7 +571,7 @@ describe("SolverWalkthrough", () => {
         });
 
         it("should auto-advance steps every 800ms when Play is active", async () => {
-            vi.useFakeTimers({ shouldAdvanceTime: true });
+            vi.useFakeTimers();
             const { wrapper } = mountWalkthrough({ initialPuzzle: singlesPuzzle });
 
             await solve(wrapper);
@@ -588,7 +588,7 @@ describe("SolverWalkthrough", () => {
         });
 
         it("should stop auto-play when going back to edit", async () => {
-            vi.useFakeTimers({ shouldAdvanceTime: true });
+            vi.useFakeTimers();
             const { wrapper } = mountWalkthrough({ initialPuzzle: singlesPuzzle });
 
             await solve(wrapper);
