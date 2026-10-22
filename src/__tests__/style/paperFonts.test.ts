@@ -60,6 +60,12 @@ describe("paper fonts", () => {
         expect(declarations.get("--font-clue")).toBe("var(--font-print)");
     });
 
+    it("should set handwritten notes large enough to read like minimal's", () => {
+        // Caveat's digits are about 15% shorter than Outfit's at the same size; measured in a browser at
+        // 360px, notes at 1.15 had 85% of minimal's ink height, so they need at least 1.3
+        expect(Number(paperDeclarations().get("--note-scale"))).toBeGreaterThanOrEqual(1.3);
+    });
+
     it("should keep the timer in a fixed-width face so it does not jitter", () => {
         expect(themeFonts().get("--font-timer")).toBe("var(--font-sans)");
         expect(paperDeclarations().get("--font-timer")).toBe("var(--font-mono)");

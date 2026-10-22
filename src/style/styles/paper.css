@@ -12,7 +12,7 @@
     /* A fixed-width face, so the ticking timer does not change width */
     --font-timer: var(--font-mono);
     --entry-scale: 1.3;
-    --note-scale: 1.15;
+    --note-scale: 1.3;
     --key-scale: 1.25;
 }
 
