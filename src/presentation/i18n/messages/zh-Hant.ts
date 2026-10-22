@@ -160,6 +160,12 @@ export const zhHant: MessageSchema = {
     walkthrough: {
         reset: "重設",
         solve: "解題",
+        intro: {
+            description: "輸入任何一題數獨，看解題器用哪些技巧一步步解開",
+            enterOwn: "自己輸入題目",
+            samples: "試試範例",
+            caveat: "不一定能解完：題目可能需要更進階的技巧、輸入可能有誤，或題目本身無解或不只一個解。",
+        },
         dialog: {
             reset: {
                 title: "清空盤面？",

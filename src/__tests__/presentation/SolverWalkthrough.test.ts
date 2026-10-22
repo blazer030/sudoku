@@ -11,25 +11,15 @@ import { TechniqueSolver } from "@/domain/solver/TechniqueSolver";
 import { singlesPuzzle, singlesSolution } from "@/__tests__/fixtures/singlesPuzzle";
 import { SAMPLE_PUZZLES } from "@/presentation/pages/solver-walkthrough/samplePuzzles";
 
-const mediumPreset = SAMPLE_PUZZLES.find((preset) => preset.label === "Medium");
-if (!mediumPreset) throw new Error("expected Medium preset to exist");
-const mediumPuzzle = mediumPreset.puzzle;
-const hardPreset = SAMPLE_PUZZLES.find((preset) => preset.label === "Hard");
-if (!hardPreset) throw new Error("expected Hard preset to exist");
-const hardPuzzle = hardPreset.puzzle;
+const samplePuzzle = (id: string): number[][] => {
+    const sample = SAMPLE_PUZZLES.find((candidate) => candidate.id === id);
+    if (!sample) throw new Error(`expected the ${id} sample to exist`);
+    return sample.puzzle;
+};
+const mediumPuzzle = samplePuzzle("medium");
+const hardPuzzle = samplePuzzle("hard");
 
 const singlesStepCount = buildSolvePath(singlesPuzzle).length;
-
-const fillPuzzle = async (wrapper: VueWrapper, puzzle: number[][]) => {
-    for (let row = 0; row < 9; row++) {
-        for (let column = 0; column < 9; column++) {
-            const digit = puzzle[row][column];
-            if (digit === 0) continue;
-            await wrapper.find(`[data-testid='solver-cell-${row}-${column}']`).trigger("click");
-            await wrapper.find(`[data-testid='number-${digit}']`).trigger("click");
-        }
-    }
-};
 
 const createTestRouter = () => createRouter({
     history: createMemoryHistory(),
@@ -39,10 +29,17 @@ const createTestRouter = () => createRouter({
     ],
 });
 
-const mountWalkthrough = () => {
+const mountWalkthrough = (props: { initialPuzzle?: number[][] } = {}) => {
     const router = createTestRouter();
-    const wrapper = mount(SolverWalkthrough, { global: { plugins: [router] } });
+    const wrapper = mount(SolverWalkthrough, { props, global: { plugins: [router] } });
     return { wrapper, router };
+};
+
+// Closes the guide to enter a puzzle by hand
+const mountEntering = async () => {
+    const mounted = mountWalkthrough();
+    await mounted.wrapper.find("[data-testid='walkthrough-enter-own']").trigger("click");
+    return mounted;
 };
 
 const solve = async (wrapper: VueWrapper) => {
@@ -67,9 +64,80 @@ const firstSinglesStep = () => {
 
 afterEach(() => {
     vi.useRealTimers();
+    vi.unstubAllEnvs();
 });
 
 describe("SolverWalkthrough", () => {
+    describe("guide", () => {
+        it("should open with the guide", async () => {
+            const { wrapper } = mountWalkthrough();
+
+            const intro = wrapper.find("[data-testid='walkthrough-intro']");
+            expect(intro.text()).toContain("Enter any Sudoku and see which techniques the solver uses to crack it, step by step.");
+            expect(intro.find("[data-testid='walkthrough-intro-caveat']").text()).toBe(
+                "It may not finish: the puzzle may need a more advanced technique, the input may have a mistake, or the puzzle may have no solution or more than one.",
+            );
+            expect(wrapper.find("[data-testid='walkthrough-inputs']").attributes("inert")).toBeDefined();
+
+            i18n.global.locale.value = "zh-Hant";
+            await nextTick();
+
+            expect(wrapper.find("[data-testid='walkthrough-intro']").text()).toContain("輸入任何一題數獨");
+            expect(wrapper.find("[data-testid='walkthrough-intro']").text()).toContain("不一定能解完");
+        });
+
+        it("should offer the samples in production", async () => {
+            vi.stubEnv("VITE_APP_ENV", "production");
+            const { wrapper } = mountWalkthrough();
+            const labels = () => ["easy", "medium", "hard"].map((id) => wrapper.find(`[data-testid='load-sample-${id}']`).text());
+
+            expect(labels()).toEqual(["Easy", "Medium", "Hard"]);
+
+            i18n.global.locale.value = "zh-Hant";
+            await nextTick();
+
+            expect(labels()).toEqual(["簡單", "中等", "困難"]);
+        });
+
+        it("should load a sample and close the guide", async () => {
+            const { wrapper } = mountWalkthrough();
+
+            await wrapper.find("[data-testid='load-sample-hard']").trigger("click");
+
+            expect(wrapper.find("[data-testid='walkthrough-intro']").exists()).toBe(false);
+            expect(cellAt(wrapper, 0, 0).text()).toBe("2");
+            expect(wrapper.find("[data-testid='walkthrough-inputs']").attributes("inert")).toBeUndefined();
+        });
+
+        it("should close the guide to enter a puzzle", async () => {
+            const { wrapper } = mountWalkthrough();
+
+            await wrapper.find("[data-testid='walkthrough-enter-own']").trigger("click");
+
+            expect(wrapper.find("[data-testid='walkthrough-intro']").exists()).toBe(false);
+            expect(wrapper.findAll("[data-testid^='solver-cell-']").every((cell) => cell.text() === "")).toBe(true);
+        });
+
+        it("should bring the guide back after a confirmed reset", async () => {
+            const { wrapper } = mountWalkthrough();
+            await wrapper.find("[data-testid='load-sample-easy']").trigger("click");
+
+            await wrapper.find("[data-testid='reset-button']").trigger("click");
+            await wrapper.find("[data-testid='walkthrough-dialog-confirm']").trigger("click");
+            await flushPromises();
+
+            expect(wrapper.find("[data-testid='walkthrough-intro']").exists()).toBe(true);
+            expect(wrapper.find("[data-testid='walkthrough-inputs']").attributes("inert")).toBeDefined();
+        });
+
+        it("should start from a puzzle passed in", () => {
+            const { wrapper } = mountWalkthrough({ initialPuzzle: singlesPuzzle });
+
+            expect(wrapper.find("[data-testid='walkthrough-intro']").exists()).toBe(false);
+            expect(cellAt(wrapper, 0, 3).text()).toBe("2");
+        });
+    });
+
     describe("entering a puzzle", () => {
         it("should render a 9x9 board on mount", () => {
             const { wrapper } = mountWalkthrough();
@@ -94,7 +162,7 @@ describe("SolverWalkthrough", () => {
         });
 
         it("should leave empty cells blank while entering a puzzle", async () => {
-            const { wrapper } = mountWalkthrough();
+            const { wrapper } = await mountEntering();
 
             expect(cellAt(wrapper, 0, 0).text()).toBe("");
 
@@ -105,7 +173,7 @@ describe("SolverWalkthrough", () => {
         });
 
         it("should show entered digits as givens", async () => {
-            const { wrapper } = mountWalkthrough();
+            const { wrapper } = await mountEntering();
 
             await cellAt(wrapper, 3, 4).trigger("click");
             await wrapper.find("[data-testid='number-7']").trigger("click");
@@ -114,7 +182,7 @@ describe("SolverWalkthrough", () => {
         });
 
         it("should reject filling a digit that clashes with a peer", async () => {
-            const { wrapper } = mountWalkthrough();
+            const { wrapper } = await mountEntering();
 
             await wrapper.find("[data-testid='number-9']").trigger("click");
             await cellAt(wrapper, 0, 0).trigger("click");
@@ -124,7 +192,7 @@ describe("SolverWalkthrough", () => {
         });
 
         it("should fill selected cell when a digit is picked", async () => {
-            const { wrapper } = mountWalkthrough();
+            const { wrapper } = await mountEntering();
 
             await cellAt(wrapper, 3, 4).trigger("click");
             await wrapper.find("[data-testid='number-7']").trigger("click");
@@ -144,7 +212,7 @@ describe("SolverWalkthrough", () => {
         });
 
         it("should select a digit when clicked without a selected cell", async () => {
-            const { wrapper } = mountWalkthrough();
+            const { wrapper } = await mountEntering();
 
             await wrapper.find("[data-testid='number-5']").trigger("click");
 
@@ -152,7 +220,7 @@ describe("SolverWalkthrough", () => {
         });
 
         it("should fill clicked cell when a digit is already selected", async () => {
-            const { wrapper } = mountWalkthrough();
+            const { wrapper } = await mountEntering();
 
             await wrapper.find("[data-testid='number-8']").trigger("click");
             await cellAt(wrapper, 2, 6).trigger("click");
@@ -161,7 +229,7 @@ describe("SolverWalkthrough", () => {
         });
 
         it("should keep digit selected and fill subsequent clicked cells", async () => {
-            const { wrapper } = mountWalkthrough();
+            const { wrapper } = await mountEntering();
 
             await wrapper.find("[data-testid='number-3']").trigger("click");
             await cellAt(wrapper, 0, 0).trigger("click");
@@ -172,7 +240,7 @@ describe("SolverWalkthrough", () => {
         });
 
         it("should deselect the digit when clicking the same digit again", async () => {
-            const { wrapper } = mountWalkthrough();
+            const { wrapper } = await mountEntering();
 
             await wrapper.find("[data-testid='number-5']").trigger("click");
             expect(wrapper.find("[data-testid='number-5']").classes()).toContain("bg-primary");
@@ -182,7 +250,7 @@ describe("SolverWalkthrough", () => {
         });
 
         it("should enter erase mode when clicking Erase button", async () => {
-            const { wrapper } = mountWalkthrough();
+            const { wrapper } = await mountEntering();
 
             await wrapper.find("[data-testid='erase-button']").trigger("click");
 
@@ -190,7 +258,7 @@ describe("SolverWalkthrough", () => {
         });
 
         it("should deselect the digit when entering erase mode", async () => {
-            const { wrapper } = mountWalkthrough();
+            const { wrapper } = await mountEntering();
 
             await wrapper.find("[data-testid='number-5']").trigger("click");
             await wrapper.find("[data-testid='erase-button']").trigger("click");
@@ -200,7 +268,7 @@ describe("SolverWalkthrough", () => {
         });
 
         it("should exit erase mode when selecting a digit", async () => {
-            const { wrapper } = mountWalkthrough();
+            const { wrapper } = await mountEntering();
 
             await wrapper.find("[data-testid='erase-button']").trigger("click");
             await wrapper.find("[data-testid='number-3']").trigger("click");
@@ -210,7 +278,7 @@ describe("SolverWalkthrough", () => {
         });
 
         it("should clear a filled cell when clicked in erase mode", async () => {
-            const { wrapper } = mountWalkthrough();
+            const { wrapper } = await mountEntering();
 
             await wrapper.find("[data-testid='number-6']").trigger("click");
             await cellAt(wrapper, 5, 2).trigger("click");
@@ -222,8 +290,8 @@ describe("SolverWalkthrough", () => {
             expect(cellAt(wrapper, 5, 2).text()).toBe("");
         });
 
-        it("should render a Solve button", () => {
-            const { wrapper } = mountWalkthrough();
+        it("should render a Solve button", async () => {
+            const { wrapper } = await mountEntering();
 
             expect(wrapper.find("[data-testid='solve-button']").exists()).toBe(true);
         });
@@ -231,8 +299,7 @@ describe("SolverWalkthrough", () => {
 
     describe("playback", () => {
         it("should keep the inputs in place under the panel", async () => {
-            const { wrapper } = mountWalkthrough();
-            await fillPuzzle(wrapper, singlesPuzzle);
+            const { wrapper } = mountWalkthrough({ initialPuzzle: singlesPuzzle });
             const board = wrapper.find("[data-testid='walkthrough-board']").element;
             expect(wrapper.find("[data-testid='walkthrough-inputs']").attributes("inert")).toBeUndefined();
 
@@ -248,8 +315,7 @@ describe("SolverWalkthrough", () => {
         });
 
         it("should ignore cell clicks after entering solve mode", async () => {
-            const { wrapper } = mountWalkthrough();
-            await fillPuzzle(wrapper, singlesPuzzle);
+            const { wrapper } = mountWalkthrough({ initialPuzzle: singlesPuzzle });
 
             await solve(wrapper);
             await cellAt(wrapper, 0, 0).trigger("click");
@@ -258,8 +324,7 @@ describe("SolverWalkthrough", () => {
         });
 
         it("should not present the cells as buttons during playback", async () => {
-            const { wrapper } = mountWalkthrough();
-            await fillPuzzle(wrapper, singlesPuzzle);
+            const { wrapper } = mountWalkthrough({ initialPuzzle: singlesPuzzle });
             expect(cellAt(wrapper, 0, 0).attributes("role")).toBe("button");
 
             await solve(wrapper);
@@ -268,8 +333,7 @@ describe("SolverWalkthrough", () => {
         });
 
         it("should return to edit mode and preserve puzzle when clicking Back during solve mode", async () => {
-            const { wrapper } = mountWalkthrough();
-            await fillPuzzle(wrapper, singlesPuzzle);
+            const { wrapper } = mountWalkthrough({ initialPuzzle: singlesPuzzle });
 
             await solve(wrapper);
             expect(wrapper.find("[data-testid='walkthrough-panel']").exists()).toBe(true);
@@ -283,8 +347,7 @@ describe("SolverWalkthrough", () => {
         });
 
         it("should open on the first step", async () => {
-            const { wrapper } = mountWalkthrough();
-            await fillPuzzle(wrapper, singlesPuzzle);
+            const { wrapper } = mountWalkthrough({ initialPuzzle: singlesPuzzle });
             const { cell, digit } = firstSinglesStep().assignments[0];
 
             await solve(wrapper);
@@ -297,8 +360,7 @@ describe("SolverWalkthrough", () => {
         });
 
         it("should mark the first step's answer cell like hint mode", async () => {
-            const { wrapper } = mountWalkthrough();
-            await fillPuzzle(wrapper, singlesPuzzle);
+            const { wrapper } = mountWalkthrough({ initialPuzzle: singlesPuzzle });
             const { cell, digit } = firstSinglesStep().assignments[0];
 
             await solve(wrapper);
@@ -318,8 +380,7 @@ describe("SolverWalkthrough", () => {
         });
 
         it("should show every empty cell's candidates before the step", async () => {
-            const { wrapper } = mountWalkthrough();
-            await fillPuzzle(wrapper, singlesPuzzle);
+            const { wrapper } = mountWalkthrough({ initialPuzzle: singlesPuzzle });
             const step = firstSinglesStep();
             const marked = new Set([
                 ...step.scopes.flatMap(scopeCells),
@@ -342,8 +403,7 @@ describe("SolverWalkthrough", () => {
         });
 
         it("should strike the candidates an elimination step removes", async () => {
-            const { wrapper } = mountWalkthrough();
-            await fillPuzzle(wrapper, hardPuzzle);
+            const { wrapper } = mountWalkthrough({ initialPuzzle: hardPuzzle });
             const path = buildSolvePath(hardPuzzle);
             const index = path.findIndex((entry) => entry.step.assignments.length === 0);
             if (index === -1) throw new Error("expected an elimination step");
@@ -359,8 +419,7 @@ describe("SolverWalkthrough", () => {
         });
 
         it("should apply scope variant to non-focus cells in the current step's scope", async () => {
-            const { wrapper } = mountWalkthrough();
-            await fillPuzzle(wrapper, mediumPuzzle);
+            const { wrapper } = mountWalkthrough({ initialPuzzle: mediumPuzzle });
             const path = buildSolvePath(mediumPuzzle);
             const index = path.findIndex((entry) => entry.step.scopes.length > 0);
             if (index === -1) throw new Error("expected at least one step with scope");
@@ -384,8 +443,7 @@ describe("SolverWalkthrough", () => {
         });
 
         it("should stop on the last step the solver found", async () => {
-            const { wrapper } = mountWalkthrough();
-            await fillPuzzle(wrapper, singlesPuzzle);
+            const { wrapper } = mountWalkthrough({ initialPuzzle: singlesPuzzle });
             const path = buildSolvePath(singlesPuzzle);
             const lastCell = path[path.length - 1].step.assignments[0].cell;
 
@@ -411,8 +469,7 @@ describe("SolverWalkthrough", () => {
 
         it("should auto-advance steps every 800ms when Play is active", async () => {
             vi.useFakeTimers({ shouldAdvanceTime: true });
-            const { wrapper } = mountWalkthrough();
-            await fillPuzzle(wrapper, singlesPuzzle);
+            const { wrapper } = mountWalkthrough({ initialPuzzle: singlesPuzzle });
 
             await solve(wrapper);
             const counter = () => wrapper.find("[data-testid='walkthrough-step-counter']").text();
@@ -429,8 +486,7 @@ describe("SolverWalkthrough", () => {
 
         it("should stop auto-play when going back to edit", async () => {
             vi.useFakeTimers({ shouldAdvanceTime: true });
-            const { wrapper } = mountWalkthrough();
-            await fillPuzzle(wrapper, singlesPuzzle);
+            const { wrapper } = mountWalkthrough({ initialPuzzle: singlesPuzzle });
 
             await solve(wrapper);
             await wrapper.find("[data-testid='walkthrough-play']").trigger("click");
@@ -444,8 +500,7 @@ describe("SolverWalkthrough", () => {
         });
 
         it("should start from the first step after solving again", async () => {
-            const { wrapper } = mountWalkthrough();
-            await fillPuzzle(wrapper, singlesPuzzle);
+            const { wrapper } = mountWalkthrough({ initialPuzzle: singlesPuzzle });
 
             await solve(wrapper);
             await clickNext(wrapper, 4);
@@ -464,7 +519,7 @@ describe("SolverWalkthrough", () => {
         };
 
         it("should make reset a quiet text button", async () => {
-            const { wrapper } = mountWalkthrough();
+            const { wrapper } = await mountEntering();
             const reset = () => wrapper.find("[data-testid='reset-button']");
 
             expect(reset().classes()).toContain("text-foreground-secondary");
@@ -477,7 +532,7 @@ describe("SolverWalkthrough", () => {
         });
 
         it("should ask before clearing the board", async () => {
-            const { wrapper } = mountWalkthrough();
+            const { wrapper } = await mountEntering();
             await enterSeven(wrapper);
 
             await wrapper.find("[data-testid='reset-button']").trigger("click");
@@ -487,7 +542,7 @@ describe("SolverWalkthrough", () => {
         });
 
         it("should keep the puzzle when reset is cancelled", async () => {
-            const { wrapper } = mountWalkthrough();
+            const { wrapper } = await mountEntering();
             await enterSeven(wrapper);
 
             await wrapper.find("[data-testid='reset-button']").trigger("click");
@@ -499,7 +554,7 @@ describe("SolverWalkthrough", () => {
         });
 
         it("should clear the board when reset is confirmed", async () => {
-            const { wrapper } = mountWalkthrough();
+            const { wrapper } = await mountEntering();
             await enterSeven(wrapper);
 
             await wrapper.find("[data-testid='reset-button']").trigger("click");
@@ -513,7 +568,7 @@ describe("SolverWalkthrough", () => {
         it("should ask in Traditional Chinese", async () => {
             i18n.global.locale.value = "zh-Hant";
             await nextTick();
-            const { wrapper } = mountWalkthrough();
+            const { wrapper } = await mountEntering();
             await enterSeven(wrapper);
 
             await wrapper.find("[data-testid='reset-button']").trigger("click");
@@ -526,8 +581,7 @@ describe("SolverWalkthrough", () => {
         it("should name the technique and the cell, and keep the button labels", async () => {
             i18n.global.locale.value = "zh-Hant";
             await nextTick();
-            const { wrapper } = mountWalkthrough();
-            await fillPuzzle(wrapper, singlesPuzzle);
+            const { wrapper } = mountWalkthrough({ initialPuzzle: singlesPuzzle });
 
             expect(wrapper.find("[data-testid='reset-button']").text()).toBe("重設");
             expect(wrapper.find("[data-testid='solve-button']").text()).toBe("解題");

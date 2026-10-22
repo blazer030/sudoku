@@ -1,11 +1,14 @@
+import type { Difficulty } from "@/domain/generator/SudokuGenerator";
+
+/** A puzzle the walkthrough offers to try, one per difficulty. */
 export interface SamplePuzzle {
-    label: string;
+    id: Difficulty;
     puzzle: number[][];
 }
 
 export const SAMPLE_PUZZLES: SamplePuzzle[] = [
     {
-        label: "Singles",
+        id: "easy",
         puzzle: [
             [0, 0, 0, 2, 6, 0, 7, 0, 1],
             [6, 8, 0, 0, 7, 0, 0, 9, 0],
@@ -19,7 +22,7 @@ export const SAMPLE_PUZZLES: SamplePuzzle[] = [
         ],
     },
     {
-        label: "Medium",
+        id: "medium",
         puzzle: [
             [0, 0, 0, 0, 0, 0, 0, 1, 2],
             [0, 0, 0, 0, 3, 5, 0, 0, 0],
@@ -33,7 +36,7 @@ export const SAMPLE_PUZZLES: SamplePuzzle[] = [
         ],
     },
     {
-        label: "Hard",
+        id: "hard",
         puzzle: [
             [2, 0, 0, 0, 1, 7, 8, 0, 0],
             [0, 0, 0, 2, 0, 0, 5, 0, 7],

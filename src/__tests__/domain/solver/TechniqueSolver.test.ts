@@ -242,7 +242,7 @@ describe("TechniqueSolver", () => {
         });
 
         it("should return elimination steps before the assignment", () => {
-            const hardPreset = SAMPLE_PUZZLES.find((preset) => preset.label === "Hard");
+            const hardPreset = SAMPLE_PUZZLES.find((sample) => sample.id === "hard");
             if (!hardPreset) throw new Error("Hard preset missing");
             const hardPuzzle = hardPreset.puzzle;
             const solver = new TechniqueSolver();

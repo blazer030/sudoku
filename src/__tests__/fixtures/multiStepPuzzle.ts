@@ -9,7 +9,7 @@ import { SAMPLE_PUZZLES } from "@/presentation/pages/solver-walkthrough/samplePu
  * Reveal Cell hint needs elimination steps before its assignment.
  */
 export const createMultiStepSudoku = (): Sudoku => {
-    const hardPreset = SAMPLE_PUZZLES.find((preset) => preset.label === "Hard");
+    const hardPreset = SAMPLE_PUZZLES.find((sample) => sample.id === "hard");
     if (!hardPreset) throw new Error("Hard preset missing");
     const solved = new TechniqueSolver().solveWithTechniques(BoardState.fromPuzzle(hardPreset.puzzle));
     const answer = hardPreset.puzzle.map((rowValues, row) =>

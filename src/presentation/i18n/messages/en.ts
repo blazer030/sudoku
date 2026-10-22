@@ -163,6 +163,12 @@ export const en = {
     walkthrough: {
         reset: "Reset",
         solve: "Solve",
+        intro: {
+            description: "Enter any Sudoku and see which techniques the solver uses to crack it, step by step.",
+            enterOwn: "Enter a Puzzle",
+            samples: "Try a Sample",
+            caveat: "It may not finish: the puzzle may need a more advanced technique, the input may have a mistake, or the puzzle may have no solution or more than one.",
+        },
         dialog: {
             reset: {
                 title: "Clear the board?",

@@ -60,8 +60,8 @@
                 class="relative w-full"
             >
                 <div
-                    :class="inPlayback ? 'opacity-0 pointer-events-none' : 'opacity-100 delay-100'"
-                    :inert="inPlayback || undefined"
+                    :class="overlayShown ? 'opacity-0 pointer-events-none' : 'opacity-100 delay-100'"
+                    :inert="overlayShown || undefined"
                     class="flex flex-col items-center gap-6 transition-opacity duration-200"
                     data-testid="walkthrough-inputs"
                 >
@@ -95,21 +95,66 @@
                             {{ t("walkthrough.solve") }}
                         </button>
                     </div>
-                    <div
-                        v-if="testButtonsEnabled"
-                        class="flex gap-2"
-                    >
-                        <button
-                            v-for="preset in SAMPLE_PUZZLES"
-                            :key="preset.label"
-                            :data-testid="`load-preset-${preset.label.toLowerCase()}`"
-                            class="px-3 py-1.5 bg-card border border-border rounded-lg text-xs text-foreground-muted cursor-pointer hover:bg-foreground/5"
-                            @click="loadPreset(preset.puzzle)"
-                        >
-                            {{ preset.label }}
-                        </button>
-                    </div>
                 </div>
+
+                <Transition name="walkthrough-overlay">
+                    <div
+                        v-if="introOpen && !inPlayback"
+                        class="absolute top-0 inset-x-0 z-10"
+                    >
+                        <section
+                            :aria-label="t('home.walkthrough')"
+                            :style="roomBelowInputArea === null ? undefined : { maxHeight: `${roomBelowInputArea}px` }"
+                            class="bg-card rounded-2xl shadow-card-lg p-4 w-full flex flex-col gap-4 overflow-y-auto"
+                            data-testid="walkthrough-intro"
+                        >
+                            <div class="flex items-start gap-3">
+                                <span class="w-10 h-10 rounded-xl bg-primary-light text-primary flex items-center justify-center shrink-0">
+                                    <Wand2 :size="20" />
+                                </span>
+                                <p class="text-[15px] leading-snug text-foreground">
+                                    {{ t("walkthrough.intro.description") }}
+                                </p>
+                            </div>
+                            <button
+                                v-press
+                                class="w-full h-12 shrink-0 flex items-center justify-center gap-2 rounded-2xl bg-primary text-on-primary font-semibold cursor-pointer shadow-primary transition-all duration-200 hover:bg-primary-hover"
+                                data-testid="walkthrough-enter-own"
+                                @click="enterOwnPuzzle"
+                            >
+                                <Pencil :size="18" />
+                                {{ t("walkthrough.intro.enterOwn") }}
+                            </button>
+                            <div class="flex flex-col gap-2">
+                                <span class="text-[13px] font-semibold text-foreground-secondary">
+                                    {{ t("walkthrough.intro.samples") }}
+                                </span>
+                                <div class="grid grid-cols-3 gap-2">
+                                    <button
+                                        v-for="sample in SAMPLE_PUZZLES"
+                                        :key="sample.id"
+                                        v-press
+                                        :data-testid="`load-sample-${sample.id}`"
+                                        class="h-11 rounded-xl bg-primary-light text-primary font-semibold cursor-pointer transition-all duration-200"
+                                        @click="loadSample(sample.puzzle)"
+                                    >
+                                        {{ difficultyLabel(sample.id) }}
+                                    </button>
+                                </div>
+                            </div>
+                            <p
+                                class="flex items-start gap-2 text-[13px] leading-snug text-foreground-secondary"
+                                data-testid="walkthrough-intro-caveat"
+                            >
+                                <Info
+                                    :size="16"
+                                    class="shrink-0 mt-px"
+                                />
+                                <span>{{ t("walkthrough.intro.caveat") }}</span>
+                            </p>
+                        </section>
+                    </div>
+                </Transition>
 
                 <Transition name="walkthrough-overlay">
                     <div
@@ -154,7 +199,7 @@
 import { computed, ref, useTemplateRef, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
-import { ChevronLeft, ListFilter, PencilLine, RotateCcw } from "lucide-vue-next";
+import { ChevronLeft, Info, ListFilter, Pencil, PencilLine, RotateCcw, Wand2 } from "lucide-vue-next";
 import { ROUTER_PATH } from "@/router";
 import { BOARD_SIZE } from "@/domain/board/constants";
 import { buildSolvePath } from "@/domain/solver/SolvePath";
@@ -171,7 +216,12 @@ import { provideWalkthroughDialog } from "@/presentation/pages/solver-walkthroug
 import WalkthroughDialog from "@/presentation/pages/solver-walkthrough/WalkthroughDialog.vue";
 import { vPress } from "@/presentation/directives/press";
 import { SAMPLE_PUZZLES } from "@/presentation/pages/solver-walkthrough/samplePuzzles";
-import { isFeatureEnabled } from "@/utils/featureToggle";
+import { useDifficultyLabel } from "@/presentation/labels/difficultyLabels";
+
+const props = defineProps<{
+    /** A puzzle to start from, such as one from the game history; the guide stays closed. */
+    initialPuzzle?: number[][];
+}>();
 
 interface CellPosition {
     row: number;
@@ -185,7 +235,10 @@ const router = useRouter();
 const { t } = useI18n();
 const techniqueLabel = useTechniqueLabel();
 const explain = useHintExplanation();
-const userValues = ref<number[][]>(createEmptyBoard());
+const difficultyLabel = useDifficultyLabel();
+const userValues = ref<number[][]>(props.initialPuzzle?.map((rowValues) => [...rowValues]) ?? createEmptyBoard());
+// The guide covers the inputs until the player picks a way in.
+const introOpen = ref(props.initialPuzzle === undefined);
 const selectedCell = ref<CellPosition | null>(null);
 const selectedDigit = ref<number | null>(null);
 const eraseMode = ref(false);
@@ -212,6 +265,7 @@ const {
 } = useWalkthroughPlayback(userValues);
 
 const inPlayback = computed(() => path.value !== null);
+const overlayShown = computed(() => inPlayback.value || introOpen.value);
 
 const explanation = computed(() =>
     currentStep.value === null ? "" : explain(currentStep.value.step, currentStep.value.candidatesBefore));
@@ -261,13 +315,16 @@ const invalidDigitsForSelectedCell = computed((): number[] => {
     }
     return invalid;
 });
-const testButtonsEnabled = isFeatureEnabled("walkthroughTestButtons");
-
-const loadPreset = (puzzle: number[][]) => {
+const loadSample = (puzzle: number[][]) => {
     selectedCell.value = null;
     selectedDigit.value = null;
     eraseMode.value = false;
     userValues.value = puzzle.map((row) => [...row]);
+    introOpen.value = false;
+};
+
+const enterOwnPuzzle = () => {
+    introOpen.value = false;
 };
 
 const resetBoard = () => {
@@ -278,7 +335,9 @@ const resetBoard = () => {
 };
 
 const confirmReset = async () => {
-    if (await openDialog("reset") === "confirm") resetBoard();
+    if (await openDialog("reset") !== "confirm") return;
+    resetBoard();
+    introOpen.value = true;
 };
 
 const toggleEraseMode = () => {
