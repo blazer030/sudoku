@@ -16,7 +16,7 @@
         :emphasized-digits="hint?.emphasized ?? []"
         :popping="revealed"
         :class="[interactionClass, 'select-none [-webkit-touch-callout:none]']"
-        role="button"
+        :role="interactive ? 'button' : undefined"
         @click="handleClick"
         @contextmenu.prevent
         @pointerdown="longPress.onPointerdown"
@@ -50,12 +50,15 @@ const props = withDefaults(defineProps<{
     /** While hint mode is on, how the hint wants this cell shown; it replaces the normal highlights. */
     hint?: StepCellView | null;
     revealed?: boolean;
+    /** False on boards that only show a game, so the cell does not present itself as a button. */
+    interactive?: boolean;
 }>(), {
     peer: false,
     selectedDigit: null,
     highlightSameDigit: true,
     hint: null,
     revealed: false,
+    interactive: true,
 });
 
 const HINT_VARIANTS: Record<Exclude<StepHighlight, "none">, CellVariant> = {
@@ -108,7 +111,7 @@ const spokenLabel = computed(() => {
 // Colour changes animate only while hinting, so normal selection stays instant.
 const interactionClass = computed(() => {
     if (props.hint) return "transition-colors duration-300";
-    return props.puzzleCell.isClue ? "" : "cursor-pointer";
+    return props.puzzleCell.isClue || !props.interactive ? "" : "cursor-pointer";
 });
 
 const variant = computed((): CellVariant => {

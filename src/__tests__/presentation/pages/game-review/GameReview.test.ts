@@ -163,4 +163,10 @@ describe("GameReview", () => {
         expect(panel.find("[data-testid='review-progress-bar']").exists()).toBe(true);
         expect(panel.find("[data-testid='review-play']").exists()).toBe(true);
     });
+
+    it("should show a board of cells that are not buttons", async () => {
+        const wrapper = await mountReview({ nextClicks: 0 });
+
+        expect(wrapper.findAll("[data-testid^='review-cell-'][role='button']")).toHaveLength(0);
+    });
 });

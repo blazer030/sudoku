@@ -44,6 +44,15 @@ describe("Cell", () => {
         expect(wrapper.classes()).toContain("bg-cell-selected");
     });
 
+    it("should not present itself as a button on a board that only shows the game", () => {
+        const wrapper = mountCell({ puzzleCell: new PuzzleCell(0), interactive: false });
+
+        expect(wrapper.attributes("role")).toBeUndefined();
+        expect(wrapper.attributes("tabindex")).toBeUndefined();
+        expect(wrapper.classes()).not.toContain("cursor-pointer");
+        expect(wrapper.attributes("aria-label")).toBe("Row 1, column 1, empty");
+    });
+
     describe("spoken label", () => {
         const mountAt = (puzzleCell: PuzzleCell) => mount(Cell, { props: { row: 0, column: 2, puzzleCell } });
 

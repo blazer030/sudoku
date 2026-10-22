@@ -72,6 +72,7 @@
                         :column="columnIndex"
                         :data-testid="`review-cell-${rowIndex}-${columnIndex}`"
                         :highlight-same-digit="false"
+                        :interactive="false"
                         :puzzle-cell="puzzleCell"
                         :row="rowIndex"
                         :selected="isChanged(rowIndex, columnIndex)"
