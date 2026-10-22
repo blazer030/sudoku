@@ -1,14 +1,11 @@
-import { BOARD_SIZE, BOX_SIZE } from "@/domain/board/constants";
+import { BOARD_SIZE } from "@/domain/board/constants";
 import { BoardState } from "@/domain/solver/BoardState";
 import { CellReference, ChainLink, Elimination, SolveStep } from "@/domain/solver/SolveStep";
 import { Technique } from "@/domain/solver/techniques/Technique";
+import { arePeers, sameCell } from "@/domain/solver/cellRelations";
+import { collectBivalueCells, type BivalueCell } from "@/domain/solver/bivalueCells";
 
 const MAX_CHAIN_CELLS = 12;
-
-interface BivalueCell {
-    cell: CellReference;
-    candidates: [number, number];
-}
 
 export class XYChain implements Technique {
     public find(state: BoardState): SolveStep | null {
@@ -65,41 +62,6 @@ function dfs(
         if (step) return step;
     }
     return null;
-}
-
-function collectBivalueCells(state: BoardState): BivalueCell[] {
-    const cells: BivalueCell[] = [];
-    for (let row = 0; row < BOARD_SIZE; row++) {
-        for (let column = 0; column < BOARD_SIZE; column++) {
-            const candidates = state.candidatesOf(row, column);
-            if (candidates.length === 2) {
-                cells.push({
-                    cell: { row, column },
-                    candidates: [candidates[0], candidates[1]],
-                });
-            }
-        }
-    }
-    return cells;
-}
-
-function sameCell(a: CellReference, b: CellReference): boolean {
-    return a.row === b.row && a.column === b.column;
-}
-
-function arePeers(a: CellReference, b: CellReference): boolean {
-    if (sameCell(a, b)) return false;
-    if (a.row === b.row) return true;
-    if (a.column === b.column) return true;
-    return inSameBox(a, b);
-}
-
-function inSameBox(a: CellReference, b: CellReference): boolean {
-    const boxRowA = Math.floor(a.row / BOX_SIZE);
-    const boxColumnA = Math.floor(a.column / BOX_SIZE);
-    const boxRowB = Math.floor(b.row / BOX_SIZE);
-    const boxColumnB = Math.floor(b.column / BOX_SIZE);
-    return boxRowA === boxRowB && boxColumnA === boxColumnB;
 }
 
 function collectEndpointEliminations(

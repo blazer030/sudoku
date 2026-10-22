@@ -1,8 +1,9 @@
-import { BOARD_SIZE, BOX_SIZE } from "@/domain/board/constants";
+import { BOARD_SIZE } from "@/domain/board/constants";
 import { BoardState } from "@/domain/solver/BoardState";
 import { CellReference, ChainLink, Elimination, SolveStep } from "@/domain/solver/SolveStep";
 import { ChainGraph } from "@/domain/solver/chains/ChainGraph";
 import { Technique } from "@/domain/solver/techniques/Technique";
+import { arePeers, sameCell } from "@/domain/solver/cellRelations";
 
 const MAX_CHAIN_LINKS = 11;
 
@@ -97,25 +98,6 @@ function addPartner(map: Map<string, CellReference[]>, cell: CellReference, part
 
 function cellKey(cell: CellReference): string {
     return `${cell.row}-${cell.column}`;
-}
-
-function sameCell(a: CellReference, b: CellReference): boolean {
-    return a.row === b.row && a.column === b.column;
-}
-
-function arePeers(a: CellReference, b: CellReference): boolean {
-    if (sameCell(a, b)) return false;
-    if (a.row === b.row) return true;
-    if (a.column === b.column) return true;
-    return inSameBox(a, b);
-}
-
-function inSameBox(a: CellReference, b: CellReference): boolean {
-    const boxRowA = Math.floor(a.row / BOX_SIZE);
-    const boxColumnA = Math.floor(a.column / BOX_SIZE);
-    const boxRowB = Math.floor(b.row / BOX_SIZE);
-    const boxColumnB = Math.floor(b.column / BOX_SIZE);
-    return boxRowA === boxRowB && boxColumnA === boxColumnB;
 }
 
 function collectWeakPeers(
