@@ -30,12 +30,18 @@ describe("board geometry", () => {
         expect(wrapper.classes()).toContain("aspect-square");
     });
 
-    it("should give the game board more of the screen width than the page gutter", () => {
-        const source = readFileSync("src/presentation/pages/game/GameScreen.vue", "utf8");
+    it.each([
+        ["src/presentation/pages/game/GameScreen.vue", "game-board"],
+        ["src/presentation/pages/game-review/GameReview.vue", "review-board"],
+        ["src/presentation/pages/solver-walkthrough/SolverWalkthrough.vue", "walkthrough-board"],
+    ])("%s gives its board more of the screen width than the page gutter", (path, testId) => {
+        const source = readFileSync(path, "utf8");
         const boardTag = [...source.matchAll(/<\w+\b(?:[^>"']|"[^"]*"|'[^']*')*>/g)].map(([tag]) => tag)
-            .find(tag => tag.includes('data-testid="game-board"'));
+            .find(tag => tag.includes(`data-testid="${testId}"`));
 
-        // The page keeps its 20px gutter for the header and controls; the board reaches 8px from the edge
+        // The page keeps its 20px gutter for everything else; every board reaches 8px from the edge,
+        // so the board is the same width in the game, the review and the walkthrough
         expect(boardTag).toMatch(/class="[^"]*\B-mx-3\b/);
+        expect(boardTag).not.toMatch(/class="[^"]*\bw-full\b/);
     });
 });

@@ -24,7 +24,7 @@
             <div
                 data-skin="board"
                 :class="boardEditable ? '' : 'pointer-events-none'"
-                class="bg-card rounded-2xl shadow-card-lg p-2 w-full"
+                class="bg-card rounded-2xl shadow-card-lg p-2 self-stretch -mx-3"
                 data-testid="walkthrough-board"
             >
                 <div class="relative flex flex-col border-3 border-foreground/20 rounded-xl">
