@@ -1,5 +1,5 @@
 import { createDialog } from "@/presentation/composables/createDialog";
-import type { Difficulty } from "@/domain";
+import type { Difficulty } from "@/domain/generator/SudokuGenerator";
 
 /** The unfinished game that starting a new one would give up. */
 export interface SavedGameSummary {

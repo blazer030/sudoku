@@ -1,6 +1,6 @@
 import { computed, ref } from "vue";
-import { BOARD_SIZE, BOX_SIZE } from "@/domain";
-import type { Sudoku } from "@/domain";
+import { BOARD_SIZE, BOX_SIZE } from "@/domain/board/constants";
+import type { Sudoku } from "@/domain/game/Sudoku";
 import type { StepRecorder } from "@/domain/game/StepRecorder";
 import { InputMode } from "@/presentation/pages/game/InputMode";
 

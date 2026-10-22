@@ -4,7 +4,7 @@ import { createPinia } from "pinia";
 import { createMemoryHistory, createRouter } from "vue-router";
 import Game from "@/presentation/pages/game/Game.vue";
 import { fillAllButLastKnownCell, knownAnswer, knownPuzzle, lastKnownEmptyCell } from "@/__tests__/fixtures/knownPuzzle";
-import type { Difficulty } from "@/domain";
+import type { Difficulty } from "@/domain/generator/SudokuGenerator";
 import { useGameStore } from "@/stores/gameStore";
 import { useStatisticsStore } from "@/stores/statisticsStore";
 

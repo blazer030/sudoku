@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { computed, ref, shallowRef } from "vue";
-import type { Difficulty } from "@/domain";
+import type { Difficulty } from "@/domain/generator/SudokuGenerator";
 import { PuzzleCell } from "@/domain/board/PuzzleCell";
 import { Sudoku } from "@/domain/game/Sudoku";
 import { GameStateConverter, type GameState } from "@/application/game/GameState";

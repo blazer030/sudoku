@@ -11,7 +11,7 @@
 
 <script lang="ts" setup>
 import { computed } from "vue";
-import { type Difficulty } from "@/domain";
+import type { Difficulty } from "@/domain/generator/SudokuGenerator";
 import { useDifficultyLabel } from "@/presentation/i18n/difficultyLabels";
 import SegmentedControl from "@/presentation/components/segmented-control/SegmentedControl.vue";
 

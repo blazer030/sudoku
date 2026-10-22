@@ -1,5 +1,5 @@
 import { type Ref, ref } from "vue";
-import type { Difficulty } from "@/domain";
+import type { Difficulty } from "@/domain/generator/SudokuGenerator";
 import type { Sudoku } from "@/domain/game/Sudoku";
 import { useGameStore } from "@/stores/gameStore";
 import { useStatisticsStore } from "@/stores/statisticsStore";

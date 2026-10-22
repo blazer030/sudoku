@@ -110,7 +110,7 @@ import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { ChartBar, Plus, Settings, Wand2 } from "lucide-vue-next";
 import { ROUTER_PATH } from "@/router";
-import type { Difficulty } from "@/domain";
+import type { Difficulty } from "@/domain/generator/SudokuGenerator";
 import { useGameStore } from "@/stores/gameStore";
 import { useStatisticsStore } from "@/stores/statisticsStore";
 import { ANALYTICS_KEY } from "@/application/analytics/AnalyticsService";

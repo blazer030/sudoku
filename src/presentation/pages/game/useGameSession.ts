@@ -1,6 +1,8 @@
 import { computed, inject, reactive } from "vue";
 import { provideGameCompleteModal, type GameCompleteAction } from "@/presentation/pages/game/components/useGameCompleteModal";
-import { BOARD_SIZE, Sudoku, StepRecorder } from "@/domain";
+import { BOARD_SIZE } from "@/domain/board/constants";
+import { Sudoku } from "@/domain/game/Sudoku";
+import { StepRecorder } from "@/domain/game/StepRecorder";
 import { useRouter } from "vue-router";
 import { useGameStore } from "@/stores/gameStore";
 import { useStatisticsStore } from "@/stores/statisticsStore";

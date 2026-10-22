@@ -1,4 +1,4 @@
-import type { Difficulty } from "@/domain";
+import type { Difficulty } from "@/domain/generator/SudokuGenerator";
 import type { GameResult } from "@/application/statistics/StatisticsRepository";
 
 export type RecentGamesFilter = "all" | Difficulty;

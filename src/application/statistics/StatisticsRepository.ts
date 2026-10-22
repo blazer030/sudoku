@@ -1,5 +1,5 @@
 import type { InjectionKey } from "vue";
-import type { Difficulty } from "@/domain";
+import type { Difficulty } from "@/domain/generator/SudokuGenerator";
 import type { GameStep } from "@/domain/game/GameStep";
 import type { CellState } from "@/application/game/GameState";
 

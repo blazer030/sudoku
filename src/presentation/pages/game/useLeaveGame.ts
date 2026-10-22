@@ -1,6 +1,6 @@
 import { type Ref, ref } from "vue";
 import { onBeforeRouteLeave, useRouter } from "vue-router";
-import type { Difficulty } from "@/domain";
+import type { Difficulty } from "@/domain/generator/SudokuGenerator";
 import type { Sudoku } from "@/domain/game/Sudoku";
 import { GameStateConverter } from "@/application/game/GameState";
 import { useGameStore } from "@/stores/gameStore";

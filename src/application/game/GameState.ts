@@ -1,5 +1,6 @@
-import { Sudoku, PuzzleCell } from "@/domain";
-import type { Difficulty } from "@/domain";
+import { Sudoku } from "@/domain/game/Sudoku";
+import { PuzzleCell } from "@/domain/board/PuzzleCell";
+import type { Difficulty } from "@/domain/generator/SudokuGenerator";
 import type { GameReplayData } from "@/application/statistics/StatisticsRepository";
 
 export interface CellState {

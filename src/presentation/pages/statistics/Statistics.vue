@@ -216,7 +216,7 @@ import { useRouter } from "vue-router";
 import { ChartBar, ChevronLeft, ChevronRight, Lightbulb, Trophy, X } from "lucide-vue-next";
 import { ROUTER_PATH } from "@/router";
 import { useStatisticsStore } from "@/stores/statisticsStore";
-import type { Difficulty } from "@/domain";
+import type { Difficulty } from "@/domain/generator/SudokuGenerator";
 import type { GameResult } from "@/application/statistics/StatisticsRepository";
 import { formatTime } from "@/utils/formatTime";
 import { countPlayStreak } from "@/application/statistics/playStreak";

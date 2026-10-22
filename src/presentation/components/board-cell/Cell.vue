@@ -32,7 +32,7 @@
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import BoardCell, { type CellVariant, type ValueTextColor, type ValueFontWeight } from "@/presentation/components/board-cell/BoardCell.vue";
-import { PuzzleCell } from "@/domain";
+import { PuzzleCell } from "@/domain/board/PuzzleCell";
 import { useLongPress } from "@/presentation/composables/useLongPress";
 import type { StepCellView, StepHighlight } from "@/presentation/components/step-presentation/stepCellView";
 import { vPress } from "@/presentation/directives/press";
