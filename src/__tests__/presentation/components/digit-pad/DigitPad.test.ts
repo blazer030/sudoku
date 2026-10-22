@@ -1,5 +1,5 @@
 import { mount } from "@vue/test-utils";
-import DigitPad from "@/presentation/pages/game/components/DigitPad.vue";
+import DigitPad from "@/presentation/components/digit-pad/DigitPad.vue";
 import { expectKeyRowsToShrinkToFit } from "@/__tests__/fixtures/digitKeyRows";
 
 describe("DigitPad", () => {

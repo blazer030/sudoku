@@ -101,7 +101,7 @@ import { useDifficultyLabel } from "@/presentation/labels/difficultyLabels";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import { useGameCompleteModal } from "@/presentation/pages/game/components/useGameCompleteModal";
-import FireworkCanvas from "@/presentation/pages/game/components/FireworkCanvas.vue";
+import FireworkCanvas from "@/presentation/components/firework-canvas/FireworkCanvas.vue";
 import { vPress } from "@/presentation/directives/press";
 
 const { t } = useI18n();

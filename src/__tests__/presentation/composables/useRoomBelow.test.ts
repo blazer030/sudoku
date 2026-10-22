@@ -1,6 +1,6 @@
 import { defineComponent, h, onMounted, ref } from "vue";
 import { mount } from "@vue/test-utils";
-import { useRoomBelow } from "@/presentation/pages/game/hint-mode/useRoomBelow";
+import { useRoomBelow } from "@/presentation/composables/useRoomBelow";
 
 const measureRoomBelow = (elementTop: number, bottomGap: number, safeAreaBottom?: string): number | null => {
     const element = document.createElement("div");

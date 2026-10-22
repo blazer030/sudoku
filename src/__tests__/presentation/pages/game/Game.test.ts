@@ -7,7 +7,7 @@ import { createMemoryHistory, createRouter, onBeforeRouteLeave } from "vue-route
 import Game from "@/presentation/pages/game/Game.vue";
 import { knownAnswer, knownPuzzle, createKnownSudoku } from "@/__tests__/fixtures/knownPuzzle";
 import type { GameState } from "@/application/GameState";
-import Cell from "@/presentation/pages/game/components/Cell.vue";
+import Cell from "@/presentation/components/board-cell/Cell.vue";
 import { useGameStore } from "@/stores/gameStore";
 import type { Difficulty } from "@/domain/generator/SudokuGenerator";
 import { useStatisticsStore } from "@/stores/statisticsStore";

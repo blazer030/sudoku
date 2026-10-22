@@ -2,7 +2,7 @@ import { defineComponent, nextTick } from "vue";
 import { mount } from "@vue/test-utils";
 import { i18n } from "@/presentation/i18n";
 import type { CellReference, SolveStep, TechniqueId } from "@/domain/solver/SolveStep";
-import { useHintExplanation } from "@/presentation/pages/game/hint-mode/useHintExplanation";
+import { useHintExplanation } from "@/presentation/components/step-presentation/useHintExplanation";
 
 type Explain = ReturnType<typeof useHintExplanation>;
 

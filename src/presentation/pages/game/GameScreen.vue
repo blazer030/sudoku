@@ -126,12 +126,12 @@ import LeaveGameDialog from "@/presentation/pages/game/components/LeaveGameDialo
 import GameControls from "@/presentation/pages/game/components/GameControls.vue";
 import HintMenuPopup from "@/presentation/pages/game/components/HintMenuPopup.vue";
 import GameToast from "@/presentation/pages/game/components/GameToast.vue";
-import DigitPad from "@/presentation/pages/game/components/DigitPad.vue";
-import Cell from "@/presentation/pages/game/components/Cell.vue";
+import DigitPad from "@/presentation/components/digit-pad/DigitPad.vue";
+import Cell from "@/presentation/components/board-cell/Cell.vue";
 import StepLinkOverlay from "@/presentation/components/step-presentation/StepLinkOverlay.vue";
 import HintPanel from "@/presentation/pages/game/hint-mode/HintPanel.vue";
-import { useRoomBelow } from "@/presentation/pages/game/hint-mode/useRoomBelow";
-import { minimumPanelHeight, panelLift } from "@/presentation/pages/game/hint-mode/panelLift";
+import { useRoomBelow } from "@/presentation/composables/useRoomBelow";
+import { minimumPanelHeight, panelLift } from "@/presentation/components/step-presentation/panelLift";
 import { InputMode } from "@/presentation/pages/game/InputMode";
 import { useGameInteraction } from "@/presentation/pages/game/useGameInteraction";
 import { useGameSession } from "@/presentation/pages/game/useGameSession";

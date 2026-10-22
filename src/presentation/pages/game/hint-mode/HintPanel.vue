@@ -137,7 +137,7 @@ import { ChevronRight, CircleAlert, Eraser, EyeOff, ListFilter, PencilLine } fro
 import type { RevealHintStep } from "@/domain/game/RevealHint";
 import type { CellReference } from "@/domain/solver/SolveStep";
 import type { HintPhase } from "@/presentation/pages/game/hint-mode/useHintMode";
-import { useHintExplanation } from "@/presentation/pages/game/hint-mode/useHintExplanation";
+import { useHintExplanation } from "@/presentation/components/step-presentation/useHintExplanation";
 import { useTechniqueLabel } from "@/presentation/labels/techniqueLabels";
 import StepTag from "@/presentation/components/step-presentation/StepTag.vue";
 import StepNavigator from "@/presentation/components/step-presentation/StepNavigator.vue";

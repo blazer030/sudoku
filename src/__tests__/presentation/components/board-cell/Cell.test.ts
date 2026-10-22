@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { mount } from "@vue/test-utils";
 import { nextTick } from "vue";
 import { i18n } from "@/presentation/i18n";
-import Cell from "@/presentation/pages/game/components/Cell.vue";
+import Cell from "@/presentation/components/board-cell/Cell.vue";
 import { PuzzleCell } from "@/domain/board/PuzzleCell";
 
 describe("Cell", () => {

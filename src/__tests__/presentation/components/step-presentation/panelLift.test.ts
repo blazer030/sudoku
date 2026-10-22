@@ -1,4 +1,4 @@
-import { minimumPanelHeight, panelLift } from "@/presentation/pages/game/hint-mode/panelLift";
+import { minimumPanelHeight, panelLift } from "@/presentation/components/step-presentation/panelLift";
 
 const panelWith = (scrollHeight: number, explanation: { height: number; minHeight: string } | null): HTMLElement => {
     const panel = document.createElement("div");

@@ -20,7 +20,7 @@
 <script lang="ts" setup>
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
-import FireworkCanvas from "@/presentation/pages/game/components/FireworkCanvas.vue";
+import FireworkCanvas from "@/presentation/components/firework-canvas/FireworkCanvas.vue";
 import type { DonateTier } from "@/application/analytics/AnalyticsService";
 
 const { t } = useI18n();
