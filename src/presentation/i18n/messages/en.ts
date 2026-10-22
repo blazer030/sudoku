@@ -95,6 +95,12 @@ export const en = {
         continueProgress: "{percent}% filled",
         statistics: "Statistics",
         walkthrough: "Walkthrough",
+        entries: {
+            winRate: "Win rate {percent}%",
+            noGames: "No games yet",
+            walkthrough: "Enter a puzzle, see the steps",
+            settings: "Theme, mode, language",
+        },
         generatingPuzzle: "Generating puzzle…",
         giveUp: {
             title: "Unfinished Game",

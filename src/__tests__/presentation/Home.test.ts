@@ -36,6 +36,8 @@ const createTestRouter = () => {
             { path: "/", component: Home },
             { path: "/game", component: { template: "<div>Game</div>" } },
             { path: "/solver", component: { template: "<div>Solver</div>" } },
+            { path: "/statistics", component: { template: "<div>Statistics</div>" } },
+            { path: "/settings", component: { template: "<div>Settings</div>" } },
         ],
     });
 };
@@ -193,6 +195,76 @@ describe("Home", () => {
 
         expect(classes).toContain("bg-primary-light");
         expect(classes).not.toContain("bg-primary");
+    });
+
+    it("should show the entries in order", () => {
+        const { wrapper } = mountHome();
+
+        expect(wrapper.get("[data-testid='home-entries']").findAll("button").map(button => button.attributes("data-testid")))
+            .toEqual(["statistics-button", "walkthrough-button", "settings-button"]);
+    });
+
+    it("should say no games yet instead of a 0% win rate", () => {
+        const { wrapper } = mountHome();
+
+        expect(wrapper.get("[data-testid='statistics-subtitle']").text()).toBe("No games yet");
+    });
+
+    it("should show the win rate on the statistics tile", async () => {
+        const { wrapper } = mountHome();
+        const statisticsStore = useStatisticsStore();
+        statisticsStore.recordGame({ difficulty: "easy", elapsedSeconds: 100, completed: true });
+        statisticsStore.recordGame({ difficulty: "easy", elapsedSeconds: 100, completed: true });
+        statisticsStore.recordGame({ difficulty: "easy", elapsedSeconds: 100, completed: false });
+        await nextTick();
+
+        expect(wrapper.get("[data-testid='statistics-subtitle']").text()).toBe("Win rate 67%");
+
+        i18n.global.locale.value = "zh-Hant";
+        await nextTick();
+
+        expect(wrapper.get("[data-testid='statistics-subtitle']").text()).toBe("勝率 67%");
+    });
+
+    it("should describe the walkthrough and settings tiles", async () => {
+        const { wrapper } = mountHome();
+        const subtitle = (id: string) => wrapper.get(`[data-testid='${id}-subtitle']`).text();
+
+        expect(subtitle("walkthrough")).toBe("Enter a puzzle, see the steps");
+        expect(subtitle("settings")).toBe("Theme, mode, language");
+
+        i18n.global.locale.value = "zh-Hant";
+        await nextTick();
+
+        expect(subtitle("walkthrough")).toBe("輸入題目看解法");
+        expect(subtitle("settings")).toBe("主題、深淺色、語言");
+    });
+
+    it("should make the whole tile the tap target", () => {
+        const { wrapper } = mountHome();
+
+        for (const id of ["statistics", "walkthrough", "settings"]) {
+            const button = wrapper.get(`[data-testid='${id}-button']`);
+            expect(button.element.tagName).toBe("BUTTON");
+            expect(button.find("svg").exists()).toBe(true);
+            expect(button.find(`[data-testid='${id}-label']`).exists()).toBe(true);
+            expect(button.find(`[data-testid='${id}-subtitle']`).exists()).toBe(true);
+            expect(button.classes()).toContain("min-h-22");
+        }
+    });
+
+    it("should open statistics and settings from their tiles", async () => {
+        const { wrapper, router } = mountHome();
+        await router.push("/");
+        await router.isReady();
+
+        await wrapper.get("[data-testid='statistics-button']").trigger("click");
+        await flushPromises();
+        expect(router.currentRoute.value.path).toBe(ROUTER_PATH.statistics);
+
+        await wrapper.get("[data-testid='settings-button']").trigger("click");
+        await flushPromises();
+        expect(router.currentRoute.value.path).toBe(ROUTER_PATH.settings);
     });
 
     it("should navigate to game page when clicking Continue", async () => {

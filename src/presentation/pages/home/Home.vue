@@ -54,42 +54,33 @@
 
         <div class="flex-1" />
 
-        <div class="flex items-center justify-center gap-10">
+        <!-- Becomes grid-cols-2 when Technique Lessons adds a fourth tile -->
+        <div
+            class="grid grid-cols-3 gap-3 w-full"
+            data-testid="home-entries"
+        >
             <button
+                v-for="entry in entries"
+                :key="entry.id"
                 v-press
-                class="flex flex-col items-center gap-1 cursor-pointer"
-                data-testid="settings-button"
-                @click="goToSettings"
+                :data-testid="`${entry.id}-button`"
+                class="flex flex-col items-center gap-1 min-h-22 bg-card rounded-2xl shadow-card px-2 py-3 cursor-pointer"
+                type="button"
+                @click="entry.open"
             >
-                <Settings
-                    :size="24"
-                    class="text-foreground-muted"
+                <component
+                    :is="entry.icon"
+                    :size="22"
+                    class="text-primary"
                 />
-                <span class="text-foreground-muted text-[11px] font-medium">{{ t("settings.title") }}</span>
-            </button>
-            <button
-                v-press
-                class="flex flex-col items-center gap-1 cursor-pointer"
-                data-testid="walkthrough-button"
-                @click="goToWalkthrough"
-            >
-                <Wand2
-                    :size="24"
-                    class="text-foreground-muted"
-                />
-                <span class="text-foreground-muted text-[11px] font-medium">{{ t("home.walkthrough") }}</span>
-            </button>
-            <button
-                v-press
-                class="flex flex-col items-center gap-1 cursor-pointer"
-                data-testid="statistics-button"
-                @click="goToStatistics"
-            >
-                <ChartBar
-                    :size="24"
-                    class="text-foreground-muted"
-                />
-                <span class="text-foreground-muted text-[11px] font-medium">{{ t("home.statistics") }}</span>
+                <span
+                    :data-testid="`${entry.id}-label`"
+                    class="text-sm font-semibold text-foreground"
+                >{{ entry.label }}</span>
+                <span
+                    :data-testid="`${entry.id}-subtitle`"
+                    class="text-[11px] text-foreground-secondary text-center leading-tight"
+                >{{ entry.subtitle }}</span>
             </button>
         </div>
 
@@ -100,7 +91,7 @@
 </template>
 
 <script lang="ts" setup>
-import { inject, ref } from "vue";
+import { computed, inject, ref } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { ChartBar, Plus, Settings, Wand2 } from "lucide-vue-next";
@@ -162,6 +153,20 @@ const startGame = async () => {
     await puzzleLoader.runWithLoader(() => gameStore.startNewGame(difficulty.value));
     void router.push(ROUTER_PATH.game);
 };
+
+// Says "no games yet" rather than a 0% win rate nobody earned
+const statisticsSubtitle = computed(() => {
+    const { gamesPlayed, winRate } = statisticsStore.statistics.overall;
+    return gamesPlayed === 0
+        ? t("home.entries.noGames")
+        : t("home.entries.winRate", { percent: Math.round(winRate * 100) });
+});
+
+const entries = computed(() => [
+    { id: "statistics", icon: ChartBar, label: t("home.statistics"), subtitle: statisticsSubtitle.value, open: goToStatistics },
+    { id: "walkthrough", icon: Wand2, label: t("home.walkthrough"), subtitle: t("home.entries.walkthrough"), open: goToWalkthrough },
+    { id: "settings", icon: Settings, label: t("settings.title"), subtitle: t("home.entries.settings"), open: goToSettings },
+]);
 
 const goToSettings = () => {
     void router.push(ROUTER_PATH.settings);

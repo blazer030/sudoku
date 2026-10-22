@@ -93,6 +93,12 @@ export const zhHant: MessageSchema = {
         continueProgress: "已填 {percent}%",
         statistics: "統計",
         walkthrough: "解題演示",
+        entries: {
+            winRate: "勝率 {percent}%",
+            noGames: "還沒有紀錄",
+            walkthrough: "輸入題目看解法",
+            settings: "主題、深淺色、語言",
+        },
         generatingPuzzle: "正在產生題目…",
         giveUp: {
             title: "還有一局沒完成",
