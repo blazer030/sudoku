@@ -30,6 +30,40 @@ describe("backDismissal", () => {
         expect(dialog.visible.value).toBe(false);
     });
 
+    it("should close only the most recently opened dialog on Back", () => {
+        const first = mountDialog<"cancel">("cancel").dialog;
+        const second = mountDialog<"cancel">("cancel").dialog;
+        void first.open();
+        void second.open();
+
+        handleBackButton(false);
+
+        expect(second.visible.value).toBe(false);
+        expect(first.visible.value).toBe(true);
+        first.close("cancel");
+    });
+
+    it("should leave a dialog without a dismiss result open on Back", () => {
+        const { dialog } = mountDialog<"done">();
+        void dialog.open();
+
+        handleBackButton(false);
+
+        expect(dialog.visible.value).toBe(true);
+        dialog.close("done");
+    });
+
+    it("should forget a dialog whose page went away while it was open", () => {
+        const back = vi.spyOn(window.history, "back").mockImplementation(() => undefined);
+        const { dialog, wrapper } = mountDialog<"cancel">("cancel");
+        void dialog.open();
+        wrapper.unmount();
+
+        handleBackButton(true);
+
+        expect(back).toHaveBeenCalledTimes(1);
+    });
+
     it("should go back a page when no dialog is open and there is a page to go back to", () => {
         const back = vi.spyOn(window.history, "back").mockImplementation(() => undefined);
 
