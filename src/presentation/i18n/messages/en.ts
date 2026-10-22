@@ -44,8 +44,8 @@ export const en = {
         gameplay: "Gameplay",
         toggles: {
             highlightSameDigit: { label: "Same Numbers", description: "Light up matching digits" },
-            highlightScope: { label: "Row, Column & Box", description: "Shade the selected cell's lines" },
-            completionFlash: { label: "Completion Flash", description: "Flash a finished row or box" },
+            highlightScope: { label: "Row, Column & Box", description: "Shade its row, column and box" },
+            completionFlash: { label: "Completion Flash", description: "Flash a finished row, column or box" },
             autoRemoveNotes: { label: "Auto-Clear Notes", description: "Clear notes a digit rules out" },
             showRemainingCount: { label: "Remaining Count", description: "Show how many are left on each key" },
         },

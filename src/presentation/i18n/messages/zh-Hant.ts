@@ -44,7 +44,7 @@ export const zhHant: MessageSchema = {
             highlightSameDigit: { label: "標示相同數字", description: "同樣數字一起亮" },
             highlightScope: { label: "標示同列、欄、宮", description: "淡淡標出所在範圍" },
             completionFlash: { label: "完成動畫", description: "完成一組時閃一下" },
-            autoRemoveNotes: { label: "自動移除筆記", description: "填入後清掉相同筆記" },
+            autoRemoveNotes: { label: "自動移除筆記", description: "填入後清掉不可能的筆記" },
             showRemainingCount: { label: "剩餘數量", description: "數字鍵上顯示還差幾個" },
         },
         support: "支持開發",
