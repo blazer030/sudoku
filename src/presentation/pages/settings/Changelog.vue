@@ -40,9 +40,10 @@
                         :key="index"
                         class="text-foreground-muted text-[13px] leading-relaxed pl-3 relative before:absolute before:left-0 before:top-[0.5em] before:w-1 before:h-1 before:rounded-full before:bg-foreground-muted"
                     >
-                        {{ change.text[appLocale] }}<span
+                        {{ change.text[appLocale] }}
+                        <span
                             v-if="change.appOnly"
-                            class="ml-1.5 inline-block align-[1px] rounded-full bg-primary-light text-primary text-[11px] font-semibold leading-4 px-1.5"
+                            class="ml-0.5 inline-block align-[1px] rounded-full bg-primary-light text-primary text-[11px] font-semibold leading-4 px-1.5"
                             data-testid="changelog-app-badge"
                         >{{ t("changelog.appBadge") }}</span>
                     </li>

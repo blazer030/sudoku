@@ -93,6 +93,14 @@ describe("Changelog", () => {
         expect(latestBadges[0].text()).toBe("App");
     });
 
+    it("should keep the App badge apart from the change text for screen readers", () => {
+        const wrapper = mountChangelog();
+
+        const item = wrapper.find("[data-testid='changelog-entry-2.1.1'] [data-testid='changelog-app-badge']").element.parentElement;
+
+        expect(item?.textContent).toMatch(/\S\s+App$/);
+    });
+
     it("should keep the App marker out of the text", () => {
         for (const entry of CHANGELOG) {
             for (const change of entry.changes) {
