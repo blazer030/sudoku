@@ -160,6 +160,13 @@ describe("useStatisticsStore", () => {
             expect(stats.recentGames).toHaveLength(4);
             expect(stats.recentGames[0].difficulty).toBe("hard");
         });
+        it("should round the average to whole seconds", () => {
+            const store = useStatisticsStore();
+            store.recordGame({ difficulty: "easy", elapsedSeconds: 100, completed: true });
+            store.recordGame({ difficulty: "easy", elapsedSeconds: 51, completed: true });
+
+            expect(store.statistics.easy.averageTime).toBe(76);
+        });
     });
 
     describe("isNewBestTime", () => {

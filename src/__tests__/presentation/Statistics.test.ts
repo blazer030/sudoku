@@ -52,7 +52,7 @@ describe("Statistics", () => {
         await nextTick();
 
         const text = wrapper.text();
-        for (const label of ["統計", "總覽", "連續遊玩天數", "最佳時間", "最近遊戲", "已放棄", "困難", "今天 15:05"]) {
+        for (const label of ["統計", "總覽", "連續遊玩天數", "各難度", "最佳", "平均", "完成", "最近遊戲", "已放棄", "困難", "今天 15:05"]) {
             expect(text).toContain(label);
         }
         expect(text).not.toContain("Gave up");
@@ -92,18 +92,52 @@ describe("Statistics", () => {
         expect(wrapper.find("[data-testid='day-streak']").text()).toContain("2");
     });
 
-    it("should display best times per difficulty", () => {
+    it("should show best, average and completed games per difficulty", () => {
         recordGames([
             { difficulty: "easy", elapsedSeconds: 263, completed: true },
             { difficulty: "easy", elapsedSeconds: 300, completed: true },
-            { difficulty: "medium", elapsedSeconds: 512, completed: true },
+            { difficulty: "easy", elapsedSeconds: 999, completed: false },
         ]);
 
         const { wrapper } = mountStatistics();
 
-        expect(wrapper.find("[data-testid='best-time-easy']").text()).toContain("04:23");
-        expect(wrapper.find("[data-testid='best-time-medium']").text()).toContain("08:32");
-        expect(wrapper.find("[data-testid='best-time-hard']").text()).toContain("--:--");
+        expect(wrapper.find("[data-testid='difficulty-best-easy']").text()).toContain("04:23");
+        expect(wrapper.find("[data-testid='difficulty-average-easy']").text()).toContain("04:42");
+        expect(wrapper.find("[data-testid='difficulty-completed-easy']").text()).toContain("2/3");
+    });
+
+    it("should show the rounded average", () => {
+        recordGames([
+            { difficulty: "easy", elapsedSeconds: 100, completed: true },
+            { difficulty: "easy", elapsedSeconds: 51, completed: true },
+        ]);
+
+        const { wrapper } = mountStatistics();
+
+        const average = wrapper.find("[data-testid='difficulty-average-easy']").text();
+        expect(average).toContain("01:16");
+        expect(average).not.toContain(".");
+    });
+
+    it("should show a dash when a difficulty has no win", () => {
+        recordGames([{ difficulty: "medium", elapsedSeconds: 400, completed: false }]);
+
+        const { wrapper } = mountStatistics();
+
+        expect(wrapper.find("[data-testid='difficulty-best-medium']").text()).toContain("—");
+        expect(wrapper.find("[data-testid='difficulty-average-medium']").text()).toContain("—");
+        expect(wrapper.find("[data-testid='difficulty-completed-medium']").text()).toContain("0/1");
+    });
+
+    it("should say a difficulty was not played yet", () => {
+        recordGames([{ difficulty: "easy", elapsedSeconds: 100, completed: true }]);
+
+        const { wrapper } = mountStatistics();
+
+        const hard = wrapper.find("[data-testid='difficulty-stats-hard']");
+        expect(hard.text()).toContain("Hard");
+        expect(hard.text()).toContain("Not played yet");
+        expect(wrapper.find("[data-testid='difficulty-best-hard']").exists()).toBe(false);
     });
 
     it("should display recent games list", () => {
@@ -156,7 +190,7 @@ describe("Statistics", () => {
 
         expect(wrapper.find("[data-testid='games-won']").text()).toContain("0");
         expect(wrapper.find("[data-testid='win-rate']").text()).toContain("0%");
-        expect(wrapper.find("[data-testid='best-time-easy']").text()).toContain("--:--");
+        expect(wrapper.find("[data-testid='difficulty-stats-easy']").text()).toContain("Not played yet");
         expect(wrapper.findAll("[data-testid='recent-game']")).toHaveLength(0);
     });
 

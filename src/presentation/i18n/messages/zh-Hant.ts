@@ -215,7 +215,11 @@ export const zhHant: MessageSchema = {
         gamesWon: "勝場",
         winRate: "勝率",
         dayStreak: "連續遊玩天數",
-        bestTimes: "最佳時間",
+        byDifficulty: "各難度",
+        best: "最佳",
+        average: "平均",
+        completed: "完成",
+        notPlayed: "還沒玩過",
         recentGames: "最近遊戲",
         gaveUp: "已放棄",
         empty: {

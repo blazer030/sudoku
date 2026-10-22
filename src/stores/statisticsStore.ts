@@ -45,7 +45,7 @@ const computeDifficultyStats = (games: GameResult[]): DifficultyStats => {
             ? Math.min(...wonGames.map((game) => game.elapsedSeconds))
             : null,
         averageTime: wonGames.length > 0
-            ? wonGames.reduce((sum, game) => sum + game.elapsedSeconds, 0) / wonGames.length
+            ? Math.round(wonGames.reduce((sum, game) => sum + game.elapsedSeconds, 0) / wonGames.length)
             : null,
     };
 };

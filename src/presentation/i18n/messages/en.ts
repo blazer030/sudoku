@@ -218,7 +218,11 @@ export const en = {
         gamesWon: "Games Won",
         winRate: "Win Rate",
         dayStreak: "Day Streak",
-        bestTimes: "Best Times",
+        byDifficulty: "By Difficulty",
+        best: "Best",
+        average: "Average",
+        completed: "Completed",
+        notPlayed: "Not played yet",
         recentGames: "Recent Games",
         gaveUp: "Gave up",
         empty: {

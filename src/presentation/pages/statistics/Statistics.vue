@@ -44,52 +44,45 @@
         </div>
 
         <div class="flex flex-col gap-2 mt-5">
-            <span class="text-foreground-muted text-xs font-semibold tracking-wider uppercase px-1">{{ t("statistics.bestTimes") }}</span>
-            <div class="bg-card rounded-2xl p-4 shadow-card flex flex-col gap-3">
+            <span class="text-foreground-muted text-xs font-semibold tracking-wider uppercase px-1">{{ t("statistics.byDifficulty") }}</span>
+            <div class="bg-card rounded-2xl p-4 shadow-card flex flex-col divide-y divide-border">
                 <div
-                    class="flex items-center justify-between"
-                    data-testid="best-time-easy"
+                    v-for="difficulty in DIFFICULTIES"
+                    :key="difficulty"
+                    :data-testid="`difficulty-stats-${difficulty}`"
+                    class="flex items-center gap-2 py-3 first:pt-0 last:pb-0"
                 >
-                    <div class="flex items-center gap-3">
-                        <Trophy
-                            :size="20"
-                            class="text-foreground-muted"
-                        />
-                        <span class="text-base font-medium text-foreground">{{ difficultyLabel("easy") }}</span>
+                    <span class="text-base font-medium text-foreground w-16 shrink-0">{{ difficultyLabel(difficulty) }}</span>
+                    <div
+                        v-if="stats[difficulty].gamesPlayed > 0"
+                        class="grid grid-cols-3 flex-1"
+                    >
+                        <div
+                            :data-testid="`difficulty-best-${difficulty}`"
+                            class="flex flex-col items-center"
+                        >
+                            <span class="text-base font-semibold font-mono text-primary">{{ formatOptionalTime(stats[difficulty].bestTime) }}</span>
+                            <span class="text-[11px] text-foreground-secondary">{{ t("statistics.best") }}</span>
+                        </div>
+                        <div
+                            :data-testid="`difficulty-average-${difficulty}`"
+                            class="flex flex-col items-center"
+                        >
+                            <span class="text-base font-semibold font-mono text-foreground">{{ formatOptionalTime(stats[difficulty].averageTime) }}</span>
+                            <span class="text-[11px] text-foreground-secondary">{{ t("statistics.average") }}</span>
+                        </div>
+                        <div
+                            :data-testid="`difficulty-completed-${difficulty}`"
+                            class="flex flex-col items-center"
+                        >
+                            <span class="text-base font-semibold font-mono text-foreground">{{ `${stats[difficulty].gamesWon}/${stats[difficulty].gamesPlayed}` }}</span>
+                            <span class="text-[11px] text-foreground-secondary">{{ t("statistics.completed") }}</span>
+                        </div>
                     </div>
-                    <span class="text-base font-semibold text-primary font-mono">
-                        {{ formatBestTime(stats.easy.bestTime) }}
-                    </span>
-                </div>
-                <div
-                    class="flex items-center justify-between"
-                    data-testid="best-time-medium"
-                >
-                    <div class="flex items-center gap-3">
-                        <Trophy
-                            :size="20"
-                            class="text-foreground-muted"
-                        />
-                        <span class="text-base font-medium text-foreground">{{ difficultyLabel("medium") }}</span>
-                    </div>
-                    <span class="text-base font-semibold text-primary font-mono">
-                        {{ formatBestTime(stats.medium.bestTime) }}
-                    </span>
-                </div>
-                <div
-                    class="flex items-center justify-between"
-                    data-testid="best-time-hard"
-                >
-                    <div class="flex items-center gap-3">
-                        <Trophy
-                            :size="20"
-                            class="text-foreground-muted"
-                        />
-                        <span class="text-base font-medium text-foreground">{{ difficultyLabel("hard") }}</span>
-                    </div>
-                    <span class="text-base font-semibold text-primary font-mono">
-                        {{ formatBestTime(stats.hard.bestTime) }}
-                    </span>
+                    <span
+                        v-else
+                        class="text-sm text-foreground-muted"
+                    >{{ t("statistics.notPlayed") }}</span>
                 </div>
             </div>
         </div>
@@ -183,6 +176,7 @@ import { useRouter } from "vue-router";
 import { ChevronLeft, ChevronRight, Lightbulb, Trophy, X } from "lucide-vue-next";
 import { ROUTER_PATH } from "@/router";
 import { useStatisticsStore } from "@/stores/statisticsStore";
+import type { Difficulty } from "@/domain";
 import type { GameResult } from "@/application/statistics/StatisticsRepository";
 import { formatTime } from "@/utils/formatTime";
 import { countPlayStreak } from "@/application/statistics/playStreak";
@@ -208,8 +202,10 @@ const dayStreak = computed(() =>
     countPlayStreak(statisticsStore.history.map(game => game.date), new Date())
 );
 
-const formatBestTime = (seconds: number | null): string => {
-    if (seconds === null) return "--:--";
+const DIFFICULTIES: readonly Difficulty[] = ["easy", "medium", "hard"];
+
+const formatOptionalTime = (seconds: number | null): string => {
+    if (seconds === null) return "—";
     return formatTime(seconds);
 };
 
