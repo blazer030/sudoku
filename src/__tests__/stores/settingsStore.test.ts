@@ -56,6 +56,36 @@ describe("settingsStore", () => {
         expect(useSettingsStore().highlightScope).toBe(false);
     });
 
+    it("should remember the theme chosen for the current style", () => {
+        const store = useSettingsStore();
+
+        store.setColorTheme("teal");
+
+        const stored = JSON.parse(localStorage.getItem("sudoku-settings") ?? "{}") as Record<string, unknown>;
+        expect(stored.colorThemeByStyle).toEqual({ minimal: "teal" });
+        setActivePinia(createPinia());
+        expect(useSettingsStore().colorThemeByStyle.minimal).toBe("teal");
+    });
+
+    it("should keep an upgraded player's theme when the current style is chosen again", () => {
+        localStorage.setItem("sudoku-settings", JSON.stringify({ colorTheme: "blue" }));
+        const store = useSettingsStore();
+
+        store.setStyle("minimal");
+
+        expect(store.colorTheme).toBe("blue");
+        expect(store.style).toBe("minimal");
+    });
+
+    it("should persist the chosen style", () => {
+        const store = useSettingsStore();
+
+        store.setStyle("minimal");
+
+        const stored = JSON.parse(localStorage.getItem("sudoku-settings") ?? "{}") as Record<string, unknown>;
+        expect(stored.style).toBe("minimal");
+    });
+
     it("should remember that the long-press tip was seen", () => {
         const store = useSettingsStore();
 

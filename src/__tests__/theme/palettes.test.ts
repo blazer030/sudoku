@@ -1,5 +1,5 @@
 import { COLOR_THEME_IDS, type ColorThemeId } from "@/application/SettingsStorage";
-import { STYLES, getPalette } from "@/theme/palettes";
+import { STYLES, getPalette, rememberedThemeFor } from "@/theme/palettes";
 import { contrastRatio } from "@/theme/contrast";
 
 describe("palettes", () => {
@@ -24,6 +24,15 @@ describe("palettes", () => {
 
     it("getPalette falls back to the style's first theme", () => {
         expect(getPalette("minimal", "red" as ColorThemeId, "light")).toEqual(getPalette("minimal", "green", "light"));
+    });
+
+    it("rememberedThemeFor returns the theme remembered for the style", () => {
+        expect(rememberedThemeFor("minimal", { minimal: "teal" })).toBe("teal");
+    });
+
+    it("rememberedThemeFor falls back to the style's first theme", () => {
+        expect(rememberedThemeFor("minimal", {})).toBe("green");
+        expect(rememberedThemeFor("minimal", { minimal: "crimson" as ColorThemeId })).toBe("green");
     });
 
     it("uses the secondary text colour for notes in every palette", () => {

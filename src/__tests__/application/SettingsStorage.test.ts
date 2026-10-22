@@ -21,7 +21,34 @@ describe("SettingsStorage", () => {
                 style: "minimal",
                 highlightScope: true,
                 seenLongPressTip: false,
+                colorThemeByStyle: { minimal: "green" },
             });
+        });
+
+        it("should seed the remembered theme from colorTheme for settings saved before it existed", () => {
+            localStorage.setItem("sudoku-settings", JSON.stringify({ colorTheme: "blue" }));
+
+            expect(loadSettings().colorThemeByStyle).toEqual({ minimal: "blue" });
+        });
+
+        it("should drop unusable remembered themes", () => {
+            localStorage.setItem("sudoku-settings", JSON.stringify({ colorThemeByStyle: null }));
+            expect(loadSettings().colorThemeByStyle).toEqual({ minimal: "green" });
+
+            localStorage.setItem("sudoku-settings", JSON.stringify({ colorThemeByStyle: ["blue"] }));
+            expect(loadSettings().colorThemeByStyle).toEqual({ minimal: "green" });
+
+            localStorage.setItem("sudoku-settings", JSON.stringify({
+                colorTheme: "teal",
+                colorThemeByStyle: { neon: "blue", minimal: "crimson" },
+            }));
+            expect(loadSettings().colorThemeByStyle).toEqual({ minimal: "teal" });
+        });
+
+        it("should not share the remembered theme map between loads", () => {
+            loadSettings().colorThemeByStyle.minimal = "teal";
+
+            expect(loadSettings().colorThemeByStyle).toEqual({ minimal: "green" });
         });
 
         it("should restore saved settings", () => {
@@ -37,6 +64,7 @@ describe("SettingsStorage", () => {
                 style: "minimal",
                 highlightScope: false,
                 seenLongPressTip: true,
+                colorThemeByStyle: { minimal: "blue" },
             });
 
             const settings = loadSettings();

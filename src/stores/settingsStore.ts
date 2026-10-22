@@ -1,6 +1,7 @@
 import { ref } from "vue";
 import { defineStore } from "pinia";
-import { loadSettings, saveSettings, type Appearance, type ColorThemeId, type LanguagePreference, type StyleId } from "@/application/SettingsStorage";
+import { loadSettings, saveSettings, type Appearance, type ColorThemeId, type LanguagePreference, type RememberedThemes, type StyleId } from "@/application/SettingsStorage";
+import { rememberedThemeFor } from "@/theme/palettes";
 import { updateFavicon, updateManifestLink, updateAppleTouchIcon } from "@/application/PwaThemeUpdater";
 import type { IconService } from "@/application/icon/IconService";
 
@@ -17,6 +18,7 @@ export const useSettingsStore = defineStore("settings", () => {
     const style = ref<StyleId>(settings.style);
     const highlightScope = ref(settings.highlightScope);
     const seenLongPressTip = ref(settings.seenLongPressTip);
+    const colorThemeByStyle = ref<RememberedThemes>(settings.colorThemeByStyle);
     let iconService: IconService | null = null;
 
     const applyColorTheme = () => {
@@ -39,16 +41,24 @@ export const useSettingsStore = defineStore("settings", () => {
             style: style.value,
             highlightScope: highlightScope.value,
             seenLongPressTip: seenLongPressTip.value,
+            colorThemeByStyle: { ...colorThemeByStyle.value },
         });
     };
 
     const setColorTheme = (id: ColorThemeId) => {
         colorTheme.value = id;
+        colorThemeByStyle.value = { ...colorThemeByStyle.value, [style.value]: id };
         applyColorTheme();
         persistAll();
         if (matchLauncherIconToTheme.value && iconService !== null) {
             void iconService.setIcon(id);
         }
+    };
+
+    // Goes through setColorTheme so the favicon, manifest, launcher icon and storage all follow
+    const setStyle = (id: StyleId) => {
+        style.value = id;
+        setColorTheme(rememberedThemeFor(id, colorThemeByStyle.value));
     };
 
     const setHighlightSameDigit = (value: boolean) => {
@@ -118,7 +128,9 @@ export const useSettingsStore = defineStore("settings", () => {
         style,
         highlightScope,
         seenLongPressTip,
+        colorThemeByStyle,
         setColorTheme,
+        setStyle,
         setHighlightSameDigit,
         setCompletionFlash,
         setAutoRemoveNotes,

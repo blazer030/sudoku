@@ -1,6 +1,6 @@
 // The only place colour values live. src/style/themes.generated.css is rendered from this
 // file by `npm run generate:theme-css`. Relative imports only: scripts/ import this file.
-import type { ColorMode, ColorThemeId, StyleId } from "../application/SettingsStorage";
+import type { ColorMode, ColorThemeId, RememberedThemes, StyleId } from "../application/SettingsStorage";
 import { mixColors } from "./contrast";
 
 export const PALETTE_TOKENS = [
@@ -143,6 +143,12 @@ export const DEFAULT_STYLE_ID: StyleId = "minimal";
 const findTheme = (style: StyleId, themeId: ColorThemeId): ThemePalette => {
     const themes = (STYLES[style] as StyleDefinition | undefined ?? STYLES[DEFAULT_STYLE_ID]).themes;
     return themes.find(theme => theme.id === themeId) ?? themes[0];
+};
+
+/** The theme a style comes back to: the one remembered for it, or the style's first theme. */
+export const rememberedThemeFor = (style: StyleId, remembered: RememberedThemes): ColorThemeId => {
+    const themes = STYLES[style].themes;
+    return themes.find(theme => theme.id === remembered[style])?.id ?? themes[0].id;
 };
 
 export const getPalette = (style: StyleId, themeId: ColorThemeId, mode: ColorMode): Palette =>
