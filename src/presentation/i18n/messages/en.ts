@@ -12,6 +12,8 @@ export const en = {
     },
     changelog: {
         title: "Changelog",
+        appBadge: "App",
+        appNote: "Items marked App apply to the Android app only.",
     },
     settings: {
         title: "Settings",

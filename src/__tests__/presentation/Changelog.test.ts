@@ -79,4 +79,37 @@ describe("Changelog", () => {
             }
         }
     });
+
+    it("should mark app-only changes with a badge", () => {
+        const wrapper = mountChangelog();
+
+        for (const entry of CHANGELOG) {
+            const badges = wrapper.findAll(`[data-testid='changelog-entry-${entry.version}'] [data-testid='changelog-app-badge']`);
+            expect(badges).toHaveLength(entry.changes.filter(change => change.appOnly).length);
+        }
+        const latestBadges = wrapper.findAll("[data-testid='changelog-entry-2.1.1'] [data-testid='changelog-app-badge']");
+        expect(latestBadges).toHaveLength(2);
+        expect(wrapper.findAll("[data-testid='changelog-entry-2.1.0'] [data-testid='changelog-app-badge']")).toHaveLength(0);
+        expect(latestBadges[0].text()).toBe("App");
+    });
+
+    it("should keep the App marker out of the text", () => {
+        for (const entry of CHANGELOG) {
+            for (const change of entry.changes) {
+                for (const locale of APP_LOCALES) {
+                    expect(change.text[locale]).not.toMatch(/\(App\)|（App）/);
+                }
+            }
+        }
+    });
+
+    it("should explain the App badge", async () => {
+        const wrapper = mountChangelog();
+
+        expect(wrapper.find("[data-testid='changelog-app-note']").text()).toBe("Items marked App apply to the Android app only.");
+
+        i18n.global.locale.value = "zh-Hant";
+        await nextTick();
+        expect(wrapper.find("[data-testid='changelog-app-note']").text()).toBe("標有 App 的項目只適用於 Android App。");
+    });
 });

@@ -30,7 +30,7 @@ These are gitignored and must exist before building a release AAB:
    git flow release start <x.y.z>
    npm version <x.y.z> --no-git-tag-version
    ```
-3. **Update the changelog** — add an entry (version, release date, user-facing changes) at the top of `src/presentation/pages/settings/changelogData.ts`. Write the changes in both languages (`en` and `zh-Hant`) with the same number of bullets; mark Android-only items with `(App)` in English and `（App）` in Chinese.
+3. **Update the changelog** — add an entry (version, release date, user-facing changes) at the top of `src/presentation/pages/settings/changelogData.ts`. Each change has its `text` in both `en` and `zh-Hant`. Mark Android-only changes with `appOnly: true`, which shows an "App" badge. Never write "(App)" in the text.
    Commit: `🚧 chore: release <x.y.z>`.
 4. **Build and smoke-test Android**
    ```bash

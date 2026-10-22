@@ -19,15 +19,17 @@ export const CHANGELOG: ChangelogEntry[] = [
         changes: [
             {
                 text: {
-                    en: "Changing the launcher icon no longer closes the app; the new icon appears after you leave it (App)",
-                    "zh-Hant": "更換 App 圖示時不會再直接關閉 App，離開 App 後就會換成新圖示（App）",
+                    en: "Changing the launcher icon no longer closes the app; the new icon appears after you leave it",
+                    "zh-Hant": "更換 App 圖示時不會再直接關閉 App，離開 App 後就會換成新圖示",
                 },
+                appOnly: true,
             },
             {
                 text: {
-                    en: "Theme launcher icons now fill the icon shape instead of sitting on a white circle (App)",
-                    "zh-Hant": "主題 App 圖示改為滿版顯示，不再縮在白色圓底裡（App）",
+                    en: "Theme launcher icons now fill the icon shape instead of sitting on a white circle",
+                    "zh-Hant": "主題 App 圖示改為滿版顯示，不再縮在白色圓底裡",
                 },
+                appOnly: true,
             },
         ],
     },
@@ -79,9 +81,10 @@ export const CHANGELOG: ChangelogEntry[] = [
             },
             {
                 text: {
-                    en: "Launcher icon can match the selected color theme (App)",
-                    "zh-Hant": "App 圖示可配合所選的色彩主題（App）",
+                    en: "Launcher icon can match the selected color theme",
+                    "zh-Hant": "App 圖示可配合所選的色彩主題",
                 },
+                appOnly: true,
             },
         ],
     },

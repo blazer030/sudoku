@@ -9,6 +9,8 @@ export const zhHant: MessageSchema = {
     },
     changelog: {
         title: "更新日誌",
+        appBadge: "App",
+        appNote: "標有 App 的項目只適用於 Android App。",
     },
     settings: {
         title: "設定",
