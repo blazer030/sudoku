@@ -219,15 +219,25 @@
     background-color: var(--color-error);
 }
 
-/* A cell showing candidates instead of a digit gets pen brackets hugging its sides: a circle over the
-   3×3 note grid always crossed some candidates, the brackets clear them */
+/* A cell showing candidates keeps the same circle in a finer stroke, drawn under the notes, so the
+   candidates it passes stay legible */
 [data-style="paper"] [data-variant="selected"]:has(.font-note)::after,
 [data-style="paper"] [data-variant="answer"]:has(.font-note)::after,
 [data-style="paper"] [data-variant="wrong"]:has(.font-note)::after {
-    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpath d='M2 4C0.8 13 0.8 27 2 36M38 4C39.2 13 39.2 27 38 36' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
-    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpath d='M2 4C0.8 13 0.8 27 2 36M38 4C39.2 13 39.2 27 38 36' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
-    inset: 0;
-    rotate: 0deg;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpath d='M30 7.5C23 3.5 11 4.5 6 11.5S3.5 29 11 33.5 30 37.5 35 30 37 13 27 6.8' fill='none' stroke='currentColor' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpath d='M30 7.5C23 3.5 11 4.5 6 11.5S3.5 29 11 33.5 30 37.5 35 30 37 13 27 6.8' fill='none' stroke='currentColor' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+}
+
+/* It runs through the corner slots, so the notes over it carry a paper halo */
+[data-style="paper"] [data-variant="selected"] .font-note,
+[data-style="paper"] [data-variant="answer"] .font-note,
+[data-style="paper"] [data-variant="wrong"] .font-note {
+    text-shadow: 0 0 2px var(--color-card), 0 0 2px var(--color-card), 0 0 1px var(--color-card);
+}
+
+/* An answer cell showing candidates with a target circles the target instead (below) */
+[data-style="paper"] [data-variant="answer"]:has([data-note-highlight])::after {
+    content: none;
 }
 
 /* The selected digit's notes are circled with the same pen instead of sitting on a filled disc,
@@ -261,15 +271,12 @@
     translate: calc(-50% - var(--paper-hand-nudge)) -50%;
 }
 
-/* Inside a circled answer cell the answer's candidate keeps its bold ink but not its own circle,
-   which crossed the cell's in the corner slots */
+/* The answer's candidate is circled with the focus pen: the note's circle in a heavier stroke, drawn
+   like the cell's, so a cell showing candidates reads with the same circle without crossing them */
 [data-style="paper"] [data-variant="answer"] [data-note-highlight]::after {
-    content: none;
-}
-
-/* Where the cell's circle runs under the corner candidate, a paper halo keeps the digit apart from it */
-[data-style="paper"] [data-variant="answer"] [data-note-highlight] {
-    text-shadow: 0 0 2px var(--color-card), 0 0 2px var(--color-card), 0 0 1px var(--color-card);
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpath d='M30 7.5C23 3.5 11 4.5 6 11.5S3.5 29 11 33.5 30 37.5 35 30 37 13 27 6.8' fill='none' stroke='currentColor' stroke-width='4.2' stroke-linecap='round'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpath d='M30 7.5C23 3.5 11 4.5 6 11.5S3.5 29 11 33.5 30 37.5 35 30 37 13 27 6.8' fill='none' stroke='currentColor' stroke-width='4.2' stroke-linecap='round'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+    animation: paper-circle-draw 220ms ease-out;
 }
 
 /* An option tile's tick is drawn as a pen stroke when it appears */
@@ -365,6 +372,7 @@
     [data-style="paper"] [data-variant="selected"]::after,
     [data-style="paper"] [data-variant="answer"]::after,
     [data-style="paper"] [data-variant="wrong"]::after,
+    [data-style="paper"] [data-variant="answer"] [data-note-highlight]::after,
     [data-style="paper"] [data-skin~="check"] svg {
         animation: none;
     }

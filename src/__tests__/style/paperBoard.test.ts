@@ -113,23 +113,39 @@ describe("paper single-cell outlines", () => {
         expect(circle.get("z-index")).toBe("-1");
     });
 
-    it("should leave the answer's candidate uncircled inside the circled answer cell, so the two pens never cross", () => {
-        // The candidate keeps the highlighted note's bold primary ink; only its own small circle goes
-        expect(declarationsOf('[data-style="paper"] [data-variant="answer"] [data-note-highlight]::after').get("content")).toBe("none");
-        // Where the cell's circle runs under the corner candidate, a paper halo keeps the digit apart from the stroke
-        expect(declarationsOf('[data-style="paper"] [data-variant="answer"] [data-note-highlight]').get("text-shadow")).toContain("var(--color-card)");
+    it("should circle the answer candidate instead of a cell showing candidates with a target", () => {
+        // A circle round a 3×3 note grid always crossed some candidates; the answer's own candidate is
+        // circled with the focus pen instead, and the cell keeps its wash
+        const cellCircle = declarationsOf('[data-style="paper"] [data-variant="answer"]:has([data-note-highlight])::after');
+        const candidateCircle = declarationsOf('[data-style="paper"] [data-variant="answer"] [data-note-highlight]::after');
+        const noteCircle = declarationsOf('[data-style="paper"] [data-note-highlight]::after');
+        const strokeOf = (mask: string | undefined): number => Number(/stroke-width='([\d.]+)'/.exec(mask ?? "")?.[1] ?? Number.NaN);
+
+        expect(cellCircle.get("content")).toBe("none");
+        expect(candidateCircle.get("content")).toBeUndefined();
+        // The note circle's primary ink, which the candidate's circle keeps
+        expect(candidateCircle.get("background-color")).toBeUndefined();
+        expect(noteCircle.get("background-color")).toBe("var(--color-primary)");
+        expect(strokeOf(candidateCircle.get("mask"))).toBeGreaterThan(strokeOf(noteCircle.get("mask")));
+        expect(candidateCircle.get("-webkit-mask")).toBe(candidateCircle.get("mask"));
+        expect(candidateCircle.get("animation")).toContain("paper-circle-draw");
+        // No halo is needed once nothing crosses the candidate
+        expect(declarationsOf('[data-style="paper"] [data-variant="answer"] [data-note-highlight]').get("text-shadow")).toBeUndefined();
     });
 
-    it.each(Object.keys(CIRCLED))("should mark a %s cell showing candidates with pen brackets at its sides, which clear the note grid", (variant) => {
-        // A circle over a 3×3 note grid always crosses some candidates; brackets hugging the cell's
-        // sides do not. A cell showing a digit keeps the circle.
+    it.each(Object.keys(CIRCLED))("should keep a thinner cell circle under the notes of a %s cell showing candidates", (variant) => {
         const circle = declarationsOf(`[data-style="paper"] [data-variant="${variant}"]::after`);
-        const brackets = declarationsOf(`[data-style="paper"] [data-variant="${variant}"]:has(.font-note)::after`);
+        const thin = declarationsOf(`[data-style="paper"] [data-variant="${variant}"]:has(.font-note)::after`);
+        const strokeOf = (mask: string | undefined): number => Number(/stroke-width='([\d.]+)'/.exec(mask ?? "")?.[1] ?? Number.NaN);
+        const pathOf = (mask: string | undefined): string => /d='([^']+)'/.exec(mask ?? "")?.[1] ?? "";
 
-        expect(brackets.get("mask")).toContain("data:image/svg+xml");
-        expect(brackets.get("mask")).not.toBe(circle.get("mask"));
-        expect(brackets.get("-webkit-mask")).toBe(brackets.get("mask"));
-        expect(brackets.get("rotate")).toBe("0deg");
+        expect(pathOf(thin.get("mask"))).toBe(pathOf(circle.get("mask")));
+        expect(strokeOf(thin.get("mask"))).toBeLessThan(strokeOf(circle.get("mask")));
+        expect(thin.get("-webkit-mask")).toBe(thin.get("mask"));
+        expect(thin.get("rotate")).toBeUndefined();
+        expect(thin.get("inset")).toBeUndefined();
+        // The circle runs through the corner slots, so the notes over it carry a paper halo
+        expect(declarationsOf(`[data-style="paper"] [data-variant="${variant}"] .font-note`).get("text-shadow")).toContain("var(--color-card)");
     });
 
     it("should stop drawing every circle under reduced motion", () => {
@@ -146,5 +162,6 @@ describe("paper single-cell outlines", () => {
         for (const variant of Object.keys(CIRCLED)) {
             expect(stopped).toContain(`[data-style="paper"] [data-variant="${variant}"]::after`);
         }
+        expect(stopped).toContain('[data-style="paper"] [data-variant="answer"] [data-note-highlight]::after');
     });
 });
