@@ -232,19 +232,22 @@
     scrollbar-width: thin;
     scrollbar-color: var(--scrollbar-thumb) transparent;
 }
-*::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-}
-*::-webkit-scrollbar-track {
-    background: transparent;
-}
-*::-webkit-scrollbar-thumb {
-    background: var(--scrollbar-thumb);
-    border-radius: 4px;
-}
-*::-webkit-scrollbar-thumb:hover {
-    background: var(--scrollbar-thumb-hover);
+/* Touch devices keep overlay scrollbars; a classic 8px gutter shifts content in Android WebView */
+@media (pointer: fine) {
+    *::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+    *::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    *::-webkit-scrollbar-thumb {
+        background: var(--scrollbar-thumb);
+        border-radius: 4px;
+    }
+    *::-webkit-scrollbar-thumb:hover {
+        background: var(--scrollbar-thumb-hover);
+    }
 }
 
 /* CJK glyphs are already evenly spaced; Latin-style tracking looks loose */
