@@ -183,12 +183,12 @@
                         >
                             <template #tag>
                                 <StepTag
-                                    v-if="currentStep"
-                                    :icon="currentStep.step.assignments.length > 0 ? PencilLine : ListFilter"
-                                    :label="techniqueLabel(currentStep.step.technique)"
+                                    v-if="tag"
+                                    :icon="tag.icon"
+                                    :label="tag.label"
                                     :step-key="stepIndex"
-                                    :strong="currentStep.step.assignments.length > 0"
-                                    test-id="walkthrough-technique"
+                                    :strong="tag.strong"
+                                    :test-id="tag.testId"
                                 />
                             </template>
                             {{ explanation }}
@@ -204,10 +204,10 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, nextTick, ref, useTemplateRef, watch } from "vue";
+import { computed, nextTick, ref, useTemplateRef, watch, type Component } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
-import { ChevronLeft, Info, ListFilter, Pencil, PencilLine, RotateCcw, Wand2 } from "lucide-vue-next";
+import { ChevronLeft, Info, ListFilter, Pencil, PencilLine, RotateCcw, Trophy, Wand2 } from "lucide-vue-next";
 import { ROUTER_PATH } from "@/router";
 import { BOARD_SIZE } from "@/domain/board/constants";
 import { SudokuSolver, UNKNOWN_SOLUTION_COUNT } from "@/domain/generator/SudokuSolver";
@@ -264,6 +264,7 @@ const {
     stepIndex,
     stepCount,
     currentStep,
+    isCompleted,
     playState,
     next,
     previous,
@@ -279,8 +280,19 @@ const overlayShown = computed(() => inPlayback.value || introOpen.value);
 // Cells take input only while the player is entering a puzzle, not under the guide or during playback.
 const boardEditable = computed(() => !overlayShown.value);
 
-const explanation = computed(() =>
-    currentStep.value === null ? "" : explain(currentStep.value.step, currentStep.value.candidatesBefore));
+// A solver step names its technique; the solved board, which ends a path that solves, gets a stage tag
+const tag = computed((): { label: string; icon: Component; strong: boolean; testId: string } | null => {
+    if (isCompleted.value) return { label: t("walkthrough.stages.completed"), icon: Trophy, strong: true, testId: "walkthrough-stage" };
+    const current = currentStep.value;
+    if (current === null) return null;
+    const assigns = current.step.assignments.length > 0;
+    return { label: techniqueLabel(current.step.technique), icon: assigns ? PencilLine : ListFilter, strong: assigns, testId: "walkthrough-technique" };
+});
+
+const explanation = computed(() => {
+    if (isCompleted.value) return t("walkthrough.completed");
+    return currentStep.value === null ? "" : explain(currentStep.value.step, currentStep.value.candidatesBefore);
+});
 
 // The panel opens over the inputs; keep it on screen when an explanation runs long.
 const PANEL_BOTTOM_GAP = 24;

@@ -22,6 +22,8 @@ const mediumPuzzle = samplePuzzle("medium");
 const hardPuzzle = samplePuzzle("hard");
 
 const singlesStepCount = buildSolvePath(singlesPuzzle).length;
+// The singles puzzle is solved by its path, so playback ends on one more position: the solved board
+const singlesPositionCount = singlesStepCount + 1;
 
 const createTestRouter = () => createRouter({
     history: createMemoryHistory(),
@@ -396,7 +398,7 @@ describe("SolverWalkthrough", () => {
             const explanation = wrapper.find("[data-testid='walkthrough-explanation']").text();
             expect(explanation).toContain(`Row ${cell.row + 1}, Col ${cell.column + 1}`);
             expect(explanation).toContain(String(digit));
-            expect(wrapper.find("[data-testid='walkthrough-step-counter']").text()).toBe(`1 / ${singlesStepCount}`);
+            expect(wrapper.find("[data-testid='walkthrough-step-counter']").text()).toBe(`1 / ${singlesPositionCount}`);
         });
 
         it("should mark the first step's answer cell like hint mode", async () => {
@@ -482,29 +484,98 @@ describe("SolverWalkthrough", () => {
             expect(checkedScopeCells).toBeGreaterThan(0);
         });
 
-        it("should stop on the last step the solver found", async () => {
-            const { wrapper } = mountWalkthrough({ initialPuzzle: singlesPuzzle });
-            const path = buildSolvePath(singlesPuzzle);
-            const lastCell = path[path.length - 1].step.assignments[0].cell;
-
-            await solve(wrapper);
+        const goToEnd = async (wrapper: VueWrapper) => {
             for (let guard = 0; guard < 200; guard++) {
                 const next = wrapper.find("[data-testid='walkthrough-next']");
                 if (next.attributes("disabled") !== undefined) break;
                 await next.trigger("click");
             }
+        };
 
-            for (let row = 0; row < 9; row++) {
-                for (let column = 0; column < 9; column++) {
-                    const value = cellAt(wrapper, row, column).find("[data-testid='cell-value']");
-                    if (row === lastCell.row && column === lastCell.column) {
-                        expect(value.exists()).toBe(false);
-                    } else {
-                        expect(value.text()).toBe(String(singlesSolution[row][column]));
-                    }
+        // A two-solution board the solver stalls on, with one more cell blanked that a single fills first
+        const stuckPuzzle = (): number[][] => {
+            const board = singlesSolution.map((rowValues) => [...rowValues]);
+            // A rectangle over rows 0–1 and two columns in different boxes, whose digits swap: two solutions
+            for (let columnOne = 0; columnOne < 9; columnOne++) {
+                for (let columnTwo = columnOne + 1; columnTwo < 9; columnTwo++) {
+                    if (Math.floor(columnOne / 3) === Math.floor(columnTwo / 3)) continue;
+                    if (board[0][columnOne] !== board[1][columnTwo] || board[0][columnTwo] !== board[1][columnOne]) continue;
+                    for (const [row, column] of [[0, columnOne], [0, columnTwo], [1, columnOne], [1, columnTwo]]) board[row][column] = 0;
+                    board[8][8] = 0;
+                    return board;
                 }
             }
+            throw new Error("expected a swappable rectangle in rows 0 and 1");
+        };
+
+        it("should end a solved path on the solved board", async () => {
+            const { wrapper } = mountWalkthrough({ initialPuzzle: singlesPuzzle });
+
+            await solve(wrapper);
+            await goToEnd(wrapper);
+
+            expect(wrapper.find("[data-testid='walkthrough-step-counter']").text()).toBe(`${singlesPositionCount} / ${singlesPositionCount}`);
+            for (let row = 0; row < 9; row++) {
+                for (let column = 0; column < 9; column++) {
+                    const cell = cellAt(wrapper, row, column);
+                    expect(cell.find("[data-testid='cell-value']").text()).toBe(String(singlesSolution[row][column]));
+                    expect(cell.classes()).not.toContain("ring-primary");
+                    expect(cell.classes()).not.toContain("bg-primary-light");
+                }
+            }
+            expect(wrapper.find("[data-testid='step-link-overlay']").exists()).toBe(false);
+            expect(wrapper.find("[data-testid='walkthrough-technique']").exists()).toBe(false);
+            expect(wrapper.find("[data-testid='walkthrough-stage']").text()).toBe("Solved");
+            expect(wrapper.find("[data-testid='walkthrough-explanation']").text()).toBe("Solved. Every cell is filled.");
             expect(wrapper.find("[data-testid='walkthrough-progress-fill']").attributes("style")).toContain("width: 100%");
+
+            i18n.global.locale.value = "zh-Hant";
+            await nextTick();
+            expect(wrapper.find("[data-testid='walkthrough-stage']").text()).toBe("已完成");
+            expect(wrapper.find("[data-testid='walkthrough-explanation']").text()).toBe("解題完成，所有格子都填好了");
+        });
+
+        it("should step back from the solved board to the last step", async () => {
+            const { wrapper } = mountWalkthrough({ initialPuzzle: singlesPuzzle });
+
+            await solve(wrapper);
+            await goToEnd(wrapper);
+            await wrapper.find("[data-testid='walkthrough-previous']").trigger("click");
+
+            expect(wrapper.find("[data-testid='walkthrough-step-counter']").text()).toBe(`${singlesStepCount} / ${singlesPositionCount}`);
+            expect(wrapper.find("[data-testid='walkthrough-technique']").exists()).toBe(true);
+            expect(wrapper.find("[data-testid='walkthrough-stage']").exists()).toBe(false);
+        });
+
+        it("should auto-play to the solved board and stop there", async () => {
+            vi.useFakeTimers({ shouldAdvanceTime: true });
+            const { wrapper } = mountWalkthrough({ initialPuzzle: singlesPuzzle });
+
+            await solve(wrapper);
+            await wrapper.find("[data-testid='walkthrough-play']").trigger("click");
+            await vi.advanceTimersByTimeAsync(800 * (singlesPositionCount + 2));
+
+            expect(wrapper.find("[data-testid='walkthrough-step-counter']").text()).toBe(`${singlesPositionCount} / ${singlesPositionCount}`);
+            expect(wrapper.find("[data-testid='walkthrough-stage']").exists()).toBe(true);
+            expect(wrapper.find("[data-testid='walkthrough-play']").attributes("aria-pressed")).toBe("false");
+        });
+
+        it("should stop on the last step the solver found when it gets stuck, with no solved position", async () => {
+            const puzzle = stuckPuzzle();
+            const path = buildSolvePath(puzzle);
+            expect(path.length).toBeGreaterThan(0);
+            const { wrapper } = mountWalkthrough({ initialPuzzle: puzzle });
+
+            await solve(wrapper);
+            await wrapper.find("[data-testid='walkthrough-dialog-confirm']").trigger("click");
+            await flushPromises();
+            await goToEnd(wrapper);
+
+            // A short path shows one dot per position: one per step, none for a solved board
+            expect(wrapper.findAll("[data-testid^='walkthrough-dot-']")).toHaveLength(path.length);
+            expect(wrapper.find(`[data-testid='walkthrough-dot-${path.length - 1}']`).attributes("aria-current")).toBe("step");
+            expect(wrapper.find("[data-testid='walkthrough-technique']").exists()).toBe(true);
+            expect(wrapper.find("[data-testid='walkthrough-stage']").exists()).toBe(false);
         });
 
         it("should auto-advance steps every 800ms when Play is active", async () => {
@@ -513,15 +584,15 @@ describe("SolverWalkthrough", () => {
 
             await solve(wrapper);
             const counter = () => wrapper.find("[data-testid='walkthrough-step-counter']").text();
-            expect(counter()).toBe(`1 / ${singlesStepCount}`);
+            expect(counter()).toBe(`1 / ${singlesPositionCount}`);
 
             await wrapper.find("[data-testid='walkthrough-play']").trigger("click");
 
             await vi.advanceTimersByTimeAsync(800);
-            expect(counter()).toBe(`2 / ${singlesStepCount}`);
+            expect(counter()).toBe(`2 / ${singlesPositionCount}`);
 
             await vi.advanceTimersByTimeAsync(800);
-            expect(counter()).toBe(`3 / ${singlesStepCount}`);
+            expect(counter()).toBe(`3 / ${singlesPositionCount}`);
         });
 
         it("should stop auto-play when going back to edit", async () => {
@@ -536,7 +607,7 @@ describe("SolverWalkthrough", () => {
             expect(wrapper.find("[data-testid='walkthrough-panel']").exists()).toBe(false);
 
             await solve(wrapper);
-            expect(wrapper.find("[data-testid='walkthrough-step-counter']").text()).toBe(`1 / ${singlesStepCount}`);
+            expect(wrapper.find("[data-testid='walkthrough-step-counter']").text()).toBe(`1 / ${singlesPositionCount}`);
         });
 
         it("should start from the first step after solving again", async () => {
@@ -544,11 +615,11 @@ describe("SolverWalkthrough", () => {
 
             await solve(wrapper);
             await clickNext(wrapper, 4);
-            expect(wrapper.find("[data-testid='walkthrough-step-counter']").text()).toBe(`5 / ${singlesStepCount}`);
+            expect(wrapper.find("[data-testid='walkthrough-step-counter']").text()).toBe(`5 / ${singlesPositionCount}`);
             await wrapper.find("[data-testid='back-button']").trigger("click");
             await solve(wrapper);
 
-            expect(wrapper.find("[data-testid='walkthrough-step-counter']").text()).toBe(`1 / ${singlesStepCount}`);
+            expect(wrapper.find("[data-testid='walkthrough-step-counter']").text()).toBe(`1 / ${singlesPositionCount}`);
         });
     });
 

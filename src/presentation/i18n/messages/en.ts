@@ -171,6 +171,10 @@ export const en = {
     walkthrough: {
         reset: "Reset",
         solve: "Solve",
+        completed: "Solved. Every cell is filled.",
+        stages: {
+            completed: "Solved",
+        },
         intro: {
             description: "Enter any Sudoku and see which techniques the solver uses to crack it, step by step.",
             enterOwn: "Enter a Puzzle",

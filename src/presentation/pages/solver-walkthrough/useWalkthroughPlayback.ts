@@ -14,23 +14,37 @@ import {
 /**
  * The walkthrough's solve path and where playback stands in it. Each step shows the board just before
  * it, marked the way hint mode marks it; every empty cell lists its candidates, since the solver
- * reasons over the whole board.
+ * reasons over the whole board. When the path solves the board, playback ends on one more position,
+ * the solved board, like the game review's final position; a path that gets stuck ends on its last step.
  */
 export const useWalkthroughPlayback = (givens: Ref<number[][]>) => {
     /** null while the player is entering a puzzle. */
     const path = shallowRef<SolvePathStep[] | null>(null);
-    const stepCount = computed(() => path.value?.length ?? 0);
 
-    // Positions run from the first step to the last, so auto-play ends on the last step.
+    /** The board after the path's last step, or null without steps. */
+    const finalValues = computed<number[][] | null>(() => {
+        const steps = path.value;
+        if (steps === null || steps.length === 0) return null;
+        const last = steps[steps.length - 1];
+        const values = last.valuesBefore.map((rowValues) => [...rowValues]);
+        for (const { cell, digit } of last.step.assignments) values[cell.row][cell.column] = digit;
+        return values;
+    });
+    const solved = computed(() => finalValues.value?.every((rowValues) => rowValues.every((value) => value !== 0)) ?? false);
+
+    // Positions run from the first step to the last, then to the solved board when there is one,
+    // so auto-play ends on the last position.
+    const stepCount = computed(() => (path.value?.length ?? 0) + (solved.value ? 1 : 0));
     const playback = usePlaybackState(computed(() => Math.max(0, stepCount.value - 1)));
     const stepIndex = playback.currentStep;
+    const isCompleted = computed(() => solved.value && stepIndex.value === stepCount.value - 1);
     const playState: PlayState = {
         isPlaying: playback.isPlaying,
         stopPlay: playback.stopPlay,
         startPlay: playback.startPlay,
     };
 
-    const currentStep = computed<SolvePathStep | null>(() => path.value?.[stepIndex.value] ?? null);
+    const currentStep = computed<SolvePathStep | null>(() => (isCompleted.value ? null : path.value?.[stepIndex.value] ?? null));
     const isLastStep = computed(() => stepCount.value > 0 && stepIndex.value === stepCount.value - 1);
 
     const start = (newPath: SolvePathStep[]) => {
@@ -46,7 +60,7 @@ export const useWalkthroughPlayback = (givens: Ref<number[][]>) => {
     };
 
     const puzzleCells = computed<PuzzleCell[][]>(() => {
-        const valuesBefore = currentStep.value?.valuesBefore ?? null;
+        const valuesBefore = isCompleted.value ? finalValues.value : currentStep.value?.valuesBefore ?? null;
         return givens.value.map((rowValues, row) => rowValues.map((given, column) => {
             const cell = new PuzzleCell(given);
             if (given === 0 && valuesBefore !== null) cell.entry = valuesBefore[row][column];
@@ -73,6 +87,7 @@ export const useWalkthroughPlayback = (givens: Ref<number[][]>) => {
         stepIndex,
         stepCount,
         currentStep,
+        isCompleted,
         isLastStep,
         playState,
         next: playback.next,
