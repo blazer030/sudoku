@@ -19,11 +19,18 @@
   --container-2xl: 1400px;
   --font-sans: "Outfit", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
   --font-mono: "Roboto Mono", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", monospace;
-  /* Board and key faces; a style may point them at its own stacks */
+  /* Paper's stacks. Each ends in a system CJK face and a generic family, never cursive, so a
+     blocked Google Fonts request still reads clearly. Times, not Georgia: Georgia's old-style
+     figures sink 3, 4, 5, 7 and 9 below the line. */
+  --font-hand: "Caveat", "LXGW WenKai TC", "Outfit", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+  --font-wenkai: "LXGW WenKai TC", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+  --font-print: "Times New Roman", "Noto Serif TC", "Songti TC", "PMingLiU", serif;
+  /* Board, key and timer faces; a style may point them at its own stacks */
   --font-clue: var(--font-sans);
   --font-entry: var(--font-sans);
   --font-note: var(--font-sans);
   --font-key: var(--font-sans);
+  --font-timer: var(--font-sans);
 
   --shadow-card-sm: 0 1px 4px color-mix(in srgb, var(--color-shadow) 3%, transparent);
   --shadow-card: 0 2px 8px color-mix(in srgb, var(--color-shadow) 3%, transparent);

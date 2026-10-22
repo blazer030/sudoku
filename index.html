@@ -56,7 +56,9 @@
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Roboto+Mono:wght@500;600;700&display=swap" rel="stylesheet" />
+    <!-- Browsers download a face only when text uses it, so paper's Caveat and WenKai cost the other styles only this CSS.
+         Offline (the Android app without network) every stack falls back to system fonts at the same sizes. -->
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=LXGW+WenKai+TC:wght@400;700&family=Outfit:wght@400;500;600;700&family=Roboto+Mono:wght@500;600;700&display=swap" rel="stylesheet" />
     <title>Sudoku</title>
 </head>
 <body>

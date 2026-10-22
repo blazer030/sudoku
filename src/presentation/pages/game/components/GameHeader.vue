@@ -19,7 +19,7 @@
                 class="text-foreground-secondary"
             />
             <span
-                class="text-foreground text-lg font-semibold"
+                class="text-foreground text-lg font-timer font-semibold"
                 data-testid="timer"
             >
                 {{ formatTime(elapsedSeconds) }}

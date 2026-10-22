@@ -1,2 +1,22 @@
 /* Paper Notebook: warm ruled paper, printed clues, handwritten entries and stamp-like presses.
    Every rule is scoped by [data-style="paper"]; keyframes start with paper-. */
+
+/* Type: the interface in WenKai, clues printed, entries, notes and keys by hand. Handwriting is
+   narrow, so it is set larger; the cells and keys keep their size and glyph-high line boxes. */
+[data-style="paper"] {
+    --font-sans: var(--font-wenkai);
+    --font-clue: var(--font-print);
+    --font-entry: var(--font-hand);
+    --font-note: var(--font-hand);
+    --font-key: var(--font-hand);
+    /* A fixed-width face, so the ticking timer does not change width */
+    --font-timer: var(--font-mono);
+    --entry-scale: 1.3;
+    --note-scale: 1.15;
+    --key-scale: 1.25;
+}
+
+[data-style="paper"] .font-entry,
+[data-style="paper"] .font-key {
+    font-weight: 700;
+}
