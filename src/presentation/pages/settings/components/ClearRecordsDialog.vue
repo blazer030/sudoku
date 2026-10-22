@@ -15,10 +15,10 @@
 
                 <div class="flex flex-col items-center gap-2">
                     <h2 class="text-2xl font-bold text-foreground tracking-tight">
-                        {{ t("statistics.clearDialog.title") }}
+                        {{ t("settings.data.clearDialog.title") }}
                     </h2>
                     <p class="text-sm text-foreground-secondary text-center">
-                        {{ t("statistics.clearDialog.message") }}
+                        {{ t("settings.data.clearDialog.message") }}
                     </p>
                 </div>
 
@@ -29,7 +29,7 @@
                         data-testid="clear-records-confirm-button"
                         @click="close('confirm')"
                     >
-                        <span class="text-base font-semibold text-on-danger">{{ t("statistics.clearRecords") }}</span>
+                        <span class="text-base font-semibold text-on-danger">{{ t("settings.data.clearRecords") }}</span>
                     </button>
 
                     <button
@@ -49,7 +49,7 @@
 <script lang="ts" setup>
 import { useI18n } from "vue-i18n";
 import { Trash2 } from "lucide-vue-next";
-import { useClearRecordsDialog } from "@/presentation/pages/statistics/useClearRecordsDialog";
+import { useClearRecordsDialog } from "@/presentation/pages/settings/components/useClearRecordsDialog";
 import { vPress } from "@/presentation/directives/press";
 
 const { t } = useI18n();

@@ -51,6 +51,13 @@ export const en = {
         },
         support: "Support",
         donate: "Donate",
+        data: {
+            clearRecords: "Clear All Records",
+            clearDialog: {
+                title: "Clear All Records?",
+                message: "All your game history, statistics and best times will be permanently deleted. This action cannot be undone.",
+            },
+        },
         about: "About",
         version: "Version",
     },
@@ -174,11 +181,6 @@ export const en = {
         empty: {
             title: "No games played yet",
             description: "Your game history will appear here",
-        },
-        clearRecords: "Clear All Records",
-        clearDialog: {
-            title: "Clear All Records?",
-            message: "All your game history, statistics and best times will be permanently deleted. This action cannot be undone.",
         },
     },
     donate: {

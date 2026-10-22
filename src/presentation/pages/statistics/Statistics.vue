@@ -188,7 +188,7 @@
                     :size="18"
                     class="text-danger"
                 />
-                <span class="text-base font-semibold text-danger">{{ t("statistics.clearRecords") }}</span>
+                <span class="text-base font-semibold text-danger">{{ t("settings.data.clearRecords") }}</span>
             </button>
         </div>
 
@@ -208,8 +208,8 @@ import { useI18n } from "vue-i18n";
 import { useAppLocale } from "@/presentation/i18n/useAppLocale";
 import { formatDate } from "@/presentation/i18n/formatDate";
 import { useDifficultyLabel } from "@/presentation/labels/difficultyLabels";
-import ClearRecordsDialog from "@/presentation/pages/statistics/ClearRecordsDialog.vue";
-import { provideClearRecordsDialog } from "@/presentation/pages/statistics/useClearRecordsDialog";
+import ClearRecordsDialog from "@/presentation/pages/settings/components/ClearRecordsDialog.vue";
+import { provideClearRecordsDialog } from "@/presentation/pages/settings/components/useClearRecordsDialog";
 
 const { t } = useI18n();
 const appLocale = useAppLocale();

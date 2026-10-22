@@ -49,6 +49,13 @@ export const zhHant: MessageSchema = {
         },
         support: "支持開發",
         donate: "贊助",
+        data: {
+            clearRecords: "清除所有紀錄",
+            clearDialog: {
+                title: "要清除所有紀錄嗎？",
+                message: "所有遊戲紀錄、統計和最佳時間都會被永久刪除，且無法復原。",
+            },
+        },
         about: "關於",
         version: "版本",
     },
@@ -172,11 +179,6 @@ export const zhHant: MessageSchema = {
         empty: {
             title: "還沒有遊戲紀錄",
             description: "你的遊戲紀錄會顯示在這裡",
-        },
-        clearRecords: "清除所有紀錄",
-        clearDialog: {
-            title: "要清除所有紀錄嗎？",
-            message: "所有遊戲紀錄、統計和最佳時間都會被永久刪除，且無法復原。",
         },
     },
     donate: {
