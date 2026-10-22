@@ -26,10 +26,11 @@
     font-weight: 700;
 }
 
-/* The page background, shared by the body and every opaque page root and sticky header:
+/* The page background, shared by the body and every page root and sticky header:
    faint dots of the border colour, and at night a warm lamp glowing from the top edge. It has
    no image, so the colour and contrast tests see it (inks are checked on the border at 40%, and
-   on the lamp at its on-screen peak, about 29%, alone and over a dot). By day the lamp layer is empty. */
+   on the lamp at its on-screen peak, about 29%, alone and over a dot). By day the lamp layer is empty.
+   Each surface lays it on the page colour, so where one sits on another the lamp is not doubled. */
 [data-style="paper"] {
     --paper-lamp: linear-gradient(transparent, transparent);
     --paper-texture:
@@ -45,6 +46,7 @@
 [data-style="paper"] body,
 [data-style="paper"] [data-skin~="page"],
 [data-style="paper"] [data-skin~="page-header"] {
+    background-color: var(--color-background);
     background-image: var(--paper-lamp), var(--paper-texture);
     background-size: 100% 100%, 9px 9px, 13px 13px;
     background-position: 0 0, 0 0, 4px 6px;
@@ -59,6 +61,7 @@
 /* Ruled pages: a line every 32px and a red margin line 14px in, inside the page gutter so no
    text crosses it. The lines scroll with the content; the page background stays put. */
 [data-style="paper"] [data-skin~="page-ruled"] {
+    background-color: var(--color-background);
     background-image:
         linear-gradient(to right, transparent 14px, var(--color-margin-line) 14px, var(--color-margin-line) 15.5px, transparent 15.5px),
         repeating-linear-gradient(to bottom, transparent 0, transparent 31px, var(--color-rule) 31px, var(--color-rule) 32px),
