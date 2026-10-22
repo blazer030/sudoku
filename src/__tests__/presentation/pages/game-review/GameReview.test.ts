@@ -198,6 +198,13 @@ describe("GameReview", () => {
         expect(panelDock.find("[data-testid='review-panel']").exists()).toBe(true);
     });
 
+    it("should never scroll sideways, though the board reaches into the page gutter", async () => {
+        const wrapper = await mountReview({ nextClicks: 0 });
+
+        // A scroller counts its end padding past the widened board as overflow, 12px to scroll sideways
+        expect(wrapper.get("[data-testid='review-scroll-area']").classes()).toContain("overflow-x-hidden");
+    });
+
     it("should run the sticky header across the page gutter, so cards scrolling under it stay hidden", async () => {
         const wrapper = await mountReview({ nextClicks: 0 });
 

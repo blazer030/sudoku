@@ -6,7 +6,7 @@
         <!-- The step panel stays pinned at the bottom; the header, summary and board scroll above it -->
         <div
             ref="scrollArea"
-            class="flex-1 min-h-0 overflow-y-auto overscroll-y-contain flex flex-col gap-4 px-5 pb-3"
+            class="flex-1 min-h-0 overflow-y-auto overflow-x-hidden overscroll-y-contain flex flex-col gap-4 px-5 pb-3"
             data-testid="review-scroll-area"
         >
             <div
