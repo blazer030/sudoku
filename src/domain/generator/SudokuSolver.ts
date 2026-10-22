@@ -36,24 +36,41 @@ export class SudokuSolver {
         return false;
     }
 
+    // Branches on the empty cell with the fewest candidates, so a dead end shows up at once.
     private countSolutionsRecursive(puzzle: number[][], limit: number): number {
+        let bestRow = -1;
+        let bestColumn = -1;
+        let bestCandidates: number[] = [];
         for (let row = 0; row < BOARD_SIZE; row++) {
             for (let column = 0; column < BOARD_SIZE; column++) {
-                if (puzzle[row][column] === 0) {
-                    let count = 0;
-                    for (let digit = 1; digit <= BOARD_SIZE; digit++) {
-                        if (this.board.isValidPlacement(puzzle, row, column, digit)) {
-                            puzzle[row][column] = digit;
-                            count += this.countSolutionsRecursive(puzzle, limit - count);
-                            puzzle[row][column] = 0;
-                            if (count >= limit) return count;
-                        }
-                    }
-                    return count;
+                if (puzzle[row][column] !== 0) continue;
+                const candidates = this.candidatesAt(puzzle, row, column);
+                if (candidates.length === 0) return 0;
+                if (bestRow === -1 || candidates.length < bestCandidates.length) {
+                    bestRow = row;
+                    bestColumn = column;
+                    bestCandidates = candidates;
                 }
             }
         }
-        return 1;
+        if (bestRow === -1) return 1;
+
+        let count = 0;
+        for (const digit of bestCandidates) {
+            puzzle[bestRow][bestColumn] = digit;
+            count += this.countSolutionsRecursive(puzzle, limit - count);
+            puzzle[bestRow][bestColumn] = 0;
+            if (count >= limit) return count;
+        }
+        return count;
+    }
+
+    private candidatesAt(puzzle: number[][], row: number, column: number): number[] {
+        const candidates: number[] = [];
+        for (let digit = 1; digit <= BOARD_SIZE; digit++) {
+            if (this.board.isValidPlacement(puzzle, row, column, digit)) candidates.push(digit);
+        }
+        return candidates;
     }
 
     private fillBoard(board: number[][], digitsProvider?: DigitsProvider): boolean {

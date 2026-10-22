@@ -1,9 +1,13 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { SudokuBoard } from "@/domain/board/SudokuBoard";
 import { SudokuSolver } from "@/domain/generator/SudokuSolver";
 
 const sudokuBoard = new SudokuBoard();
 const solver = new SudokuSolver();
+
+afterEach(() => {
+    vi.restoreAllMocks();
+});
 
 describe("SudokuSolver", () => {
     it("should return null for an unsolvable board", () => {
@@ -83,6 +87,16 @@ describe("SudokuSolver", () => {
 
         expect(solver.countSolutions(sameRow, 2)).toBe(0);
         expect(solver.countSolutions(sameBox, 2)).toBe(0);
+    });
+
+    it("should give up at once when an empty cell has no candidate", () => {
+        const board = Array.from({ length: 9 }, () => Array.from({ length: 9 }, () => 0));
+        for (let row = 1; row <= 8; row++) board[row][8] = row;
+        board[0][0] = 9;
+        const placementCheck = vi.spyOn(SudokuBoard.prototype, "isValidPlacement");
+
+        expect(solver.countSolutions(board, 2)).toBe(0);
+        expect(placementCheck.mock.calls.length).toBeLessThan(5000);
     });
 
     it("should solve a standard difficulty puzzle", () => {
