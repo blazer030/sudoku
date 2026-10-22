@@ -30,7 +30,7 @@ final class AppearanceStore {
     }
 
     static void saveMode(Context context, String mode) {
-        preferences(context).edit().putString(KEY_MODE, mode).apply();
+        preferences(context).edit().putString(KEY_MODE, mode).commit();
     }
 
     static String loadMode(Context context) {
