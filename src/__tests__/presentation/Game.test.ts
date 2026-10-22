@@ -1579,12 +1579,20 @@ describe("Game", () => {
         it("should draw smaller, top-aligned digits in note mode", async () => {
             const wrapper = mountGame();
             const digitKey = () => wrapper.find("[data-testid='number-8']");
-            expect(digitKey().classes()).toEqual(expect.arrayContaining(["items-center", "text-2xl"]));
+            const normalSize = "text-[length:calc(var(--text-2xl)*var(--key-scale,1))]";
+            const noteSize = "text-[length:calc(var(--text-lg)*var(--key-scale,1))]";
+            expect(digitKey().classes()).toEqual(expect.arrayContaining(["items-center", normalSize]));
 
             await wrapper.find("[data-testid='note-button']").trigger("click");
 
-            expect(digitKey().classes()).toEqual(expect.arrayContaining(["items-start", "text-lg"]));
-            expect(digitKey().classes()).not.toContain("text-2xl");
+            expect(digitKey().classes()).toEqual(expect.arrayContaining(["items-start", noteSize]));
+            expect(digitKey().classes()).not.toContain(normalSize);
+        });
+
+        it("should write digit keys in the key face", () => {
+            const wrapper = mountGame();
+
+            expect(wrapper.get("[data-testid='number-8']").classes()).toContain("font-key");
         });
     });
 

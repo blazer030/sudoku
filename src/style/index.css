@@ -19,6 +19,11 @@
   --container-2xl: 1400px;
   --font-sans: "Outfit", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
   --font-mono: "Roboto Mono", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", monospace;
+  /* Board and key faces; a style may point them at its own stacks */
+  --font-clue: var(--font-sans);
+  --font-entry: var(--font-sans);
+  --font-note: var(--font-sans);
+  --font-key: var(--font-sans);
 
   --shadow-card-sm: 0 1px 4px color-mix(in srgb, var(--color-shadow) 3%, transparent);
   --shadow-card: 0 2px 8px color-mix(in srgb, var(--color-shadow) 3%, transparent);

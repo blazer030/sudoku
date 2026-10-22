@@ -44,6 +44,14 @@ describe("Cell", () => {
         expect(wrapper.classes()).toContain("bg-cell-selected");
     });
 
+    it("should tell a player's entry from a clue", () => {
+        const entered = new PuzzleCell(0);
+        entered.entry = 5;
+
+        expect(mountCell({ puzzleCell: entered }).attributes("data-value-kind")).toBe("entered");
+        expect(mountCell({ puzzleCell: new PuzzleCell(5) }).attributes("data-value-kind")).toBe("given");
+    });
+
     it("should not present itself as a button on a board that only shows the game", () => {
         const wrapper = mountCell({ puzzleCell: new PuzzleCell(0), interactive: false });
 

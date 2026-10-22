@@ -20,6 +20,35 @@ describe("BoardCell", () => {
         expect(wrapper.find("[data-testid='cell-value']").classes()).toContain("leading-none");
     });
 
+    it("should expose its variant for style sheets", () => {
+        expect(mountCell({ variant: "selected" }).attributes("data-variant")).toBe("selected");
+        expect(mountCell({}).attributes("data-variant")).toBe("default");
+    });
+
+    it("should mark an entered digit and write it in the entry face", () => {
+        const wrapper = mountCell({ value: 5, valueKind: "entered" });
+
+        expect(wrapper.attributes("data-value-kind")).toBe("entered");
+        expect(wrapper.find("[data-testid='cell-value']").classes()).toContain("font-entry");
+    });
+
+    it("should write a given digit in the clue face by default", () => {
+        const wrapper = mountCell({ value: 5 });
+
+        expect(wrapper.attributes("data-value-kind")).toBe("given");
+        expect(wrapper.find("[data-testid='cell-value']").classes()).toContain("font-clue");
+    });
+
+    it("should not mark an empty cell's value kind", () => {
+        expect(mountCell({ value: 0, valueKind: "entered" }).attributes("data-value-kind")).toBeUndefined();
+    });
+
+    it("should write notes in the note face", () => {
+        const wrapper = mountCell({ value: 0, notes: [4] });
+
+        expect(wrapper.findAll("span").find(span => span.text() === "4")?.classes()).toContain("font-note");
+    });
+
     it("should render notes grid when value is zero and notes are provided", () => {
         const wrapper = mountCell({ value: 0, notes: [1, 3, 5] });
 
@@ -55,7 +84,7 @@ describe("BoardCell", () => {
         const wrapper = mountCell({ value: 0, notes: [4] });
 
         const note = wrapper.findAll("span").find(span => span.text() === "4");
-        expect(note?.classes()).toContain("text-[clamp(10px,-0.49px+2.26vw,14px)]");
+        expect(note?.classes()).toContain("text-[length:calc(clamp(10px,-0.49px+2.26vw,14px)*var(--note-scale,1))]");
         expect(note?.classes()).toContain("text-note");
     });
 
@@ -63,7 +92,7 @@ describe("BoardCell", () => {
         const wrapper = mountCell({ value: 0, notes: [4], noteTone: "solver" });
 
         const note = wrapper.findAll("span").find(span => span.text() === "4");
-        expect(note?.classes()).toContain("text-[clamp(10px,-0.49px+2.7vw,15px)]");
+        expect(note?.classes()).toContain("text-[length:calc(clamp(10px,-0.49px+2.7vw,15px)*var(--note-scale,1))]");
     });
 
     it("should render valueFontWeight bold", () => {

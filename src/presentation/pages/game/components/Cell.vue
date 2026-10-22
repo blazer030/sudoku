@@ -9,6 +9,7 @@
         :variant="variant"
         :value-text-color="valueTextColor"
         :value-font-weight="valueFontWeight"
+        :value-kind="puzzleCell.isClue ? 'given' : 'entered'"
         :highlighted-note="highlightedNote"
         :flashing="flashing"
         :note-tone="hint?.candidates ? 'solver' : 'player'"

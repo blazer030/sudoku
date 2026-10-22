@@ -6,11 +6,13 @@
             flashing ? 'animate-completion-flash' : '',
             popping ? 'animate-hint-reveal-glow' : '',
         ]"
+        :data-value-kind="value !== 0 ? valueKind : undefined"
+        :data-variant="variant"
         class="flex justify-center items-center flex-1 aspect-square"
     >
         <div
             v-if="value !== 0"
-            :class="[valueTextColorClass, valueFontWeightClass, popping ? 'animate-hint-reveal-pop' : '', 'text-[22px] leading-none']"
+            :class="[valueTextColorClass, valueFontWeightClass, valueFaceClass, popping ? 'animate-hint-reveal-pop' : '', 'leading-none']"
             data-testid="cell-value"
         >
             {{ value }}
@@ -26,7 +28,7 @@
             >
                 <span
                     v-if="notes.includes(noteDigit) || eliminatedDigits.includes(noteDigit)"
-                    :class="[noteClass(noteDigit), noteSizeClass]"
+                    :class="[noteClass(noteDigit), noteSizeClass, 'font-note']"
                     :data-testid="eliminatedDigits.includes(noteDigit) ? `eliminated-note-${noteDigit}` : undefined"
                 >
                     {{ noteDigit }}
@@ -44,6 +46,8 @@ export type CellVariant = "default" | "clue" | "selected" | "focus" | "scope" | 
 export type NoteTone = "player" | "solver";
 export type ValueTextColor = "normal" | "error" | "primary";
 export type ValueFontWeight = "bold" | "semibold" | "medium";
+/** A given digit is printed like a clue; an entered one is the player's (or a hint's) answer. Styles may set them in different faces. */
+export type ValueKind = "given" | "entered";
 
 const props = withDefaults(defineProps<{
     row: number;
@@ -59,6 +63,7 @@ const props = withDefaults(defineProps<{
     noteTone?: NoteTone;
     emphasizedDigits?: number[];
     popping?: boolean;
+    valueKind?: ValueKind;
 }>(), {
     notes: () => [],
     eliminatedDigits: () => [],
@@ -70,6 +75,7 @@ const props = withDefaults(defineProps<{
     noteTone: "player",
     emphasizedDigits: () => [],
     popping: false,
+    valueKind: "given",
 });
 
 const VARIANT_BACKGROUNDS: Record<CellVariant, string> = {
@@ -104,9 +110,17 @@ const valueTextColorClass = computed(() => VALUE_TEXT_COLORS[props.valueTextColo
 
 const valueFontWeightClass = computed(() => VALUE_FONT_WEIGHTS[props.valueFontWeight]);
 
+// Faces and sizes go through per-style tokens; each scale defaults to 1, so minimal keeps 22px digits
+const VALUE_FACES: Record<ValueKind, string> = {
+    given: "font-clue text-[length:calc(22px*var(--clue-scale,1))]",
+    entered: "font-entry text-[length:calc(22px*var(--entry-scale,1))]",
+};
+
+const valueFaceClass = computed(() => VALUE_FACES[props.valueKind]);
+
 const noteSizeClass = computed(() => (props.noteTone === "solver"
-    ? "text-[clamp(10px,-0.49px+2.7vw,15px)]"
-    : "text-[clamp(10px,-0.49px+2.26vw,14px)]"));
+    ? "text-[length:calc(clamp(10px,-0.49px+2.7vw,15px)*var(--note-scale,1))]"
+    : "text-[length:calc(clamp(10px,-0.49px+2.26vw,14px)*var(--note-scale,1))]"));
 
 const noteClass = (digit: number): string => {
     if (props.eliminatedDigits.includes(digit)) {
