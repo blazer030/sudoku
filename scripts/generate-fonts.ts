@@ -1,6 +1,7 @@
 // Bundles the app's web fonts so every style reads the same offline (the Android app often has
 // no network). Downloads the pinned Google Fonts sources, cuts each down to the characters the app
-// writes, and writes woff2 files plus each family's licence to src/assets/fonts/.
+// writes, and writes woff2 files to src/assets/fonts/ and each family's licence to
+// public/fonts/licenses/, which the build copies as is into dist/.
 // Run with `npm run generate:fonts` after changing any copy that adds new Chinese characters;
 // bundledFonts.test.ts fails until the WenKai subset covers them.
 import subsetFont from "subset-font";
@@ -10,6 +11,9 @@ import { fileURLToPath } from "url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const OUTPUT_DIR = join(ROOT, "src/assets/fonts");
+const LICENCE_DIR = join(ROOT, "public/fonts/licenses");
+// The licence description and URL; the subsetter drops them from the name table unless asked
+const LICENCE_NAME_IDS = [13, 14];
 const CACHE_DIR = join(ROOT, "node_modules/.cache/sudoku-fonts");
 
 // google/fonts on 2026-10-21; bump to pick up upstream fixes
@@ -96,11 +100,13 @@ const main = async (): Promise<void> => {
     ];
 
     mkdirSync(OUTPUT_DIR, { recursive: true });
+    mkdirSync(LICENCE_DIR, { recursive: true });
     for (const family of families) {
-        writeFileSync(join(OUTPUT_DIR, family.licenceOutput), await download(family.licence));
+        writeFileSync(join(LICENCE_DIR, family.licenceOutput), await download(family.licence));
         for (const job of family.jobs) {
             const subset = await subsetFont(await download(job.source), job.text, {
                 targetFormat: "woff2",
+                preserveNameIds: LICENCE_NAME_IDS,
                 ...(job.weights ? { variationAxes: { wght: job.weights } } : {}),
             });
             writeFileSync(join(OUTPUT_DIR, job.output), subset);

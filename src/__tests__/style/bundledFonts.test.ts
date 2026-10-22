@@ -1,8 +1,10 @@
 import { existsSync, readdirSync, readFileSync, statSync } from "fs";
 import { dirname, join, resolve } from "path";
 import postcss from "postcss";
+import { nameStrings } from "./woff2Tables";
 
 const FONTS_CSS = "src/style/fonts.css";
+const BUNDLED_FONTS = ["outfit.woff2", "roboto-mono.woff2", "caveat.woff2", "lxgw-wenkai-tc-regular.woff2", "lxgw-wenkai-tc-bold.woff2"];
 
 interface FontFace {
     family: string;
@@ -68,10 +70,19 @@ describe("bundled fonts", () => {
         expect(existsSync(resolve(dirname(FONTS_CSS), url)), url).toBe(true);
     });
 
-    it("should ship each family's licence beside its files", () => {
+    it("should ship each family's licence in the build", () => {
+        // public/ is copied as is into dist/, which the web build serves and the Android app packs
         for (const licence of ["Outfit-OFL.txt", "RobotoMono-OFL.txt", "Caveat-OFL.txt", "LXGWWenKaiTC-OFL.txt"]) {
-            expect(readFileSync(`src/assets/fonts/${licence}`, "utf8"), licence).toContain("SIL Open Font License");
+            expect(readFileSync(`public/fonts/licenses/${licence}`, "utf8"), licence).toContain("SIL Open Font License");
         }
+    });
+
+    it.each(BUNDLED_FONTS)("should keep the licence in %s's name table", (file) => {
+        // Name IDs 13 and 14 carry the licence and its URL; the subsetter drops them unless asked
+        const names = nameStrings(readFileSync(`src/assets/fonts/${file}`));
+
+        expect(names.get(13), "licence description").toMatch(/Open Font License/i);
+        expect(names.get(14), "licence URL").toMatch(/openfontlicense\.org|scripts\.sil\.org\/OFL/i);
     });
 
     it("should cover every character the app writes in its WenKai subset (run npm run generate:fonts)", () => {
