@@ -11,6 +11,7 @@ import type { CellState, GameState } from "@/application/GameState";
 import { i18n } from "@/presentation/i18n";
 import { knownAnswer, knownPuzzle } from "@/__tests__/fixtures/knownPuzzle";
 import { ANALYTICS_KEY, type AnalyticsService } from "@/application/analytics/AnalyticsService";
+import { handleBackButton } from "@/presentation/composables/backDismissal";
 
 vi.mock("@/application/PuzzleGenerationService", () => ({
     generatePuzzleAsync: vi.fn(() => Promise.resolve({
@@ -470,6 +471,14 @@ describe("Home", () => {
                 const context = await openDialog();
 
                 document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+
+                await expectStayedWithoutSideEffects(context);
+            });
+
+            it("should close the dialog without side effects when pressing the system Back key", async () => {
+                const context = await openDialog();
+
+                handleBackButton(false);
 
                 await expectStayedWithoutSideEffects(context);
             });

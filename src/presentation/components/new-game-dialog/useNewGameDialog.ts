@@ -8,4 +8,4 @@ export interface SavedGameSummary {
 }
 
 export const { provideDialog: provideNewGameDialog, useDialog: useNewGameDialog } =
-    createDialog<SavedGameSummary, "continue" | "giveUp" | "stay">();
+    createDialog<SavedGameSummary, "continue" | "giveUp" | "stay">({ dismissResult: "stay" });
