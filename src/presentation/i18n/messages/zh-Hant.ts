@@ -222,6 +222,9 @@ export const zhHant: MessageSchema = {
         notPlayed: "還沒玩過",
         recentGames: "最近遊戲",
         gaveUp: "已放棄",
+        filter: { all: "全部" },
+        showMore: "顯示更多",
+        filteredEmpty: "這個難度還沒有遊戲紀錄",
         empty: {
             title: "還沒有遊戲紀錄",
             description: "你的遊戲紀錄會顯示在這裡",

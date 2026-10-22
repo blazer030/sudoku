@@ -1,4 +1,7 @@
+import type { Difficulty } from "@/domain";
 import type { GameResult } from "@/application/statistics/StatisticsRepository";
+
+export type RecentGamesFilter = "all" | Difficulty;
 
 export interface RecentGame {
     game: GameResult;
@@ -6,8 +9,11 @@ export interface RecentGame {
     historyIndex: number;
 }
 
-/** Lists the games newest first, each keeping its own index in the history. */
-export const listRecentGames = (history: readonly GameResult[]): RecentGame[] =>
+export const RECENT_GAMES_PAGE_SIZE = 20;
+
+/** Lists the games newest first, each keeping its own index in the history, so a filtered list still opens the right review. */
+export const listRecentGames = (history: readonly GameResult[], filter: RecentGamesFilter): RecentGame[] =>
     history
         .map((game, historyIndex) => ({ game, historyIndex }))
+        .filter(({ game }) => filter === "all" || game.difficulty === filter)
         .reverse();

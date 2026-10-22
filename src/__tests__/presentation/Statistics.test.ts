@@ -6,6 +6,7 @@ import { createRouter, createMemoryHistory } from "vue-router";
 import Statistics from "@/presentation/pages/statistics/Statistics.vue";
 import { useStatisticsStore, type RecordGameInput } from "@/stores/statisticsStore";
 import { i18n } from "@/presentation/i18n";
+import { formatTime } from "@/utils/formatTime";
 
 const createTestRouter = () => {
     return createRouter({
@@ -13,6 +14,7 @@ const createTestRouter = () => {
         routes: [
             { path: "/statistics", component: Statistics },
             { path: "/", component: { template: "<div>Home</div>" } },
+            { path: "/game-review/:index", component: { template: "<div>Review</div>" } },
         ],
     });
 };
@@ -30,6 +32,14 @@ const mountStatistics = () => {
 const recordGames = (games: RecordGameInput[]) => {
     const store = useStatisticsStore();
     games.forEach((game) => { store.recordGame(game); });
+};
+
+const recordEasyGames = (count: number) => {
+    recordGames(Array.from({ length: count }, (_, number) => ({
+        difficulty: "easy" as const,
+        elapsedSeconds: 100 + number,
+        completed: true,
+    })));
 };
 
 beforeEach(() => {
@@ -154,6 +164,99 @@ describe("Statistics", () => {
         expect(games[0].text()).toContain("Gave up");
         expect(games[1].text()).toContain("Easy");
         expect(games[1].text()).toContain("05:32");
+    });
+
+    it("should show the newest 20 games and more on request", async () => {
+        recordEasyGames(45);
+        const { wrapper } = mountStatistics();
+
+        expect(wrapper.findAll("[data-testid='recent-game']")).toHaveLength(20);
+        expect(wrapper.findAll("[data-testid='recent-game']")[0].text()).toContain(formatTime(144));
+
+        await wrapper.find("[data-testid='show-more-button']").trigger("click");
+        expect(wrapper.findAll("[data-testid='recent-game']")).toHaveLength(40);
+
+        await wrapper.find("[data-testid='show-more-button']").trigger("click");
+        expect(wrapper.findAll("[data-testid='recent-game']")).toHaveLength(45);
+        expect(wrapper.find("[data-testid='show-more-button']").exists()).toBe(false);
+    });
+
+    it("should not offer more when exactly 20 games exist", () => {
+        recordEasyGames(20);
+        const { wrapper } = mountStatistics();
+
+        expect(wrapper.findAll("[data-testid='recent-game']")).toHaveLength(20);
+        expect(wrapper.find("[data-testid='show-more-button']").exists()).toBe(false);
+    });
+
+    it("should filter recent games by difficulty", async () => {
+        recordGames([
+            { difficulty: "easy", elapsedSeconds: 100, completed: true },
+            { difficulty: "hard", elapsedSeconds: 200, completed: true },
+            { difficulty: "easy", elapsedSeconds: 300, completed: true },
+        ]);
+        const { wrapper } = mountStatistics();
+
+        expect(wrapper.find("[data-testid='recent-filter-all']").attributes("aria-pressed")).toBe("true");
+
+        await wrapper.find("[data-testid='recent-filter-easy']").trigger("click");
+        const games = wrapper.findAll("[data-testid='recent-game']");
+        expect(games).toHaveLength(2);
+        for (const item of games) {
+            expect(item.text()).toContain("Easy");
+        }
+
+        i18n.global.locale.value = "zh-Hant";
+        await nextTick();
+        expect(wrapper.find("[data-testid='recent-filter-all']").text()).toBe("全部");
+    });
+
+    it("should start from 20 again after switching filters", async () => {
+        recordGames(Array.from({ length: 60 }, (_, number) => ({
+            difficulty: number % 2 === 0 ? "easy" as const : "hard" as const,
+            elapsedSeconds: 100 + number,
+            completed: true,
+        })));
+        const { wrapper } = mountStatistics();
+
+        await wrapper.find("[data-testid='show-more-button']").trigger("click");
+        expect(wrapper.findAll("[data-testid='recent-game']")).toHaveLength(40);
+
+        await wrapper.find("[data-testid='recent-filter-hard']").trigger("click");
+        expect(wrapper.findAll("[data-testid='recent-game']")).toHaveLength(20);
+
+        await wrapper.find("[data-testid='recent-filter-all']").trigger("click");
+        expect(wrapper.findAll("[data-testid='recent-game']")).toHaveLength(20);
+    });
+
+    it("should say when a difficulty has no games yet", async () => {
+        recordEasyGames(3);
+        const { wrapper } = mountStatistics();
+
+        await wrapper.find("[data-testid='recent-filter-hard']").trigger("click");
+
+        expect(wrapper.find("[data-testid='recent-games-empty']").text()).toBe("No games at this difficulty yet");
+        expect(wrapper.find("[data-testid='recent-game']").exists()).toBe(false);
+
+        i18n.global.locale.value = "zh-Hant";
+        await nextTick();
+        expect(wrapper.find("[data-testid='recent-games-empty']").text()).toBe("這個難度還沒有遊戲紀錄");
+    });
+
+    it("should open the review of the tapped game while filtered", async () => {
+        const replay = { initialBoard: [], steps: [] };
+        recordGames([
+            { difficulty: "easy", elapsedSeconds: 100, completed: true, replay },
+            { difficulty: "hard", elapsedSeconds: 200, completed: true, replay },
+            { difficulty: "easy", elapsedSeconds: 300, completed: true, replay },
+        ]);
+        const { wrapper, router } = mountStatistics();
+
+        await wrapper.find("[data-testid='recent-filter-hard']").trigger("click");
+        await wrapper.find("[data-testid='recent-game']").trigger("click");
+        await flushPromises();
+
+        expect(router.currentRoute.value.path).toBe("/game-review/1");
     });
 
     it("should navigate back to home when clicking Back", async () => {

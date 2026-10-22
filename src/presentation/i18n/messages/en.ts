@@ -225,6 +225,9 @@ export const en = {
         notPlayed: "Not played yet",
         recentGames: "Recent Games",
         gaveUp: "Gave up",
+        filter: { all: "All" },
+        showMore: "Show more",
+        filteredEmpty: "No games at this difficulty yet",
         empty: {
             title: "No games played yet",
             description: "Your game history will appear here",

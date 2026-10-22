@@ -89,12 +89,19 @@
 
         <div class="flex flex-col gap-2 mt-5">
             <span class="text-foreground-muted text-xs font-semibold tracking-wider uppercase px-1">{{ t("statistics.recentGames") }}</span>
+            <SegmentedControl
+                v-if="hasRecords"
+                v-model="recentGamesFilter"
+                :options="recentGamesFilterOptions"
+                data-testid="recent-games-filter"
+                test-id-prefix="recent-filter"
+            />
             <div
                 v-if="hasRecords"
                 class="flex flex-col gap-2"
             >
                 <button
-                    v-for="{ game, historyIndex } in recentGames"
+                    v-for="{ game, historyIndex } in visibleRecentGames"
                     :key="historyIndex"
                     :class="game.replay ? 'cursor-pointer' : 'cursor-default'"
                     class="flex items-center justify-between bg-card rounded-xl py-3 px-4 shadow-card-sm text-left"
@@ -150,6 +157,22 @@
                         />
                     </div>
                 </button>
+                <p
+                    v-if="filteredRecentGames.length === 0"
+                    class="text-sm text-foreground-muted text-center py-6"
+                    data-testid="recent-games-empty"
+                >
+                    {{ t("statistics.filteredEmpty") }}
+                </p>
+                <button
+                    v-if="filteredRecentGames.length > visibleCount"
+                    v-press
+                    class="w-full h-11 bg-card rounded-xl shadow-card-sm text-primary text-sm font-semibold cursor-pointer"
+                    data-testid="show-more-button"
+                    @click="showMore"
+                >
+                    {{ t("statistics.showMore") }}
+                </button>
             </div>
 
             <div
@@ -171,7 +194,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from "vue";
+import { computed, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import { ChevronLeft, ChevronRight, Lightbulb, Trophy, X } from "lucide-vue-next";
 import { ROUTER_PATH } from "@/router";
@@ -180,7 +203,13 @@ import type { Difficulty } from "@/domain";
 import type { GameResult } from "@/application/statistics/StatisticsRepository";
 import { formatTime } from "@/utils/formatTime";
 import { countPlayStreak } from "@/application/statistics/playStreak";
-import { listRecentGames } from "@/presentation/pages/statistics/recentGames";
+import {
+    listRecentGames,
+    RECENT_GAMES_PAGE_SIZE,
+    type RecentGamesFilter,
+} from "@/presentation/pages/statistics/recentGames";
+import SegmentedControl, { type SegmentedOption } from "@/presentation/components/segmented-control/SegmentedControl.vue";
+import { vPress } from "@/presentation/directives/press";
 import { useI18n } from "vue-i18n";
 import { useAppLocale } from "@/presentation/i18n/useAppLocale";
 import { formatDate } from "@/presentation/i18n/formatDate";
@@ -212,7 +241,25 @@ const formatOptionalTime = (seconds: number | null): string => {
 
 const difficultyLabel = useDifficultyLabel();
 
-const recentGames = computed(() => listRecentGames(statisticsStore.history));
+const recentGamesFilter = ref<RecentGamesFilter>("all");
+const visibleCount = ref(RECENT_GAMES_PAGE_SIZE);
+
+const recentGamesFilterOptions = computed<SegmentedOption<RecentGamesFilter>[]>(() => [
+    { value: "all", label: t("statistics.filter.all") },
+    ...DIFFICULTIES.map(difficulty => ({ value: difficulty, label: difficultyLabel(difficulty) })),
+]);
+
+const filteredRecentGames = computed(() => listRecentGames(statisticsStore.history, recentGamesFilter.value));
+const visibleRecentGames = computed(() => filteredRecentGames.value.slice(0, visibleCount.value));
+
+// Each filter opens collapsed again rather than inheriting the previous one's "Show more"
+watch(recentGamesFilter, () => {
+    visibleCount.value = RECENT_GAMES_PAGE_SIZE;
+});
+
+const showMore = () => {
+    visibleCount.value += RECENT_GAMES_PAGE_SIZE;
+};
 
 const openReview = (game: GameResult, historyIndex: number) => {
     if (!game.replay) return;
