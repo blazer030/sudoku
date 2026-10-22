@@ -185,9 +185,9 @@ export const en = {
             multipleSolutions: {
                 title: "More Than One Solution",
                 message: "This puzzle has more than one solution, so the steps may not be complete.",
-                confirm: "Solve Anyway",
-                cancel: "Keep Editing",
             },
+            solveAnyway: "Solve Anyway",
+            keepEditing: "Keep Editing",
         },
     },
     review: {

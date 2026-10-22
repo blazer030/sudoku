@@ -103,9 +103,9 @@ const CONTENT: Record<WalkthroughDialogKind, DialogContent> = {
         icon: CircleHelp,
         titleKey: "walkthrough.dialog.multipleSolutions.title",
         messageKey: "walkthrough.dialog.multipleSolutions.message",
-        confirmKey: "walkthrough.dialog.multipleSolutions.confirm",
+        confirmKey: "walkthrough.dialog.solveAnyway",
         confirmTone: "primary",
-        cancelKey: "walkthrough.dialog.multipleSolutions.cancel",
+        cancelKey: "walkthrough.dialog.keepEditing",
     },
 };
 

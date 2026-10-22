@@ -182,9 +182,9 @@ export const zhHant: MessageSchema = {
             multipleSolutions: {
                 title: "不只一個解",
                 message: "這題不只一個解，解題結果可能不完整",
-                confirm: "仍要解題",
-                cancel: "返回修改",
             },
+            solveAnyway: "仍要解題",
+            keepEditing: "返回修改",
         },
     },
     review: {
