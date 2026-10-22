@@ -50,6 +50,7 @@ export const en = {
             showRemainingCount: { label: "Remaining Count", description: "Show how many are left on each key" },
         },
         support: "Support",
+        privacyPolicy: "Privacy Policy",
         donate: "Donate",
         groups: {
             data: "Data",
@@ -62,7 +63,7 @@ export const en = {
             },
         },
         about: "About",
-        version: "Version",
+        version: "Version & Changelog",
     },
     difficulty: { easy: "Easy", medium: "Medium", hard: "Hard" } satisfies Record<Difficulty, string>,
     technique: {

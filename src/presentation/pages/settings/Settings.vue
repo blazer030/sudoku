@@ -159,31 +159,44 @@
             :icon="Info"
             :title="t('settings.about')"
         >
-            <button
-                class="flex items-center justify-between py-3.5 cursor-pointer w-full"
-                data-testid="version-link"
-                @click="goToChangelog"
-            >
-                <span class="text-foreground text-[15px] font-medium">{{ t("settings.version") }}</span>
-                <div class="flex items-center gap-1.5">
-                    <span class="text-foreground-muted text-[15px]">{{ appVersion }}</span>
-                    <ChevronRight
+            <div class="flex flex-col divide-y divide-border -my-1">
+                <button
+                    v-press:tint
+                    class="flex items-center justify-between h-13 px-1 cursor-pointer w-full"
+                    data-testid="version-link"
+                    type="button"
+                    @click="goToChangelog"
+                >
+                    <span class="text-foreground text-[15px] font-medium">{{ t("settings.version") }}</span>
+                    <span class="flex items-center gap-1.5">
+                        <span class="text-foreground-muted text-[15px]">{{ appVersion }}</span>
+                        <ChevronRight
+                            :size="18"
+                            class="text-foreground-muted"
+                        />
+                    </span>
+                </button>
+                <!-- Capacitor hands off-host navigation to the system browser, so no plugin is needed -->
+                <a
+                    v-press:tint
+                    :href="PRIVACY_POLICY_URL"
+                    class="flex items-center justify-between h-13 px-1 w-full"
+                    data-testid="privacy-policy-link"
+                    rel="noopener noreferrer"
+                    target="_blank"
+                >
+                    <span class="text-foreground text-[15px] font-medium">{{ t("settings.privacyPolicy") }}</span>
+                    <ExternalLink
                         :size="18"
                         class="text-foreground-muted"
                     />
-                </div>
-            </button>
-        </SettingsGroup>
-
-        <div
-            v-if="platform.isNative && donateStore.products.length > 0"
-            class="flex flex-col gap-2"
-        >
-            <span class="text-foreground-muted text-xs font-semibold tracking-wider uppercase px-1">{{ t("settings.support") }}</span>
-            <div class="bg-card rounded-2xl px-4 shadow-card-sm">
+                </a>
                 <button
-                    class="flex items-center justify-between py-3.5 cursor-pointer w-full"
+                    v-if="platform.isNative && donateStore.products.length > 0"
+                    v-press:tint
+                    class="flex items-center justify-between h-13 px-1 cursor-pointer w-full"
                     data-testid="donate-link"
+                    type="button"
                     @click="goToDonate"
                 >
                     <span class="text-foreground text-[15px] font-medium">{{ t("settings.donate") }}</span>
@@ -193,7 +206,7 @@
                     />
                 </button>
             </div>
-        </div>
+        </SettingsGroup>
 
         <div class="flex-1" />
 
@@ -205,12 +218,13 @@
 import { computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
-import { ChevronLeft, ChevronRight, Check, Crosshair, Database, Eraser, Gamepad2, Hash, Highlighter, Info, Languages, Palette, Smartphone, Sparkles, Trash2 } from "lucide-vue-next";
+import { ChevronLeft, ChevronRight, Check, Crosshair, Database, Eraser, ExternalLink, Gamepad2, Hash, Highlighter, Info, Languages, Palette, Smartphone, Sparkles, Trash2 } from "lucide-vue-next";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { useDonateStore } from "@/stores/donateStore";
 import { useStatisticsStore } from "@/stores/statisticsStore";
 import { usePlatform } from "@/presentation/composables/usePlatform";
 import { appVersion } from "@/utils/appVersion";
+import { PRIVACY_POLICY_URL } from "@/presentation/pages/settings/externalLinks";
 import { ROUTER_PATH } from "@/router";
 import { STYLE_IDS, type Appearance, type LanguagePreference } from "@/application/SettingsStorage";
 import { STYLES, getPalette, rememberedThemeFor } from "@/theme/palettes";

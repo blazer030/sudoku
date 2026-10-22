@@ -77,6 +77,17 @@ describe("Settings.vue Support section", () => {
         const wrapper = mountSettings(buildBilling(vi.fn().mockResolvedValue(fakeProducts)));
         await flushPromises();
         expect(wrapper.find("[data-testid='donate-link']").exists()).toBe(true);
+        expect(wrapper.get("[data-testid='settings-group-about']").find("[data-testid='donate-link']").exists()).toBe(true);
+    });
+
+    it("should keep the about rows in order", async () => {
+        vi.mocked(Capacitor.isNativePlatform).mockReturnValue(true);
+        const wrapper = mountSettings(buildBilling(vi.fn().mockResolvedValue(fakeProducts)));
+        await flushPromises();
+
+        const rows = wrapper.get("[data-testid='settings-group-about']").findAll("[data-testid]");
+
+        expect(rows.map(row => row.attributes("data-testid"))).toEqual(["version-link", "privacy-policy-link", "donate-link"]);
     });
 
     it("hides the donate entry on native when Play returns no products", async () => {
@@ -431,6 +442,28 @@ describe("Settings.vue data group", () => {
         expect(useSettingsStore().colorTheme).toBe("blue");
         expect(readStoredSettings().colorTheme).toBe("blue");
         expect(wrapper.get("[data-testid='clear-records-button']").attributes()).toHaveProperty("disabled");
+    });
+});
+
+describe("Settings.vue about group", () => {
+    beforeEach(() => {
+        localStorage.clear();
+        vi.mocked(Capacitor.isNativePlatform).mockReturnValue(false);
+    });
+
+    it("should link to the privacy policy in a new window", async () => {
+        const wrapper = mountSettings();
+        const link = wrapper.get("[data-testid='privacy-policy-link']");
+
+        expect(link.attributes("href")).toBe("https://blazer030.github.io/sudoku/privacy-policy.html");
+        expect(link.attributes("target")).toBe("_blank");
+        expect(link.attributes("rel")).toContain("noopener");
+        expect(link.text()).toBe("Privacy Policy");
+
+        i18n.global.locale.value = "zh-Hant";
+        await nextTick();
+
+        expect(wrapper.get("[data-testid='privacy-policy-link']").text()).toBe("隱私權政策");
     });
 });
 

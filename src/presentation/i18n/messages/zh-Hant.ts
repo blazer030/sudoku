@@ -48,6 +48,7 @@ export const zhHant: MessageSchema = {
             showRemainingCount: { label: "剩餘數量", description: "數字鍵上顯示還差幾個" },
         },
         support: "支持開發",
+        privacyPolicy: "隱私權政策",
         donate: "贊助",
         groups: {
             data: "資料",
@@ -60,7 +61,7 @@ export const zhHant: MessageSchema = {
             },
         },
         about: "關於",
-        version: "版本",
+        version: "版本與更新日誌",
     },
     difficulty: { easy: "簡單", medium: "中等", hard: "困難" },
     technique: {
