@@ -13,13 +13,18 @@ npx vitest run src/__tests__/domain/game/Sudoku.test.ts  # Run single test file
 
 ## Architecture
 
-Vue 3 + TypeScript Sudoku game following **Domain-Driven Design (DDD)**:
+Vue 3 + TypeScript Sudoku game following **Domain-Driven Design (DDD)** with ports and adapters:
 
-- **`src/domain/`** — Pure business logic, zero framework dependencies. Subdivided into `board/`, `game/`, `generator/`.
-- **`src/application/`** — Serialization (`GameState`, `GameStateConverter`), persistence (`GameStorage`), and `Statistics`.
-- **`src/presentation/`** — Vue components, pages, and composables. Pages: `home/`, `game/`, `statistics/`.
-- **`src/stores/`** — Pinia store (`gameStore.ts`) as single source of truth for active game state.
+- **`src/domain/`** — Pure business logic, zero framework dependencies: `board/`, `game/` (the `Sudoku` engine, history, conflicts, hints, replay), `generator/` (puzzles and solution counting), `solver/` (human-style techniques, difficulty rating; shared helpers such as `cellRelations.ts`).
+- **`src/application/`** — Ports and app services, one folder each: `game/` (`GameState`, `GameRepository`), `settings/` (`SettingsStorage`), `statistics/`, `puzzleGeneration/` and `puzzleCheck/` (Web Worker services), `analytics/`, `billing/`, `icon/`, `systemBar/`, `appearanceBridge/`, `backButton/`.
+- **`src/infrastructure/`** — Adapters for those ports: IndexedDB repositories, and native adapters (Capacitor plugins, Firebase, Play Billing) that each have a no-op web twin. `src/main.ts` picks them by platform.
+- **`src/presentation/`** — `pages/` (home, game, game-review, solver-walkthrough, statistics, settings, donate), shared `components/` (one kebab-case folder each), `composables/`, `directives/`, `i18n/` (messages and label helpers), `theme/` (runtime appearance and launcher icon sync).
+- **`src/stores/`** — Pinia stores: game (single source of truth for the active game), statistics, settings, donate.
+- **`src/theme/`** — Framework-free look data shared with `scripts/`: `themeIds.ts` (styles, themes, light/dark), `palettes.ts`, `launcherIcon.ts`. Relative imports only.
 - **`src/style/styles/<id>/`** — One folder per visual style (`minimal`, `tactile`, `paper`): `skin.css` (scoped by `[data-style]`), `palette.ts` (colours; run `npm run generate:theme-css` after editing), `thumbnail.ts` (Settings preview). A new style registers in `theme/palettes.ts` `STYLES`, `style/index.css`, `StyleThumbnail.vue` and `STYLE_IDS` / `THEME_IDS_BY_STYLE` in `theme/themeIds.ts`.
+- **`src/utils/featureToggle.ts`** — Ships half-built features switched off (`VITE_APP_ENV`); keep it even when nothing uses it.
+
+Folders are camelCase in the TypeScript layers and kebab-case under `presentation/`.
 
 IMPORTANT: Domain layer must never import from `presentation/`, `stores/`, or `application/`. Dependencies flow inward only.
 
@@ -47,7 +52,7 @@ Follow `docs/release.md` (git flow, web + Android). Bump the version only on the
 - **Component tests**: `@vue/test-utils` `mount()` with `jsdom` environment
 - **Mocking**: Use `vi.mocked()` and `vi.restoreAllMocks()` in `afterEach`
 - **Test selectors**: Use `[data-testid="..."]` for querying DOM elements
-- **Fixtures**: Known puzzle data in `src/__tests__/fixtures/knownPuzzle.ts` — use `spyGeneratePuzzle()` to mock puzzle generation for deterministic tests
+- **Fixtures**: Known puzzle data in `src/__tests__/fixtures/knownPuzzle.ts` — use `spyGeneratePuzzle()` to mock puzzle generation for deterministic tests, and `fillAllButLastKnownCell()` when a test only needs to finish a game
 
 ## Copy (zh-Hant)
 
@@ -64,7 +69,7 @@ The app ships in English and Traditional Chinese (`src/presentation/i18n/message
 ## Key Domain Concepts
 
 - **`PuzzleCell`**: Has `clue` (given), `entry` (player input), `notes` (candidates). `isClue` cells cannot be modified.
-- **`Sudoku`**: Main game engine — `generate()`, `fill()`, `erase()`, `toggleNote()`, `undo()`, `isCompleted()`, `revealRandomCell()`.
+- **`Sudoku`**: Main game engine — `generate()`, `fill()`, `erase()`, `toggleNote()`, `undo()`, `isCompleted()`, `planRevealHint()` / `applyRevealHint()`.
 - **`HintTracker`**: Max 4 hints per game, 1st hint is free. Tracked in game state and statistics.
 - **`BoardHistory`**: Stores snapshots for undo. Records state before each `fill`/`erase`/`toggleNote`.
 - **Difficulty levels**: `easy`, `medium`, `hard` — controls number of clues removed during generation.

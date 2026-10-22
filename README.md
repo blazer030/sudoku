@@ -17,7 +17,9 @@ progressive web app (PWA) and as a native Android app via Capacitor.
 - **Save & restore** with a running timer, persisted to IndexedDB
 - **Statistics** (best times, win rate, day streak) plus per-game **Review**
   with move replay
-- **Six selectable color themes** (green, blue, purple, orange, pink, teal)
+- **Three visual styles** — Minimal Motion, Tactile Tiles and Paper Notebook — each
+  with its own colour themes, in light, dark or following the system
+- **English and Traditional Chinese**, following the system language or chosen in Settings
 - **Offline support** via service worker (web build)
 - **Native Android app** — Firebase analytics, Google Play Billing donations,
   and a dynamic app icon that can match the selected theme (native-only
@@ -46,23 +48,24 @@ src/
 ├── domain/          Pure business logic, zero framework dependencies
 │   ├── board/         PuzzleCell, SudokuBoard, constants
 │   ├── game/          Sudoku engine, history/undo, conflicts, replay, hints
-│   ├── generator/     Puzzle generator + backtracking solver
+│   ├── generator/     Puzzle generator + solution counting
 │   └── solver/        Technique solver, difficulty rater, techniques, chains
 ├── application/     Ports (interfaces) + app services
-│   ├── game/          GameRepository port
-│   ├── statistics/    StatisticsRepository port
-│   ├── analytics/     AnalyticsService port
-│   ├── billing/       BillingService port
-│   └── icon/          IconService port
+│   ├── game/          GameState, GameRepository port
+│   ├── settings/      Settings load/save
+│   ├── statistics/    StatisticsRepository port, play streak
+│   ├── puzzleGeneration/, puzzleCheck/   Web Worker services
+│   └── analytics/, billing/, icon/, systemBar/, appearanceBridge/, backButton/
 ├── infrastructure/  Adapters implementing the ports
-│   ├── game/          IndexedDB game repository
-│   ├── statistics/    IndexedDB statistics repository
-│   ├── analytics/     Firebase / Noop adapters
-│   ├── billing/       Play Billing / Noop adapters
-│   └── icon/          Dynamic icon / Noop adapters
-├── presentation/    Vue components, pages, composables
+│   ├── game/, statistics/   IndexedDB repositories
+│   └── analytics/, billing/, icon/, systemBar/, appearanceBridge/, backButton/
+│                      Capacitor / Firebase / Play Billing adapters + no-op web twins
+├── presentation/    Pages, shared components, composables, i18n, appearance sync
 ├── stores/          Pinia stores (game, statistics, settings, donate)
-├── workers/         Puzzle generation Web Worker
+├── theme/           Style and theme ids, palettes, launcher icons (shared with scripts/)
+├── style/           Tailwind entry, fonts, one folder per visual style (styles/<id>/)
+├── utils/           Feature toggle, app version, time formatting
+├── workers/         Puzzle generation and puzzle check Web Workers
 └── router.ts        Routes (donate is native-only, guarded)
 ```
 
