@@ -28,8 +28,8 @@
 
 /* The page background, shared by the body and every opaque page root and sticky header:
    faint dots of the border colour, and at night a warm lamp glowing from the top edge. It has
-   no image, so the colour and contrast tests see it (inks are checked on the border at 40% and
-   the lamp at 35% over the background). By day the lamp layer is empty. */
+   no image, so the colour and contrast tests see it (inks are checked on the border at 40%, and
+   on the lamp at its on-screen peak, about 29%, alone and over a dot). By day the lamp layer is empty. */
 [data-style="paper"] {
     --paper-lamp: linear-gradient(transparent, transparent);
     --paper-texture:

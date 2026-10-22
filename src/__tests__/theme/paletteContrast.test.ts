@@ -1,3 +1,4 @@
+import { readFileSync } from "fs";
 import { THEME_IDS_BY_STYLE, STYLE_IDS, type StyleId } from "@/application/SettingsStorage";
 import { contrastRatio, mixColors } from "@/theme/contrast";
 import { STYLES, type Palette, type PaletteToken } from "@/theme/palettes";
@@ -86,13 +87,41 @@ const TINTED_PAIRS: readonly ContrastPair[] = [
     tinted("on-scrim", "scrim", 0.65, "background", TEXT),
 ];
 
-// Paper's page texture: text crosses the ruled lines, the night lamp's glow at its peak,
-// and the texture dots (the border colour at no more than 40%)
+// The night lamp's strongest alpha on screen. Its glow is centred above the top edge, so the
+// brightest visible point is already part-way out along the gradient:
+// radial-gradient(<w> <h> at 50% <y>, lamp <alpha>, transparent <end>)
+const lampPeakAlpha = (): number => {
+    const css = readFileSync("src/style/styles/paper.css", "utf8");
+    const match = /radial-gradient\(\d+% (\d+)% at 50% (-?\d+)%, color-mix\(in srgb, var\(--color-lamp\) (\d+)%, transparent\), transparent (\d+)%\)/.exec(css);
+    if (match === null) throw new Error("paper.css has no night lamp gradient in the expected form");
+    const [height, centre, alpha, end] = match.slice(1).map(Number);
+    // How far along the gradient ray the top edge sits, as a fraction of the ray
+    const topEdge = Math.max(0, -centre) / height;
+    return (alpha / 100) * (1 - topEdge / (end / 100));
+};
+
+const LAMP_PEAK = lampPeakAlpha();
+// The texture dots are the border colour at no more than 40%; the lamp is painted over them
+const GRAIN = 0.4;
+
+// Paper's page texture: text crosses the ruled lines, the texture dots, the night lamp's glow at
+// its peak, and the lamp over a dot, the brightest spot behind night text
 const PAPER_INKS: readonly PaletteToken[] = ["foreground", "foreground-secondary", "foreground-muted", "primary"];
 const PAPER_PAIRS: readonly ContrastPair[] = PAPER_INKS.flatMap(ink => [
     pair(ink, "rule"),
-    tinted(ink, "lamp", 0.35, "background", TEXT),
-    tinted(ink, "border", 0.4, "background", TEXT),
+    tinted(ink, "border", GRAIN, "background", TEXT),
+    {
+        name: `${ink} on lamp ${(LAMP_PEAK * 100).toFixed(1)}% over background`,
+        foreground: (palette: Palette) => palette[ink],
+        background: (palette: Palette) => mixColors(palette.lamp, LAMP_PEAK, palette.background),
+        minimum: TEXT,
+    },
+    {
+        name: `${ink} on lamp ${(LAMP_PEAK * 100).toFixed(1)}% over a texture dot`,
+        foreground: (palette: Palette) => palette[ink],
+        background: (palette: Palette) => mixColors(palette.lamp, LAMP_PEAK, mixColors(palette.border, GRAIN, palette.background)),
+        minimum: TEXT,
+    },
 ]).map(contrastPair => ({ ...contrastPair, styles: ["paper"] }));
 
 const ALL_PAIRS = [...TEXT_PAIRS, ...BOARD_PAIRS, ...SURFACE_PAIRS, ...TINTED_PAIRS, ...PAPER_PAIRS];
@@ -116,6 +145,11 @@ describe("palette contrast", () => {
 
     it("should check 26 style, theme and mode combinations", () => {
         expect(new Set(CASES.map(contrastCase => contrastCase.prefix)).size).toBe(2 * (6 + 4 + 3));
+    });
+
+    it("should model the night lamp at its on-screen peak, about 29%", () => {
+        // 35% at the glow's centre, 6% above the top edge, fading out by 65% of a 55%-tall ray
+        expect(LAMP_PEAK).toBeCloseTo(0.291, 3);
     });
 
     it.each(CASES)("$label", ({ palette, contrastPair }) => {
