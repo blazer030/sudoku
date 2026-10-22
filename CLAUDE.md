@@ -25,7 +25,7 @@ IMPORTANT: Domain layer must never import from `presentation/`, `stores/`, or `a
 
 ## Specs & Plans
 
-Design specs and implementation plans live under `docs/` — never in a root `plan.md`.
+Design specs and implementation plans live under `docs/superpowers/` — never in a root `plan.md`. Delete them once the work is complete; git history keeps them.
 
 ## Release
 
@@ -48,6 +48,18 @@ Follow `docs/release.md` (git flow, web + Android). Bump the version only on the
 - **Mocking**: Use `vi.mocked()` and `vi.restoreAllMocks()` in `afterEach`
 - **Test selectors**: Use `[data-testid="..."]` for querying DOM elements
 - **Fixtures**: Known puzzle data in `src/__tests__/fixtures/knownPuzzle.ts` — use `spyGeneratePuzzle()` to mock puzzle generation for deterministic tests
+
+## Copy (zh-Hant)
+
+The app ships in English and Traditional Chinese (`src/presentation/i18n/messages/`). Chinese copy follows these rules:
+
+- Row is 列 (horizontal), column is 欄 (vertical): 「第 r 列第 c 欄」. Box is 宮: 「第 n 宮」, numbered from the top left.
+- A single game is 「遊戲」, never 「對局」 (遊戲回顧, 最近遊戲).
+- Dates: 「今天 15:05」「昨天 09:12」「10/21 15:05」 — slash dates, 24-hour clock, no year.
+- Fixed terms: Easy/Medium/Hard 簡單／中等／困難 · Auto Notes 自動筆記 · Check Conflicts 檢查衝突 · Reveal Cell 揭示一格 · Walkthrough 解題演示 · Statistics 統計 · Settings 設定 · Changelog 更新日誌 · Donate 贊助 · Game Review 遊戲回顧 · Recent Games 最近遊戲.
+- Techniques: Naked Single 唯一候選數 · Hidden Single 隱藏唯一數 · Naked Pair/Triple/Quad 顯性數對／三數組／四數組 · Hidden Pair/Triple/Quad 隱性數對／三數組／四數組 · Pointing 宮區塊摒除 · Claiming 行列區塊摒除 · X-Chain X 鏈 · XY-Chain XY 鏈 · X-Wing, Swordfish, Jellyfish, XY-Wing, W-Wing, XYZ-Wing, WXYZ-Wing stay in English.
+- Google Play's localised prices, analytics ids, `data-testid`s, developer messages and the privacy policy are never translated.
+- Tests check that switching language switches the screen, not the exact wording of the copy.
 
 ## Key Domain Concepts
 
