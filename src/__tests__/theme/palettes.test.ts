@@ -59,6 +59,26 @@ describe("palettes", () => {
         }
     });
 
+    it("should keep paper's lines and lamp invisible in other styles", () => {
+        for (const style of [STYLES.minimal, STYLES.tactile]) {
+            for (const theme of style.themes) {
+                for (const mode of ["light", "dark"] as const) {
+                    const palette = theme[mode];
+                    for (const token of ["rule", "margin-line", "lamp"] as const) {
+                        expect(palette[token], `${style.id}/${theme.id}/${mode} ${token}`).toBe(palette.background);
+                    }
+                }
+            }
+        }
+    });
+
+    it("should light the paper lamp only at night", () => {
+        for (const theme of STYLES.paper.themes) {
+            expect(theme.light.lamp, theme.id).toBe(theme.light.background);
+            expect(theme.dark.lamp, theme.id).not.toBe(theme.dark.background);
+        }
+    });
+
     it("should keep the dark toast a dark surface rather than a light block", () => {
         for (const style of Object.values(STYLES)) {
             for (const theme of style.themes) {

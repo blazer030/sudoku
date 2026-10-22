@@ -38,6 +38,14 @@ describe("iconTheme", () => {
         expect(iconThemeFor("tactile", theme)).toBe(expected);
     });
 
+    it.each([
+        ["blueInk", "blue"],
+        ["greenInk", "green"],
+        ["redInk", "pink"],
+    ] as const)("should show the %s paper theme with the %s icon", (theme, expected) => {
+        expect(iconThemeFor("paper", theme)).toBe(expected);
+    });
+
     it("should match the icon generator scripts", () => {
         // The scripts draw every launcher and PWA icon in the minimal style's light primary
         const artwork = readFileSync("scripts/iconArtwork.ts", "utf8");

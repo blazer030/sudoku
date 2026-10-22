@@ -1,4 +1,4 @@
-import { THEME_IDS_BY_STYLE, STYLE_IDS } from "@/application/SettingsStorage";
+import { THEME_IDS_BY_STYLE, STYLE_IDS, type StyleId } from "@/application/SettingsStorage";
 import { contrastRatio, mixColors } from "@/theme/contrast";
 import { STYLES, type Palette, type PaletteToken } from "@/theme/palettes";
 
@@ -10,6 +10,8 @@ interface ContrastPair {
     foreground: (palette: Palette) => string;
     background: (palette: Palette) => string;
     minimum: number;
+    /** Checked only in these styles; every style when left out. */
+    styles?: readonly StyleId[];
 }
 
 const pair = (foreground: PaletteToken, background: PaletteToken, minimum = TEXT): ContrastPair => ({
@@ -84,9 +86,20 @@ const TINTED_PAIRS: readonly ContrastPair[] = [
     tinted("on-scrim", "scrim", 0.65, "background", TEXT),
 ];
 
+// Paper's page texture: text crosses the ruled lines, the night lamp's glow at its peak,
+// and the texture dots (the border colour at no more than 40%)
+const PAPER_INKS: readonly PaletteToken[] = ["foreground", "foreground-secondary", "foreground-muted", "primary"];
+const PAPER_PAIRS: readonly ContrastPair[] = PAPER_INKS.flatMap(ink => [
+    pair(ink, "rule"),
+    tinted(ink, "lamp", 0.35, "background", TEXT),
+    tinted(ink, "border", 0.4, "background", TEXT),
+]).map(contrastPair => ({ ...contrastPair, styles: ["paper"] }));
+
+const ALL_PAIRS = [...TEXT_PAIRS, ...BOARD_PAIRS, ...SURFACE_PAIRS, ...TINTED_PAIRS, ...PAPER_PAIRS];
+
 const CASES = Object.values(STYLES).flatMap(style => style.themes.flatMap(theme =>
     (["light", "dark"] as const).flatMap(mode =>
-        [...TEXT_PAIRS, ...BOARD_PAIRS, ...SURFACE_PAIRS, ...TINTED_PAIRS].map(contrastPair => ({
+        ALL_PAIRS.filter(contrastPair => contrastPair.styles?.includes(style.id) ?? true).map(contrastPair => ({
             prefix: `${style.id}/${theme.id}/${mode}`,
             label: `${style.id}/${theme.id}/${mode}: ${contrastPair.name} ≥ ${contrastPair.minimum}`,
             palette: theme[mode],
@@ -99,6 +112,10 @@ describe("palette contrast", () => {
             ["light", "dark"].map(mode => `${style}/${theme}/${mode}`)));
 
         expect(new Set(CASES.map(contrastCase => contrastCase.prefix))).toEqual(new Set(expected));
+    });
+
+    it("should check 26 style, theme and mode combinations", () => {
+        expect(new Set(CASES.map(contrastCase => contrastCase.prefix)).size).toBe(2 * (6 + 4 + 3));
     });
 
     it.each(CASES)("$label", ({ palette, contrastPair }) => {

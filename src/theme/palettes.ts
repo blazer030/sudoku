@@ -9,6 +9,8 @@ export const PALETTE_TOKENS = [
     "danger", "danger-hover", "error", "error-surface", "shadow",
     "on-primary", "on-danger", "note", "cell-focus", "cell-scope", "cell-pattern", "scrim", "on-scrim",
     "toast", "on-toast", "cell-selected", "cell-peer", "featured", "on-featured",
+    // Paper's ruled lines, margin line and night lamp; other styles paint them as their background
+    "rule", "margin-line", "lamp",
 ] as const;
 export type PaletteToken = typeof PALETTE_TOKENS[number];
 export type Palette = Record<PaletteToken, string>;
@@ -28,8 +30,9 @@ export interface StyleDefinition {
 type LightThemeColors = Pick<Palette, "primary" | "primary-hover" | "primary-light" | "accent" | "highlight">;
 type DarkThemeColors = Pick<Palette, "primary" | "primary-hover" | "accent">;
 type DerivedToken = "primary-light" | "highlight" | "cell-focus" | "cell-scope" | "cell-pattern" | "cell-peer";
-// Tokens that repeat another token of the same palette
-type AliasToken = "note" | "cell-selected" | "featured" | "on-featured";
+// Tokens that repeat another token of the same palette unless a style sets its own
+type AliasToken = "note" | "cell-selected" | "featured" | "on-featured" | "rule" | "margin-line" | "lamp";
+type StyleExtras = Partial<Pick<Palette, "featured" | "on-featured" | "rule" | "margin-line" | "lamp">>;
 type Neutrals<ThemeColors> = Omit<Palette, keyof ThemeColors | DerivedToken | AliasToken>;
 
 // Values are tuned so every pair in paletteContrast.test.ts meets WCAG AA. The board layers
@@ -89,30 +92,39 @@ const tintsOf = <Token extends DerivedToken>(primary: string, card: string, stre
     Object.fromEntries(Object.entries<number>(strengths).map(([token, alpha]) =>
         [token, mixColors(primary, alpha, card)])) as Record<Token, string>;
 
-// Notes use the secondary text colour; the selected cell uses the primary tint;
-// the continue card is a primary surface
-const withAliases = (palette: Omit<Palette, AliasToken>): Palette => ({
+// Notes use the secondary text colour; the selected cell uses the primary tint; the continue
+// card is a primary surface; lines and lamp vanish into the background unless a style draws them
+const withAliases = (palette: Omit<Palette, AliasToken>, extras: StyleExtras): Palette => ({
     ...palette,
     "note": palette["foreground-secondary"],
     "cell-selected": palette["primary-light"],
     "featured": palette.primary,
     "on-featured": palette["on-primary"],
+    "rule": palette.background,
+    "margin-line": palette.background,
+    "lamp": palette.background,
+    ...extras,
 });
 
 // A style's theme builder: its own neutrals under each theme's colours and tints
-const themeBuilder = (lightNeutrals: Neutrals<LightThemeColors>, darkNeutrals: Neutrals<DarkThemeColors>) =>
+const themeBuilder = (
+    lightNeutrals: Neutrals<LightThemeColors>,
+    darkNeutrals: Neutrals<DarkThemeColors>,
+    lightExtras: StyleExtras = {},
+    darkExtras: StyleExtras = {},
+) =>
     (id: ColorThemeId, light: LightThemeColors, dark: DarkThemeColors): ThemePalette => ({
         id,
         light: withAliases({
             ...lightNeutrals,
             ...light,
             ...tintsOf(light.primary, lightNeutrals.card, LIGHT_TINTS),
-        }),
+        }, lightExtras),
         dark: withAliases({
             ...darkNeutrals,
             ...dark,
             ...tintsOf(dark.primary, darkNeutrals.card, DARK_TINTS),
-        }),
+        }, darkExtras),
     });
 
 const minimalTheme = themeBuilder(MINIMAL_LIGHT_NEUTRALS, MINIMAL_DARK_NEUTRALS);
@@ -207,9 +219,83 @@ const TACTILE: StyleDefinition = {
     ],
 };
 
+// Paper notebook: warm paper by day, a night desk by lamplight. Inks are the theme colours;
+// the continue card is a yellow sticky note. Muted text is darker than the reference so it
+// still reads where it crosses a ruled line.
+const PAPER_LIGHT_NEUTRALS: Neutrals<LightThemeColors> = {
+    "background": "#F4EDE0",
+    "card": "#FBF7EF",
+    "border": "#DCD0BB",
+    "foreground": "#2F2C35",
+    "foreground-secondary": "#4E4A50",
+    "foreground-muted": "#5E5850",
+    "cell-clue": "#E6DCCB",
+    "danger": "#A8423A",
+    "danger-hover": "#983730",
+    "error": "#951C15",
+    "error-surface": "#FBE5DF",
+    "shadow": "#2F2C35",
+    "on-primary": "#FFFFFF",
+    "on-danger": "#FFFFFF",
+    "scrim": "#000000",
+    "on-scrim": "#FFFFFF",
+    "toast": "#2F2C35",
+    "on-toast": "#F4EDE0",
+};
+
+const PAPER_DARK_NEUTRALS: Neutrals<DarkThemeColors> = {
+    "background": "#201D19",
+    "card": "#2A2621",
+    "border": "#3D372F",
+    "foreground": "#EDE4D3",
+    "foreground-secondary": "#E2D9C8",
+    "foreground-muted": "#DCD2C0",
+    "cell-clue": "#3B362E",
+    "danger": "#E8846F",
+    "danger-hover": "#EE917E",
+    "error": "#FFB8A8",
+    "error-surface": "#4A342D",
+    "shadow": "#000000",
+    "on-primary": "#201D19",
+    "on-danger": "#201D19",
+    "scrim": "#000000",
+    "on-scrim": "#FFFFFF",
+    "toast": "#3D372F",
+    "on-toast": "#EDE4D3",
+};
+
+const paperTheme = themeBuilder(PAPER_LIGHT_NEUTRALS, PAPER_DARK_NEUTRALS, {
+    "featured": "#F7E6A0",
+    "on-featured": "#3A3326",
+    "rule": "#CFDCE4",
+    "margin-line": "#E9B9AF",
+}, {
+    "featured": "#4A4230",
+    "on-featured": "#F3E8CC",
+    "rule": "#2B343B",
+    "margin-line": "#583833",
+    "lamp": "#FFBE6E",
+});
+
+const PAPER: StyleDefinition = {
+    id: "paper",
+    themes: [
+        paperTheme("blueInk",
+            { "primary": "#2B4A7A", "primary-hover": "#22406F", "primary-light": "#DCE4F0", "accent": "#8A5A20", "highlight": "#AFC3E2" },
+            { "primary": "#BFD3F4", "primary-hover": "#C9DBF6", "accent": "#D9AE70" }),
+        paperTheme("greenInk",
+            { "primary": "#235A3C", "primary-hover": "#1B5034", "primary-light": "#D8EBDD", "accent": "#8E4F3A", "highlight": "#9ECFAF" },
+            { "primary": "#ADDFBF", "primary-hover": "#B8E6C8", "accent": "#E2A68E" }),
+        paperTheme("redInk",
+            { "primary": "#8E2533", "primary-hover": "#831D2B", "primary-light": "#F5DCDF", "accent": "#2F6B60", "highlight": "#EDB8BF" },
+            { "primary": "#F8C3CA", "primary-hover": "#FACDD3", "accent": "#86C0B4" }),
+    ],
+};
+
 export const STYLES: Record<StyleId, StyleDefinition> = {
     minimal: MINIMAL,
     tactile: TACTILE,
+    paper: PAPER,
 };
 
 export const DEFAULT_STYLE_ID: StyleId = "minimal";

@@ -1,4 +1,4 @@
-export const STYLE_IDS = ["minimal", "tactile"] as const;
+export const STYLE_IDS = ["minimal", "tactile", "paper"] as const;
 export type StyleId = typeof STYLE_IDS[number];
 /** Launcher aliases and PWA icon sets exist for these six only. */
 export const ICON_THEME_IDS = ["green", "blue", "purple", "orange", "pink", "teal"] as const;
@@ -8,6 +8,7 @@ export const THEME_IDS_BY_STYLE = {
     minimal: ICON_THEME_IDS,
     // Tactile's green and blue are its own palettes; a theme is always looked up within its style
     tactile: ["green", "blue", "rust", "slate"],
+    paper: ["blueInk", "greenInk", "redInk"],
 } as const satisfies Record<StyleId, readonly string[]>;
 export type ColorThemeId = typeof THEME_IDS_BY_STYLE[StyleId][number];
 /** Every style's theme ids together, in first-seen order. */
