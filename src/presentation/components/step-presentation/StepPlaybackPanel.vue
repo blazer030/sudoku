@@ -21,6 +21,7 @@
 
         <StepExplanation
             ref="explanation"
+            :compact="compactExplanation"
             :step-key="stepIndex"
             :test-id-prefix="testIdPrefix"
         >
@@ -78,7 +79,9 @@ const props = withDefaults(defineProps<{
     /** The group's accessible name. */
     label: string;
     maxHeight?: number | null;
-}>(), { maxHeight: null });
+    /** The explanations always fit one line, so the panel need not keep room for three. */
+    compactExplanation?: boolean;
+}>(), { maxHeight: null, compactExplanation: false });
 
 const emit = defineEmits<{
     previous: [];

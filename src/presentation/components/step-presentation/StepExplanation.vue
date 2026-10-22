@@ -3,10 +3,10 @@
          It stays mounted across steps, so it can announce each new explanation. -->
     <div
         ref="box"
-        :class="clipped ? 'step-explanation-fade' : ''"
+        :class="[clipped ? 'step-explanation-fade' : '', compact ? 'min-h-[1.45rem]' : 'min-h-[4.6rem]']"
         :data-testid="`${testIdPrefix}-explanation-region`"
         aria-live="polite"
-        class="step-explanation-box min-h-[4.6rem] shrink! overflow-y-auto"
+        class="step-explanation-box shrink! overflow-y-auto"
         @scroll="updateClipped"
     >
         <Transition
@@ -29,10 +29,12 @@
 <script lang="ts" setup>
 import { onMounted, onUpdated, ref, useTemplateRef } from "vue";
 
-defineProps<{
+withDefaults(defineProps<{
     stepKey: string | number;
     testIdPrefix: string;
-}>();
+    /** Reserve one line instead of three, for explanations that always fit one. */
+    compact?: boolean;
+}>(), { compact: false });
 
 // When the panel is height-capped, fade the cut-off edge so a long explanation reads as scrollable.
 const box = useTemplateRef<HTMLElement>("box");

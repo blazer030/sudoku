@@ -76,4 +76,18 @@ describe("StepPlaybackPanel", () => {
         const region = wrapper.find("[data-testid='demo-explanation-region']");
         expect(region.find("[data-testid='demo-explanation']").text()).toBe("Because.");
     });
+
+    it("should keep room for three lines of explanation, or one when the explanations are short", () => {
+        // The reserved room keeps the panel from jumping as explanations of 1 to 3 lines come and go;
+        // a page whose explanations always fit one line (the game review) gives the room to its board
+        const roomy = mountPanel(0, 3).find("[data-testid='demo-explanation-region']");
+        expect(roomy.classes()).toContain("min-h-[4.6rem]");
+
+        const compact = mount(StepPlaybackPanel, {
+            props: { stepIndex: 0, totalSteps: 3, playState: playState(), testIdPrefix: "demo", label: "Demo", compactExplanation: true },
+            slots: { default: "Because." },
+        }).find("[data-testid='demo-explanation-region']");
+        expect(compact.classes()).toContain("min-h-[1.45rem]");
+        expect(compact.classes()).not.toContain("min-h-[4.6rem]");
+    });
 });
