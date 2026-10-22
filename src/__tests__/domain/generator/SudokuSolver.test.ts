@@ -1,6 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { SudokuBoard } from "@/domain/board/SudokuBoard";
-import { SudokuSolver } from "@/domain/generator/SudokuSolver";
+import { SudokuSolver, UNKNOWN_SOLUTION_COUNT } from "@/domain/generator/SudokuSolver";
+import { openNoSolutionPuzzle } from "@/__tests__/fixtures/openPuzzles";
+import { singlesPuzzle } from "@/__tests__/fixtures/singlesPuzzle";
 
 const sudokuBoard = new SudokuBoard();
 const solver = new SudokuSolver();
@@ -97,6 +99,16 @@ describe("SudokuSolver", () => {
 
         expect(solver.countSolutions(board, 2)).toBe(0);
         expect(placementCheck.mock.calls.length).toBeLessThan(5000);
+    });
+
+    describe("with a node budget", () => {
+        it("should report an unknown count when the search runs past its budget", () => {
+            expect(solver.countSolutions(openNoSolutionPuzzle, 2, { maxNodes: 1000 })).toBe(UNKNOWN_SOLUTION_COUNT);
+        });
+
+        it("should count normally when the search fits in its budget", () => {
+            expect(solver.countSolutions(singlesPuzzle, 2, { maxNodes: 1000 })).toBe(1);
+        });
     });
 
     it("should solve a standard difficulty puzzle", () => {

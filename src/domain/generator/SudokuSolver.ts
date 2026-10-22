@@ -3,6 +3,20 @@ import { SudokuBoard } from "@/domain/board/SudokuBoard";
 
 export type DigitsProvider = () => number[];
 
+/** The count of a search that ran out of budget before it could tell how many solutions there are. */
+export const UNKNOWN_SOLUTION_COUNT = "unknown";
+
+export type SolutionCount = number | typeof UNKNOWN_SOLUTION_COUNT;
+
+export interface CountSolutionsOptions {
+    /** How many search nodes to visit before giving up with `UNKNOWN_SOLUTION_COUNT`. */
+    maxNodes: number;
+}
+
+interface SearchBudget {
+    nodesLeft: number;
+}
+
 export class SudokuSolver {
     private board = new SudokuBoard();
 
@@ -15,10 +29,19 @@ export class SudokuSolver {
         return null;
     }
 
-    public countSolutions(board: number[][], limit = 2): number {
+    /**
+     * Counts solutions up to `limit`. Without options the search runs to the end; with `maxNodes`
+     * it gives up with `UNKNOWN_SOLUTION_COUNT` once it has visited that many nodes.
+     */
+    public countSolutions(board: number[][], limit?: number): number;
+    public countSolutions(board: number[][], limit: number, options: CountSolutionsOptions): SolutionCount;
+    public countSolutions(board: number[][], limit = 2, options?: CountSolutionsOptions): SolutionCount {
         const puzzle = board.map(row => [...row]);
         if (this.hasConflictingGivens(puzzle)) return 0;
-        return this.countSolutionsRecursive(puzzle, limit);
+        const budget: SearchBudget = { nodesLeft: options?.maxNodes ?? Number.POSITIVE_INFINITY };
+        const count = this.countSolutionsRecursive(puzzle, limit, budget);
+        if (count < limit && budget.nodesLeft < 0) return UNKNOWN_SOLUTION_COUNT;
+        return count;
     }
 
     // The search only checks the digits it places, so givens that already clash must be caught first.
@@ -37,7 +60,9 @@ export class SudokuSolver {
     }
 
     // Branches on the empty cell with the fewest candidates, so a dead end shows up at once.
-    private countSolutionsRecursive(puzzle: number[][], limit: number): number {
+    private countSolutionsRecursive(puzzle: number[][], limit: number, budget: SearchBudget): number {
+        budget.nodesLeft--;
+        if (budget.nodesLeft < 0) return 0;
         let bestRow = -1;
         let bestColumn = -1;
         let bestCandidates: number[] = [];
@@ -58,9 +83,9 @@ export class SudokuSolver {
         let count = 0;
         for (const digit of bestCandidates) {
             puzzle[bestRow][bestColumn] = digit;
-            count += this.countSolutionsRecursive(puzzle, limit - count);
+            count += this.countSolutionsRecursive(puzzle, limit - count, budget);
             puzzle[bestRow][bestColumn] = 0;
-            if (count >= limit) return count;
+            if (count >= limit || budget.nodesLeft < 0) return count;
         }
         return count;
     }
