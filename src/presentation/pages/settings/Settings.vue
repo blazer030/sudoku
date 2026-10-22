@@ -137,6 +137,24 @@
         </SettingsGroup>
 
         <SettingsGroup
+            id="data"
+            :icon="Database"
+            :title="t('settings.groups.data')"
+        >
+            <button
+                v-press
+                :disabled="!hasRecords"
+                class="flex items-center justify-center gap-2 w-full h-11 rounded-button text-danger disabled:text-foreground-muted cursor-pointer disabled:cursor-default"
+                data-testid="clear-records-button"
+                type="button"
+                @click="handleClearRecords"
+            >
+                <Trash2 :size="18" />
+                <span class="text-[15px] font-semibold">{{ t("settings.data.clearRecords") }}</span>
+            </button>
+        </SettingsGroup>
+
+        <SettingsGroup
             id="about"
             :icon="Info"
             :title="t('settings.about')"
@@ -178,6 +196,8 @@
         </div>
 
         <div class="flex-1" />
+
+        <ClearRecordsDialog />
     </div>
 </template>
 
@@ -185,9 +205,10 @@
 import { computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
-import { ChevronLeft, ChevronRight, Check, Crosshair, Eraser, Gamepad2, Hash, Highlighter, Info, Languages, Palette, Smartphone, Sparkles } from "lucide-vue-next";
+import { ChevronLeft, ChevronRight, Check, Crosshair, Database, Eraser, Gamepad2, Hash, Highlighter, Info, Languages, Palette, Smartphone, Sparkles, Trash2 } from "lucide-vue-next";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { useDonateStore } from "@/stores/donateStore";
+import { useStatisticsStore } from "@/stores/statisticsStore";
 import { usePlatform } from "@/presentation/composables/usePlatform";
 import { appVersion } from "@/utils/appVersion";
 import { ROUTER_PATH } from "@/router";
@@ -198,12 +219,16 @@ import SegmentedControl from "@/presentation/components/segmented-control/Segmen
 import OptionTile from "@/presentation/components/option-tile/OptionTile.vue";
 import SettingsGroup from "@/presentation/pages/settings/components/SettingsGroup.vue";
 import StyleThumbnail from "@/presentation/pages/settings/components/StyleThumbnail.vue";
+import ClearRecordsDialog from "@/presentation/pages/settings/components/ClearRecordsDialog.vue";
+import { provideClearRecordsDialog } from "@/presentation/pages/settings/components/useClearRecordsDialog";
 
 const { t } = useI18n();
 const router = useRouter();
 const settingsStore = useSettingsStore();
 const platform = usePlatform();
 const donateStore = useDonateStore();
+const statisticsStore = useStatisticsStore();
+const { open: openClearRecordsDialog } = provideClearRecordsDialog();
 
 // The donate entry only appears once Google Play actually returns products;
 // load in the background so the page renders immediately.
@@ -267,6 +292,15 @@ const toggles = computed(() => [
     // An odd last tile spans both columns of the grid
     wide: all.length % 2 === 1 && position === all.length - 1,
 })));
+
+const hasRecords = computed(() => statisticsStore.statistics.overall.gamesPlayed > 0);
+
+const handleClearRecords = async () => {
+    const result = await openClearRecordsDialog();
+    if (result === "confirm") {
+        void statisticsStore.clearAll();
+    }
+};
 
 const goBack = () => {
     router.back();

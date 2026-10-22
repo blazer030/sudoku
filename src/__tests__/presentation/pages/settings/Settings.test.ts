@@ -24,6 +24,9 @@ import { i18n } from "@/presentation/i18n";
 import { startLocaleSync } from "@/presentation/i18n/localeSync";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { useDonateStore } from "@/stores/donateStore";
+import { useGameStore } from "@/stores/gameStore";
+import { useStatisticsStore } from "@/stores/statisticsStore";
+import type { CellState, GameState } from "@/application/GameState";
 import type { BillingService, Product } from "@/application/billing/BillingService";
 import { startAppearanceSync } from "@/presentation/theme/appearanceSync";
 import { STYLES } from "@/theme/palettes";
@@ -218,7 +221,13 @@ describe("Settings.vue groups", () => {
         const wrapper = mountSettings();
 
         expect(wrapper.findAll("[data-testid^='settings-group-']").map(group => group.attributes("data-testid")))
-            .toEqual(["settings-group-gameplay", "settings-group-appearance", "settings-group-language", "settings-group-about"]);
+            .toEqual([
+                "settings-group-gameplay",
+                "settings-group-appearance",
+                "settings-group-language",
+                "settings-group-data",
+                "settings-group-about",
+            ]);
     });
 
     it("should show five gameplay tiles in order", () => {
@@ -324,6 +333,104 @@ describe("Settings.vue appearance group", () => {
 
         expect(wrapper.findAll("[data-testid='appearance-switcher']")).toHaveLength(1);
         expect(wrapper.get("[data-testid='settings-group-appearance']").find("[data-testid='appearance-switcher']").exists()).toBe(true);
+    });
+});
+
+const dummySave: GameState = {
+    difficulty: "easy",
+    answer: Array.from({ length: 9 }, () => Array.from({ length: 9 }, () => 0)),
+    cells: Array.from({ length: 9 }, () =>
+        Array.from({ length: 9 }, (): CellState => ({ clue: 0, entry: 0, notes: [] }))
+    ),
+    elapsedSeconds: 204,
+    completed: false,
+    hintsUsed: 0,
+};
+
+const recordOneGame = () => {
+    useStatisticsStore().recordGame({ difficulty: "easy", elapsedSeconds: 120, completed: true });
+};
+
+describe("Settings.vue data group", () => {
+    beforeEach(() => {
+        localStorage.clear();
+        vi.mocked(Capacitor.isNativePlatform).mockReturnValue(false);
+    });
+
+    it("should disable clearing when there are no records", () => {
+        const wrapper = mountSettings();
+
+        expect(wrapper.get("[data-testid='settings-group-data']").get("[data-testid='clear-records-button']").attributes())
+            .toHaveProperty("disabled");
+    });
+
+    it("should be a quiet text button", async () => {
+        const wrapper = mountSettings();
+        recordOneGame();
+        await nextTick();
+
+        const button = wrapper.get("[data-testid='clear-records-button']");
+        expect(button.attributes()).not.toHaveProperty("disabled");
+        expect(button.classes()).toContain("text-danger");
+        expect(button.classes()).not.toContain("bg-danger");
+        expect(button.classes()).not.toContain("border-danger");
+    });
+
+    it("should say what clearing deletes and keeps", async () => {
+        const wrapper = mountSettings();
+        recordOneGame();
+        await nextTick();
+
+        await wrapper.get("[data-testid='clear-records-button']").trigger("click");
+
+        expect(wrapper.get("[data-testid='clear-records-dialog']").text()).toContain(
+            "All game records, including their reviews, plus your win rate and best times will be permanently deleted. "
+            + "This can't be undone. Your unfinished game and settings are kept.",
+        );
+        i18n.global.locale.value = "zh-Hant";
+        await nextTick();
+        expect(wrapper.get("[data-testid='clear-records-dialog']").text()).toContain("未完成的遊戲和設定會保留");
+    });
+
+    it("should clear records on confirm", async () => {
+        const wrapper = mountSettings();
+        recordOneGame();
+        await nextTick();
+
+        await wrapper.get("[data-testid='clear-records-button']").trigger("click");
+        await wrapper.get("[data-testid='clear-records-confirm-button']").trigger("click");
+        await flushPromises();
+
+        expect(useStatisticsStore().history).toHaveLength(0);
+    });
+
+    it("should keep records on cancel", async () => {
+        const wrapper = mountSettings();
+        recordOneGame();
+        await nextTick();
+
+        await wrapper.get("[data-testid='clear-records-button']").trigger("click");
+        await wrapper.get("[data-testid='clear-records-cancel-button']").trigger("click");
+        await flushPromises();
+
+        expect(useStatisticsStore().history).toHaveLength(1);
+    });
+
+    it("should keep the unfinished game and settings when clearing records", async () => {
+        const wrapper = mountSettings();
+        useGameStore().persistGame(dummySave);
+        useSettingsStore().setColorTheme("blue");
+        recordOneGame();
+        await nextTick();
+
+        await wrapper.get("[data-testid='clear-records-button']").trigger("click");
+        await wrapper.get("[data-testid='clear-records-confirm-button']").trigger("click");
+        await flushPromises();
+
+        expect(useGameStore().savedGame).not.toBeNull();
+        expect(useSettingsStore().colorTheme).toBe("blue");
+        expect(readStoredSettings().colorTheme).toBe("blue");
+        expect(wrapper.get("[data-testid='clear-records-button']").attributes()).toHaveProperty("disabled");
     });
 });
 

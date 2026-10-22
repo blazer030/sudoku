@@ -174,32 +174,13 @@
                 <span class="text-sm text-foreground-muted">{{ t("statistics.empty.description") }}</span>
             </div>
         </div>
-
-        <div
-            v-if="hasRecords"
-            class="sticky bottom-0 bg-background py-4"
-        >
-            <button
-                class="w-full h-13 rounded-xl border-2 border-danger bg-background flex items-center justify-center gap-2 cursor-pointer transition-all duration-200 hover:bg-danger/10"
-                data-testid="clear-records-button"
-                @click="handleClearRecords"
-            >
-                <Trash2
-                    :size="18"
-                    class="text-danger"
-                />
-                <span class="text-base font-semibold text-danger">{{ t("settings.data.clearRecords") }}</span>
-            </button>
-        </div>
-
-        <ClearRecordsDialog />
     </div>
 </template>
 
 <script lang="ts" setup>
 import { computed } from "vue";
 import { useRouter } from "vue-router";
-import { ChevronLeft, ChevronRight, Lightbulb, Trash2, Trophy, X } from "lucide-vue-next";
+import { ChevronLeft, ChevronRight, Lightbulb, Trophy, X } from "lucide-vue-next";
 import { ROUTER_PATH } from "@/router";
 import { useStatisticsStore } from "@/stores/statisticsStore";
 import type { GameResult } from "@/application/statistics/StatisticsRepository";
@@ -208,21 +189,11 @@ import { useI18n } from "vue-i18n";
 import { useAppLocale } from "@/presentation/i18n/useAppLocale";
 import { formatDate } from "@/presentation/i18n/formatDate";
 import { useDifficultyLabel } from "@/presentation/labels/difficultyLabels";
-import ClearRecordsDialog from "@/presentation/pages/settings/components/ClearRecordsDialog.vue";
-import { provideClearRecordsDialog } from "@/presentation/pages/settings/components/useClearRecordsDialog";
 
 const { t } = useI18n();
 const appLocale = useAppLocale();
 const router = useRouter();
-const { open: openClearRecordsDialog } = provideClearRecordsDialog();
 const statisticsStore = useStatisticsStore();
-
-const handleClearRecords = async () => {
-    const result = await openClearRecordsDialog();
-    if (result === "confirm") {
-        void statisticsStore.clearAll();
-    }
-};
 
 const stats = computed(() => statisticsStore.statistics);
 

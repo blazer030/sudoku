@@ -49,11 +49,14 @@ export const zhHant: MessageSchema = {
         },
         support: "支持開發",
         donate: "贊助",
+        groups: {
+            data: "資料",
+        },
         data: {
             clearRecords: "清除所有紀錄",
             clearDialog: {
                 title: "要清除所有紀錄嗎？",
-                message: "所有遊戲紀錄、統計和最佳時間都會被永久刪除，且無法復原。",
+                message: "所有遊戲紀錄（包括遊戲回顧）、勝率和最佳時間都會永久刪除，無法復原。未完成的遊戲和設定會保留。",
             },
         },
         about: "關於",

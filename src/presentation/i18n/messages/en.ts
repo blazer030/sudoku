@@ -51,11 +51,14 @@ export const en = {
         },
         support: "Support",
         donate: "Donate",
+        groups: {
+            data: "Data",
+        },
         data: {
             clearRecords: "Clear All Records",
             clearDialog: {
                 title: "Clear All Records?",
-                message: "All your game history, statistics and best times will be permanently deleted. This action cannot be undone.",
+                message: "All game records, including their reviews, plus your win rate and best times will be permanently deleted. This can't be undone. Your unfinished game and settings are kept.",
             },
         },
         about: "About",
