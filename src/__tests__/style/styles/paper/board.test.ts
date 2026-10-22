@@ -1,0 +1,156 @@
+import { readFileSync } from "fs";
+import postcss from "postcss";
+import { declarationsOf } from "@/__tests__/style/styleSheetRules";
+
+// Paper's board is drawn on the notebook page: a sheet of the page's paper with its grain, the grid
+// in the theme's ink, printed clue squares shaded in graphite and every highlight a translucent wash,
+// so the grain (and at night the lamp) shows through. The colours are checked in paletteContrast.
+
+const PAPER_CSS = readFileSync("src/style/styles/paper/skin.css", "utf8");
+const BOARD = '[data-style="paper"] [data-skin~="board"]';
+
+// The variants BoardCell can show, read from its CellVariant union
+const CELL_VARIANTS = (() => {
+    const source = readFileSync("src/presentation/components/board-cell/BoardCell.vue", "utf8");
+    const union = /export type CellVariant = ([^;]+);/.exec(source)?.[1] ?? "";
+    return [...union.matchAll(/"([\w-]+)"/g)].map(([, variant]) => variant);
+})();
+
+describe("paper board", () => {
+    it("should read every cell variant from BoardCell", () => {
+        expect(CELL_VARIANTS).toEqual(expect.arrayContaining(["default", "clue", "selected", "same-digit", "peer", "answer"]));
+    });
+
+    it("should lay the board on a sheet of the page's paper with its grain, not a card with a shadow", () => {
+        const board = declarationsOf(PAPER_CSS, BOARD);
+
+        // Its own page surface under the sheet, so the ruled lines behind the board never show through
+        expect(board.get("background-color")).toBe("var(--color-background)");
+        expect(board.get("background-image")).toBe(
+            "var(--paper-texture), linear-gradient(var(--paper-sheet), var(--paper-sheet)), var(--paper-lamp-fade), var(--paper-lamp), var(--paper-texture)");
+        expect(board.get("background-attachment")).toBe("scroll, scroll, scroll, fixed, fixed, fixed, fixed");
+        expect(board.get("--tw-shadow")).toBe("0 0 transparent");
+        expect(declarationsOf(PAPER_CSS, '[data-style="paper"]').get("--paper-sheet")).toMatch(/^color-mix\(in srgb, var\(--color-card\) \d+%, transparent\)$/);
+    });
+
+    it("should draw the grid in the theme's ink: thin lines faded, box lines as firmer strokes", () => {
+        const paper = declarationsOf(PAPER_CSS, '[data-style="paper"]');
+        const alphaOf = (value: string | undefined): number =>
+            Number(/^color-mix\(in srgb, var\(--color-primary\) (\d+)%, transparent\)$/.exec(value ?? "")?.[1] ?? Number.NaN);
+
+        expect(alphaOf(paper.get("--board-line"))).toBeGreaterThan(0);
+        expect(alphaOf(paper.get("--board-box-line"))).toBeGreaterThan(alphaOf(paper.get("--board-line")));
+        // The grid's outer frame is drawn with the same pen as the box lines
+        expect(declarationsOf(PAPER_CSS, `${BOARD} > div`).get("border-color")).toBe("var(--board-box-line)");
+    });
+
+    it("should wash every cell variant translucently, the blank cell showing the sheet itself", () => {
+        const cell = declarationsOf(PAPER_CSS, `${BOARD} [data-variant]`);
+
+        expect(cell.get("background-color")).toBe("var(--paper-cell-wash)");
+        expect(cell.get("--paper-cell-wash")).toBe("transparent");
+        // The wash stops at the cell's lines, so the ink reads the same over every wash
+        expect(cell.get("background-clip")).toBe("padding-box");
+        for (const variant of CELL_VARIANTS.filter(name => name !== "default")) {
+            expect(declarationsOf(PAPER_CSS, `${BOARD} [data-variant="${variant}"]`).get("--paper-cell-wash"), variant).toBe(`var(--paper-wash-${variant})`);
+            expect(declarationsOf(PAPER_CSS, '[data-style="paper"]').get(`--paper-wash-${variant}`), variant).toMatch(/^color-mix\(in srgb, var\(--color-[\w-]+\) [\d.]+%, transparent\)$/);
+        }
+    });
+
+    it("should shade the printed clue squares with a pencil hatch over the graphite wash", () => {
+        expect(declarationsOf(PAPER_CSS, `${BOARD} [data-variant="clue"]`).get("background-image")).toBe("var(--paper-clue-hatch)");
+        expect(declarationsOf(PAPER_CSS, '[data-style="paper"]').get("--paper-clue-hatch")).toMatch(/^repeating-linear-gradient\(.*var\(--paper-hatch\)/);
+    });
+
+    it("should keep the press ink on a pressed clue square", () => {
+        const pressed = declarationsOf(PAPER_CSS, `${BOARD} [data-variant="clue"][data-pressed]`).get("background-image") ?? "";
+
+        expect(pressed).toContain("var(--press-overlay)");
+        expect(pressed).toContain("var(--paper-clue-hatch)");
+    });
+
+    it("should flash a completed group from and back to the cell's own wash", () => {
+        // The shared flash starts and ends on the card colour unless a style says what the cell rests on
+        const indexCss = readFileSync("src/style/index.css", "utf8");
+        const flash = /@keyframes completion-flash \{([^@]*?)\n\}/.exec(indexCss)?.[1] ?? "";
+
+        expect(flash).toContain("0% { background-color: var(--completion-flash-rest, var(--color-card)); }");
+        expect(flash).toContain("100% { background-color: var(--completion-flash-rest, var(--color-card)); }");
+        expect(declarationsOf(PAPER_CSS, `${BOARD} [data-variant]`).get("--completion-flash-rest")).toBe("var(--paper-cell-wash)");
+    });
+
+    it("should square the board's corners like a ruled sheet", () => {
+        expect(declarationsOf(PAPER_CSS, `${BOARD} [data-variant]`).get("border-radius")).toBe("0");
+    });
+});
+
+describe("paper single-cell outlines", () => {
+    // The selection, a hint's or walkthrough's answer cell and a wrong entry each mark one cell;
+    // paper circles all of them with the same pen instead of a square ring
+    const CIRCLED: Record<string, string> = { selected: "var(--color-primary)", answer: "var(--color-primary)", wrong: "var(--color-error)" };
+
+    it.each(Object.entries(CIRCLED))("should circle the %s cell by hand instead of ringing it", (variant, ink) => {
+        const cell = declarationsOf(PAPER_CSS, `[data-style="paper"] [data-variant="${variant}"]`);
+        const circle = declarationsOf(PAPER_CSS, `[data-style="paper"] [data-variant="${variant}"]::after`);
+
+        expect(cell.get("--tw-ring-shadow")).toBe("0 0 transparent");
+        expect(cell.get("position")).toBe("relative");
+        expect(circle.get("mask")).toContain("data:image/svg+xml");
+        expect(circle.get("background-color")).toBe(ink);
+        // Drawn under the cell's digits and notes, over its wash, so the pen never covers a digit
+        expect(cell.get("isolation")).toBe("isolate");
+        expect(circle.get("z-index")).toBe("-1");
+    });
+
+    it("should circle the answer candidate instead of a cell showing candidates with a target", () => {
+        // A circle round a 3×3 note grid always crossed some candidates; the answer's own candidate is
+        // circled with the focus pen instead, and the cell keeps its wash
+        const cellCircle = declarationsOf(PAPER_CSS, '[data-style="paper"] [data-variant="answer"]:has([data-note-highlight])::after');
+        const candidateCircle = declarationsOf(PAPER_CSS, '[data-style="paper"] [data-variant="answer"] [data-note-highlight]::after');
+        const noteCircle = declarationsOf(PAPER_CSS, '[data-style="paper"] [data-note-highlight]::after');
+        const strokeOf = (mask: string | undefined): number => Number(/stroke-width='([\d.]+)'/.exec(mask ?? "")?.[1] ?? Number.NaN);
+
+        expect(cellCircle.get("content")).toBe("none");
+        expect(candidateCircle.get("content")).toBeUndefined();
+        // The note circle's primary ink, which the candidate's circle keeps
+        expect(candidateCircle.get("background-color")).toBeUndefined();
+        expect(noteCircle.get("background-color")).toBe("var(--color-primary)");
+        expect(strokeOf(candidateCircle.get("mask"))).toBeGreaterThan(strokeOf(noteCircle.get("mask")));
+        expect(candidateCircle.get("-webkit-mask")).toBe(candidateCircle.get("mask"));
+        expect(candidateCircle.get("animation")).toContain("paper-circle-draw");
+        // No halo is needed once nothing crosses the candidate
+        expect(declarationsOf(PAPER_CSS, '[data-style="paper"] [data-variant="answer"] [data-note-highlight]').get("text-shadow")).toBeUndefined();
+    });
+
+    it.each(Object.keys(CIRCLED))("should keep a thinner cell circle under the notes of a %s cell showing candidates", (variant) => {
+        const circle = declarationsOf(PAPER_CSS, `[data-style="paper"] [data-variant="${variant}"]::after`);
+        const thin = declarationsOf(PAPER_CSS, `[data-style="paper"] [data-variant="${variant}"]:has(.font-note)::after`);
+        const strokeOf = (mask: string | undefined): number => Number(/stroke-width='([\d.]+)'/.exec(mask ?? "")?.[1] ?? Number.NaN);
+        const pathOf = (mask: string | undefined): string => /d='([^']+)'/.exec(mask ?? "")?.[1] ?? "";
+
+        expect(pathOf(thin.get("mask"))).toBe(pathOf(circle.get("mask")));
+        expect(strokeOf(thin.get("mask"))).toBeLessThan(strokeOf(circle.get("mask")));
+        expect(thin.get("-webkit-mask")).toBe(thin.get("mask"));
+        expect(thin.get("rotate")).toBeUndefined();
+        expect(thin.get("inset")).toBeUndefined();
+        // The circle runs through the corner slots, so the notes over it carry a paper halo
+        expect(declarationsOf(PAPER_CSS, `[data-style="paper"] [data-variant="${variant}"] .font-note`).get("text-shadow")).toContain("var(--color-card)");
+    });
+
+    it("should stop drawing every circle under reduced motion", () => {
+        const stopped: string[] = [];
+        postcss.parse(PAPER_CSS).walkAtRules("media", (atRule) => {
+            if (!atRule.params.includes("prefers-reduced-motion: reduce")) return;
+            atRule.walkRules((rule) => {
+                if (rule.nodes.some(node => node.type === "decl" && node.prop === "animation" && node.value === "none")) {
+                    stopped.push(...rule.selectors.map(item => item.replace(/\s+/g, " ").trim()));
+                }
+            });
+        });
+
+        for (const variant of Object.keys(CIRCLED)) {
+            expect(stopped).toContain(`[data-style="paper"] [data-variant="${variant}"]::after`);
+        }
+        expect(stopped).toContain('[data-style="paper"] [data-variant="answer"] [data-note-highlight]::after');
+    });
+});

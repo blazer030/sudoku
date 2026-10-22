@@ -2,80 +2,13 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { Sudoku } from "@/domain/game/Sudoku";
 import { TechniqueSolver } from "@/domain/solver/TechniqueSolver";
 import { createKnownSudoku, knownAnswer, knownPuzzle, spyGeneratePuzzle } from "@/__tests__/fixtures/knownPuzzle";
+import { createMultiStepSudoku } from "@/__tests__/fixtures/multiStepPuzzle";
 
 afterEach(() => {
     vi.restoreAllMocks();
 });
 
 describe("Sudoku", () => {
-    it("should correctly check answers against the solution", () => {
-        spyGeneratePuzzle();
-        const sudoku = new Sudoku();
-        sudoku.generate("easy");
-
-        expect(sudoku.check(0, 0, 5)).toBe(true);
-        expect(sudoku.check(0, 0, 3)).toBe(false);
-    });
-
-    it("should return empty array when there are no conflicts", () => {
-        spyGeneratePuzzle();
-        const sudoku = new Sudoku();
-        sudoku.generate("easy");
-
-        // (0, 2) 是空格，填入 4（正確答案），同行/列/宮沒有 4
-        const conflicts = sudoku.findConflicts(0, 2, 4);
-
-        expect(conflicts).toEqual([]);
-    });
-
-    it("should return row conflicts when same number exists in the row", () => {
-        spyGeneratePuzzle();
-        const sudoku = new Sudoku();
-        sudoku.generate("easy");
-
-        // (0, 2) 是空格，填入 5 → 與 (0, 0) 的 clue=5 衝突
-        const conflicts = sudoku.findConflicts(0, 2, 5);
-
-        expect(conflicts).toContainEqual({ row: 0, column: 0 });
-    });
-
-    it("should return column conflicts when same number exists in the column", () => {
-        spyGeneratePuzzle();
-        const sudoku = new Sudoku();
-        sudoku.generate("easy");
-
-        // (1, 1) 是空格，填入 9 → 與 (2, 1) 的 clue=9 衝突
-        const conflicts = sudoku.findConflicts(1, 1, 9);
-
-        expect(conflicts).toContainEqual({ row: 2, column: 1 });
-    });
-
-    it("should return box conflicts when same number exists in the box", () => {
-        spyGeneratePuzzle();
-        const sudoku = new Sudoku();
-        sudoku.generate("easy");
-
-        // (0, 2) 是空格，填入 6 → 與同宮 (1, 0) 的 clue=6 衝突
-        const conflicts = sudoku.findConflicts(0, 2, 6);
-
-        expect(conflicts).toContainEqual({ row: 1, column: 0 });
-    });
-
-    it("should return all conflicts across row, column, and box", () => {
-        spyGeneratePuzzle();
-        const sudoku = new Sudoku();
-        sudoku.generate("easy");
-
-        // (1, 1) 是空格，填入 9
-        // 行衝突：(1, 4) clue=9
-        // 列衝突：(2, 1) clue=9
-        const conflicts = sudoku.findConflicts(1, 1, 9);
-
-        expect(conflicts).toContainEqual({ row: 1, column: 4 });
-        expect(conflicts).toContainEqual({ row: 2, column: 1 });
-        expect(conflicts).toHaveLength(2);
-    });
-
     it("should allow inputting a number into a slot cell", () => {
         spyGeneratePuzzle();
         const sudoku = new Sudoku();
@@ -314,29 +247,39 @@ describe("Sudoku", () => {
             expect(conflicts).toEqual([]);
         });
 
-        it('should return conflict coordinates for row duplicates', () => {
+        it("should return only the player cell for a clue duplicate", () => {
             const sudoku = createKnownSudoku();
 
-            // (0,0) clue=5，在 (0,2) 填入 5 → 行衝突
+            // (0,0) is the clue 5; 5 at (0,2) repeats it in row 0
             sudoku.fill(0, 2, 5);
 
             const conflicts = sudoku.checkAllConflicts();
 
-            expect(conflicts).toContainEqual({ row: 0, column: 0 });
-            expect(conflicts).toContainEqual({ row: 0, column: 2 });
+            expect(conflicts).toEqual([{ row: 0, column: 2 }]);
         });
 
         it('should return conflicts for column and box duplicates', () => {
             const sudoku = createKnownSudoku();
 
-            // (2,1) clue=9，在 (1,1) 填入 9 → 列衝突 + (1,4) clue=9 行衝突
+            // 9 at (1,1) repeats the clue (2,1) in column 1 and box 0, and the clue (1,4) in row 1
             sudoku.fill(1, 1, 9);
 
             const conflicts = sudoku.checkAllConflicts();
 
-            expect(conflicts).toContainEqual({ row: 1, column: 1 });
-            expect(conflicts).toContainEqual({ row: 2, column: 1 });
-            expect(conflicts).toContainEqual({ row: 1, column: 4 });
+            expect(conflicts).toEqual([{ row: 1, column: 1 }]);
+        });
+
+        it("should return both player cells when two entries repeat", () => {
+            const sudoku = createKnownSudoku();
+
+            sudoku.fill(0, 2, 4);
+            sudoku.fill(0, 3, 4);
+
+            const conflicts = sudoku.checkAllConflicts();
+
+            expect(conflicts).toHaveLength(2);
+            expect(conflicts).toContainEqual({ row: 0, column: 2 });
+            expect(conflicts).toContainEqual({ row: 0, column: 3 });
         });
     });
 
@@ -437,32 +380,142 @@ describe("Sudoku", () => {
         });
     });
 
-    describe("revealCellWithTechnique", () => {
-        it("should fill a cell using the technique solver and return the step used", () => {
+    describe("planRevealHint", () => {
+        const snapshotBoard = (sudoku: Sudoku) =>
+            sudoku.puzzle.map(row => row.map(cell => ({ entry: cell.entry, notes: [...cell.notes] })));
+
+        it("planRevealHint should point out the first wrong entry in reading order", () => {
             const sudoku = createKnownSudoku();
+            sudoku.fill(4, 1, 9); // wrong, answer is 2
+            sudoku.fill(1, 1, 1); // wrong, answer is 7
+            sudoku.toggleNote(0, 2, 4);
+            const before = snapshotBoard(sudoku);
 
-            const outcome = sudoku.revealCellWithTechnique();
+            const plan = sudoku.planRevealHint();
 
-            expect(outcome).not.toBeNull();
-            if (!outcome) return;
-            expect(outcome.fallback).toBe(false);
-            expect(outcome.step).not.toBeNull();
-            expect(outcome.value).toBe(knownAnswer[outcome.cell.row][outcome.cell.column]);
-            expect(sudoku.puzzle[outcome.cell.row][outcome.cell.column].entry).toBe(outcome.value);
+            expect(plan).toEqual({ kind: "wrongEntry", cell: { row: 1, column: 1 } });
+            expect(snapshotBoard(sudoku)).toEqual(before);
         });
 
-        it("should fallback to random reveal when the solver cannot find an assignment", () => {
+        it("planRevealHint should return the steps to the next assignment when there are no errors", () => {
             const sudoku = createKnownSudoku();
-            vi.spyOn(TechniqueSolver.prototype, "nextAssignment").mockReturnValue(null);
+            sudoku.fill(0, 2, 4);
 
-            const outcome = sudoku.revealCellWithTechnique();
+            const plan = sudoku.planRevealHint();
 
-            expect(outcome).not.toBeNull();
-            if (!outcome) return;
-            expect(outcome.fallback).toBe(true);
-            expect(outcome.step).toBeNull();
-            expect(outcome.value).toBe(knownAnswer[outcome.cell.row][outcome.cell.column]);
-            expect(sudoku.puzzle[outcome.cell.row][outcome.cell.column].entry).toBe(outcome.value);
+            expect(plan.kind).toBe("steps");
+            if (plan.kind !== "steps") return;
+            const lastStep = plan.steps[plan.steps.length - 1].step;
+            expect(lastStep.assignments[0]).toEqual({ cell: plan.target, digit: plan.digit });
+            expect(plan.digit).toBe(knownAnswer[plan.target.row][plan.target.column]);
+            expect(plan.steps[0].candidatesBefore[0][2]).toEqual([]);
+            expect(plan.steps[0].candidatesBefore[0][0]).toEqual([]);
+        });
+
+        it("planRevealHint should record the candidates before each step", () => {
+            const sudoku = createMultiStepSudoku();
+
+            const plan = sudoku.planRevealHint();
+
+            expect(plan.kind).toBe("steps");
+            if (plan.kind !== "steps") return;
+            expect(plan.steps.length).toBeGreaterThan(1);
+            const [first, second] = plan.steps;
+            for (const cell of first.step.focus) {
+                expect(first.candidatesBefore[cell.row][cell.column].length).toBeGreaterThan(0);
+            }
+            const eliminated = first.step.eliminations[0];
+            const { row, column } = eliminated.cell;
+            expect(first.candidatesBefore[row][column]).toContain(eliminated.digit);
+            expect(second.candidatesBefore[row][column]).not.toContain(eliminated.digit);
+        });
+
+        it("planRevealHint should ignore the player's notes", () => {
+            const clean = createKnownSudoku();
+            const noisy = createKnownSudoku();
+            noisy.toggleNote(0, 2, 1);
+            noisy.toggleNote(0, 2, 9);
+            noisy.toggleNote(0, 3, 2);
+
+            expect(noisy.planRevealHint()).toEqual(clean.planRevealHint());
+        });
+
+        it("planRevealHint should return noTechnique when the solver is stuck", () => {
+            const sudoku = createKnownSudoku();
+            vi.spyOn(TechniqueSolver.prototype, "stepsToNextAssignment").mockReturnValue([]);
+
+            expect(sudoku.planRevealHint()).toEqual({ kind: "noTechnique" });
+        });
+
+        it("planRevealHint should return solved when no cell is left to fill", () => {
+            const sudoku = createKnownSudoku();
+            for (let row = 0; row < 9; row++) {
+                for (let column = 0; column < 9; column++) {
+                    if (knownPuzzle[row][column] === 0) sudoku.fill(row, column, knownAnswer[row][column]);
+                }
+            }
+
+            expect(sudoku.planRevealHint()).toEqual({ kind: "solved" });
+        });
+    });
+
+    describe("applyRevealHint", () => {
+        it("applyRevealHint should fill the target and only delete eliminated candidates from notes", () => {
+            const sudoku = createKnownSudoku();
+            sudoku.toggleNote(0, 3, 2);
+            sudoku.toggleNote(0, 3, 7);
+            sudoku.toggleNote(2, 0, 4);
+            sudoku.toggleNote(2, 0, 2);
+
+            sudoku.applyRevealHint(
+                { row: 0, column: 2 },
+                4,
+                [
+                    { cell: { row: 0, column: 3 }, digit: 2 },
+                    { cell: { row: 2, column: 0 }, digit: 7 }, // not in the notes
+                    { cell: { row: 1, column: 1 }, digit: 3 }, // no notes at all
+                ],
+                { autoRemoveNotes: false },
+            );
+
+            expect(sudoku.puzzle[0][2].entry).toBe(4);
+            expect(sudoku.puzzle[0][3].notes).toEqual([7]);
+            expect(sudoku.puzzle[2][0].notes).toEqual([4, 2]);
+            expect(sudoku.puzzle[1][1].notes).toEqual([]);
+        });
+
+        it("applyRevealHint should honour autoRemoveNotes", () => {
+            const build = () => {
+                const sudoku = createKnownSudoku();
+                sudoku.toggleNote(0, 3, 4); // same row
+                sudoku.toggleNote(1, 2, 4); // same column
+                sudoku.toggleNote(2, 0, 4); // same box
+                return sudoku;
+            };
+
+            const enabled = build();
+            enabled.applyRevealHint({ row: 0, column: 2 }, 4, [], { autoRemoveNotes: true });
+            expect(enabled.puzzle[0][3].notes).toEqual([]);
+            expect(enabled.puzzle[1][2].notes).toEqual([]);
+            expect(enabled.puzzle[2][0].notes).toEqual([]);
+
+            const disabled = build();
+            disabled.applyRevealHint({ row: 0, column: 2 }, 4, [], { autoRemoveNotes: false });
+            expect(disabled.puzzle[0][3].notes).toEqual([4]);
+            expect(disabled.puzzle[1][2].notes).toEqual([4]);
+            expect(disabled.puzzle[2][0].notes).toEqual([4]);
+        });
+
+        it("undo after applyRevealHint should restore the board and notes", () => {
+            const sudoku = createKnownSudoku();
+            sudoku.toggleNote(0, 3, 2);
+            sudoku.toggleNote(0, 3, 4);
+
+            sudoku.applyRevealHint({ row: 0, column: 2 }, 4, [{ cell: { row: 0, column: 3 }, digit: 2 }]);
+            sudoku.undo();
+
+            expect(sudoku.puzzle[0][2].entry).toBe(0);
+            expect(sudoku.puzzle[0][3].notes).toEqual([2, 4]);
         });
     });
 

@@ -4,9 +4,10 @@ import { SudokuBoard } from "@/domain/board/SudokuBoard";
 import { BoardHistory } from "@/domain/game/BoardHistory";
 import { Conflict, ConflictDetector } from "@/domain/game/ConflictDetector";
 import { HintTracker } from "@/domain/game/HintTracker";
-import { RevealOutcome } from "@/domain/game/RevealOutcome";
+import { RevealHintPlan, RevealHintStep } from "@/domain/game/RevealHint";
 import { Difficulty, SudokuGenerator } from "@/domain/generator/SudokuGenerator";
 import { BoardState } from "@/domain/solver/BoardState";
+import { CellReference, Elimination } from "@/domain/solver/SolveStep";
 import { TechniqueSolver } from "@/domain/solver/TechniqueSolver";
 
 export interface CompletedCells {
@@ -160,10 +161,6 @@ export class Sudoku {
         }
     }
 
-    public check(row: number, column: number, value: number): boolean {
-        return this._answer[row][column] === value;
-    }
-
     public autoNotes(): void {
         this.snapshot();
         const currentBoard = this.getCurrentBoard();
@@ -185,25 +182,43 @@ export class Sudoku {
         return this.conflictDetector.findAllConflicts(this._puzzle, this.getCurrentBoard());
     }
 
-    public revealCellWithTechnique(): RevealOutcome | null {
-        const state = BoardState.fromPuzzle(this.buildEffectiveNumberBoard());
-        const step = new TechniqueSolver().nextAssignment(state);
-        if (step !== null && step.assignments.length > 0) {
-            const { cell, digit } = step.assignments[0];
-            this.snapshot();
-            this._puzzle[cell.row][cell.column].entry = digit;
-            this.removeNoteFromPeers(cell.row, cell.column, digit);
-            return { cell, value: digit, step, fallback: false };
-        }
+    public planRevealHint(): RevealHintPlan {
+        const errors = this.checkErrors();
+        if (errors.length > 0) return { kind: "wrongEntry", cell: errors[0] };
 
-        const target = this.revealRandomCell();
-        if (target === null) return null;
-        return {
-            cell: { row: target.row, column: target.column },
-            value: this._answer[target.row][target.column],
-            step: null,
-            fallback: true,
-        };
+        const effectiveBoard = this.buildEffectiveNumberBoard();
+        if (effectiveBoard.every(rowValues => rowValues.every(value => value > 0))) return { kind: "solved" };
+
+        const initialState = BoardState.fromPuzzle(effectiveBoard);
+        const solveSteps = new TechniqueSolver().stepsToNextAssignment(initialState);
+        if (solveSteps.length === 0) return { kind: "noTechnique" };
+
+        const steps: RevealHintStep[] = [];
+        let currentState = initialState;
+        for (const step of solveSteps) {
+            steps.push({ step, candidatesBefore: currentState.candidateGrid() });
+            for (const elimination of step.eliminations) {
+                currentState = currentState.eliminate(elimination.cell.row, elimination.cell.column, elimination.digit);
+            }
+        }
+        const { cell, digit } = solveSteps[solveSteps.length - 1].assignments[0];
+        return { kind: "steps", steps, target: cell, digit };
+    }
+
+    public applyRevealHint(
+        target: CellReference,
+        digit: number,
+        eliminations: Elimination[],
+        options?: { autoRemoveNotes?: boolean },
+    ): void {
+        this.snapshot();
+        this._puzzle[target.row][target.column].entry = digit;
+        if (options?.autoRemoveNotes ?? true) {
+            this.removeNoteFromPeers(target.row, target.column, digit);
+        }
+        for (const elimination of eliminations) {
+            this._puzzle[elimination.cell.row][elimination.cell.column].removeNote(elimination.digit);
+        }
     }
 
     private buildEffectiveNumberBoard(): number[][] {
@@ -247,10 +262,6 @@ export class Sudoku {
 
     public checkErrors(): Conflict[] {
         return this.conflictDetector.findErrors(this._puzzle, this._answer);
-    }
-
-    public findConflicts(row: number, column: number, value: number): Conflict[] {
-        return this.conflictDetector.findConflicts(this.getCurrentBoard(), row, column, value);
     }
 
     private snapshot(): void {

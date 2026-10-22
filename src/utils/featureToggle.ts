@@ -1,8 +1,6 @@
 type FeatureEnvironment = 'all' | 'develop'
 
-const features: Partial<Record<string, FeatureEnvironment>> = {
-    walkthroughTestButtons: 'develop',
-}
+const features: Partial<Record<string, FeatureEnvironment>> = {}
 
 export const isDevelop = (): boolean =>
     import.meta.env.VITE_APP_ENV === 'develop'

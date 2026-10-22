@@ -1,4 +1,4 @@
-import type { AppLocale } from "@/application/SettingsStorage";
+import type { AppLocale } from "@/application/settings/SettingsStorage";
 import { i18n } from "@/presentation/i18n";
 
 const MILLISECONDS_PER_DAY = 86400000;

@@ -1,8 +1,8 @@
 import type { InjectionKey } from "vue";
-import type { ColorThemeId } from "@/application/SettingsStorage";
+import type { LauncherIconKey } from "@/theme/launcherIcon";
 
 export interface IconService {
-    setIcon(themeId: ColorThemeId): Promise<void>;
+    setIcon(icon: LauncherIconKey): Promise<void>;
 }
 
 export const ICON_KEY: InjectionKey<IconService> = Symbol("IconService");

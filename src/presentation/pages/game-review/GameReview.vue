@@ -1,93 +1,140 @@
 <template>
-    <div class="flex flex-col gap-5 px-5 bg-background overflow-y-auto h-dvh">
-        <div class="flex items-center justify-between sticky top-0 bg-background pt-6 pb-3 z-10">
-            <button
-                class="flex items-center gap-2 cursor-pointer"
-                data-testid="review-back-button"
-                @click="goBack"
+    <div
+        class="flex flex-col h-full overflow-hidden bg-background"
+        data-skin="page"
+    >
+        <!-- The step panel stays pinned at the bottom; the header, summary and board scroll above it -->
+        <div
+            ref="scrollArea"
+            class="flex-1 min-h-0 overflow-y-auto overflow-x-hidden overscroll-y-contain flex flex-col gap-4 px-5 pb-4"
+            data-testid="review-scroll-area"
+        >
+            <div
+                ref="header"
+                class="flex items-center justify-between sticky top-0 bg-background -mx-5 px-5 pt-6 pb-1 z-10"
+                data-skin="page-header"
+                data-testid="review-header"
             >
-                <ChevronLeft
-                    :size="24"
-                    class="text-foreground"
-                />
-                <span class="text-foreground text-base font-medium">{{ t("common.back") }}</span>
-            </button>
-            <span class="text-foreground text-lg font-semibold">{{ t("review.title") }}</span>
-            <div class="w-15" />
-        </div>
-
-        <div class="flex items-center justify-between bg-card rounded-xl py-3 px-4 shadow-card-sm">
-            <div class="flex items-center gap-3">
-                <div
-                    :class="game.completed
-                        ? 'bg-primary-light text-primary'
-                        : 'bg-accent/10 text-accent'"
-                    class="w-9 h-9 rounded-icon flex items-center justify-center"
+                <button
+                    class="flex items-center gap-2 cursor-pointer"
+                    data-testid="review-back-button"
+                    @click="goBack"
                 >
-                    <Trophy
-                        v-if="game.completed"
-                        :size="18"
+                    <ChevronLeft
+                        :size="24"
+                        class="text-foreground"
                     />
-                    <X
-                        v-else
-                        :size="18"
-                    />
+                    <span class="text-foreground text-base font-medium">{{ t("common.back") }}</span>
+                </button>
+                <span class="text-foreground text-lg font-semibold">{{ t("review.title") }}</span>
+                <div class="w-15" />
+            </div>
+
+            <div class="flex items-center justify-between bg-card rounded-xl py-2 px-4 shadow-card-sm">
+                <div class="flex items-center gap-3">
+                    <div
+                        :class="game.completed
+                            ? 'bg-primary-light text-primary'
+                            : 'bg-accent/10 text-accent'"
+                        class="w-9 h-9 rounded-icon flex items-center justify-center"
+                    >
+                        <Trophy
+                            v-if="game.completed"
+                            :size="18"
+                        />
+                        <X
+                            v-else
+                            :size="18"
+                        />
+                    </div>
+                    <div class="flex flex-col gap-0.5">
+                        <span class="text-sm font-semibold text-foreground">
+                            {{ difficultyLabel(game.difficulty) }}
+                        </span>
+                        <span class="text-[11px] text-foreground-muted">
+                            {{ formatDate(game.date, appLocale) }}
+                        </span>
+                    </div>
                 </div>
-                <div class="flex flex-col gap-0.5">
-                    <span class="text-sm font-semibold text-foreground">
-                        {{ difficultyLabel(game.difficulty) }}
+                <div class="flex flex-col items-end gap-0.5">
+                    <span
+                        :class="game.completed ? 'text-primary' : 'text-accent'"
+                        class="text-base font-semibold font-mono"
+                    >
+                        {{ game.completed ? formatTime(game.elapsedSeconds) : t("statistics.gaveUp") }}
                     </span>
-                    <span class="text-[11px] text-foreground-muted">
-                        {{ formatDate(game.date, appLocale) }}
+                    <span class="flex items-center gap-0.75 text-[11px] font-medium text-foreground-muted font-mono">
+                        <Lightbulb :size="11" />
+                        {{ game.hintsUsed }}
                     </span>
                 </div>
             </div>
-            <div class="flex flex-col items-end gap-0.5">
-                <span
-                    :class="game.completed ? 'text-primary' : 'text-accent'"
-                    class="text-base font-semibold font-mono"
-                >
-                    {{ game.completed ? formatTime(game.elapsedSeconds) : t("statistics.gaveUp") }}
-                </span>
-                <span class="flex items-center gap-0.75 text-[11px] font-medium text-foreground-muted font-mono">
-                    <Lightbulb :size="11" />
-                    {{ game.hintsUsed }}
-                </span>
-            </div>
-        </div>
 
-        <div class="bg-card rounded-2xl shadow-card-lg p-2 w-full pointer-events-none">
-            <div class="flex flex-col border-3 border-foreground/20 rounded-xl">
+            <!-- The board reaches into the page gutter from inside this wrapper: as a direct child it would
+                 count the scroll area's end padding past it as sideways overflow -->
+            <div class="flex flex-col">
+                <!-- Everything else here (header, summary, gaps, panel and the room under it) takes 326px,
+                     within the 331px the shared cap leaves, so a capped board ends 16px or more above the panel -->
                 <div
-                    v-for="(row, rowIndex) in board"
-                    :key="rowIndex"
-                    class="flex"
+                    data-skin="board"
+                    class="bg-card rounded-2xl shadow-card-lg p-2 self-center w-[calc(100%+1.5rem)] max-w-board-fit pointer-events-none"
+                    data-testid="review-board"
                 >
-                    <Cell
-                        v-for="(puzzleCell, columnIndex) in row"
-                        :key="`cell-${rowIndex}-${columnIndex}`"
-                        :column="columnIndex"
-                        :puzzle-cell="puzzleCell"
-                        :row="rowIndex"
-                        :selected="isActiveCell(rowIndex, columnIndex)"
-                        :highlight-same-digit="false"
-                    />
+                    <div
+                        ref="boardGrid"
+                        class="flex flex-col border-3 border-foreground/20 rounded-xl"
+                    >
+                        <div
+                            v-for="(row, rowIndex) in board"
+                            :key="rowIndex"
+                            class="grid grid-cols-9"
+                        >
+                            <Cell
+                                v-for="(puzzleCell, columnIndex) in row"
+                                :key="`cell-${rowIndex}-${columnIndex}`"
+                                :column="columnIndex"
+                                :data-testid="`review-cell-${rowIndex}-${columnIndex}`"
+                                :highlight-same-digit="false"
+                                :interactive="false"
+                                :puzzle-cell="puzzleCell"
+                                :row="rowIndex"
+                                :selected="isChanged(rowIndex, columnIndex)"
+                            />
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="bg-card rounded-lg py-2.5 px-4 shadow-card-sm min-h-9 flex items-center gap-2">
-            <template v-if="description && stepIcon">
-                <component
-                    :is="stepIcon"
-                    :size="16"
-                    class="text-foreground-muted shrink-0"
-                />
+        <div
+            class="shrink-0 px-5 pb-3"
+            data-testid="review-panel-dock"
+        >
+            <StepPlaybackPanel
+                :label="t('review.title')"
+                :play-state="playState"
+                :step-index="currentStep"
+                compact-explanation
+                :total-steps="positionCount"
+                test-id-prefix="review"
+                @go-to="goToStep"
+                @next="next"
+                @previous="previous"
+                @toggle-play="togglePlay"
+            >
+                <template #tag>
+                    <StepTag
+                        :icon="tag.icon"
+                        :label="tag.label"
+                        :step-key="currentStep"
+                        :strong="stage === 'final'"
+                        test-id="review-action"
+                    />
+                </template>
                 <i18n-t
                     :keypath="description.keypath"
-                    tag="span"
                     scope="global"
-                    class="text-sm text-foreground"
+                    tag="span"
                 >
                     <template #value>
                         <span class="font-semibold">{{ description.params.value }}</span>
@@ -99,54 +146,28 @@
                         <span class="font-semibold">{{ description.params.column }}</span>
                     </template>
                 </i18n-t>
-            </template>
-            <span
-                v-else
-                class="text-sm text-foreground-muted"
-            >
-                {{ t("review.initialBoard") }}
-            </span>
-        </div>
-
-        <ProgressBar
-            :current-step="currentStep"
-            :total-steps="totalSteps"
-            :play-state="playState"
-            testid-prefix="review-"
-            @seek="goToStep"
-        />
-
-        <div class="pb-8">
-            <PlaybackControls
-                :can-go-next="currentStep < totalSteps"
-                :can-go-prev="currentStep > 0"
-                :is-playing="isPlaying"
-                testid-prefix="review-"
-                @first="goToFirst"
-                @prev="previous"
-                @toggle-play="togglePlay"
-                @next="next"
-                @last="goToLast"
-            />
+            </StepPlaybackPanel>
         </div>
     </div>
 </template>
 
 <script lang="ts" setup>
-import { computed } from "vue";
+import { computed, useTemplateRef, watch, type Component } from "vue";
 import { useRouter } from "vue-router";
-import { ChevronLeft, Eraser, Lightbulb, Pencil, Sparkles, StickyNote, Trophy, Undo2, X } from "lucide-vue-next";
+import { ChevronLeft, Eraser, LayoutGrid, Lightbulb, Pencil, Sparkles, StickyNote, Trophy, Undo2, X } from "lucide-vue-next";
 import { ROUTER_PATH } from "@/router";
+import type { GameStepAction } from "@/domain/game/GameStep";
 import { useStatisticsStore } from "@/stores/statisticsStore";
 import { formatTime } from "@/utils/formatTime";
 import { useI18n } from "vue-i18n";
 import { useAppLocale } from "@/presentation/i18n/useAppLocale";
 import { formatDate } from "@/presentation/i18n/formatDate";
-import { useDifficultyLabel } from "@/presentation/labels/difficultyLabels";
-import Cell from "@/presentation/pages/game/components/Cell.vue";
-import PlaybackControls from "@/presentation/components/playback/PlaybackControls.vue";
-import ProgressBar from "@/presentation/components/playback/ProgressBar.vue";
+import { useDifficultyLabel } from "@/presentation/i18n/difficultyLabels";
+import Cell from "@/presentation/components/board-cell/Cell.vue";
+import StepPlaybackPanel from "@/presentation/components/step-presentation/StepPlaybackPanel.vue";
+import StepTag from "@/presentation/components/step-presentation/StepTag.vue";
 import { useGameReview } from "@/presentation/pages/game-review/useGameReview";
+import { revealInScroller } from "@/presentation/pages/game-review/revealInScroller";
 
 const props = defineProps<{
     index: string;
@@ -166,25 +187,20 @@ if (!replayData) {
 
 const {
     currentStep,
-    totalSteps,
-    isAtFinalStep,
+    positionCount,
+    stage,
     board,
     gameStep,
+    changedCell,
     description,
-    isPlaying,
+    playState,
     next,
     previous,
-    goToFirst,
-    goToLast,
     goToStep,
     togglePlay,
-    stopPlay,
-    startPlay,
 } = useGameReview(replayData ?? { initialBoard: [], steps: [] }, game.completed);
 
-const playState = { isPlaying, stopPlay, startPlay };
-
-const ACTION_ICONS: Record<string, typeof Pencil> = {
+const ACTION_ICONS: Record<GameStepAction, Component> = {
     fill: Pencil,
     erase: Eraser,
     toggleNote: StickyNote,
@@ -193,20 +209,33 @@ const ACTION_ICONS: Record<string, typeof Pencil> = {
     undo: Undo2,
 };
 
-const stepIcon = computed(() => {
-    if (isAtFinalStep.value) {
-        return game.completed ? Trophy : X;
+const tag = computed((): { label: string; icon: Component } => {
+    if (stage.value === "final") {
+        return game.completed
+            ? { label: t("review.stages.completed"), icon: Trophy }
+            : { label: t("review.stages.gaveUp"), icon: X };
     }
     const step = gameStep.value;
-    if (!step) return null;
-    return ACTION_ICONS[step.action];
+    if (stage.value === "initial" || step === null) return { label: t("review.stages.initial"), icon: LayoutGrid };
+    return { label: t(`review.actions.${step.action}`), icon: ACTION_ICONS[step.action] };
 });
 
-const isActiveCell = (row: number, column: number): boolean => {
-    const step = gameStep.value;
-    if (!step) return false;
-    return step.row === row && step.column === column;
+const isChanged = (row: number, column: number): boolean => {
+    const cell = changedCell.value;
+    return cell !== null && cell.row === row && cell.column === column;
 };
+
+// Each step brings the cell it changed into view above the pinned panel. Steps that touch no single
+// cell (auto notes, undo, the first and last boards) leave the scroll where the player put it.
+const scrollArea = useTemplateRef<HTMLElement>("scrollArea");
+const header = useTemplateRef<HTMLElement>("header");
+const boardGrid = useTemplateRef<HTMLElement>("boardGrid");
+watch(currentStep, () => {
+    const cell = changedCell.value;
+    const cellElement = cell === null ? null : boardGrid.value?.children[cell.row]?.children[cell.column];
+    if (!(cellElement instanceof HTMLElement) || !scrollArea.value) return;
+    revealInScroller(scrollArea.value, cellElement, header.value?.getBoundingClientRect().bottom ?? 0);
+}, { flush: "post" });
 
 const difficultyLabel = useDifficultyLabel();
 

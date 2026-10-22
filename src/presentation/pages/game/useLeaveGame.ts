@@ -1,13 +1,14 @@
 import { type Ref, ref } from "vue";
 import { onBeforeRouteLeave, useRouter } from "vue-router";
-import type { Difficulty } from "@/domain";
+import type { Difficulty } from "@/domain/generator/SudokuGenerator";
 import type { Sudoku } from "@/domain/game/Sudoku";
-import { GameStateConverter } from "@/application/GameState";
+import { GameStateConverter } from "@/application/game/GameState";
 import { useGameStore } from "@/stores/gameStore";
 import { useStatisticsStore } from "@/stores/statisticsStore";
 import type { GameReplayData } from "@/application/statistics/StatisticsRepository";
 import { provideLeaveDialog } from "@/presentation/pages/game/components/useLeaveDialog";
 import type { AnalyticsService } from "@/application/analytics/AnalyticsService";
+import { computeAbandonProgress } from "@/application/analytics/computeAbandonProgress";
 
 interface LeaveGameOptions {
     sudoku: Sudoku;
@@ -16,21 +17,13 @@ interface LeaveGameOptions {
     getElapsedSeconds: () => number;
     getReplayData: () => GameReplayData;
     analytics?: AnalyticsService;
+    /** Runs once leaving is confirmed, before the game is saved or given up. */
+    onLeave?: () => void;
+    /** Closes the topmost other overlay (hint menu, hint panel); returns whether one was open. */
+    dismissOverlay?: () => boolean;
 }
 
-const TOTAL_CELLS = 81;
-
-const computeProgressPct = (sudoku: Sudoku): number => {
-    let filled = 0;
-    for (const row of sudoku.puzzle) {
-        for (const cell of row) {
-            if (cell.isClue || cell.hasEntry) filled += 1;
-        }
-    }
-    return Math.round((filled / TOTAL_CELLS) * 100);
-};
-
-export const useLeaveGame = ({ sudoku, difficulty, completed, getElapsedSeconds, getReplayData, analytics }: LeaveGameOptions) => {
+export const useLeaveGame = ({ sudoku, difficulty, completed, getElapsedSeconds, getReplayData, analytics, onLeave, dismissOverlay }: LeaveGameOptions) => {
     const router = useRouter();
     const leaveDialog = provideLeaveDialog();
     const leavingConfirmed = ref(false);
@@ -39,6 +32,7 @@ export const useLeaveGame = ({ sudoku, difficulty, completed, getElapsedSeconds,
 
     const showLeaveDialog = async () => {
         const result = await leaveDialog.open();
+        if (result === "save" || result === "giveUp") onLeave?.();
         if (result === "save") {
             const state = GameStateConverter.fromSudoku(sudoku.raw(), {
                 difficulty: difficulty.value,
@@ -50,10 +44,13 @@ export const useLeaveGame = ({ sudoku, difficulty, completed, getElapsedSeconds,
             leavingConfirmed.value = true;
             router.back();
         } else if (result === "giveUp") {
+            const { progressPct, correctPct, incorrectPct } = computeAbandonProgress(sudoku.puzzle, sudoku.answer);
             void analytics?.logEvent({
                 name: "game_abandon",
                 difficulty: difficulty.value,
-                progress_pct: computeProgressPct(sudoku),
+                progress_pct: progressPct,
+                correct_pct: correctPct,
+                incorrect_pct: incorrectPct,
             });
             statisticsStore.recordGame({
                 difficulty: difficulty.value,
@@ -70,6 +67,12 @@ export const useLeaveGame = ({ sudoku, difficulty, completed, getElapsedSeconds,
 
     onBeforeRouteLeave(() => {
         if (completed.value || leavingConfirmed.value) return true;
+        // Back closes the topmost overlay first; only a bare game screen asks to leave.
+        if (leaveDialog.visible.value) {
+            leaveDialog.close("cancel");
+            return false;
+        }
+        if (dismissOverlay?.()) return false;
         void showLeaveDialog();
         return false;
     });

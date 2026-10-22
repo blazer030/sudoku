@@ -1,5 +1,5 @@
 import localforage from "localforage";
-import type { GameState } from "@/application/GameState";
+import type { GameState } from "@/application/game/GameState";
 import type { GameRepository } from "@/application/game/GameRepository";
 
 const SAVE_KEY = "saved-game";

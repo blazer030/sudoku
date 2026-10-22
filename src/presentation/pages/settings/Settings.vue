@@ -1,6 +1,12 @@
 <template>
-    <div class="flex flex-col gap-5 h-dvh px-5 bg-background overflow-y-auto">
-        <div class="flex items-center justify-between sticky top-0 bg-background pt-6 pb-3 z-10">
+    <div
+        class="flex flex-col gap-5 h-full px-5 pb-6 bg-background overflow-y-auto"
+        data-skin="page page-ruled"
+    >
+        <div
+            class="flex items-center justify-between sticky top-0 bg-background pt-6 pb-3 z-10"
+            data-skin="page-header"
+        >
             <button
                 class="flex items-center gap-2 cursor-pointer"
                 data-testid="back-button"
@@ -16,128 +22,184 @@
             <div class="w-15" />
         </div>
 
-        <div class="flex flex-col gap-2">
-            <span class="text-foreground-muted text-xs font-semibold tracking-wider uppercase px-1">{{ t("settings.language.label") }}</span>
-            <div
-                class="flex h-12 w-full bg-card rounded-button shadow-card p-1"
-                data-testid="language-switcher"
-            >
-                <button
-                    v-for="option in languageOptions"
-                    :key="option.value"
-                    :aria-pressed="settingsStore.language === option.value"
-                    :class="settingsStore.language === option.value
-                        ? 'bg-primary text-white font-semibold shadow-primary-sm'
-                        : 'text-foreground-secondary font-medium hover:bg-foreground/5'"
-                    :data-testid="`language-${option.value}`"
-                    class="flex-1 h-full rounded-icon flex items-center justify-center text-sm transition-all cursor-pointer"
-                    @click="settingsStore.setLanguage(option.value)"
-                >
-                    {{ option.label }}
-                </button>
-            </div>
-        </div>
-
-        <div class="flex flex-col gap-2">
-            <span class="text-foreground-muted text-xs font-semibold tracking-wider uppercase px-1">{{ t("settings.appearance") }}</span>
-            <div class="bg-card rounded-2xl px-4 py-4 shadow-card-sm flex flex-col">
-                <span class="text-foreground text-[15px] font-medium">{{ t("settings.colorTheme") }}</span>
-                <div class="grid grid-cols-6 gap-3 mt-3 justify-items-center">
-                    <button
-                        v-for="color in THEMES"
-                        :key="color.id"
-                        class="relative aspect-square w-full max-w-15 rounded-full cursor-pointer transition-all duration-200 overflow-hidden"
-                        :class="[
-                            color.id === settingsStore.colorTheme
-                                ? 'ring-2 ring-offset-2 ring-primary scale-110'
-                                : 'hover:scale-105',
-                        ]"
-                        :data-testid="`color-theme-${color.id}`"
-                        @click="settingsStore.setColorTheme(color.id)"
-                    >
-                        <div class="absolute inset-0 flex">
-                            <div
-                                class="w-1/2 h-full"
-                                :style="{ backgroundColor: color.primary }"
-                            />
-                            <div
-                                class="w-1/2 h-full"
-                                :style="{ backgroundColor: color.accent }"
-                            />
-                        </div>
-                        <div
-                            v-if="color.id === settingsStore.colorTheme"
-                            data-testid="color-theme-check"
-                            class="absolute inset-0 flex items-center justify-center"
-                        >
-                            <Check
-                                :size="18"
-                                class="text-white"
-                                :stroke-width="3"
-                            />
-                        </div>
-                    </button>
-                </div>
-
-                <button
-                    v-if="platform.isNative"
-                    class="flex items-center justify-between pt-4 mt-4 border-t border-border cursor-pointer w-full"
-                    data-testid="toggle-matchLauncherIconToTheme"
-                    @click="onToggleMatchIcon"
-                >
-                    <div class="flex flex-col gap-0.5">
-                        <span class="text-foreground text-[15px] font-medium text-left">{{ t("settings.matchLauncherIcon") }}</span>
-                        <span class="text-foreground-muted text-[13px] text-left">{{ t("settings.matchLauncherIconNote") }}</span>
-                    </div>
-                    <div
-                        class="relative w-11 h-6 rounded-full transition-colors duration-200 shrink-0 ml-4"
-                        :class="settingsStore.matchLauncherIconToTheme ? 'bg-primary' : 'bg-foreground-muted'"
-                    >
-                        <div
-                            class="absolute top-0.5 w-5 h-5 bg-white rounded-full shadow-card-sm transition-transform duration-200"
-                            :class="settingsStore.matchLauncherIconToTheme ? 'translate-x-5.5' : 'translate-x-0.5'"
-                        />
-                    </div>
-                </button>
-            </div>
-        </div>
-
-        <div class="flex flex-col gap-2">
-            <span class="text-foreground-muted text-xs font-semibold tracking-wider uppercase px-1">{{ t("settings.gameplay") }}</span>
-            <div class="bg-card rounded-2xl px-4 shadow-card-sm divide-y divide-border">
-                <button
+        <SettingsGroup
+            id="gameplay"
+            :icon="Gamepad2"
+            :title="t('settings.gameplay')"
+        >
+            <div class="grid grid-cols-2 gap-2">
+                <OptionTile
                     v-for="toggle in toggles"
                     :key="toggle.key"
-                    class="flex items-center justify-between py-3.5 cursor-pointer w-full"
+                    :class="{ 'col-span-2': toggle.wide }"
                     :data-testid="`toggle-${toggle.key}`"
-                    @click="toggle.setter(!toggle.value)"
+                    :description="toggle.description"
+                    :icon="toggle.icon"
+                    :label="toggle.label"
+                    :pressed="toggle.value"
+                    :wide="toggle.wide"
+                    @toggle="toggle.setter(!toggle.value)"
+                />
+            </div>
+        </SettingsGroup>
+
+        <SettingsGroup
+            id="appearance"
+            :icon="Palette"
+            :title="t('settings.appearance')"
+        >
+            <span class="text-foreground text-[15px] font-medium">{{ t("settings.style.label") }}</span>
+            <div class="grid grid-cols-3 gap-2 mt-3">
+                <button
+                    v-for="styleId in STYLE_IDS"
+                    :key="styleId"
+                    v-press
+                    data-skin="tile"
+                    :aria-pressed="styleId === settingsStore.style"
+                    :class="styleId === settingsStore.style ? 'border-primary' : 'border-border'"
+                    :data-testid="`style-option-${styleId}`"
+                    class="flex flex-col items-center gap-1.5 p-1.5 rounded-xl border-2 bg-card cursor-pointer"
+                    type="button"
+                    @click="onSelectStyle(styleId)"
                 >
-                    <div class="flex flex-col gap-0.5">
-                        <span class="text-foreground text-[15px] font-medium text-left">{{ toggle.label }}</span>
-                        <span class="text-foreground-muted text-[13px] text-left">{{ toggle.description }}</span>
-                    </div>
+                    <!-- Thumbnails stand for the style, not the current mode, so they always use the light palette -->
+                    <StyleThumbnail
+                        :palette="getPalette(styleId, rememberedThemeFor(styleId, settingsStore.colorThemeByStyle), 'light')"
+                        :style-id="styleId"
+                    />
+                    <span class="text-foreground text-xs font-medium text-center">{{ t(`settings.style.names.${styleId}`) }}</span>
+                </button>
+            </div>
+
+            <span class="text-foreground text-[15px] font-medium mt-5">{{ t("settings.colorTheme") }}</span>
+            <div class="grid grid-cols-6 gap-3 mt-3 justify-items-center">
+                <button
+                    v-for="swatch in swatches"
+                    :key="swatch.id"
+                    v-press
+                    :aria-label="t(`settings.colorThemes.${swatch.id}`)"
+                    :aria-pressed="swatch.id === settingsStore.colorTheme"
+                    :class="swatch.id === settingsStore.colorTheme ? 'ring-2 ring-offset-2 ring-offset-card ring-primary' : ''"
+                    :data-testid="`color-theme-${swatch.id}`"
+                    :style="{ backgroundColor: swatch.palette.primary }"
+                    class="relative aspect-square w-full max-w-15 rounded-full cursor-pointer overflow-hidden"
+                    type="button"
+                    @click="onSelectColorTheme(swatch.id)"
+                >
                     <div
-                        class="relative w-11 h-6 rounded-full transition-colors duration-200 shrink-0 ml-4"
-                        :class="toggle.value ? 'bg-primary' : 'bg-foreground-muted'"
+                        v-if="swatch.id === settingsStore.colorTheme"
+                        :style="{ color: swatch.palette['on-primary'] }"
+                        class="absolute inset-0 flex items-center justify-center"
+                        data-testid="color-theme-check"
                     >
-                        <div
-                            class="absolute top-0.5 w-5 h-5 bg-white rounded-full shadow-card-sm transition-transform duration-200"
-                            :class="toggle.value ? 'translate-x-5.5' : 'translate-x-0.5'"
+                        <Check
+                            :size="18"
+                            :stroke-width="3"
                         />
                     </div>
                 </button>
             </div>
-        </div>
 
-        <div
-            v-if="platform.isNative && donateStore.products.length > 0"
-            class="flex flex-col gap-2"
+            <span class="text-foreground text-[15px] font-medium mt-5">{{ t("settings.colorMode.label") }}</span>
+            <SegmentedControl
+                :model-value="settingsStore.appearance"
+                :options="appearanceOptions"
+                class="mt-3"
+                data-testid="appearance-switcher"
+                inset
+                test-id-prefix="appearance"
+                @update:model-value="settingsStore.setAppearance"
+            />
+
+            <OptionTile
+                v-if="platform.isNative"
+                :description="t('settings.matchLauncherIconNote')"
+                :icon="Smartphone"
+                :label="t('settings.matchLauncherIcon')"
+                :pressed="settingsStore.matchLauncherIconToTheme"
+                class="mt-5"
+                data-testid="toggle-matchLauncherIconToTheme"
+                wide
+                @toggle="onToggleMatchIcon"
+            />
+        </SettingsGroup>
+
+        <SettingsGroup
+            id="language"
+            :icon="Languages"
+            :title="t('settings.language.label')"
         >
-            <span class="text-foreground-muted text-xs font-semibold tracking-wider uppercase px-1">{{ t("settings.support") }}</span>
-            <div class="bg-card rounded-2xl px-4 shadow-card-sm">
+            <SegmentedControl
+                :model-value="settingsStore.language"
+                :options="languageOptions"
+                inset
+                data-testid="language-switcher"
+                test-id-prefix="language"
+                @update:model-value="settingsStore.setLanguage"
+            />
+        </SettingsGroup>
+
+        <SettingsGroup
+            id="data"
+            :icon="Database"
+            :title="t('settings.groups.data')"
+        >
+            <button
+                v-press
+                :disabled="!hasRecords"
+                class="flex items-center justify-center gap-2 w-full h-11 rounded-button text-danger disabled:text-foreground-muted cursor-pointer disabled:cursor-default"
+                data-testid="clear-records-button"
+                type="button"
+                @click="handleClearRecords"
+            >
+                <Trash2 :size="18" />
+                <span class="text-[15px] font-semibold">{{ t("settings.data.clearRecords") }}</span>
+            </button>
+        </SettingsGroup>
+
+        <SettingsGroup
+            id="about"
+            :icon="Info"
+            :title="t('settings.about')"
+        >
+            <div class="flex flex-col divide-y divide-border -my-1">
                 <button
-                    class="flex items-center justify-between py-3.5 cursor-pointer w-full"
+                    v-press:tint
+                    class="flex items-center justify-between h-13 px-1 cursor-pointer w-full"
+                    data-testid="version-link"
+                    type="button"
+                    @click="goToChangelog"
+                >
+                    <span class="text-foreground text-[15px] font-medium">{{ t("settings.version") }}</span>
+                    <span class="flex items-center gap-1.5">
+                        <span class="text-foreground-muted text-[15px]">{{ appVersion }}</span>
+                        <ChevronRight
+                            :size="18"
+                            class="text-foreground-muted"
+                        />
+                    </span>
+                </button>
+                <!-- Capacitor hands off-host navigation to the system browser, so no plugin is needed -->
+                <a
+                    v-press:tint
+                    :href="PRIVACY_POLICY_URL"
+                    class="flex items-center justify-between h-13 px-1 w-full"
+                    data-testid="privacy-policy-link"
+                    rel="noopener noreferrer"
+                    target="_blank"
+                >
+                    <span class="text-foreground text-[15px] font-medium">{{ t("settings.privacyPolicy") }}</span>
+                    <ExternalLink
+                        :size="18"
+                        class="text-foreground-muted"
+                    />
+                </a>
+                <button
+                    v-if="platform.isNative && donateStore.products.length > 0"
+                    v-press:tint
+                    class="flex items-center justify-between h-13 px-1 cursor-pointer w-full"
                     data-testid="donate-link"
+                    type="button"
                     @click="goToDonate"
                 >
                     <span class="text-foreground text-[15px] font-medium">{{ t("settings.donate") }}</span>
@@ -147,29 +209,11 @@
                     />
                 </button>
             </div>
-        </div>
-
-        <div class="flex flex-col gap-2">
-            <span class="text-foreground-muted text-xs font-semibold tracking-wider uppercase px-1">{{ t("settings.about") }}</span>
-            <div class="bg-card rounded-2xl px-4 shadow-card-sm">
-                <button
-                    class="flex items-center justify-between py-3.5 cursor-pointer w-full"
-                    data-testid="version-link"
-                    @click="goToChangelog"
-                >
-                    <span class="text-foreground text-[15px] font-medium">{{ t("settings.version") }}</span>
-                    <div class="flex items-center gap-1.5">
-                        <span class="text-foreground-muted text-[15px]">{{ appVersion }}</span>
-                        <ChevronRight
-                            :size="18"
-                            class="text-foreground-muted"
-                        />
-                    </div>
-                </button>
-            </div>
-        </div>
+        </SettingsGroup>
 
         <div class="flex-1" />
+
+        <ClearRecordsDialog />
     </div>
 </template>
 
@@ -177,20 +221,34 @@
 import { computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
-import { ChevronLeft, ChevronRight, Check } from "lucide-vue-next";
+import { storeToRefs } from "pinia";
+import { ChevronLeft, ChevronRight, Check, Crosshair, Database, Eraser, ExternalLink, Gamepad2, Hash, Highlighter, Info, Languages, Palette, Smartphone, Sparkles, Trash2 } from "lucide-vue-next";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { useDonateStore } from "@/stores/donateStore";
+import { useStatisticsStore } from "@/stores/statisticsStore";
 import { usePlatform } from "@/presentation/composables/usePlatform";
 import { appVersion } from "@/utils/appVersion";
+import { PRIVACY_POLICY_URL } from "@/presentation/pages/settings/externalLinks";
 import { ROUTER_PATH } from "@/router";
-import type { LanguagePreference } from "@/application/SettingsStorage";
-import { THEMES } from "@/theme/themeConfig";
+import { STYLE_IDS, type Appearance, type ColorThemeId, type StyleId } from "@/theme/themeIds";
+import type { LanguagePreference } from "@/application/settings/SettingsStorage";
+import { STYLES, getPalette, rememberedThemeFor } from "@/theme/palettes";
+import { vPress } from "@/presentation/directives/press";
+import { useColorMode } from "@/presentation/theme/useColorMode";
+import SegmentedControl from "@/presentation/components/segmented-control/SegmentedControl.vue";
+import OptionTile from "@/presentation/components/option-tile/OptionTile.vue";
+import SettingsGroup from "@/presentation/pages/settings/components/SettingsGroup.vue";
+import StyleThumbnail from "@/presentation/pages/settings/components/StyleThumbnail.vue";
+import ClearRecordsDialog from "@/presentation/pages/settings/components/ClearRecordsDialog.vue";
+import { provideClearRecordsDialog } from "@/presentation/pages/settings/components/useClearRecordsDialog";
 
 const { t } = useI18n();
 const router = useRouter();
 const settingsStore = useSettingsStore();
 const platform = usePlatform();
 const donateStore = useDonateStore();
+const statisticsStore = useStatisticsStore();
+const { open: openClearRecordsDialog } = provideClearRecordsDialog();
 
 // The donate entry only appears once Google Play actually returns products;
 // load in the background so the page renders immediately.
@@ -204,36 +262,68 @@ const languageOptions = computed((): { value: LanguagePreference; label: string 
     { value: "zh-Hant", label: t("settings.language.traditionalChinese") },
 ]);
 
+const appearanceOptions = computed((): { value: Appearance; label: string }[] => [
+    { value: "system", label: t("settings.colorMode.system") },
+    { value: "light", label: t("settings.colorMode.light") },
+    { value: "dark", label: t("settings.colorMode.dark") },
+]);
+
+const { appearance } = storeToRefs(settingsStore);
+const colorMode = useColorMode(appearance);
+
+// The current style's own themes, each a solid circle of the primary the app would show in the current mode
+const swatches = computed(() => STYLES[settingsStore.style].themes.map(theme => ({
+    id: theme.id,
+    palette: getPalette(settingsStore.style, theme.id, colorMode.value),
+})));
+
 const toggles = computed(() => [
     {
         key: "highlightSameDigit",
-        label: t("settings.toggles.highlightSameDigit.label"),
-        description: t("settings.toggles.highlightSameDigit.description"),
+        icon: Highlighter,
         value: settingsStore.highlightSameDigit,
         setter: settingsStore.setHighlightSameDigit,
     },
     {
+        key: "highlightScope",
+        icon: Crosshair,
+        value: settingsStore.highlightScope,
+        setter: settingsStore.setHighlightScope,
+    },
+    {
         key: "completionFlash",
-        label: t("settings.toggles.completionFlash.label"),
-        description: t("settings.toggles.completionFlash.description"),
+        icon: Sparkles,
         value: settingsStore.completionFlash,
         setter: settingsStore.setCompletionFlash,
     },
     {
         key: "autoRemoveNotes",
-        label: t("settings.toggles.autoRemoveNotes.label"),
-        description: t("settings.toggles.autoRemoveNotes.description"),
+        icon: Eraser,
         value: settingsStore.autoRemoveNotes,
         setter: settingsStore.setAutoRemoveNotes,
     },
     {
         key: "showRemainingCount",
-        label: t("settings.toggles.showRemainingCount.label"),
-        description: t("settings.toggles.showRemainingCount.description"),
+        icon: Hash,
         value: settingsStore.showRemainingCount,
         setter: settingsStore.setShowRemainingCount,
     },
-]);
+].map((toggle, position, all) => ({
+    ...toggle,
+    label: t(`settings.toggles.${toggle.key}.label`),
+    description: t(`settings.toggles.${toggle.key}.description`),
+    // An odd last tile spans both columns of the grid
+    wide: all.length % 2 === 1 && position === all.length - 1,
+})));
+
+const hasRecords = computed(() => statisticsStore.statistics.overall.gamesPlayed > 0);
+
+const handleClearRecords = async () => {
+    const result = await openClearRecordsDialog();
+    if (result === "confirm") {
+        void statisticsStore.clearAll();
+    }
+};
 
 const goBack = () => {
     router.back();
@@ -241,6 +331,17 @@ const goBack = () => {
 
 const goToChangelog = () => {
     void router.push(ROUTER_PATH.changelog);
+};
+
+// Re-selecting the current choice must not re-run side effects such as the launcher-icon change
+const onSelectStyle = (styleId: StyleId) => {
+    if (styleId === settingsStore.style) return;
+    settingsStore.setStyle(styleId);
+};
+
+const onSelectColorTheme = (themeId: ColorThemeId) => {
+    if (themeId === settingsStore.colorTheme) return;
+    settingsStore.setColorTheme(themeId);
 };
 
 const goToDonate = () => {

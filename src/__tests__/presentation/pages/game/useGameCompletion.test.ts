@@ -4,6 +4,7 @@ import { createPinia, setActivePinia } from "pinia";
 import { Sudoku } from "@/domain/game/Sudoku";
 import { PuzzleCell } from "@/domain/board/PuzzleCell";
 import { useGameCompletion } from "@/presentation/pages/game/useGameCompletion";
+import { useStatisticsStore } from "@/stores/statisticsStore";
 import type { AnalyticsService } from "@/application/analytics/AnalyticsService";
 import type { GameReplayData } from "@/application/statistics/StatisticsRepository";
 
@@ -63,7 +64,27 @@ describe("useGameCompletion", () => {
             difficulty: "easy",
             time_seconds: 420,
             hints_used: 0,
+            hints_total: 0,
         });
+    });
+
+    it("reports hints_used 0 and hints_total 1 when only the free hint was used", () => {
+        const logEvent = vi.fn().mockResolvedValue(undefined);
+        const sudoku = buildCompleteSudoku();
+        sudoku.hintTracker.useHint();
+
+        const { checkAndComplete } = useGameCompletion({
+            sudoku,
+            difficulty: ref("easy"),
+            getElapsedSeconds: () => 420,
+            getReplayData: emptyReplay,
+            onCompleted: () => { /* noop */ },
+            analytics: { logEvent },
+        });
+
+        checkAndComplete({ row: 0, column: 0 });
+
+        expect(logEvent).toHaveBeenCalledWith(expect.objectContaining({ hints_used: 0, hints_total: 1 }));
     });
 
     it("does not emit event when sudoku is not completed", () => {
@@ -82,5 +103,38 @@ describe("useGameCompletion", () => {
         checkAndComplete({ row: 0, column: 0 });
 
         expect(logEvent).not.toHaveBeenCalled();
+    });
+
+    describe("new record", () => {
+        it("reports a new record on the first win", () => {
+            const onCompleted = vi.fn();
+            const { checkAndComplete } = useGameCompletion({
+                sudoku: buildCompleteSudoku(),
+                difficulty: ref("easy"),
+                getElapsedSeconds: () => 420,
+                getReplayData: emptyReplay,
+                onCompleted,
+            });
+
+            checkAndComplete({ row: 0, column: 0 });
+
+            expect(onCompleted).toHaveBeenCalledWith({ row: 0, column: 0 }, { isNewRecord: true });
+        });
+
+        it("compares against the history before this game", () => {
+            useStatisticsStore().recordGame({ difficulty: "easy", elapsedSeconds: 420, completed: true });
+            const onCompleted = vi.fn();
+            const { checkAndComplete } = useGameCompletion({
+                sudoku: buildCompleteSudoku(),
+                difficulty: ref("easy"),
+                getElapsedSeconds: () => 420,
+                getReplayData: emptyReplay,
+                onCompleted,
+            });
+
+            checkAndComplete({ row: 0, column: 0 });
+
+            expect(onCompleted).toHaveBeenCalledWith({ row: 0, column: 0 }, { isNewRecord: false });
+        });
     });
 });

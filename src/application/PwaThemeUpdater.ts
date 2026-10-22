@@ -1,29 +1,22 @@
-import { THEMES } from "@/theme/themeConfig";
-import type { ColorThemeId } from "@/application/SettingsStorage";
+import type { LauncherIconKey } from "@/theme/launcherIcon";
 
-const DEFAULT_PRIMARY = "#3D8A5A";
-
-const getPrimary = (id: ColorThemeId): string => {
-    const theme = THEMES.find((t) => t.id === id);
-    return theme ? theme.primary : DEFAULT_PRIMARY;
-};
-
-export const updateMetaThemeColor = (id: ColorThemeId): void => {
+export const updateMetaThemeColor = (color: string): void => {
     const meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
-    if (meta) meta.content = getPrimary(id);
+    if (meta) meta.content = color;
 };
 
-export const updateFavicon = (id: ColorThemeId): void => {
+// The files are drawn by scripts/generate-pwa-icons.ts, one set per icon key
+export const updateFavicon = (icon: LauncherIconKey): void => {
     const link = document.querySelector<HTMLLinkElement>('link[rel="icon"]');
-    if (link) link.href = `${import.meta.env.BASE_URL}sudoku-${id}.svg`;
+    if (link) link.href = `${import.meta.env.BASE_URL}sudoku-${icon}.svg`;
 };
 
-export const updateManifestLink = (id: ColorThemeId): void => {
+export const updateManifestLink = (icon: LauncherIconKey): void => {
     const link = document.querySelector<HTMLLinkElement>('link[rel="manifest"]');
-    if (link) link.href = `${import.meta.env.BASE_URL}manifest-${id}.webmanifest`;
+    if (link) link.href = `${import.meta.env.BASE_URL}manifest-${icon}.webmanifest`;
 };
 
-export const updateAppleTouchIcon = (id: ColorThemeId): void => {
+export const updateAppleTouchIcon = (icon: LauncherIconKey): void => {
     const link = document.querySelector<HTMLLinkElement>('link[rel="apple-touch-icon"]');
-    if (link) link.href = `${import.meta.env.BASE_URL}apple-touch-icon-${id}.png`;
+    if (link) link.href = `${import.meta.env.BASE_URL}apple-touch-icon-${icon}.png`;
 };

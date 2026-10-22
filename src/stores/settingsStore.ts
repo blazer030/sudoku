@@ -1,8 +1,10 @@
 import { ref } from "vue";
 import { defineStore } from "pinia";
-import { loadSettings, saveSettings, type ColorThemeId, type LanguagePreference } from "@/application/SettingsStorage";
-import { updateMetaThemeColor, updateFavicon, updateManifestLink, updateAppleTouchIcon } from "@/application/PwaThemeUpdater";
-import type { IconService } from "@/application/icon/IconService";
+import type { Appearance, ColorThemeId, RememberedThemes, StyleId } from "@/theme/themeIds";
+import { loadSettings, saveSettings, type LanguagePreference } from "@/application/settings/SettingsStorage";
+import { rememberedThemeFor } from "@/theme/palettes";
+import { launcherIconKey } from "@/theme/launcherIcon";
+import { updateManifestLink, updateAppleTouchIcon } from "@/application/PwaThemeUpdater";
 
 export const useSettingsStore = defineStore("settings", () => {
     const settings = loadSettings();
@@ -13,15 +15,16 @@ export const useSettingsStore = defineStore("settings", () => {
     const showRemainingCount = ref(settings.showRemainingCount);
     const matchLauncherIconToTheme = ref(settings.matchLauncherIconToTheme);
     const language = ref<LanguagePreference>(settings.language);
-    let iconService: IconService | null = null;
+    const appearance = ref<Appearance>(settings.appearance);
+    const style = ref<StyleId>(settings.style);
+    const highlightScope = ref(settings.highlightScope);
+    const colorThemeByStyle = ref<RememberedThemes>(settings.colorThemeByStyle);
 
+    // Installed web apps keep the light icon; the favicon also follows light or dark, so appearanceSync keeps it
     const applyColorTheme = () => {
-        const id = colorTheme.value;
-        document.documentElement.dataset.colorTheme = id;
-        updateMetaThemeColor(id);
-        updateFavicon(id);
-        updateManifestLink(id);
-        updateAppleTouchIcon(id);
+        const icon = launcherIconKey(style.value, colorTheme.value, "light");
+        updateManifestLink(icon);
+        updateAppleTouchIcon(icon);
     };
 
     const persistAll = () => {
@@ -33,16 +36,24 @@ export const useSettingsStore = defineStore("settings", () => {
             showRemainingCount: showRemainingCount.value,
             matchLauncherIconToTheme: matchLauncherIconToTheme.value,
             language: language.value,
+            appearance: appearance.value,
+            style: style.value,
+            highlightScope: highlightScope.value,
+            colorThemeByStyle: { ...colorThemeByStyle.value },
         });
     };
 
     const setColorTheme = (id: ColorThemeId) => {
         colorTheme.value = id;
+        colorThemeByStyle.value = { ...colorThemeByStyle.value, [style.value]: id };
         applyColorTheme();
         persistAll();
-        if (matchLauncherIconToTheme.value && iconService !== null) {
-            void iconService.setIcon(id);
-        }
+    };
+
+    // Goes through setColorTheme so the manifest and storage follow (launcherIconSync watches the result)
+    const setStyle = (id: StyleId) => {
+        style.value = id;
+        setColorTheme(rememberedThemeFor(id, colorThemeByStyle.value));
     };
 
     const setHighlightSameDigit = (value: boolean) => {
@@ -66,12 +77,8 @@ export const useSettingsStore = defineStore("settings", () => {
     };
 
     const setMatchLauncherIconToTheme = (value: boolean) => {
-        const wasOn = matchLauncherIconToTheme.value;
         matchLauncherIconToTheme.value = value;
         persistAll();
-        if (!wasOn && value && iconService !== null) {
-            void iconService.setIcon(colorTheme.value);
-        }
     };
 
     const setLanguage = (value: LanguagePreference) => {
@@ -79,8 +86,14 @@ export const useSettingsStore = defineStore("settings", () => {
         persistAll();
     };
 
-    const setIconService = (service: IconService) => {
-        iconService = service;
+    const setAppearance = (value: Appearance) => {
+        appearance.value = value;
+        persistAll();
+    };
+
+    const setHighlightScope = (value: boolean) => {
+        highlightScope.value = value;
+        persistAll();
     };
 
     applyColorTheme();
@@ -93,13 +106,19 @@ export const useSettingsStore = defineStore("settings", () => {
         showRemainingCount,
         matchLauncherIconToTheme,
         language,
+        appearance,
+        style,
+        highlightScope,
+        colorThemeByStyle,
         setColorTheme,
+        setStyle,
         setHighlightSameDigit,
         setCompletionFlash,
         setAutoRemoveNotes,
         setShowRemainingCount,
         setMatchLauncherIconToTheme,
         setLanguage,
-        setIconService,
+        setAppearance,
+        setHighlightScope,
     };
 });

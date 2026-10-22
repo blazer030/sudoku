@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createPinia, setActivePinia } from "pinia";
 import { useGameStore } from "@/stores/gameStore";
-import type { GameState } from "@/application/GameState";
+import type { GameState } from "@/application/game/GameState";
 import type { GameRepository } from "@/application/game/GameRepository";
 import { knownPuzzle, knownAnswer } from "@/__tests__/fixtures/knownPuzzle";
 import type { AnalyticsService } from "@/application/analytics/AnalyticsService";
@@ -22,7 +22,7 @@ const buildGameRepo = (overrides: Partial<GameRepository> = {}): GameRepository 
     ...overrides,
 });
 
-vi.mock("@/application/PuzzleGenerationService", () => ({
+vi.mock("@/application/puzzleGeneration/PuzzleGenerationService", () => ({
     generatePuzzleAsync: vi.fn(() => Promise.resolve({
         puzzle: knownPuzzle.map(row => [...row]),
         answer: knownAnswer.map(row => [...row]),
@@ -34,15 +34,13 @@ describe("gameStore", () => {
         setActivePinia(createPinia());
     });
 
-    it("should have null as default difficulty", () => {
+    it("should start with no game, difficulty or save", () => {
         const store = useGameStore();
-        expect(store.difficulty).toBeNull();
-    });
 
-    it("should have no active game by default", () => {
-        const store = useGameStore();
         expect(store.sudoku).toBeNull();
         expect(store.hasActiveGame).toBe(false);
+        expect(store.difficulty).toBeNull();
+        expect(store.savedGame).toBeNull();
     });
 
     it("startNewGame should create a new game in store", async () => {
@@ -52,6 +50,15 @@ describe("gameStore", () => {
         expect(store.sudoku).not.toBeNull();
         expect(store.difficulty).toBe("medium");
         expect(store.hasActiveGame).toBe(true);
+    });
+
+    it("startNewGame should give each new game its own serial number", async () => {
+        const store = useGameStore();
+        expect(store.gameSerial).toBe(0);
+
+        await store.startNewGame("easy");
+
+        expect(store.gameSerial).toBe(1);
     });
 
     it("loadSavedGame should restore a game from GameState", () => {
@@ -150,11 +157,6 @@ describe("gameStore", () => {
     });
 
     describe("saved game persistence", () => {
-        it("savedGame starts as null", () => {
-            const store = useGameStore();
-            expect(store.savedGame).toBeNull();
-        });
-
         it("loadFromRepository hydrates savedGame from repository", async () => {
             const repo = buildGameRepo({ load: vi.fn().mockResolvedValue(sampleState) });
             const store = useGameStore();

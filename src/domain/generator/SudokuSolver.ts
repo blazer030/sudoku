@@ -1,7 +1,18 @@
 import { BOARD_SIZE } from "@/domain/board/constants";
 import { SudokuBoard } from "@/domain/board/SudokuBoard";
+import { countSolutionsWithPropagation } from "@/domain/generator/PropagatingSolutionCounter";
 
 export type DigitsProvider = () => number[];
+
+/** The count of a search that ran out of budget before it could tell how many solutions there are. */
+export const UNKNOWN_SOLUTION_COUNT = "unknown";
+
+export type SolutionCount = number | typeof UNKNOWN_SOLUTION_COUNT;
+
+export interface CountSolutionsOptions {
+    /** How many search nodes to visit before giving up with `UNKNOWN_SOLUTION_COUNT`. */
+    maxNodes: number;
+}
 
 export class SudokuSolver {
     private board = new SudokuBoard();
@@ -15,29 +26,16 @@ export class SudokuSolver {
         return null;
     }
 
-    public countSolutions(board: number[][], limit = 2): number {
-        const puzzle = board.map(row => [...row]);
-        return this.countSolutionsRecursive(puzzle, limit);
-    }
-
-    private countSolutionsRecursive(puzzle: number[][], limit: number): number {
-        for (let row = 0; row < BOARD_SIZE; row++) {
-            for (let column = 0; column < BOARD_SIZE; column++) {
-                if (puzzle[row][column] === 0) {
-                    let count = 0;
-                    for (let digit = 1; digit <= BOARD_SIZE; digit++) {
-                        if (this.board.isValidPlacement(puzzle, row, column, digit)) {
-                            puzzle[row][column] = digit;
-                            count += this.countSolutionsRecursive(puzzle, limit - count);
-                            puzzle[row][column] = 0;
-                            if (count >= limit) return count;
-                        }
-                    }
-                    return count;
-                }
-            }
-        }
-        return 1;
+    /**
+     * Counts solutions up to `limit`. Without options the search runs to the end; with `maxNodes`
+     * it gives up with `UNKNOWN_SOLUTION_COUNT` once it has visited that many nodes.
+     */
+    public countSolutions(board: number[][], limit?: number): number;
+    public countSolutions(board: number[][], limit: number, options: CountSolutionsOptions): SolutionCount;
+    public countSolutions(board: number[][], limit = 2, options?: CountSolutionsOptions): SolutionCount {
+        const maxNodes = options?.maxNodes ?? Number.POSITIVE_INFINITY;
+        const { solutions, exhausted } = countSolutionsWithPropagation(board, limit, maxNodes);
+        return exhausted ? UNKNOWN_SOLUTION_COUNT : solutions;
     }
 
     private fillBoard(board: number[][], digitsProvider?: DigitsProvider): boolean {

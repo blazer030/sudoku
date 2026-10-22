@@ -1,6 +1,12 @@
 <template>
-    <div class="flex flex-col gap-5 h-dvh px-5 bg-background overflow-y-auto">
-        <div class="flex items-center justify-between sticky top-0 bg-background pt-6 pb-3 z-10">
+    <div
+        class="flex flex-col gap-5 h-full px-5 bg-background overflow-y-auto"
+        data-skin="page"
+    >
+        <div
+            class="flex items-center justify-between sticky top-0 bg-background pt-6 pb-3 z-10"
+            data-skin="page-header"
+        >
             <button
                 class="flex items-center gap-2 cursor-pointer"
                 data-testid="back-button"
@@ -43,7 +49,7 @@
                 {{ t("donate.loadFailed") }}
             </span>
             <button
-                class="px-5 py-2 rounded-button bg-primary text-white text-[15px] font-medium cursor-pointer hover:bg-primary-hover"
+                class="px-5 py-2 rounded-button bg-primary text-on-primary text-[15px] font-medium cursor-pointer hover:bg-primary-hover"
                 data-testid="donate-retry"
                 @click="retryLoad"
             >
@@ -88,7 +94,7 @@
         <Transition name="toast">
             <div
                 v-if="toastMessage !== null"
-                class="fixed left-1/2 -translate-x-1/2 bottom-24 z-50 bg-foreground text-background text-sm px-4 py-3 rounded-xl shadow-lg max-w-[90%]"
+                class="fixed left-1/2 -translate-x-1/2 bottom-safe-24 z-50 bg-toast text-on-toast text-sm px-4 py-3 rounded-xl shadow-lg max-w-[90%]"
                 data-testid="donate-toast"
             >
                 {{ toastMessage }}

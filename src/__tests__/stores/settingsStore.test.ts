@@ -1,14 +1,21 @@
 import { createPinia, setActivePinia } from "pinia";
 import { useSettingsStore } from "@/stores/settingsStore";
-import { updateMetaThemeColor, updateFavicon, updateManifestLink, updateAppleTouchIcon } from "@/application/PwaThemeUpdater";
-import type { IconService } from "@/application/icon/IconService";
+import { updateManifestLink, updateAppleTouchIcon } from "@/application/PwaThemeUpdater";
+import { STYLE_IDS, THEME_IDS_BY_STYLE } from "@/theme/themeIds";
+import { launcherIconKey } from "@/theme/launcherIcon";
 
-vi.mock("@/application/PwaThemeUpdater", () => ({
-    updateMetaThemeColor: vi.fn(),
-    updateFavicon: vi.fn(),
-    updateManifestLink: vi.fn(),
-    updateAppleTouchIcon: vi.fn(),
-}));
+// Spies that still update the page links, so tests can read the hrefs too
+vi.mock("@/application/PwaThemeUpdater", async (importOriginal) => {
+    const actual = await importOriginal<typeof import("@/application/PwaThemeUpdater")>();
+    return {
+        updateMetaThemeColor: vi.fn(),
+        updateManifestLink: vi.fn(actual.updateManifestLink),
+        updateAppleTouchIcon: vi.fn(actual.updateAppleTouchIcon),
+    };
+});
+
+// The favicon also depends on light or dark, so appearanceSync owns it (appearanceSync.test.ts)
+const ICON_LINK_RELS = ["manifest", "apple-touch-icon"] as const;
 
 describe("settingsStore", () => {
     beforeEach(() => {
@@ -30,17 +37,51 @@ describe("settingsStore", () => {
         expect(store.showRemainingCount).toBe(true);
         expect(store.matchLauncherIconToTheme).toBe(false);
         expect(store.language).toBe("system");
+        expect(store.appearance).toBe("system");
+        expect(store.style).toBe("minimal");
     });
 
-    it("should persist language change and restore it in a new store", () => {
-        const store = useSettingsStore();
-
-        store.setLanguage("zh-Hant");
+    it.each([
+        ["appearance", (store: ReturnType<typeof useSettingsStore>) => { store.setAppearance("dark"); }, "dark"],
+        ["highlightScope", (store: ReturnType<typeof useSettingsStore>) => { store.setHighlightScope(false); }, false],
+        ["language", (store: ReturnType<typeof useSettingsStore>) => { store.setLanguage("zh-Hant"); }, "zh-Hant"],
+    ] as const)("should persist a %s change and restore it in a new store", (key, change, expected) => {
+        change(useSettingsStore());
 
         const stored = JSON.parse(localStorage.getItem("sudoku-settings") ?? "{}") as Record<string, unknown>;
-        expect(stored.language).toBe("zh-Hant");
+        expect(stored[key]).toBe(expected);
         setActivePinia(createPinia());
-        expect(useSettingsStore().language).toBe("zh-Hant");
+        expect(useSettingsStore()[key]).toBe(expected);
+    });
+
+    it("should remember the theme chosen for the current style", () => {
+        const store = useSettingsStore();
+
+        store.setColorTheme("teal");
+
+        const stored = JSON.parse(localStorage.getItem("sudoku-settings") ?? "{}") as Record<string, unknown>;
+        expect(stored.colorThemeByStyle).toEqual({ minimal: "teal" });
+        setActivePinia(createPinia());
+        expect(useSettingsStore().colorThemeByStyle.minimal).toBe("teal");
+    });
+
+    it("should keep an upgraded player's theme when the current style is chosen again", () => {
+        localStorage.setItem("sudoku-settings", JSON.stringify({ colorTheme: "blue" }));
+        const store = useSettingsStore();
+
+        store.setStyle("minimal");
+
+        expect(store.colorTheme).toBe("blue");
+        expect(store.style).toBe("minimal");
+    });
+
+    it("should persist the chosen style", () => {
+        const store = useSettingsStore();
+
+        store.setStyle("minimal");
+
+        const stored = JSON.parse(localStorage.getItem("sudoku-settings") ?? "{}") as Record<string, unknown>;
+        expect(stored.style).toBe("minimal");
     });
 
     it("should persist colorTheme change to localStorage", () => {
@@ -71,85 +112,54 @@ describe("settingsStore", () => {
         expect(stored.completionFlash).toBe(false);
     });
 
-    it("should set data-color-theme on document element on init", () => {
-        useSettingsStore();
-
-        expect(document.documentElement.dataset.colorTheme).toBe("green");
-    });
-
-    it("should update data-color-theme when colorTheme changes", () => {
-        const store = useSettingsStore();
-
-        store.setColorTheme("purple");
-
-        expect(document.documentElement.dataset.colorTheme).toBe("purple");
-    });
-
     it("should call PwaThemeUpdater functions when setting color theme", () => {
         const store = useSettingsStore();
 
         store.setColorTheme("blue");
 
-        expect(updateMetaThemeColor).toHaveBeenCalledWith("blue");
-        expect(updateFavicon).toHaveBeenCalledWith("blue");
         expect(updateManifestLink).toHaveBeenCalledWith("blue");
         expect(updateAppleTouchIcon).toHaveBeenCalledWith("blue");
     });
 
-    describe("icon sync", () => {
-        const buildIconService = (): { service: IconService; setIcon: ReturnType<typeof vi.fn> } => {
-            const setIcon = vi.fn().mockResolvedValue(undefined);
-            return { service: { setIcon }, setIcon };
-        };
-
-        it("calls IconService.setIcon when theme changes and toggle is ON", async () => {
-            const { service, setIcon } = buildIconService();
-            const store = useSettingsStore();
-            store.setIconService(service);
-            store.setMatchLauncherIconToTheme(true);
-            setIcon.mockClear();
-
-            store.setColorTheme("blue");
-            await Promise.resolve();
-
-            expect(setIcon).toHaveBeenCalledWith("blue");
+    describe("with the page's icon links", () => {
+        beforeEach(() => {
+            for (const rel of ICON_LINK_RELS) {
+                const link = document.createElement("link");
+                link.rel = rel;
+                document.head.appendChild(link);
+            }
         });
 
-        it("does NOT call IconService.setIcon when theme changes and toggle is OFF", async () => {
-            const { service, setIcon } = buildIconService();
-            const store = useSettingsStore();
-            store.setIconService(service);
-
-            store.setColorTheme("blue");
-            await Promise.resolve();
-
-            expect(setIcon).not.toHaveBeenCalled();
+        afterEach(() => {
+            for (const rel of ICON_LINK_RELS) document.head.querySelector(`link[rel="${rel}"]`)?.remove();
         });
 
-        it("calls IconService.setIcon when toggle transitions OFF → ON (sync to current theme)", async () => {
-            const { service, setIcon } = buildIconService();
+        const linkHref = (rel: string): string => document.head.querySelector<HTMLLinkElement>(`link[rel="${rel}"]`)?.href ?? "";
+
+        it("should point the links at the style's own light icon when the style changes", () => {
             const store = useSettingsStore();
-            store.setIconService(service);
-            store.setColorTheme("purple");
-            setIcon.mockClear();
+            store.setColorTheme("teal");
 
-            store.setMatchLauncherIconToTheme(true);
-            await Promise.resolve();
+            store.setStyle("tactile");
+            expect(linkHref("manifest")).toMatch(/manifest-tactileGreen\.webmanifest$/);
+            expect(linkHref("apple-touch-icon")).toMatch(/apple-touch-icon-tactileGreen\.png$/);
 
-            expect(setIcon).toHaveBeenCalledWith("purple");
+            store.setColorTheme("rust");
+            expect(linkHref("manifest")).toMatch(/manifest-tactileRust\.webmanifest$/);
         });
 
-        it("does not call IconService.setIcon when toggle transitions ON → OFF", async () => {
-            const { service, setIcon } = buildIconService();
+        it("should point the page links at every theme's own light icon", () => {
             const store = useSettingsStore();
-            store.setIconService(service);
-            store.setMatchLauncherIconToTheme(true);
-            setIcon.mockClear();
 
-            store.setMatchLauncherIconToTheme(false);
-            await Promise.resolve();
-
-            expect(setIcon).not.toHaveBeenCalled();
+            for (const style of STYLE_IDS) {
+                store.setStyle(style);
+                for (const theme of THEME_IDS_BY_STYLE[style]) {
+                    store.setColorTheme(theme);
+                    const key = launcherIconKey(style, theme, "light");
+                    expect(linkHref("manifest"), `${style}/${theme}`).toMatch(new RegExp(`/manifest-${key}\\.webmanifest$`));
+                    expect(linkHref("apple-touch-icon"), `${style}/${theme}`).toMatch(new RegExp(`/apple-touch-icon-${key}\\.png$`));
+                }
+            }
         });
     });
 });

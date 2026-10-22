@@ -1,5 +1,5 @@
 import type { InjectionKey } from "vue";
-import type { GameState } from "@/application/GameState";
+import type { GameState } from "@/application/game/GameState";
 
 export interface GameRepository {
     load(): Promise<GameState | null>;

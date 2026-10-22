@@ -1,7 +1,7 @@
 import { nextTick, ref, type Ref } from "vue";
 import { i18n } from "@/presentation/i18n";
 import { startLocaleSync } from "@/presentation/i18n/localeSync";
-import type { LanguagePreference } from "@/application/SettingsStorage";
+import type { LanguagePreference } from "@/application/settings/SettingsStorage";
 
 describe("startLocaleSync", () => {
     let stop: (() => void) | undefined;

@@ -1,14 +1,12 @@
 import { App } from "@capacitor/app";
 import { AppIcon } from "@capacitor-community/app-icon";
-import type { ColorThemeId } from "@/application/SettingsStorage";
+import { LAUNCHER_ICONS, type LauncherIconKey } from "@/theme/launcherIcon";
 import type { IconService } from "@/application/icon/IconService";
-
-const ALIAS_NAMES: ColorThemeId[] = ["green", "blue", "purple", "orange", "pink", "teal"];
 
 // Switching launcher aliases makes Android remove the running task, so the
 // change is deferred until the app is backgrounded, where the close is invisible.
 export class DynamicIconAdapter implements IconService {
-    private pendingThemeId: ColorThemeId | null = null;
+    private pendingIcon: LauncherIconKey | null = null;
 
     constructor() {
         App.addListener("pause", () => {
@@ -18,17 +16,18 @@ export class DynamicIconAdapter implements IconService {
         });
     }
 
-    setIcon(themeId: ColorThemeId): Promise<void> {
-        this.pendingThemeId = themeId;
+    setIcon(icon: LauncherIconKey): Promise<void> {
+        this.pendingIcon = icon;
         return Promise.resolve();
     }
 
     private applyPending(): void {
-        const themeId = this.pendingThemeId;
-        if (themeId === null) return;
-        this.pendingThemeId = null;
-        const others = ALIAS_NAMES.filter((id) => id !== themeId);
-        AppIcon.change({ name: themeId, disable: others, suppressNotification: false }).catch((error: unknown) => {
+        const icon = this.pendingIcon;
+        if (icon === null) return;
+        this.pendingIcon = null;
+        // The launcher aliases are named by the icon keys
+        const others = LAUNCHER_ICONS.map(({ key }) => key).filter(key => key !== icon);
+        AppIcon.change({ name: icon, disable: others, suppressNotification: false }).catch((error: unknown) => {
             console.error("Failed to change the launcher icon", error);
         });
     }

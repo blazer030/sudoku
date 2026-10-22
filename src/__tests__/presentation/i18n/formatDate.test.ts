@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { AppLocale } from "@/application/SettingsStorage";
+import type { AppLocale } from "@/application/settings/SettingsStorage";
 import { formatDate } from "@/presentation/i18n/formatDate";
 
 const now = new Date(2026, 9, 21, 15, 30);

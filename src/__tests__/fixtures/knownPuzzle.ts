@@ -35,6 +35,23 @@ export const createKnownSudoku = (): Sudoku => {
     return Sudoku.restoreSave(answer, puzzle);
 };
 
+// The known puzzle's empty cells in reading order
+const knownEmptyCells: readonly (readonly [number, number])[] = knownPuzzle.flatMap((row, rowIndex) =>
+    row.flatMap((value, column) => value === 0 ? [[rowIndex, column] as const] : []));
+
+/** The cell a nearly solved known puzzle still needs, with its answer. */
+export const lastKnownEmptyCell = (() => {
+    const [row, column] = knownEmptyCells[knownEmptyCells.length - 1];
+    return { row, column, value: knownAnswer[row][column] };
+})();
+
+/** Fills every empty cell of the known puzzle but the last, so a test only plays the finishing move. */
+export const fillAllButLastKnownCell = (sudoku: Sudoku): void => {
+    for (const [row, column] of knownEmptyCells.slice(0, -1)) {
+        sudoku.fill(row, column, knownAnswer[row][column]);
+    }
+};
+
 export const spyGeneratePuzzle = () => {
     return vi.spyOn(SudokuGenerator.prototype, "generatePuzzle").mockReturnValue({
         puzzle: knownPuzzle.map(row => [...row]),

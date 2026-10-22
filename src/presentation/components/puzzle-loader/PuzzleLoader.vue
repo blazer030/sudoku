@@ -2,14 +2,13 @@
     <Transition name="modal">
         <div
             v-if="visible"
-            class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+            class="fixed inset-0 bg-scrim/50 flex items-center justify-center z-50"
             data-testid="puzzle-loader"
         >
             <div
-                class="rounded-3xl px-8 py-6 flex flex-col items-center gap-4 shadow-modal"
+                class="rounded-3xl px-8 py-6 flex flex-col items-center gap-4 shadow-modal bg-scrim/30"
                 :style="{
                     color: themeColor,
-                    background: 'rgba(0, 0, 0, 0.3)',
                     backdropFilter: 'blur(8px) saturate(160%)',
                     WebkitBackdropFilter: 'blur(8px) saturate(160%)',
                 }"
@@ -23,7 +22,7 @@
                         :auto-play="true"
                     />
                 </div>
-                <p class="text-sm text-white/80 font-medium">
+                <p class="text-sm text-on-scrim font-medium">
                     {{ message ?? t("home.generatingPuzzle") }}
                 </p>
             </div>

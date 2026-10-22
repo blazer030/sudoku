@@ -2,12 +2,17 @@ import { computed, watch } from "vue";
 import { GameReplay } from "@/domain/game/GameReplay";
 import type { GameReplayData } from "@/application/statistics/StatisticsRepository";
 import type { GameStep, GameStepAction } from "@/domain/game/GameStep";
+import type { CellReference } from "@/domain/solver/SolveStep";
 import { usePlaybackState } from "@/presentation/components/playback/usePlaybackState";
+import type { PlayState } from "@/presentation/components/playback/useProgressDrag";
 
 export interface ReviewDescription {
     keypath: string;
     params: { value?: number; row?: number; column?: number };
 }
+
+/** The board as the game began, one of the player's actions, or the board as the game ended. */
+export type ReviewStage = "initial" | "action" | "final";
 
 const stepParams = (step: GameStep): ReviewDescription["params"] => ({
     value: step.value,
@@ -24,13 +29,29 @@ const ACTION_DESCRIPTIONS: Record<GameStepAction, (step: GameStep) => ReviewDesc
     undo: () => ({ keypath: "review.undo", params: {} }),
 };
 
+// Auto notes and undo are recorded at row 0, column 0, so only these actions name a real cell.
+const CELL_ACTIONS: ReadonlySet<GameStepAction> = new Set(["fill", "erase", "toggleNote", "hint"]);
+
 export const useGameReview = (replayData: GameReplayData, completed: boolean) => {
     const replay = new GameReplay(replayData.initialBoard, replayData.steps);
+    // Positions run from the initial board, through every action, to the final board.
     const virtualTotalSteps = computed(() => replay.totalSteps + 1);
+    const positionCount = computed(() => replay.totalSteps + 2);
 
     const playback = usePlaybackState(virtualTotalSteps);
+    const playState: PlayState = {
+        isPlaying: playback.isPlaying,
+        stopPlay: playback.stopPlay,
+        startPlay: playback.startPlay,
+    };
 
     const isAtFinalStep = computed(() => playback.currentStep.value === virtualTotalSteps.value);
+
+    const stage = computed((): ReviewStage => {
+        if (playback.currentStep.value === 0) return "initial";
+        if (isAtFinalStep.value) return "final";
+        return "action";
+    });
 
     watch(playback.currentStep, (step) => {
         if (step <= replay.totalSteps) {
@@ -52,30 +73,33 @@ export const useGameReview = (replayData: GameReplayData, completed: boolean) =>
         return replay.currentGameStep;
     });
 
-    const description = computed((): ReviewDescription | null => {
+    const changedCell = computed((): CellReference | null => {
+        const step = gameStep.value;
+        if (step === null || !CELL_ACTIONS.has(step.action)) return null;
+        return { row: step.row, column: step.column };
+    });
+
+    const description = computed((): ReviewDescription => {
         if (isAtFinalStep.value) {
             return { keypath: completed ? "review.completed" : "review.gaveUp", params: {} };
         }
         const step = gameStep.value;
-        if (!step) return null;
+        if (!step) return { keypath: "review.initialBoard", params: {} };
         return ACTION_DESCRIPTIONS[step.action](step);
     });
 
     return {
         currentStep: playback.currentStep,
-        totalSteps: virtualTotalSteps,
-        isAtFinalStep,
+        positionCount,
+        stage,
         board,
         gameStep,
+        changedCell,
         description,
-        isPlaying: playback.isPlaying,
+        playState,
         next: playback.next,
         previous: playback.previous,
-        goToFirst: playback.goToFirst,
-        goToLast: playback.goToLast,
         goToStep: playback.goToStep,
         togglePlay: playback.togglePlay,
-        stopPlay: playback.stopPlay,
-        startPlay: playback.startPlay,
     };
 };

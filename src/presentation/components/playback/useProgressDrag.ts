@@ -1,10 +1,16 @@
 import { onUnmounted, ref, type Ref } from "vue";
 
+export interface PlayState {
+    isPlaying: Ref<boolean>;
+    stopPlay: () => void;
+    startPlay: () => void;
+}
+
 export const useProgressDrag = (
     progressRef: Ref<HTMLElement | null>,
     totalSteps: Ref<number>,
     onSeek: (step: number) => void,
-    playState: { isPlaying: Ref<boolean>; stopPlay: () => void; startPlay: () => void },
+    playState: PlayState,
 ) => {
     const isDragging = ref(false);
     let wasPlaying = false;

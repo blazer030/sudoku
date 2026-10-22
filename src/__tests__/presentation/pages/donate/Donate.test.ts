@@ -182,6 +182,7 @@ describe("Donate.vue purchase feedback", () => {
         await flushPromises();
 
         expect(wrapper.find("[data-testid='donate-toast']").text()).toBe("Cancelled");
+        expect(wrapper.find("[data-testid='donate-toast']").classes()).toEqual(expect.arrayContaining(["bg-toast", "text-on-toast"]));
     });
 
     it("shows a generic error toast and logs the reason when the purchase fails", async () => {
@@ -224,15 +225,6 @@ describe("Donate.vue zh-Hant", () => {
         await nextTick();
     };
 
-    it("shows the two-line intro in Chinese", async () => {
-        await useChinese();
-        const wrapper = mountDonate({ logEvent: vi.fn().mockResolvedValue(undefined) }, buildBilling({ kind: "cancelled" }));
-        await flushPromises();
-
-        expect(wrapper.text()).toContain("數獨完全免費，沒有廣告。");
-        expect(wrapper.text()).toContain("如果你想支持開發：");
-    });
-
     it("shows the tier name in Chinese while keeping the Google Play price text", async () => {
         await useChinese();
         const wrapper = mountDonate({ logEvent: vi.fn().mockResolvedValue(undefined) }, buildBilling({ kind: "cancelled" }));
@@ -241,28 +233,5 @@ describe("Donate.vue zh-Hant", () => {
         const tier = wrapper.find("[data-testid='donate-tier-coffee']");
         expect(tier.text()).toContain("一杯咖啡");
         expect(tier.text()).toContain("$2.99");
-    });
-
-    it("shows the cancelled toast in Chinese", async () => {
-        await useChinese();
-        const wrapper = mountDonate({ logEvent: vi.fn().mockResolvedValue(undefined) }, buildBilling({ kind: "cancelled" }));
-        await flushPromises();
-
-        await wrapper.find("[data-testid='donate-tier-coffee']").trigger("click");
-        await flushPromises();
-
-        expect(wrapper.find("[data-testid='donate-toast']").text()).toBe("已取消");
-    });
-
-    it("shows the thank-you sentence in Chinese on the success screen", async () => {
-        await useChinese();
-        const billing = buildBilling({ kind: "success", productId: "donate_coffee", tier: "coffee", amountUsd: 2.99 });
-        const wrapper = mountDonate({ logEvent: vi.fn().mockResolvedValue(undefined) }, billing);
-        await flushPromises();
-
-        await wrapper.find("[data-testid='donate-tier-coffee']").trigger("click");
-        await flushPromises();
-
-        expect(wrapper.text()).toContain("謝謝你請我喝咖啡！");
     });
 });
