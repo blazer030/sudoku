@@ -5,7 +5,7 @@ import { useRouter } from "vue-router";
 import { useGameStore } from "@/stores/gameStore";
 import { useStatisticsStore } from "@/stores/statisticsStore";
 import { ROUTER_PATH } from "@/router";
-import { captureInitialBoard } from "@/application/GameState";
+import { captureInitialBoard } from "@/application/game/GameState";
 import type { GameReplayData } from "@/application/statistics/StatisticsRepository";
 import { useGameTimer } from "@/presentation/pages/game/useGameTimer";
 import { useGameCompletion } from "@/presentation/pages/game/useGameCompletion";

@@ -1,7 +1,7 @@
 import { ref } from "vue";
 import { defineStore } from "pinia";
 import type { Appearance, ColorThemeId, RememberedThemes, StyleId } from "@/theme/themeIds";
-import { loadSettings, saveSettings, type LanguagePreference } from "@/application/SettingsStorage";
+import { loadSettings, saveSettings, type LanguagePreference } from "@/application/settings/SettingsStorage";
 import { rememberedThemeFor } from "@/theme/palettes";
 import { launcherIconKey } from "@/theme/launcherIcon";
 import { updateManifestLink, updateAppleTouchIcon } from "@/application/PwaThemeUpdater";

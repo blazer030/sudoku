@@ -6,7 +6,7 @@ import { createPinia } from "pinia";
 import { createMemoryHistory, createRouter, onBeforeRouteLeave } from "vue-router";
 import Game from "@/presentation/pages/game/Game.vue";
 import { knownAnswer, knownPuzzle, createKnownSudoku, fillAllButLastKnownCell, lastKnownEmptyCell } from "@/__tests__/fixtures/knownPuzzle";
-import type { GameState } from "@/application/GameState";
+import type { GameState } from "@/application/game/GameState";
 import Cell from "@/presentation/components/board-cell/Cell.vue";
 import { useGameStore } from "@/stores/gameStore";
 import type { Difficulty } from "@/domain/generator/SudokuGenerator";

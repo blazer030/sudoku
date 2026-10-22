@@ -2,7 +2,7 @@ import { type Ref, ref } from "vue";
 import { onBeforeRouteLeave, useRouter } from "vue-router";
 import type { Difficulty } from "@/domain";
 import type { Sudoku } from "@/domain/game/Sudoku";
-import { GameStateConverter } from "@/application/GameState";
+import { GameStateConverter } from "@/application/game/GameState";
 import { useGameStore } from "@/stores/gameStore";
 import { useStatisticsStore } from "@/stores/statisticsStore";
 import type { GameReplayData } from "@/application/statistics/StatisticsRepository";

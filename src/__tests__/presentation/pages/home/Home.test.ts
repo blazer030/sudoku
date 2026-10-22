@@ -7,13 +7,13 @@ import Home from "@/presentation/pages/home/Home.vue";
 import { ROUTER_PATH } from "@/router";
 import { useGameStore } from "@/stores/gameStore";
 import { useStatisticsStore } from "@/stores/statisticsStore";
-import type { CellState, GameState } from "@/application/GameState";
+import type { CellState, GameState } from "@/application/game/GameState";
 import { i18n } from "@/presentation/i18n";
 import { knownAnswer, knownPuzzle } from "@/__tests__/fixtures/knownPuzzle";
 import { ANALYTICS_KEY, type AnalyticsService } from "@/application/analytics/AnalyticsService";
 import { handleBackButton } from "@/presentation/composables/backDismissal";
 
-vi.mock("@/application/PuzzleGenerationService", () => ({
+vi.mock("@/application/puzzleGeneration/PuzzleGenerationService", () => ({
     generatePuzzleAsync: vi.fn(() => Promise.resolve({
         puzzle: knownPuzzle.map(row => [...row]),
         answer: knownAnswer.map(row => [...row]),

@@ -8,7 +8,7 @@ import type { Difficulty } from "@/domain";
 import { useGameStore } from "@/stores/gameStore";
 import { useStatisticsStore } from "@/stores/statisticsStore";
 
-vi.mock("@/application/PuzzleGenerationService", () => ({
+vi.mock("@/application/puzzleGeneration/PuzzleGenerationService", () => ({
     generatePuzzleAsync: vi.fn(() => Promise.resolve({
         puzzle: knownPuzzle.map(row => [...row]),
         answer: knownAnswer.map(row => [...row]),

@@ -1,7 +1,7 @@
 import { watch, type Ref } from "vue";
 import { i18n } from "@/presentation/i18n";
 import { resolveLocale } from "@/presentation/i18n/resolveLocale";
-import { LANGUAGE_PREFERENCES, type LanguagePreference } from "@/application/SettingsStorage";
+import { LANGUAGE_PREFERENCES, type LanguagePreference } from "@/application/settings/SettingsStorage";
 
 const readSystemLanguages = (): readonly string[] =>
     navigator.languages.length > 0 ? navigator.languages : [navigator.language];

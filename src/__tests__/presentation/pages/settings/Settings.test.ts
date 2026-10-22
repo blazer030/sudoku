@@ -26,7 +26,7 @@ import { useSettingsStore } from "@/stores/settingsStore";
 import { useDonateStore } from "@/stores/donateStore";
 import { useGameStore } from "@/stores/gameStore";
 import { useStatisticsStore } from "@/stores/statisticsStore";
-import type { CellState, GameState } from "@/application/GameState";
+import type { CellState, GameState } from "@/application/game/GameState";
 import type { BillingService, Product } from "@/application/billing/BillingService";
 import { startAppearanceSync } from "@/presentation/theme/appearanceSync";
 import { startLauncherIconSync } from "@/presentation/theme/launcherIconSync";

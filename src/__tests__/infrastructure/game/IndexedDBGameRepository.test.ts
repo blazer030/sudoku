@@ -1,6 +1,6 @@
 import { vi, describe, it, expect, beforeEach } from "vitest";
 import { reactive, isReactive } from "vue";
-import type { GameState } from "@/application/GameState";
+import type { GameState } from "@/application/game/GameState";
 
 const mocks = vi.hoisted(() => {
     const store = new Map<string, unknown>();

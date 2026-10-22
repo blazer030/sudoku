@@ -1,4 +1,4 @@
-import type { AppLocale, LanguagePreference } from "@/application/SettingsStorage";
+import type { AppLocale, LanguagePreference } from "@/application/settings/SettingsStorage";
 
 const TRADITIONAL_REGIONS = ["tw", "hk", "mo"];
 

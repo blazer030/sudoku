@@ -1,5 +1,5 @@
 import { ICON_THEME_IDS, THEME_IDS_BY_STYLE } from "@/theme/themeIds";
-import { loadSettings, saveSettings } from "@/application/SettingsStorage";
+import { loadSettings, saveSettings } from "@/application/settings/SettingsStorage";
 
 describe("SettingsStorage", () => {
     beforeEach(() => {

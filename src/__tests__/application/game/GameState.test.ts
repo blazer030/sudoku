@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { Sudoku } from "@/domain/game/Sudoku";
-import { GameStateConverter, captureInitialBoard, type CellState } from "@/application/GameState";
+import { GameStateConverter, captureInitialBoard, type CellState } from "@/application/game/GameState";
 import { knownAnswer, knownPuzzle, spyGeneratePuzzle } from "@/__tests__/fixtures/knownPuzzle";
 
 afterEach(() => {

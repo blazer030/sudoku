@@ -4,7 +4,7 @@ import { createMemoryHistory, createRouter } from "vue-router";
 import Changelog from "@/presentation/pages/settings/Changelog.vue";
 import { i18n } from "@/presentation/i18n";
 import { CHANGELOG } from "@/presentation/pages/settings/changelogData";
-import { APP_LOCALES } from "@/application/SettingsStorage";
+import { APP_LOCALES } from "@/application/settings/SettingsStorage";
 
 const mountChangelog = () => {
     const router = createRouter({

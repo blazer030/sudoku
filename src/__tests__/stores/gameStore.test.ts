@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createPinia, setActivePinia } from "pinia";
 import { useGameStore } from "@/stores/gameStore";
-import type { GameState } from "@/application/GameState";
+import type { GameState } from "@/application/game/GameState";
 import type { GameRepository } from "@/application/game/GameRepository";
 import { knownPuzzle, knownAnswer } from "@/__tests__/fixtures/knownPuzzle";
 import type { AnalyticsService } from "@/application/analytics/AnalyticsService";
@@ -22,7 +22,7 @@ const buildGameRepo = (overrides: Partial<GameRepository> = {}): GameRepository 
     ...overrides,
 });
 
-vi.mock("@/application/PuzzleGenerationService", () => ({
+vi.mock("@/application/puzzleGeneration/PuzzleGenerationService", () => ({
     generatePuzzleAsync: vi.fn(() => Promise.resolve({
         puzzle: knownPuzzle.map(row => [...row]),
         answer: knownAnswer.map(row => [...row]),

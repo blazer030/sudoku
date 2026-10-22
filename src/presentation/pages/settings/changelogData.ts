@@ -1,4 +1,4 @@
-import type { AppLocale } from "@/application/SettingsStorage";
+import type { AppLocale } from "@/application/settings/SettingsStorage";
 
 export interface ChangelogChange {
     text: Record<AppLocale, string>;

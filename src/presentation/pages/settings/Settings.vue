@@ -231,7 +231,7 @@ import { appVersion } from "@/utils/appVersion";
 import { PRIVACY_POLICY_URL } from "@/presentation/pages/settings/externalLinks";
 import { ROUTER_PATH } from "@/router";
 import { STYLE_IDS, type Appearance, type ColorThemeId, type StyleId } from "@/theme/themeIds";
-import type { LanguagePreference } from "@/application/SettingsStorage";
+import type { LanguagePreference } from "@/application/settings/SettingsStorage";
 import { STYLES, getPalette, rememberedThemeFor } from "@/theme/palettes";
 import { vPress } from "@/presentation/directives/press";
 import { useColorMode } from "@/presentation/theme/useColorMode";
