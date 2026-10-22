@@ -1,4 +1,4 @@
-import type { ColorMode } from "@/application/SettingsStorage";
+import type { ColorMode } from "@/theme/themeIds";
 import type { SystemBarService } from "@/application/systemBar/SystemBarService";
 
 export class NoopSystemBarAdapter implements SystemBarService {

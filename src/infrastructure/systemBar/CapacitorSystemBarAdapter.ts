@@ -1,5 +1,5 @@
 import { SystemBars, SystemBarsStyle } from "@capacitor/core";
-import type { ColorMode } from "@/application/SettingsStorage";
+import type { ColorMode } from "@/theme/themeIds";
 import type { SystemBarService } from "@/application/systemBar/SystemBarService";
 
 // Under Capacitor 8's edge-to-edge layout the bars show the page background,

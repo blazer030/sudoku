@@ -1,6 +1,6 @@
 // Every style's colours, gathered from src/style/styles/<id>/palette.ts. src/style/themes.generated.css
 // is rendered from them by `npm run generate:theme-css`. Relative imports only: scripts/ import this file.
-import type { ColorMode, ColorThemeId, RememberedThemes, StyleId } from "../application/SettingsStorage";
+import type { ColorMode, ColorThemeId, RememberedThemes, StyleId } from "./themeIds";
 import { MINIMAL_STYLE } from "../style/styles/minimal/palette";
 import { PAPER_STYLE } from "../style/styles/paper/palette";
 import { TACTILE_STYLE } from "../style/styles/tactile/palette";

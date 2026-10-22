@@ -1,7 +1,7 @@
 import { readFileSync } from "fs";
 import postcss from "postcss";
 import { effectScope, nextTick, ref } from "vue";
-import { STYLE_IDS } from "@/application/SettingsStorage";
+import { STYLE_IDS } from "@/theme/themeIds";
 import { ARRIVAL_SETTLE_MS, useArrivalMotion } from "@/presentation/components/board-cell/useArrivalMotion";
 
 describe("useArrivalMotion", () => {

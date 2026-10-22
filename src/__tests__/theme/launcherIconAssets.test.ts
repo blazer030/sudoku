@@ -2,7 +2,7 @@ import { readdirSync, readFileSync } from "fs";
 import sharp from "sharp";
 import { getPalette } from "@/theme/palettes";
 import { LAUNCHER_ICONS, launcherResourceName } from "@/theme/launcherIcon";
-import { ICON_THEME_IDS } from "@/application/SettingsStorage";
+import { ICON_THEME_IDS } from "@/theme/themeIds";
 
 // The Android launcher icons are generated (npm run generate:launcher-icons); regenerate them
 // whenever a primary or on-primary in palettes.ts changes.

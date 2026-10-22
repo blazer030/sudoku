@@ -1,6 +1,6 @@
 import { LAUNCHER_ICONS, launcherIconKey, launcherResourceName } from "@/theme/launcherIcon";
 import { STYLES } from "@/theme/palettes";
-import { ICON_THEME_IDS, STYLE_IDS } from "@/application/SettingsStorage";
+import { ICON_THEME_IDS, STYLE_IDS } from "@/theme/themeIds";
 
 describe("launcher icons", () => {
     it("should keep the bare theme id for minimal's light icons, whose aliases existing shortcuts point at", () => {

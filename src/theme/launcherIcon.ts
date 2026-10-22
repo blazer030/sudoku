@@ -1,6 +1,6 @@
 // The app icons: one per style's theme in light and in dark. The generator scripts import this
 // too, so relative imports only.
-import { STYLE_IDS, type ColorMode, type ColorThemeId, type StyleId } from "../application/SettingsStorage";
+import { STYLE_IDS, type ColorMode, type ColorThemeId, type StyleId } from "./themeIds";
 import { STYLES } from "./palettes";
 
 /** Names an icon: its Android launcher alias and its web asset file names. */

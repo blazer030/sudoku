@@ -19,7 +19,7 @@ Vue 3 + TypeScript Sudoku game following **Domain-Driven Design (DDD)**:
 - **`src/application/`** — Serialization (`GameState`, `GameStateConverter`), persistence (`GameStorage`), and `Statistics`.
 - **`src/presentation/`** — Vue components, pages, and composables. Pages: `home/`, `game/`, `statistics/`.
 - **`src/stores/`** — Pinia store (`gameStore.ts`) as single source of truth for active game state.
-- **`src/style/styles/<id>/`** — One folder per visual style (`minimal`, `tactile`, `paper`): `skin.css` (scoped by `[data-style]`), `palette.ts` (colours; run `npm run generate:theme-css` after editing), `thumbnail.ts` (Settings preview). A new style registers in `theme/palettes.ts` `STYLES`, `style/index.css`, `StyleThumbnail.vue` and `STYLE_IDS`.
+- **`src/style/styles/<id>/`** — One folder per visual style (`minimal`, `tactile`, `paper`): `skin.css` (scoped by `[data-style]`), `palette.ts` (colours; run `npm run generate:theme-css` after editing), `thumbnail.ts` (Settings preview). A new style registers in `theme/palettes.ts` `STYLES`, `style/index.css`, `StyleThumbnail.vue` and `STYLE_IDS` / `THEME_IDS_BY_STYLE` in `theme/themeIds.ts`.
 
 IMPORTANT: Domain layer must never import from `presentation/`, `stores/`, or `application/`. Dependencies flow inward only.
 

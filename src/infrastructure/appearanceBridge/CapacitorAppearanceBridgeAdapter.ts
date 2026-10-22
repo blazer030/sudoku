@@ -1,5 +1,5 @@
 import { registerPlugin } from "@capacitor/core";
-import type { Appearance } from "@/application/SettingsStorage";
+import type { Appearance } from "@/theme/themeIds";
 import type { AppearanceBridgeService, SystemBarColors } from "@/application/appearanceBridge/AppearanceBridgeService";
 
 // The app's own plugin: android/app/src/main/java/io/github/blazer030/sudoku/AppearanceBridgePlugin.java

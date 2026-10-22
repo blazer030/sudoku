@@ -1,4 +1,4 @@
-import { COLOR_THEME_IDS, STYLE_IDS } from "@/application/SettingsStorage";
+import { COLOR_THEME_IDS, STYLE_IDS } from "@/theme/themeIds";
 import { en } from "@/presentation/i18n/messages/en";
 import { zhHant } from "@/presentation/i18n/messages/zh-Hant";
 

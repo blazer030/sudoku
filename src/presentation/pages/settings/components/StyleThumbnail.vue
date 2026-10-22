@@ -60,7 +60,7 @@
 
 <script lang="ts" setup>
 import { computed } from "vue";
-import type { StyleId } from "@/application/SettingsStorage";
+import type { StyleId } from "@/theme/themeIds";
 import { MINIMAL_THUMBNAIL } from "@/style/styles/minimal/thumbnail";
 import { PAPER_THUMBNAIL } from "@/style/styles/paper/thumbnail";
 import { TACTILE_THUMBNAIL } from "@/style/styles/tactile/thumbnail";

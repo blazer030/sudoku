@@ -2,7 +2,7 @@ import { computed, watch, type Ref } from "vue";
 import { launcherIconKey } from "@/theme/launcherIcon";
 import { resolveColorMode } from "@/presentation/theme/appearanceSync";
 import { watchSystemDark } from "@/presentation/theme/useColorMode";
-import type { Appearance, ColorThemeId, StyleId } from "@/application/SettingsStorage";
+import type { Appearance, ColorThemeId, StyleId } from "@/theme/themeIds";
 import type { IconService } from "@/application/icon/IconService";
 
 export interface LauncherIconSources {

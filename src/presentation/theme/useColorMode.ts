@@ -1,6 +1,6 @@
 import { computed, onScopeDispose, ref, type ComputedRef, type Ref } from "vue";
 import { DARK_SCHEME_QUERY, listenForChanges, resolveColorMode } from "@/presentation/theme/appearanceSync";
-import type { Appearance, ColorMode } from "@/application/SettingsStorage";
+import type { Appearance, ColorMode } from "@/theme/themeIds";
 
 /** Whether the system asks for dark, kept live until stop. Old WebViews and jsdom may lack matchMedia; they count as light. */
 export const watchSystemDark = (): { systemPrefersDark: Ref<boolean>; stop: () => void } => {

@@ -1,5 +1,5 @@
 import { readFileSync } from "fs";
-import { STYLE_IDS, THEME_IDS_BY_STYLE } from "@/application/SettingsStorage";
+import { STYLE_IDS, THEME_IDS_BY_STYLE } from "@/theme/themeIds";
 import { systemBarColor } from "@/theme/palettes";
 
 const extractInlineScript = (): string => {

@@ -1,6 +1,6 @@
 import { readFileSync } from "fs";
 import postcss from "postcss";
-import { THEME_IDS_BY_STYLE, STYLE_IDS, type StyleId } from "@/application/SettingsStorage";
+import { THEME_IDS_BY_STYLE, STYLE_IDS, type StyleId } from "@/theme/themeIds";
 import { contrastRatio, mixColors } from "@/theme/contrast";
 import { STYLES, systemBarColor, type Palette, type PaletteToken } from "@/theme/palettes";
 

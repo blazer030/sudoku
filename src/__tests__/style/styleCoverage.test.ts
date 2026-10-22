@@ -1,6 +1,6 @@
 import { readFileSync } from "fs";
 import postcss from "postcss";
-import { STYLE_IDS, type StyleId } from "@/application/SettingsStorage";
+import { STYLE_IDS, type StyleId } from "@/theme/themeIds";
 
 // Press feedback every style must give the v-press states and the segmented indicator
 const PRESS = ["[data-pressed]", "[data-press-motion][data-pressed]", "[data-press-bounce]", ".segmented-indicator-motion"] as const;

@@ -2,7 +2,7 @@
 // material, shape, thickness, shadow, texture, type and motion, never layout; it stays inside its
 // own [data-style] scope; and every movement it adds stops under reduced motion.
 import postcss, { type AtRule, type ChildNode, type Declaration, type Node, type Rule } from "postcss";
-import type { StyleId } from "@/application/SettingsStorage";
+import type { StyleId } from "@/theme/themeIds";
 
 const REDUCED_MOTION_PARAMS = "(prefers-reduced-motion: reduce)";
 

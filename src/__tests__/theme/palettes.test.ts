@@ -1,4 +1,4 @@
-import { STYLE_IDS, THEME_IDS_BY_STYLE, type ColorThemeId } from "@/application/SettingsStorage";
+import { STYLE_IDS, THEME_IDS_BY_STYLE, type ColorThemeId } from "@/theme/themeIds";
 import { STYLES, getPalette, rememberedThemeFor } from "@/theme/palettes";
 import { contrastRatio } from "@/theme/contrast";
 

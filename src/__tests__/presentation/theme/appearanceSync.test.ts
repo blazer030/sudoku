@@ -2,7 +2,7 @@ import { nextTick, ref } from "vue";
 import type { Mock } from "vitest";
 import { resolveColorMode, startAppearanceSync } from "@/presentation/theme/appearanceSync";
 import { getPalette } from "@/theme/palettes";
-import type { Appearance, ColorMode, ColorThemeId, StyleId } from "@/application/SettingsStorage";
+import type { Appearance, ColorMode, ColorThemeId, StyleId } from "@/theme/themeIds";
 import type { SystemBarService } from "@/application/systemBar/SystemBarService";
 import type { AppearanceBridgeService, SystemBarColors } from "@/application/appearanceBridge/AppearanceBridgeService";
 

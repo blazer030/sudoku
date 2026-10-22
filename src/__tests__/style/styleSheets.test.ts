@@ -1,5 +1,5 @@
 import { existsSync, readdirSync, readFileSync } from "fs";
-import { STYLE_IDS, type StyleId } from "@/application/SettingsStorage";
+import { STYLE_IDS, type StyleId } from "@/theme/themeIds";
 import { findLayoutDeclarations, findScalesOutOfRange, findUnguardedMotion, findUnscopedSelectors } from "./styleSheetRules";
 
 const sheetOf = (style: StyleId): string => readFileSync(`src/style/styles/${style}/skin.css`, "utf8");

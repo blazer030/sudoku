@@ -1,4 +1,4 @@
-import type { Appearance } from "@/application/SettingsStorage";
+import type { Appearance } from "@/theme/themeIds";
 import type { AppearanceBridgeService, SystemBarColors } from "@/application/appearanceBridge/AppearanceBridgeService";
 
 export class NoopAppearanceBridgeAdapter implements AppearanceBridgeService {

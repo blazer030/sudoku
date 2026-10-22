@@ -3,7 +3,7 @@ import { createPinia, setActivePinia, storeToRefs } from "pinia";
 import type { Mock } from "vitest";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { startLauncherIconSync } from "@/presentation/theme/launcherIconSync";
-import { STYLE_IDS, THEME_IDS_BY_STYLE } from "@/application/SettingsStorage";
+import { STYLE_IDS, THEME_IDS_BY_STYLE } from "@/theme/themeIds";
 import { LAUNCHER_ICONS, type LauncherIconKey } from "@/theme/launcherIcon";
 
 describe("startLauncherIconSync", () => {

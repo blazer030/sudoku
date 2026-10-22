@@ -1,4 +1,4 @@
-import type { Appearance } from "@/application/SettingsStorage";
+import type { Appearance } from "@/theme/themeIds";
 
 export interface SystemBarColors {
     background: string;

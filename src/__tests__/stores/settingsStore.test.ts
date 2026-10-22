@@ -1,7 +1,7 @@
 import { createPinia, setActivePinia } from "pinia";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { updateManifestLink, updateAppleTouchIcon } from "@/application/PwaThemeUpdater";
-import { STYLE_IDS, THEME_IDS_BY_STYLE } from "@/application/SettingsStorage";
+import { STYLE_IDS, THEME_IDS_BY_STYLE } from "@/theme/themeIds";
 import { launcherIconKey } from "@/theme/launcherIcon";
 
 // Spies that still update the page links, so tests can read the hrefs too

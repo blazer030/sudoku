@@ -1,6 +1,6 @@
 // What every style's palette is made of: the tokens, and the builder that fills in each theme's
 // tints and aliases. Relative imports only: scripts/ import this file through palettes.ts.
-import type { ColorThemeId, StyleId } from "../application/SettingsStorage";
+import type { ColorThemeId, StyleId } from "./themeIds";
 import { mixColors } from "./contrast";
 
 export const PALETTE_TOKENS = [

@@ -31,7 +31,7 @@ import type { BillingService, Product } from "@/application/billing/BillingServi
 import { startAppearanceSync } from "@/presentation/theme/appearanceSync";
 import { startLauncherIconSync } from "@/presentation/theme/launcherIconSync";
 import { STYLES, getPalette, rememberedThemeFor } from "@/theme/palettes";
-import { STYLE_IDS } from "@/application/SettingsStorage";
+import { STYLE_IDS } from "@/theme/themeIds";
 import Settings from "@/presentation/pages/settings/Settings.vue";
 import { appVersion } from "@/utils/appVersion";
 import { handleBackButton } from "@/presentation/composables/backDismissal";
