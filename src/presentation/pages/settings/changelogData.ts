@@ -14,6 +14,49 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
     {
+        version: "2.2.0",
+        date: "2026-10-23",
+        changes: [
+            {
+                text: {
+                    en: "A fresh look: choose from three styles, Minimal Motion, Tactile Tiles and Paper Notebook, each with its own colours, in light or dark mode",
+                    "zh-Hant": "全新外觀：三種風格可以選（極簡動態、實體方塊、紙本筆記），各有自己的主題色，並支援淺色和深色模式",
+                },
+            },
+            {
+                text: {
+                    en: "Reveal Cell now walks you through the reasoning step by step",
+                    "zh-Hant": "「揭示一格」會一步一步帶你看推理過程",
+                },
+            },
+            {
+                text: {
+                    en: "Game Review and the Walkthrough play step by step and are easier to follow",
+                    "zh-Hant": "遊戲回顧和解題演示改成逐步播放，更容易看懂",
+                },
+            },
+            {
+                text: {
+                    en: "Statistics show more for each difficulty",
+                    "zh-Hant": "統計頁可以依難度看到更多紀錄",
+                },
+            },
+            {
+                text: {
+                    en: "Smoother play: quicker notes, clearer highlights and many small improvements",
+                    "zh-Hant": "操作更順手：寫筆記更快、標示更清楚，還有許多小改善",
+                },
+            },
+            {
+                text: {
+                    en: "Lighter and more natural: about half the download size, and Back closes menus and dialogs first",
+                    "zh-Hant": "更輕巧也更好用：下載大小減少約一半，返回鍵會先關閉選單和對話框",
+                },
+                appOnly: true,
+            },
+        ],
+    },
+    {
         version: "2.1.1",
         date: "2026-10-21",
         changes: [
