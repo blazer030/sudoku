@@ -1,6 +1,7 @@
 // The app icon: a 3×3 block of tiles on a rounded square in the theme's primary.
 // public/sudoku-<theme>.svg and every launcher and PWA icon are rendered from this.
 import { getPalette, STYLES } from "../src/theme/palettes";
+import type { ColorMode } from "../src/application/SettingsStorage";
 
 export interface IconTheme {
     id: string;
@@ -12,10 +13,15 @@ export interface IconTheme {
 // Icons use the minimal style's light palette, whatever style the app is set to
 const ICON_STYLE = "minimal";
 
-export const ICON_THEMES: IconTheme[] = STYLES[ICON_STYLE].themes.map((theme) => {
-    const palette = getPalette(ICON_STYLE, theme.id, "light");
+const iconThemesIn = (mode: ColorMode): IconTheme[] => STYLES[ICON_STYLE].themes.map((theme) => {
+    const palette = getPalette(ICON_STYLE, theme.id, mode);
     return { id: theme.id, primary: palette.primary, onPrimary: palette["on-primary"], background: palette.background };
 });
+
+export const ICON_THEMES: IconTheme[] = iconThemesIn("light");
+
+// Android's -night launcher resources: the dark palette's lighter primary with dark tiles
+export const DARK_ICON_THEMES: IconTheme[] = iconThemesIn("dark");
 
 const TILE_ORIGINS = [48, 100, 152];
 const TILE_SIZE = 40;

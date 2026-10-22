@@ -51,7 +51,8 @@ describe("iconTheme", () => {
         const artwork = readFileSync("scripts/iconArtwork.ts", "utf8");
 
         expect(artwork).toMatch(/const ICON_STYLE = "minimal";/);
-        expect(artwork).toMatch(/getPalette\(ICON_STYLE,\s*theme\.id,\s*"light"\)/);
+        expect(artwork).toMatch(/getPalette\(ICON_STYLE,\s*theme\.id,\s*mode\)/);
+        expect(artwork).toMatch(/export const ICON_THEMES: IconTheme\[\] = iconThemesIn\("light"\);/);
         expect(artwork).toMatch(/primary:\s*palette\.primary/);
         for (const id of ICON_THEME_IDS) {
             expect(ICON_COLORS[id], id).toBe(getPalette("minimal", id, "light").primary);

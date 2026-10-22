@@ -2,7 +2,7 @@ import sharp from "sharp";
 import { mkdirSync, writeFileSync } from "fs";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
-import { ICON_THEMES, iconSvg, type IconTheme } from "./iconArtwork";
+import { DARK_ICON_THEMES, ICON_THEMES, iconSvg, type IconTheme } from "./iconArtwork";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -29,11 +29,19 @@ const SOURCE_GRID_SIZE = 144;
 const FOREGROUND_BASE_NAME = "ic_launcher_tiles_foreground";
 
 const FOREGROUND_DENSITIES: DensityDef[] = [
-    { name: "mipmap-mdpi",    size: 108 },
-    { name: "mipmap-hdpi",    size: 162 },
-    { name: "mipmap-xhdpi",   size: 216 },
-    { name: "mipmap-xxhdpi",  size: 324 },
-    { name: "mipmap-xxxhdpi", size: 432 },
+    { name: "mdpi",    size: 108 },
+    { name: "hdpi",    size: 162 },
+    { name: "xhdpi",   size: 216 },
+    { name: "xxhdpi",  size: 324 },
+    { name: "xxxhdpi", size: 432 },
+];
+
+// Launchers resolve the icon's resources in the system's configuration, so the -night set follows
+// the system dark theme (never the app's own appearance setting). Legacy PNGs (API 24-25) have
+// no system dark theme to follow and stay light only.
+const ADAPTIVE_VARIANTS = [
+    { qualifier: "", themes: ICON_THEMES },
+    { qualifier: "-night", themes: DARK_ICON_THEMES },
 ];
 
 const tilesForegroundSvg = (svgContent: string): string => {
@@ -57,22 +65,35 @@ const adaptiveIconXml = (theme: IconTheme): string => `<?xml version="1.0" encod
 </adaptive-icon>
 `;
 
-const themeColorsXml = (): string => `<?xml version="1.0" encoding="utf-8"?>
+const themeColorsXml = (themes: IconTheme[]): string => `<?xml version="1.0" encoding="utf-8"?>
 <resources>
-${ICON_THEMES.map((theme) => `    <color name="ic_launcher_${theme.id}_background">${theme.primary}</color>`).join("\n")}
+${themes.map((theme) => `    <color name="ic_launcher_${theme.id}_background">${theme.primary}</color>`).join("\n")}
 </resources>
 `;
 
+// Every theme shares one foreground, so its tile colour must be the same for all of them
+const sharedOnPrimary = (themes: IconTheme[]): string => {
+    const colors = new Set(themes.map(theme => theme.onPrimary));
+    if (colors.size !== 1) throw new Error(`Icon themes disagree on the tile colour: ${[...colors].join(", ")}`);
+    return themes[0].onPrimary;
+};
+
 const generateAdaptiveIcons = async () => {
-    // The foreground keeps only the tiles, so the primary passed here does not show
-    const foregroundSvg = Buffer.from(tilesForegroundSvg(iconSvg(ICON_THEMES[0])));
-    for (const density of FOREGROUND_DENSITIES) {
-        const outDir = resolve(RES_ROOT, density.name);
-        mkdirSync(outDir, { recursive: true });
-        await sharp(foregroundSvg)
-            .resize(density.size, density.size)
-            .png()
-            .toFile(resolve(outDir, `${FOREGROUND_BASE_NAME}.png`));
+    for (const { qualifier, themes } of ADAPTIVE_VARIANTS) {
+        // The foreground keeps only the tiles, so the primary passed here does not show
+        const foregroundSvg = Buffer.from(tilesForegroundSvg(iconSvg({ primary: themes[0].primary, onPrimary: sharedOnPrimary(themes) })));
+        for (const density of FOREGROUND_DENSITIES) {
+            const outDir = resolve(RES_ROOT, `mipmap${qualifier}-${density.name}`);
+            mkdirSync(outDir, { recursive: true });
+            await sharp(foregroundSvg)
+                .resize(density.size, density.size)
+                .png()
+                .toFile(resolve(outDir, `${FOREGROUND_BASE_NAME}.png`));
+        }
+
+        const valuesDir = resolve(RES_ROOT, `values${qualifier}`);
+        mkdirSync(valuesDir, { recursive: true });
+        writeFileSync(resolve(valuesDir, "ic_launcher_theme_colors.xml"), themeColorsXml(themes));
     }
 
     const xmlDir = resolve(RES_ROOT, "mipmap-anydpi-v26");
@@ -82,8 +103,7 @@ const generateAdaptiveIcons = async () => {
         writeFileSync(resolve(xmlDir, `ic_launcher_${theme.id}.xml`), xml);
         writeFileSync(resolve(xmlDir, `ic_launcher_${theme.id}_round.xml`), xml);
     }
-    writeFileSync(resolve(RES_ROOT, "values/ic_launcher_theme_colors.xml"), themeColorsXml());
-    console.log("Generated adaptive launcher icons and theme colors.");
+    console.log("Generated adaptive launcher icons and theme colors, light and night.");
 };
 
 const main = async () => {
