@@ -24,9 +24,11 @@ const reducedMotionBlocks = (css: string): string[] => {
 
 describe("reduced motion", () => {
     const css = readFileSync("src/style/index.css", "utf8");
+    const minimalCss = readFileSync("src/style/styles/minimal.css", "utf8");
 
     it("should keep every reduced-motion rule in one block", () => {
         expect(reducedMotionBlocks(css)).toHaveLength(1);
+        expect(reducedMotionBlocks(minimalCss)).toHaveLength(1);
     });
 
     it("should drop the movement from enter and leave transitions, keeping the fades", () => {
@@ -41,9 +43,10 @@ describe("reduced motion", () => {
 
     it("should stop the hint reveal pop, press motion and sliding indicator", () => {
         const [block] = reducedMotionBlocks(css);
+        const [minimalBlock] = reducedMotionBlocks(minimalCss);
 
         expect(block).toContain(".animate-hint-reveal-pop");
-        expect(block).toContain("[data-press-bounce]");
-        expect(block).toContain(".segmented-indicator-motion");
+        expect(minimalBlock).toContain("[data-press-bounce]");
+        expect(minimalBlock).toContain(".segmented-indicator-motion");
     });
 });
