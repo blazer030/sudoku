@@ -1,7 +1,8 @@
 /* The app's web fonts, bundled so every style reads the same offline. Generated subsets: run
-   npm run generate:fonts after adding copy with new Chinese characters. A browser downloads a face
-   only when text uses it, so only paper ever fetches Caveat and LXGW WenKai TC. Each family's
-   licence (SIL Open Font License) sits beside its files. */
+   npm run generate:fonts after adding copy with new Chinese characters. The installed web app's
+   service worker precaches all five files and the Android app ships them, so they are there
+   offline; a page only reads Caveat and LXGW WenKai TC while paper's text uses them. Each family's
+   licence (SIL Open Font License) is in public/fonts/licenses/. */
 
 @font-face {
     font-family: "Outfit";

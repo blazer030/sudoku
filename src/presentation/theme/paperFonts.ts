@@ -1,7 +1,8 @@
 /**
- * Paper's handwriting is Caveat, bundled with the app (src/style/fonts.css) and fetched by the
- * browser only once paper's text uses it. Paper enlarges its handwriting only once Caveat has
- * loaded (data-paper-fonts="ready" on <html>); until then the fallback faces stay full-size.
+ * Paper's handwriting is Caveat, bundled with the app (src/style/fonts.css; the web app's service
+ * worker precaches it for everyone). A page loads the face once paper's text uses it, and paper
+ * enlarges its handwriting only once it has loaded (data-paper-fonts="ready" on <html>); until
+ * then the fallback faces stay full-size.
  */
 
 const HANDWRITING_DIGITS = "0123456789";
