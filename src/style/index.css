@@ -72,10 +72,10 @@
 /* The boards (game, review, walkthrough) give up width on a short screen so the game's digit keys
    stay on it, and all three stay the same size. 331px is what the game screen needs besides the
    board (page padding, header, gaps, controls and two rows of 56px keys), measured at 360×640;
-   the board is square, so its width is its height. It never goes under 17rem: a short but wide
-   window (a phone in landscape, split screen) scrolls instead. */
+   the board is square, so its width is its height. It never goes under 15rem, which still fits a
+   640px phone after its system bars; a shorter window (a phone in landscape, split screen) scrolls. */
 @utility max-w-board-fit {
-  max-width: max(17rem, calc(100dvh - 331px - var(--safe-area-inset-top, env(safe-area-inset-top)) - var(--safe-area-inset-bottom, env(safe-area-inset-bottom))));
+  max-width: max(15rem, calc(100dvh - 331px - var(--safe-area-inset-top, env(safe-area-inset-top)) - var(--safe-area-inset-bottom, env(safe-area-inset-bottom))));
 }
 
 :root {

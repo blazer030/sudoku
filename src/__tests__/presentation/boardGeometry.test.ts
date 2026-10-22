@@ -51,7 +51,8 @@ describe("board geometry", () => {
     it("should cap the boards by the screen's height, with a floor for short but wide windows", () => {
         const utility = /@utility max-w-board-fit \{([^}]*)\}/.exec(readFileSync("src/style/index.css", "utf8"))?.[1] ?? "";
         // A short but wide window (a phone in landscape, split screen) keeps a usable board and scrolls
-        expect(utility).toMatch(/max-width: max\(17rem, calc\(100dvh - /);
+        // 15rem (240px) still fits a 640px phone whose status and navigation bars take 72px
+        expect(utility).toMatch(/max-width: max\(15rem, calc\(100dvh - /);
         expect(utility).toContain("safe-area-inset-top");
         expect(utility).toContain("safe-area-inset-bottom");
     });
