@@ -185,6 +185,7 @@ import { ROUTER_PATH } from "@/router";
 import { useStatisticsStore } from "@/stores/statisticsStore";
 import type { GameResult } from "@/application/statistics/StatisticsRepository";
 import { formatTime } from "@/utils/formatTime";
+import { countPlayStreak } from "@/application/statistics/playStreak";
 import { useI18n } from "vue-i18n";
 import { useAppLocale } from "@/presentation/i18n/useAppLocale";
 import { formatDate } from "@/presentation/i18n/formatDate";
@@ -203,39 +204,9 @@ const winRateDisplay = computed(() =>
     `${Math.round(stats.value.overall.winRate * 100)}%`
 );
 
-const dayStreak = computed(() => {
-    const games = stats.value.recentGames;
-    if (games.length === 0) return 0;
-
-    let streak = 0;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const playedDates = new Set(
-        games.filter(game => game.completed).map(game => {
-            const date = new Date(game.date);
-            date.setHours(0, 0, 0, 0);
-            return date.getTime();
-        })
-    );
-
-    const sortedDates = [...playedDates].sort((dateA, dateB) => dateB - dateA);
-    if (sortedDates.length === 0) return 0;
-
-    const msPerDay = 86400000;
-    let expectedDate = today.getTime();
-
-    for (const date of sortedDates) {
-        if (date === expectedDate || date === expectedDate - msPerDay) {
-            streak++;
-            expectedDate = date - msPerDay;
-        } else {
-            break;
-        }
-    }
-
-    return streak;
-});
+const dayStreak = computed(() =>
+    countPlayStreak(statisticsStore.history.map(game => game.date), new Date())
+);
 
 const formatBestTime = (seconds: number | null): string => {
     if (seconds === null) return "--:--";

@@ -80,6 +80,18 @@ describe("Statistics", () => {
         expect(wrapper.find("[data-testid='win-rate']").text()).toContain("50%");
     });
 
+    it("should count a day with only a given-up game in the streak", () => {
+        vi.useFakeTimers();
+        vi.setSystemTime(new Date(2026, 9, 21, 20, 0));
+        recordGames([{ difficulty: "easy", elapsedSeconds: 100, completed: false }]);
+        vi.setSystemTime(new Date(2026, 9, 22, 9, 0));
+        recordGames([{ difficulty: "hard", elapsedSeconds: 100, completed: false }]);
+
+        const { wrapper } = mountStatistics();
+
+        expect(wrapper.find("[data-testid='day-streak']").text()).toContain("2");
+    });
+
     it("should display best times per difficulty", () => {
         recordGames([
             { difficulty: "easy", elapsedSeconds: 263, completed: true },
