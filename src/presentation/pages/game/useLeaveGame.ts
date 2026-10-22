@@ -19,9 +19,11 @@ interface LeaveGameOptions {
     analytics?: AnalyticsService;
     /** Runs once leaving is confirmed, before the game is saved or given up. */
     onLeave?: () => void;
+    /** Closes the topmost other overlay (hint menu, hint panel); returns whether one was open. */
+    dismissOverlay?: () => boolean;
 }
 
-export const useLeaveGame = ({ sudoku, difficulty, completed, getElapsedSeconds, getReplayData, analytics, onLeave }: LeaveGameOptions) => {
+export const useLeaveGame = ({ sudoku, difficulty, completed, getElapsedSeconds, getReplayData, analytics, onLeave, dismissOverlay }: LeaveGameOptions) => {
     const router = useRouter();
     const leaveDialog = provideLeaveDialog();
     const leavingConfirmed = ref(false);
@@ -65,6 +67,12 @@ export const useLeaveGame = ({ sudoku, difficulty, completed, getElapsedSeconds,
 
     onBeforeRouteLeave(() => {
         if (completed.value || leavingConfirmed.value) return true;
+        // Back closes the topmost overlay first; only a bare game screen asks to leave.
+        if (leaveDialog.visible.value) {
+            leaveDialog.close("cancel");
+            return false;
+        }
+        if (dismissOverlay?.()) return false;
         void showLeaveDialog();
         return false;
     });

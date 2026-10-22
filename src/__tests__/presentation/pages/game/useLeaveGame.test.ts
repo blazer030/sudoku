@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { ref, defineComponent } from "vue";
 import { mount } from "@vue/test-utils";
-import { createRouter, createMemoryHistory } from "vue-router";
+import { createRouter, createMemoryHistory, RouterView } from "vue-router";
 import { createPinia, setActivePinia } from "pinia";
 import { Sudoku } from "@/domain/game/Sudoku";
 import { PuzzleCell } from "@/domain/board/PuzzleCell";
@@ -59,9 +59,14 @@ type LeaveApi = ReturnType<typeof useLeaveGame>;
 interface MountConfig {
     sudoku: Sudoku;
     analytics: AnalyticsService;
+    dismissOverlay?: () => boolean;
 }
 
-const mountLeaveHarness = ({ sudoku, analytics }: MountConfig): LeaveApi => {
+const mountLeaveHarness = async (config: MountConfig): Promise<LeaveApi> => {
+    return (await mountLeaveHarnessWithRouter(config)).api;
+};
+
+const mountLeaveHarnessWithRouter = async ({ sudoku, analytics, dismissOverlay }: MountConfig) => {
     const captured: { api: LeaveApi | undefined } = { api: undefined };
     const Harness = defineComponent({
         setup() {
@@ -72,25 +77,31 @@ const mountLeaveHarness = ({ sudoku, analytics }: MountConfig): LeaveApi => {
                 getElapsedSeconds: () => 60,
                 getReplayData: emptyReplay,
                 analytics,
+                dismissOverlay,
             });
             return () => null;
         },
     });
     const router = createRouter({
         history: createMemoryHistory(),
-        routes: [{ path: "/", component: Harness }],
+        routes: [
+            { path: "/", component: Harness },
+            { path: "/home", component: { template: "<div />" } },
+        ],
     });
-    void router.push("/");
-    mount(Harness, { global: { plugins: [router] } });
+    await router.push("/");
+    // onBeforeRouteLeave only registers for a component rendered by a router-view
+    const App = defineComponent({ components: { RouterView }, template: "<RouterView />" });
+    mount(App, { global: { plugins: [router] } });
     if (captured.api === undefined) throw new Error("useLeaveGame did not initialize");
-    return captured.api;
+    return { api: captured.api, router };
 };
 
 describe("useLeaveGame — analytics", () => {
     it("emits game_abandon with progress computed without clue cells", async () => {
         const logEvent = vi.fn().mockResolvedValue(undefined);
         // 40 clue cells, 41 empty cells with no entries yet.
-        const api = mountLeaveHarness({
+        const api = await mountLeaveHarness({
             sudoku: buildSudokuWithFilledCount(40),
             analytics: { logEvent },
         });
@@ -110,7 +121,7 @@ describe("useLeaveGame — analytics", () => {
     it("emits progress, correct and incorrect percentages of the player's cells", async () => {
         const logEvent = vi.fn().mockResolvedValue(undefined);
         // 81 empty cells: 40 entries, 20 of them wrong.
-        const api = mountLeaveHarness({
+        const api = await mountLeaveHarness({
             sudoku: buildSudokuWithEntries(40, 20),
             analytics: { logEvent },
         });
@@ -129,7 +140,7 @@ describe("useLeaveGame — analytics", () => {
 
     it("does not emit game_abandon when user chooses save", async () => {
         const logEvent = vi.fn().mockResolvedValue(undefined);
-        const api = mountLeaveHarness({
+        const api = await mountLeaveHarness({
             sudoku: buildSudokuWithFilledCount(10),
             analytics: { logEvent },
         });
@@ -142,7 +153,7 @@ describe("useLeaveGame — analytics", () => {
 
     it("does not emit game_abandon when user cancels", async () => {
         const logEvent = vi.fn().mockResolvedValue(undefined);
-        const api = mountLeaveHarness({
+        const api = await mountLeaveHarness({
             sudoku: buildSudokuWithFilledCount(10),
             analytics: { logEvent },
         });
@@ -156,7 +167,7 @@ describe("useLeaveGame — analytics", () => {
 
 describe("useLeaveGame — save", () => {
     it("saves the session's replay with the game", async () => {
-        const api = mountLeaveHarness({
+        const api = await mountLeaveHarness({
             sudoku: buildSudokuWithFilledCount(10),
             analytics: { logEvent: vi.fn().mockResolvedValue(undefined) },
         });
@@ -165,5 +176,44 @@ describe("useLeaveGame — save", () => {
         await api.showLeaveDialog();
 
         expect(useGameStore().savedGame?.replay).toEqual(emptyReplay());
+    });
+});
+
+describe("useLeaveGame — Back key", () => {
+    const harness = (dismissOverlay?: () => boolean) => mountLeaveHarnessWithRouter({
+        sudoku: buildSudokuWithFilledCount(10),
+        analytics: { logEvent: vi.fn().mockResolvedValue(undefined) },
+        dismissOverlay,
+    });
+
+    it("opens the leave dialog when nothing else is open", async () => {
+        const { api, router } = await harness(() => false);
+
+        await router.push("/home");
+
+        expect(api.leaveDialog.visible.value).toBe(true);
+        expect(router.currentRoute.value.path).toBe("/");
+    });
+
+    it("closes the open overlay instead of opening the leave dialog", async () => {
+        const dismissOverlay = vi.fn(() => true);
+        const { api, router } = await harness(dismissOverlay);
+
+        await router.push("/home");
+
+        expect(dismissOverlay).toHaveBeenCalledOnce();
+        expect(api.leaveDialog.visible.value).toBe(false);
+        expect(router.currentRoute.value.path).toBe("/");
+    });
+
+    it("closes the leave dialog itself instead of stacking another", async () => {
+        const { api, router } = await harness(() => false);
+        await router.push("/home");
+        expect(api.leaveDialog.visible.value).toBe(true);
+
+        await router.push("/home");
+
+        expect(api.leaveDialog.visible.value).toBe(false);
+        expect(router.currentRoute.value.path).toBe("/");
     });
 });

@@ -132,5 +132,18 @@ export const useHintActions = ({
         }
     };
 
-    return { errorCells, clearErrors, isError, isRevealed, openHintMenu, hintMode };
+    // Closes whichever hint overlay is on top (the menu, else the hint panel); false when none is open.
+    const dismissOverlay = (): boolean => {
+        if (hintMenu.visible.value) {
+            hintMenu.close("close");
+            return true;
+        }
+        if (hintMode.active.value) {
+            hintMode.cancel();
+            return true;
+        }
+        return false;
+    };
+
+    return { errorCells, clearErrors, isError, isRevealed, openHintMenu, hintMode, dismissOverlay };
 };

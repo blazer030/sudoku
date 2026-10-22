@@ -1332,7 +1332,7 @@ describe("Game", () => {
             expect(boardOf(wrapper)).toEqual(before);
         });
 
-        it("should end hint mode without changing the board when leaving through the router", async () => {
+        it("should end hint mode without changing the board when leaving from the header", async () => {
             const wrapper = mountGame();
             await wrapper.find("[data-testid='note-button']").trigger("click");
             await wrapper.find("[data-testid='cell-0-3']").trigger("click");
@@ -1344,9 +1344,7 @@ describe("Game", () => {
             expect(wrapper.find("[data-testid='hint-panel']").exists()).toBe(true);
             const before = boardOf(wrapper);
 
-            const leaveGuards = vi.mocked(onBeforeRouteLeave).mock.calls;
-            const leaveGuard = leaveGuards[leaveGuards.length - 1][0] as unknown as () => boolean;
-            expect(leaveGuard()).toBe(false);
+            await wrapper.find("[data-testid='back-button']").trigger("click");
             await flushPromises();
             await wrapper.find("[data-testid='save-and-leave-button']").trigger("click");
             await flushPromises();
@@ -1357,6 +1355,62 @@ describe("Game", () => {
             const saved = useGameStore().savedGame;
             expect(saved?.cells.flat().map(({ entry, notes }) => ({ entry, notes }))).toEqual(before);
             expect(saved?.hintsUsed).toBe(1);
+        });
+    });
+
+    describe("System Back key", () => {
+        // Android's Back key reaches the game as a route-leave attempt.
+        const pressBack = async () => {
+            const leaveGuards = vi.mocked(onBeforeRouteLeave).mock.calls;
+            const leaveGuard = leaveGuards[leaveGuards.length - 1][0] as unknown as () => boolean;
+            expect(leaveGuard()).toBe(false);
+            await flushPromises();
+        };
+
+        it("should open the leave dialog when nothing is open", async () => {
+            const wrapper = mountGame();
+
+            await pressBack();
+
+            expect(wrapper.find("[data-testid='leave-game-dialog']").exists()).toBe(true);
+        });
+
+        it("should close the hint menu without opening the leave dialog", async () => {
+            const wrapper = mountGame();
+            await wrapper.find("[data-testid='hint-button']").trigger("click");
+            expect(wrapper.find("[data-testid='hint-menu']").exists()).toBe(true);
+
+            await pressBack();
+
+            expect(wrapper.find("[data-testid='hint-menu']").exists()).toBe(false);
+            expect(wrapper.find("[data-testid='leave-game-dialog']").exists()).toBe(false);
+        });
+
+        it("should close the leave dialog instead of stacking another", async () => {
+            const wrapper = mountGame();
+            await pressBack();
+            expect(wrapper.find("[data-testid='leave-game-dialog']").exists()).toBe(true);
+
+            await pressBack();
+
+            expect(wrapper.find("[data-testid='leave-game-dialog']").exists()).toBe(false);
+        });
+
+        it("should end hint mode without opening the leave dialog", async () => {
+            const wrapper = mountGame();
+            await wrapper.find("[data-testid='note-button']").trigger("click");
+            await wrapper.find("[data-testid='cell-0-3']").trigger("click");
+            await wrapper.find("[data-testid='number-6']").trigger("click");
+            await wrapper.find("[data-testid='note-button']").trigger("click");
+            await wrapper.find("[data-testid='cell-0-2']").trigger("click");
+            await wrapper.find("[data-testid='number-4']").trigger("click");
+            await openRevealCell(wrapper);
+            expect(wrapper.find("[data-testid='hint-panel']").exists()).toBe(true);
+
+            await pressBack();
+
+            expect(wrapper.find("[data-testid='hint-panel']").exists()).toBe(false);
+            expect(wrapper.find("[data-testid='leave-game-dialog']").exists()).toBe(false);
         });
     });
 

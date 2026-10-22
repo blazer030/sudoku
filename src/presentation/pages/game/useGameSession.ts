@@ -97,7 +97,7 @@ export const useGameSession = ({ onPlayAgain }: GameSessionOptions) => {
 
     const gameToast = useGameToast();
 
-    const { clearErrors, isError, isRevealed, openHintMenu, hintMode } = useHintActions({
+    const { clearErrors, isError, isRevealed, openHintMenu, hintMode, dismissOverlay } = useHintActions({
         sudoku: sudoku.raw(),
         stepRecorder,
         autoRemoveNotes: () => settingsStore.autoRemoveNotes,
@@ -117,6 +117,7 @@ export const useGameSession = ({ onPlayAgain }: GameSessionOptions) => {
         analytics,
         // Hint mode is never saved: leaving ends it with the board untouched.
         onLeave: hintMode.cancel,
+        dismissOverlay,
     });
 
     const timerPaused = computed(() => completed.value || leaveDialog.visible.value);
