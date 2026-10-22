@@ -1,7 +1,6 @@
 import { createPinia, setActivePinia } from "pinia";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { updateManifestLink, updateAppleTouchIcon } from "@/application/PwaThemeUpdater";
-import type { IconService } from "@/application/icon/IconService";
 import { ICON_THEME_IDS, STYLE_IDS, THEME_IDS_BY_STYLE } from "@/application/SettingsStorage";
 
 // Spies that still update the page links, so tests can read the hrefs too
@@ -151,117 +150,45 @@ describe("settingsStore", () => {
         expect(updateAppleTouchIcon).toHaveBeenCalledWith("blue");
     });
 
-    describe("icon sync", () => {
-        const buildIconService = (): { service: IconService; setIcon: ReturnType<typeof vi.fn> } => {
-            const setIcon = vi.fn().mockResolvedValue(undefined);
-            return { service: { setIcon }, setIcon };
-        };
-
-        it("calls IconService.setIcon when theme changes and toggle is ON", async () => {
-            const { service, setIcon } = buildIconService();
-            const store = useSettingsStore();
-            store.setIconService(service);
-            store.setMatchLauncherIconToTheme(true);
-            setIcon.mockClear();
-
-            store.setColorTheme("blue");
-            await Promise.resolve();
-
-            expect(setIcon).toHaveBeenCalledWith("blue");
+    describe("with the page's icon links", () => {
+        beforeEach(() => {
+            for (const rel of ICON_LINK_RELS) {
+                const link = document.createElement("link");
+                link.rel = rel;
+                document.head.appendChild(link);
+            }
         });
 
-        it("does NOT call IconService.setIcon when theme changes and toggle is OFF", async () => {
-            const { service, setIcon } = buildIconService();
-            const store = useSettingsStore();
-            store.setIconService(service);
-
-            store.setColorTheme("blue");
-            await Promise.resolve();
-
-            expect(setIcon).not.toHaveBeenCalled();
+        afterEach(() => {
+            for (const rel of ICON_LINK_RELS) document.head.querySelector(`link[rel="${rel}"]`)?.remove();
         });
 
-        it("calls IconService.setIcon when toggle transitions OFF → ON (sync to current theme)", async () => {
-            const { service, setIcon } = buildIconService();
+        const linkHref = (rel: string): string => document.head.querySelector<HTMLLinkElement>(`link[rel="${rel}"]`)?.href ?? "";
+        const ICON_FILE_PATTERN = new RegExp(`-(?:${ICON_THEME_IDS.join("|")})\\.(?:svg|webmanifest|png)$`);
+
+        it("should point the links at the nearest icon when the style changes", () => {
             const store = useSettingsStore();
-            store.setIconService(service);
-            store.setColorTheme("purple");
-            setIcon.mockClear();
+            store.setColorTheme("teal");
 
-            store.setMatchLauncherIconToTheme(true);
-            await Promise.resolve();
+            store.setStyle("tactile");
+            expect(linkHref("manifest")).toMatch(/manifest-green\.webmanifest$/);
 
-            expect(setIcon).toHaveBeenCalledWith("purple");
+            store.setColorTheme("rust");
+            expect(linkHref("manifest")).toMatch(/manifest-orange\.webmanifest$/);
         });
 
-        it("does not call IconService.setIcon when toggle transitions ON → OFF", async () => {
-            const { service, setIcon } = buildIconService();
+        it("should never point the page links at a non-icon id", () => {
             const store = useSettingsStore();
-            store.setIconService(service);
-            store.setMatchLauncherIconToTheme(true);
-            setIcon.mockClear();
 
-            store.setMatchLauncherIconToTheme(false);
-            await Promise.resolve();
-
-            expect(setIcon).not.toHaveBeenCalled();
-        });
-
-        describe("with the page's icon links", () => {
-            beforeEach(() => {
-                for (const rel of ICON_LINK_RELS) {
-                    const link = document.createElement("link");
-                    link.rel = rel;
-                    document.head.appendChild(link);
-                }
-            });
-
-            afterEach(() => {
-                for (const rel of ICON_LINK_RELS) document.head.querySelector(`link[rel="${rel}"]`)?.remove();
-            });
-
-            const linkHref = (rel: string): string => document.head.querySelector<HTMLLinkElement>(`link[rel="${rel}"]`)?.href ?? "";
-            const ICON_FILE_PATTERN = new RegExp(`-(?:${ICON_THEME_IDS.join("|")})\\.(?:svg|webmanifest|png)$`);
-
-            it("should send the nearest icon when the style changes", async () => {
-                const { service, setIcon } = buildIconService();
-                const store = useSettingsStore();
-                store.setIconService(service);
-                store.setColorTheme("teal");
-                store.setMatchLauncherIconToTheme(true);
-                setIcon.mockClear();
-
-                store.setStyle("tactile");
-                await Promise.resolve();
-                expect(setIcon).toHaveBeenLastCalledWith("green");
-
-                store.setColorTheme("rust");
-                await Promise.resolve();
-                expect(setIcon).toHaveBeenLastCalledWith("orange");
-                expect(linkHref("manifest")).toMatch(/manifest-orange\.webmanifest$/);
-            });
-
-            it("should never hand a non-icon id to the icon or the page links", () => {
-                const { service, setIcon } = buildIconService();
-                const store = useSettingsStore();
-                store.setIconService(service);
-                store.setMatchLauncherIconToTheme(true);
-
-                for (const style of STYLE_IDS) {
-                    store.setStyle(style);
-                    for (const theme of THEME_IDS_BY_STYLE[style]) {
-                        store.setColorTheme(theme);
-                        for (const rel of ICON_LINK_RELS) {
-                            expect(linkHref(rel), `${style}/${theme} ${rel}`).toMatch(ICON_FILE_PATTERN);
-                        }
+            for (const style of STYLE_IDS) {
+                store.setStyle(style);
+                for (const theme of THEME_IDS_BY_STYLE[style]) {
+                    store.setColorTheme(theme);
+                    for (const rel of ICON_LINK_RELS) {
+                        expect(linkHref(rel), `${style}/${theme} ${rel}`).toMatch(ICON_FILE_PATTERN);
                     }
                 }
-
-                expect(setIcon.mock.calls.length).toBeGreaterThan(0);
-                for (const [iconTheme] of setIcon.mock.calls) {
-                    expect(ICON_THEME_IDS).toContain(iconTheme);
-                }
-            });
+            }
         });
     });
 });

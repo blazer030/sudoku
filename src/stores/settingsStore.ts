@@ -4,7 +4,6 @@ import { loadSettings, saveSettings, type Appearance, type ColorThemeId, type La
 import { rememberedThemeFor } from "@/theme/palettes";
 import { iconThemeFor } from "@/theme/iconTheme";
 import { updateManifestLink, updateAppleTouchIcon } from "@/application/PwaThemeUpdater";
-import type { IconService } from "@/application/icon/IconService";
 
 export const useSettingsStore = defineStore("settings", () => {
     const settings = loadSettings();
@@ -20,7 +19,6 @@ export const useSettingsStore = defineStore("settings", () => {
     const highlightScope = ref(settings.highlightScope);
     const seenLongPressTip = ref(settings.seenLongPressTip);
     const colorThemeByStyle = ref<RememberedThemes>(settings.colorThemeByStyle);
-    let iconService: IconService | null = null;
 
     // Only six icons exist; any other theme shows the nearest of them
     const currentIconTheme = () => iconThemeFor(style.value, colorTheme.value);
@@ -54,12 +52,9 @@ export const useSettingsStore = defineStore("settings", () => {
         colorThemeByStyle.value = { ...colorThemeByStyle.value, [style.value]: id };
         applyColorTheme();
         persistAll();
-        if (matchLauncherIconToTheme.value && iconService !== null) {
-            void iconService.setIcon(currentIconTheme());
-        }
     };
 
-    // Goes through setColorTheme so the manifest, launcher icon and storage all follow
+    // Goes through setColorTheme so the manifest and storage follow (launcherIconSync watches the result)
     const setStyle = (id: StyleId) => {
         style.value = id;
         setColorTheme(rememberedThemeFor(id, colorThemeByStyle.value));
@@ -86,12 +81,8 @@ export const useSettingsStore = defineStore("settings", () => {
     };
 
     const setMatchLauncherIconToTheme = (value: boolean) => {
-        const wasOn = matchLauncherIconToTheme.value;
         matchLauncherIconToTheme.value = value;
         persistAll();
-        if (!wasOn && value && iconService !== null) {
-            void iconService.setIcon(currentIconTheme());
-        }
     };
 
     const setLanguage = (value: LanguagePreference) => {
@@ -112,10 +103,6 @@ export const useSettingsStore = defineStore("settings", () => {
     const markLongPressTipSeen = () => {
         seenLongPressTip.value = true;
         persistAll();
-    };
-
-    const setIconService = (service: IconService) => {
-        iconService = service;
     };
 
     applyColorTheme();
@@ -144,6 +131,5 @@ export const useSettingsStore = defineStore("settings", () => {
         setAppearance,
         setHighlightScope,
         markLongPressTipSeen,
-        setIconService,
     };
 });

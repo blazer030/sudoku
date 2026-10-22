@@ -10,6 +10,7 @@ import { storeToRefs } from "pinia";
 import { i18n } from "@/presentation/i18n";
 import { startLocaleSync } from "@/presentation/i18n/localeSync";
 import { startAppearanceSync } from "@/presentation/theme/appearanceSync";
+import { startLauncherIconSync } from "@/presentation/theme/launcherIconSync";
 import { useGameStore } from "@/stores/gameStore";
 import { useDonateStore } from "@/stores/donateStore";
 import { useStatisticsStore } from "@/stores/statisticsStore";
@@ -74,8 +75,8 @@ app.provide(ICON_KEY, icon);
 app.provide(STATISTICS_REPOSITORY_KEY, statisticsRepository);
 app.provide(GAME_REPOSITORY_KEY, gameRepository);
 
-useSettingsStore().setIconService(icon);
 startAppearanceSync(storeToRefs(useSettingsStore()), systemBar, appearanceBridge);
+startLauncherIconSync(storeToRefs(useSettingsStore()), icon);
 useDonateStore().setBilling(billing);
 const gameStore = useGameStore();
 gameStore.setAnalytics(analytics);

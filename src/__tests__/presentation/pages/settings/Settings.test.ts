@@ -29,6 +29,7 @@ import { useStatisticsStore } from "@/stores/statisticsStore";
 import type { CellState, GameState } from "@/application/GameState";
 import type { BillingService, Product } from "@/application/billing/BillingService";
 import { startAppearanceSync } from "@/presentation/theme/appearanceSync";
+import { startLauncherIconSync } from "@/presentation/theme/launcherIconSync";
 import { STYLES, getPalette, rememberedThemeFor } from "@/theme/palettes";
 import { STYLE_IDS } from "@/application/SettingsStorage";
 import Settings from "@/presentation/pages/settings/Settings.vue";
@@ -132,10 +133,14 @@ describe("Settings.vue match-launcher-icon toggle", () => {
         const wrapper = mountSettings();
         const setIcon = vi.fn().mockResolvedValue(undefined);
         const settingsStore = useSettingsStore();
-        settingsStore.setIconService({ setIcon });
-        await wrapper.find("[data-testid='toggle-matchLauncherIconToTheme']").trigger("click");
+        const stopLauncherIconSync = startLauncherIconSync(storeToRefs(settingsStore), { setIcon });
+        try {
+            await wrapper.find("[data-testid='toggle-matchLauncherIconToTheme']").trigger("click");
 
-        expect(setIcon).toHaveBeenCalledWith(settingsStore.colorTheme);
+            expect(setIcon).toHaveBeenCalledWith(settingsStore.colorTheme);
+        } finally {
+            stopLauncherIconSync();
+        }
     });
 
     it("disables the setting when toggling from ON", async () => {
@@ -305,8 +310,9 @@ describe("Settings.vue appearance group", () => {
         const wrapper = mountSettings();
         const settingsStore = useSettingsStore();
         const setIcon = vi.fn().mockResolvedValue(undefined);
-        settingsStore.setIconService({ setIcon });
+        const stopLauncherIconSync = startLauncherIconSync(storeToRefs(settingsStore), { setIcon });
         settingsStore.setMatchLauncherIconToTheme(true);
+        await nextTick();
         setIcon.mockClear();
         const setStyle = vi.spyOn(settingsStore, "setStyle");
         const setColorTheme = vi.spyOn(settingsStore, "setColorTheme");
@@ -317,6 +323,7 @@ describe("Settings.vue appearance group", () => {
         expect(setStyle).not.toHaveBeenCalled();
         expect(setColorTheme).not.toHaveBeenCalled();
         expect(setIcon).not.toHaveBeenCalled();
+        stopLauncherIconSync();
     });
 
     it("should list the current style's themes with names and state", () => {
