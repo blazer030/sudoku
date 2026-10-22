@@ -61,68 +61,19 @@
 <script lang="ts" setup>
 import { computed } from "vue";
 import type { StyleId } from "@/application/SettingsStorage";
+import { MINIMAL_THUMBNAIL } from "@/style/styles/minimal/thumbnail";
+import { PAPER_THUMBNAIL } from "@/style/styles/paper/thumbnail";
+import { TACTILE_THUMBNAIL } from "@/style/styles/tactile/thumbnail";
+import type { ThumbnailLook } from "@/style/styles/thumbnailLook";
 import { PALETTE_TOKENS, type Palette } from "@/theme/palettes";
 
 const props = defineProps<{ styleId: StyleId; palette: Palette }>();
 
-interface ThumbnailLook {
-    /** The style's interface face, pinned on the thumbnail so the active style's never leaks in */
-    sansFont: string;
-    page: string;
-    board: string;
-    /** Added to every cell; the fill comes from the cell's role */
-    cell: string;
-    /** Added to the selected cell's fill */
-    selected: string;
-    given: string;
-    entered: string;
-    circledSelection: boolean;
-    key: string;
-    keyDigit: string;
-    pill: string;
-}
-
 // Each style's look as plain token classes, drawn with the thumbnail's own palette
 const THUMBNAIL_LOOKS: Record<StyleId, ThumbnailLook> = {
-    minimal: {
-        sansFont: "var(--font-default)",
-        page: "",
-        board: "bg-border",
-        cell: "",
-        selected: "ring-1 ring-inset ring-primary",
-        given: "font-sans",
-        entered: "font-sans font-medium",
-        circledSelection: false,
-        key: "shadow-card-sm",
-        keyDigit: "font-sans font-semibold",
-        pill: "",
-    },
-    tactile: {
-        sansFont: "var(--font-default)",
-        page: "",
-        board: "bg-background shadow-[inset_0_1px_2px_color-mix(in_srgb,var(--color-shadow)_22%,transparent)]",
-        cell: "shadow-[inset_0_-1px_0_color-mix(in_srgb,var(--color-shadow)_16%,transparent)]",
-        selected: "ring-1 ring-inset ring-primary",
-        given: "font-sans",
-        entered: "font-sans font-medium",
-        circledSelection: false,
-        key: "shadow-[0_2px_0_color-mix(in_srgb,var(--color-shadow)_28%,var(--color-background))]",
-        keyDigit: "font-sans font-semibold",
-        pill: "shadow-[0_2px_0_color-mix(in_srgb,var(--color-shadow)_28%,var(--color-background))]",
-    },
-    paper: {
-        sansFont: "var(--font-wenkai)",
-        page: "bg-[repeating-linear-gradient(to_bottom,transparent_0,transparent_7px,var(--color-rule)_7px,var(--color-rule)_8px)]",
-        board: "bg-border",
-        cell: "",
-        selected: "",
-        given: "font-print",
-        entered: "font-hand font-bold text-[10px]",
-        circledSelection: true,
-        key: "",
-        keyDigit: "font-hand font-bold text-[10px]",
-        pill: "-rotate-2",
-    },
+    minimal: MINIMAL_THUMBNAIL,
+    tactile: TACTILE_THUMBNAIL,
+    paper: PAPER_THUMBNAIL,
 };
 
 // A 3×3 mini board: a given digit, an entered digit and the selected cell
