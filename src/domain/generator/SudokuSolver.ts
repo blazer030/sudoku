@@ -1,5 +1,6 @@
 import { BOARD_SIZE } from "@/domain/board/constants";
 import { SudokuBoard } from "@/domain/board/SudokuBoard";
+import { countSolutionsWithPropagation } from "@/domain/generator/PropagatingSolutionCounter";
 
 export type DigitsProvider = () => number[];
 
@@ -11,10 +12,6 @@ export type SolutionCount = number | typeof UNKNOWN_SOLUTION_COUNT;
 export interface CountSolutionsOptions {
     /** How many search nodes to visit before giving up with `UNKNOWN_SOLUTION_COUNT`. */
     maxNodes: number;
-}
-
-interface SearchBudget {
-    nodesLeft: number;
 }
 
 export class SudokuSolver {
@@ -36,66 +33,9 @@ export class SudokuSolver {
     public countSolutions(board: number[][], limit?: number): number;
     public countSolutions(board: number[][], limit: number, options: CountSolutionsOptions): SolutionCount;
     public countSolutions(board: number[][], limit = 2, options?: CountSolutionsOptions): SolutionCount {
-        const puzzle = board.map(row => [...row]);
-        if (this.hasConflictingGivens(puzzle)) return 0;
-        const budget: SearchBudget = { nodesLeft: options?.maxNodes ?? Number.POSITIVE_INFINITY };
-        const count = this.countSolutionsRecursive(puzzle, limit, budget);
-        if (count < limit && budget.nodesLeft < 0) return UNKNOWN_SOLUTION_COUNT;
-        return count;
-    }
-
-    // The search only checks the digits it places, so givens that already clash must be caught first.
-    private hasConflictingGivens(puzzle: number[][]): boolean {
-        for (let row = 0; row < BOARD_SIZE; row++) {
-            for (let column = 0; column < BOARD_SIZE; column++) {
-                const digit = puzzle[row][column];
-                if (digit === 0) continue;
-                puzzle[row][column] = 0;
-                const valid = this.board.isValidPlacement(puzzle, row, column, digit);
-                puzzle[row][column] = digit;
-                if (!valid) return true;
-            }
-        }
-        return false;
-    }
-
-    // Branches on the empty cell with the fewest candidates, so a dead end shows up at once.
-    private countSolutionsRecursive(puzzle: number[][], limit: number, budget: SearchBudget): number {
-        budget.nodesLeft--;
-        if (budget.nodesLeft < 0) return 0;
-        let bestRow = -1;
-        let bestColumn = -1;
-        let bestCandidates: number[] = [];
-        for (let row = 0; row < BOARD_SIZE; row++) {
-            for (let column = 0; column < BOARD_SIZE; column++) {
-                if (puzzle[row][column] !== 0) continue;
-                const candidates = this.candidatesAt(puzzle, row, column);
-                if (candidates.length === 0) return 0;
-                if (bestRow === -1 || candidates.length < bestCandidates.length) {
-                    bestRow = row;
-                    bestColumn = column;
-                    bestCandidates = candidates;
-                }
-            }
-        }
-        if (bestRow === -1) return 1;
-
-        let count = 0;
-        for (const digit of bestCandidates) {
-            puzzle[bestRow][bestColumn] = digit;
-            count += this.countSolutionsRecursive(puzzle, limit - count, budget);
-            puzzle[bestRow][bestColumn] = 0;
-            if (count >= limit || budget.nodesLeft < 0) return count;
-        }
-        return count;
-    }
-
-    private candidatesAt(puzzle: number[][], row: number, column: number): number[] {
-        const candidates: number[] = [];
-        for (let digit = 1; digit <= BOARD_SIZE; digit++) {
-            if (this.board.isValidPlacement(puzzle, row, column, digit)) candidates.push(digit);
-        }
-        return candidates;
+        const maxNodes = options?.maxNodes ?? Number.POSITIVE_INFINITY;
+        const { solutions, exhausted } = countSolutionsWithPropagation(board, limit, maxNodes);
+        return exhausted ? UNKNOWN_SOLUTION_COUNT : solutions;
     }
 
     private fillBoard(board: number[][], digitsProvider?: DigitsProvider): boolean {
