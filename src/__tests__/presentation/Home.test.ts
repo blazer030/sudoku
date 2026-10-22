@@ -469,6 +469,19 @@ describe("Home", () => {
             expect(router.currentRoute.value.path).toBe(ROUTER_PATH.game);
         });
 
+        it("should no longer render the Continue card once the unfinished game is given up", async () => {
+            const { wrapper, router } = mountHome({ savedGame: dummySave });
+            await router.push("/");
+            await router.isReady();
+            expect(wrapper.find("[data-testid='continue-button']").exists()).toBe(true);
+
+            await wrapper.find("[data-testid='new-game-button']").trigger("click");
+            await wrapper.find("[data-testid='give-up-and-start-new-button']").trigger("click");
+            await flushPromises();
+
+            expect(wrapper.find("[data-testid='continue-button']").exists()).toBe(false);
+        });
+
         const giveUpAndStartNew = async (savedGame: GameState) => {
             const { wrapper, router, pinia } = mountHome({ savedGame });
             await router.push("/");
