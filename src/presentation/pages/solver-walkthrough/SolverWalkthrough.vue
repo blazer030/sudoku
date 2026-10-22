@@ -75,16 +75,20 @@
                         @select-digit="pickDigit"
                         @toggle-erase-mode="toggleEraseMode"
                     />
-                    <div class="flex gap-3">
+                    <div class="flex gap-3 w-full">
                         <button
-                            class="px-6 py-3 bg-danger text-on-danger rounded-2xl font-semibold cursor-pointer shadow-danger transition-all duration-200 hover:bg-danger-hover hover:shadow-primary-lg"
+                            v-press
+                            :disabled="isBoardEmpty"
+                            class="h-12 px-4 flex items-center gap-2 rounded-2xl text-foreground-secondary font-medium cursor-pointer transition-all duration-200 hover:bg-foreground/5 disabled:opacity-40 disabled:cursor-default"
                             data-testid="reset-button"
-                            @click="resetBoard"
+                            @click="confirmReset"
                         >
+                            <RotateCcw :size="18" />
                             {{ t("walkthrough.reset") }}
                         </button>
                         <button
-                            class="px-6 py-3 bg-primary text-on-primary rounded-2xl font-semibold cursor-pointer shadow-primary transition-all duration-200 hover:bg-primary-hover hover:shadow-primary-lg"
+                            v-press
+                            class="flex-1 h-12 bg-primary text-on-primary rounded-2xl font-semibold cursor-pointer shadow-primary transition-all duration-200 hover:bg-primary-hover hover:shadow-primary-lg"
                             data-testid="solve-button"
                             @click="runSolver"
                         >
@@ -141,6 +145,8 @@
             </div>
         </div>
         <div class="flex-1" />
+
+        <WalkthroughDialog />
     </div>
 </template>
 
@@ -148,7 +154,7 @@
 import { computed, ref, useTemplateRef, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
-import { ChevronLeft, ListFilter, PencilLine } from "lucide-vue-next";
+import { ChevronLeft, ListFilter, PencilLine, RotateCcw } from "lucide-vue-next";
 import { ROUTER_PATH } from "@/router";
 import { BOARD_SIZE } from "@/domain/board/constants";
 import { buildSolvePath } from "@/domain/solver/SolvePath";
@@ -161,6 +167,9 @@ import StepTag from "@/presentation/components/step-presentation/StepTag.vue";
 import { useHintExplanation } from "@/presentation/pages/game/hint-mode/useHintExplanation";
 import { useRoomBelow } from "@/presentation/pages/game/hint-mode/useRoomBelow";
 import { useWalkthroughPlayback } from "@/presentation/pages/solver-walkthrough/useWalkthroughPlayback";
+import { provideWalkthroughDialog } from "@/presentation/pages/solver-walkthrough/useWalkthroughDialog";
+import WalkthroughDialog from "@/presentation/pages/solver-walkthrough/WalkthroughDialog.vue";
+import { vPress } from "@/presentation/directives/press";
 import { TEST_PUZZLE_PRESETS } from "@/presentation/pages/solver-walkthrough/testPuzzles";
 import { isFeatureEnabled } from "@/utils/featureToggle";
 
@@ -181,6 +190,9 @@ const selectedCell = ref<CellPosition | null>(null);
 const selectedDigit = ref<number | null>(null);
 const eraseMode = ref(false);
 const emptyDigitCounts = Array.from({ length: 10 }, () => 0);
+const { open: openDialog } = provideWalkthroughDialog();
+
+const isBoardEmpty = computed(() => userValues.value.every((rowValues) => rowValues.every((value) => value === 0)));
 
 const {
     path,
@@ -263,6 +275,10 @@ const resetBoard = () => {
     selectedDigit.value = null;
     eraseMode.value = false;
     userValues.value = createEmptyBoard();
+};
+
+const confirmReset = async () => {
+    if (await openDialog("reset") === "confirm") resetBoard();
 };
 
 const toggleEraseMode = () => {

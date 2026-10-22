@@ -160,6 +160,13 @@ export const zhHant: MessageSchema = {
     walkthrough: {
         reset: "重設",
         solve: "解題",
+        dialog: {
+            reset: {
+                title: "清空盤面？",
+                message: "你輸入的數字會全部清除。",
+                confirm: "清空",
+            },
+        },
     },
     review: {
         title: "遊戲回顧",

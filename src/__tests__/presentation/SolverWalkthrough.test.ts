@@ -457,6 +457,71 @@ describe("SolverWalkthrough", () => {
         });
     });
 
+    describe("reset", () => {
+        const enterSeven = async (wrapper: VueWrapper) => {
+            await cellAt(wrapper, 3, 4).trigger("click");
+            await wrapper.find("[data-testid='number-7']").trigger("click");
+        };
+
+        it("should make reset a quiet text button", async () => {
+            const { wrapper } = mountWalkthrough();
+            const reset = () => wrapper.find("[data-testid='reset-button']");
+
+            expect(reset().classes()).toContain("text-foreground-secondary");
+            expect(reset().classes()).not.toContain("bg-danger");
+            expect(reset().attributes("disabled")).toBeDefined();
+
+            await enterSeven(wrapper);
+
+            expect(reset().attributes("disabled")).toBeUndefined();
+        });
+
+        it("should ask before clearing the board", async () => {
+            const { wrapper } = mountWalkthrough();
+            await enterSeven(wrapper);
+
+            await wrapper.find("[data-testid='reset-button']").trigger("click");
+
+            expect(wrapper.find("[data-testid='walkthrough-dialog-message']").text()).toBe("Every digit you entered will be removed.");
+            expect(cellAt(wrapper, 3, 4).text()).toBe("7");
+        });
+
+        it("should keep the puzzle when reset is cancelled", async () => {
+            const { wrapper } = mountWalkthrough();
+            await enterSeven(wrapper);
+
+            await wrapper.find("[data-testid='reset-button']").trigger("click");
+            await wrapper.find("[data-testid='walkthrough-dialog-cancel']").trigger("click");
+            await flushPromises();
+
+            expect(wrapper.find("[data-testid='walkthrough-dialog']").exists()).toBe(false);
+            expect(cellAt(wrapper, 3, 4).text()).toBe("7");
+        });
+
+        it("should clear the board when reset is confirmed", async () => {
+            const { wrapper } = mountWalkthrough();
+            await enterSeven(wrapper);
+
+            await wrapper.find("[data-testid='reset-button']").trigger("click");
+            await wrapper.find("[data-testid='walkthrough-dialog-confirm']").trigger("click");
+            await flushPromises();
+
+            expect(cellAt(wrapper, 3, 4).text()).toBe("");
+            expect(wrapper.find("[data-testid='reset-button']").attributes("disabled")).toBeDefined();
+        });
+
+        it("should ask in Traditional Chinese", async () => {
+            i18n.global.locale.value = "zh-Hant";
+            await nextTick();
+            const { wrapper } = mountWalkthrough();
+            await enterSeven(wrapper);
+
+            await wrapper.find("[data-testid='reset-button']").trigger("click");
+
+            expect(wrapper.find("[data-testid='walkthrough-dialog-title']").text()).toBe("清空盤面？");
+        });
+    });
+
     describe("in Traditional Chinese", () => {
         it("should name the technique and the cell, and keep the button labels", async () => {
             i18n.global.locale.value = "zh-Hant";

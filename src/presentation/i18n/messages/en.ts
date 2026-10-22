@@ -163,6 +163,13 @@ export const en = {
     walkthrough: {
         reset: "Reset",
         solve: "Solve",
+        dialog: {
+            reset: {
+                title: "Clear the board?",
+                message: "Every digit you entered will be removed.",
+                confirm: "Clear",
+            },
+        },
     },
     review: {
         title: "Game Review",
