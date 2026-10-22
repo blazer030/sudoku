@@ -51,11 +51,12 @@ interface HarnessParts {
     sudoku?: Sudoku;
     stepRecorder?: StepRecorder;
     onHintReveal?: (outcome: RevealOutcome) => void;
+    onNoConflicts?: () => void;
 }
 
 const mountHintHarness = (
     analytics: AnalyticsService,
-    { sudoku = buildPartialSudoku(), stepRecorder = new StepRecorder(), onHintReveal }: HarnessParts = {},
+    { sudoku = buildPartialSudoku(), stepRecorder = new StepRecorder(), onHintReveal, onNoConflicts }: HarnessParts = {},
 ) => {
     const captured: { api: HintApi | undefined } = { api: undefined };
     const Harness = defineComponent({
@@ -66,6 +67,7 @@ const mountHintHarness = (
                 autoRemoveNotes: () => true,
                 onRevealComplete: () => { /* noop */ },
                 onHintReveal,
+                onNoConflicts,
                 analytics,
             });
             return () => null;
@@ -113,6 +115,35 @@ describe("useHintActions — step recording", () => {
         expect(sudoku.hintTracker.recordedUsed).toBe(0);
         expect(stepRecorder.steps).toHaveLength(1);
         expect(stepRecorder.steps[0].action).toBe("autoNotes");
+    });
+});
+
+describe("useHintActions — check conflicts", () => {
+    it("reports no conflicts and still spends a hint", async () => {
+        openHintDialog.mockReset();
+        openHintDialog.mockResolvedValue("checkConflicts");
+        const sudoku = buildPartialSudoku();
+        const onNoConflicts = vi.fn();
+        const api = mountHintHarness({ logEvent: vi.fn().mockResolvedValue(undefined) }, { sudoku, onNoConflicts });
+
+        await api.openHintMenu();
+
+        expect(onNoConflicts).toHaveBeenCalledTimes(1);
+        expect(sudoku.hintTracker.totalUsed).toBe(1);
+    });
+
+    it("does not report no conflicts when a duplicate exists", async () => {
+        openHintDialog.mockReset();
+        openHintDialog.mockResolvedValue("checkConflicts");
+        const sudoku = buildPartialSudoku();
+        // Column 0 already has the clue 5
+        sudoku.fill(4, 0, 5);
+        const onNoConflicts = vi.fn();
+        const api = mountHintHarness({ logEvent: vi.fn().mockResolvedValue(undefined) }, { sudoku, onNoConflicts });
+
+        await api.openHintMenu();
+
+        expect(onNoConflicts).not.toHaveBeenCalled();
     });
 });
 

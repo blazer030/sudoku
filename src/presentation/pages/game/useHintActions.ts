@@ -14,6 +14,8 @@ interface HintActionsOptions {
     onRevealComplete: (origin: { row: number; column: number }) => void;
     onGroupCompleted?: (cells: { row: number; column: number }[], origin: { row: number; column: number }) => void;
     onHintReveal?: (outcome: RevealOutcome) => void;
+    /** Check Conflicts found no repeated digits; the hint is still spent. */
+    onNoConflicts?: () => void;
     analytics?: AnalyticsService;
 }
 
@@ -35,6 +37,7 @@ export const useHintActions = ({
     onRevealComplete,
     onGroupCompleted,
     onHintReveal,
+    onNoConflicts,
     analytics,
 }: HintActionsOptions) => {
     const hintMenu = provideHintMenu();
@@ -98,8 +101,8 @@ export const useHintActions = ({
     const openHintMenu = async () => {
         if (hintMode.active.value) return;
         const action = await hintMenu.open({
-            recordedUsed: sudoku.hintTracker.recordedUsed,
-            canUseHint: sudoku.hintTracker.canUseHint,
+            remaining: sudoku.hintTracker.remainingHints,
+            firstHintFree: sudoku.hintTracker.totalUsed === 0,
         });
         if (action === "close") return;
         // Plan before spending: a solved board has nothing to reveal and must not cost a hint.
@@ -114,6 +117,7 @@ export const useHintActions = ({
             break;
         case "checkConflicts":
             errorCells.value = sudoku.checkAllConflicts();
+            if (errorCells.value.length === 0) onNoConflicts?.();
             break;
         case "revealCell": {
             // A wrong entry or a solver path is shown step by step; only a stuck solver falls back to a random cell.
@@ -128,5 +132,18 @@ export const useHintActions = ({
         }
     };
 
-    return { errorCells, clearErrors, isError, isRevealed, openHintMenu, hintMode };
+    // Closes whichever hint overlay is on top (the menu, else the hint panel); false when none is open.
+    const dismissOverlay = (): boolean => {
+        if (hintMenu.visible.value) {
+            hintMenu.close("close");
+            return true;
+        }
+        if (hintMode.active.value) {
+            hintMode.cancel();
+            return true;
+        }
+        return false;
+    };
+
+    return { errorCells, clearErrors, isError, isRevealed, openHintMenu, hintMode, dismissOverlay };
 };

@@ -9,6 +9,8 @@ import { useSettingsStore } from "@/stores/settingsStore";
 import { storeToRefs } from "pinia";
 import { i18n } from "@/presentation/i18n";
 import { startLocaleSync } from "@/presentation/i18n/localeSync";
+import { startAppearanceSync } from "@/presentation/theme/appearanceSync";
+import { startLauncherIconSync } from "@/presentation/theme/launcherIconSync";
 import { useGameStore } from "@/stores/gameStore";
 import { useDonateStore } from "@/stores/donateStore";
 import { useStatisticsStore } from "@/stores/statisticsStore";
@@ -21,6 +23,12 @@ import { PlayBillingAdapter } from "@/infrastructure/billing/PlayBillingAdapter"
 import { ICON_KEY, type IconService } from "@/application/icon/IconService";
 import { DynamicIconAdapter } from "@/infrastructure/icon/DynamicIconAdapter";
 import { NoopIconAdapter } from "@/infrastructure/icon/NoopIconAdapter";
+import type { SystemBarService } from "@/application/systemBar/SystemBarService";
+import { CapacitorSystemBarAdapter } from "@/infrastructure/systemBar/CapacitorSystemBarAdapter";
+import { NoopSystemBarAdapter } from "@/infrastructure/systemBar/NoopSystemBarAdapter";
+import type { AppearanceBridgeService } from "@/application/appearanceBridge/AppearanceBridgeService";
+import { CapacitorAppearanceBridgeAdapter } from "@/infrastructure/appearanceBridge/CapacitorAppearanceBridgeAdapter";
+import { NoopAppearanceBridgeAdapter } from "@/infrastructure/appearanceBridge/NoopAppearanceBridgeAdapter";
 import { STATISTICS_REPOSITORY_KEY, type StatisticsRepository } from "@/application/statistics/StatisticsRepository";
 import { IndexedDBStatisticsRepository } from "@/infrastructure/statistics/IndexedDBStatisticsRepository";
 import { GAME_REPOSITORY_KEY, type GameRepository } from "@/application/game/GameRepository";
@@ -46,6 +54,14 @@ const icon: IconService = Capacitor.isNativePlatform()
     ? new DynamicIconAdapter()
     : new NoopIconAdapter();
 
+const systemBar: SystemBarService = Capacitor.isNativePlatform()
+    ? new CapacitorSystemBarAdapter()
+    : new NoopSystemBarAdapter();
+
+const appearanceBridge: AppearanceBridgeService = Capacitor.isNativePlatform()
+    ? new CapacitorAppearanceBridgeAdapter()
+    : new NoopAppearanceBridgeAdapter();
+
 const statisticsRepository: StatisticsRepository = new IndexedDBStatisticsRepository();
 const gameRepository: GameRepository = new IndexedDBGameRepository();
 
@@ -59,7 +75,8 @@ app.provide(ICON_KEY, icon);
 app.provide(STATISTICS_REPOSITORY_KEY, statisticsRepository);
 app.provide(GAME_REPOSITORY_KEY, gameRepository);
 
-useSettingsStore().setIconService(icon);
+startAppearanceSync(storeToRefs(useSettingsStore()), systemBar, appearanceBridge);
+startLauncherIconSync(storeToRefs(useSettingsStore()), icon);
 useDonateStore().setBilling(billing);
 const gameStore = useGameStore();
 gameStore.setAnalytics(analytics);

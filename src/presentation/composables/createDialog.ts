@@ -35,7 +35,7 @@ export const createDialog = <TParams = undefined, TResult = undefined>() => {
             params: params as Readonly<ShallowRef<TParams | undefined>>,
             close,
         });
-        return { open, visible: readonly(visible) };
+        return { open, close, visible: readonly(visible) };
     };
 
     const useDialog = () => {

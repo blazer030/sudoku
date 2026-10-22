@@ -19,30 +19,17 @@
                 />
             </div>
         </div>
-        <span
-            class="text-xs text-center text-foreground-muted"
-            :data-testid="`${testidPrefix}step-counter`"
-        >
-            {{ t("playback.step", { current: currentStep, total: totalSteps }) }}
-        </span>
     </div>
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, toRef, type Ref } from "vue";
-import { useI18n } from "vue-i18n";
-import { useProgressDrag } from "@/presentation/components/playback/useProgressDrag";
-
-const { t } = useI18n();
+import { computed, ref, toRef } from "vue";
+import { type PlayState, useProgressDrag } from "@/presentation/components/playback/useProgressDrag";
 
 const props = withDefaults(defineProps<{
     currentStep: number;
     totalSteps: number;
-    playState: {
-        isPlaying: Ref<boolean>;
-        stopPlay: () => void;
-        startPlay: () => void;
-    };
+    playState: PlayState;
     testidPrefix?: string;
 }>(), {
     testidPrefix: "",

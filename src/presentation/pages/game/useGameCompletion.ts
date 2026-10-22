@@ -6,12 +6,16 @@ import { useStatisticsStore } from "@/stores/statisticsStore";
 import type { GameReplayData } from "@/application/statistics/StatisticsRepository";
 import type { AnalyticsService } from "@/application/analytics/AnalyticsService";
 
+export interface CompletionOutcome {
+    isNewRecord: boolean;
+}
+
 interface GameCompletionOptions {
     sudoku: Sudoku;
     difficulty: Ref<Difficulty>;
     getElapsedSeconds: () => number;
     getReplayData: () => GameReplayData;
-    onCompleted: (origin: { row: number; column: number }) => void;
+    onCompleted: (origin: { row: number; column: number }, outcome: CompletionOutcome) => void;
     analytics?: AnalyticsService;
 }
 
@@ -23,6 +27,8 @@ export const useGameCompletion = ({ sudoku, difficulty, getElapsedSeconds, getRe
     const checkAndComplete = (origin: { row: number; column: number }) => {
         if (!sudoku.isCompleted()) return;
         completed.value = true;
+        // Compared before this game joins the history
+        const isNewRecord = statisticsStore.isNewBestTime(difficulty.value, getElapsedSeconds());
         void gameStore.clearSavedGame();
         statisticsStore.recordGame({
             difficulty: difficulty.value,
@@ -38,7 +44,7 @@ export const useGameCompletion = ({ sudoku, difficulty, getElapsedSeconds, getRe
             hints_used: sudoku.hintTracker.recordedUsed,
             hints_total: sudoku.hintTracker.totalUsed,
         });
-        onCompleted(origin);
+        onCompleted(origin, { isNewRecord });
     };
 
     return { completed, checkAndComplete };

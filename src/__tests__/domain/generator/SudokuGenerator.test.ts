@@ -30,6 +30,27 @@ const walkRevealHintsToCompletion = ({ puzzle, answer }: { puzzle: number[][]; a
     }
 };
 
+
+// A small seeded generator (mulberry32), so a run of `Math.random` can be replayed exactly.
+const seededRandom = (seed: number) => {
+    let state = seed >>> 0;
+    return () => {
+        state = (state + 0x6d2b79f5) >>> 0;
+        let value = state;
+        value = Math.imul(value ^ (value >>> 15), value | 1);
+        value ^= value + Math.imul(value ^ (value >>> 7), value | 61);
+        return ((value ^ (value >>> 14)) >>> 0) / 4294967296;
+    };
+};
+
+// Puzzles the generator made from seed 20261022 before the solution counter learned to propagate;
+// any change here means generated puzzles changed.
+const SEEDED_PUZZLES = {
+    easy: "903700060600580390000690007135070846009041530080006000020000005098025000507900020",
+    medium: "003700000600080300000690007035070846009001530080000000020000005098025000007900000",
+    hard: "000000960430020700060800100000000000500007000090563070028050006000700003900004000",
+} as const;
+
 describe("SudokuGenerator", () => {
     it.skip("should generate different boards on multiple calls", () => {
         const boards = Array.from({ length: 5 }, () => generator.generateFullBoard());
@@ -119,6 +140,28 @@ describe("SudokuGenerator", () => {
     it.skip.each(["easy", "medium", "hard"] as const)("should keep every generated %s puzzle solvable step by step", { timeout: 180000 }, (difficulty) => {
         for (let round = 0; round < 2; round++) {
             walkRevealHintsToCompletion(generator.generatePuzzle(difficulty));
+        }
+    });
+
+    it.each(["easy", "medium", "hard"] as const)("should generate the same %s puzzle from the same random numbers", (difficulty) => {
+        vi.spyOn(Math, "random").mockImplementation(seededRandom(20261022));
+        vi.spyOn(DifficultyRater.prototype, "matches").mockReturnValue(true);
+
+        const { puzzle } = new SudokuGenerator().generatePuzzle(difficulty);
+
+        expect(puzzle.flat().join("")).toBe(SEEDED_PUZZLES[difficulty]);
+    });
+
+    it("should count solutions without a search budget", () => {
+        vi.spyOn(Math, "random").mockImplementation(seededRandom(20261022));
+        vi.spyOn(DifficultyRater.prototype, "matches").mockReturnValue(true);
+        const countSpy = vi.spyOn(SudokuSolver.prototype, "countSolutions");
+
+        new SudokuGenerator().generatePuzzle("easy");
+
+        expect(countSpy).toHaveBeenCalled();
+        for (const call of countSpy.mock.calls) {
+            expect(call).toHaveLength(2);
         }
     });
 

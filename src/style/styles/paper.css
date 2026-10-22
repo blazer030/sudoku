@@ -1,0 +1,383 @@
+/* Paper Notebook: warm ruled paper, printed clues, handwritten entries and stamp-like presses.
+   Every rule is scoped by [data-style="paper"]; keyframes start with paper-. */
+
+/* Type: the interface in WenKai, clues printed, entries, notes and keys by hand. */
+[data-style="paper"] {
+    --font-sans: var(--font-wenkai);
+    --font-mono: var(--font-mono-paper);
+    --font-clue: var(--font-print);
+    --font-entry: var(--font-hand);
+    --font-note: var(--font-hand);
+    --font-key: var(--font-hand);
+    /* A fixed-width face, so the ticking timer does not change width */
+    --font-timer: var(--font-mono);
+}
+
+/* Caveat's digits are short, so handwriting is set larger, but only once Caveat has loaded
+   (paperFonts.ts marks it): the fallback faces are full-size. The cells and keys keep their
+   size and glyph-high line boxes either way. */
+[data-style="paper"][data-paper-fonts="ready"] {
+    --entry-scale: 1.3;
+    --note-scale: 1.3;
+    --key-scale: 1.25;
+    /* Caveat's digits overhang their advance to the right (their ink sits 0.09–0.14em right of the
+       advance box's centre, which is what cells and keys centre), so they are moved back by the mean */
+    --paper-hand-nudge: -0.12em;
+}
+
+/* The translate property moves the ink without changing any box; it adds to any transform */
+[data-style="paper"][data-paper-fonts="ready"] .font-entry,
+[data-style="paper"][data-paper-fonts="ready"] .font-note,
+[data-style="paper"][data-paper-fonts="ready"] .font-key > span {
+    translate: var(--paper-hand-nudge) 0;
+}
+
+[data-style="paper"] .font-entry,
+[data-style="paper"] .font-key {
+    font-weight: 700;
+}
+
+/* The page background, shared by the body, the app root and every page root and sticky header:
+   faint dots of the border colour, and at night a warm lamp hanging just below the top edge. It has
+   no image, so the colour and contrast tests see it (inks are checked on the border at 40%, and
+   on the lamp at its on-screen peak, 29%, alone and over a dot). By day the lamp layers are empty.
+   Each surface lays it on the page colour, so where one sits on another the lamp is not doubled. */
+[data-style="paper"] {
+    --paper-lamp-fade: linear-gradient(transparent, transparent);
+    --paper-lamp: linear-gradient(transparent, transparent);
+    --paper-texture:
+        radial-gradient(circle, color-mix(in srgb, var(--color-border) 40%, transparent) 0.7px, transparent 1px),
+        radial-gradient(circle, color-mix(in srgb, var(--color-border) 40%, transparent) 0.7px, transparent 1px);
+}
+
+/* The glow is sized to the viewport and set from the top edge, so every surface draws the same
+   one whatever its box. Over it the page colour fades in towards the top edge, so the glow meets
+   the status bar, painted flat in the page colour below API 35, without an edge. */
+:root.dark[data-style="paper"] {
+    --paper-lamp-fade: linear-gradient(
+        var(--color-background),
+        color-mix(in srgb, var(--color-background) 45%, transparent) 14px,
+        color-mix(in srgb, var(--color-background) 12%, transparent) 32px,
+        transparent 48px
+    );
+    --paper-lamp: radial-gradient(
+        110vw 36vh at 50% 48px,
+        color-mix(in srgb, var(--color-lamp) 29%, transparent),
+        color-mix(in srgb, var(--color-lamp) 25%, transparent) 18%,
+        color-mix(in srgb, var(--color-lamp) 14%, transparent) 38%,
+        color-mix(in srgb, var(--color-lamp) 4%, transparent) 55%,
+        transparent 68%
+    );
+    /* At night the light inks need the board's washes lighter, under the lamp as well */
+    --paper-wash-clue: color-mix(in srgb, var(--color-foreground) 8.5%, transparent);
+    --paper-wash-same-digit: color-mix(in srgb, var(--color-primary) 20%, transparent);
+    --paper-wash-focus: color-mix(in srgb, var(--color-primary) 20%, transparent);
+}
+
+/* The app root paints it on its own box, which takes in the safe-area padding, so edge to edge it
+   runs on under the status bar. Page roots and headers, which scroll, attach it to the viewport,
+   so it lines up with the app root behind them. */
+[data-style="paper"] body,
+[data-style="paper"] .app-safe-area,
+[data-style="paper"] [data-skin~="page"],
+[data-style="paper"] [data-skin~="page-header"] {
+    background-color: var(--color-background);
+    background-image: var(--paper-lamp-fade), var(--paper-lamp), var(--paper-texture);
+    background-size: 100% 100%, 100% 100%, 9px 9px, 13px 13px;
+    background-position: 0 0, 0 0, 0 0, 4px 6px;
+    background-repeat: no-repeat, no-repeat, repeat, repeat;
+}
+
+[data-style="paper"] [data-skin~="page"],
+[data-style="paper"] [data-skin~="page-header"] {
+    background-attachment: fixed;
+}
+
+/* Ruled pages: a line every 32px and a red margin line 14px in, inside the page gutter so no
+   text crosses it. Every page is ruled: page roots that scroll on their own, and the app's page
+   scroller behind the pages that do not. The lines scroll with the content; the page background
+   stays put. Cards, the board's sheet and sticky headers sit on top of them. */
+[data-style="paper"] [data-skin~="page"],
+[data-style="paper"] [data-skin~="page-ruled"] {
+    background-color: var(--color-background);
+    background-image:
+        linear-gradient(to right, transparent 14px, var(--color-margin-line) 14px, var(--color-margin-line) 15.5px, transparent 15.5px),
+        repeating-linear-gradient(to bottom, transparent 0, transparent 31px, var(--color-rule) 31px, var(--color-rule) 32px),
+        var(--paper-lamp-fade),
+        var(--paper-lamp),
+        var(--paper-texture);
+    background-size: auto, auto, 100% 100%, 100% 100%, 9px 9px, 13px 13px;
+    background-position: 0 0, 0 0, 0 0, 0 0, 0 0, 4px 6px;
+    background-repeat: repeat, repeat, no-repeat, no-repeat, repeat, repeat;
+    background-attachment: local, local, fixed, fixed, fixed, fixed;
+}
+
+/* The board is drawn on the page: a sheet of the notebook's paper with its grain and no card shadow,
+   the grid in the theme's ink (faded thin lines, box lines as firmer strokes), printed clues on
+   graphite-shaded squares and every highlight a translucent wash, so the grain and at night the lamp
+   show through. Sheet, washes and hatch are tokens mixed with transparent; paletteContrast.test.ts
+   reads them from here and checks every board ink on them, by day and under the lamp. */
+[data-style="paper"] {
+    --paper-sheet: color-mix(in srgb, var(--color-card) 80%, transparent);
+    --board-line: color-mix(in srgb, var(--color-primary) 28%, transparent);
+    --board-box-line: color-mix(in srgb, var(--color-primary) 62%, transparent);
+    --paper-hatch: color-mix(in srgb, var(--color-foreground) 6%, transparent);
+    --paper-wash-clue: color-mix(in srgb, var(--color-foreground) 12.5%, transparent);
+    --paper-wash-peer: color-mix(in srgb, var(--color-primary) 10%, transparent);
+    --paper-wash-same-digit: color-mix(in srgb, var(--color-highlight) 100%, transparent);
+    --paper-wash-selected: color-mix(in srgb, var(--color-primary) 16%, transparent);
+    --paper-wash-focus: color-mix(in srgb, var(--color-primary) 22%, transparent);
+    --paper-wash-scope: color-mix(in srgb, var(--color-primary) 8%, transparent);
+    --paper-wash-pattern: color-mix(in srgb, var(--color-primary) 16%, transparent);
+    --paper-wash-answer: color-mix(in srgb, var(--color-primary) 18%, transparent);
+    --paper-wash-error: color-mix(in srgb, var(--color-error) 14%, transparent);
+    --paper-wash-wrong: color-mix(in srgb, var(--color-error) 14%, transparent);
+    --paper-clue-hatch: repeating-linear-gradient(-45deg, var(--paper-hatch) 0 1px, transparent 1px 4px);
+}
+
+/* The sheet lies on its own patch of the page surface (page colour, grain and lamp, but no ruled
+   lines), so the lines behind the board never show through it */
+[data-style="paper"] [data-skin~="board"] {
+    border-radius: 6px;
+    background-color: var(--color-background);
+    background-image: var(--paper-texture), linear-gradient(var(--paper-sheet), var(--paper-sheet)), var(--paper-lamp-fade), var(--paper-lamp), var(--paper-texture);
+    background-size: 9px 9px, 13px 13px, 100% 100%, 100% 100%, 100% 100%, 9px 9px, 13px 13px;
+    background-position: 0 0, 4px 6px, 0 0, 0 0, 0 0, 0 0, 4px 6px;
+    background-repeat: repeat, repeat, no-repeat, no-repeat, no-repeat, repeat, repeat;
+    background-attachment: scroll, scroll, scroll, fixed, fixed, fixed, fixed;
+    --tw-shadow: 0 0 transparent;
+}
+
+/* The grid's outer frame, drawn with the box lines' pen */
+[data-style="paper"] [data-skin~="board"] > div {
+    border-color: var(--board-box-line);
+    border-radius: 2px;
+}
+
+/* Each cell shows its wash; a completed group's flash starts and ends on it */
+[data-style="paper"] [data-skin~="board"] [data-variant] {
+    --paper-cell-wash: transparent;
+    --completion-flash-rest: var(--paper-cell-wash);
+    border-radius: 0;
+    background-color: var(--paper-cell-wash);
+    /* The wash stops at the cell's lines, so the ink reads the same over every wash */
+    background-clip: padding-box;
+}
+
+[data-style="paper"] [data-skin~="board"] [data-variant="clue"] {
+    --paper-cell-wash: var(--paper-wash-clue);
+    background-image: var(--paper-clue-hatch);
+}
+
+[data-style="paper"] [data-skin~="board"] [data-variant="clue"][data-pressed] {
+    background-image: linear-gradient(var(--press-overlay), var(--press-overlay)), var(--paper-clue-hatch);
+}
+
+[data-style="paper"] [data-skin~="board"] [data-variant="peer"] { --paper-cell-wash: var(--paper-wash-peer); }
+[data-style="paper"] [data-skin~="board"] [data-variant="same-digit"] { --paper-cell-wash: var(--paper-wash-same-digit); }
+[data-style="paper"] [data-skin~="board"] [data-variant="selected"] { --paper-cell-wash: var(--paper-wash-selected); }
+[data-style="paper"] [data-skin~="board"] [data-variant="focus"] { --paper-cell-wash: var(--paper-wash-focus); }
+[data-style="paper"] [data-skin~="board"] [data-variant="scope"] { --paper-cell-wash: var(--paper-wash-scope); }
+[data-style="paper"] [data-skin~="board"] [data-variant="pattern"] { --paper-cell-wash: var(--paper-wash-pattern); }
+[data-style="paper"] [data-skin~="board"] [data-variant="answer"] { --paper-cell-wash: var(--paper-wash-answer); }
+[data-style="paper"] [data-skin~="board"] [data-variant="error"] { --paper-cell-wash: var(--paper-wash-error); }
+[data-style="paper"] [data-skin~="board"] [data-variant="wrong"] { --paper-cell-wash: var(--paper-wash-wrong); }
+
+/* A single marked cell is circled by hand instead of outlined: the selection, a hint's or the
+   walkthrough's answer, and a wrong entry (in the error ink) */
+[data-style="paper"] [data-variant="selected"],
+[data-style="paper"] [data-variant="answer"],
+[data-style="paper"] [data-variant="wrong"] {
+    position: relative;
+    /* The circle is drawn under the cell's digits and notes but over its wash */
+    isolation: isolate;
+    --tw-ring-shadow: 0 0 transparent;
+}
+
+@keyframes paper-circle-draw {
+    from { clip-path: inset(0 100% 0 0); }
+    to { clip-path: inset(0 0 0 0); }
+}
+
+/* A slightly open ellipse; the SVG is only a mask, the ink is the primary */
+[data-style="paper"] [data-variant="selected"]::after,
+[data-style="paper"] [data-variant="answer"]::after,
+[data-style="paper"] [data-variant="wrong"]::after {
+    content: "";
+    position: absolute;
+    inset: 1px;
+    pointer-events: none;
+    background-color: var(--color-primary);
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpath d='M30 7.5C23 3.5 11 4.5 6 11.5S3.5 29 11 33.5 30 37.5 35 30 37 13 27 6.8' fill='none' stroke='currentColor' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpath d='M30 7.5C23 3.5 11 4.5 6 11.5S3.5 29 11 33.5 30 37.5 35 30 37 13 27 6.8' fill='none' stroke='currentColor' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+    rotate: -4deg;
+    z-index: -1;
+    animation: paper-circle-draw 220ms ease-out;
+}
+
+[data-style="paper"] [data-variant="wrong"]::after {
+    background-color: var(--color-error);
+}
+
+/* A cell showing candidates keeps the same circle in a finer stroke, drawn under the notes, so the
+   candidates it passes stay legible */
+[data-style="paper"] [data-variant="selected"]:has(.font-note)::after,
+[data-style="paper"] [data-variant="answer"]:has(.font-note)::after,
+[data-style="paper"] [data-variant="wrong"]:has(.font-note)::after {
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpath d='M30 7.5C23 3.5 11 4.5 6 11.5S3.5 29 11 33.5 30 37.5 35 30 37 13 27 6.8' fill='none' stroke='currentColor' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpath d='M30 7.5C23 3.5 11 4.5 6 11.5S3.5 29 11 33.5 30 37.5 35 30 37 13 27 6.8' fill='none' stroke='currentColor' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+}
+
+/* It runs through the corner slots, so the notes over it carry a paper halo */
+[data-style="paper"] [data-variant="selected"] .font-note,
+[data-style="paper"] [data-variant="answer"] .font-note,
+[data-style="paper"] [data-variant="wrong"] .font-note {
+    text-shadow: 0 0 2px var(--color-card), 0 0 2px var(--color-card), 0 0 1px var(--color-card);
+}
+
+/* An answer cell showing candidates with a target circles the target instead (below) */
+[data-style="paper"] [data-variant="answer"]:has([data-note-highlight])::after {
+    content: none;
+}
+
+/* The selected digit's notes are circled with the same pen instead of sitting on a filled disc,
+   which buried the thin handwritten digit */
+[data-style="paper"] [data-note-highlight] {
+    position: relative;
+    overflow: visible;
+    background-color: transparent;
+    color: var(--color-primary);
+    font-weight: 700;
+}
+
+/* Sized to the digit (em-based, centred on it), not to the slot, which shrinks with the cell */
+[data-style="paper"] [data-note-highlight]::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 1.15em;
+    height: 1.15em;
+    translate: -50% -50%;
+    pointer-events: none;
+    background-color: var(--color-primary);
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpath d='M30 7.5C23 3.5 11 4.5 6 11.5S3.5 29 11 33.5 30 37.5 35 30 37 13 27 6.8' fill='none' stroke='currentColor' stroke-width='3.2' stroke-linecap='round'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpath d='M30 7.5C23 3.5 11 4.5 6 11.5S3.5 29 11 33.5 30 37.5 35 30 37 13 27 6.8' fill='none' stroke='currentColor' stroke-width='3.2' stroke-linecap='round'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+    rotate: -4deg;
+}
+
+/* The note's box moved left of its ink, so the circle follows the ink */
+[data-style="paper"][data-paper-fonts="ready"] [data-note-highlight]::after {
+    translate: calc(-50% - var(--paper-hand-nudge)) -50%;
+}
+
+/* The answer's candidate is circled with the focus pen: the note's circle in a heavier stroke, drawn
+   like the cell's, so a cell showing candidates reads with the same circle without crossing them */
+[data-style="paper"] [data-variant="answer"] [data-note-highlight]::after {
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpath d='M30 7.5C23 3.5 11 4.5 6 11.5S3.5 29 11 33.5 30 37.5 35 30 37 13 27 6.8' fill='none' stroke='currentColor' stroke-width='4.2' stroke-linecap='round'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpath d='M30 7.5C23 3.5 11 4.5 6 11.5S3.5 29 11 33.5 30 37.5 35 30 37 13 27 6.8' fill='none' stroke='currentColor' stroke-width='4.2' stroke-linecap='round'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+    animation: paper-circle-draw 220ms ease-out;
+}
+
+/* An option tile's tick is drawn as a pen stroke when it appears */
+@keyframes paper-check-draw {
+    from { stroke-dashoffset: 24; }
+    to { stroke-dashoffset: 0; }
+}
+
+[data-style="paper"] [data-skin~="check"] svg {
+    stroke-dasharray: 24;
+    animation: paper-check-draw 300ms ease-out;
+}
+
+/* Presses land like a stamp. vPress sets the data attributes; input never waits for them.
+   The ink overlay is a colour change, so it stays on under reduced motion. */
+[data-style="paper"] [data-pressed] {
+    --press-overlay: color-mix(in srgb, var(--color-primary) 10%, transparent);
+    background-image: linear-gradient(var(--press-overlay), var(--press-overlay));
+}
+
+[data-style="paper"] [data-press-motion] {
+    transition-property: transform, background-color, color, box-shadow, opacity;
+    transition-duration: 340ms;
+    transition-timing-function: cubic-bezier(0.3, 1.7, 0.5, 1);
+}
+
+[data-style="paper"] [data-press-motion][data-pressed] {
+    transform: translate(1px, 1.5px) scale(0.965) rotate(-0.7deg);
+    transition-duration: 80ms;
+    transition-timing-function: ease-out;
+}
+
+@keyframes paper-stamp-settle {
+    0% { transform: translate(1px, 1.5px) scale(0.965) rotate(-0.7deg); }
+    55% { transform: translate(0, -0.5px) scale(1.01) rotate(0.3deg); }
+    100% { transform: none; }
+}
+
+[data-style="paper"] [data-press-bounce] {
+    animation: paper-stamp-settle 260ms ease-out;
+}
+
+/* Continue is a sticky note taped on: tilted, a hard paper shadow, a strip of tape on top.
+   The tilt uses the rotate property, so a press's transform adds to it. */
+[data-style="paper"] [data-skin~="continue"] {
+    position: relative;
+    rotate: -1deg;
+    border-radius: 4px;
+    box-shadow: 2px 4px 0 color-mix(in srgb, var(--color-shadow) 18%, transparent);
+}
+
+[data-style="paper"] [data-skin~="continue"]::before {
+    content: "";
+    position: absolute;
+    top: -8px;
+    left: calc(50% - 28px);
+    width: 56px;
+    height: 16px;
+    pointer-events: none;
+    background-color: color-mix(in srgb, var(--color-card) 60%, transparent);
+    rotate: 2deg;
+}
+
+/* New Game is a rubber stamp: no fill, the ink in a double ring */
+[data-style="paper"] [data-skin~="new-game"] {
+    background-color: transparent;
+    color: var(--color-primary);
+    box-shadow:
+        inset 0 0 0 2px var(--color-primary),
+        inset 0 0 0 4px var(--color-card),
+        inset 0 0 0 5px var(--color-primary);
+    rotate: -1.5deg;
+}
+
+/* The segmented selection stays filled, so its labels keep on-primary, and sits a little askew */
+[data-style="paper"] [data-skin~="segmented-indicator"] {
+    rotate: -0.6deg;
+}
+
+[data-style="paper"] .segmented-indicator-motion {
+    transition: transform 300ms ease-in-out;
+}
+
+/* Reduced motion: no stamping, settling, drawing or sliding; tilts and the ink overlay stay */
+@media (prefers-reduced-motion: reduce) {
+    [data-style="paper"] [data-press-motion],
+    [data-style="paper"] [data-press-motion][data-pressed],
+    [data-style="paper"] [data-press-bounce] {
+        transform: none;
+        animation: none;
+    }
+
+    [data-style="paper"] [data-variant="selected"]::after,
+    [data-style="paper"] [data-variant="answer"]::after,
+    [data-style="paper"] [data-variant="wrong"]::after,
+    [data-style="paper"] [data-variant="answer"] [data-note-highlight]::after,
+    [data-style="paper"] [data-skin~="check"] svg {
+        animation: none;
+    }
+
+    [data-style="paper"] .segmented-indicator-motion {
+        transition: none;
+    }
+}

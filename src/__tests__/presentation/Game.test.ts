@@ -15,6 +15,7 @@ import { Sudoku } from "@/domain/game/Sudoku";
 import type { PuzzleCell } from "@/domain/board/PuzzleCell";
 import { createMultiStepSudoku } from "@/__tests__/fixtures/multiStepPuzzle";
 import { ANALYTICS_KEY, type AnalyticsService } from "@/application/analytics/AnalyticsService";
+import { expectKeyRowsToShrinkToFit } from "@/__tests__/fixtures/digitKeyRows";
 
 const createTestRouter = () => {
     return createRouter({
@@ -170,13 +171,51 @@ describe("Game", () => {
         expect(wrapper.findComponent<typeof Cell>("[data-testid='cell-0-2']").props("selected")).toBe(true);
     });
 
-    it("should not select a clue cell", async () => {
+    it("should outline a tapped clue cell", async () => {
         const wrapper = mountGame();
 
-        // (0, 0) 是 clue 格子（值為 5）
+        // (0, 0) is the clue 5
         await wrapper.find("[data-testid='cell-0-0']").trigger("click");
 
-        expect(wrapper.findComponent<typeof Cell>("[data-testid='cell-0-0']").props("selected")).toBeFalsy();
+        expect(wrapper.findComponent<typeof Cell>("[data-testid='cell-0-0']").props("selected")).toBe(true);
+        expect(wrapper.find("[data-testid='cell-0-0']").classes()).toContain("ring-primary");
+        await wrapper.find("[data-testid='number-4']").trigger("click");
+        expect(wrapper.find("[data-testid='cell-0-0']").text()).toBe("5");
+    });
+
+    it("should not pick a digit when a clue is tapped, so the next tapped cell is not overwritten", async () => {
+        const wrapper = mountGame();
+        await wrapper.find("[data-testid='number-2']").trigger("click");
+        await wrapper.find("[data-testid='cell-0-2']").trigger("click");
+        await wrapper.find("[data-testid='number-2']").trigger("click");
+        expect(wrapper.find("[data-testid='cell-0-2']").text()).toBe("2");
+
+        await wrapper.find("[data-testid='cell-0-0']").trigger("click");
+        expect(wrapper.find("[data-testid='number-5']").attributes("aria-pressed")).toBe("false");
+        await wrapper.find("[data-testid='cell-0-2']").trigger("click");
+
+        expect(wrapper.find("[data-testid='cell-0-2']").text()).toBe("2");
+        expect(wrapper.findComponent<typeof Cell>("[data-testid='cell-0-2']").props("selected")).toBe(true);
+    });
+
+    it("should tint the row, column and box of the selected cell", async () => {
+        const wrapper = mountGame();
+
+        await wrapper.find("[data-testid='cell-0-2']").trigger("click");
+
+        expect(wrapper.find("[data-testid='cell-0-8']").classes()).toContain("bg-cell-peer");
+        expect(wrapper.find("[data-testid='cell-8-2']").classes()).toContain("bg-cell-peer");
+        expect(wrapper.find("[data-testid='cell-1-1']").classes()).toContain("bg-cell-peer");
+        expect(wrapper.find("[data-testid='cell-4-4']").classes()).not.toContain("bg-cell-peer");
+    });
+
+    it("should not tint peers when highlightScope is off", async () => {
+        localStorage.setItem("sudoku-settings", JSON.stringify({ highlightScope: false }));
+        const wrapper = mountGame();
+
+        await wrapper.find("[data-testid='cell-0-2']").trigger("click");
+
+        expect(wrapper.find("[data-testid='cell-0-8']").classes()).not.toContain("bg-cell-peer");
     });
 
     it("should deselect when clicking the same cell again", async () => {
@@ -363,7 +402,7 @@ describe("Game", () => {
 
         await wrapper.find("[data-testid='note-button']").trigger("click");
 
-        expect(wrapper.find("[data-testid='note-button']").find(".border-accent").exists()).toBe(true);
+        expect(wrapper.find("[data-testid='note-button']").attributes("aria-pressed")).toBe("true");
     });
 
     it("should add note to slot cell in note mode", async () => {
@@ -754,7 +793,7 @@ describe("Game", () => {
         // erase mode 取消
         expect(wrapper.find("[data-testid='erase-button']").classes()).not.toContain("bg-primary");
         // note mode 啟用
-        expect(wrapper.find("[data-testid='note-button']").find(".border-accent").exists()).toBe(true);
+        expect(wrapper.find("[data-testid='note-button']").attributes("aria-pressed")).toBe("true");
     });
 
     it("should restore saved game state from store", () => {
@@ -910,9 +949,8 @@ describe("Game", () => {
 
             // 再開 hint menu 檢查用量
             await wrapper.find("[data-testid='hint-button']").trigger("click");
-            const dots = wrapper.findAll("[data-testid='hint-light']");
-            // recordedUsed=0（第一次免費），所以 3 個都亮
-            expect(dots.filter(dot => dot.classes().some(cssClass => cssClass.includes("opacity")))).toHaveLength(0);
+            expect(wrapper.find("[data-testid='hint-remaining']").text()).toBe("3 hints left this game");
+            expect(wrapper.find("[data-testid='hint-free-note']").exists()).toBe(false);
         });
 
         it("should show error style on conflict cells after Check Conflicts", async () => {
@@ -926,7 +964,34 @@ describe("Game", () => {
             await wrapper.find("[data-testid='hint-button']").trigger("click");
             await wrapper.find("[data-testid='hint-check-conflicts']").trigger("click");
 
-            expect(wrapper.find("[data-testid='cell-0-2']").classes()).toContain("bg-error-light");
+            expect(wrapper.find("[data-testid='cell-0-2']").classes()).toContain("bg-error-surface");
+        });
+
+        it("should toast when Check Conflicts finds nothing", async () => {
+            const wrapper = mountGame();
+
+            await wrapper.find("[data-testid='hint-button']").trigger("click");
+            await wrapper.find("[data-testid='hint-check-conflicts']").trigger("click");
+            await flushPromises();
+
+            expect(wrapper.find("[data-testid='game-toast']").text()).toBe("No repeated digits found");
+        });
+
+        it("should mark only the player cell when an entry repeats a clue", async () => {
+            const wrapper = mountGame();
+
+            // (0, 0) is the clue 5; fill 5 at (0, 2)
+            await wrapper.find("[data-testid='number-5']").trigger("click");
+            await wrapper.find("[data-testid='cell-0-2']").trigger("click");
+            await wrapper.find("[data-testid='number-5']").trigger("click"); // deselect
+
+            await wrapper.find("[data-testid='hint-button']").trigger("click");
+            await wrapper.find("[data-testid='hint-check-conflicts']").trigger("click");
+            await flushPromises();
+
+            expect(wrapper.find("[data-testid='cell-0-2']").classes()).toContain("bg-error-surface");
+            expect(wrapper.find("[data-testid='cell-0-0']").classes()).not.toContain("bg-error-surface");
+            expect(wrapper.find("[data-testid='game-toast']").exists()).toBe(false);
         });
 
         it("should clear conflict marks on the next interaction", async () => {
@@ -938,11 +1003,11 @@ describe("Game", () => {
 
             await wrapper.find("[data-testid='hint-button']").trigger("click");
             await wrapper.find("[data-testid='hint-check-conflicts']").trigger("click");
-            expect(wrapper.find("[data-testid='cell-0-2']").classes()).toContain("bg-error-light");
+            expect(wrapper.find("[data-testid='cell-0-2']").classes()).toContain("bg-error-surface");
 
             await wrapper.find("[data-testid='cell-0-3']").trigger("click");
 
-            expect(wrapper.find("[data-testid='cell-0-2']").classes()).not.toContain("bg-error-light");
+            expect(wrapper.find("[data-testid='cell-0-2']").classes()).not.toContain("bg-error-surface");
         });
 
         it("should show a random-reveal toast after Reveal Cell", async () => {
@@ -952,7 +1017,7 @@ describe("Game", () => {
             await wrapper.find("[data-testid='hint-button']").trigger("click");
             await wrapper.find("[data-testid='hint-reveal-cell']").trigger("click");
 
-            const toast = wrapper.find("[data-testid='hint-result-toast']");
+            const toast = wrapper.find("[data-testid='game-toast']");
             expect(toast.exists()).toBe(true);
             expect(toast.text()).toMatch(/^Random reveal: /);
         });
@@ -966,7 +1031,7 @@ describe("Game", () => {
             await wrapper.find("[data-testid='hint-button']").trigger("click");
             await wrapper.find("[data-testid='hint-reveal-cell']").trigger("click");
 
-            expect(wrapper.find("[data-testid='hint-result-toast']").text()).toMatch(/第 \d 列第 \d 欄 = \d/);
+            expect(wrapper.find("[data-testid='game-toast']").text()).toMatch(/第 \d 列第 \d 欄 = \d/);
         });
 
         it("should size the hint toast to its content so Chinese positions do not wrap early", async () => {
@@ -976,7 +1041,7 @@ describe("Game", () => {
             await wrapper.find("[data-testid='hint-button']").trigger("click");
             await wrapper.find("[data-testid='hint-reveal-cell']").trigger("click");
 
-            expect(wrapper.find("[data-testid='hint-result-toast']").classes()).toContain("w-max");
+            expect(wrapper.find("[data-testid='game-toast']").classes()).toContain("w-max");
         });
 
         it("should reveal a random cell with correct answer", async () => {
@@ -1043,13 +1108,10 @@ describe("Game", () => {
             };
             const wrapper = mountContinueGame(savedState);
 
-            // 打開 hint menu，檢查 dot 狀態 (totalUsed=3, recordedUsed=2, 2 dots dimmed)
+            // Three hints used out of four
             await wrapper.find("[data-testid='hint-button']").trigger("click");
 
-            const dots = wrapper.findAll("[data-testid='hint-light']");
-            expect(dots).toHaveLength(3);
-            const outlined = dots.filter(dot => dot.classes().some(cssClass => cssClass.includes("border")));
-            expect(outlined).toHaveLength(2);
+            expect(wrapper.find("[data-testid='hint-remaining']").text()).toBe("1 hint left this game");
         });
 
         it("should check completion after Reveal Cell", async () => {
@@ -1116,6 +1178,28 @@ describe("Game", () => {
             expect(wrapper.findAll("[data-testid^='hint-dot-']")).toHaveLength(0);
         });
 
+        it("should lift the panel over the board when its buttons would not fit below", async () => {
+            // The input area starts 120px above the bottom edge, leaving 104px under the 16px gap,
+            // and the panel's smallest layout is 190px tall
+            vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockReturnValue({ top: window.innerHeight - 120 } as DOMRect);
+            Object.defineProperty(HTMLElement.prototype, "scrollHeight", {
+                configurable: true,
+                get(this: HTMLElement) { return this.dataset.testid === "hint-panel" ? 190 : 0; },
+            });
+            try {
+                const wrapper = mountGameWith(createMultiStepSudoku());
+
+                await openRevealCell(wrapper);
+                await flushPromises();
+
+                const panel = wrapper.find<HTMLElement>("[data-testid='hint-panel']");
+                expect(panel.element.style.maxHeight).toBe("190px");
+                expect(wrapper.find<HTMLElement>("[data-testid='hint-panel-position']").element.style.top).toBe("-86px");
+            } finally {
+                Reflect.deleteProperty(HTMLElement.prototype, "scrollHeight");
+            }
+        });
+
         it("should hand the cells the same hint views when only the timer ticks", async () => {
             vi.useFakeTimers({ toFake: ["setInterval", "clearInterval"] });
             const wrapper = mountGameWith(createMultiStepSudoku());
@@ -1178,7 +1262,7 @@ describe("Game", () => {
             expect(wrapper.find("[data-testid='hint-auto-notes']").exists()).toBe(false);
             expect(wrapper.find("[data-testid='hint-panel']").exists()).toBe(true);
 
-            await wrapper.find("[data-testid='hint-cancel']").trigger("click");
+            await wrapper.find("[data-testid='hint-close']").trigger("click");
             await wrapper.find("[data-testid='cell-0-3']").trigger("click");
             await wrapper.find("[data-testid='number-6']").trigger("click");
             expect(wrapper.find("[data-testid='cell-0-3']").text()).toBe("6");
@@ -1260,7 +1344,7 @@ describe("Game", () => {
             expect(boardOf(wrapper)).toEqual(before);
         });
 
-        it("should end hint mode without changing the board when leaving through the router", async () => {
+        it("should end hint mode without changing the board when leaving from the header", async () => {
             const wrapper = mountGame();
             await wrapper.find("[data-testid='note-button']").trigger("click");
             await wrapper.find("[data-testid='cell-0-3']").trigger("click");
@@ -1272,9 +1356,7 @@ describe("Game", () => {
             expect(wrapper.find("[data-testid='hint-panel']").exists()).toBe(true);
             const before = boardOf(wrapper);
 
-            const leaveGuards = vi.mocked(onBeforeRouteLeave).mock.calls;
-            const leaveGuard = leaveGuards[leaveGuards.length - 1][0] as unknown as () => boolean;
-            expect(leaveGuard()).toBe(false);
+            await wrapper.find("[data-testid='back-button']").trigger("click");
             await flushPromises();
             await wrapper.find("[data-testid='save-and-leave-button']").trigger("click");
             await flushPromises();
@@ -1285,6 +1367,62 @@ describe("Game", () => {
             const saved = useGameStore().savedGame;
             expect(saved?.cells.flat().map(({ entry, notes }) => ({ entry, notes }))).toEqual(before);
             expect(saved?.hintsUsed).toBe(1);
+        });
+    });
+
+    describe("System Back key", () => {
+        // Android's Back key reaches the game as a route-leave attempt.
+        const pressBack = async () => {
+            const leaveGuards = vi.mocked(onBeforeRouteLeave).mock.calls;
+            const leaveGuard = leaveGuards[leaveGuards.length - 1][0] as unknown as () => boolean;
+            expect(leaveGuard()).toBe(false);
+            await flushPromises();
+        };
+
+        it("should open the leave dialog when nothing is open", async () => {
+            const wrapper = mountGame();
+
+            await pressBack();
+
+            expect(wrapper.find("[data-testid='leave-game-dialog']").exists()).toBe(true);
+        });
+
+        it("should close the hint menu without opening the leave dialog", async () => {
+            const wrapper = mountGame();
+            await wrapper.find("[data-testid='hint-button']").trigger("click");
+            expect(wrapper.find("[data-testid='hint-menu']").exists()).toBe(true);
+
+            await pressBack();
+
+            expect(wrapper.find("[data-testid='hint-menu']").exists()).toBe(false);
+            expect(wrapper.find("[data-testid='leave-game-dialog']").exists()).toBe(false);
+        });
+
+        it("should close the leave dialog instead of stacking another", async () => {
+            const wrapper = mountGame();
+            await pressBack();
+            expect(wrapper.find("[data-testid='leave-game-dialog']").exists()).toBe(true);
+
+            await pressBack();
+
+            expect(wrapper.find("[data-testid='leave-game-dialog']").exists()).toBe(false);
+        });
+
+        it("should end hint mode without opening the leave dialog", async () => {
+            const wrapper = mountGame();
+            await wrapper.find("[data-testid='note-button']").trigger("click");
+            await wrapper.find("[data-testid='cell-0-3']").trigger("click");
+            await wrapper.find("[data-testid='number-6']").trigger("click");
+            await wrapper.find("[data-testid='note-button']").trigger("click");
+            await wrapper.find("[data-testid='cell-0-2']").trigger("click");
+            await wrapper.find("[data-testid='number-4']").trigger("click");
+            await openRevealCell(wrapper);
+            expect(wrapper.find("[data-testid='hint-panel']").exists()).toBe(true);
+
+            await pressBack();
+
+            expect(wrapper.find("[data-testid='hint-panel']").exists()).toBe(false);
+            expect(wrapper.find("[data-testid='leave-game-dialog']").exists()).toBe(false);
         });
     });
 
@@ -1353,6 +1491,203 @@ describe("Game", () => {
         });
     });
 
+    describe("leave dialog", () => {
+        const openLeaveDialog = async () => {
+            const wrapper = mountGame();
+            await wrapper.find("[data-testid='back-button']").trigger("click");
+            return wrapper;
+        };
+
+        it("should make saving the primary choice and giving up a quiet text button", async () => {
+            const wrapper = await openLeaveDialog();
+
+            expect(wrapper.find("[data-testid='save-and-leave-button']").classes()).toContain("bg-primary");
+            const giveUp = wrapper.find("[data-testid='give-up-and-leave-button']");
+            expect(giveUp.text()).toBe("Give Up This Game");
+            expect(giveUp.classes()).toContain("text-danger");
+            expect(giveUp.classes()).not.toContain("bg-danger");
+        });
+
+        it("should keep the give-up label on one line beside Cancel", async () => {
+            const wrapper = await openLeaveDialog();
+
+            for (const testId of ["leave-cancel-button", "give-up-and-leave-button"]) {
+                expect(wrapper.find(`[data-testid='${testId}']`).classes()).toEqual(expect.arrayContaining(["flex-1", "whitespace-nowrap"]));
+            }
+        });
+
+        it("should spell out what giving up costs", async () => {
+            const wrapper = await openLeaveDialog();
+
+            expect(wrapper.find("[data-testid='leave-give-up-note']").text()).toBe("Giving up counts as an unfinished game and lowers your win rate.");
+        });
+
+        it("should show the give-up choice and its cost in Traditional Chinese", async () => {
+            const wrapper = await openLeaveDialog();
+            i18n.global.locale.value = "zh-Hant";
+            await nextTick();
+
+            expect(wrapper.find("[data-testid='give-up-and-leave-button']").text()).toBe("放棄這局");
+            expect(wrapper.find("[data-testid='leave-give-up-note']").text()).toBe("放棄會記為一場未完成，會影響勝率");
+        });
+    });
+
+    describe("picking a digit", () => {
+        it("should not show any toast the first time a digit is selected", async () => {
+            const wrapper = mountGame();
+
+            await wrapper.find("[data-testid='number-4']").trigger("click");
+
+            expect(wrapper.find("[data-testid='game-toast']").exists()).toBe(false);
+        });
+    });
+
+    describe("control labels", () => {
+        it.each([
+            ["undo-button", "Undo", "復原"],
+            ["note-button", "Notes", "筆記"],
+            ["hint-button", "Hint", "提示"],
+            ["erase-button", "Erase", "擦除"],
+        ])("should label %s in text and for screen readers", async (testId, english, chinese) => {
+            const wrapper = mountGame();
+            const button = () => wrapper.find(`[data-testid='${testId}']`);
+
+            expect(button().text()).toBe(english);
+            expect(button().attributes("aria-label")).toBe(english);
+
+            i18n.global.locale.value = "zh-Hant";
+            await nextTick();
+
+            expect(button().text()).toBe(chinese);
+            expect(button().attributes("aria-label")).toBe(chinese);
+        });
+
+        it("should show note mode as a pressed, solid Notes button", async () => {
+            const wrapper = mountGame();
+            const noteButton = () => wrapper.find("[data-testid='note-button']");
+            expect(noteButton().attributes("aria-pressed")).toBe("false");
+
+            await noteButton().trigger("click");
+
+            expect(noteButton().text()).toBe("Notes on");
+            expect(noteButton().attributes("aria-label")).toBe("Notes");
+            expect(noteButton().attributes("aria-pressed")).toBe("true");
+            expect(noteButton().find("[data-testid='control-tile']").classes()).toContain("bg-primary");
+            i18n.global.locale.value = "zh-Hant";
+            await nextTick();
+            expect(noteButton().text()).toBe("筆記 開");
+            expect(noteButton().attributes("aria-label")).toBe("筆記");
+        });
+
+        it("should expose the erase mode and the selected digit as pressed states", async () => {
+            const wrapper = mountGame();
+            const eraseKey = () => wrapper.find("[data-testid='erase-button']");
+            const digitKey = (digit: number) => wrapper.find(`[data-testid='number-${digit}']`);
+            expect(eraseKey().attributes("aria-pressed")).toBe("false");
+            expect(digitKey(4).attributes("aria-pressed")).toBe("false");
+
+            await eraseKey().trigger("click");
+            expect(eraseKey().attributes("aria-pressed")).toBe("true");
+
+            await digitKey(4).trigger("click");
+            expect(digitKey(4).attributes("aria-pressed")).toBe("true");
+            expect(digitKey(3).attributes("aria-pressed")).toBe("false");
+        });
+
+        it("should name each digit key with what it does and how many are left", async () => {
+            const wrapper = mountGame();
+            const digitKey = () => wrapper.find("[data-testid='number-8']");
+
+            // 8 has five clues in the fixture
+            expect(digitKey().attributes("aria-label")).toBe("Fill 8, 4 left");
+            await wrapper.find("[data-testid='note-button']").trigger("click");
+            expect(digitKey().attributes("aria-label")).toBe("Note 8, 4 left");
+            await wrapper.find("[data-testid='note-button']").trigger("click");
+
+            i18n.global.locale.value = "zh-Hant";
+            await nextTick();
+            expect(digitKey().attributes("aria-label")).toBe("填入 8，還剩 4 個");
+        });
+
+        it("should draw smaller digits in note mode, each moved to its place in a cell's note grid", async () => {
+            const wrapper = mountGame();
+            const digitKey = (digit: number) => wrapper.get(`[data-testid='number-${digit}']`);
+            const glyph = (digit: number) => wrapper.get(`[data-testid='number-${digit}-glyph']`);
+            const normalSize = "text-[length:calc(var(--text-2xl)*var(--key-scale,1))]";
+            const noteSize = "text-[length:calc(var(--text-lg)*var(--key-scale,1))]";
+            expect(digitKey(8).classes()).toContain(normalSize);
+            for (const digit of [1, 5, 9]) expect(glyph(digit).attributes("style") ?? "").not.toContain("translate");
+
+            await wrapper.find("[data-testid='note-button']").trigger("click");
+
+            expect(digitKey(8).classes()).toContain(noteSize);
+            expect(digitKey(8).classes()).not.toContain(normalSize);
+            // 1 top left, 2 top, 3 top right … 9 bottom right, like the notes inside a cell
+            // The step is 27% of the key's width: 15px on a 56px key
+            const expected: [number, string][] = [
+                [1, "translate(-27cqw, -27cqw)"], [2, "translate(0cqw, -27cqw)"], [3, "translate(27cqw, -27cqw)"],
+                [4, "translate(-27cqw, 0cqw)"], [5, "translate(0cqw, 0cqw)"], [6, "translate(27cqw, 0cqw)"],
+                [7, "translate(-27cqw, 27cqw)"], [8, "translate(0cqw, 27cqw)"], [9, "translate(27cqw, 27cqw)"],
+            ];
+            for (const [digit, transform] of expected) {
+                expect(glyph(digit).attributes("style"), `${digit}`).toContain(`transform: ${transform}`);
+                expect(glyph(digit).text()).toBe(`${digit}`);
+            }
+        });
+
+        it("should fade the remaining counts while note mode moves digits into the corners", async () => {
+            const wrapper = mountGame();
+            const badge = () => wrapper.get("[data-testid='badge-3']");
+            expect(badge().classes()).not.toContain("opacity-0");
+
+            await wrapper.find("[data-testid='note-button']").trigger("click");
+            expect(badge().classes()).toContain("opacity-0");
+            // The count is still spoken
+            expect(wrapper.get("[data-testid='number-3']").attributes("aria-label")).toMatch(/\d+ left/);
+
+            await wrapper.find("[data-testid='note-button']").trigger("click");
+            expect(badge().classes()).not.toContain("opacity-0");
+        });
+
+        it("should glide digits to their note places, and jump under reduced motion", () => {
+            const wrapper = mountGame();
+
+            expect(wrapper.get("[data-testid='number-1-glyph']").classes()).toEqual(expect.arrayContaining(["transition-transform", "motion-reduce:transition-none"]));
+        });
+
+        it("should write digit keys in the key face", () => {
+            const wrapper = mountGame();
+
+            expect(wrapper.get("[data-testid='number-8']").classes()).toContain("font-key");
+        });
+
+        it("should keep digit keys' line box at the glyph size", async () => {
+            const wrapper = mountGame();
+            expect(wrapper.get("[data-testid='number-8']").classes()).toContain("leading-none");
+
+            await wrapper.find("[data-testid='note-button']").trigger("click");
+
+            expect(wrapper.get("[data-testid='number-8']").classes()).toContain("leading-none");
+        });
+    });
+
+    describe("narrow windows", () => {
+        // A letterboxed window can be narrower than a 312px row of five keys
+        it("should fit the digit keys to the window instead of clipping the outer ones", () => {
+            const wrapper = mountGame();
+
+            expectKeyRowsToShrinkToFit(wrapper);
+        });
+
+        it("should not let a digit taller than a narrow cell stretch the board, so it keeps one height in every style", () => {
+            const wrapper = mountGame();
+
+            for (const cell of wrapper.findAllComponents(Cell)) {
+                expect(cell.classes()).toEqual(expect.arrayContaining(["aspect-square", "min-w-0", "min-h-0"]));
+            }
+        });
+    });
+
     describe("quick input", () => {
         it("should toggle a note when a cell is long-pressed in Normal mode with a digit selected", async () => {
             vi.useFakeTimers();
@@ -1370,6 +1705,84 @@ describe("Game", () => {
 
             expect(wrapper.findComponent<typeof Cell>("[data-testid='cell-0-2']").props("puzzleCell").notes).toEqual([4]);
             expect(wrapper.findComponent<typeof Cell>("[data-testid='cell-0-2']").props("puzzleCell").entry).toBe(0);
+        });
+    });
+
+    describe("press feedback", () => {
+        // jsdom has no PointerEvent, so build a plain event carrying the pointer fields.
+        const pressDown = (element: Element) => {
+            const pointerdown = new Event("pointerdown", { bubbles: true });
+            Object.assign(pointerdown, { isPrimary: true, pointerType: "touch", button: 0, clientX: 10, clientY: 10 });
+            element.dispatchEvent(pointerdown);
+        };
+
+        const releaseOnWindow = () => {
+            window.dispatchEvent(new Event("pointerup"));
+        };
+
+        afterEach(() => {
+            releaseOnWindow();
+        });
+
+        it("should press and bounce a digit key", async () => {
+            const wrapper = mountGame();
+            const digitKey = wrapper.find("[data-testid='number-4']");
+
+            pressDown(digitKey.element);
+            await nextTick();
+            expect(digitKey.attributes()).toHaveProperty("data-pressed");
+            expect(digitKey.attributes()).toHaveProperty("data-press-motion");
+
+            releaseOnWindow();
+            expect(digitKey.attributes()).toHaveProperty("data-press-bounce");
+        });
+
+        it("should tint a cell without motion", () => {
+            const wrapper = mountGame();
+            const cell = wrapper.find("[data-testid='cell-0-2']");
+
+            pressDown(cell.element);
+
+            expect(cell.attributes()).toHaveProperty("data-pressed");
+            expect(cell.attributes()).not.toHaveProperty("data-press-motion");
+        });
+
+        it("should still long-press a cell with press feedback", async () => {
+            vi.useFakeTimers();
+            const wrapper = mountGame();
+            await wrapper.find("[data-testid='number-4']").trigger("click");
+            const cell = wrapper.find("[data-testid='cell-0-2']");
+
+            pressDown(cell.element);
+            vi.advanceTimersByTime(400);
+            await cell.trigger("pointerup");
+            releaseOnWindow();
+            await cell.trigger("click");
+
+            const cellComponent = wrapper.findComponent<typeof Cell>("[data-testid='cell-0-2']");
+            expect(cellComponent.emitted("longPress")).toHaveLength(1);
+            expect(cellComponent.props("puzzleCell").notes).toEqual([4]);
+            expect(cellComponent.props("puzzleCell").entry).toBe(0);
+        });
+
+        it("should register quick taps on two cells", async () => {
+            vi.useFakeTimers();
+            const wrapper = mountGame();
+            const firstCell = wrapper.find("[data-testid='cell-0-2']");
+            const secondCell = wrapper.find("[data-testid='cell-0-3']");
+
+            pressDown(firstCell.element);
+            await firstCell.trigger("pointerup");
+            releaseOnWindow();
+            await firstCell.trigger("click");
+            vi.advanceTimersByTime(20);
+            pressDown(secondCell.element);
+            await secondCell.trigger("pointerup");
+            releaseOnWindow();
+            await secondCell.trigger("click");
+
+            expect(wrapper.findComponent<typeof Cell>("[data-testid='cell-0-3']").props("selected")).toBe(true);
+            expect(wrapper.findComponent<typeof Cell>("[data-testid='cell-0-2']").props("selected")).toBe(false);
         });
     });
 });

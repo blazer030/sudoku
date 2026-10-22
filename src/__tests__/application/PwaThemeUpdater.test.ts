@@ -6,19 +6,19 @@ describe("PwaThemeUpdater", () => {
             document.head.innerHTML = "";
         });
 
-        it("should set meta theme-color content to the theme primary color", () => {
+        it("should set meta theme-color content to the given color", () => {
             const meta = document.createElement("meta");
             meta.name = "theme-color";
             meta.content = "#000000";
             document.head.appendChild(meta);
 
-            updateMetaThemeColor("blue");
+            updateMetaThemeColor("#123456");
 
-            expect(meta.content).toBe("#4A7AB5");
+            expect(meta.content).toBe("#123456");
         });
 
         it("should not throw when meta theme-color element is missing", () => {
-            expect(() => { updateMetaThemeColor("blue"); }).not.toThrow();
+            expect(() => { updateMetaThemeColor("#123456"); }).not.toThrow();
         });
     });
 
@@ -34,8 +34,10 @@ describe("PwaThemeUpdater", () => {
             document.head.appendChild(link);
 
             updateFavicon("purple");
+            expect(link.href).toMatch(/\/sudoku-purple\.svg$/);
 
-            expect(link.href).toContain("sudoku-purple.svg");
+            updateFavicon("paperRedInkDark");
+            expect(link.href).toMatch(/\/sudoku-paperRedInkDark\.svg$/);
         });
 
         it("should not throw when icon link is missing", () => {

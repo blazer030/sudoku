@@ -48,6 +48,19 @@ describe("HintPanel", () => {
         expect(wrapper.find("[data-testid='hint-wrong-entry-note']").text()).toBe("清除只會移除這格的數字。");
     });
 
+    it("should call the steps phase exit Close, not Cancel", async () => {
+        const wrapper = mountSteps(3, 0);
+
+        expect(wrapper.find("[data-testid='hint-cancel']").exists()).toBe(false);
+        expect(wrapper.find("[data-testid='hint-close']").text()).toBe("Close");
+        await wrapper.find("[data-testid='hint-close']").trigger("click");
+        expect(wrapper.emitted("close")).toHaveLength(1);
+
+        i18n.global.locale.value = "zh-Hant";
+        await nextTick();
+        expect(wrapper.find("[data-testid='hint-close']").text()).toBe("關閉");
+    });
+
     it("should move focus into the panel, named for hint mode, when it opens", () => {
         const wrapper = mount(HintPanel, {
             attachTo: document.body,

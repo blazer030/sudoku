@@ -96,7 +96,7 @@ describe("Game Routing", () => {
             expect(saved?.cells[0][2].entry).toBe(4);
         });
 
-        it("should record gave up and delete save when clicking Give Up & Leave", async () => {
+        it("should record gave up and delete save when clicking Give Up This Game", async () => {
             const { wrapper } = await mountWithRouterView();
 
             await wrapper.find("[data-testid='back-button']").trigger("click");

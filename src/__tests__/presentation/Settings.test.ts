@@ -3,6 +3,8 @@ import { createPinia } from "pinia";
 import { createRouter, createMemoryHistory } from "vue-router";
 import Settings from "@/presentation/pages/settings/Settings.vue";
 import { useSettingsStore } from "@/stores/settingsStore";
+import { getPalette } from "@/theme/palettes";
+import { appVersion } from "@/utils/appVersion";
 
 const createTestRouter = () => {
     return createRouter({
@@ -43,6 +45,16 @@ describe("Settings Page", () => {
         expect(greenSwatch.find("[data-testid='color-theme-check']").exists()).toBe(true);
     });
 
+    it("should draw the swatch check in the swatch's own on-primary colour", () => {
+        const { wrapper } = mountSettings();
+        const probe = document.createElement("div");
+        probe.style.color = getPalette("minimal", "green", "light")["on-primary"];
+
+        const check = wrapper.get<HTMLElement>("[data-testid='color-theme-check']").element;
+
+        expect(check.style.color).toBe(probe.style.color);
+    });
+
     it("should change color theme when clicking a swatch", async () => {
         const { wrapper, store } = mountSettings();
 
@@ -51,11 +63,11 @@ describe("Settings Page", () => {
         expect(store.colorTheme).toBe("blue");
     });
 
-    it("should render 4 toggle switches", () => {
+    it("should render 5 toggle tiles", () => {
         const { wrapper } = mountSettings();
 
         const toggles = wrapper.findAll("[data-testid^='toggle-']");
-        expect(toggles).toHaveLength(4);
+        expect(toggles).toHaveLength(5);
     });
 
     it("should toggle highlightSameDigit setting", async () => {
@@ -93,6 +105,6 @@ describe("Settings Page", () => {
     it("should display app version", () => {
         const { wrapper } = mountSettings();
 
-        expect(wrapper.text()).toContain("v");
+        expect(wrapper.get("[data-testid='version-link']").text()).toContain(appVersion);
     });
 });

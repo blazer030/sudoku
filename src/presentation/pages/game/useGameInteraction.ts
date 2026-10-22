@@ -1,5 +1,5 @@
 import { computed, ref } from "vue";
-import { BOARD_SIZE } from "@/domain";
+import { BOARD_SIZE, BOX_SIZE } from "@/domain";
 import type { Sudoku } from "@/domain";
 import type { StepRecorder } from "@/domain/game/StepRecorder";
 import { InputMode } from "@/presentation/pages/game/InputMode";
@@ -32,9 +32,10 @@ export const useGameInteraction = ({
         if (isLocked()) return;
         clearErrors();
         if (sudoku.puzzle[row][column].isClue) {
-            pickClueDigit(sudoku.puzzle[row][column].clue);
+            selectClue(row, column);
             return;
         }
+        clearClueSelection();
         if (inputMode.value === InputMode.Erase) {
             eraseCell(row, column);
             return;
@@ -60,6 +61,7 @@ export const useGameInteraction = ({
         if (inputMode.value === InputMode.Erase) return;
         if (selectedDigit.value === null) return;
         clearErrors();
+        clearClueSelection();
         if (inputMode.value === InputMode.Note) {
             inputToCell(row, column, selectedDigit.value);
         } else {
@@ -67,10 +69,17 @@ export const useGameInteraction = ({
         }
     };
 
-    const pickClueDigit = (digit: number) => {
+    // A tapped clue is only looked at: it takes the selection outline, drops any picked digit or Erase mode,
+    // and never becomes an input target.
+    const selectClue = (row: number, column: number) => {
         if (inputMode.value === InputMode.Erase) inputMode.value = InputMode.Normal;
-        selectedCell.value = null;
-        selectedDigit.value = selectedDigit.value === digit ? null : digit;
+        selectedDigit.value = null;
+        selectedCell.value = isSelected(row, column) ? null : { row, column };
+    };
+
+    const clearClueSelection = () => {
+        if (selectedCell.value === null) return;
+        if (sudoku.puzzle[selectedCell.value.row][selectedCell.value.column].isClue) selectedCell.value = null;
     };
 
     const noteToCell = (row: number, column: number, value: number) => {
@@ -104,10 +113,29 @@ export const useGameInteraction = ({
         selectedCell.value = { row, column };
     };
 
+    // The digit whose matching cells light up: the picked digit, else the value of the selected cell.
+    const highlightedDigit = computed(() => {
+        if (selectedDigit.value !== null) return selectedDigit.value;
+        if (selectedCell.value === null) return null;
+        const cell = sudoku.puzzle[selectedCell.value.row][selectedCell.value.column];
+        const value = cell.isClue ? cell.clue : cell.entry;
+        return value > 0 ? value : null;
+    });
+
     const isSelected = (row: number, column: number) => {
         if (selectedCell.value === null) return false;
         if (selectedCell.value.row !== row) return false;
         return selectedCell.value.column === column;
+    };
+
+    const isPeerOfSelected = (row: number, column: number) => {
+        if (selectedCell.value === null) return false;
+        const selected = selectedCell.value;
+        if (selected.row === row && selected.column === column) return false;
+        if (selected.row === row || selected.column === column) return true;
+        const sameBoxRow = Math.floor(selected.row / BOX_SIZE) === Math.floor(row / BOX_SIZE);
+        const sameBoxColumn = Math.floor(selected.column / BOX_SIZE) === Math.floor(column / BOX_SIZE);
+        return sameBoxRow && sameBoxColumn;
     };
 
     const digitCounts = computed(() => {
@@ -151,6 +179,7 @@ export const useGameInteraction = ({
     const selectDigit = (digit: number) => {
         if (isLocked()) return;
         clearErrors();
+        clearClueSelection();
         if (inputMode.value === InputMode.Erase) inputMode.value = InputMode.Normal;
         if (selectedCell.value) {
             const { row, column } = selectedCell.value;
@@ -175,6 +204,7 @@ export const useGameInteraction = ({
     return {
         selectedCell,
         selectedDigit,
+        highlightedDigit,
         inputMode,
         clickCell,
         longPressCell,
@@ -182,6 +212,7 @@ export const useGameInteraction = ({
         toggleNoteMode,
         toggleEraseMode,
         isSelected,
+        isPeerOfSelected,
         digitCounts,
         undo,
     };

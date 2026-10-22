@@ -73,6 +73,24 @@ export class BoardState {
         return digits;
     }
 
+    /** Every cell's digit, indexed [row][column]; 0 for empty cells. */
+    public valueGrid(): number[][] {
+        return this._values.map((rowValues) => [...rowValues]);
+    }
+
+    /** Every cell's sorted candidates, indexed [row][column]; [] for filled cells. */
+    public candidateGrid(): number[][][] {
+        const candidates: number[][][] = [];
+        for (let row = 0; row < BOARD_SIZE; row++) {
+            const rowCandidates: number[][] = [];
+            for (let column = 0; column < BOARD_SIZE; column++) {
+                rowCandidates.push(this.candidatesOf(row, column));
+            }
+            candidates.push(rowCandidates);
+        }
+        return candidates;
+    }
+
     private static computeCandidates(puzzle: number[][], row: number, column: number): number {
         let candidateMask = ALL_DIGITS_MASK;
         for (let index = 0; index < BOARD_SIZE; index++) {

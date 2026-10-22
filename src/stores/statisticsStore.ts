@@ -33,7 +33,6 @@ export interface Statistics {
     medium: DifficultyStats;
     hard: DifficultyStats;
     overall: OverallStats;
-    recentGames: GameResult[];
 }
 
 const computeDifficultyStats = (games: GameResult[]): DifficultyStats => {
@@ -45,7 +44,7 @@ const computeDifficultyStats = (games: GameResult[]): DifficultyStats => {
             ? Math.min(...wonGames.map((game) => game.elapsedSeconds))
             : null,
         averageTime: wonGames.length > 0
-            ? wonGames.reduce((sum, game) => sum + game.elapsedSeconds, 0) / wonGames.length
+            ? Math.round(wonGames.reduce((sum, game) => sum + game.elapsedSeconds, 0) / wonGames.length)
             : null,
     };
 };
@@ -78,6 +77,12 @@ export const useStatisticsStore = defineStore("statistics", () => {
         persist();
     };
 
+    /** True when this time would be the best win at this difficulty: the first win, or strictly faster. */
+    const isNewBestTime = (difficulty: Difficulty, elapsedSeconds: number): boolean => {
+        const wins = history.value.filter(game => game.difficulty === difficulty && game.completed);
+        return wins.every(game => elapsedSeconds < game.elapsedSeconds);
+    };
+
     const clearAll = async () => {
         history.value = [];
         if (repository === null) return;
@@ -98,7 +103,6 @@ export const useStatisticsStore = defineStore("statistics", () => {
                 gamesPlayed: games.length,
                 winRate: games.length > 0 ? totalWon / games.length : 0,
             },
-            recentGames: [...games].reverse(),
         };
     });
 
@@ -108,6 +112,7 @@ export const useStatisticsStore = defineStore("statistics", () => {
         setRepository,
         loadFromRepository,
         recordGame,
+        isNewBestTime,
         clearAll,
     };
 });

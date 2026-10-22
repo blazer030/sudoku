@@ -2,9 +2,9 @@
   "name": "Sudoku",
   "short_name": "Sudoku",
   "description": "Train your brain with Sudoku puzzles",
-  "background_color": "#F5F5F0",
+  "background_color": "#F5F4F1",
   "display": "standalone",
-  "theme_color": "#4A9A9A",
+  "theme_color": "#0A5E5F",
   "icons": [
     {
       "src": "pwa-192x192-teal.png",

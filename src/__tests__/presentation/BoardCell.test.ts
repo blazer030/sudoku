@@ -1,5 +1,8 @@
-import { describe, expect, it } from "vitest";
+import { readFileSync } from "fs";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { nextTick } from "vue";
 import { mount } from "@vue/test-utils";
+import { ARRIVAL_SETTLE_MS } from "@/presentation/components/board-cell/useArrivalMotion";
 import BoardCell from "@/presentation/components/board-cell/BoardCell.vue";
 
 describe("BoardCell", () => {
@@ -10,6 +13,126 @@ describe("BoardCell", () => {
         const wrapper = mountCell({ value: 5 });
 
         expect(wrapper.find("[data-testid='cell-value']").text()).toBe("5");
+    });
+
+    it("should keep the digit's line box no taller than the digit, so a row under a box border keeps its height", () => {
+        // A 22px digit on the default 1.5 line height plus a 3px box border outgrows a square cell,
+        // which made the board taller once rows 3 or 6 held a digit.
+        const wrapper = mountCell({ value: 5, row: 2 });
+
+        expect(wrapper.find("[data-testid='cell-value']").classes()).toContain("leading-none");
+    });
+
+    it("should not grow to fit a digit whose line box is taller than a narrow cell", () => {
+        // A square box grows to fit its content unless its minimum size is zero: in a 304px window a
+        // cell is about 27px, under paper's 28.6px entries, and the board grew taller in paper alone
+        const wrapper = mountCell({ value: 5, valueKind: "entered" });
+
+        expect(wrapper.classes()).toEqual(expect.arrayContaining(["aspect-square", "min-w-0", "min-h-0"]));
+    });
+
+    it("should expose its variant for style sheets", () => {
+        expect(mountCell({ variant: "selected" }).attributes("data-variant")).toBe("selected");
+        expect(mountCell({}).attributes("data-variant")).toBe("default");
+    });
+
+    it("should mark an entered digit and write it in the entry face", () => {
+        const wrapper = mountCell({ value: 5, valueKind: "entered" });
+
+        expect(wrapper.attributes("data-value-kind")).toBe("entered");
+        expect(wrapper.find("[data-testid='cell-value']").classes()).toContain("font-entry");
+    });
+
+    it("should write a given digit in the clue face by default", () => {
+        const wrapper = mountCell({ value: 5 });
+
+        expect(wrapper.attributes("data-value-kind")).toBe("given");
+        expect(wrapper.find("[data-testid='cell-value']").classes()).toContain("font-clue");
+    });
+
+    it("should not mark an empty cell's value kind", () => {
+        expect(mountCell({ value: 0, valueKind: "entered" }).attributes("data-value-kind")).toBeUndefined();
+    });
+
+    it("should write notes in the note face", () => {
+        const wrapper = mountCell({ value: 0, notes: [4] });
+
+        expect(wrapper.findAll("span").find(span => span.text() === "4")?.classes()).toContain("font-note");
+    });
+
+    it("should keep the value's line box at its glyph size", () => {
+        // A larger style face (paper's 1.3× entries) must not raise the row: the line box stays the glyph's
+        for (const valueKind of ["given", "entered"]) {
+            expect(mountCell({ value: 5, valueKind }).find("[data-testid='cell-value']").classes(), valueKind).toContain("leading-none");
+        }
+    });
+
+    describe("arrival", () => {
+        afterEach(() => {
+            vi.unstubAllGlobals();
+        });
+
+        const stubReducedMotion = (reduce: boolean) => {
+            vi.stubGlobal("matchMedia", (query: string) => ({
+                matches: reduce && query === "(prefers-reduced-motion: reduce)",
+                media: query,
+            }));
+        };
+
+        it("should mark a newly placed digit as arriving", async () => {
+            stubReducedMotion(false);
+            const wrapper = mountCell({ value: 0 });
+
+            await wrapper.setProps({ value: 5 });
+            const value = wrapper.get("[data-testid='cell-value']");
+            expect(value.classes()).toContain("value-arrive");
+
+            await value.trigger("animationend");
+            expect(wrapper.get("[data-testid='cell-value']").classes()).not.toContain("value-arrive");
+        });
+
+        it("should drop the arriving mark when the active style has no arrival animation", async () => {
+            // Minimal and paper never animate value-arrive, so no animationend ever comes
+            vi.useFakeTimers();
+            try {
+                stubReducedMotion(false);
+                const wrapper = mountCell({ value: 0 });
+                await wrapper.setProps({ value: 5 });
+                expect(wrapper.get("[data-testid='cell-value']").classes()).toContain("value-arrive");
+
+                vi.advanceTimersByTime(ARRIVAL_SETTLE_MS);
+                await nextTick();
+
+                expect(wrapper.get("[data-testid='cell-value']").classes()).not.toContain("value-arrive");
+            } finally {
+                vi.useRealTimers();
+            }
+        });
+
+        it("should not animate digits present on mount", () => {
+            stubReducedMotion(false);
+            const wrapper = mountCell({ value: 5 });
+
+            expect(wrapper.get("[data-testid='cell-value']").classes()).not.toContain("value-arrive");
+        });
+
+        it("should not animate under reduced motion", async () => {
+            stubReducedMotion(true);
+            const wrapper = mountCell({ value: 0 });
+
+            await wrapper.setProps({ value: 5 });
+
+            expect(wrapper.get("[data-testid='cell-value']").classes()).not.toContain("value-arrive");
+        });
+
+        it("should leave a hint reveal to its own pop", async () => {
+            stubReducedMotion(false);
+            const wrapper = mountCell({ value: 0, popping: true });
+
+            await wrapper.setProps({ value: 5 });
+
+            expect(wrapper.get("[data-testid='cell-value']").classes()).not.toContain("value-arrive");
+        });
     });
 
     it("should render notes grid when value is zero and notes are provided", () => {
@@ -25,15 +148,43 @@ describe("BoardCell", () => {
     it.each([
         ["default", "bg-card"],
         ["clue", "bg-cell-clue"],
-        ["selected", "bg-primary-light"],
-        ["focus", "bg-primary/40"],
-        ["scope", "bg-primary/15"],
-        ["error", "bg-error-light"],
+        ["selected", "bg-cell-selected"],
+        ["focus", "bg-cell-focus"],
+        ["scope", "bg-cell-scope"],
+        ["error", "bg-error-surface"],
         ["same-digit", "bg-highlight"],
+        ["peer", "bg-cell-peer"],
     ])("variant='%s' applies background class '%s'", (variant, expectedClass) => {
         const wrapper = mountCell({ variant });
 
         expect(wrapper.classes()).toContain(expectedClass);
+    });
+
+    it("should outline the selected cell inside its edges", () => {
+        const wrapper = mountCell({ variant: "selected" });
+
+        expect(wrapper.classes()).toEqual(expect.arrayContaining(["ring-2", "ring-inset", "ring-primary"]));
+    });
+
+    it("should keep player notes at least 10px", () => {
+        const wrapper = mountCell({ value: 0, notes: [4] });
+
+        const note = wrapper.findAll("span").find(span => span.text() === "4");
+        expect(note?.classes()).toContain("text-[length:calc(clamp(10px,-0.49px+2.26vw,14px)*var(--note-scale,1))]");
+        expect(note?.classes()).toContain("text-note");
+    });
+
+    it("should keep solver candidates at least 10px", () => {
+        const wrapper = mountCell({ value: 0, notes: [4], noteTone: "solver" });
+
+        const note = wrapper.findAll("span").find(span => span.text() === "4");
+        expect(note?.classes()).toContain("text-[length:calc(clamp(10px,-0.49px+2.7vw,15px)*var(--note-scale,1))]");
+    });
+
+    it("should render valueFontWeight bold", () => {
+        const wrapper = mountCell({ value: 5, valueFontWeight: "bold" });
+
+        expect(wrapper.find("[data-testid='cell-value']").classes()).toContain("font-bold");
     });
 
     it.each([
@@ -52,7 +203,15 @@ describe("BoardCell", () => {
         const spans = wrapper.findAll("span");
         const highlightedSpan = spans.find((span) => span.text() === "2");
         expect(highlightedSpan?.classes()).toContain("bg-primary");
-        expect(highlightedSpan?.classes()).toContain("text-white");
+        expect(highlightedSpan?.classes()).toContain("text-on-primary");
+    });
+
+    it("should mark the highlighted note so a style can redraw it", () => {
+        const wrapper = mountCell({ value: 0, notes: [1, 2, 3], highlightedNote: 2 });
+        const note = (digit: number) => wrapper.findAll("span").find(span => span.text() === `${digit}`);
+
+        expect(note(2)?.attributes("data-note-highlight")).toBeDefined();
+        expect(note(1)?.attributes("data-note-highlight")).toBeUndefined();
     });
 
     it("should apply top-left corner rounding at (0, 0)", () => {
@@ -73,6 +232,24 @@ describe("BoardCell", () => {
 
         expect(wrapperCol2.classes()).toContain("border-r-3");
         expect(wrapperCol5.classes()).toContain("border-r-3");
+    });
+
+    it("should draw grid lines in the board's line colours, which a style can redraw", () => {
+        const wrapper = mountCell({ row: 0, column: 0, variant: "clue" });
+        const boxEdge = mountCell({ row: 2, column: 2 });
+
+        expect(wrapper.classes()).toContain("border-r-(color:--board-line)");
+        expect(wrapper.classes()).toContain("border-b-(color:--board-line)");
+        expect(wrapper.classes()).not.toContain("border-r-border");
+        expect(boxEdge.classes()).toContain("border-r-(color:--board-box-line)");
+        expect(boxEdge.classes()).toContain("border-b-(color:--board-box-line)");
+    });
+
+    it("should default the board's line colours to translucent ink, so they still show on clue cells", () => {
+        const indexCss = readFileSync("src/style/index.css", "utf8");
+
+        expect(indexCss).toContain("--board-line: color-mix(in oklab, var(--color-foreground) 12%, transparent);");
+        expect(indexCss).toContain("--board-box-line: color-mix(in oklab, var(--color-foreground) 20%, transparent);");
     });
 
     it("should apply thick bottom border at box boundary rows (2, 5)", () => {

@@ -1,23 +1,35 @@
 <template>
-    <div class="flex flex-col h-full items-center pt-20 pb-15 px-6">
+    <div
+        class="flex flex-col min-h-full items-center pt-20 pb-15 px-6"
+        data-skin="page-ruled"
+    >
         <div class="flex flex-col items-center gap-2">
             <div
                 class="w-20 h-20 bg-primary rounded-popup flex items-center justify-center shadow-primary-lg"
             >
                 <div class="grid grid-cols-3 gap-1 w-12 h-12">
-                    <div class="rounded-sm bg-white/40" />
-                    <div class="rounded-sm bg-white" />
-                    <div class="rounded-sm bg-white/40" />
-                    <div class="rounded-sm bg-white" />
-                    <div class="rounded-sm bg-white/40" />
-                    <div class="rounded-sm bg-white" />
-                    <div class="rounded-sm bg-white/40" />
-                    <div class="rounded-sm bg-white" />
-                    <div class="rounded-sm bg-white/40" />
+                    <div class="rounded-sm bg-on-primary/40" />
+                    <div class="rounded-sm bg-on-primary" />
+                    <div class="rounded-sm bg-on-primary/40" />
+                    <div class="rounded-sm bg-on-primary" />
+                    <div class="rounded-sm bg-on-primary/40" />
+                    <div class="rounded-sm bg-on-primary" />
+                    <div class="rounded-sm bg-on-primary/40" />
+                    <div class="rounded-sm bg-on-primary" />
+                    <div class="rounded-sm bg-on-primary/40" />
                 </div>
             </div>
-            <h1 class="text-foreground text-4xl font-bold tracking-[-1px]">
-                {{ t("home.title") }}
+            <h1
+                class="text-foreground text-4xl font-bold tracking-[-1px]"
+                data-skin="title"
+            >
+                <!-- One span per plate; the heading's text is unchanged, so it reads as before -->
+                <span
+                    v-for="(glyph, glyphIndex) in titleGlyphs(t('home.title'))"
+                    :key="glyphIndex"
+                    data-skin="title-glyph"
+                    data-testid="home-title-glyph"
+                >{{ glyph }}</span>
             </h1>
             <p class="text-foreground-secondary text-sm">
                 {{ t("home.subtitle") }}
@@ -29,56 +41,60 @@
         <div class="flex flex-col gap-3 w-full">
             <ContinueButton @continue="continueGame" />
 
-            <DifficultySwitcher v-model="difficulty" />
-
-            <button
-                class="flex items-center justify-center gap-2.5 h-14 w-full bg-card rounded-2xl shadow-card cursor-pointer transition-all duration-200 hover:bg-foreground/3 hover:shadow-card-lg"
-                data-testid="new-game-button"
-                @click="handleNewGame"
+            <div
+                class="flex flex-col gap-3 bg-card rounded-2xl shadow-card p-3"
+                data-testid="new-game-card"
             >
-                <Plus
-                    :size="20"
-                    class="text-foreground"
-                />
-                <span class="text-foreground text-base font-semibold">{{ t("home.newGame") }}</span>
-            </button>
+                <DifficultySwitcher v-model="difficulty" />
+
+                <!-- The main action without a save; secondary to Continue while one exists -->
+                <button
+                    v-press
+                    data-skin="button new-game"
+                    :class="gameStore.savedGame === null
+                        ? 'bg-primary text-on-primary shadow-primary'
+                        : 'bg-primary-light text-primary'"
+                    class="flex items-center justify-center gap-2.5 h-14 w-full rounded-2xl cursor-pointer"
+                    data-testid="new-game-button"
+                    type="button"
+                    @click="handleNewGame"
+                >
+                    <Plus :size="20" />
+                    <span class="text-base font-semibold">{{ t("home.newGame") }}</span>
+                </button>
+            </div>
         </div>
 
         <div class="flex-1" />
 
-        <div class="flex items-center justify-center gap-10">
+        <!-- Becomes grid-cols-2 when Technique Lessons adds a fourth tile -->
+        <div
+            class="grid grid-cols-3 gap-3 w-full"
+            data-testid="home-entries"
+        >
             <button
-                class="flex flex-col items-center gap-1 cursor-pointer"
-                data-testid="settings-button"
-                @click="goToSettings"
+                v-for="entry in entries"
+                :key="entry.id"
+                v-press
+                data-skin="tile"
+                :data-testid="`${entry.id}-button`"
+                class="flex flex-col items-center gap-1 min-h-22 bg-card rounded-2xl shadow-card px-2 py-3 cursor-pointer"
+                type="button"
+                @click="entry.open"
             >
-                <Settings
-                    :size="24"
-                    class="text-foreground-muted"
+                <component
+                    :is="entry.icon"
+                    :size="22"
+                    class="text-primary"
                 />
-                <span class="text-foreground-muted text-[11px] font-medium">{{ t("settings.title") }}</span>
-            </button>
-            <button
-                class="flex flex-col items-center gap-1 cursor-pointer"
-                data-testid="walkthrough-button"
-                @click="goToWalkthrough"
-            >
-                <Wand2
-                    :size="24"
-                    class="text-foreground-muted"
-                />
-                <span class="text-foreground-muted text-[11px] font-medium">{{ t("home.walkthrough") }}</span>
-            </button>
-            <button
-                class="flex flex-col items-center gap-1 cursor-pointer"
-                data-testid="statistics-button"
-                @click="goToStatistics"
-            >
-                <ChartBar
-                    :size="24"
-                    class="text-foreground-muted"
-                />
-                <span class="text-foreground-muted text-[11px] font-medium">{{ t("home.statistics") }}</span>
+                <span
+                    :data-testid="`${entry.id}-label`"
+                    class="text-sm font-semibold text-foreground"
+                >{{ entry.label }}</span>
+                <span
+                    :data-testid="`${entry.id}-subtitle`"
+                    class="text-[11px] text-foreground-secondary text-center leading-tight"
+                >{{ entry.subtitle }}</span>
             </button>
         </div>
 
@@ -89,7 +105,7 @@
 </template>
 
 <script lang="ts" setup>
-import { inject, ref } from "vue";
+import { computed, inject, ref } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { ChartBar, Plus, Settings, Wand2 } from "lucide-vue-next";
@@ -106,6 +122,8 @@ import NewGameDialog from "@/presentation/components/new-game-dialog/NewGameDial
 import { provideNewGameDialog } from "@/presentation/components/new-game-dialog/useNewGameDialog";
 import PuzzleLoader from "@/presentation/components/puzzle-loader/PuzzleLoader.vue";
 import { usePuzzleLoader } from "@/presentation/components/puzzle-loader/usePuzzleLoader";
+import { vPress } from "@/presentation/directives/press";
+import { titleGlyphs } from "@/presentation/pages/home/titleGlyphs";
 
 const { t } = useI18n();
 const router = useRouter();
@@ -119,8 +137,13 @@ const difficulty = ref<Difficulty>("easy");
 
 const handleNewGame = async () => {
     if (gameStore.savedGame !== null) {
-        const result = await newGameDialog.open();
-        if (result === "cancel") return;
+        const unfinished = gameStore.savedGame;
+        const result = await newGameDialog.open({ difficulty: unfinished.difficulty, elapsedSeconds: unfinished.elapsedSeconds });
+        if (result === "stay") return;
+        if (result === "continue") {
+            continueGame();
+            return;
+        }
         const saved = gameStore.savedGame;
         const { progressPct, correctPct, incorrectPct } = computeAbandonProgress(saved.cells, saved.answer);
         void analytics?.logEvent({
@@ -145,6 +168,20 @@ const startGame = async () => {
     await puzzleLoader.runWithLoader(() => gameStore.startNewGame(difficulty.value));
     void router.push(ROUTER_PATH.game);
 };
+
+// Says "no games yet" rather than a 0% win rate nobody earned
+const statisticsSubtitle = computed(() => {
+    const { gamesPlayed, winRate } = statisticsStore.statistics.overall;
+    return gamesPlayed === 0
+        ? t("home.entries.noGames")
+        : t("home.entries.winRate", { percent: Math.round(winRate * 100) });
+});
+
+const entries = computed(() => [
+    { id: "statistics", icon: ChartBar, label: t("home.statistics"), subtitle: statisticsSubtitle.value, open: goToStatistics },
+    { id: "walkthrough", icon: Wand2, label: t("home.walkthrough"), subtitle: t("home.entries.walkthrough"), open: goToWalkthrough },
+    { id: "settings", icon: Settings, label: t("settings.title"), subtitle: t("home.entries.settings"), open: goToSettings },
+]);
 
 const goToSettings = () => {
     void router.push(ROUTER_PATH.settings);

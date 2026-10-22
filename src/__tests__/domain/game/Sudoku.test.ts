@@ -315,29 +315,39 @@ describe("Sudoku", () => {
             expect(conflicts).toEqual([]);
         });
 
-        it('should return conflict coordinates for row duplicates', () => {
+        it("should return only the player cell for a clue duplicate", () => {
             const sudoku = createKnownSudoku();
 
-            // (0,0) clue=5，在 (0,2) 填入 5 → 行衝突
+            // (0,0) is the clue 5; 5 at (0,2) repeats it in row 0
             sudoku.fill(0, 2, 5);
 
             const conflicts = sudoku.checkAllConflicts();
 
-            expect(conflicts).toContainEqual({ row: 0, column: 0 });
-            expect(conflicts).toContainEqual({ row: 0, column: 2 });
+            expect(conflicts).toEqual([{ row: 0, column: 2 }]);
         });
 
         it('should return conflicts for column and box duplicates', () => {
             const sudoku = createKnownSudoku();
 
-            // (2,1) clue=9，在 (1,1) 填入 9 → 列衝突 + (1,4) clue=9 行衝突
+            // 9 at (1,1) repeats the clue (2,1) in column 1 and box 0, and the clue (1,4) in row 1
             sudoku.fill(1, 1, 9);
 
             const conflicts = sudoku.checkAllConflicts();
 
-            expect(conflicts).toContainEqual({ row: 1, column: 1 });
-            expect(conflicts).toContainEqual({ row: 2, column: 1 });
-            expect(conflicts).toContainEqual({ row: 1, column: 4 });
+            expect(conflicts).toEqual([{ row: 1, column: 1 }]);
+        });
+
+        it("should return both player cells when two entries repeat", () => {
+            const sudoku = createKnownSudoku();
+
+            sudoku.fill(0, 2, 4);
+            sudoku.fill(0, 3, 4);
+
+            const conflicts = sudoku.checkAllConflicts();
+
+            expect(conflicts).toHaveLength(2);
+            expect(conflicts).toContainEqual({ row: 0, column: 2 });
+            expect(conflicts).toContainEqual({ row: 0, column: 3 });
         });
     });
 

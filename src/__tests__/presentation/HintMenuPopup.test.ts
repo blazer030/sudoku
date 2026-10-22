@@ -12,7 +12,7 @@ describe("HintMenuPopup", () => {
             components: { HintMenuPopup },
             setup() {
                 const hintMenu = provideHintMenu();
-                void hintMenu.open({ recordedUsed: 0, canUseHint: true, ...params });
+                void hintMenu.open({ remaining: 4, firstHintFree: true, ...params });
                 return {};
             },
             template: "<HintMenuPopup />",
@@ -35,21 +35,67 @@ describe("HintMenuPopup", () => {
         await nextTick();
 
         expect(wrapper.find("[data-testid='hint-auto-notes']").text()).toBe("自動筆記");
-        expect(wrapper.find("[data-testid='hint-check-conflicts']").text()).toBe("檢查衝突");
+        expect(wrapper.find("[data-testid='hint-check-conflicts']").text()).toContain("檢查衝突");
         expect(wrapper.find("[data-testid='hint-reveal-cell']").text()).toBe("揭示一格");
     });
 
-    it("should display 3 hint lights matching usage count", () => {
-        const wrapper = mountPopup({ recordedUsed: 2 });
+    it("should explain that Check Conflicts looks for repeated digits", async () => {
+        const wrapper = mountPopup();
 
-        const dots = wrapper.findAll("[data-testid='hint-light']");
-        expect(dots).toHaveLength(3);
+        expect(wrapper.find("[data-testid='hint-check-conflicts-description']").text()).toBe("Finds repeated digits in a row, column or box");
+        i18n.global.locale.value = "zh-Hant";
+        await nextTick();
+        expect(wrapper.find("[data-testid='hint-check-conflicts-description']").text()).toBe("找出同列、欄、宮裡重複的數字");
+    });
 
-        // 1 個剩餘（填色），2 個已用（邊框）
-        const filledDots = dots.filter(dot => dot.classes().some(cssClass => cssClass.includes("bg-primary")));
-        expect(filledDots).toHaveLength(1);
-        const outlinedDots = dots.filter(dot => dot.classes().some(cssClass => cssClass.includes("border")));
-        expect(outlinedDots).toHaveLength(2);
+    it("should spell out how many hints are left", () => {
+        const wrapper = mountPopup({ remaining: 3 });
+
+        expect(wrapper.find("[data-testid='hint-remaining']").text()).toBe("3 hints left this game");
+        expect(wrapper.find("[data-testid='hint-light']").exists()).toBe(false);
+    });
+
+    it("should use the singular for the last hint", () => {
+        const wrapper = mountPopup({ remaining: 1 });
+
+        expect(wrapper.find("[data-testid='hint-remaining']").text()).toBe("1 hint left this game");
+    });
+
+    it("should spell out the hints left in Traditional Chinese", async () => {
+        const wrapper = mountPopup({ remaining: 4 });
+        i18n.global.locale.value = "zh-Hant";
+        await nextTick();
+
+        expect(wrapper.find("[data-testid='hint-remaining']").text()).toBe("本局還剩 4 次提示");
+    });
+
+    it("should explain the free first hint only before any hint is used", async () => {
+        const wrapper = mountPopup({ firstHintFree: true });
+        expect(wrapper.find("[data-testid='hint-free-note']").text()).toBe("Your first hint each game is free and isn't counted in statistics.");
+        i18n.global.locale.value = "zh-Hant";
+        await nextTick();
+        expect(wrapper.find("[data-testid='hint-free-note']").text()).toBe("每局第一次提示免費，不計入統計");
+
+        const usedWrapper = mountPopup({ firstHintFree: false });
+        expect(usedWrapper.find("[data-testid='hint-free-note']").exists()).toBe(false);
+    });
+
+    it("should be wide enough and balance its wrapped lines so short words are not left alone", () => {
+        const wrapper = mountPopup({ remaining: 0, firstHintFree: false });
+
+        expect(wrapper.find("[data-testid='hint-menu']").classes()).toContain("w-72");
+        expect(wrapper.find("[data-testid='hint-used-up']").classes()).toContain("text-balance");
+        expect(wrapper.find("[data-testid='hint-check-conflicts-description']").classes()).toContain("text-balance");
+    });
+
+    it("should say why the options are off when no hints are left", () => {
+        const wrapper = mountPopup({ remaining: 0, firstHintFree: false });
+
+        expect(wrapper.find("[data-testid='hint-used-up']").text()).toBe("No hints left in this game (4 per game)");
+        expect(wrapper.find("[data-testid='hint-remaining']").exists()).toBe(false);
+        for (const testId of ["hint-auto-notes", "hint-check-conflicts", "hint-reveal-cell"]) {
+            expect(wrapper.find(`[data-testid='${testId}']`).attributes("disabled")).toBeDefined();
+        }
     });
 
     it("should close when clicking overlay", async () => {
@@ -70,7 +116,7 @@ describe("HintMenuPopup", () => {
     });
 
     it("should disable options when all hints are used", () => {
-        const wrapper = mountPopup({ canUseHint: false });
+        const wrapper = mountPopup({ remaining: 0 });
 
         const buttons = wrapper.findAll("button[data-testid^='hint-']");
         buttons.forEach(btn => {

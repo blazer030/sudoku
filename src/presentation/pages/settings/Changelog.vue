@@ -1,6 +1,12 @@
 <template>
-    <div class="flex flex-col gap-5 h-dvh px-5 bg-background overflow-y-auto">
-        <div class="flex items-center justify-between sticky top-0 bg-background pt-6 pb-3 z-10">
+    <div
+        class="flex flex-col gap-5 h-full px-5 bg-background overflow-y-auto"
+        data-skin="page"
+    >
+        <div
+            class="flex items-center justify-between sticky top-0 bg-background pt-6 pb-3 z-10"
+            data-skin="page-header"
+        >
             <button
                 class="flex items-center gap-2 cursor-pointer"
                 data-testid="back-button"
@@ -16,6 +22,13 @@
             <div class="w-15" />
         </div>
 
+        <p
+            class="text-xs text-foreground-secondary px-1"
+            data-testid="changelog-app-note"
+        >
+            {{ t("changelog.appNote") }}
+        </p>
+
         <div class="bg-card rounded-2xl px-4 shadow-card-sm divide-y divide-border">
             <div
                 v-for="entry in CHANGELOG"
@@ -29,11 +42,16 @@
                 </div>
                 <ul class="flex flex-col gap-1.5">
                     <li
-                        v-for="(change, index) in entry.changes[appLocale]"
+                        v-for="(change, index) in entry.changes"
                         :key="index"
                         class="text-foreground-muted text-[13px] leading-relaxed pl-3 relative before:absolute before:left-0 before:top-[0.5em] before:w-1 before:h-1 before:rounded-full before:bg-foreground-muted"
                     >
-                        {{ change }}
+                        {{ change.text[appLocale] }}
+                        <span
+                            v-if="change.appOnly"
+                            class="ml-0.5 inline-block align-[1px] rounded-full bg-primary-light text-primary text-[11px] font-semibold leading-4 px-1.5"
+                            data-testid="changelog-app-badge"
+                        >{{ t("changelog.appBadge") }}</span>
                     </li>
                 </ul>
             </div>

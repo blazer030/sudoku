@@ -200,7 +200,7 @@ export class Sudoku {
         const steps: RevealHintStep[] = [];
         let currentState = initialState;
         for (const step of solveSteps) {
-            steps.push({ step, candidatesBefore: this.candidatesOfAllCells(currentState) });
+            steps.push({ step, candidatesBefore: currentState.candidateGrid() });
             for (const elimination of step.eliminations) {
                 currentState = currentState.eliminate(elimination.cell.row, elimination.cell.column, elimination.digit);
             }
@@ -223,18 +223,6 @@ export class Sudoku {
         for (const elimination of eliminations) {
             this._puzzle[elimination.cell.row][elimination.cell.column].removeNote(elimination.digit);
         }
-    }
-
-    private candidatesOfAllCells(state: BoardState): number[][][] {
-        const candidates: number[][][] = [];
-        for (let row = 0; row < BOARD_SIZE; row++) {
-            const rowCandidates: number[][] = [];
-            for (let column = 0; column < BOARD_SIZE; column++) {
-                rowCandidates.push(state.candidatesOf(row, column));
-            }
-            candidates.push(rowCandidates);
-        }
-        return candidates;
     }
 
     private buildEffectiveNumberBoard(): number[][] {

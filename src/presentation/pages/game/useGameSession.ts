@@ -1,8 +1,9 @@
 import { computed, inject, reactive } from "vue";
-import { useRouter } from "vue-router";
-import { provideGameCompleteModal } from "@/presentation/pages/game/components/useGameCompleteModal";
+import { provideGameCompleteModal, type GameCompleteAction } from "@/presentation/pages/game/components/useGameCompleteModal";
 import { BOARD_SIZE, Sudoku, StepRecorder } from "@/domain";
+import { useRouter } from "vue-router";
 import { useGameStore } from "@/stores/gameStore";
+import { useStatisticsStore } from "@/stores/statisticsStore";
 import { ROUTER_PATH } from "@/router";
 import { captureInitialBoard } from "@/application/GameState";
 import type { GameReplayData } from "@/application/statistics/StatisticsRepository";
@@ -10,19 +11,20 @@ import { useGameTimer } from "@/presentation/pages/game/useGameTimer";
 import { useGameCompletion } from "@/presentation/pages/game/useGameCompletion";
 import { useLeaveGame } from "@/presentation/pages/game/useLeaveGame";
 import { useHintActions } from "@/presentation/pages/game/useHintActions";
-import { useHintResult } from "@/presentation/pages/game/useHintResult";
+import { useGameToast } from "@/presentation/pages/game/useGameToast";
 import { useCompletionFlash } from "@/presentation/pages/game/useCompletionFlash";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { ANALYTICS_KEY } from "@/application/analytics/AnalyticsService";
 
-export const useGameSession = () => {
+interface GameSessionOptions {
+    /** The player chose Play Again on the completion modal. */
+    onPlayAgain: () => void;
+}
+
+export const useGameSession = ({ onPlayAgain }: GameSessionOptions) => {
     const router = useRouter();
     const gameStore = useGameStore();
     const analytics = inject(ANALYTICS_KEY);
-
-    if (!gameStore.hasActiveGame) {
-        void router.replace(ROUTER_PATH.home);
-    }
 
     const sudoku = (() => {
         if (gameStore.sudoku) {
@@ -47,6 +49,22 @@ export const useGameSession = () => {
     });
 
     const gameCompleteModal = provideGameCompleteModal();
+    const statisticsStore = useStatisticsStore();
+
+    const handleCompleteAction = (action: GameCompleteAction) => {
+        switch (action) {
+        case "home":
+            router.back();
+            break;
+        case "review":
+            // Replace, so Back from the review does not land on the finished game
+            void router.replace(ROUTER_PATH.gameReviewFor(statisticsStore.history.length - 1));
+            break;
+        case "playAgain":
+            onPlayAgain();
+            break;
+        }
+    };
 
     const difficulty = computed(() => gameStore.difficulty ?? "easy");
 
@@ -56,7 +74,7 @@ export const useGameSession = () => {
         getElapsedSeconds: () => elapsedSeconds.value,
         getReplayData,
         analytics,
-        onCompleted: (origin) => {
+        onCompleted: (origin, { isNewRecord }) => {
             const allCells: { row: number; column: number }[] = [];
             for (let row = 0; row < BOARD_SIZE; row++) {
                 for (let column = 0; column < BOARD_SIZE; column++) {
@@ -68,7 +86,8 @@ export const useGameSession = () => {
                     elapsedSeconds: elapsedSeconds.value,
                     difficulty: difficulty.value,
                     hintsUsed: sudoku.hintTracker.recordedUsed,
-                });
+                    isNewRecord,
+                }).then(handleCompleteAction);
             });
         },
     });
@@ -76,15 +95,16 @@ export const useGameSession = () => {
     const settingsStore = useSettingsStore();
     const { triggerFlash, isFlashing } = useCompletionFlash(() => settingsStore.completionFlash);
 
-    const hintResult = useHintResult();
+    const gameToast = useGameToast();
 
-    const { clearErrors, isError, isRevealed, openHintMenu, hintMode } = useHintActions({
+    const { clearErrors, isError, isRevealed, openHintMenu, hintMode, dismissOverlay } = useHintActions({
         sudoku: sudoku.raw(),
         stepRecorder,
         autoRemoveNotes: () => settingsStore.autoRemoveNotes,
         onRevealComplete: (origin) => { checkAndComplete(origin); },
         onGroupCompleted: triggerFlash,
-        onHintReveal: hintResult.show,
+        onHintReveal: outcome => { gameToast.show({ kind: "randomReveal", outcome }); },
+        onNoConflicts: () => { gameToast.show({ kind: "noConflicts" }); },
         analytics,
     });
 
@@ -97,6 +117,7 @@ export const useGameSession = () => {
         analytics,
         // Hint mode is never saved: leaving ends it with the board untouched.
         onLeave: hintMode.cancel,
+        dismissOverlay,
     });
 
     const timerPaused = computed(() => completed.value || leaveDialog.visible.value);
@@ -118,7 +139,8 @@ export const useGameSession = () => {
         isRevealed,
         openHintMenu,
         hintMode,
-        hintResultOutcome: hintResult.outcome,
+        toastContent: gameToast.content,
+        showToast: gameToast.show,
         showLeaveDialog,
         triggerFlash,
         isFlashing,
