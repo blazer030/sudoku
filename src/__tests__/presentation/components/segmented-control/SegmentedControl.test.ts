@@ -50,6 +50,14 @@ describe("SegmentedControl", () => {
         }
     });
 
+    it("should not paint a hover fill taller than the selected pill", () => {
+        const wrapper = mountControl("small");
+
+        for (const button of wrapper.findAll("button")) {
+            expect(button.classes().some(name => name.startsWith("hover:bg-"))).toBe(false);
+        }
+    });
+
     it("should keep its layered options inside its own stacking context", () => {
         const wrapper = mountControl("small");
 

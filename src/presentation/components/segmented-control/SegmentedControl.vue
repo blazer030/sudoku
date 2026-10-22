@@ -20,7 +20,7 @@
             :aria-pressed="modelValue === option.value"
             :class="modelValue === option.value
                 ? 'text-on-primary font-semibold'
-                : 'text-foreground-secondary font-medium hover:bg-foreground/5'"
+                : 'text-foreground-secondary font-medium hover:text-foreground'"
             :data-testid="`${testIdPrefix}-${option.value}`"
             class="relative z-10 flex-1 h-full rounded-icon flex items-center justify-center text-sm transition-all cursor-pointer"
             @click="emit('update:modelValue', option.value)"
