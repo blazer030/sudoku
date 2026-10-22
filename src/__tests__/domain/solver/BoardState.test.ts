@@ -1,4 +1,5 @@
 import { BoardState } from "@/domain/solver/BoardState";
+import { singlesPuzzle } from "@/__tests__/fixtures/singlesPuzzle";
 
 describe("BoardState", () => {
     it("should initialize candidates for an empty cell with all digits except peer values", () => {
@@ -98,5 +99,9 @@ describe("BoardState", () => {
         expect(updated.candidatesOf(0, 4)).not.toContain(5);
         expect(updated.candidatesOf(4, 0)).not.toContain(5);
         expect(updated.candidatesOf(1, 1)).not.toContain(5);
+    });
+
+    it("should list every cell's value", () => {
+        expect(BoardState.fromPuzzle(singlesPuzzle).valueGrid()).toEqual(singlesPuzzle);
     });
 });
