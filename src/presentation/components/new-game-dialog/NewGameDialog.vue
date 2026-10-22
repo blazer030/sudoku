@@ -72,7 +72,7 @@ import { computed, onBeforeUnmount, onMounted } from "vue";
 import { Play, TriangleAlert } from "lucide-vue-next";
 import { useI18n } from "vue-i18n";
 import { useNewGameDialog } from "@/presentation/components/new-game-dialog/useNewGameDialog";
-import { useDifficultyLabel } from "@/presentation/labels/difficultyLabels";
+import { useDifficultyLabel } from "@/presentation/i18n/difficultyLabels";
 import { formatTime } from "@/utils/formatTime";
 import { vPress } from "@/presentation/directives/press";
 

@@ -97,7 +97,7 @@
 <script lang="ts" setup>
 import { History, RotateCcw, Trophy } from "lucide-vue-next";
 import { formatTime } from "@/utils/formatTime";
-import { useDifficultyLabel } from "@/presentation/labels/difficultyLabels";
+import { useDifficultyLabel } from "@/presentation/i18n/difficultyLabels";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import { useGameCompleteModal } from "@/presentation/pages/game/components/useGameCompleteModal";

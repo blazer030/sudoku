@@ -37,7 +37,7 @@ import { useI18n } from "vue-i18n";
 import { useGameStore } from "@/stores/gameStore";
 import { computeAbandonProgress } from "@/application/analytics/computeAbandonProgress";
 import { formatTime } from "@/utils/formatTime";
-import { useDifficultyLabel } from "@/presentation/labels/difficultyLabels";
+import { useDifficultyLabel } from "@/presentation/i18n/difficultyLabels";
 import { vPress } from "@/presentation/directives/press";
 
 const { t } = useI18n();

@@ -12,7 +12,7 @@
 <script lang="ts" setup>
 import { computed } from "vue";
 import { type Difficulty } from "@/domain";
-import { useDifficultyLabel } from "@/presentation/labels/difficultyLabels";
+import { useDifficultyLabel } from "@/presentation/i18n/difficultyLabels";
 import SegmentedControl from "@/presentation/components/segmented-control/SegmentedControl.vue";
 
 defineProps<{ modelValue: Difficulty }>();

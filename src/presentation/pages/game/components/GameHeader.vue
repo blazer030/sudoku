@@ -57,7 +57,7 @@ import { useGameStore } from "@/stores/gameStore";
 import { formatTime } from "@/utils/formatTime";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
-import { useDifficultyLabel } from "@/presentation/labels/difficultyLabels";
+import { useDifficultyLabel } from "@/presentation/i18n/difficultyLabels";
 
 withDefaults(defineProps<{ elapsedSeconds: number; hintMode?: boolean }>(), { hintMode: false });
 const emit = defineEmits<{ back: [] }>();

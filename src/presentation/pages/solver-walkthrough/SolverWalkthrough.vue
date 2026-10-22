@@ -222,7 +222,7 @@ import { checkPuzzleAsync } from "@/application/puzzleCheck/PuzzleCheckService";
 import type { PuzzleCheck } from "@/application/puzzleCheck/checkPuzzle";
 import PuzzleLoader from "@/presentation/components/puzzle-loader/PuzzleLoader.vue";
 import { usePuzzleLoader } from "@/presentation/components/puzzle-loader/usePuzzleLoader";
-import { useTechniqueLabel } from "@/presentation/labels/techniqueLabels";
+import { useTechniqueLabel } from "@/presentation/i18n/techniqueLabels";
 import Cell from "@/presentation/components/board-cell/Cell.vue";
 import DigitPad from "@/presentation/components/digit-pad/DigitPad.vue";
 import StepLinkOverlay from "@/presentation/components/step-presentation/StepLinkOverlay.vue";
@@ -237,7 +237,7 @@ import { provideWalkthroughDialog } from "@/presentation/pages/solver-walkthroug
 import WalkthroughDialog from "@/presentation/pages/solver-walkthrough/WalkthroughDialog.vue";
 import { vPress } from "@/presentation/directives/press";
 import { SAMPLE_PUZZLES } from "@/presentation/pages/solver-walkthrough/samplePuzzles";
-import { useDifficultyLabel } from "@/presentation/labels/difficultyLabels";
+import { useDifficultyLabel } from "@/presentation/i18n/difficultyLabels";
 
 const props = defineProps<{
     /** A puzzle to start from, such as one from the game history; the guide stays closed. */

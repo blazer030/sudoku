@@ -230,7 +230,7 @@ import { vPress } from "@/presentation/directives/press";
 import { useI18n } from "vue-i18n";
 import { useAppLocale } from "@/presentation/i18n/useAppLocale";
 import { formatDate } from "@/presentation/i18n/formatDate";
-import { useDifficultyLabel } from "@/presentation/labels/difficultyLabels";
+import { useDifficultyLabel } from "@/presentation/i18n/difficultyLabels";
 
 const { t } = useI18n();
 const appLocale = useAppLocale();
