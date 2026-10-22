@@ -33,6 +33,7 @@ import { startLauncherIconSync } from "@/presentation/theme/launcherIconSync";
 import { STYLES, getPalette, rememberedThemeFor } from "@/theme/palettes";
 import { STYLE_IDS } from "@/application/SettingsStorage";
 import Settings from "@/presentation/pages/settings/Settings.vue";
+import { appVersion } from "@/utils/appVersion";
 import { handleBackButton } from "@/presentation/composables/backDismissal";
 
 const fakeProducts: Product[] = [
@@ -91,6 +92,7 @@ describe("Settings.vue Support section", () => {
         const rows = wrapper.get("[data-testid='settings-group-about']").findAll("[data-testid]");
 
         expect(rows.map(row => row.attributes("data-testid"))).toEqual(["version-link", "privacy-policy-link", "donate-link"]);
+        expect(wrapper.get("[data-testid='version-link']").text()).toContain(appVersion);
     });
 
     it("hides the donate entry on native when Play returns no products", async () => {
