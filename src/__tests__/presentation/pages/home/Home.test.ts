@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { nextTick } from "vue";
-import { flushPromises, mount } from "@vue/test-utils";
+import { flushPromises, mount, type VueWrapper } from "@vue/test-utils";
 import { createPinia, setActivePinia } from "pinia";
 import { createRouter, createMemoryHistory } from "vue-router";
 import Home from "@/presentation/pages/home/Home.vue";
@@ -118,17 +118,6 @@ describe("Home", () => {
         }
     });
 
-    it("should navigate to game page when clicking New Game button without saved game", async () => {
-        const { wrapper, router } = mountHome();
-        await router.push("/");
-        await router.isReady();
-
-        await wrapper.find("[data-testid='new-game-button']").trigger("click");
-        await flushPromises();
-
-        expect(router.currentRoute.value.path).toBe(ROUTER_PATH.game);
-    });
-
     it("should show Easy as default selected difficulty", () => {
         const { wrapper } = mountHome();
         const easyBtn = wrapper.find("[data-testid='difficulty-easy']");
@@ -148,12 +137,6 @@ describe("Home", () => {
         expect(wrapper.find("[data-testid='difficulty-medium']").attributes("aria-pressed")).toBe("false");
     });
 
-    it("should show Continue button when saved game exists", () => {
-        const { wrapper } = mountHome({ savedGame: dummySave });
-
-        expect(wrapper.find("[data-testid='continue-button']").exists()).toBe(true);
-    });
-
     it("should paint Continue with its own featured surface", () => {
         const { wrapper } = mountHome({ savedGame: dummySave });
         const classes = wrapper.get("[data-testid='continue-button']").classes();
@@ -161,18 +144,6 @@ describe("Home", () => {
         expect(classes).toContain("bg-featured");
         expect(classes).toContain("text-on-featured");
         expect(classes).not.toContain("bg-primary");
-    });
-
-    it("should not show Continue button when no saved game exists", () => {
-        const { wrapper } = mountHome();
-
-        expect(wrapper.find("[data-testid='continue-button']").exists()).toBe(false);
-    });
-
-    it("should display saved elapsed time on Continue button", () => {
-        const { wrapper } = mountHome({ savedGame: dummySave });
-
-        expect(wrapper.find("[data-testid='continue-button']").text()).toContain("03:24");
     });
 
     it("should show the saved difficulty, time and progress", async () => {
@@ -365,6 +336,8 @@ describe("Home", () => {
         await wrapper.find("[data-testid='new-game-button']").trigger("click");
         await flushPromises();
 
+        // Without a save there is nothing to give up, so no confirmation
+        expect(wrapper.find("[data-testid='new-game-confirm-dialog']").exists()).toBe(false);
         const gameStore = useGameStore(pinia);
         expect(gameStore.hasActiveGame).toBe(true);
         expect(gameStore.sudoku).not.toBeNull();
@@ -443,18 +416,15 @@ describe("Home", () => {
                 expect(wrapper.find("[data-testid='new-game-stay-button']").text()).toBe("留在首頁");
             });
 
-            it("should close the dialog without side effects when tapping Stay here", async () => {
+            it.each([
+                ["tapping Stay here", (wrapper: VueWrapper) => wrapper.find("[data-testid='new-game-stay-button']").trigger("click")],
+                ["tapping the scrim", (wrapper: VueWrapper) => wrapper.find("[data-testid='new-game-confirm-dialog']").trigger("click")],
+                ["pressing Escape", () => document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }))],
+                ["pressing the system Back key", () => { handleBackButton(false); }],
+            ] as const)("should close the dialog without side effects when %s", async (_way, dismiss) => {
                 const context = await openDialog();
 
-                await context.wrapper.find("[data-testid='new-game-stay-button']").trigger("click");
-
-                await expectStayedWithoutSideEffects(context);
-            });
-
-            it("should close the dialog without side effects when tapping the scrim", async () => {
-                const context = await openDialog();
-
-                await context.wrapper.find("[data-testid='new-game-confirm-dialog']").trigger("click");
+                await dismiss(context.wrapper);
 
                 await expectStayedWithoutSideEffects(context);
             });
@@ -467,21 +437,6 @@ describe("Home", () => {
                 expect(wrapper.find("[data-testid='new-game-confirm-dialog']").exists()).toBe(true);
             });
 
-            it("should close the dialog without side effects when pressing Escape", async () => {
-                const context = await openDialog();
-
-                document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
-
-                await expectStayedWithoutSideEffects(context);
-            });
-
-            it("should close the dialog without side effects when pressing the system Back key", async () => {
-                const context = await openDialog();
-
-                handleBackButton(false);
-
-                await expectStayedWithoutSideEffects(context);
-            });
         });
 
         it("should show the confirm dialog in Traditional Chinese when the language is zh-Hant", async () => {
@@ -585,17 +540,6 @@ describe("Home", () => {
             expect(analytics.logEvent).not.toHaveBeenCalledWith(expect.objectContaining({ name: "game_abandon" }));
         });
 
-        it("should start game directly when no saved game exists", async () => {
-            const { wrapper, router } = mountHome();
-            await router.push("/");
-            await router.isReady();
-
-            await wrapper.find("[data-testid='new-game-button']").trigger("click");
-            await flushPromises();
-
-            expect(wrapper.find("[data-testid='new-game-confirm-dialog']").exists()).toBe(false);
-            expect(router.currentRoute.value.path).toBe(ROUTER_PATH.game);
-        });
     });
 
     describe("game_abandon analytics", () => {
