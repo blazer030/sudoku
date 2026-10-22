@@ -50,7 +50,6 @@
             <ProgressBar
                 :current-step="stepIndex"
                 :play-state="playState"
-                :show-counter="false"
                 :testid-prefix="`${testIdPrefix}-`"
                 :total-steps="Math.max(0, totalSteps - 1)"
                 class="flex-1"

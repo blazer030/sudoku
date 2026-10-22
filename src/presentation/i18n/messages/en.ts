@@ -142,7 +142,6 @@ export const en = {
             fill: "Fill {digit}, {count} left",
             note: "Note {digit}, {count} left",
         },
-        hintResult: "{technique}: {position}",
         randomReveal: "Random reveal: {position}",
         leave: {
             title: "Leave Game?",
@@ -161,12 +160,7 @@ export const en = {
             review: "Review This Game",
         },
     },
-    playback: {
-        step: "Step {current} of {total}",
-    },
     walkthrough: {
-        initialBoard: "Initial board",
-        eliminations: "{technique}: {count} elimination | {technique}: {count} eliminations",
         reset: "Reset",
         solve: "Solve",
     },

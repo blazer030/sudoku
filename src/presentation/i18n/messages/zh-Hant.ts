@@ -139,7 +139,6 @@ export const zhHant: MessageSchema = {
             fill: "填入 {digit}，還剩 {count} 個",
             note: "筆記 {digit}，還剩 {count} 個",
         },
-        hintResult: "{technique}：{position}",
         randomReveal: "隨機揭示：{position}",
         leave: {
             title: "離開遊戲？",
@@ -158,12 +157,7 @@ export const zhHant: MessageSchema = {
             review: "看這局回顧",
         },
     },
-    playback: {
-        step: "第 {current} 步／共 {total} 步",
-    },
     walkthrough: {
-        initialBoard: "初始盤面",
-        eliminations: "{technique}：刪去 {count} 個候選數",
         reset: "重設",
         solve: "解題",
     },
