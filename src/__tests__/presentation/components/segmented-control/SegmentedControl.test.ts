@@ -38,6 +38,18 @@ describe("SegmentedControl", () => {
             .toEqual(["Small", "Medium", "Large"]);
     });
 
+    it("should let every option fill the track's full 48px height as its tap target", () => {
+        const wrapper = mountControl("small");
+
+        // Only horizontal track padding: vertical padding would leave each option 40px tall and a dead strip above and below
+        expect(wrapper.classes()).toContain("h-12");
+        expect(wrapper.classes()).toContain("px-1");
+        expect(wrapper.classes()).not.toContain("p-1");
+        for (const option of OPTIONS) {
+            expect(wrapper.get(`[data-testid='size-${option.value}']`).classes()).toContain("h-full");
+        }
+    });
+
     it("should mark only the selected option as pressed", () => {
         const wrapper = mountControl("medium");
 
