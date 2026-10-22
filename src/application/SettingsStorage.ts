@@ -1,10 +1,18 @@
-export const COLOR_THEME_IDS = ["green", "blue", "purple", "orange", "pink", "teal"] as const;
-export type ColorThemeId = typeof COLOR_THEME_IDS[number];
+export const STYLE_IDS = ["minimal"] as const;
+export type StyleId = typeof STYLE_IDS[number];
+/** Launcher aliases and PWA icon sets exist for these six only. */
+export const ICON_THEME_IDS = ["green", "blue", "purple", "orange", "pink", "teal"] as const;
+export type IconThemeId = typeof ICON_THEME_IDS[number];
+/** Each style's own colour themes, in the order the picker shows them; the first is the style's default. */
+export const THEME_IDS_BY_STYLE = {
+    minimal: ICON_THEME_IDS,
+} as const satisfies Record<StyleId, readonly string[]>;
+export type ColorThemeId = typeof THEME_IDS_BY_STYLE[StyleId][number];
+/** Every style's theme ids together, in first-seen order. */
+export const COLOR_THEME_IDS: readonly ColorThemeId[] = [...new Set(STYLE_IDS.flatMap(style => THEME_IDS_BY_STYLE[style]))];
 export const APPEARANCES = ["system", "light", "dark"] as const;
 export type Appearance = typeof APPEARANCES[number];
 export type ColorMode = Exclude<Appearance, "system">;
-export const STYLE_IDS = ["minimal"] as const;
-export type StyleId = typeof STYLE_IDS[number];
 export const APP_LOCALES = ["en", "zh-Hant"] as const;
 export const LANGUAGE_PREFERENCES = ["system", ...APP_LOCALES] as const;
 export type AppLocale = typeof APP_LOCALES[number];

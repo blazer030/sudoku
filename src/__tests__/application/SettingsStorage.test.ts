@@ -1,8 +1,12 @@
-import { loadSettings, saveSettings } from "@/application/SettingsStorage";
+import { ICON_THEME_IDS, THEME_IDS_BY_STYLE, loadSettings, saveSettings } from "@/application/SettingsStorage";
 
 describe("SettingsStorage", () => {
     beforeEach(() => {
         localStorage.clear();
+    });
+
+    it("should list the six icon themes as the minimal style's themes", () => {
+        expect(THEME_IDS_BY_STYLE.minimal).toEqual(ICON_THEME_IDS);
     });
 
     describe("loadSettings", () => {

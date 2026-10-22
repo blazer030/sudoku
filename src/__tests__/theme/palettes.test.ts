@@ -1,10 +1,13 @@
-import { COLOR_THEME_IDS, type ColorThemeId } from "@/application/SettingsStorage";
+import { STYLE_IDS, THEME_IDS_BY_STYLE, type ColorThemeId } from "@/application/SettingsStorage";
 import { STYLES, getPalette, rememberedThemeFor } from "@/theme/palettes";
 import { contrastRatio } from "@/theme/contrast";
 
 describe("palettes", () => {
-    it("should define every color theme for the minimal style in order", () => {
-        expect(STYLES.minimal.themes.map(theme => theme.id)).toEqual([...COLOR_THEME_IDS]);
+    it("should define each style's themes in the listed order", () => {
+        expect(Object.keys(STYLES)).toEqual([...STYLE_IDS]);
+        for (const style of STYLE_IDS) {
+            expect(STYLES[style].themes.map(theme => theme.id), style).toEqual([...THEME_IDS_BY_STYLE[style]]);
+        }
     });
 
     it("should use upper-case six-digit hex values everywhere", () => {
