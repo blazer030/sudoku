@@ -20,6 +20,7 @@
             </div>
         </div>
         <span
+            v-if="showCounter"
             class="text-xs text-center text-foreground-muted"
             :data-testid="`${testidPrefix}step-counter`"
         >
@@ -29,23 +30,21 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, toRef, type Ref } from "vue";
+import { computed, ref, toRef } from "vue";
 import { useI18n } from "vue-i18n";
-import { useProgressDrag } from "@/presentation/components/playback/useProgressDrag";
+import { type PlayState, useProgressDrag } from "@/presentation/components/playback/useProgressDrag";
 
 const { t } = useI18n();
 
 const props = withDefaults(defineProps<{
     currentStep: number;
     totalSteps: number;
-    playState: {
-        isPlaying: Ref<boolean>;
-        stopPlay: () => void;
-        startPlay: () => void;
-    };
+    playState: PlayState;
     testidPrefix?: string;
+    showCounter?: boolean;
 }>(), {
     testidPrefix: "",
+    showCounter: true,
 });
 
 const emit = defineEmits<{

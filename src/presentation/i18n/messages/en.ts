@@ -224,6 +224,8 @@ export const en = {
         nextStep: "Next step",
         stepCounter: "Step {current} of {total}",
         stepCount: "{current} / {total}",
+        play: "Play",
+        pause: "Pause",
     },
     hintMode: {
         badge: "Hint mode",

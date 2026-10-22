@@ -78,4 +78,12 @@ describe("ProgressBar", () => {
 
         expect(wrapper.find("[data-testid='step-counter']").classes()).toContain("text-center");
     });
+
+    it("should leave the step counter out when showCounter is false", () => {
+        const wrapper = mount(ProgressBar, {
+            props: { currentStep: 1, totalSteps: 5, playState: noopPlayState(), showCounter: false },
+        });
+
+        expect(wrapper.find("[data-testid='step-counter']").exists()).toBe(false);
+    });
 });

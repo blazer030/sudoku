@@ -222,6 +222,8 @@ export const zhHant: MessageSchema = {
         nextStep: "下一步",
         stepCounter: "第 {current} 步，共 {total} 步",
         stepCount: "{current} / {total}",
+        play: "播放",
+        pause: "暫停",
     },
     hintMode: {
         badge: "提示模式",
