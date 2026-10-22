@@ -33,6 +33,10 @@ import { STATISTICS_REPOSITORY_KEY, type StatisticsRepository } from "@/applicat
 import { IndexedDBStatisticsRepository } from "@/infrastructure/statistics/IndexedDBStatisticsRepository";
 import { GAME_REPOSITORY_KEY, type GameRepository } from "@/application/game/GameRepository";
 import { IndexedDBGameRepository } from "@/infrastructure/game/IndexedDBGameRepository";
+import type { BackButtonService } from "@/application/backButton/BackButtonService";
+import { CapacitorBackButtonAdapter } from "@/infrastructure/backButton/CapacitorBackButtonAdapter";
+import { NoopBackButtonAdapter } from "@/infrastructure/backButton/NoopBackButtonAdapter";
+import { handleBackButton } from "@/presentation/composables/backDismissal";
 
 if (Capacitor.isNativePlatform() && "serviceWorker" in navigator) {
     void navigator.serviceWorker.getRegistrations().then((registrations) => {
@@ -62,6 +66,10 @@ const appearanceBridge: AppearanceBridgeService = Capacitor.isNativePlatform()
     ? new CapacitorAppearanceBridgeAdapter()
     : new NoopAppearanceBridgeAdapter();
 
+const backButton: BackButtonService = Capacitor.isNativePlatform()
+    ? new CapacitorBackButtonAdapter()
+    : new NoopBackButtonAdapter();
+
 const statisticsRepository: StatisticsRepository = new IndexedDBStatisticsRepository();
 const gameRepository: GameRepository = new IndexedDBGameRepository();
 
@@ -77,6 +85,7 @@ app.provide(GAME_REPOSITORY_KEY, gameRepository);
 
 startAppearanceSync(storeToRefs(useSettingsStore()), systemBar, appearanceBridge);
 startLauncherIconSync(storeToRefs(useSettingsStore()), icon);
+backButton.listen(handleBackButton);
 useDonateStore().setBilling(billing);
 const gameStore = useGameStore();
 gameStore.setAnalytics(analytics);
