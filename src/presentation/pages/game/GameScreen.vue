@@ -11,7 +11,7 @@
         <div class="flex flex-col items-center gap-6">
             <div
                 :class="hintMode.active.value ? 'ring-2 ring-primary/50' : 'ring-0 ring-transparent'"
-                class="bg-card rounded-2xl shadow-card-lg p-2 self-stretch -mx-3 transition-shadow duration-300"
+                class="bg-card rounded-2xl shadow-card-lg p-2 self-center w-[calc(100%+1.5rem)] max-w-board-fit transition-shadow duration-300"
                 data-skin="board"
                 data-testid="game-board"
             >

@@ -30,18 +30,31 @@ describe("board geometry", () => {
         expect(wrapper.classes()).toContain("aspect-square");
     });
 
+    const boardTagOf = (path: string, testId: string): string =>
+        [...readFileSync(path, "utf8").matchAll(/<\w+\b(?:[^>"']|"[^"]*"|'[^']*')*>/g)].map(([tag]) => tag)
+            .find(tag => tag.includes(`data-testid="${testId}"`)) ?? "";
+
     it.each([
-        ["src/presentation/pages/game/GameScreen.vue", "game-board"],
         ["src/presentation/pages/game-review/GameReview.vue", "review-board"],
         ["src/presentation/pages/solver-walkthrough/SolverWalkthrough.vue", "walkthrough-board"],
     ])("%s gives its board more of the screen width than the page gutter", (path, testId) => {
-        const source = readFileSync(path, "utf8");
-        const boardTag = [...source.matchAll(/<\w+\b(?:[^>"']|"[^"]*"|'[^']*')*>/g)].map(([tag]) => tag)
-            .find(tag => tag.includes(`data-testid="${testId}"`));
-
         // The page keeps its 20px gutter for everything else; every board reaches 8px from the edge,
         // so the board is the same width in the game, the review and the walkthrough
-        expect(boardTag).toMatch(/class="[^"]*\B-mx-3\b/);
-        expect(boardTag).not.toMatch(/class="[^"]*\bw-full\b/);
+        expect(boardTagOf(path, testId)).toMatch(/class="[^"]*\B-mx-3\b/);
+        expect(boardTagOf(path, testId)).not.toMatch(/class="[^"]*\bw-full\b/);
+    });
+
+    it("should widen the game board the same way, but no further than a short screen allows", () => {
+        // Centred and 24px wider than the page's content, like the other boards; on a short screen
+        // (360×640) it gives up width so the digit keys stay on screen
+        const boardTag = boardTagOf("src/presentation/pages/game/GameScreen.vue", "game-board");
+        expect(boardTag).toMatch(/class="[^"]*\bself-center\b/);
+        expect(boardTag).toMatch(/class="[^"]*\bw-\[calc\(100%\+1\.5rem\)\]/);
+        expect(boardTag).toMatch(/class="[^"]*\bmax-w-board-fit\b/);
+
+        const utility = /@utility max-w-board-fit \{([^}]*)\}/.exec(readFileSync("src/style/index.css", "utf8"))?.[1] ?? "";
+        expect(utility).toMatch(/max-width: calc\(100dvh - /);
+        expect(utility).toContain("safe-area-inset-top");
+        expect(utility).toContain("safe-area-inset-bottom");
     });
 });

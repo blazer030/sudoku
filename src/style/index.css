@@ -67,6 +67,13 @@
   bottom: calc(6rem + var(--safe-area-inset-bottom, env(safe-area-inset-bottom)));
 }
 
+/* The game board gives up width on a short screen so the digit keys stay on it. 331px is what the
+   game screen needs besides the board (page padding, header, gaps, controls and two rows of 56px
+   keys), measured at 360×640; the board is square, so its width is its height. */
+@utility max-w-board-fit {
+  max-width: calc(100dvh - 331px - var(--safe-area-inset-top, env(safe-area-inset-top)) - var(--safe-area-inset-bottom, env(safe-area-inset-bottom)));
+}
+
 :root {
   color-scheme: light;
 }
