@@ -3,11 +3,11 @@ import { flushPromises, mount } from "@vue/test-utils";
 import { createPinia } from "pinia";
 import { createMemoryHistory, createRouter } from "vue-router";
 import Game from "@/presentation/pages/game/Game.vue";
-import { knownAnswer, knownPuzzle, createKnownSudoku } from "@/__tests__/fixtures/knownPuzzle";
+import { createKnownSudoku, fillAllButLastKnownCell, lastKnownEmptyCell } from "@/__tests__/fixtures/knownPuzzle";
 import { useGameStore } from "@/stores/gameStore";
 import { useStatisticsStore } from "@/stores/statisticsStore";
 
-const mountWithRouterView = async () => {
+const mountWithRouterView = async ({ nearlySolved = false } = {}) => {
     const pinia = createPinia();
     const router = createRouter({
         history: createMemoryHistory(),
@@ -18,6 +18,7 @@ const mountWithRouterView = async () => {
     });
     const gameStore = useGameStore(pinia);
     gameStore.sudoku = createKnownSudoku();
+    if (nearlySolved) fillAllButLastKnownCell(gameStore.sudoku);
     gameStore.setDifficulty("easy");
     await router.push("/game");
     await router.isReady();
@@ -49,19 +50,13 @@ describe("Game Routing", () => {
 
         it("should allow route leave when game is completed", async () => {
             localStorage.setItem("sudoku-settings", JSON.stringify({ completionFlash: false }));
-            const { wrapper, router } = await mountWithRouterView();
+            const { wrapper, router } = await mountWithRouterView({ nearlySolved: true });
 
-            for (let row = 0; row < 9; row++) {
-                for (let column = 0; column < 9; column++) {
-                    if (knownPuzzle[row][column] === 0) {
-                        const value = knownAnswer[row][column];
-                        const numberButton = wrapper.find(`[data-testid='number-${value}']`);
-                        await numberButton.trigger("click");
-                        await wrapper.find(`[data-testid='cell-${row}-${column}']`).trigger("click");
-                        await numberButton.trigger("click");
-                    }
-                }
-            }
+            const { row, column, value } = lastKnownEmptyCell;
+            const numberButton = wrapper.find(`[data-testid='number-${value}']`);
+            await numberButton.trigger("click");
+            await wrapper.find(`[data-testid='cell-${row}-${column}']`).trigger("click");
+            await numberButton.trigger("click");
             expect(wrapper.find("[data-testid='game-complete-modal']").exists()).toBe(true);
 
             await router.push("/");

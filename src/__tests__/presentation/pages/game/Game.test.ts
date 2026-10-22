@@ -5,7 +5,7 @@ import { flushPromises, mount } from "@vue/test-utils";
 import { createPinia } from "pinia";
 import { createMemoryHistory, createRouter, onBeforeRouteLeave } from "vue-router";
 import Game from "@/presentation/pages/game/Game.vue";
-import { knownAnswer, knownPuzzle, createKnownSudoku } from "@/__tests__/fixtures/knownPuzzle";
+import { knownAnswer, knownPuzzle, createKnownSudoku, fillAllButLastKnownCell, lastKnownEmptyCell } from "@/__tests__/fixtures/knownPuzzle";
 import type { GameState } from "@/application/GameState";
 import Cell from "@/presentation/components/board-cell/Cell.vue";
 import { useGameStore } from "@/stores/gameStore";
@@ -24,11 +24,11 @@ const createTestRouter = () => {
     });
 };
 
-const mountGame = (difficulty: Difficulty = "easy") => {
+const mountGame = (difficulty: Difficulty = "easy", sudoku: Sudoku = createKnownSudoku()) => {
     const pinia = createPinia();
     const router = createTestRouter();
     const gameStore = useGameStore(pinia);
-    gameStore.sudoku = createKnownSudoku();
+    gameStore.sudoku = sudoku;
     gameStore.setDifficulty(difficulty);
     return mount(Game, { global: { plugins: [pinia, router] } });
 };
@@ -64,20 +64,20 @@ const openRevealCell = async (wrapper: GameWrapper) => {
     await flushPromises();
 };
 
-// Fills every empty cell of the known puzzle except the last one, digit first.
-const fillAllButLastEmptyCell = async (wrapper: GameWrapper) => {
-    const emptyCells: [number, number][] = [];
-    for (let row = 0; row < 9; row++) {
-        for (let column = 0; column < 9; column++) {
-            if (knownPuzzle[row][column] === 0) emptyCells.push([row, column]);
-        }
-    }
-    for (const [row, column] of emptyCells.slice(0, -1)) {
-        const numberButton = wrapper.find(`[data-testid='number-${knownAnswer[row][column]}']`);
-        await numberButton.trigger("click");
-        await wrapper.find(`[data-testid='cell-${row}-${column}']`).trigger("click");
-        await numberButton.trigger("click");
-    }
+// The known puzzle with only its last empty cell left, so a test plays just the finishing move
+const nearlySolvedSudoku = (): Sudoku => {
+    const sudoku = createKnownSudoku();
+    fillAllButLastKnownCell(sudoku);
+    return sudoku;
+};
+
+// Fills the last empty cell through the digit pad, digit first
+const fillLastCell = async (wrapper: GameWrapper) => {
+    const { row, column, value } = lastKnownEmptyCell;
+    const numberButton = wrapper.find(`[data-testid='number-${value}']`);
+    await numberButton.trigger("click");
+    await wrapper.find(`[data-testid='cell-${row}-${column}']`).trigger("click");
+    await numberButton.trigger("click");
 };
 
 const boardOf = (wrapper: GameWrapper) =>
@@ -373,20 +373,9 @@ describe("Game", () => {
 
     it("should show game complete modal when all cells are correctly filled", async () => {
         localStorage.setItem("sudoku-settings", JSON.stringify({ completionFlash: false }));
-        const wrapper = mountGame();
+        const wrapper = mountGame("easy", nearlySolvedSudoku());
 
-        for (let row = 0; row < 9; row++) {
-            for (let column = 0; column < 9; column++) {
-                const cell = wrapper.find(`[data-testid='cell-${row}-${column}']`);
-                if (cell.text() !== "") continue;
-
-                const value = knownAnswer[row][column];
-                const numberButton = wrapper.find(`[data-testid='number-${value}']`);
-                await numberButton.trigger("click");
-                await cell.trigger("click");
-                await numberButton.trigger("click");
-            }
-        }
+        await fillLastCell(wrapper);
 
         const modal = wrapper.find("[data-testid='game-complete-modal']");
         expect(modal.exists()).toBe(true);
@@ -668,23 +657,11 @@ describe("Game", () => {
     it("should stop timer when game is completed", async () => {
         localStorage.setItem("sudoku-settings", JSON.stringify({ completionFlash: false }));
         vi.useFakeTimers();
-        const wrapper = mountGame();
+        const wrapper = mountGame("easy", nearlySolvedSudoku());
 
         await vi.advanceTimersByTimeAsync(5000);
 
-        // 填入所有正確答案
-        for (let row = 0; row < 9; row++) {
-            for (let column = 0; column < 9; column++) {
-                if (knownPuzzle[row][column] === 0) {
-                    const cell = wrapper.find(`[data-testid='cell-${row}-${column}']`);
-                    const value = knownAnswer[row][column];
-                    const numberButton = wrapper.find(`[data-testid='number-${value}']`);
-                    await numberButton.trigger("click");
-                    await cell.trigger("click");
-                    await numberButton.trigger("click");
-                }
-            }
-        }
+        await fillLastCell(wrapper);
 
         expect(wrapper.find("[data-testid='game-complete-modal']").exists()).toBe(true);
         expect(wrapper.find("[data-testid='timer']").text()).toBe("00:05");
@@ -851,19 +828,9 @@ describe("Game", () => {
 
     it("should record game result when game is completed", async () => {
         localStorage.setItem("sudoku-settings", JSON.stringify({ completionFlash: false }));
-        const wrapper = mountGame();
+        const wrapper = mountGame("easy", nearlySolvedSudoku());
 
-        for (let row = 0; row < 9; row++) {
-            for (let column = 0; column < 9; column++) {
-                if (knownPuzzle[row][column] === 0) {
-                    const value = knownAnswer[row][column];
-                    const numberButton = wrapper.find(`[data-testid='number-${value}']`);
-                    await numberButton.trigger("click");
-                    await wrapper.find(`[data-testid='cell-${row}-${column}']`).trigger("click");
-                    await numberButton.trigger("click");
-                }
-            }
-        }
+        await fillLastCell(wrapper);
 
         const history = useStatisticsStore().history;
         expect(history).toHaveLength(1);
@@ -876,10 +843,13 @@ describe("Game", () => {
         const savedState: GameState = {
             difficulty: "easy",
             answer: knownAnswer.map(row => [...row]),
-            cells: knownPuzzle.map(row =>
-                row.map(puzzleValue => ({
+            // Everything filled but the last empty cell
+            cells: knownPuzzle.map((row, rowIndex) =>
+                row.map((puzzleValue, column) => ({
                     clue: puzzleValue,
-                    entry: 0,
+                    entry: puzzleValue === 0 && !(rowIndex === lastKnownEmptyCell.row && column === lastKnownEmptyCell.column)
+                        ? knownAnswer[rowIndex][column]
+                        : 0,
                     notes: [],
                 }))
             ),
@@ -890,17 +860,7 @@ describe("Game", () => {
         const wrapper = mountContinueGame(savedState);
         expect(useGameStore().savedGame).not.toBeNull();
 
-        for (let row = 0; row < 9; row++) {
-            for (let column = 0; column < 9; column++) {
-                if (knownPuzzle[row][column] === 0) {
-                    const value = knownAnswer[row][column];
-                    const numberButton = wrapper.find(`[data-testid='number-${value}']`);
-                    await numberButton.trigger("click");
-                    await wrapper.find(`[data-testid='cell-${row}-${column}']`).trigger("click");
-                    await numberButton.trigger("click");
-                }
-            }
-        }
+        await fillLastCell(wrapper);
 
         expect(wrapper.find("[data-testid='game-complete-modal']").exists()).toBe(true);
         expect(useGameStore().savedGame).toBeNull();
@@ -1117,8 +1077,7 @@ describe("Game", () => {
         it("should check completion after Reveal Cell", async () => {
             localStorage.setItem("sudoku-settings", JSON.stringify({ completionFlash: false }));
             vi.spyOn(Sudoku.prototype, "planRevealHint").mockReturnValue({ kind: "noTechnique" });
-            const wrapper = mountGame();
-            await fillAllButLastEmptyCell(wrapper);
+            const wrapper = mountGame("easy", nearlySolvedSudoku());
 
             await openRevealCell(wrapper);
 
@@ -1290,8 +1249,7 @@ describe("Game", () => {
         it("should show the complete modal and log game_complete when the hint fills the last cell", async () => {
             localStorage.setItem("sudoku-settings", JSON.stringify({ completionFlash: false }));
             const logEvent = vi.fn().mockResolvedValue(undefined);
-            const wrapper = mountGameWith(createKnownSudoku(), { logEvent });
-            await fillAllButLastEmptyCell(wrapper);
+            const wrapper = mountGameWith(nearlySolvedSudoku(), { logEvent });
 
             await openRevealCell(wrapper);
             await wrapper.find("[data-testid='hint-primary']").trigger("click");

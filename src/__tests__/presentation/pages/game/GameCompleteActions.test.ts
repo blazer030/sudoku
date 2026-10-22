@@ -3,7 +3,7 @@ import { flushPromises, mount } from "@vue/test-utils";
 import { createPinia } from "pinia";
 import { createMemoryHistory, createRouter } from "vue-router";
 import Game from "@/presentation/pages/game/Game.vue";
-import { knownAnswer, knownPuzzle } from "@/__tests__/fixtures/knownPuzzle";
+import { fillAllButLastKnownCell, knownAnswer, knownPuzzle, lastKnownEmptyCell } from "@/__tests__/fixtures/knownPuzzle";
 import type { Difficulty } from "@/domain";
 import { useGameStore } from "@/stores/gameStore";
 import { useStatisticsStore } from "@/stores/statisticsStore";
@@ -38,6 +38,8 @@ const mountGameRoute = async (difficulty: Difficulty = "easy") => {
     });
     const gameStore = useGameStore(pinia);
     await gameStore.startNewGame(difficulty);
+    // Every test finishes the game, so it starts one move from the end
+    if (gameStore.sudoku !== null) fillAllButLastKnownCell(gameStore.sudoku);
     await router.push("/");
     await router.push("/game");
     await router.isReady();
@@ -48,17 +50,13 @@ const mountGameRoute = async (difficulty: Difficulty = "easy") => {
 
 type GameWrapper = Awaited<ReturnType<typeof mountGameRoute>>["wrapper"];
 
-// Fills every empty cell of the known puzzle, digit first.
+// Plays the finishing move through the digit pad, digit first
 const completeKnownGame = async (wrapper: GameWrapper) => {
-    for (let row = 0; row < 9; row++) {
-        for (let column = 0; column < 9; column++) {
-            if (knownPuzzle[row][column] !== 0) continue;
-            const numberButton = wrapper.find(`[data-testid='number-${knownAnswer[row][column]}']`);
-            await numberButton.trigger("click");
-            await wrapper.find(`[data-testid='cell-${row}-${column}']`).trigger("click");
-            await numberButton.trigger("click");
-        }
-    }
+    const { row, column, value } = lastKnownEmptyCell;
+    const numberButton = wrapper.find(`[data-testid='number-${value}']`);
+    await numberButton.trigger("click");
+    await wrapper.find(`[data-testid='cell-${row}-${column}']`).trigger("click");
+    await numberButton.trigger("click");
     await flushPromises();
 };
 
