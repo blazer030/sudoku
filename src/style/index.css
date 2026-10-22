@@ -170,11 +170,12 @@
     pointer-events: none;
 }
 
-/* Completion flash animation */
+/* Completion flash animation. It starts and ends on the card colour unless a style says what
+   the cell rests on (--completion-flash-rest). */
 @keyframes completion-flash {
-  0% { background-color: var(--color-card); }
+  0% { background-color: var(--completion-flash-rest, var(--color-card)); }
   50% { background-color: var(--color-highlight); }
-  100% { background-color: var(--color-card); }
+  100% { background-color: var(--completion-flash-rest, var(--color-card)); }
 }
 
 .animate-completion-flash {

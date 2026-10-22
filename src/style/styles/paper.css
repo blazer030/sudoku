@@ -58,6 +58,10 @@
         color-mix(in srgb, var(--color-lamp) 4%, transparent) 55%,
         transparent 68%
     );
+    /* At night the light inks need the board's washes lighter, under the lamp as well */
+    --paper-wash-clue: color-mix(in srgb, var(--color-foreground) 8.5%, transparent);
+    --paper-wash-same-digit: color-mix(in srgb, var(--color-primary) 20%, transparent);
+    --paper-wash-focus: color-mix(in srgb, var(--color-primary) 20%, transparent);
 }
 
 /* The app root paints it on its own box, which takes in the safe-area padding, so edge to edge it
@@ -94,6 +98,74 @@
     background-repeat: repeat, repeat, no-repeat, no-repeat, repeat, repeat;
     background-attachment: local, local, fixed, fixed, fixed, fixed;
 }
+
+/* The board is drawn on the page: a sheet of the notebook's paper with its grain and no card shadow,
+   the grid in the theme's ink (faded thin lines, box lines as firmer strokes), printed clues on
+   graphite-shaded squares and every highlight a translucent wash, so the grain and at night the lamp
+   show through. Sheet, washes and hatch are tokens mixed with transparent; paletteContrast.test.ts
+   reads them from here and checks every board ink on them, by day and under the lamp. */
+[data-style="paper"] {
+    --paper-sheet: color-mix(in srgb, var(--color-card) 80%, transparent);
+    --board-line: color-mix(in srgb, var(--color-primary) 28%, transparent);
+    --board-box-line: color-mix(in srgb, var(--color-primary) 62%, transparent);
+    --paper-hatch: color-mix(in srgb, var(--color-foreground) 6%, transparent);
+    --paper-wash-clue: color-mix(in srgb, var(--color-foreground) 12.5%, transparent);
+    --paper-wash-peer: color-mix(in srgb, var(--color-primary) 10%, transparent);
+    --paper-wash-same-digit: color-mix(in srgb, var(--color-highlight) 100%, transparent);
+    --paper-wash-selected: color-mix(in srgb, var(--color-primary) 16%, transparent);
+    --paper-wash-focus: color-mix(in srgb, var(--color-primary) 22%, transparent);
+    --paper-wash-scope: color-mix(in srgb, var(--color-primary) 8%, transparent);
+    --paper-wash-pattern: color-mix(in srgb, var(--color-primary) 16%, transparent);
+    --paper-wash-answer: color-mix(in srgb, var(--color-primary) 18%, transparent);
+    --paper-wash-error: color-mix(in srgb, var(--color-error) 14%, transparent);
+    --paper-wash-wrong: color-mix(in srgb, var(--color-error) 14%, transparent);
+    --paper-clue-hatch: repeating-linear-gradient(-45deg, var(--paper-hatch) 0 1px, transparent 1px 4px);
+}
+
+[data-style="paper"] [data-skin~="board"] {
+    border-radius: 6px;
+    background-color: var(--paper-sheet);
+    background-image: var(--paper-texture);
+    background-size: 9px 9px, 13px 13px;
+    background-position: 0 0, 4px 6px;
+    background-repeat: repeat, repeat;
+    --tw-shadow: 0 0 transparent;
+}
+
+/* The grid's outer frame, drawn with the box lines' pen */
+[data-style="paper"] [data-skin~="board"] > div {
+    border-color: var(--board-box-line);
+    border-radius: 2px;
+}
+
+/* Each cell shows its wash; a completed group's flash starts and ends on it */
+[data-style="paper"] [data-skin~="board"] [data-variant] {
+    --paper-cell-wash: transparent;
+    --completion-flash-rest: var(--paper-cell-wash);
+    border-radius: 0;
+    background-color: var(--paper-cell-wash);
+    /* The wash stops at the cell's lines, so the ink reads the same over every wash */
+    background-clip: padding-box;
+}
+
+[data-style="paper"] [data-skin~="board"] [data-variant="clue"] {
+    --paper-cell-wash: var(--paper-wash-clue);
+    background-image: var(--paper-clue-hatch);
+}
+
+[data-style="paper"] [data-skin~="board"] [data-variant="clue"][data-pressed] {
+    background-image: linear-gradient(var(--press-overlay), var(--press-overlay)), var(--paper-clue-hatch);
+}
+
+[data-style="paper"] [data-skin~="board"] [data-variant="peer"] { --paper-cell-wash: var(--paper-wash-peer); }
+[data-style="paper"] [data-skin~="board"] [data-variant="same-digit"] { --paper-cell-wash: var(--paper-wash-same-digit); }
+[data-style="paper"] [data-skin~="board"] [data-variant="selected"] { --paper-cell-wash: var(--paper-wash-selected); }
+[data-style="paper"] [data-skin~="board"] [data-variant="focus"] { --paper-cell-wash: var(--paper-wash-focus); }
+[data-style="paper"] [data-skin~="board"] [data-variant="scope"] { --paper-cell-wash: var(--paper-wash-scope); }
+[data-style="paper"] [data-skin~="board"] [data-variant="pattern"] { --paper-cell-wash: var(--paper-wash-pattern); }
+[data-style="paper"] [data-skin~="board"] [data-variant="answer"] { --paper-cell-wash: var(--paper-wash-answer); }
+[data-style="paper"] [data-skin~="board"] [data-variant="error"] { --paper-cell-wash: var(--paper-wash-error); }
+[data-style="paper"] [data-skin~="board"] [data-variant="wrong"] { --paper-cell-wash: var(--paper-wash-wrong); }
 
 /* The selected cell is circled by hand instead of outlined */
 [data-style="paper"] [data-variant="selected"] {

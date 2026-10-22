@@ -1,0 +1,93 @@
+import { readFileSync } from "fs";
+import postcss, { type Rule } from "postcss";
+
+// Paper's board is drawn on the notebook page: a sheet of the page's paper with its grain, the grid
+// in the theme's ink, printed clue squares shaded in graphite and every highlight a translucent wash,
+// so the grain (and at night the lamp) shows through. The colours are checked in paletteContrast.
+
+const PAPER_CSS = readFileSync("src/style/styles/paper.css", "utf8");
+const BOARD = '[data-style="paper"] [data-skin~="board"]';
+
+const declarationsOf = (selector: string): Map<string, string> => {
+    const declarations = new Map<string, string>();
+    postcss.parse(PAPER_CSS).walkRules((rule: Rule) => {
+        if (rule.parent?.type === "atrule") return;
+        if (!rule.selectors.map(item => item.replace(/\s+/g, " ").trim()).includes(selector)) return;
+        rule.walkDecls((declaration) => {
+            declarations.set(declaration.prop, declaration.value.replace(/\s+/g, " ").trim());
+        });
+    });
+    return declarations;
+};
+
+// The variants BoardCell can show, read from its CellVariant union
+const CELL_VARIANTS = (() => {
+    const source = readFileSync("src/presentation/components/board-cell/BoardCell.vue", "utf8");
+    const union = /export type CellVariant = ([^;]+);/.exec(source)?.[1] ?? "";
+    return [...union.matchAll(/"([\w-]+)"/g)].map(([, variant]) => variant);
+})();
+
+describe("paper board", () => {
+    it("should read every cell variant from BoardCell", () => {
+        expect(CELL_VARIANTS).toEqual(expect.arrayContaining(["default", "clue", "selected", "same-digit", "peer", "answer"]));
+    });
+
+    it("should lay the board on a sheet of the page's paper with its grain, not a card with a shadow", () => {
+        const board = declarationsOf(BOARD);
+
+        expect(board.get("background-color")).toBe("var(--paper-sheet)");
+        expect(board.get("background-image")).toContain("var(--paper-texture)");
+        expect(board.get("--tw-shadow")).toBe("0 0 transparent");
+        expect(declarationsOf('[data-style="paper"]').get("--paper-sheet")).toMatch(/^color-mix\(in srgb, var\(--color-card\) \d+%, transparent\)$/);
+    });
+
+    it("should draw the grid in the theme's ink: thin lines faded, box lines as firmer strokes", () => {
+        const paper = declarationsOf('[data-style="paper"]');
+        const alphaOf = (value: string | undefined): number =>
+            Number(/^color-mix\(in srgb, var\(--color-primary\) (\d+)%, transparent\)$/.exec(value ?? "")?.[1] ?? Number.NaN);
+
+        expect(alphaOf(paper.get("--board-line"))).toBeGreaterThan(0);
+        expect(alphaOf(paper.get("--board-box-line"))).toBeGreaterThan(alphaOf(paper.get("--board-line")));
+        // The grid's outer frame is drawn with the same pen as the box lines
+        expect(declarationsOf(`${BOARD} > div`).get("border-color")).toBe("var(--board-box-line)");
+    });
+
+    it("should wash every cell variant translucently, the blank cell showing the sheet itself", () => {
+        const cell = declarationsOf(`${BOARD} [data-variant]`);
+
+        expect(cell.get("background-color")).toBe("var(--paper-cell-wash)");
+        expect(cell.get("--paper-cell-wash")).toBe("transparent");
+        // The wash stops at the cell's lines, so the ink reads the same over every wash
+        expect(cell.get("background-clip")).toBe("padding-box");
+        for (const variant of CELL_VARIANTS.filter(name => name !== "default")) {
+            expect(declarationsOf(`${BOARD} [data-variant="${variant}"]`).get("--paper-cell-wash"), variant).toBe(`var(--paper-wash-${variant})`);
+            expect(declarationsOf('[data-style="paper"]').get(`--paper-wash-${variant}`), variant).toMatch(/^color-mix\(in srgb, var\(--color-[\w-]+\) [\d.]+%, transparent\)$/);
+        }
+    });
+
+    it("should shade the printed clue squares with a pencil hatch over the graphite wash", () => {
+        expect(declarationsOf(`${BOARD} [data-variant="clue"]`).get("background-image")).toBe("var(--paper-clue-hatch)");
+        expect(declarationsOf('[data-style="paper"]').get("--paper-clue-hatch")).toMatch(/^repeating-linear-gradient\(.*var\(--paper-hatch\)/);
+    });
+
+    it("should keep the press ink on a pressed clue square", () => {
+        const pressed = declarationsOf(`${BOARD} [data-variant="clue"][data-pressed]`).get("background-image") ?? "";
+
+        expect(pressed).toContain("var(--press-overlay)");
+        expect(pressed).toContain("var(--paper-clue-hatch)");
+    });
+
+    it("should flash a completed group from and back to the cell's own wash", () => {
+        // The shared flash starts and ends on the card colour unless a style says what the cell rests on
+        const indexCss = readFileSync("src/style/index.css", "utf8");
+        const flash = /@keyframes completion-flash \{([^@]*?)\n\}/.exec(indexCss)?.[1] ?? "";
+
+        expect(flash).toContain("0% { background-color: var(--completion-flash-rest, var(--color-card)); }");
+        expect(flash).toContain("100% { background-color: var(--completion-flash-rest, var(--color-card)); }");
+        expect(declarationsOf(`${BOARD} [data-variant]`).get("--completion-flash-rest")).toBe("var(--paper-cell-wash)");
+    });
+
+    it("should square the board's corners like a ruled sheet", () => {
+        expect(declarationsOf(`${BOARD} [data-variant]`).get("border-radius")).toBe("0");
+    });
+});
