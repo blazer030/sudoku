@@ -14,7 +14,7 @@
                     :class="[digitButtonClasses(digit), digitSizeClasses]"
                     :data-testid="`number-${digit}`"
                     :disabled="isDigitDisabled(digit)"
-                    class="w-14 h-14 rounded-xl flex justify-center font-key font-semibold transition-all cursor-pointer disabled:cursor-default"
+                    class="w-14 h-14 rounded-xl flex justify-center font-key font-semibold leading-none transition-all cursor-pointer disabled:cursor-default"
                     @click="emit('selectDigit', digit)"
                 >
                     {{ digit }}
@@ -45,7 +45,7 @@
                     :class="[digitButtonClasses(digit), digitSizeClasses]"
                     :data-testid="`number-${digit}`"
                     :disabled="isDigitDisabled(digit)"
-                    class="w-14 h-14 rounded-xl flex justify-center font-key font-semibold transition-all cursor-pointer disabled:cursor-default"
+                    class="w-14 h-14 rounded-xl flex justify-center font-key font-semibold leading-none transition-all cursor-pointer disabled:cursor-default"
                     @click="emit('selectDigit', digit)"
                 >
                     {{ digit }}
@@ -117,8 +117,10 @@ const digitLabel = (digit: number): string =>
     t(props.noteMode ? "game.digitPad.note" : "game.digitPad.fill", { digit, count: getRemainingCount(digit) });
 
 // Sizes go through --key-scale, which a style may raise for a narrower face; it defaults to 1
+// The line box is the glyph's, so a larger face cannot push the digit; note mode's top padding
+// adds back the half-leading the line box used to give
 const digitSizeClasses = computed(() => (props.noteMode
-    ? "text-[length:calc(var(--text-lg)*var(--key-scale,1))] items-start pt-1.5"
+    ? "text-[length:calc(var(--text-lg)*var(--key-scale,1))] items-start pt-2.5"
     : "text-[length:calc(var(--text-2xl)*var(--key-scale,1))] items-center"));
 
 const digitButtonClasses = (digit: number): string => {

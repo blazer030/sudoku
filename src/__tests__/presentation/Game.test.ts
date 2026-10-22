@@ -1594,6 +1594,15 @@ describe("Game", () => {
 
             expect(wrapper.get("[data-testid='number-8']").classes()).toContain("font-key");
         });
+
+        it("should keep digit keys' line box at the glyph size", async () => {
+            const wrapper = mountGame();
+            expect(wrapper.get("[data-testid='number-8']").classes()).toContain("leading-none");
+
+            await wrapper.find("[data-testid='note-button']").trigger("click");
+
+            expect(wrapper.get("[data-testid='number-8']").classes()).toContain("leading-none");
+        });
     });
 
     describe("quick input", () => {

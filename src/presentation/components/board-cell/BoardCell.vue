@@ -12,8 +12,16 @@
     >
         <div
             v-if="value !== 0"
-            :class="[valueTextColorClass, valueFontWeightClass, valueFaceClass, popping ? 'animate-hint-reveal-pop' : '', 'leading-none']"
+            :class="[
+                valueTextColorClass,
+                valueFontWeightClass,
+                valueFaceClass,
+                popping ? 'animate-hint-reveal-pop' : '',
+                arriving ? 'value-arrive' : '',
+                'leading-none',
+            ]"
             data-testid="cell-value"
+            @animationend="settle"
         >
             {{ value }}
         </div>
@@ -39,7 +47,8 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from "vue";
+import { computed, toRef } from "vue";
+import { useArrivalMotion } from "@/presentation/components/board-cell/useArrivalMotion";
 
 export type CellVariant = "default" | "clue" | "selected" | "focus" | "scope" | "error" | "same-digit" | "pattern" | "answer" | "wrong" | "peer";
 /** Player notes are muted; solver candidates are bold in the theme colour so they never pass for the player's own. */
@@ -103,6 +112,9 @@ const VALUE_FONT_WEIGHTS: Record<ValueFontWeight, string> = {
     semibold: "font-semibold",
     medium: "font-medium",
 };
+
+// Only a style sheet gives value-arrive a look; minimal has none
+const { arriving, settle } = useArrivalMotion(toRef(props, "value"), toRef(props, "popping"));
 
 const backgroundClass = computed(() => VARIANT_BACKGROUNDS[props.variant]);
 

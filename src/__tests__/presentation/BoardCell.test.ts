@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { mount } from "@vue/test-utils";
 import BoardCell from "@/presentation/components/board-cell/BoardCell.vue";
 
@@ -47,6 +47,63 @@ describe("BoardCell", () => {
         const wrapper = mountCell({ value: 0, notes: [4] });
 
         expect(wrapper.findAll("span").find(span => span.text() === "4")?.classes()).toContain("font-note");
+    });
+
+    it("should keep the value's line box at its glyph size", () => {
+        // A larger style face (paper's 1.3× entries) must not raise the row: the line box stays the glyph's
+        for (const valueKind of ["given", "entered"]) {
+            expect(mountCell({ value: 5, valueKind }).find("[data-testid='cell-value']").classes(), valueKind).toContain("leading-none");
+        }
+    });
+
+    describe("arrival", () => {
+        afterEach(() => {
+            vi.unstubAllGlobals();
+        });
+
+        const stubReducedMotion = (reduce: boolean) => {
+            vi.stubGlobal("matchMedia", (query: string) => ({
+                matches: reduce && query === "(prefers-reduced-motion: reduce)",
+                media: query,
+            }));
+        };
+
+        it("should mark a newly placed digit as arriving", async () => {
+            stubReducedMotion(false);
+            const wrapper = mountCell({ value: 0 });
+
+            await wrapper.setProps({ value: 5 });
+            const value = wrapper.get("[data-testid='cell-value']");
+            expect(value.classes()).toContain("value-arrive");
+
+            await value.trigger("animationend");
+            expect(wrapper.get("[data-testid='cell-value']").classes()).not.toContain("value-arrive");
+        });
+
+        it("should not animate digits present on mount", () => {
+            stubReducedMotion(false);
+            const wrapper = mountCell({ value: 5 });
+
+            expect(wrapper.get("[data-testid='cell-value']").classes()).not.toContain("value-arrive");
+        });
+
+        it("should not animate under reduced motion", async () => {
+            stubReducedMotion(true);
+            const wrapper = mountCell({ value: 0 });
+
+            await wrapper.setProps({ value: 5 });
+
+            expect(wrapper.get("[data-testid='cell-value']").classes()).not.toContain("value-arrive");
+        });
+
+        it("should leave a hint reveal to its own pop", async () => {
+            stubReducedMotion(false);
+            const wrapper = mountCell({ value: 0, popping: true });
+
+            await wrapper.setProps({ value: 5 });
+
+            expect(wrapper.get("[data-testid='cell-value']").classes()).not.toContain("value-arrive");
+        });
     });
 
     it("should render notes grid when value is zero and notes are provided", () => {
