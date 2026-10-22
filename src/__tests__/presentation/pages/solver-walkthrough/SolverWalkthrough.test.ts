@@ -220,14 +220,18 @@ describe("SolverWalkthrough", () => {
             expect(cellAt(wrapper, 3, 4).find("[data-testid='cell-value']").classes()).toContain("font-bold");
         });
 
-        it("should reject filling a digit that clashes with a peer", async () => {
+        it.each([
+            ["row", 0, 5],
+            ["column", 5, 0],
+            ["box", 1, 1],
+        ] as const)("should reject filling a digit that clashes with a peer in its %s", async (_unit, row, column) => {
             const { wrapper } = await mountEntering();
 
             await wrapper.find("[data-testid='number-9']").trigger("click");
             await cellAt(wrapper, 0, 0).trigger("click");
-            await cellAt(wrapper, 0, 1).trigger("click");
+            await cellAt(wrapper, row, column).trigger("click");
 
-            expect(cellAt(wrapper, 0, 1).text()).toBe("");
+            expect(cellAt(wrapper, row, column).text()).toBe("");
         });
 
         it("should fill selected cell when a digit is picked", async () => {
