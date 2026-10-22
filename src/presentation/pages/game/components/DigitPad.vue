@@ -19,18 +19,23 @@
                     :class="[digitButtonClasses(digit), digitSizeClasses]"
                     :data-testid="`number-${digit}`"
                     :disabled="isDigitDisabled(digit)"
-                    class="w-full aspect-square rounded-xl flex justify-center font-key font-semibold leading-none transition-all cursor-pointer disabled:cursor-default"
+                    class="@container w-full aspect-square rounded-xl flex items-center justify-center font-key font-semibold leading-none transition-all cursor-pointer disabled:cursor-default"
                     @click="emit('selectDigit', digit)"
                 >
-                    {{ digit }}
+                    <span
+                        :data-testid="`number-${digit}-glyph`"
+                        :style="glyphStyle(digit)"
+                        class="inline-block transition-transform duration-300 ease-out motion-reduce:transition-none"
+                    >{{ digit }}</span>
                 </button>
                 <span
                     v-if="showRemainingCount && !isDigitCompleted(digit)"
-                    :class="selectedDigit === digit
-                        ? 'bg-on-primary text-primary'
-                        : 'bg-foreground-secondary text-card'"
+                    :class="[
+                        selectedDigit === digit ? 'bg-on-primary text-primary' : 'bg-foreground-secondary text-card',
+                        { 'opacity-0': noteMode },
+                    ]"
                     :data-testid="`badge-${digit}`"
-                    class="absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-semibold"
+                    class="absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-semibold transition-opacity duration-200"
                 >
                     {{ getRemainingCount(digit) }}
                 </span>
@@ -53,18 +58,23 @@
                     :class="[digitButtonClasses(digit), digitSizeClasses]"
                     :data-testid="`number-${digit}`"
                     :disabled="isDigitDisabled(digit)"
-                    class="w-full aspect-square rounded-xl flex justify-center font-key font-semibold leading-none transition-all cursor-pointer disabled:cursor-default"
+                    class="@container w-full aspect-square rounded-xl flex items-center justify-center font-key font-semibold leading-none transition-all cursor-pointer disabled:cursor-default"
                     @click="emit('selectDigit', digit)"
                 >
-                    {{ digit }}
+                    <span
+                        :data-testid="`number-${digit}-glyph`"
+                        :style="glyphStyle(digit)"
+                        class="inline-block transition-transform duration-300 ease-out motion-reduce:transition-none"
+                    >{{ digit }}</span>
                 </button>
                 <span
                     v-if="showRemainingCount && !isDigitCompleted(digit)"
-                    :class="selectedDigit === digit
-                        ? 'bg-on-primary text-primary'
-                        : 'bg-foreground-secondary text-card'"
+                    :class="[
+                        selectedDigit === digit ? 'bg-on-primary text-primary' : 'bg-foreground-secondary text-card',
+                        { 'opacity-0': noteMode },
+                    ]"
                     :data-testid="`badge-${digit}`"
-                    class="absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-semibold"
+                    class="absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-semibold transition-opacity duration-200"
                 >
                     {{ getRemainingCount(digit) }}
                 </span>
@@ -100,7 +110,7 @@ const props = withDefaults(defineProps<{
     showRemainingCount?: boolean;
     disabledDigits?: number[];
     eraseDisabled?: boolean;
-    /** Digits go into notes, so the keys show smaller, top-aligned digits. */
+    /** Digits go into notes, so the keys show smaller digits, each at its place in a cell's note grid. */
     noteMode?: boolean;
 }>(), {
     showRemainingCount: true,
@@ -124,12 +134,22 @@ const getRemainingCount = (digit: number): number => 9 - props.digitCounts[digit
 const digitLabel = (digit: number): string =>
     t(props.noteMode ? "game.digitPad.note" : "game.digitPad.fill", { digit, count: getRemainingCount(digit) });
 
-// Sizes go through --key-scale, which a style may raise for a narrower face; it defaults to 1
-// The line box is the glyph's, so a larger face cannot push the digit; note mode's top padding
-// adds back the half-leading the line box used to give
+// Sizes go through --key-scale, which a style may raise for a narrower face; it defaults to 1.
+// The line box is the glyph's, so a larger face cannot push the digit.
 const digitSizeClasses = computed(() => (props.noteMode
-    ? "text-[length:calc(var(--text-lg)*var(--key-scale,1))] items-start pt-2.5"
-    : "text-[length:calc(var(--text-2xl)*var(--key-scale,1))] items-center"));
+    ? "text-[length:calc(var(--text-lg)*var(--key-scale,1))]"
+    : "text-[length:calc(var(--text-2xl)*var(--key-scale,1))]"));
+
+// In note mode each digit moves to its place in a cell's 3×3 note grid (1 top left … 9 bottom right),
+// and the remaining counts fade so they do not cover the corner digits; the keys still speak them.
+// The step is a share of the key's width (15px on a 56px key), so it holds when keys shrink.
+const NOTE_PLACE_STEP = 27;
+const glyphStyle = (digit: number): { transform: string } | undefined => {
+    if (!props.noteMode) return undefined;
+    const column = (digit - 1) % 3 - 1;
+    const row = Math.floor((digit - 1) / 3) - 1;
+    return { transform: `translate(${column * NOTE_PLACE_STEP}cqw, ${row * NOTE_PLACE_STEP}cqw)` };
+};
 
 const digitButtonClasses = (digit: number): string => {
     if (isDigitDisabled(digit)) return "bg-card opacity-50 text-foreground-muted";

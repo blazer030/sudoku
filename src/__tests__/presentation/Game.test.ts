@@ -1577,17 +1577,50 @@ describe("Game", () => {
             expect(digitKey().attributes("aria-label")).toBe("填入 8，還剩 4 個");
         });
 
-        it("should draw smaller, top-aligned digits in note mode", async () => {
+        it("should draw smaller digits in note mode, each moved to its place in a cell's note grid", async () => {
             const wrapper = mountGame();
-            const digitKey = () => wrapper.find("[data-testid='number-8']");
+            const digitKey = (digit: number) => wrapper.get(`[data-testid='number-${digit}']`);
+            const glyph = (digit: number) => wrapper.get(`[data-testid='number-${digit}-glyph']`);
             const normalSize = "text-[length:calc(var(--text-2xl)*var(--key-scale,1))]";
             const noteSize = "text-[length:calc(var(--text-lg)*var(--key-scale,1))]";
-            expect(digitKey().classes()).toEqual(expect.arrayContaining(["items-center", normalSize]));
+            expect(digitKey(8).classes()).toContain(normalSize);
+            for (const digit of [1, 5, 9]) expect(glyph(digit).attributes("style") ?? "").not.toContain("translate");
 
             await wrapper.find("[data-testid='note-button']").trigger("click");
 
-            expect(digitKey().classes()).toEqual(expect.arrayContaining(["items-start", noteSize]));
-            expect(digitKey().classes()).not.toContain(normalSize);
+            expect(digitKey(8).classes()).toContain(noteSize);
+            expect(digitKey(8).classes()).not.toContain(normalSize);
+            // 1 top left, 2 top, 3 top right … 9 bottom right, like the notes inside a cell
+            // The step is 27% of the key's width: 15px on a 56px key
+            const expected: [number, string][] = [
+                [1, "translate(-27cqw, -27cqw)"], [2, "translate(0cqw, -27cqw)"], [3, "translate(27cqw, -27cqw)"],
+                [4, "translate(-27cqw, 0cqw)"], [5, "translate(0cqw, 0cqw)"], [6, "translate(27cqw, 0cqw)"],
+                [7, "translate(-27cqw, 27cqw)"], [8, "translate(0cqw, 27cqw)"], [9, "translate(27cqw, 27cqw)"],
+            ];
+            for (const [digit, transform] of expected) {
+                expect(glyph(digit).attributes("style"), `${digit}`).toContain(`transform: ${transform}`);
+                expect(glyph(digit).text()).toBe(`${digit}`);
+            }
+        });
+
+        it("should fade the remaining counts while note mode moves digits into the corners", async () => {
+            const wrapper = mountGame();
+            const badge = () => wrapper.get("[data-testid='badge-3']");
+            expect(badge().classes()).not.toContain("opacity-0");
+
+            await wrapper.find("[data-testid='note-button']").trigger("click");
+            expect(badge().classes()).toContain("opacity-0");
+            // The count is still spoken
+            expect(wrapper.get("[data-testid='number-3']").attributes("aria-label")).toMatch(/\d+ left/);
+
+            await wrapper.find("[data-testid='note-button']").trigger("click");
+            expect(badge().classes()).not.toContain("opacity-0");
+        });
+
+        it("should glide digits to their note places, and jump under reduced motion", () => {
+            const wrapper = mountGame();
+
+            expect(wrapper.get("[data-testid='number-1-glyph']").classes()).toEqual(expect.arrayContaining(["transition-transform", "motion-reduce:transition-none"]));
         });
 
         it("should write digit keys in the key face", () => {
