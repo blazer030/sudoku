@@ -14,8 +14,8 @@
 }
 
 /* Caveat's digits are short, so handwriting is set larger, but only once Caveat has loaded
-   (paperFonts.ts marks it): the fallback faces are full-size. The cells and keys keep their
-   size and glyph-high line boxes either way. */
+   (fonts.ts beside this sheet marks it): the fallback faces are full-size. The cells and keys
+   keep their size and glyph-high line boxes either way. */
 [data-style="paper"][data-paper-fonts="ready"] {
     --entry-scale: 1.3;
     --note-scale: 1.3;

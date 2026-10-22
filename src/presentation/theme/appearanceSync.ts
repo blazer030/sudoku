@@ -2,7 +2,7 @@ import { watch, type Ref } from "vue";
 import { getPalette, systemBarColor } from "@/theme/palettes";
 import { updateFavicon, updateMetaThemeColor } from "@/application/PwaThemeUpdater";
 import { launcherIconKey } from "@/theme/launcherIcon";
-import { syncPaperFonts } from "@/presentation/theme/paperFonts";
+import { syncPaperFonts } from "@/style/styles/paper/fonts";
 import type { Appearance, ColorMode, ColorThemeId, StyleId } from "@/application/SettingsStorage";
 import type { SystemBarService } from "@/application/systemBar/SystemBarService";
 import type { AppearanceBridgeService } from "@/application/appearanceBridge/AppearanceBridgeService";

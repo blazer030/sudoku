@@ -3,7 +3,7 @@ import postcss, { type Rule } from "postcss";
 
 // Caveat's digits overhang their advance to the right: measured in a browser, each digit's ink sits
 // 0.09–0.14em right of its advance box's centre, and cells and keys centre the advance box. Once
-// Caveat is in use (paperFonts.ts marks it ready) paper nudges the handwritten digits back by the
+// Caveat is in use (styles/paper/fonts.ts marks it ready) paper nudges the handwritten digits back by the
 // mean overhang with the translate property, which moves the ink without changing any box.
 
 const PAPER_CSS = readFileSync("src/style/styles/paper/skin.css", "utf8");

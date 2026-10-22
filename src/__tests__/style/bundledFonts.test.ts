@@ -49,7 +49,7 @@ const sourceCharacters = (): Set<string> => {
 
 describe("bundled fonts", () => {
     it("should load no font from Google, so every style reads the same offline", () => {
-        for (const path of ["index.html", "vite.config.ts", "src/presentation/theme/paperFonts.ts"]) {
+        for (const path of ["index.html", "vite.config.ts", "src/style/styles/paper/fonts.ts"]) {
             expect(readFileSync(path, "utf8"), path).not.toMatch(/fonts\.(?:googleapis|gstatic)\.com/);
         }
     });
