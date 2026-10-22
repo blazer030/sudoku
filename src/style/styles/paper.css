@@ -183,6 +183,8 @@
 [data-style="paper"] [data-variant="answer"],
 [data-style="paper"] [data-variant="wrong"] {
     position: relative;
+    /* The circle is drawn under the cell's digits and notes but over its wash */
+    isolation: isolate;
     --tw-ring-shadow: 0 0 transparent;
 }
 
@@ -203,6 +205,7 @@
     -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpath d='M30 7.5C23 3.5 11 4.5 6 11.5S3.5 29 11 33.5 30 37.5 35 30 37 13 27 6.8' fill='none' stroke='currentColor' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
     mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpath d='M30 7.5C23 3.5 11 4.5 6 11.5S3.5 29 11 33.5 30 37.5 35 30 37 13 27 6.8' fill='none' stroke='currentColor' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
     rotate: -4deg;
+    z-index: -1;
     animation: paper-circle-draw 220ms ease-out;
 }
 
@@ -245,6 +248,11 @@
    which crossed the cell's in the corner slots */
 [data-style="paper"] [data-variant="answer"] [data-note-highlight]::after {
     content: none;
+}
+
+/* Where the cell's circle runs under the corner candidate, a paper halo keeps the digit apart from it */
+[data-style="paper"] [data-variant="answer"] [data-note-highlight] {
+    text-shadow: 0 0 2px var(--color-card), 0 0 2px var(--color-card), 0 0 1px var(--color-card);
 }
 
 /* An option tile's tick is drawn as a pen stroke when it appears */

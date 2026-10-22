@@ -105,11 +105,16 @@ describe("paper single-cell outlines", () => {
         expect(cell.get("position")).toBe("relative");
         expect(circle.get("mask")).toContain("data:image/svg+xml");
         expect(circle.get("background-color")).toBe(ink);
+        // Drawn under the cell's digits and notes, over its wash, so the pen never covers a digit
+        expect(cell.get("isolation")).toBe("isolate");
+        expect(circle.get("z-index")).toBe("-1");
     });
 
     it("should leave the answer's candidate uncircled inside the circled answer cell, so the two pens never cross", () => {
         // The candidate keeps the highlighted note's bold primary ink; only its own small circle goes
         expect(declarationsOf('[data-style="paper"] [data-variant="answer"] [data-note-highlight]::after').get("content")).toBe("none");
+        // Where the cell's circle runs under the corner candidate, a paper halo keeps the digit apart from the stroke
+        expect(declarationsOf('[data-style="paper"] [data-variant="answer"] [data-note-highlight]').get("text-shadow")).toContain("var(--color-card)");
     });
 
     it("should stop drawing every circle under reduced motion", () => {
