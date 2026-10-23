@@ -48,8 +48,16 @@
                 </button>
             </div>
 
-            <span class="text-foreground text-[15px] font-medium mt-5">{{ t("settings.colorTheme") }}</span>
-            <div class="grid grid-cols-6 gap-3 mt-3 justify-items-center">
+            <!-- A style with one theme has nothing to choose -->
+            <span
+                v-if="swatches.length > 1"
+                class="text-foreground text-[15px] font-medium mt-5"
+                data-testid="appearance-theme-label"
+            >{{ t("settings.colorTheme") }}</span>
+            <div
+                v-if="swatches.length > 1"
+                class="grid grid-cols-6 gap-3 mt-3 justify-items-center"
+            >
                 <button
                     v-for="swatch in swatches"
                     :key="swatch.id"
@@ -120,6 +128,7 @@ import { useSettingsStore } from "@/stores/settingsStore";
 import { usePlatform } from "@/presentation/composables/usePlatform";
 import { STYLE_COLOR_MODES, STYLE_IDS, type ColorMode, type ColorThemeId, type StyleId } from "@/theme/themeIds";
 import { STYLES, getPalette, rememberedThemeFor } from "@/theme/palettes";
+import { useColorModeLabel } from "@/presentation/i18n/colorModeLabels";
 import { vPress } from "@/presentation/directives/press";
 import SegmentedControl from "@/presentation/components/segmented-control/SegmentedControl.vue";
 import OptionTile from "@/presentation/components/option-tile/OptionTile.vue";
@@ -129,6 +138,7 @@ const { t } = useI18n();
 const router = useRouter();
 const settingsStore = useSettingsStore();
 const platform = usePlatform();
+const colorModeLabel = useColorModeLabel();
 
 // Each card shows the style's app icon in the theme it would come back to, in the current mode
 const styleCards = computed(() => STYLE_IDS.map(styleId => ({
@@ -143,7 +153,7 @@ const swatches = computed(() => STYLES[settingsStore.style].themes.map(theme => 
 })));
 
 const modeOptions = computed((): { value: ColorMode; label: string }[] =>
-    STYLE_COLOR_MODES[settingsStore.style].map(mode => ({ value: mode, label: t(`settings.colorMode.${mode}`) })));
+    STYLE_COLOR_MODES[settingsStore.style].map(mode => ({ value: mode, label: colorModeLabel(settingsStore.style, mode) })));
 
 const goBack = () => {
     router.back();

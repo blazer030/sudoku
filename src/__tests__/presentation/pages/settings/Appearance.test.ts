@@ -185,6 +185,11 @@ describe("Appearance.vue colour-theme swatches", () => {
 
     const expectSwatchesIn = (wrapper: ReturnType<typeof mountAppearance>, mode: "light" | "dark") => {
         const settingsStore = useSettingsStore();
+        // A one-theme style has nothing to pick, so it draws no swatch
+        if (STYLES[settingsStore.style].themes.length < 2) {
+            expect(wrapper.findAll("button[data-testid^='color-theme-']"), settingsStore.style).toHaveLength(0);
+            return;
+        }
         for (const theme of STYLES[settingsStore.style].themes) {
             const palette = getPalette(settingsStore.style, theme.id, mode);
             const swatch = wrapper.get(`[data-testid='color-theme-${theme.id}']`);
@@ -425,5 +430,60 @@ describe("Appearance.vue going back", () => {
 
         expect(router.currentRoute.value.path).toBe("/settings");
         expect(wrapper.find("[data-testid='home']").exists()).toBe(false);
+    });
+});
+
+describe("Appearance.vue one-theme style", () => {
+    beforeEach(() => {
+        localStorage.clear();
+        vi.mocked(Capacitor.isNativePlatform).mockReturnValue(false);
+    });
+
+    afterEach(() => {
+        i18n.global.locale.value = "en";
+    });
+
+    it("should show the theme heading and swatches for a style with several themes", () => {
+        const wrapper = mountAppearance();
+
+        expect(wrapper.find("[data-testid='appearance-theme-label']").exists()).toBe(true);
+        expect(wrapper.findAll("button[data-testid^='color-theme-']")).toHaveLength(6);
+    });
+
+    it("should hide the theme heading and swatch for a style with one theme", async () => {
+        const wrapper = mountAppearance();
+        useSettingsStore().setStyle("pixel");
+        await nextTick();
+
+        expect(wrapper.find("[data-testid='appearance-theme-label']").exists()).toBe(false);
+        expect(wrapper.find("[data-testid='color-theme-classic']").exists()).toBe(false);
+        expect(wrapper.find("[data-testid='appearance-mode-label']").exists()).toBe(true);
+    });
+
+    it("should name the modes in the style's own words, in either language", async () => {
+        const wrapper = mountAppearance();
+        const modeTexts = () => ["appearance-light", "appearance-dark"].map(id => wrapper.get(`[data-testid='${id}']`).text());
+        const minimalEnglish = modeTexts();
+        useSettingsStore().setStyle("pixel");
+        await nextTick();
+        const pixelEnglish = modeTexts();
+        i18n.global.locale.value = "zh-Hant";
+        await nextTick();
+        const pixelChinese = modeTexts();
+
+        expect(pixelEnglish).not.toEqual(minimalEnglish);
+        expect(pixelChinese).not.toEqual(pixelEnglish);
+    });
+
+    it("should bring minimal back to the theme last chosen there after a visit to pixel", () => {
+        mountAppearance();
+        const settingsStore = useSettingsStore();
+        settingsStore.setColorTheme("blue");
+        settingsStore.setStyle("pixel");
+        expect(settingsStore.colorTheme).toBe("classic");
+
+        settingsStore.setStyle("minimal");
+
+        expect(settingsStore.colorTheme).toBe("blue");
     });
 });

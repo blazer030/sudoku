@@ -28,6 +28,9 @@ export const en = {
             label: "Color mode",
             light: "Light",
             dark: "Dark",
+            styled: {
+                pixel: { light: "Handheld", dark: "Console" },
+            },
         },
         appearanceSummary: "{mode} · {theme}",
         colorTheme: "Color theme",

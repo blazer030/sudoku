@@ -180,9 +180,10 @@ import { usePlatform } from "@/presentation/composables/usePlatform";
 import { appVersion } from "@/utils/appVersion";
 import { PRIVACY_POLICY_URL } from "@/presentation/pages/settings/externalLinks";
 import { ROUTER_PATH } from "@/router";
-import { STYLE_COLOR_MODES } from "@/theme/themeIds";
+import { STYLE_COLOR_MODES, effectiveColorMode } from "@/theme/themeIds";
+import { useColorModeLabel } from "@/presentation/i18n/colorModeLabels";
 import type { LanguagePreference } from "@/application/settings/SettingsStorage";
-import { getPalette } from "@/theme/palettes";
+import { STYLES, getPalette } from "@/theme/palettes";
 import { vPress } from "@/presentation/directives/press";
 import SegmentedControl from "@/presentation/components/segmented-control/SegmentedControl.vue";
 import OptionTile from "@/presentation/components/option-tile/OptionTile.vue";
@@ -194,6 +195,7 @@ import { provideClearRecordsDialog } from "@/presentation/pages/settings/compone
 const { t } = useI18n();
 const router = useRouter();
 const settingsStore = useSettingsStore();
+const colorModeLabel = useColorModeLabel();
 const platform = usePlatform();
 const donateStore = useDonateStore();
 const statisticsStore = useStatisticsStore();
@@ -215,12 +217,14 @@ const languageOptions = computed((): { value: LanguagePreference; label: string 
 const currentPalette = computed(() => getPalette(settingsStore.style, settingsStore.colorTheme, settingsStore.appearance));
 
 const appearanceSummary = computed(() => {
+    const hasThemes = STYLES[settingsStore.style].themes.length > 1;
+    const hasModes = STYLE_COLOR_MODES[settingsStore.style].length > 1;
     const theme = t(`settings.colorThemes.${settingsStore.colorTheme}`);
-    if (STYLE_COLOR_MODES[settingsStore.style].length < 2) return theme;
-    return t("settings.appearanceSummary", {
-        mode: t(`settings.colorMode.${settingsStore.appearance}`),
-        theme,
-    });
+    const mode = colorModeLabel(settingsStore.style, effectiveColorMode(settingsStore.style, settingsStore.appearance));
+    if (hasThemes && hasModes) return t("settings.appearanceSummary", { mode, theme });
+    if (hasThemes) return theme;
+    if (hasModes) return mode;
+    return t(`settings.style.names.${settingsStore.style}`);
 });
 
 const toggles = computed(() => [

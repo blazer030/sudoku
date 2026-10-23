@@ -26,6 +26,8 @@ export const STYLE_COLOR_MODES: Readonly<Record<StyleId, readonly ColorMode[]>> 
     paper: ["light"],
     pixel: ["light", "dark"],
 };
+/** Styles that give light and dark their own names (the i18n keys settings.colorMode.styled.<style>.<mode>). */
+export const STYLE_MODE_NAMES: Readonly<Partial<Record<StyleId, true>>> = { pixel: true };
 /** The mode a style actually shows for the requested one: the requested mode when the style has it, else the style's first. */
 export const effectiveColorMode = (style: StyleId, mode: ColorMode): ColorMode => {
     const modes = STYLE_COLOR_MODES[style];
