@@ -557,8 +557,8 @@
     box-shadow: none;
 }
 
-/* Cards (settings groups, dialog panels, Home's new-game card) are framed panels: a 4px notched ink
-   frame and no drop shadow, so a card on the page colour (掌機) still reads as one */
+/* Cards (settings groups, dialog panels, the hint menu, Home's new-game card) are framed panels: a
+   4px notched ink frame and no drop shadow, so a card on the page colour (掌機) still reads as one */
 [data-style="pixel"] [data-skin~="card"] {
     border-radius: 0;
     box-shadow:

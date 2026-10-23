@@ -71,6 +71,14 @@ describe("skin hooks", () => {
         expect(offenders).toEqual([]);
     });
 
+    it("should mark the hint menu as a card, so a style frames it like the dialogs", () => {
+        const source = readFileSync("src/presentation/pages/game/components/HintMenuPopup.vue", "utf8");
+        const menuTag = openingTags(source, "div").find(tag => tag.includes('data-testid="hint-menu"'));
+
+        expect(menuTag).toBeDefined();
+        expect(hasSkinToken(menuTag ?? "", "card")).toBe(true);
+    });
+
     it("should keep the skin hooks GameScreen measures", () => {
         const source = readFileSync("src/presentation/pages/game/GameScreen.vue", "utf8");
         const boardTag = openingTags(source, "\\w+").find(tag => tag.includes('data-testid="game-board"'));
