@@ -19,48 +19,29 @@ export interface ChangelogEntry {
 export const UNRELEASED_CHANGES: ChangelogChange[] = [
     {
         text: {
-            en: "A new style: 8-bit, with a Handheld and a Console look",
-            "zh-Hant": "新風格「8-bit 電玩」，有掌機和紅白機兩種模式",
+            en: "New style: 8-bit",
+            "zh-Hant": "全新風格「8-bit 電玩」",
         },
     },
     {
         text: {
-            en: "A new Appearance page puts the style, colour, light or dark and the app icon together",
-            "zh-Hant": "新的「外觀」頁面，把風格、主題色、深淺色和 App 圖示放在一起",
+            en: "Appearance settings and interface improvements",
+            "zh-Hant": "外觀設定與介面優化",
         },
     },
     {
         text: {
-            en: "Each style has its own app icon",
-            "zh-Hant": "每種風格都有自己的 App 圖示",
-        },
-        appOnly: true,
-    },
-    {
-        text: {
-            en: "Light or dark follows your device the first time you open the app; after that, you choose",
-            "zh-Hant": "第一次開啟時依手機設定決定淺色或深色，之後由你自己選",
+            en: "Game progress is saved more reliably",
+            "zh-Hant": "遊戲進度保存更可靠",
         },
     },
     {
         text: {
-            en: "Paper Notebook is now light only",
-            "zh-Hant": "紙本筆記改為只有淺色",
+            en: "Hints are easier to use",
+            "zh-Hant": "提示操作優化",
         },
     },
-    {
-        text: {
-            en: "Your game is kept even if the app is closed while it is in the background",
-            "zh-Hant": "App 在背景被關掉時，遊戲進度也會保留",
-        },
-    },
-    {
-        text: {
-            en: "Closing Reveal Cell's steps early now fills in the answer",
-            "zh-Hant": "「揭示一格」的步驟看到一半按關閉，也會直接填入答案",
-        },
-    },
-];
+]
 
 export const CHANGELOG: ChangelogEntry[] = [
     {
