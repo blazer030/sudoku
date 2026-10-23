@@ -382,18 +382,6 @@ describe("Settings.vue appearance group", () => {
                 expectSwatchesIn(wrapper, "dark");
             }
         });
-
-        it("should follow the system's light or dark when the appearance is system", async () => {
-            const setSystemDark = stubSystemDark(true);
-            const wrapper = mountSettings();
-            expect(useSettingsStore().appearance).toBe("system");
-
-            expectSwatchesIn(wrapper, "dark");
-
-            setSystemDark(false);
-            await nextTick();
-            expectSwatchesIn(wrapper, "light");
-        });
     });
 
     it("should switch light and dark live", async () => {
@@ -642,15 +630,16 @@ describe("Settings.vue color mode switcher", () => {
 
     it("should label the modes", () => {
         const wrapper = mountSettings();
-        const labels = ["system", "light", "dark"].map(mode => wrapper.get(`[data-testid='appearance-${mode}']`).text());
+        const labels = ["light", "dark"].map(mode => wrapper.get(`[data-testid='appearance-${mode}']`).text());
 
-        expect(labels).toEqual(["System", "Light", "Dark"]);
+        expect(labels).toEqual(["Light", "Dark"]);
     });
 
-    it("should mark system as selected by default", () => {
+    it("should not offer following the system", () => {
         const wrapper = mountSettings();
 
-        expect(wrapper.get("[data-testid='appearance-system']").attributes("aria-pressed")).toBe("true");
+        expect(wrapper.find("[data-testid='appearance-system']").exists()).toBe(false);
+        expect(wrapper.get("[data-testid='appearance-light']").attributes("aria-pressed")).toBe("true");
     });
 
     it("should store dark when dark is chosen", async () => {

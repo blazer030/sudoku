@@ -230,7 +230,7 @@ import { usePlatform } from "@/presentation/composables/usePlatform";
 import { appVersion } from "@/utils/appVersion";
 import { PRIVACY_POLICY_URL } from "@/presentation/pages/settings/externalLinks";
 import { ROUTER_PATH } from "@/router";
-import { STYLE_IDS, type Appearance, type ColorThemeId, type StyleId } from "@/theme/themeIds";
+import { COLOR_MODES, STYLE_IDS, type ColorMode, type ColorThemeId, type StyleId } from "@/theme/themeIds";
 import type { LanguagePreference } from "@/application/settings/SettingsStorage";
 import { STYLES, getPalette, rememberedThemeFor } from "@/theme/palettes";
 import { vPress } from "@/presentation/directives/press";
@@ -262,11 +262,8 @@ const languageOptions = computed((): { value: LanguagePreference; label: string 
     { value: "zh-Hant", label: t("settings.language.traditionalChinese") },
 ]);
 
-const appearanceOptions = computed((): { value: Appearance; label: string }[] => [
-    { value: "system", label: t("settings.colorMode.system") },
-    { value: "light", label: t("settings.colorMode.light") },
-    { value: "dark", label: t("settings.colorMode.dark") },
-]);
+const appearanceOptions = computed((): { value: ColorMode; label: string }[] =>
+    COLOR_MODES.map(mode => ({ value: mode, label: t(`settings.colorMode.${mode}`) })));
 
 const { appearance } = storeToRefs(settingsStore);
 const colorMode = useColorMode(appearance);

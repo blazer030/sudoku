@@ -2,8 +2,16 @@ import { ICON_THEME_IDS, THEME_IDS_BY_STYLE } from "@/theme/themeIds";
 import { loadSettings, saveSettings } from "@/application/settings/SettingsStorage";
 
 describe("SettingsStorage", () => {
+    const stubSystemDark = (dark: boolean) => {
+        vi.stubGlobal("matchMedia", (query: string) => ({ matches: dark && query === "(prefers-color-scheme: dark)" }));
+    };
+
     beforeEach(() => {
         localStorage.clear();
+    });
+
+    afterEach(() => {
+        vi.unstubAllGlobals();
     });
 
     it("should list the six icon themes as the minimal style's themes", () => {
@@ -22,11 +30,35 @@ describe("SettingsStorage", () => {
                 showRemainingCount: true,
                 matchLauncherIconToTheme: false,
                 language: "system",
-                appearance: "system",
+                appearance: "light",
                 style: "minimal",
                 highlightScope: true,
                 colorThemeByStyle: { minimal: "green" },
             });
+        });
+
+        it("should start a fresh install in the mode the system shows", () => {
+            stubSystemDark(true);
+
+            expect(loadSettings().appearance).toBe("dark");
+        });
+
+        it.each(["system", "sepia"])("should turn a stored %s appearance into the system's mode and save it", (stored) => {
+            stubSystemDark(false);
+            localStorage.setItem("sudoku-settings", JSON.stringify({ appearance: stored }));
+
+            expect(loadSettings().appearance).toBe("light");
+            expect(JSON.parse(localStorage.getItem("sudoku-settings") ?? "{}")).toMatchObject({ appearance: "light" });
+
+            stubSystemDark(true);
+            expect(loadSettings().appearance).toBe("light");
+        });
+
+        it("should keep a stored dark appearance whatever the system shows", () => {
+            stubSystemDark(false);
+            localStorage.setItem("sudoku-settings", JSON.stringify({ appearance: "dark" }));
+
+            expect(loadSettings().appearance).toBe("dark");
         });
 
         it("should seed the remembered theme from colorTheme for settings saved before it existed", () => {
@@ -113,7 +145,6 @@ describe("SettingsStorage", () => {
         });
 
         it.each([
-            ["appearance", "sepia", "system"],
             ["style", "neon", "minimal"],
             ["colorTheme", "red", "green"],
             ["language", "fr", "system"],
@@ -136,7 +167,7 @@ describe("SettingsStorage", () => {
             expect(settings.showRemainingCount).toBe(true);
             expect(settings.matchLauncherIconToTheme).toBe(false);
             expect(settings.language).toBe("system");
-            expect(settings.appearance).toBe("system");
+            expect(settings.appearance).toBe("light");
             expect(settings.style).toBe("minimal");
         });
     });

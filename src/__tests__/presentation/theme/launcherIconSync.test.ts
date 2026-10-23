@@ -56,8 +56,6 @@ describe("startLauncherIconSync", () => {
         ["light", true, "green"],
         ["dark", false, "minimalGreenDark"],
         ["dark", true, "minimalGreenDark"],
-        ["system", false, "green"],
-        ["system", true, "minimalGreenDark"],
     ] as const)("should pick the %s appearance's icon when the system is dark: %s", async (appearance, systemDark, expected) => {
         stubSystemDark(systemDark);
         const store = start();
@@ -81,19 +79,6 @@ describe("startLauncherIconSync", () => {
         await nextTick();
         expect(setIcon).toHaveBeenLastCalledWith("green");
         expect(setIcon).toHaveBeenCalledTimes(2);
-    });
-
-    it("should follow the system's light or dark while the appearance is system", async () => {
-        const setSystemDark = stubSystemDark(false);
-        await startMatching();
-
-        setSystemDark(true);
-        await nextTick();
-        expect(setIcon).toHaveBeenLastCalledWith("minimalGreenDark");
-
-        setSystemDark(false);
-        await nextTick();
-        expect(setIcon).toHaveBeenLastCalledWith("green");
     });
 
     it("should leave the icon alone on appearance changes while matching is off", async () => {

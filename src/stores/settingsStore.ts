@@ -1,6 +1,6 @@
 import { ref } from "vue";
 import { defineStore } from "pinia";
-import type { Appearance, ColorThemeId, RememberedThemes, StyleId } from "@/theme/themeIds";
+import type { ColorMode, ColorThemeId, RememberedThemes, StyleId } from "@/theme/themeIds";
 import { loadSettings, saveSettings, type LanguagePreference } from "@/application/settings/SettingsStorage";
 import { rememberedThemeFor } from "@/theme/palettes";
 import { launcherIconKey } from "@/theme/launcherIcon";
@@ -15,7 +15,7 @@ export const useSettingsStore = defineStore("settings", () => {
     const showRemainingCount = ref(settings.showRemainingCount);
     const matchLauncherIconToTheme = ref(settings.matchLauncherIconToTheme);
     const language = ref<LanguagePreference>(settings.language);
-    const appearance = ref<Appearance>(settings.appearance);
+    const appearance = ref<ColorMode>(settings.appearance);
     const style = ref<StyleId>(settings.style);
     const highlightScope = ref(settings.highlightScope);
     const colorThemeByStyle = ref<RememberedThemes>(settings.colorThemeByStyle);
@@ -86,7 +86,7 @@ export const useSettingsStore = defineStore("settings", () => {
         persistAll();
     };
 
-    const setAppearance = (value: Appearance) => {
+    const setAppearance = (value: ColorMode) => {
         appearance.value = value;
         persistAll();
     };

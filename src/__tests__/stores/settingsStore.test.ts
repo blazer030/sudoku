@@ -37,7 +37,7 @@ describe("settingsStore", () => {
         expect(store.showRemainingCount).toBe(true);
         expect(store.matchLauncherIconToTheme).toBe(false);
         expect(store.language).toBe("system");
-        expect(store.appearance).toBe("system");
+        expect(store.appearance).toBe("light");
         expect(store.style).toBe("minimal");
     });
 
