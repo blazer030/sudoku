@@ -23,10 +23,10 @@ export const zhHant: MessageSchema = {
         appearance: "外觀",
         colorMode: {
             label: "深淺色",
-            system: "跟隨系統",
             light: "淺色",
             dark: "深色",
         },
+        appearanceSummary: "{mode}・{theme}",
         colorTheme: "色彩主題",
         style: {
             label: "風格",

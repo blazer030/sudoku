@@ -12,4 +12,11 @@ describe("themes.generated.css", () => {
         expect(css).toContain(':root.dark[data-style="minimal"][data-color-theme="teal"] {');
         expect(css).toContain("--color-primary: #0A5E5F;");
     });
+
+    it("should give a light-only style no dark block", () => {
+        const css = renderThemeCss();
+
+        expect(css).toContain(':root[data-style="paper"][data-color-theme="blueInk"] {');
+        expect(css).not.toContain(':root.dark[data-style="paper"]');
+    });
 });

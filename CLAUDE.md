@@ -20,8 +20,8 @@ Vue 3 + TypeScript Sudoku game following **Domain-Driven Design (DDD)** with por
 - **`src/infrastructure/`** — Adapters for those ports: IndexedDB repositories, and native adapters (Capacitor plugins, Firebase, Play Billing) that each have a no-op web twin. `src/main.ts` picks them by platform.
 - **`src/presentation/`** — `pages/` (home, game, game-review, solver-walkthrough, statistics, settings, donate), shared `components/` (one kebab-case folder each), `composables/`, `directives/`, `i18n/` (messages and label helpers), `theme/` (runtime appearance and launcher icon sync).
 - **`src/stores/`** — Pinia stores: game (single source of truth for the active game), statistics, settings, donate.
-- **`src/theme/`** — Framework-free look data shared with `scripts/`: `themeIds.ts` (styles, themes, light/dark), `palettes.ts`, `launcherIcon.ts`. Relative imports only.
-- **`src/style/styles/<id>/`** — One folder per visual style (`minimal`, `tactile`, `paper`): `skin.css` (scoped by `[data-style]`), `palette.ts` (colours; run `npm run generate:theme-css` after editing), `thumbnail.ts` (Settings preview). A new style registers in `theme/palettes.ts` `STYLES`, `style/index.css`, `StyleThumbnail.vue` and `STYLE_IDS` / `THEME_IDS_BY_STYLE` in `theme/themeIds.ts`.
+- **`src/theme/`** — Framework-free look data shared with `scripts/`: `themeIds.ts` (styles, themes, light/dark), `palettes.ts`, `launcherIcon.ts`, `styleIcons.ts` (each style's app icon, also the 外觀 page's card). Relative imports only.
+- **`src/style/styles/<id>/`** — One folder per visual style (`minimal`, `tactile`, `paper`): `skin.css` (scoped by `[data-style]`), `palette.ts` (colours; run `npm run generate:theme-css` after editing). A new style registers in `theme/palettes.ts` `STYLES`, `style/index.css`, `theme/styleIcons.ts` (its app icon, also the 外觀 page's card) and `STYLE_IDS` / `THEME_IDS_BY_STYLE` / `STYLE_COLOR_MODES` in `theme/themeIds.ts`.
 - **`src/utils/featureToggle.ts`** — Ships half-built features switched off (`VITE_APP_ENV`); keep it even when nothing uses it.
 
 Folders are camelCase in the TypeScript layers and kebab-case under `presentation/`.

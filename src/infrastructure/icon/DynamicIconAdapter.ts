@@ -1,6 +1,6 @@
 import { App } from "@capacitor/app";
 import { AppIcon } from "@capacitor-community/app-icon";
-import { LAUNCHER_ICONS, type LauncherIconKey } from "@/theme/launcherIcon";
+import { ALL_LAUNCHER_ALIASES, type LauncherIconKey } from "@/theme/launcherIcon";
 import type { IconService } from "@/application/icon/IconService";
 
 // Switching launcher aliases makes Android remove the running task, so the
@@ -26,7 +26,7 @@ export class DynamicIconAdapter implements IconService {
         if (icon === null) return;
         this.pendingIcon = null;
         // The launcher aliases are named by the icon keys
-        const others = LAUNCHER_ICONS.map(({ key }) => key).filter(key => key !== icon);
+        const others = ALL_LAUNCHER_ALIASES.filter(alias => alias !== icon);
         AppIcon.change({ name: icon, disable: others, suppressNotification: false }).catch((error: unknown) => {
             console.error("Failed to change the launcher icon", error);
         });

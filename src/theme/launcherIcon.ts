@@ -1,6 +1,13 @@
-// The app icons: one per style's theme in light and in dark. The generator scripts import this
-// too, so relative imports only.
-import { STYLE_IDS, type ColorMode, type ColorThemeId, type StyleId } from "./themeIds";
+// The app icons: one per style's theme in each colour mode the style has. The generator scripts
+// import this too, so relative imports only.
+import {
+    STYLE_COLOR_MODES,
+    STYLE_IDS,
+    THEME_IDS_BY_STYLE,
+    type ColorMode,
+    type ColorThemeId,
+    type StyleId,
+} from "./themeIds";
 import { STYLES } from "./palettes";
 
 /** Names an icon: its Android launcher alias and its web asset file names. */
@@ -24,16 +31,37 @@ export const launcherIconKey = (style: StyleId, themeId: ColorThemeId, mode: Col
     return `${style}${capitalize(themeId)}${mode === "dark" ? "Dark" : ""}`;
 };
 
-const MODES: readonly ColorMode[] = ["light", "dark"];
-
 export const LAUNCHER_ICONS: readonly LauncherIcon[] = STYLE_IDS.flatMap(style =>
-    STYLES[style].themes.flatMap(theme => MODES.map(mode => ({
+    STYLES[style].themes.flatMap(theme => STYLE_COLOR_MODES[style].map(mode => ({
         key: launcherIconKey(style, theme.id, mode),
         style,
         themeId: theme.id,
         mode,
     }))));
 
-/** The Android resource name for an icon: "paperBlueInkDark" is ic_launcher_paper_blue_ink_dark. */
+/** A launcher alias kept for users already on it, drawing another icon. */
+export interface LegacyLauncherAlias {
+    key: string;
+    icon: LauncherIconKey;
+}
+
+/**
+ * Paper had dark icons before it became light only. A user who matched the icon to paper in dark
+ * sits on one of these aliases, and removing an enabled alias would leave no launcher entry, so
+ * they stay in the manifest drawing the light twin. While matching is on, the app moves that user
+ * to the light alias on its next pause.
+ */
+export const LEGACY_LAUNCHER_ALIASES: readonly LegacyLauncherAlias[] = THEME_IDS_BY_STYLE.paper.map(themeId => ({
+    key: launcherIconKey("paper", themeId, "dark"),
+    icon: launcherIconKey("paper", themeId, "light"),
+}));
+
+/** Every Android launcher alias the manifest declares: the icons' then the legacy ones. */
+export const ALL_LAUNCHER_ALIASES: readonly string[] = [
+    ...LAUNCHER_ICONS.map(icon => icon.key),
+    ...LEGACY_LAUNCHER_ALIASES.map(alias => alias.key),
+];
+
+/** The Android resource name for an icon: "tactileRustDark" is ic_launcher_tactile_rust_dark. */
 export const launcherResourceName = (key: LauncherIconKey): string =>
     `ic_launcher_${key.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`)}`;

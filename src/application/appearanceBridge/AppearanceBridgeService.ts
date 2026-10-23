@@ -1,4 +1,4 @@
-import type { Appearance } from "@/theme/themeIds";
+import type { ColorMode } from "@/theme/themeIds";
 
 export interface SystemBarColors {
     background: string;
@@ -9,7 +9,7 @@ export interface SystemBarColors {
 /** Tells the Android shell how the app looks, so the parts it draws before or around the page match. */
 export interface AppearanceBridgeService {
     /** Remembered natively, so the next cold start's splash screen already uses this mode. */
-    setAppearance(mode: Appearance): Promise<void>;
+    setAppearance(mode: ColorMode): Promise<void>;
     /** Colours the system bars on Android versions that do not draw the page under them. */
     setSystemBarColors(colors: SystemBarColors): Promise<void>;
 }

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { nextTick } from "vue";
 import { flushPromises, mount } from "@vue/test-utils";
 import { storeToRefs } from "pinia";
@@ -28,10 +28,10 @@ import { useGameStore } from "@/stores/gameStore";
 import { useStatisticsStore } from "@/stores/statisticsStore";
 import type { CellState, GameState } from "@/application/game/GameState";
 import type { BillingService, Product } from "@/application/billing/BillingService";
-import { startAppearanceSync } from "@/presentation/theme/appearanceSync";
-import { startLauncherIconSync } from "@/presentation/theme/launcherIconSync";
-import { STYLES, getPalette, rememberedThemeFor } from "@/theme/palettes";
-import { STYLE_IDS } from "@/theme/themeIds";
+import { getPalette } from "@/theme/palettes";
+import { styleIconSvg } from "@/theme/styleIcons";
+import type { StyleId } from "@/theme/themeIds";
+import { ROUTER_PATH } from "@/router";
 import Settings from "@/presentation/pages/settings/Settings.vue";
 import { appVersion } from "@/utils/appVersion";
 import { handleBackButton } from "@/presentation/composables/backDismissal";
@@ -46,7 +46,7 @@ const buildBilling = (loadProducts: BillingService["loadProducts"]): BillingServ
     consumeAll: vi.fn().mockResolvedValue(undefined),
 });
 
-const mountSettings = (billing?: BillingService) => {
+const mountSettingsWithRouter = (billing?: BillingService) => {
     setActivePinia(createPinia());
     if (billing !== undefined) useDonateStore().setBilling(billing);
     const router = createRouter({
@@ -55,11 +55,14 @@ const mountSettings = (billing?: BillingService) => {
             { path: "/", component: { template: "<div />" } },
             { path: "/settings", component: Settings },
             { path: "/settings/changelog", component: { template: "<div />" } },
+            { path: "/settings/appearance", component: { template: "<div />" } },
             { path: "/donate", component: { template: "<div />" } },
         ],
     });
-    return mount(Settings, { global: { plugins: [router] } });
+    return { router, wrapper: mount(Settings, { global: { plugins: [router] } }) };
 };
+
+const mountSettings = (billing?: BillingService) => mountSettingsWithRouter(billing).wrapper;
 
 describe("Settings.vue Support section", () => {
     beforeEach(() => {
@@ -107,67 +110,6 @@ describe("Settings.vue Support section", () => {
         const wrapper = mountSettings(buildBilling(vi.fn().mockRejectedValue(new Error("unavailable"))));
         await flushPromises();
         expect(wrapper.find("[data-testid='donate-link']").exists()).toBe(false);
-    });
-});
-
-describe("Settings.vue match-launcher-icon toggle", () => {
-    beforeEach(() => {
-        localStorage.clear();
-        vi.mocked(Capacitor.isNativePlatform).mockReset();
-    });
-
-    it("hides the toggle on web", () => {
-        vi.mocked(Capacitor.isNativePlatform).mockReturnValue(false);
-        const wrapper = mountSettings();
-        expect(wrapper.find("[data-testid='toggle-matchLauncherIconToTheme']").exists()).toBe(false);
-    });
-
-    it("enables the setting immediately without a confirm dialog", async () => {
-        vi.mocked(Capacitor.isNativePlatform).mockReturnValue(true);
-        const wrapper = mountSettings();
-        await wrapper.find("[data-testid='toggle-matchLauncherIconToTheme']").trigger("click");
-
-        expect(wrapper.find("[data-testid='icon-dialog-confirm']").exists()).toBe(false);
-        expect(useSettingsStore().matchLauncherIconToTheme).toBe(true);
-    });
-
-    it("asks the icon service to apply the current theme when enabled", async () => {
-        vi.mocked(Capacitor.isNativePlatform).mockReturnValue(true);
-        const wrapper = mountSettings();
-        const setIcon = vi.fn().mockResolvedValue(undefined);
-        const settingsStore = useSettingsStore();
-        const stopLauncherIconSync = startLauncherIconSync(storeToRefs(settingsStore), { setIcon });
-        try {
-            await wrapper.find("[data-testid='toggle-matchLauncherIconToTheme']").trigger("click");
-
-            expect(setIcon).toHaveBeenCalledWith(settingsStore.colorTheme);
-        } finally {
-            stopLauncherIconSync();
-        }
-    });
-
-    it("disables the setting when toggling from ON", async () => {
-        vi.mocked(Capacitor.isNativePlatform).mockReturnValue(true);
-        const wrapper = mountSettings();
-        await wrapper.find("[data-testid='toggle-matchLauncherIconToTheme']").trigger("click");
-        await wrapper.find("[data-testid='toggle-matchLauncherIconToTheme']").trigger("click");
-
-        expect(useSettingsStore().matchLauncherIconToTheme).toBe(false);
-    });
-
-    it("shows the toggle as an unpressed tile inside the appearance group", () => {
-        vi.mocked(Capacitor.isNativePlatform).mockReturnValue(true);
-        const wrapper = mountSettings();
-
-        const tile = wrapper.get("[data-testid='settings-group-appearance']").get("[data-testid='toggle-matchLauncherIconToTheme']");
-
-        expect(tile.attributes("aria-pressed")).toBe("false");
-    });
-
-    it("explains that the icon updates after leaving the app", () => {
-        vi.mocked(Capacitor.isNativePlatform).mockReturnValue(true);
-        const wrapper = mountSettings();
-        expect(wrapper.text()).toContain("The icon updates after you leave the app");
     });
 });
 
@@ -274,238 +216,114 @@ describe("Settings.vue groups", () => {
     );
 });
 
-describe("Settings.vue appearance group", () => {
+describe("Settings.vue appearance row", () => {
     beforeEach(() => {
         localStorage.clear();
-        vi.mocked(Capacitor.isNativePlatform).mockReturnValue(false);
-    });
-
-    it("should show the minimal style as the selected style card", () => {
-        const wrapper = mountSettings();
-        const card = wrapper.get("[data-testid='style-option-minimal']");
-
-        expect(card.attributes("aria-pressed")).toBe("true");
-        expect(card.text()).toContain("Minimal Motion");
-        expect(card.find("[data-testid='style-thumbnail']").exists()).toBe(true);
-    });
-
-    it("should not re-apply the style or theme that is already selected", async () => {
+        // On native the launcher-icon tile would show too, if it were still here
         vi.mocked(Capacitor.isNativePlatform).mockReturnValue(true);
+    });
+
+    const t = i18n.global.t;
+    const summaryOf = (wrapper: ReturnType<typeof mountSettings>) => wrapper.get("[data-testid='appearance-summary']").text();
+
+    it("should hold a single row instead of the pickers", async () => {
+        const wrapper = mountSettings();
+        await flushPromises();
+
+        expect(wrapper.get("[data-testid='settings-group-appearance']").findAll("[data-testid='appearance-row']")).toHaveLength(1);
+        for (const moved of ["style-option-", "color-theme-", "appearance-switcher", "appearance-light", "toggle-matchLauncherIconToTheme"]) {
+            expect(wrapper.find(`[data-testid^='${moved}']`).exists(), moved).toBe(false);
+        }
+    });
+
+    it("should show the current style's icon in the current theme and mode, with its name", async () => {
         const wrapper = mountSettings();
         const settingsStore = useSettingsStore();
-        const setIcon = vi.fn().mockResolvedValue(undefined);
-        const stopLauncherIconSync = startLauncherIconSync(storeToRefs(settingsStore), { setIcon });
-        settingsStore.setMatchLauncherIconToTheme(true);
+        const row = () => wrapper.get("[data-testid='appearance-row']");
+        const expectIconFor = (style: StyleId) => {
+            const palette = getPalette(style, settingsStore.colorTheme, settingsStore.appearance);
+            const host = document.createElement("div");
+            host.innerHTML = styleIconSvg(style, palette);
+            expect(row().get(`[data-testid='style-icon-${style}'] svg`).element.outerHTML).toBe(host.innerHTML.trim());
+            expect(row().text()).toContain(t(`settings.style.names.${style}`));
+        };
+
+        expectIconFor("minimal");
+
+        settingsStore.setStyle("tactile");
+        settingsStore.setAppearance("dark");
         await nextTick();
-        setIcon.mockClear();
-        const setStyle = vi.spyOn(settingsStore, "setStyle");
-        const setColorTheme = vi.spyOn(settingsStore, "setColorTheme");
 
-        await wrapper.get(`[data-testid='style-option-${settingsStore.style}']`).trigger("click");
-        await wrapper.get(`[data-testid='color-theme-${settingsStore.colorTheme}']`).trigger("click");
-
-        expect(setStyle).not.toHaveBeenCalled();
-        expect(setColorTheme).not.toHaveBeenCalled();
-        expect(setIcon).not.toHaveBeenCalled();
-        stopLauncherIconSync();
+        expectIconFor("tactile");
+        expect(row().find("[data-testid='style-icon-minimal']").exists()).toBe(false);
     });
 
-    it("should list the current style's themes with names and state", () => {
+    it("should leave the icon to the style name beside it for screen readers", () => {
         const wrapper = mountSettings();
 
-        expect(wrapper.findAll("button[data-testid^='color-theme-']")).toHaveLength(STYLES.minimal.themes.length);
-        const blue = wrapper.get("[data-testid='color-theme-blue']");
-        expect(blue.attributes("aria-label")).toBe("Blue");
-        expect(blue.attributes("aria-pressed")).toBe("false");
-        expect(wrapper.get("[data-testid='color-theme-green']").attributes("aria-pressed")).toBe("true");
+        expect(wrapper.get("[data-testid='appearance-row'] [data-testid='style-icon-minimal']").attributes("aria-hidden")).toBe("true");
     });
 
-    describe("colour-theme swatches", () => {
-        // jsdom reports inline colours as rgb(); run the expected hex through the same parser
-        const cssColor = (hex: string): string => {
-            const probe = document.createElement("div");
-            probe.style.color = hex;
-            return probe.style.color;
-        };
-
-        const stubSystemDark = (initial: boolean) => {
-            let matches = initial;
-            const listeners = new Set<(event: MediaQueryListEvent) => void>();
-            vi.stubGlobal("matchMedia", (query: string) => ({
-                get matches() { return query === "(prefers-color-scheme: dark)" && matches; },
-                media: query,
-                addEventListener: (_type: string, listener: (event: MediaQueryListEvent) => void) => { listeners.add(listener); },
-                removeEventListener: (_type: string, listener: (event: MediaQueryListEvent) => void) => { listeners.delete(listener); },
-            }));
-            return (value: boolean) => {
-                matches = value;
-                listeners.forEach((listener) => { listener({ matches: value } as MediaQueryListEvent); });
-            };
-        };
-
-        afterEach(() => {
-            vi.unstubAllGlobals();
-        });
-
-        const expectSwatchesIn = (wrapper: ReturnType<typeof mountSettings>, mode: "light" | "dark") => {
-            const settingsStore = useSettingsStore();
-            for (const theme of STYLES[settingsStore.style].themes) {
-                const palette = getPalette(settingsStore.style, theme.id, mode);
-                const swatch = wrapper.get(`[data-testid='color-theme-${theme.id}']`);
-                const label = `${settingsStore.style} ${theme.id} in ${mode}`;
-                expect((swatch.element as HTMLElement).style.backgroundColor, label).toBe(cssColor(palette.primary));
-                // One solid colour: no second half in the accent
-                expect(swatch.html(), label).not.toContain(cssColor(palette.accent));
-                expect(swatch.findAll("[style*='background']"), label).toHaveLength(0);
-            }
-            const check = wrapper.get("[data-testid='color-theme-check']");
-            const selected = getPalette(settingsStore.style, settingsStore.colorTheme, mode);
-            expect((check.element as HTMLElement).style.color).toBe(cssColor(selected["on-primary"]));
-        };
-
-        it("should fill each swatch with its light primary in light mode", () => {
-            stubSystemDark(true);
-            localStorage.setItem("sudoku-settings", JSON.stringify({ appearance: "light" }));
-
-            expectSwatchesIn(mountSettings(), "light");
-        });
-
-        it("should fill each swatch with its dark primary in dark mode, for every style", async () => {
-            stubSystemDark(false);
-            const wrapper = mountSettings();
-            const settingsStore = useSettingsStore();
-            settingsStore.setAppearance("dark");
-
-            for (const style of STYLE_IDS) {
-                settingsStore.setStyle(style);
-                await nextTick();
-                expectSwatchesIn(wrapper, "dark");
-            }
-        });
-
-        it("should follow the system's light or dark when the appearance is system", async () => {
-            const setSystemDark = stubSystemDark(true);
-            const wrapper = mountSettings();
-            expect(useSettingsStore().appearance).toBe("system");
-
-            expectSwatchesIn(wrapper, "dark");
-
-            setSystemDark(false);
-            await nextTick();
-            expectSwatchesIn(wrapper, "light");
-        });
-    });
-
-    it("should switch light and dark live", async () => {
+    it("should summarise the mode and theme and follow both", async () => {
         const wrapper = mountSettings();
-        const stopAppearanceSync = startAppearanceSync(
-            storeToRefs(useSettingsStore()),
-            { apply: vi.fn().mockResolvedValue(undefined) },
-            { setAppearance: vi.fn().mockResolvedValue(undefined), setSystemBarColors: vi.fn().mockResolvedValue(undefined) },
-        );
-        try {
-            await wrapper.get("[data-testid='appearance-dark']").trigger("click");
-            expect(document.documentElement.classList.contains("dark")).toBe(true);
+        const settingsStore = useSettingsStore();
+        const lightGreen = summaryOf(wrapper);
+        expect(lightGreen).toContain(t("settings.colorMode.light"));
+        expect(lightGreen).toContain(t("settings.colorThemes.green"));
 
-            await wrapper.get("[data-testid='appearance-light']").trigger("click");
-            expect(document.documentElement.classList.contains("dark")).toBe(false);
-        } finally {
-            stopAppearanceSync();
-            document.documentElement.className = "";
-        }
+        settingsStore.setAppearance("dark");
+        await nextTick();
+        const darkGreen = summaryOf(wrapper);
+        expect(darkGreen).not.toBe(lightGreen);
+        expect(darkGreen).toContain(t("settings.colorMode.dark"));
+
+        settingsStore.setColorTheme("blue");
+        await nextTick();
+        expect(summaryOf(wrapper)).not.toBe(darkGreen);
+        expect(summaryOf(wrapper)).toContain(t("settings.colorThemes.blue"));
     });
 
-    it("should show a thumbnail for each of the three styles", () => {
+    it("should show only the theme for a one-mode style", async () => {
         const wrapper = mountSettings();
-        const cards = wrapper.findAll("button[data-testid^='style-option-']");
+        const settingsStore = useSettingsStore();
+        settingsStore.setStyle("paper");
+        await nextTick();
 
-        expect(cards.map(card => card.attributes("data-testid"))).toEqual(["style-option-minimal", "style-option-tactile", "style-option-paper"]);
-        // The thumbnail is hidden from screen readers; the card's name is its last text
-        const names = wrapper.findAll("button[data-testid^='style-option-'] > span").map(name => name.text());
-        expect(names).toEqual(["Minimal Motion", "Tactile Tiles", "Paper Notebook"]);
-        for (const style of STYLE_IDS) {
-            const thumbnail = wrapper.get(`[data-testid='style-option-${style}'] [data-testid='style-thumbnail']`);
-            const primary = getPalette(style, rememberedThemeFor(style, useSettingsStore().colorThemeByStyle), "light").primary;
-            expect(thumbnail.attributes("data-thumbnail-style")).toBe(style);
-            expect(thumbnail.attributes("style")?.toUpperCase()).toContain(`--COLOR-PRIMARY: ${primary}`);
-        }
+        expect(summaryOf(wrapper)).toBe(t(`settings.colorThemes.${settingsStore.colorTheme}`));
     });
 
-    it("should draw each thumbnail in its own style's faces whatever style is active", () => {
-        // Paper points --font-sans at WenKai on <html>; the other thumbnails must not inherit it
-        const expectedSans: Record<string, string> = {
-            minimal: "--font-sans: var(--font-default)",
-            tactile: "--font-sans: var(--font-default)",
-            paper: "--font-sans: var(--font-wenkai)",
-        };
-        for (const activeStyle of STYLE_IDS) {
-            localStorage.setItem("sudoku-settings", JSON.stringify({ style: activeStyle }));
-            const wrapper = mountSettings();
-            expect(useSettingsStore().style).toBe(activeStyle);
-
-            for (const style of STYLE_IDS) {
-                const thumbnail = wrapper.get(`[data-testid='style-option-${style}'] [data-testid='style-thumbnail']`);
-                expect(thumbnail.attributes("style"), `${style} while ${activeStyle} is active`).toContain(expectedSans[style]);
-            }
-            wrapper.unmount();
-        }
-    });
-
-    it("should keep style hooks out of thumbnails", () => {
+    it("should keep a one-mode style's summary while dark is stored", async () => {
         const wrapper = mountSettings();
+        const settingsStore = useSettingsStore();
+        settingsStore.setStyle("paper");
+        settingsStore.setAppearance("light");
+        await nextTick();
+        const light = summaryOf(wrapper);
 
-        for (const thumbnail of wrapper.findAll("[data-testid='style-thumbnail']")) {
-            expect(thumbnail.findAll("[data-style], [data-skin]")).toHaveLength(0);
-            expect(thumbnail.attributes("data-style")).toBeUndefined();
-            expect(thumbnail.attributes("data-skin")).toBeUndefined();
-        }
+        settingsStore.setAppearance("dark");
+        await nextTick();
+
+        expect(summaryOf(wrapper)).toBe(light);
+        expect(settingsStore.appearance).toBe("dark");
     });
 
-    it("should switch styles live and remember each style's theme", async () => {
-        const wrapper = mountSettings();
-        const stopAppearanceSync = startAppearanceSync(
-            storeToRefs(useSettingsStore()),
-            { apply: vi.fn().mockResolvedValue(undefined) },
-            { setAppearance: vi.fn().mockResolvedValue(undefined), setSystemBarColors: vi.fn().mockResolvedValue(undefined) },
-        );
-        const root = document.documentElement;
-        const swatchCount = () => wrapper.findAll("button[data-testid^='color-theme-']").length;
-        const pressed = (theme: string) => wrapper.get(`[data-testid='color-theme-${theme}']`).attributes("aria-pressed");
-        try {
-            await wrapper.get("[data-testid='style-option-tactile']").trigger("click");
-            expect(root.dataset.style).toBe("tactile");
-            expect(root.dataset.colorTheme).toBe("green");
-            expect(swatchCount()).toBe(4);
-            expect(wrapper.get("[data-testid='color-theme-rust']").attributes("aria-label")).toBe("Rust");
+    it("should open the appearance page", async () => {
+        const { router, wrapper } = mountSettingsWithRouter();
 
-            await wrapper.get("[data-testid='color-theme-rust']").trigger("click");
+        await wrapper.get("[data-testid='appearance-row']").trigger("click");
+        await flushPromises();
 
-            await wrapper.get("[data-testid='style-option-paper']").trigger("click");
-            expect(swatchCount()).toBe(3);
-            expect(pressed("blueInk")).toBe("true");
-            await wrapper.get("[data-testid='color-theme-redInk']").trigger("click");
-
-            await wrapper.get("[data-testid='style-option-tactile']").trigger("click");
-            expect(pressed("rust")).toBe("true");
-            expect(root.dataset.colorTheme).toBe("rust");
-
-            await wrapper.get("[data-testid='style-option-paper']").trigger("click");
-            expect(root.dataset.colorTheme).toBe("redInk");
-
-            await wrapper.get("[data-testid='style-option-minimal']").trigger("click");
-            expect(root.dataset.style).toBe("minimal");
-            expect(root.dataset.colorTheme).toBe("green");
-        } finally {
-            stopAppearanceSync();
-            document.documentElement.className = "";
-        }
+        expect(router.currentRoute.value.path).toBe(ROUTER_PATH.appearance);
     });
 
-    it("should keep a single appearance control inside the appearance group", () => {
+    it("should switch the row's words with the language", async () => {
         const wrapper = mountSettings();
+        const english = wrapper.get("[data-testid='appearance-row']").text();
 
-        expect(wrapper.findAll("[data-testid='appearance-switcher']")).toHaveLength(1);
-        expect(wrapper.get("[data-testid='settings-group-appearance']").find("[data-testid='appearance-switcher']").exists()).toBe(true);
+        i18n.global.locale.value = "zh-Hant";
+        await nextTick();
+
+        expect(wrapper.get("[data-testid='appearance-row']").text()).not.toBe(english);
     });
 });
 
@@ -631,35 +449,5 @@ describe("Settings.vue about group", () => {
         expect(link.attributes("target")).toBe("_blank");
         expect(link.attributes("rel")).toContain("noopener");
         expect(link.text()).toBe("Privacy Policy");
-    });
-});
-
-describe("Settings.vue color mode switcher", () => {
-    beforeEach(() => {
-        localStorage.clear();
-        vi.mocked(Capacitor.isNativePlatform).mockReturnValue(false);
-    });
-
-    it("should label the modes", () => {
-        const wrapper = mountSettings();
-        const labels = ["system", "light", "dark"].map(mode => wrapper.get(`[data-testid='appearance-${mode}']`).text());
-
-        expect(labels).toEqual(["System", "Light", "Dark"]);
-    });
-
-    it("should mark system as selected by default", () => {
-        const wrapper = mountSettings();
-
-        expect(wrapper.get("[data-testid='appearance-system']").attributes("aria-pressed")).toBe("true");
-    });
-
-    it("should store dark when dark is chosen", async () => {
-        const wrapper = mountSettings();
-
-        await wrapper.get("[data-testid='appearance-dark']").trigger("click");
-
-        expect(useSettingsStore().appearance).toBe("dark");
-        const stored = JSON.parse(localStorage.getItem("sudoku-settings") ?? "{}") as Record<string, unknown>;
-        expect(stored.appearance).toBe("dark");
     });
 });

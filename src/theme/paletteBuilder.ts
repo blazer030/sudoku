@@ -9,8 +9,8 @@ export const PALETTE_TOKENS = [
     "danger", "danger-hover", "error", "error-surface", "shadow",
     "on-primary", "on-danger", "note", "cell-focus", "cell-scope", "cell-pattern", "scrim", "on-scrim",
     "toast", "on-toast", "cell-selected", "cell-peer", "featured", "on-featured",
-    // Paper's ruled lines, margin line and night lamp; other styles paint them as their background
-    "rule", "margin-line", "lamp",
+    // Paper's ruled lines and margin line; other styles paint them as their background
+    "rule", "margin-line",
 ] as const;
 export type PaletteToken = typeof PALETTE_TOKENS[number];
 export type Palette = Record<PaletteToken, string>;
@@ -18,7 +18,8 @@ export type Palette = Record<PaletteToken, string>;
 export interface ThemePalette {
     id: ColorThemeId;
     light: Palette;
-    dark: Palette;
+    /** Missing for a style that is light only (STYLE_COLOR_MODES). */
+    dark?: Palette;
 }
 
 export interface StyleDefinition {
@@ -31,8 +32,8 @@ export type LightThemeColors = Pick<Palette, "primary" | "primary-hover" | "prim
 export type DarkThemeColors = Pick<Palette, "primary" | "primary-hover" | "accent">;
 type DerivedToken = "primary-light" | "highlight" | "cell-focus" | "cell-scope" | "cell-pattern" | "cell-peer";
 // Tokens that repeat another token of the same palette unless a style sets its own
-type AliasToken = "note" | "cell-selected" | "featured" | "on-featured" | "rule" | "margin-line" | "lamp";
-type StyleExtras = Partial<Pick<Palette, "featured" | "on-featured" | "rule" | "margin-line" | "lamp">>;
+type AliasToken = "note" | "cell-selected" | "featured" | "on-featured" | "rule" | "margin-line";
+type StyleExtras = Partial<Pick<Palette, "featured" | "on-featured" | "rule" | "margin-line">>;
 export type Neutrals<ThemeColors> = Omit<Palette, keyof ThemeColors | DerivedToken | AliasToken>;
 
 // Values are tuned so every pair in paletteContrast.test.ts meets WCAG AA. The board layers
@@ -50,7 +51,7 @@ const tintsOf = <Token extends DerivedToken>(primary: string, card: string, stre
         [token, mixColors(primary, alpha, card)])) as Record<Token, string>;
 
 // Notes use the secondary text colour; the selected cell uses the primary tint; the continue
-// card is a primary surface; lines and lamp vanish into the background unless a style draws them
+// card is a primary surface; lines vanish into the background unless a style draws them
 const withAliases = (palette: Omit<Palette, AliasToken>, extras: StyleExtras): Palette => ({
     ...palette,
     "note": palette["foreground-secondary"],
@@ -59,9 +60,22 @@ const withAliases = (palette: Omit<Palette, AliasToken>, extras: StyleExtras): P
     "on-featured": palette["on-primary"],
     "rule": palette.background,
     "margin-line": palette.background,
-    "lamp": palette.background,
     ...extras,
 });
+
+const lightPalette = (neutrals: Neutrals<LightThemeColors>, light: LightThemeColors, extras: StyleExtras): Palette =>
+    withAliases({
+        ...neutrals,
+        ...light,
+        ...tintsOf(light.primary, neutrals.card, LIGHT_TINTS),
+    }, extras);
+
+// A light-only style's theme builder: its own neutrals under each theme's colours and tints
+export const lightOnlyThemeBuilder = (lightNeutrals: Neutrals<LightThemeColors>, lightExtras: StyleExtras = {}) =>
+    (id: ColorThemeId, light: LightThemeColors): ThemePalette => ({
+        id,
+        light: lightPalette(lightNeutrals, light, lightExtras),
+    });
 
 // A style's theme builder: its own neutrals under each theme's colours and tints
 export const themeBuilder = (
@@ -72,11 +86,7 @@ export const themeBuilder = (
 ) =>
     (id: ColorThemeId, light: LightThemeColors, dark: DarkThemeColors): ThemePalette => ({
         id,
-        light: withAliases({
-            ...lightNeutrals,
-            ...light,
-            ...tintsOf(light.primary, lightNeutrals.card, LIGHT_TINTS),
-        }, lightExtras),
+        light: lightPalette(lightNeutrals, light, lightExtras),
         dark: withAliases({
             ...darkNeutrals,
             ...dark,

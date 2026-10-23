@@ -1,6 +1,6 @@
 import {
-    APPEARANCES, STYLE_IDS, THEME_IDS_BY_STYLE,
-    type Appearance, type ColorThemeId, type RememberedThemes, type StyleId,
+    COLOR_MODES, STYLE_IDS, THEME_IDS_BY_STYLE,
+    type ColorMode, type ColorThemeId, type RememberedThemes, type StyleId,
 } from "@/theme/themeIds";
 
 export const APP_LOCALES = ["en", "zh-Hant"] as const;
@@ -16,7 +16,7 @@ export interface Settings {
     showRemainingCount: boolean;
     matchLauncherIconToTheme: boolean;
     language: LanguagePreference;
-    appearance: Appearance;
+    appearance: ColorMode;
     style: StyleId;
     highlightScope: boolean;
     // The colour theme last chosen under each style, so switching styles comes back to it
@@ -34,7 +34,7 @@ const DEFAULT_SETTINGS: Settings = {
     showRemainingCount: true,
     matchLauncherIconToTheme: false,
     language: "system",
-    appearance: "system",
+    appearance: "light",
     style: "minimal",
     highlightScope: true,
     colorThemeByStyle: { minimal: "green" },
@@ -57,17 +57,24 @@ const usableRememberedThemes = (stored: unknown): RememberedThemes => {
     return remembered;
 };
 
+// The mode the system shows right now; old WebViews and jsdom may lack matchMedia and count as light
+const systemColorMode = (): ColorMode =>
+    typeof window.matchMedia === "function" && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+
 export const loadSettings = (): Settings => {
     const stored = localStorage.getItem(STORAGE_KEY);
     // A fresh map every load, so a change to one result never leaks into the defaults
-    if (stored === null) return { ...DEFAULT_SETTINGS, colorThemeByStyle: { ...DEFAULT_SETTINGS.colorThemeByStyle } };
-    const settings: Settings = { ...DEFAULT_SETTINGS, ...JSON.parse(stored) as Partial<Settings> };
+    // The JSON text "null" parses to null, which counts as nothing saved
+    const parsed: Partial<Settings> = (stored === null ? null : JSON.parse(stored) as Partial<Settings> | null) ?? {};
+    const settings: Settings = { ...DEFAULT_SETTINGS, colorThemeByStyle: { ...DEFAULT_SETTINGS.colorThemeByStyle }, ...parsed };
+    // A missing, retired "system" or unknown appearance becomes the system's current mode once, then is saved
+    const appearanceChosen = (COLOR_MODES as readonly unknown[]).includes(parsed.appearance);
+    if (!appearanceChosen) settings.appearance = systemColorMode();
     // A hand-edited unknown language falls back to following the system
     // The one-time long-press tip is gone; older saves may still carry its flag
     delete (settings as Partial<Record<"seenLongPressTip", unknown>>).seenLongPressTip;
     if (!LANGUAGE_PREFERENCES.includes(settings.language)) settings.language = "system";
-    // Unknown appearance, style or theme ids (hand-edited, or from a future version) fall back too
-    if (!APPEARANCES.includes(settings.appearance)) settings.appearance = "system";
+    // Unknown style or theme ids (hand-edited, or from a future version) fall back too
     if (!STYLE_IDS.includes(settings.style)) settings.style = "minimal";
     const remembered = usableRememberedThemes(settings.colorThemeByStyle);
     // A theme of another style (or an unknown one) falls back to the style's remembered theme, then its
@@ -77,6 +84,14 @@ export const loadSettings = (): Settings => {
     }
     // The current theme is the truth for the current style, which also seeds settings saved before the map existed
     settings.colorThemeByStyle = { ...remembered, [settings.style]: settings.colorTheme };
+    if (!appearanceChosen) {
+        // A failed save (quota, private mode) must not block startup; the migration just retries next launch
+        try {
+            saveSettings(settings);
+        } catch {
+            // keep the loaded settings
+        }
+    }
     return settings;
 };
 

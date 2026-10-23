@@ -27,6 +27,15 @@ describe("settingsStore", () => {
         vi.restoreAllMocks();
     });
 
+    it("should initialise with defaults when the saved settings are the JSON text null", () => {
+        localStorage.setItem("sudoku-settings", "null");
+
+        const store = useSettingsStore();
+
+        expect(store.style).toBe("minimal");
+        expect(store.appearance).toBe("light");
+    });
+
     it("should have default values on first load", () => {
         const store = useSettingsStore();
 
@@ -37,7 +46,7 @@ describe("settingsStore", () => {
         expect(store.showRemainingCount).toBe(true);
         expect(store.matchLauncherIconToTheme).toBe(false);
         expect(store.language).toBe("system");
-        expect(store.appearance).toBe("system");
+        expect(store.appearance).toBe("light");
         expect(store.style).toBe("minimal");
     });
 

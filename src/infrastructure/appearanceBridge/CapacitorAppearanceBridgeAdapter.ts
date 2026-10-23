@@ -1,17 +1,17 @@
 import { registerPlugin } from "@capacitor/core";
-import type { Appearance } from "@/theme/themeIds";
+import type { ColorMode } from "@/theme/themeIds";
 import type { AppearanceBridgeService, SystemBarColors } from "@/application/appearanceBridge/AppearanceBridgeService";
 
 // The app's own plugin: android/app/src/main/java/io/github/blazer030/sudoku/AppearanceBridgePlugin.java
 interface AppearanceBridgePlugin {
-    setAppearance(options: { mode: Appearance }): Promise<void>;
+    setAppearance(options: { mode: ColorMode }): Promise<void>;
     setSystemBarColors(options: SystemBarColors): Promise<void>;
 }
 
 const AppearanceBridge = registerPlugin<AppearanceBridgePlugin>("AppearanceBridge");
 
 export class CapacitorAppearanceBridgeAdapter implements AppearanceBridgeService {
-    async setAppearance(mode: Appearance): Promise<void> {
+    async setAppearance(mode: ColorMode): Promise<void> {
         try {
             await AppearanceBridge.setAppearance({ mode });
         } catch (error: unknown) {

@@ -31,7 +31,6 @@ const REQUIRED_SELECTORS: Record<StyleId, readonly string[]> = {
         '[data-skin~="check"]',
         '[data-skin~="continue"]',
         '[data-skin~="new-game"]',
-        ':root.dark[data-style="paper"]',
     ],
 };
 

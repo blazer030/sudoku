@@ -18,9 +18,8 @@
 
 @theme {
   --container-2xl: 1400px;
-  /* The interface face; a style may repoint --font-sans, and the style picker's thumbnails pin it back */
-  --font-default: "Outfit", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
-  --font-sans: var(--font-default);
+  /* The interface face; a style may repoint it */
+  --font-sans: "Outfit", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
   --font-mono: "Roboto Mono", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", monospace;
   /* Paper's stacks. Each ends in a system CJK face and a generic family, never cursive, so a
      character outside the bundled subsets still reads clearly. Times, not Georgia: Georgia's old-style

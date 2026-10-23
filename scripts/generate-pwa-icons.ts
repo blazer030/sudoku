@@ -2,7 +2,7 @@ import sharp from "sharp";
 import { writeFileSync, mkdirSync } from "fs";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
-import { ICON_VARIANTS, iconSvg, type IconTheme } from "./iconArtwork";
+import { ICON_VARIANTS, roundedIconSvg, type IconVariant } from "./iconArtwork";
 import { LAUNCHER_ICONS } from "../src/theme/launcherIcon";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -19,17 +19,17 @@ const PUBLIC_DIR = resolve(__dirname, "../public");
 const generatePngFromSvg = async (svg: string, size: number): Promise<Buffer> =>
     sharp(Buffer.from(svg)).resize(size, size).png().toBuffer();
 
-const generateManifest = (theme: IconTheme): string =>
+const generateManifest = ({ id, palette }: IconVariant): string =>
     JSON.stringify(
         {
             ...MANIFEST_TEMPLATE,
-            background_color: theme.background,
+            background_color: palette.background,
             display: "standalone",
-            theme_color: theme.primary,
+            theme_color: palette.primary,
             icons: [
-                { src: `pwa-192x192-${theme.id}.png`, sizes: "192x192", type: "image/png" },
-                { src: `pwa-512x512-${theme.id}.png`, sizes: "512x512", type: "image/png" },
-                { src: `pwa-512x512-${theme.id}.png`, sizes: "512x512", type: "image/png", purpose: "maskable" },
+                { src: `pwa-192x192-${id}.png`, sizes: "192x192", type: "image/png" },
+                { src: `pwa-512x512-${id}.png`, sizes: "512x512", type: "image/png" },
+                { src: `pwa-512x512-${id}.png`, sizes: "512x512", type: "image/png", purpose: "maskable" },
             ],
         },
         null,
@@ -43,7 +43,7 @@ const main = async () => {
     mkdirSync(PUBLIC_DIR, { recursive: true });
 
     for (const variant of ICON_VARIANTS) {
-        const svg = iconSvg(variant);
+        const svg = roundedIconSvg(variant);
         writeFileSync(resolve(PUBLIC_DIR, `sudoku-${variant.id}.svg`), svg);
         if (!LIGHT_KEYS.has(variant.id)) continue;
 
