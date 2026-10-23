@@ -1,3 +1,4 @@
+import { createAnalyticsSpy } from "@/__tests__/fixtures/analyticsSpy";
 import { nextTick } from "vue";
 import { i18n } from "@/presentation/i18n";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -1118,14 +1119,14 @@ describe("Game", () => {
 
         it("should show the complete modal and log game_complete when the hint fills the last cell", async () => {
             localStorage.setItem("sudoku-settings", JSON.stringify({ completionFlash: false }));
-            const logEvent = vi.fn().mockResolvedValue(undefined);
-            const wrapper = mountGameWith(nearlySolvedSudoku(), { logEvent });
+            const analytics = createAnalyticsSpy();
+            const wrapper = mountGameWith(nearlySolvedSudoku(), analytics);
 
             await openRevealCell(wrapper);
             await wrapper.find("[data-testid='hint-primary']").trigger("click");
 
             expect(wrapper.find("[data-testid='game-complete-modal']").exists()).toBe(true);
-            expect(logEvent).toHaveBeenCalledWith(expect.objectContaining({ name: "game_complete" }));
+            expect(analytics.logEvent).toHaveBeenCalledWith(expect.objectContaining({ name: "game_complete" }));
         });
 
         it("should keep every note empty after filling when the player had none", async () => {

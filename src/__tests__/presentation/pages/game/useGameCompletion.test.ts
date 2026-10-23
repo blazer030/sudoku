@@ -1,3 +1,4 @@
+import { createAnalyticsSpy } from "@/__tests__/fixtures/analyticsSpy";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { ref } from "vue";
 import { createPinia, setActivePinia } from "pinia";
@@ -5,7 +6,6 @@ import { Sudoku } from "@/domain/game/Sudoku";
 import { PuzzleCell } from "@/domain/board/PuzzleCell";
 import { useGameCompletion } from "@/presentation/pages/game/useGameCompletion";
 import { useStatisticsStore } from "@/stores/statisticsStore";
-import type { AnalyticsService } from "@/application/analytics/AnalyticsService";
 import type { GameReplayData } from "@/application/statistics/StatisticsRepository";
 
 const SOLVED_BOARD: number[][] = [
@@ -44,8 +44,7 @@ describe("useGameCompletion", () => {
     });
 
     it("emits game_complete analytics event when sudoku is completed", () => {
-        const logEvent = vi.fn().mockResolvedValue(undefined);
-        const analytics: AnalyticsService = { logEvent };
+        const analytics = createAnalyticsSpy();
         const sudoku = buildCompleteSudoku();
 
         const { checkAndComplete } = useGameCompletion({
@@ -59,7 +58,7 @@ describe("useGameCompletion", () => {
 
         checkAndComplete({ row: 0, column: 0 });
 
-        expect(logEvent).toHaveBeenCalledWith({
+        expect(analytics.logEvent).toHaveBeenCalledWith({
             name: "game_complete",
             difficulty: "easy",
             time_seconds: 420,
@@ -69,7 +68,7 @@ describe("useGameCompletion", () => {
     });
 
     it("reports hints_used 0 and hints_total 1 when only the free hint was used", () => {
-        const logEvent = vi.fn().mockResolvedValue(undefined);
+        const analytics = createAnalyticsSpy();
         const sudoku = buildCompleteSudoku();
         sudoku.hintTracker.useHint();
 
@@ -79,17 +78,16 @@ describe("useGameCompletion", () => {
             getElapsedSeconds: () => 420,
             getReplayData: emptyReplay,
             onCompleted: () => { /* noop */ },
-            analytics: { logEvent },
+            analytics,
         });
 
         checkAndComplete({ row: 0, column: 0 });
 
-        expect(logEvent).toHaveBeenCalledWith(expect.objectContaining({ hints_used: 0, hints_total: 1 }));
+        expect(analytics.logEvent).toHaveBeenCalledWith(expect.objectContaining({ hints_used: 0, hints_total: 1 }));
     });
 
     it("does not emit event when sudoku is not completed", () => {
-        const logEvent = vi.fn().mockResolvedValue(undefined);
-        const analytics: AnalyticsService = { logEvent };
+        const analytics = createAnalyticsSpy();
 
         const { checkAndComplete } = useGameCompletion({
             sudoku: buildIncompleteSudoku(),
@@ -102,7 +100,7 @@ describe("useGameCompletion", () => {
 
         checkAndComplete({ row: 0, column: 0 });
 
-        expect(logEvent).not.toHaveBeenCalled();
+        expect(analytics.logEvent).not.toHaveBeenCalled();
     });
 
     describe("new record", () => {

@@ -1,3 +1,4 @@
+import { createAnalyticsSpy } from "@/__tests__/fixtures/analyticsSpy";
 import { describe, it, expect, vi } from "vitest";
 import { defineComponent } from "vue";
 import { mount } from "@vue/test-utils";
@@ -90,15 +91,15 @@ describe("useHintActions — analytics", () => {
         ["checkConflicts" as const,  "check_conflicts"],
         ["revealCell" as const,      "reveal_cell"],
     ])("emits hint_used with hint_type=%s -> %s", async (action, hintType) => {
-        const logEvent = vi.fn().mockResolvedValue(undefined);
-        await runAction(action, { logEvent });
-        expect(logEvent).toHaveBeenCalledWith({ name: "hint_used", hint_type: hintType });
+        const analytics = createAnalyticsSpy();
+        await runAction(action, analytics);
+        expect(analytics.logEvent).toHaveBeenCalledWith({ name: "hint_used", hint_type: hintType });
     });
 
     it("does not emit hint_used when user closes menu", async () => {
-        const logEvent = vi.fn().mockResolvedValue(undefined);
-        await runAction("close", { logEvent });
-        expect(logEvent).not.toHaveBeenCalled();
+        const analytics = createAnalyticsSpy();
+        await runAction("close", analytics);
+        expect(analytics.logEvent).not.toHaveBeenCalled();
     });
 });
 
@@ -107,7 +108,7 @@ describe("useHintActions — step recording", () => {
         openHintDialog.mockResolvedValue("autoNotes");
         const sudoku = buildPartialSudoku();
         const stepRecorder = new StepRecorder();
-        const api = mountHintHarness({ logEvent: vi.fn().mockResolvedValue(undefined) }, { sudoku, stepRecorder });
+        const api = mountHintHarness(createAnalyticsSpy(), { sudoku, stepRecorder });
 
         await api.openHintMenu();
 
@@ -124,7 +125,7 @@ describe("useHintActions — check conflicts", () => {
         openHintDialog.mockResolvedValue("checkConflicts");
         const sudoku = buildPartialSudoku();
         const onNoConflicts = vi.fn();
-        const api = mountHintHarness({ logEvent: vi.fn().mockResolvedValue(undefined) }, { sudoku, onNoConflicts });
+        const api = mountHintHarness(createAnalyticsSpy(), { sudoku, onNoConflicts });
 
         await api.openHintMenu();
 
@@ -139,7 +140,7 @@ describe("useHintActions — check conflicts", () => {
         // Column 0 already has the clue 5
         sudoku.fill(4, 0, 5);
         const onNoConflicts = vi.fn();
-        const api = mountHintHarness({ logEvent: vi.fn().mockResolvedValue(undefined) }, { sudoku, onNoConflicts });
+        const api = mountHintHarness(createAnalyticsSpy(), { sudoku, onNoConflicts });
 
         await api.openHintMenu();
 
@@ -151,15 +152,15 @@ describe("useHintActions — reveal cell", () => {
     it("does not spend a hint when the puzzle is already solved", async () => {
         openHintDialog.mockReset();
         openHintDialog.mockResolvedValue("revealCell");
-        const logEvent = vi.fn().mockResolvedValue(undefined);
+        const analytics = createAnalyticsSpy();
         const sudoku = createKnownSudoku();
         vi.spyOn(sudoku, "planRevealHint").mockReturnValue({ kind: "solved" });
-        const api = mountHintHarness({ logEvent }, { sudoku });
+        const api = mountHintHarness(analytics, { sudoku });
 
         await api.openHintMenu();
 
         expect(sudoku.hintTracker.totalUsed).toBe(0);
-        expect(logEvent).not.toHaveBeenCalled();
+        expect(analytics.logEvent).not.toHaveBeenCalled();
         expect(api.hintMode.active.value).toBe(false);
     });
 
@@ -169,7 +170,7 @@ describe("useHintActions — reveal cell", () => {
         const sudoku = createKnownSudoku();
         vi.spyOn(sudoku, "planRevealHint").mockReturnValue({ kind: "noTechnique" });
         const onHintReveal = vi.fn();
-        const api = mountHintHarness({ logEvent: vi.fn().mockResolvedValue(undefined) }, { sudoku, onHintReveal });
+        const api = mountHintHarness(createAnalyticsSpy(), { sudoku, onHintReveal });
 
         await api.openHintMenu();
 
@@ -183,10 +184,10 @@ describe("useHintActions — reveal cell", () => {
     it("enters hint mode, spends one hint and logs it once without touching the board", async () => {
         openHintDialog.mockReset();
         openHintDialog.mockResolvedValue("revealCell");
-        const logEvent = vi.fn().mockResolvedValue(undefined);
+        const analytics = createAnalyticsSpy();
         const sudoku = createKnownSudoku();
         const stepRecorder = new StepRecorder();
-        const api = mountHintHarness({ logEvent }, { sudoku, stepRecorder });
+        const api = mountHintHarness(analytics, { sudoku, stepRecorder });
 
         await api.openHintMenu();
         await api.openHintMenu();
@@ -194,8 +195,8 @@ describe("useHintActions — reveal cell", () => {
         expect(api.hintMode.active.value).toBe(true);
         expect(sudoku.hintTracker.totalUsed).toBe(1);
         expect(openHintDialog).toHaveBeenCalledTimes(1);
-        expect(logEvent).toHaveBeenCalledTimes(1);
-        expect(logEvent).toHaveBeenCalledWith({ name: "hint_used", hint_type: "reveal_cell" });
+        expect(analytics.logEvent).toHaveBeenCalledTimes(1);
+        expect(analytics.logEvent).toHaveBeenCalledWith({ name: "hint_used", hint_type: "reveal_cell" });
         expect(stepRecorder.steps).toHaveLength(0);
     });
 });

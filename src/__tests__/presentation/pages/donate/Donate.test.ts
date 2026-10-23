@@ -1,3 +1,4 @@
+import { createAnalyticsSpy } from "@/__tests__/fixtures/analyticsSpy";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { mount, flushPromises } from "@vue/test-utils";
 import { nextTick } from "vue";
@@ -46,51 +47,51 @@ describe("Donate.vue analytics", () => {
     });
 
     it("emits donate_view on mount", async () => {
-        const logEvent = vi.fn().mockResolvedValue(undefined);
+        const analytics = createAnalyticsSpy();
         const billing = buildBilling({
             kind: "success",
             productId: "donate_coffee",
             tier: "coffee",
             amountUsd: 2.99,
         });
-        mountDonate({ logEvent }, billing);
+        mountDonate(analytics, billing);
         await flushPromises();
 
-        expect(logEvent).toHaveBeenCalledWith({ name: "donate_view" });
+        expect(analytics.logEvent).toHaveBeenCalledWith({ name: "donate_view" });
     });
 
     it("emits donate_tap when a tier is tapped", async () => {
-        const logEvent = vi.fn().mockResolvedValue(undefined);
+        const analytics = createAnalyticsSpy();
         const billing = buildBilling({
             kind: "success",
             productId: "donate_coffee",
             tier: "coffee",
             amountUsd: 2.99,
         });
-        const wrapper = mountDonate({ logEvent }, billing);
+        const wrapper = mountDonate(analytics, billing);
         await flushPromises();
 
         await wrapper.find("[data-testid='donate-tier-coffee']").trigger("click");
         await flushPromises();
 
-        expect(logEvent).toHaveBeenCalledWith({ name: "donate_tap", tier: "coffee" });
+        expect(analytics.logEvent).toHaveBeenCalledWith({ name: "donate_tap", tier: "coffee" });
     });
 
     it("emits donate_success after a successful purchase", async () => {
-        const logEvent = vi.fn().mockResolvedValue(undefined);
+        const analytics = createAnalyticsSpy();
         const billing = buildBilling({
             kind: "success",
             productId: "donate_coffee",
             tier: "coffee",
             amountUsd: 2.99,
         });
-        const wrapper = mountDonate({ logEvent }, billing);
+        const wrapper = mountDonate(analytics, billing);
         await flushPromises();
 
         await wrapper.find("[data-testid='donate-tier-coffee']").trigger("click");
         await flushPromises();
 
-        expect(logEvent).toHaveBeenCalledWith({
+        expect(analytics.logEvent).toHaveBeenCalledWith({
             name: "donate_success",
             tier: "coffee",
             amount_usd: 2.99,
@@ -98,15 +99,15 @@ describe("Donate.vue analytics", () => {
     });
 
     it("does not emit donate_success when purchase is cancelled", async () => {
-        const logEvent = vi.fn().mockResolvedValue(undefined);
+        const analytics = createAnalyticsSpy();
         const billing = buildBilling({ kind: "cancelled" });
-        const wrapper = mountDonate({ logEvent }, billing);
+        const wrapper = mountDonate(analytics, billing);
         await flushPromises();
 
         await wrapper.find("[data-testid='donate-tier-coffee']").trigger("click");
         await flushPromises();
 
-        const successCalls = logEvent.mock.calls.filter(([event]) => (event as { name: string }).name === "donate_success");
+        const successCalls = analytics.logEvent.mock.calls.filter(([event]) => (event as { name: string }).name === "donate_success");
         expect(successCalls).toHaveLength(0);
     });
 });
@@ -118,7 +119,7 @@ describe("Donate.vue product loading", () => {
             ...buildBilling({ kind: "cancelled" }),
             loadProducts: vi.fn(() => new Promise<Product[]>((resolve) => { finishLoading = resolve; })),
         };
-        const wrapper = mountDonate({ logEvent: vi.fn().mockResolvedValue(undefined) }, billing);
+        const wrapper = mountDonate(createAnalyticsSpy(), billing);
         await flushPromises();
 
         expect(wrapper.find("[data-testid='donate-loading']").exists()).toBe(true);
@@ -139,7 +140,7 @@ describe("Donate.vue product loading", () => {
                 .mockResolvedValueOnce([])
                 .mockImplementationOnce(() => new Promise<Product[]>((resolve) => { finishRetry = resolve; })),
         };
-        const wrapper = mountDonate({ logEvent: vi.fn().mockResolvedValue(undefined) }, billing);
+        const wrapper = mountDonate(createAnalyticsSpy(), billing);
         await flushPromises();
 
         await wrapper.find("[data-testid='donate-retry']").trigger("click");
@@ -156,7 +157,7 @@ describe("Donate.vue product loading", () => {
             ...buildBilling({ kind: "cancelled" }),
             loadProducts: vi.fn().mockResolvedValueOnce([]).mockResolvedValue(fakeProducts),
         };
-        const wrapper = mountDonate({ logEvent: vi.fn().mockResolvedValue(undefined) }, billing);
+        const wrapper = mountDonate(createAnalyticsSpy(), billing);
         await flushPromises();
 
         expect(wrapper.find("[data-testid='donate-tier-coffee']").exists()).toBe(false);
@@ -175,7 +176,7 @@ describe("Donate.vue purchase feedback", () => {
     });
 
     it("shows a Cancelled toast when the purchase is cancelled", async () => {
-        const wrapper = mountDonate({ logEvent: vi.fn().mockResolvedValue(undefined) }, buildBilling({ kind: "cancelled" }));
+        const wrapper = mountDonate(createAnalyticsSpy(), buildBilling({ kind: "cancelled" }));
         await flushPromises();
 
         await wrapper.find("[data-testid='donate-tier-coffee']").trigger("click");
@@ -188,7 +189,7 @@ describe("Donate.vue purchase feedback", () => {
     it("shows a generic error toast and logs the reason when the purchase fails", async () => {
         const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
         const wrapper = mountDonate(
-            { logEvent: vi.fn().mockResolvedValue(undefined) },
+            createAnalyticsSpy(),
             buildBilling({ kind: "error", reason: "Service disconnected" }),
         );
         await flushPromises();
@@ -204,7 +205,7 @@ describe("Donate.vue purchase feedback", () => {
 describe("Donate.vue success screen", () => {
     it("returns to Settings when Done is tapped", async () => {
         const billing = buildBilling({ kind: "success", productId: "donate_coffee", tier: "coffee", amountUsd: 2.99 });
-        const wrapper = mountDonate({ logEvent: vi.fn().mockResolvedValue(undefined) }, billing);
+        const wrapper = mountDonate(createAnalyticsSpy(), billing);
         const router = wrapper.vm.$router;
         await router.push("/settings");
         await router.push("/donate");
@@ -227,7 +228,7 @@ describe("Donate.vue zh-Hant", () => {
 
     it("shows the tier name in Chinese while keeping the Google Play price text", async () => {
         await useChinese();
-        const wrapper = mountDonate({ logEvent: vi.fn().mockResolvedValue(undefined) }, buildBilling({ kind: "cancelled" }));
+        const wrapper = mountDonate(createAnalyticsSpy(), buildBilling({ kind: "cancelled" }));
         await flushPromises();
 
         const tier = wrapper.find("[data-testid='donate-tier-coffee']");
