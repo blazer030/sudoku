@@ -14,9 +14,8 @@ import { startLauncherIconSync } from "@/presentation/theme/launcherIconSync";
 import { useGameStore } from "@/stores/gameStore";
 import { useDonateStore } from "@/stores/donateStore";
 import { useStatisticsStore } from "@/stores/statisticsStore";
-import { ANALYTICS_KEY, type AnalyticsService } from "@/application/analytics/AnalyticsService";
-import { FirebaseAnalyticsAdapter } from "@/infrastructure/analytics/FirebaseAnalyticsAdapter";
-import { NoopAnalyticsAdapter } from "@/infrastructure/analytics/NoopAnalyticsAdapter";
+import { ANALYTICS_KEY } from "@/application/analytics/AnalyticsService";
+import { chooseAnalytics } from "@/infrastructure/analytics/chooseAnalytics";
 import { readWebFirebaseConfig } from "@/infrastructure/analytics/webFirebaseConfig";
 import { BILLING_KEY, type BillingService } from "@/application/billing/BillingService";
 import { NoopBillingAdapter } from "@/infrastructure/billing/NoopBillingAdapter";
@@ -49,20 +48,14 @@ if (Capacitor.isNativePlatform() && "serviceWorker" in navigator) {
     });
 }
 
-const createAnalytics = async (): Promise<AnalyticsService> => {
-    if (Capacitor.isNativePlatform()) {
-        return new FirebaseAnalyticsAdapter();
-    }
-    const webFirebaseConfig = readWebFirebaseConfig(import.meta.env);
-    if (webFirebaseConfig === null) {
-        return new NoopAnalyticsAdapter();
-    }
-    const { initializeApp } = await import("firebase/app");
-    initializeApp(webFirebaseConfig);
-    return new FirebaseAnalyticsAdapter();
-};
-
-const analytics = await createAnalytics();
+const analytics = await chooseAnalytics({
+    isNative: Capacitor.isNativePlatform(),
+    webConfig: readWebFirebaseConfig(import.meta.env),
+    initializeWebFirebase: async (config) => {
+        const { initializeApp } = await import("firebase/app");
+        initializeApp(config);
+    },
+});
 
 startScreenTracking(router, analytics);
 
