@@ -30,9 +30,10 @@ const findUnmarkedFilledButtons = (path: string, source: string): string[] =>
 const styledSkinTokens = (css: string): string[] =>
     [...css.matchAll(/\[data-skin~?="([^"]+)"\]/g)].map(match => match[1]);
 
-// Tokens of every data-skin attribute: static values and string literals inside bound values
+// Tokens of every data-skin attribute: static values and string literals inside bound values. A static
+// `skin` prop counts too: SegmentedControl adds it to its own data-skin.
 const markupSkinTokens = (source: string): string[] =>
-    [...source.matchAll(/(?<![\w-])(:?)data-skin="([^"]*)"/g)].flatMap(([, bound, value]) => {
+    [...source.matchAll(/(?<![\w-])(:?)(?:data-)?skin="([^"]*)"/g)].flatMap(([, bound, value]) => {
         const text = bound === ":" ? [...value.matchAll(/'([^']*)'|`([^`]*)`/g)].map(literal => literal.slice(1).join("")).join(" ") : value;
         return text.split(/\s+/).filter(token => token !== "");
     });
@@ -80,6 +81,12 @@ describe("skin hooks", () => {
             .map(tag => `${path}: ${tag.replace(/\s+/g, " ").slice(0, 90)}`));
 
         expect(offenders).toEqual([]);
+    });
+
+    it("should mark the continue card's arrow, so a style can draw it", () => {
+        const source = readFileSync("src/presentation/components/continue-button/ContinueButton.vue", "utf8");
+
+        expect(openingTags(source, "Play").some(tag => hasSkinToken(tag, "caret"))).toBe(true);
     });
 
     it("should mark the hint menu as a card, so a style frames it like the dialogs", () => {

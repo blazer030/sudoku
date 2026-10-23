@@ -9,7 +9,10 @@
         @click="$emit('continue')"
     >
         <span class="flex items-center gap-2">
-            <Play :size="20" />
+            <Play
+                :size="20"
+                data-skin="caret"
+            />
             <span class="text-lg font-semibold">{{ t("home.continueGame") }}</span>
         </span>
         <span class="flex flex-wrap gap-1.5">
