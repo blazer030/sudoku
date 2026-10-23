@@ -61,20 +61,21 @@ interface MountConfig {
     sudoku: Sudoku;
     analytics: AnalyticsService;
     dismissOverlay?: () => boolean;
+    completed?: boolean;
 }
 
 const mountLeaveHarness = async (config: MountConfig): Promise<LeaveApi> => {
     return (await mountLeaveHarnessWithRouter(config)).api;
 };
 
-const mountLeaveHarnessWithRouter = async ({ sudoku, analytics, dismissOverlay }: MountConfig) => {
+const mountLeaveHarnessWithRouter = async ({ sudoku, analytics, dismissOverlay, completed = false }: MountConfig) => {
     const captured: { api: LeaveApi | undefined } = { api: undefined };
     const Harness = defineComponent({
         setup() {
             captured.api = useLeaveGame({
                 sudoku,
                 difficulty: ref("easy"),
-                completed: ref(false),
+                completed: ref(completed),
                 getElapsedSeconds: () => 60,
                 getReplayData: emptyReplay,
                 analytics,
@@ -218,3 +219,41 @@ describe("useLeaveGame — Back key", () => {
         expect(router.currentRoute.value.path).toBe("/");
     });
 });
+
+const setPageVisibility = (state: DocumentVisibilityState) => {
+    Object.defineProperty(document, "visibilityState", { configurable: true, get: () => state });
+    document.dispatchEvent(new Event("visibilitychange"));
+};
+
+describe("useLeaveGame — saving when the page is hidden", () => {
+    afterEach(() => {
+        setPageVisibility("visible");
+    });
+
+    it("saves the game as it stands when the page is hidden", async () => {
+        await mountLeaveHarness({ sudoku: buildSudokuWithEntries(3), analytics: createAnalyticsSpy() });
+
+        setPageVisibility("hidden");
+
+        const saved = useGameStore().savedGame;
+        expect(saved?.cells[0][2].entry).toBe(SOLVED_BOARD[0][2]);
+        expect(saved?.elapsedSeconds).toBe(60);
+    });
+
+    it("leaves a finished game unsaved when the page is hidden", async () => {
+        await mountLeaveHarness({ sudoku: buildSudokuWithEntries(3), analytics: createAnalyticsSpy(), completed: true });
+
+        setPageVisibility("hidden");
+
+        expect(useGameStore().savedGame).toBeNull();
+    });
+
+    it("saves nothing when the page becomes visible again", async () => {
+        await mountLeaveHarness({ sudoku: buildSudokuWithEntries(3), analytics: createAnalyticsSpy() });
+
+        setPageVisibility("visible");
+
+        expect(useGameStore().savedGame).toBeNull();
+    });
+});
+

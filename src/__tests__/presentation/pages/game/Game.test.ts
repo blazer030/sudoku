@@ -1583,3 +1583,29 @@ describe("Game", () => {
         });
     });
 });
+
+// The page's visibility as the browser or the Android WebView reports it when the app goes to the background
+const setPageVisibility = (state: DocumentVisibilityState) => {
+    Object.defineProperty(document, "visibilityState", { configurable: true, get: () => state });
+    document.dispatchEvent(new Event("visibilitychange"));
+};
+
+describe("Game — saving when the app goes to the background", () => {
+    afterEach(() => {
+        setPageVisibility("visible");
+    });
+
+    it("should save the game with its latest move when the page is hidden, so a killed app resumes it", async () => {
+        const wrapper = mountGame();
+        await wrapper.find("[data-testid='cell-0-2']").trigger("click");
+        await wrapper.find("[data-testid='number-2']").trigger("click");
+
+        setPageVisibility("hidden");
+
+        const saved = useGameStore().savedGame;
+        expect(saved?.cells[0][2].entry).toBe(2);
+        expect(saved?.completed).toBe(false);
+        wrapper.unmount();
+    });
+});
+
