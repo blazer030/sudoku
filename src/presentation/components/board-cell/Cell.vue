@@ -7,6 +7,7 @@
         :value="value"
         :notes="notes"
         :variant="variant"
+        :selected="selected"
         :value-text-color="valueTextColor"
         :value-font-weight="valueFontWeight"
         :value-kind="puzzleCell.isClue ? 'given' : 'entered'"

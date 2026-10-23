@@ -6,6 +6,7 @@
             flashing ? 'animate-completion-flash' : '',
             popping ? 'animate-hint-reveal-glow' : '',
         ]"
+        :data-selected="selected ? '' : undefined"
         :data-value-kind="value !== 0 ? valueKind : undefined"
         :data-variant="variant"
         class="flex justify-center items-center aspect-square min-w-0 min-h-0"
@@ -74,6 +75,8 @@ const props = withDefaults(defineProps<{
     emphasizedDigits?: number[];
     popping?: boolean;
     valueKind?: ValueKind;
+    /** The selected cell, even when another state (an error) decides its variant; a style may mark it. */
+    selected?: boolean;
 }>(), {
     notes: () => [],
     eliminatedDigits: () => [],
@@ -86,6 +89,7 @@ const props = withDefaults(defineProps<{
     emphasizedDigits: () => [],
     popping: false,
     valueKind: "given",
+    selected: false,
 });
 
 const VARIANT_BACKGROUNDS: Record<CellVariant, string> = {

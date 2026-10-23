@@ -36,6 +36,11 @@ describe("BoardCell", () => {
         expect(mountCell({}).attributes("data-variant")).toBe("default");
     });
 
+    it("should mark the selected cell for style sheets, whatever its variant", () => {
+        expect(mountCell({ variant: "error", selected: true }).attributes("data-selected")).toBe("");
+        expect(mountCell({ variant: "selected" }).attributes("data-selected")).toBeUndefined();
+    });
+
     it("should mark an entered digit and write it in the entry face", () => {
         const wrapper = mountCell({ value: 5, valueKind: "entered" });
 
