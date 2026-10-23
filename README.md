@@ -18,7 +18,7 @@ progressive web app (PWA) and as a native Android app via Capacitor.
 - **Statistics** (best times, win rate, day streak) plus per-game **Review**
   with move replay
 - **Three visual styles** — Minimal Motion, Tactile Tiles and Paper Notebook — each
-  with its own colour themes, in light, dark or following the system
+  with its own colour themes, in light or dark (Paper Notebook is light only)
 - **English and Traditional Chinese**, following the system language or chosen in Settings
 - **Offline support** via service worker (web build)
 - **Native Android app** — Firebase analytics, Google Play Billing donations,
