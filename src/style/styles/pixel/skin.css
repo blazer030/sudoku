@@ -344,8 +344,9 @@
     transition: transform 200ms steps(4, end);
 }
 
-/* Reduced motion: no dropping, jumping, hopping or sliding; the frames, shadows and press overlay
-   stay */
+/* Reduced motion: no dropping, jumping, blinking or sliding. A pressed piece stays where it is but
+   still loses its drop shadow, a change of look rather than a movement, and the press overlay stays;
+   hint mode keeps its doubled frame, held still. */
 @media (prefers-reduced-motion: reduce) {
     [data-style="pixel"] .segmented-indicator-motion {
         transition: none;
