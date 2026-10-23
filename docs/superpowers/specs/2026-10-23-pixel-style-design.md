@@ -78,7 +78,7 @@ The owner researched six new looks on the style-research canvas (`feature/style-
   - Through `scripts/generate-fonts.ts`: subset, licence files in `public/fonts/licenses/`, `bundledFonts.test.ts` updated.
   - The Chinese face is cut to the characters `src` uses, the same way WenKai is.
 - **Launcher icons:** two new aliases (掌機, 紅白機). The count in `launcherIcon.test.ts` goes from 23 to 25; legacy aliases are untouched.
-- **Release safety:** the style ships off in production through `featureToggle` (it shows in develop builds only). See "Needed from the owner".
+- **Release safety:** no feature toggle (owner). The branch is merged only after the owner has finished checking 8-bit, so `develop` never carries a half-done style.
 
 ## Decided shape
 
@@ -93,21 +93,22 @@ The owner researched six new looks on the style-research canvas (`feature/style-
 
 The canvas's `.m-light` / `.m-dark` blocks in `Pixel.dc.html` are the reference for every other token.
 
-- **Fonts**: see "Needed from the owner" item 2.
+- **Fonts**: see "Owner's answers" item 2.
 - **Theme id:** one theme, id `classic` (labels 「經典」/"Classic"). `settings.colorThemes` and the messages test need a label even though it is never shown.
 - **Launcher keys** follow `launcherIconKey`: `pixelClassic` and `pixelClassicDark`.
 
-## Needed from the owner
+## Owner's answers (2026-10-23)
 
-1. **Hide it in production until it's ready?** (recommended: yes)
-   - With the feature toggle, 8-bit shows only in develop builds, so `develop` can still ship a release while 8-bit is unfinished.
-   - Proposed scope: the 外觀 page and every style list skip `pixel` in production. The files (CSS, fonts, icons, the two launcher aliases) still ship, so turning it on later is a one-line change. A production build that reads a saved `pixel` falls back to minimal.
-   - Without the toggle, merging means the next release includes 8-bit.
-2. **Which pixel font for text.**
-   - Press Start 2P is very wide: English set in it runs about 1.8× wider than today's font. A skin may not change sizes or layout, so English buttons, tiles and labels would overflow.
-   - Proposal: Press Start 2P only for digits (board, keys, timer, counts); 俐方體 11 號 (Cubic 11, OFL, Traditional Chinese pixel font with its own Latin letters) for all other text in both languages; Silkscreen for notes.
-   - Alternative: pixel type only for digits, and the system font for everything else.
-3. **English mode names.** Proposed "Handheld" / "Console" (no Game Boy / Famicom trademarks). Cheap to change later.
+1. **No feature toggle.** The work stays on this branch until the owner says it is done; then it is merged whole.
+2. **Fonts as proposed, judged on the result:**
+   - Press Start 2P only for digits (board, keys, timer, counts).
+   - 俐方體 11 號 (Cubic 11, OFL; Traditional Chinese pixel font with its own Latin letters) for all other text in both languages.
+   - Silkscreen for notes.
+   - The owner will look at the real screens and decide whether this holds. The reference and the build will differ, which is why the styles go one at a time.
+3. **English mode names** "Handheld" / "Console".
+4. **Sound** is out of scope for now. The owner has thought about it, but not yet.
+
+The calls marked as mine in this document were reviewed and accepted.
 
 ## Left to the builder
 
