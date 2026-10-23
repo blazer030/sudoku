@@ -600,8 +600,8 @@
 /* Reduced motion: no dropping, jumping, blinking, sliding, popping or bursting. A pressed piece stays
    where it is but still loses its drop shadow, a change of look rather than a movement, and the press
    overlay stays; hint mode keeps its doubled frame and the selection its cursor, held still, an
-   error's digit stays lit over its hatch, a hint's answer shows its glow still, and a completed group
-   does not flash. */
+   error's digit stays lit over its hatch, and a hint's answer and a completed group show their colour
+   still instead of flashing. */
 @media (prefers-reduced-motion: reduce) {
     [data-style="pixel"] .segmented-indicator-motion {
         transition: none;
@@ -612,7 +612,6 @@
     [data-style="pixel"] [data-skin~="board"] [data-variant="error"] > div,
     [data-style="pixel"] [data-skin~="board"] .value-arrive,
     [data-style="pixel"] [data-skin~="board"] [data-variant].value-leave::after,
-    [data-style="pixel"] [data-skin~="board"] .animate-completion-flash:not(.animate-hint-reveal-glow),
     [data-style="pixel"] [data-skin~="board"] .animate-hint-reveal-pop,
     [data-style="pixel"] [data-press-motion],
     [data-style="pixel"] [data-skin~="key"][data-press-motion][data-pressed],
@@ -621,6 +620,13 @@
     [data-style="pixel"] [data-press-bounce] {
         transform: none;
         animation: none;
+    }
+
+    /* A completed group shows the flash's colour, still, for as long as each cell is marked flashing
+       (other styles keep the colour flash itself) */
+    [data-style="pixel"] [data-skin~="board"] .animate-completion-flash:not(.animate-hint-reveal-glow) {
+        animation: none;
+        background-color: var(--color-highlight);
     }
 
     /* A hint's answer shows the glow's colours, still, for as long as it is marked revealed */

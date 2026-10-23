@@ -412,12 +412,20 @@ describe("pixel skin", () => {
             expect(Number(declarationsOf(PIXEL_CSS, BURST).get("z-index"))).toBeGreaterThan(Number(declarationsOf(PIXEL_CSS, `${BOARD} > div::before`).get("z-index")));
         });
 
-        it("should flash a completed group in steps, leaving the hint's answer to its own glow, and not under reduced motion", () => {
+        it("should flash a completed group in steps, leaving the hint's answer to its own glow", () => {
             // The shared glow is defined after the flash so it wins on the answer cell; the pixel flash must not outweigh it
             const FLASH = `${BOARD} .animate-completion-flash:not(.animate-hint-reveal-glow)`;
 
             expect(declarationsOf(PIXEL_CSS, FLASH).get("animation")).toMatch(/^completion-flash \d+ms steps\(2, jump-none\)$/);
-            expect(reducedMotionDeclarationsOf(FLASH).get("animation")).toBe("none");
+        });
+
+        it("should mark a completed group with a still fill under reduced motion, as other styles keep their colour flash", () => {
+            const FLASH = `${BOARD} .animate-completion-flash:not(.animate-hint-reveal-glow)`;
+            const still = reducedMotionDeclarationsOf(FLASH);
+
+            expect(still.get("animation")).toBe("none");
+            // The flash's own peak colour, for the 500ms each cell keeps the class
+            expect(still.get("background-color")).toBe("var(--color-highlight)");
         });
 
         it("should step a hint's reveal: the answer pops like a placed digit and its glow snaps off", () => {
