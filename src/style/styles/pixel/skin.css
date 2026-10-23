@@ -78,6 +78,8 @@
    own ink in 掌機, so it is hidden and the frame itself shows hint mode (below). */
 [data-style="pixel"] [data-skin~="board"] {
     border-radius: 0;
+    /* The frame changes in one step, never eases */
+    transition-duration: 0ms;
     --tw-ring-color: transparent;
     --tw-shadow:
         0 -4px 0 0 var(--pixel-ink),

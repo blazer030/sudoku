@@ -158,6 +158,10 @@ describe("pixel skin", () => {
         expect(hint.get("animation")).toMatch(/^pixel-[\w-]+ \d+ms steps\(/);
     });
 
+    it("should snap the board's frame between hint mode and play instead of easing it", () => {
+        expect(declarationsOf(PIXEL_CSS, skin("board")).get("transition-duration")).toBe("0ms");
+    });
+
     it("should move only in steps", () => {
         const moving = allDeclarations(/^(?:animation|animation-timing-function|transition|transition-timing-function)$/)
             .filter(declaration => !isInside(declaration, atRule => atRule.name === "media"))
