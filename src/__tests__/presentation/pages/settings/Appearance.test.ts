@@ -68,11 +68,11 @@ describe("Appearance.vue style cards", () => {
         vi.mocked(Capacitor.isNativePlatform).mockReturnValue(false);
     });
 
-    it("should list the three styles, each with its app icon and name", () => {
+    it("should list the four styles, each with its app icon and name", () => {
         const wrapper = mountAppearance();
         const cards = wrapper.findAll("button[data-testid^='style-option-']");
 
-        expect(cards.map(card => card.attributes("data-testid"))).toEqual(["style-option-minimal", "style-option-tactile", "style-option-paper"]);
+        expect(cards.map(card => card.attributes("data-testid"))).toEqual(["style-option-minimal", "style-option-tactile", "style-option-paper", "style-option-pixel"]);
         for (const style of STYLE_IDS) {
             const card = wrapper.get(`[data-testid='style-option-${style}']`);
             expect(card.get(`[data-testid='style-icon-${style}'] svg`).element.outerHTML, style).toBe(iconSvgFor(style));

@@ -33,7 +33,7 @@ export const en = {
         colorTheme: "Color theme",
         style: {
             label: "Style",
-            names: { minimal: "Minimal Motion", tactile: "Tactile Tiles", paper: "Paper Notebook" },
+            names: { minimal: "Minimal Motion", tactile: "Tactile Tiles", paper: "Paper Notebook", pixel: "8-bit" },
         },
         colorThemes: {
             green: "Green",
@@ -47,6 +47,7 @@ export const en = {
             blueInk: "Blue Ink",
             greenInk: "Green Ink",
             redInk: "Red Ink",
+            classic: "Classic",
         },
         matchLauncherIcon: "Match launcher icon to theme",
         matchLauncherIconNote: "The icon updates after you leave the app",

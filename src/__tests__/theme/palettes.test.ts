@@ -25,6 +25,23 @@ describe("palettes", () => {
         expect(getPalette("minimal", "blue", "light").highlight).toBe("#ABCEF1");
     });
 
+    it("should give pixel one fixed theme", () => {
+        expect(STYLES.pixel.themes.map(theme => theme.id)).toEqual(["classic"]);
+    });
+
+    it("should give pixel the four handheld greens in light and the console colours in dark", () => {
+        const handheld = getPalette("pixel", "classic", "light");
+        const homeConsole = getPalette("pixel", "classic", "dark");
+
+        expect(handheld.background).toBe("#9BBC0F");
+        expect(handheld["on-primary"]).toBe("#9BBC0F");
+        for (const token of ["foreground", "foreground-secondary", "foreground-muted", "note", "error", "danger", "primary"] as const) {
+            expect(handheld[token], token).toBe("#0F380F");
+        }
+        expect(homeConsole.background).toBe("#000000");
+        expect(homeConsole.highlight).toBe("#0058F8");
+    });
+
     it("getPalette gives a light-only style its light palette whatever the mode", () => {
         expect(getPalette("paper", "blueInk", "dark")).toEqual(getPalette("paper", "blueInk", "light"));
     });
@@ -57,7 +74,8 @@ describe("palettes", () => {
         }
     });
 
-    it("should keep featured equal to primary outside paper", () => {
+    // Paper's continue card is a sticky note; pixel's is the page colour framed in ink, as on the canvas
+    it("should keep featured equal to primary outside paper and pixel", () => {
         for (const style of [STYLES.minimal, STYLES.tactile]) {
             for (const theme of style.themes) {
                 for (const mode of STYLE_COLOR_MODES[style.id]) {
@@ -70,7 +88,7 @@ describe("palettes", () => {
     });
 
     it("should keep paper's lines invisible in other styles", () => {
-        for (const style of [STYLES.minimal, STYLES.tactile]) {
+        for (const style of [STYLES.minimal, STYLES.tactile, STYLES.pixel]) {
             for (const theme of style.themes) {
                 for (const mode of STYLE_COLOR_MODES[style.id]) {
                     const palette = getPalette(style.id, theme.id, mode);

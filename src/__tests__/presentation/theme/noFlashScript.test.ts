@@ -81,6 +81,23 @@ describe("index.html no-flash script", () => {
         expect(meta.content).toBe(systemBarColor("paper", "blueInk", "light"));
     });
 
+    // Review Focus 3: no flash of minimal on a cold start in pixel
+    it.each([
+        { appearance: "light", dark: false, barColor: "#0F380F" },
+        { appearance: "dark", dark: true, barColor: "#000000" },
+    ])("should paint pixel in $appearance with its own bar colour", ({ appearance, dark, barColor }) => {
+        stubSystemDark(false);
+        storeSettings({ style: "pixel", colorTheme: "classic", appearance });
+
+        runInlineScript();
+
+        expect(root.dataset.style).toBe("pixel");
+        expect(root.dataset.colorTheme).toBe("classic");
+        expect(root.classList.contains("dark")).toBe(dark);
+        expect(meta.content).toBe(barColor);
+        expect(meta.content).toBe(systemBarColor("pixel", "classic", appearance as "light" | "dark"));
+    });
+
     it("should paint paper light for a stored system appearance on a dark system", () => {
         stubSystemDark(true);
         storeSettings({ style: "paper", appearance: "system" });

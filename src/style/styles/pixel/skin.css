@@ -1,0 +1,52 @@
+/* 8-bit: square corners and a hard press that jumps rather than eases. A stub for now: the pixel
+   board, keys, type and motion replace it. Every rule is scoped by [data-style="pixel"]; keyframes
+   start with pixel-. */
+
+/* Press feedback. vPress sets the data attributes; input never waits for them.
+   The overlay is a colour change, so it stays on under reduced motion. */
+[data-style="pixel"] [data-pressed] {
+    --press-overlay: color-mix(in srgb, var(--color-foreground) 12%, transparent);
+    background-image: linear-gradient(var(--press-overlay), var(--press-overlay));
+    border-radius: 0;
+}
+
+[data-style="pixel"] [data-press-motion] {
+    border-radius: 0;
+    transition-property: transform, background-color, color, box-shadow, opacity;
+    transition-duration: 0ms;
+}
+
+/* The key drops into its shadow in one step */
+[data-style="pixel"] [data-press-motion][data-pressed] {
+    transform: translate(4px, 4px);
+}
+
+@keyframes pixel-press-release {
+    0% { transform: translate(4px, 4px); }
+    100% { transform: none; }
+}
+
+[data-style="pixel"] [data-press-bounce] {
+    border-radius: 0;
+    animation: pixel-press-release 120ms steps(2, end);
+}
+
+/* The segmented control's selection jumps across in steps */
+[data-style="pixel"] .segmented-indicator-motion {
+    border-radius: 0;
+    transition: transform 200ms steps(4, end);
+}
+
+/* Reduced motion: no pressing, releasing or sliding; the press overlay stays */
+@media (prefers-reduced-motion: reduce) {
+    [data-style="pixel"] .segmented-indicator-motion {
+        transition: none;
+    }
+
+    [data-style="pixel"] [data-press-motion],
+    [data-style="pixel"] [data-press-motion][data-pressed],
+    [data-style="pixel"] [data-press-bounce] {
+        transform: none;
+        animation: none;
+    }
+}

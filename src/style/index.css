@@ -5,6 +5,7 @@
 @import "./styles/minimal/skin.css";
 @import "./styles/tactile/skin.css";
 @import "./styles/paper/skin.css";
+@import "./styles/pixel/skin.css";
 
 @variant dark (&:where(.dark, .dark *));
 
