@@ -984,6 +984,18 @@ describe("Game", () => {
             expect(useGameStore().savedGame?.hintsUsed).toBe(1);
         });
 
+        it("should fill the hint's cell when the step-by-step hint is closed early", async () => {
+            const plan = createKnownSudoku().planRevealHint();
+            if (plan.kind !== "steps") throw new Error(`expected a steps plan, got ${plan.kind}`);
+            const wrapper = mountGame();
+            await openRevealCell(wrapper);
+
+            await wrapper.find("[data-testid='hint-close']").trigger("click");
+
+            expect(wrapper.find("[data-testid='hint-panel']").exists()).toBe(false);
+            expect(wrapper.find(`[data-testid='cell-${plan.target.row}-${plan.target.column}']`).text()).toBe(String(plan.digit));
+        });
+
         it("should clear only the wrong entry when Clear is pressed", async () => {
             const wrapper = mountGame();
             await wrapper.find("[data-testid='cell-0-2']").trigger("click");

@@ -103,6 +103,13 @@ export const useHintMode = (sudoku: Sudoku, { autoRemoveNotes, onApplied, record
         onApplied(plan.target);
     };
 
+    // Closing a step-by-step hint early skips the walkthrough, not the hint: it was already spent, so its
+    // answer goes in. A wrong-entry hint only ends; clearing the entry stays the player's call.
+    const close = () => {
+        if (stepsPlan.value !== null) fill();
+        else end();
+    };
+
     const cellView = (row: number, column: number): StepCellView => {
         if (phase.value === "wrongEntry") {
             const view: StepCellView = { highlight: "none", candidates: null, eliminated: [], emphasized: [] };
@@ -140,6 +147,7 @@ export const useHintMode = (sudoku: Sudoku, { autoRemoveNotes, onApplied, record
         next,
         previous,
         cancel,
+        close,
         clearWrongEntry,
         fill,
         cellView,
