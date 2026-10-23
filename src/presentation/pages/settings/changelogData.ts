@@ -12,6 +12,56 @@ export interface ChangelogEntry {
     changes: ChangelogChange[];
 }
 
+/**
+ * Player-facing changes merged since the last release, newest last. Develop builds show them on top of
+ * the changelog; at release they move into the new version's entry (docs/release.md).
+ */
+export const UNRELEASED_CHANGES: ChangelogChange[] = [
+    {
+        text: {
+            en: "A new style: 8-bit, with a Handheld and a Console look",
+            "zh-Hant": "新風格「8-bit 電玩」，有掌機和紅白機兩種模式",
+        },
+    },
+    {
+        text: {
+            en: "A new Appearance page puts the style, colour, light or dark and the app icon together",
+            "zh-Hant": "新的「外觀」頁面，把風格、主題色、深淺色和 App 圖示放在一起",
+        },
+    },
+    {
+        text: {
+            en: "Each style has its own app icon",
+            "zh-Hant": "每種風格都有自己的 App 圖示",
+        },
+        appOnly: true,
+    },
+    {
+        text: {
+            en: "Light or dark follows your device the first time you open the app; after that, you choose",
+            "zh-Hant": "第一次開啟時依手機設定決定淺色或深色，之後由你自己選",
+        },
+    },
+    {
+        text: {
+            en: "Paper Notebook is now light only",
+            "zh-Hant": "紙本筆記改為只有淺色",
+        },
+    },
+    {
+        text: {
+            en: "Your game is kept even if the app is closed while it is in the background",
+            "zh-Hant": "App 在背景被關掉時，遊戲進度也會保留",
+        },
+    },
+    {
+        text: {
+            en: "Closing Reveal Cell's steps early now fills in the answer",
+            "zh-Hant": "「揭示一格」的步驟看到一半按關閉，也會直接填入答案",
+        },
+    },
+];
+
 export const CHANGELOG: ChangelogEntry[] = [
     {
         version: "2.2.0",

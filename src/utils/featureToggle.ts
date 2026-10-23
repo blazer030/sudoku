@@ -1,6 +1,9 @@
 type FeatureEnvironment = 'all' | 'develop'
 
-const features: Partial<Record<string, FeatureEnvironment>> = {}
+const features: Partial<Record<string, FeatureEnvironment>> = {
+    // The changes waiting for the next release, on top of the changelog
+    changelogUnreleased: 'develop',
+}
 
 export const isDevelop = (): boolean =>
     import.meta.env.VITE_APP_ENV === 'develop'
