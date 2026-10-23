@@ -54,12 +54,13 @@ const PIXEL_DARK_NEUTRALS: Neutrals<DarkThemeColors> = {
 };
 
 // The continue card is the page colour framed in ink, as on the canvas; same digit in 紅白機 is the
-// console blue rather than a tint of the gold
+// console blue, and the primary's light surface (the secondary New Game, icon wells) the navy card,
+// rather than tints of the gold
 const pixelTheme = themeBuilder(
     PIXEL_LIGHT_NEUTRALS,
     PIXEL_DARK_NEUTRALS,
     { "featured": HANDHELD.lightest, "on-featured": HANDHELD.darkest },
-    { "featured": "#000000", "on-featured": "#FCFCFC", "highlight": "#0058F8" },
+    { "featured": "#000000", "on-featured": "#FCFCFC", "highlight": "#0058F8", "primary-light": "#1E1E3C" },
 );
 
 export const PIXEL_STYLE: StyleDefinition = {

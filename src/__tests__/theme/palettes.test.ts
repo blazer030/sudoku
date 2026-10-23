@@ -42,6 +42,10 @@ describe("palettes", () => {
         expect(homeConsole.highlight).toBe("#0058F8");
     });
 
+    it("should give the console's light primary surface the navy card, not a tint of the gold", () => {
+        expect(getPalette("pixel", "classic", "dark")["primary-light"]).toBe("#1E1E3C");
+    });
+
     it("getPalette gives a light-only style its light palette whatever the mode", () => {
         expect(getPalette("paper", "blueInk", "dark")).toEqual(getPalette("paper", "blueInk", "light"));
     });
