@@ -1,4 +1,5 @@
 import { createAnalyticsSpy } from "@/__tests__/fixtures/analyticsSpy";
+import { setPageVisibility } from "@/__tests__/fixtures/pageVisibility";
 import { nextTick } from "vue";
 import { i18n } from "@/presentation/i18n";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -1242,7 +1243,7 @@ describe("Game", () => {
             expect(wrapper.find("[data-testid='leave-game-dialog']").exists()).toBe(false);
         });
 
-        it("should end hint mode without opening the leave dialog", async () => {
+        it("should close a step-by-step hint by filling its cell, without opening the leave dialog", async () => {
             const wrapper = mountGame();
             await wrapper.find("[data-testid='note-button']").trigger("click");
             await wrapper.find("[data-testid='cell-0-3']").trigger("click");
@@ -1253,10 +1254,13 @@ describe("Game", () => {
             await openRevealCell(wrapper);
             expect(wrapper.find("[data-testid='hint-panel']").exists()).toBe(true);
 
+            const filledBefore = boardOf(wrapper).filter(cell => cell.entry !== 0).length;
+
             await pressBack();
 
             expect(wrapper.find("[data-testid='hint-panel']").exists()).toBe(false);
             expect(wrapper.find("[data-testid='leave-game-dialog']").exists()).toBe(false);
+            expect(boardOf(wrapper).filter(cell => cell.entry !== 0)).toHaveLength(filledBefore + 1);
         });
     });
 
@@ -1596,12 +1600,6 @@ describe("Game", () => {
     });
 });
 
-// The page's visibility as the browser or the Android WebView reports it when the app goes to the background
-const setPageVisibility = (state: DocumentVisibilityState) => {
-    Object.defineProperty(document, "visibilityState", { configurable: true, get: () => state });
-    document.dispatchEvent(new Event("visibilitychange"));
-};
-
 describe("Game — saving when the app goes to the background", () => {
     afterEach(() => {
         setPageVisibility("visible");
@@ -1617,7 +1615,5 @@ describe("Game — saving when the app goes to the background", () => {
         const saved = useGameStore().savedGame;
         expect(saved?.cells[0][2].entry).toBe(2);
         expect(saved?.completed).toBe(false);
-        wrapper.unmount();
     });
 });
-

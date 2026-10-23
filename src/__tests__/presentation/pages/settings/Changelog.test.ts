@@ -20,26 +20,48 @@ const mountChangelog = () => {
 // Every change the players will read: each release, and the changes waiting for the next one
 const ALL_CHANGE_LISTS = [...CHANGELOG.map(entry => entry.changes), UNRELEASED_CHANGES];
 
+// The waiting list is empty right after a release, so the rendering tests use their own lines
+const WAITING_LINES = [
+    { text: { en: "A waiting change", "zh-Hant": "一項等待中的改動" } },
+    { text: { en: "Another waiting change", "zh-Hant": "另一項等待中的改動" }, appOnly: true },
+];
+const releasedWaitingChanges = [...UNRELEASED_CHANGES];
+const showWaiting = (changes: typeof UNRELEASED_CHANGES) => {
+    UNRELEASED_CHANGES.splice(0, UNRELEASED_CHANGES.length, ...changes);
+};
+
 describe("Changelog", () => {
     afterEach(() => {
         vi.unstubAllEnvs();
+        showWaiting(releasedWaitingChanges);
+        i18n.global.locale.value = "en";
     });
 
     // Changes merged since the last release show on top in develop builds only, so a late release still
     // knows what it holds; players never see them
     it("should show the changes waiting for the next release on top in a develop build", () => {
         vi.stubEnv("VITE_APP_ENV", "develop");
+        showWaiting(WAITING_LINES);
         const wrapper = mountChangelog();
 
         const entries = wrapper.findAll("[data-testid^='changelog-entry-']");
         expect(entries[0].attributes("data-testid")).toBe("changelog-entry-unreleased");
-        for (const change of UNRELEASED_CHANGES) {
+        for (const change of WAITING_LINES) {
             expect(entries[0].text()).toContain(change.text.en);
         }
     });
 
     it("should hide the changes waiting for the next release in a production build", () => {
         vi.stubEnv("VITE_APP_ENV", "production");
+        showWaiting(WAITING_LINES);
+        const wrapper = mountChangelog();
+
+        expect(wrapper.find("[data-testid='changelog-entry-unreleased']").exists()).toBe(false);
+    });
+
+    it("should leave the waiting block out when nothing is waiting", () => {
+        vi.stubEnv("VITE_APP_ENV", "develop");
+        showWaiting([]);
         const wrapper = mountChangelog();
 
         expect(wrapper.find("[data-testid='changelog-entry-unreleased']").exists()).toBe(false);
@@ -47,6 +69,7 @@ describe("Changelog", () => {
 
     it("should name the waiting changes differently in each language", async () => {
         vi.stubEnv("VITE_APP_ENV", "develop");
+        showWaiting(WAITING_LINES);
         const wrapper = mountChangelog();
         const english = wrapper.find("[data-testid='changelog-entry-unreleased']").text();
 
@@ -54,7 +77,6 @@ describe("Changelog", () => {
         await nextTick();
 
         expect(wrapper.find("[data-testid='changelog-entry-unreleased']").text()).not.toBe(english);
-        i18n.global.locale.value = "en";
     });
 
     it("should render an entry for every version", () => {

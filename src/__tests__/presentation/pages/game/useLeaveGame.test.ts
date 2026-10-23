@@ -1,4 +1,5 @@
 import { createAnalyticsSpy } from "@/__tests__/fixtures/analyticsSpy";
+import { setPageVisibility } from "@/__tests__/fixtures/pageVisibility";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { ref, defineComponent } from "vue";
 import { mount } from "@vue/test-utils";
@@ -220,11 +221,6 @@ describe("useLeaveGame — Back key", () => {
     });
 });
 
-const setPageVisibility = (state: DocumentVisibilityState) => {
-    Object.defineProperty(document, "visibilityState", { configurable: true, get: () => state });
-    document.dispatchEvent(new Event("visibilitychange"));
-};
-
 describe("useLeaveGame — saving when the page is hidden", () => {
     afterEach(() => {
         setPageVisibility("visible");
@@ -248,6 +244,18 @@ describe("useLeaveGame — saving when the page is hidden", () => {
         expect(useGameStore().savedGame).toBeNull();
     });
 
+    // Giving up clears the save; the screen is still mounted for a moment, and a hidden page then must not
+    // bring the abandoned game back
+    it("keeps a given-up game unsaved when the page is hidden before the screen goes", async () => {
+        const api = await mountLeaveHarness({ sudoku: buildSudokuWithEntries(3), analytics: createAnalyticsSpy() });
+        vi.spyOn(api.leaveDialog, "open").mockResolvedValue("giveUp");
+        await api.showLeaveDialog();
+
+        setPageVisibility("hidden");
+
+        expect(useGameStore().savedGame).toBeNull();
+    });
+
     it("saves nothing when the page becomes visible again", async () => {
         await mountLeaveHarness({ sudoku: buildSudokuWithEntries(3), analytics: createAnalyticsSpy() });
 
@@ -256,4 +264,3 @@ describe("useLeaveGame — saving when the page is hidden", () => {
         expect(useGameStore().savedGame).toBeNull();
     });
 });
-
