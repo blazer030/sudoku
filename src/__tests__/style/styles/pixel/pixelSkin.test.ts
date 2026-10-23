@@ -316,7 +316,8 @@ describe("pixel skin", () => {
             const selectedCursor = declarationsOf(PIXEL_CSS, `${CURSOR}::before`);
 
             expect(answer.get("--pixel-cell-fill")).toBeUndefined();
-            expect(answer.get("box-shadow")).toBeUndefined();
+            // The shared answer ring gives way to the cursor, as on the selected cell
+            expect(answer.get("box-shadow")).toBe("none");
             expect(answer.get("position")).toBe("relative");
             expect(answerCursor.get("background")).toBe(selectedCursor.get("background"));
             expect(answerCursor.get("animation")).toBe(selectedCursor.get("animation"));

@@ -280,6 +280,11 @@
     --pixel-cell-fill: var(--pixel-pattern-shade);
 }
 
+/* The shared answer ring gives way to the cursor, as on the selected cell */
+[data-style="pixel"] [data-skin~="board"] [data-variant="answer"] {
+    box-shadow: none;
+}
+
 /* The selected cell is inverted, its digit, notes and underline in the page colour, and the shared
    selection ring gives way to the cursor */
 [data-style="pixel"] [data-skin~="board"] [data-variant="selected"] {
