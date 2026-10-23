@@ -329,14 +329,18 @@
     to { opacity: 0; }
 }
 
-/* A placed digit pops in over four steps (a quarter, half, three quarters, whole) while eight pixels
-   burst out of its cell; a cleared digit bursts the same pixels in the leaving colour. The burst hangs
-   off the cell, not the digit, so the pop's scaling never shrinks it and it outlives the digit; it is
-   drawn over the grid lines and the cursor. The arrival is the digit's class, so the cell finds it
-   with :has(); a WebView without :has() pops the digit without the burst. An error's blink replaces
-   the pop, and whichever animation ends first settles the cell. */
+/* A placed digit pops in four held frames, as on the canvas: half size, past full size, under it, then
+   settled (steps() applies to each keyframe interval, so one step each holds a frame). Eight pixels
+   burst out of its cell meanwhile; a cleared digit bursts the same pixels in the leaving colour. The
+   burst hangs off the cell, not the digit, so the pop's scaling never shrinks it and it outlives the
+   digit; it is drawn over the grid lines and the cursor. The arrival is the digit's class, so the cell
+   finds it with :has(); a WebView without :has() pops the digit without the burst. An error's blink
+   replaces the pop, and whichever animation ends first settles the cell. */
 @keyframes pixel-pop {
-    from { transform: scale(0); }
+    0% { transform: scale(0.5); }
+    25% { transform: scale(1.5); }
+    50% { transform: scale(0.75); }
+    75%, 100% { transform: none; }
 }
 
 @keyframes pixel-burst-in {
@@ -376,7 +380,7 @@
 }
 
 [data-style="pixel"] [data-skin~="board"] .value-arrive {
-    animation: pixel-pop 480ms steps(4, jump-start);
+    animation: pixel-pop 480ms steps(1, end);
 }
 
 [data-style="pixel"] [data-skin~="board"] [data-variant]:is(.value-leave, :has(> .value-arrive)) {

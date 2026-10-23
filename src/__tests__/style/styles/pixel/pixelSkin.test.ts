@@ -342,8 +342,20 @@ describe("pixel skin", () => {
             return frames;
         };
 
-        it("should pop a placed digit in over four steps", () => {
-            expect(declarationsOf(PIXEL_CSS, ARRIVE).get("animation")).toMatch(/^pixel-[\w-]+ \d+ms steps\(4, jump-start\)$/);
+        it("should pop a placed digit in four held frames that go past its size and settle", () => {
+            // steps() applies to each keyframe interval, so one step per quarter holds each frame
+            const name = /^(pixel-[\w-]+) \d+ms steps\(1, end\)$/.exec(declarationsOf(PIXEL_CSS, ARRIVE).get("animation") ?? "")?.[1] ?? "";
+            const scales = [...keyframesOf(name)].map(([selector, frame]) => {
+                const transform = frame.get("transform") ?? "";
+                return [selector, transform === "none" ? 1 : Number(/^scale\(([\d.]+)\)$/.exec(transform)?.[1])] as const;
+            });
+
+            expect(scales.map(([selector]) => selector)).toEqual(["0%", "25%", "50%", "75%, 100%"]);
+            const [small, over, under, rest] = scales.map(([, scale]) => scale);
+            expect(small).toBeLessThan(1);
+            expect(over).toBeGreaterThan(1);
+            expect(under).toBeLessThan(1);
+            expect(rest).toBe(1);
         });
 
         // Arriving and leaving bursts run different keyframes, so a digit that flips from one to the
