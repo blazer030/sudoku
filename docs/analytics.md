@@ -31,7 +31,11 @@ Games left without an ending = `game_start − game_complete − game_abandon`.
 
 ## GA4 setup
 
-- Event params show in reports only after they are registered as custom dimensions or metrics (Admin → Custom definitions). Register `result`, `confirmed`, `source`, `undo_count`, `wrong_entries` and `used_notes`, plus the older params (`difficulty`, `time_seconds`, `hints_used`, `hints_total`, `progress_pct`, `correct_pct`, `incorrect_pct`, `hint_type`, `tier`, `amount_usd`) if they are missing.
+- Params and user properties show in reports only after they are registered (Admin → Data display → Custom definitions). Register each once:
+  - **User-scoped custom dimensions**: `style`, `color_theme`, `color_mode`, `language`, `icon_follows_theme`.
+  - **Event-scoped custom dimensions** (values to group by): `result`, `source`, `confirmed`, `used_notes`, `difficulty`, `hint_type`, `tier`.
+  - **Custom metrics** (numbers to add up or average, unit Standard): `undo_count`, `wrong_entries`, `time_seconds`, `hints_used`, `hints_total`, `progress_pct`, `correct_pct`, `incorrect_pct`, `amount_usd`.
+  - Data collected before a definition exists is not filled in afterwards, so register them before reading the numbers.
 - `firebase_screen` (from `screen_view`) needs no registration: GA4 shows it as the built-in "Page title and screen name" (Screen name) dimension.
 - The web build suppresses gtag's automatic page_view on load in code (`send_page_view: false`). History-change page views are a separate Enhanced-measurement feature: on the web data stream, turn off Enhanced measurement's "Page changes based on browser history events". Otherwise GA adds its own `page_view` next to our `screen_view`.
 

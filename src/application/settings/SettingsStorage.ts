@@ -61,11 +61,22 @@ const usableRememberedThemes = (stored: unknown): RememberedThemes => {
 const systemColorMode = (): ColorMode =>
     typeof window.matchMedia === "function" && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 
-export const loadSettings = (): Settings => {
+// Anything but a JSON object (unreadable text, the text "null", an array, a lone value) counts as
+// nothing saved, so the app starts like a fresh install and saves readable settings over it
+const readStoredSettings = (): Partial<Settings> => {
     const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored === null) return {};
+    try {
+        const parsed: unknown = JSON.parse(stored);
+        return isPlainObject(parsed) ? parsed as Partial<Settings> : {};
+    } catch {
+        return {};
+    }
+};
+
+export const loadSettings = (): Settings => {
+    const parsed = readStoredSettings();
     // A fresh map every load, so a change to one result never leaks into the defaults
-    // The JSON text "null" parses to null, which counts as nothing saved
-    const parsed: Partial<Settings> = (stored === null ? null : JSON.parse(stored) as Partial<Settings> | null) ?? {};
     const settings: Settings = { ...DEFAULT_SETTINGS, colorThemeByStyle: { ...DEFAULT_SETTINGS.colorThemeByStyle }, ...parsed };
     // A missing, retired "system" or unknown appearance becomes the system's current mode once, then is saved
     const appearanceChosen = (COLOR_MODES as readonly unknown[]).includes(parsed.appearance);
