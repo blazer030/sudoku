@@ -12,6 +12,37 @@ export interface ChangelogEntry {
     changes: ChangelogChange[];
 }
 
+/**
+ * Player-facing changes merged since the last release, newest last. Develop builds show them on top of
+ * the changelog; at release they move into the new version's entry (docs/release.md).
+ */
+export const UNRELEASED_CHANGES: ChangelogChange[] = [
+    {
+        text: {
+            en: "New style: 8-bit",
+            "zh-Hant": "全新風格「8-bit 電玩」",
+        },
+    },
+    {
+        text: {
+            en: "Appearance settings and interface improvements",
+            "zh-Hant": "外觀設定與介面優化",
+        },
+    },
+    {
+        text: {
+            en: "Game progress is saved more reliably",
+            "zh-Hant": "遊戲進度保存更可靠",
+        },
+    },
+    {
+        text: {
+            en: "Hints and controls are easier to use",
+            "zh-Hant": "提示與操作優化",
+        },
+    },
+]
+
 export const CHANGELOG: ChangelogEntry[] = [
     {
         version: "2.2.0",

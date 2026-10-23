@@ -11,6 +11,7 @@ export const zhHant: MessageSchema = {
         title: "更新日誌",
         appBadge: "App",
         appNote: "標有 App 的項目只適用於 Android App。",
+        unreleased: "開發中",
     },
     settings: {
         title: "設定",

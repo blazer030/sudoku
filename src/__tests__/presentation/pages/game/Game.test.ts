@@ -1,4 +1,5 @@
 import { createAnalyticsSpy } from "@/__tests__/fixtures/analyticsSpy";
+import { setPageVisibility } from "@/__tests__/fixtures/pageVisibility";
 import { nextTick } from "vue";
 import { i18n } from "@/presentation/i18n";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -464,6 +465,29 @@ describe("Game", () => {
         expect(wrapper.find("[data-testid='erase-button']").classes()).toContain("bg-primary");
     });
 
+    // Cell first works the same for Erase as for a digit: the selected cell is cleared at once
+    it("should clear a selected cell at once when Erase is pressed, without entering Erase mode", async () => {
+        const wrapper = mountGame();
+        const cell = wrapper.find("[data-testid='cell-0-2']");
+        await cell.trigger("click");
+        await wrapper.find("[data-testid='number-4']").trigger("click");
+        await cell.trigger("click");
+
+        await wrapper.find("[data-testid='erase-button']").trigger("click");
+
+        expect(cell.text()).toBe("");
+        expect(wrapper.find("[data-testid='erase-button']").classes()).not.toContain("bg-primary");
+        expect(wrapper.findComponent<typeof Cell>("[data-testid='cell-0-2']").props("selected")).toBe(false);
+    });
+
+    it("should disable Erase while the selected cell has nothing to erase", async () => {
+        const wrapper = mountGame();
+
+        await wrapper.find("[data-testid='cell-0-2']").trigger("click");
+
+        expect(wrapper.find("[data-testid='erase-button']").attributes("disabled")).toBeDefined();
+    });
+
     it("should clear input when clicking a filled slot cell in erase mode", async () => {
         const wrapper = mountGame();
 
@@ -914,6 +938,9 @@ describe("Game", () => {
             await wrapper.find("[data-testid='hint-auto-notes']").trigger("click");
             await wrapper.find("[data-testid='hint-button']").trigger("click");
             await wrapper.find("[data-testid='hint-reveal-cell']").trigger("click");
+            await flushPromises();
+            // A shown hint is closed before the game can be left
+            await wrapper.find("[data-testid='hint-close']").trigger("click");
 
             // Save & Leave
             await wrapper.find("[data-testid='back-button']").trigger("click");
@@ -982,6 +1009,18 @@ describe("Game", () => {
             await wrapper.find("[data-testid='save-and-leave-button']").trigger("click");
             await flushPromises();
             expect(useGameStore().savedGame?.hintsUsed).toBe(1);
+        });
+
+        it("should fill the hint's cell when the step-by-step hint is closed early", async () => {
+            const plan = createKnownSudoku().planRevealHint();
+            if (plan.kind !== "steps") throw new Error(`expected a steps plan, got ${plan.kind}`);
+            const wrapper = mountGame();
+            await openRevealCell(wrapper);
+
+            await wrapper.find("[data-testid='hint-close']").trigger("click");
+
+            expect(wrapper.find("[data-testid='hint-panel']").exists()).toBe(false);
+            expect(wrapper.find(`[data-testid='cell-${plan.target.row}-${plan.target.column}']`).text()).toBe(String(plan.digit));
         });
 
         it("should clear only the wrong entry when Clear is pressed", async () => {
@@ -1184,29 +1223,22 @@ describe("Game", () => {
             expect(boardOf(wrapper)).toEqual(before);
         });
 
-        it("should end hint mode without changing the board when leaving from the header", async () => {
+        // A hint is finished (填入答案) or closed first; the header's Back cannot leave the game in the middle
+        it("should keep the header's Back disabled while a hint is shown", async () => {
             const wrapper = mountGame();
-            await wrapper.find("[data-testid='note-button']").trigger("click");
-            await wrapper.find("[data-testid='cell-0-3']").trigger("click");
-            await wrapper.find("[data-testid='number-6']").trigger("click");
-            await wrapper.find("[data-testid='note-button']").trigger("click");
-            await wrapper.find("[data-testid='cell-0-2']").trigger("click");
-            await wrapper.find("[data-testid='number-4']").trigger("click");
             await openRevealCell(wrapper);
             expect(wrapper.find("[data-testid='hint-panel']").exists()).toBe(true);
-            const before = boardOf(wrapper);
 
-            await wrapper.find("[data-testid='back-button']").trigger("click");
-            await flushPromises();
-            await wrapper.find("[data-testid='save-and-leave-button']").trigger("click");
+            const back = wrapper.find("[data-testid='back-button']");
+            expect(back.attributes("disabled")).toBeDefined();
+            await back.trigger("click");
             await flushPromises();
 
-            expect(wrapper.find("[data-testid='hint-panel']").exists()).toBe(false);
-            expect(wrapper.find("[data-testid='hint-mode-pill']").exists()).toBe(false);
-            expect(boardOf(wrapper)).toEqual(before);
-            const saved = useGameStore().savedGame;
-            expect(saved?.cells.flat().map(({ entry, notes }) => ({ entry, notes }))).toEqual(before);
-            expect(saved?.hintsUsed).toBe(1);
+            expect(wrapper.find("[data-testid='leave-game-dialog']").exists()).toBe(false);
+            expect(wrapper.find("[data-testid='hint-panel']").exists()).toBe(true);
+
+            await wrapper.find("[data-testid='hint-close']").trigger("click");
+            expect(wrapper.find("[data-testid='back-button']").attributes("disabled")).toBeUndefined();
         });
     });
 
@@ -1230,7 +1262,7 @@ describe("Game", () => {
             expect(wrapper.find("[data-testid='leave-game-dialog']").exists()).toBe(false);
         });
 
-        it("should end hint mode without opening the leave dialog", async () => {
+        it("should close a step-by-step hint by filling its cell, without opening the leave dialog", async () => {
             const wrapper = mountGame();
             await wrapper.find("[data-testid='note-button']").trigger("click");
             await wrapper.find("[data-testid='cell-0-3']").trigger("click");
@@ -1241,10 +1273,13 @@ describe("Game", () => {
             await openRevealCell(wrapper);
             expect(wrapper.find("[data-testid='hint-panel']").exists()).toBe(true);
 
+            const filledBefore = boardOf(wrapper).filter(cell => cell.entry !== 0).length;
+
             await pressBack();
 
             expect(wrapper.find("[data-testid='hint-panel']").exists()).toBe(false);
             expect(wrapper.find("[data-testid='leave-game-dialog']").exists()).toBe(false);
+            expect(boardOf(wrapper).filter(cell => cell.entry !== 0)).toHaveLength(filledBefore + 1);
         });
     });
 
@@ -1581,5 +1616,23 @@ describe("Game", () => {
             expect(wrapper.findComponent<typeof Cell>("[data-testid='cell-0-3']").props("selected")).toBe(true);
             expect(wrapper.findComponent<typeof Cell>("[data-testid='cell-0-2']").props("selected")).toBe(false);
         });
+    });
+});
+
+describe("Game — saving when the app goes to the background", () => {
+    afterEach(() => {
+        setPageVisibility("visible");
+    });
+
+    it("should save the game with its latest move when the page is hidden, so a killed app resumes it", async () => {
+        const wrapper = mountGame();
+        await wrapper.find("[data-testid='cell-0-2']").trigger("click");
+        await wrapper.find("[data-testid='number-2']").trigger("click");
+
+        setPageVisibility("hidden");
+
+        const saved = useGameStore().savedGame;
+        expect(saved?.cells[0][2].entry).toBe(2);
+        expect(saved?.completed).toBe(false);
     });
 });

@@ -69,6 +69,7 @@
                     <DigitPad
                         :digit-counts="digitCounts"
                         :erase-active="inputMode === InputMode.Erase"
+                        :erase-disabled="eraseDisabled"
                         :note-mode="inputMode === InputMode.Note"
                         :selected-digit="selectedDigit"
                         :show-remaining-count="settingsStore.showRemainingCount"
@@ -96,7 +97,7 @@
                             :total-steps="hintMode.steps.value.length"
                             :wrong-cell="hintMode.wrongCell.value"
                             @clear="hintMode.clearWrongEntry"
-                            @close="hintMode.cancel"
+                            @close="hintMode.close"
                             @fill="hintMode.fill"
                             @go-to="hintMode.goTo"
                             @next="hintMode.next"
@@ -196,6 +197,7 @@ const {
     selectDigit,
     toggleNoteMode,
     toggleEraseMode,
+    eraseDisabled,
     isSelected,
     isPeerOfSelected,
     digitCounts,

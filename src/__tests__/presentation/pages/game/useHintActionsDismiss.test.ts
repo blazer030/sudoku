@@ -8,7 +8,7 @@ import { useHintMenu } from "@/presentation/pages/game/components/useHintMenu";
 
 type HintApi = ReturnType<typeof useHintActions>;
 
-const mountHarness = () => {
+const mountHarness = (sudoku = createKnownSudoku()) => {
     const captured: { api?: HintApi; menu?: ReturnType<typeof useHintMenu> } = {};
     const Child = defineComponent({
         setup() {
@@ -20,7 +20,7 @@ const mountHarness = () => {
         components: { Child },
         setup() {
             captured.api = useHintActions({
-                sudoku: createKnownSudoku(),
+                sudoku,
                 stepRecorder: new StepRecorder(),
                 autoRemoveNotes: () => false,
                 onRevealComplete: () => undefined,
@@ -43,6 +43,20 @@ describe("useHintActions — dismissOverlay", () => {
         await menuClosed;
 
         expect(api.dismissOverlay()).toBe(false);
+    });
+
+    // The system Back key closes a step-by-step hint the same way its Close button does: by filling it
+    it("fills the hint's cell when Back closes a step-by-step hint", () => {
+        const sudoku = createKnownSudoku();
+        const plan = sudoku.planRevealHint();
+        if (plan.kind !== "steps") throw new Error(`expected a steps plan, got ${plan.kind}`);
+        const api = mountHarness(sudoku);
+        api.hintMode.start(plan);
+
+        expect(api.dismissOverlay()).toBe(true);
+
+        expect(api.hintMode.active.value).toBe(false);
+        expect(sudoku.puzzle[plan.target.row][plan.target.column].entry).toBe(plan.digit);
     });
 
     it("reports nothing to dismiss when no overlay is open", () => {

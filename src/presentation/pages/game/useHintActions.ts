@@ -139,7 +139,7 @@ export const useHintActions = ({
             return true;
         }
         if (hintMode.active.value) {
-            hintMode.cancel();
+            hintMode.close();
             return true;
         }
         return false;

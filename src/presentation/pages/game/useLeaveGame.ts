@@ -1,4 +1,4 @@
-import { type Ref, ref } from "vue";
+import { type Ref, onScopeDispose, ref } from "vue";
 import { onBeforeRouteLeave, useRouter } from "vue-router";
 import type { Difficulty } from "@/domain/generator/SudokuGenerator";
 import type { Sudoku } from "@/domain/game/Sudoku";
@@ -30,17 +30,20 @@ export const useLeaveGame = ({ sudoku, difficulty, completed, getElapsedSeconds,
     const statisticsStore = useStatisticsStore();
     const gameStore = useGameStore();
 
+    const saveGame = () => {
+        gameStore.persistGame(GameStateConverter.fromSudoku(sudoku.raw(), {
+            difficulty: difficulty.value,
+            elapsedSeconds: getElapsedSeconds(),
+            completed: completed.value,
+            replay: getReplayData(),
+        }));
+    };
+
     const showLeaveDialog = async () => {
         const result = await leaveDialog.open();
         if (result === "save" || result === "giveUp") onLeave?.();
         if (result === "save") {
-            const state = GameStateConverter.fromSudoku(sudoku.raw(), {
-                difficulty: difficulty.value,
-                elapsedSeconds: getElapsedSeconds(),
-                completed: completed.value,
-                replay: getReplayData(),
-            });
-            gameStore.persistGame(state);
+            saveGame();
             leavingConfirmed.value = true;
             router.back();
         } else if (result === "giveUp") {
@@ -64,6 +67,18 @@ export const useLeaveGame = ({ sudoku, difficulty, completed, getElapsedSeconds,
             router.back();
         }
     };
+
+    // The app may be killed while it is in the background (a swipe from recents, the system reclaiming
+    // memory, a closed tab), so a game in progress is saved whenever the page is hidden. A hint in
+    // progress leaves the board as it was, so the save is whole; the hint itself is not kept.
+    const saveWhenHidden = () => {
+        if (document.visibilityState !== "hidden" || completed.value || leavingConfirmed.value) return;
+        saveGame();
+    };
+    document.addEventListener("visibilitychange", saveWhenHidden);
+    onScopeDispose(() => {
+        document.removeEventListener("visibilitychange", saveWhenHidden);
+    });
 
     onBeforeRouteLeave(() => {
         if (completed.value || leavingConfirmed.value) return true;

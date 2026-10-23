@@ -474,6 +474,23 @@ describe("Home", () => {
             expect(history[0].replay).toEqual(replay);
         });
 
+        // The save counts every hint used; statistics count the ones past the free first, as leaving a game does
+        it("should record the hints a given-up game paid for", async () => {
+            const history = await giveUpAndStartNew({ ...dummySave, hintsUsed: 3 });
+
+            expect(history[0].hintsUsed).toBe(2);
+        });
+
+        it.each([
+            [1, 0],
+            [2, 1],
+            [4, 3],
+        ])("should record %i saved hints as %i paid ones when the game is given up", async (saved, recorded) => {
+            const history = await giveUpAndStartNew({ ...dummySave, hintsUsed: saved });
+
+            expect(history[0].hintsUsed).toBe(recorded);
+        });
+
         it("should record a given-up game without a replay when its save has none", async () => {
             const history = await giveUpAndStartNew(dummySave);
 

@@ -1,7 +1,9 @@
 <template>
     <div class="grid grid-cols-[1fr_auto_1fr] items-center">
+        <!-- A hint is finished or closed before the game can be left -->
         <button
-            class="flex items-center gap-2 cursor-pointer justify-self-start"
+            :disabled="hintMode"
+            class="flex items-center gap-2 cursor-pointer justify-self-start disabled:opacity-40 disabled:cursor-default"
             data-testid="back-button"
             @click="emit('back')"
         >

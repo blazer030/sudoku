@@ -34,13 +34,13 @@
             data-skin="card"
         >
             <div
-                v-for="entry in CHANGELOG"
-                :key="entry.version"
+                v-for="entry in entries"
+                :key="entry.id"
                 class="py-4"
-                :data-testid="`changelog-entry-${entry.version}`"
+                :data-testid="`changelog-entry-${entry.id}`"
             >
                 <div class="flex items-baseline justify-between mb-2">
-                    <span class="text-foreground text-[15px] font-semibold">v{{ entry.version }}</span>
+                    <span class="text-foreground text-[15px] font-semibold">{{ entry.title }}</span>
                     <span class="text-foreground-muted text-[13px]">{{ entry.date }}</span>
                 </div>
                 <ul class="flex flex-col gap-1.5">
@@ -65,15 +65,32 @@
 </template>
 
 <script lang="ts" setup>
+import { computed } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { useAppLocale } from "@/presentation/i18n/useAppLocale";
 import { ChevronLeft } from "lucide-vue-next";
-import { CHANGELOG } from "@/presentation/pages/settings/changelogData";
+import { CHANGELOG, UNRELEASED_CHANGES, type ChangelogChange } from "@/presentation/pages/settings/changelogData";
+import { isFeatureEnabled } from "@/utils/featureToggle";
 
 const router = useRouter();
 const { t } = useI18n();
 const appLocale = useAppLocale();
+
+interface ShownEntry {
+    id: string;
+    title: string;
+    date: string;
+    changes: ChangelogChange[];
+}
+
+// Develop builds also list what is waiting for the next release, on top and undated
+const entries = computed((): ShownEntry[] => [
+    ...(isFeatureEnabled("changelogUnreleased") && UNRELEASED_CHANGES.length > 0
+        ? [{ id: "unreleased", title: t("changelog.unreleased"), date: "", changes: UNRELEASED_CHANGES }]
+        : []),
+    ...CHANGELOG.map(entry => ({ id: entry.version, title: `v${entry.version}`, date: entry.date, changes: entry.changes })),
+]);
 
 const goBack = () => {
     router.back();
