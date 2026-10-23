@@ -229,7 +229,8 @@
 
 /* An error (檢查衝突) or a hint's wrong entry is hatched; the error's digit blinks twice as it shows.
    An error cell that is also selected or the same digit is drawn as an error: the cell gives the
-   error precedence, so the red never sits on the inverted cell or the same-digit blue. */
+   error precedence, so the red never sits on the inverted cell or the same-digit blue. A selected
+   error keeps the cursor (below). */
 [data-style="pixel"] [data-skin~="board"] [data-variant="error"],
 [data-style="pixel"] [data-skin~="board"] [data-variant="wrong"] {
     --pixel-cell-pattern: linear-gradient(45deg, var(--pixel-pattern-shade) 25%, transparent 0 50%, var(--pixel-pattern-shade) 0 75%, transparent 0);
@@ -269,7 +270,6 @@
     --pixel-cell-fill: var(--color-foreground);
     --pixel-clue-ink: var(--color-background);
     --pixel-entry-ink: var(--color-background);
-    position: relative;
     box-shadow: none;
 }
 
@@ -283,8 +283,14 @@
     color: var(--color-foreground);
 }
 
-/* The cursor: four corner brackets just outside the cell, over the grid lines, blinking on and off */
-[data-style="pixel"] [data-skin~="board"] [data-variant="selected"]::before {
+/* The cursor: four corner brackets just outside the cell, over the grid lines, blinking on and off.
+   It marks the selected cell whatever its variant, so a selected error (hatched, not inverted) still
+   shows where the player is; hint mode shows its own cells instead. */
+[data-style="pixel"] [data-skin~="board"]:not([data-hint-mode]) [data-selected] {
+    position: relative;
+}
+
+[data-style="pixel"] [data-skin~="board"]:not([data-hint-mode]) [data-selected]::before {
     content: "";
     position: absolute;
     inset: -7px;
@@ -490,7 +496,7 @@
     }
 
     [data-style="pixel"] [data-skin~="board"][data-hint-mode],
-    [data-style="pixel"] [data-skin~="board"] [data-variant="selected"]::before,
+    [data-style="pixel"] [data-skin~="board"]:not([data-hint-mode]) [data-selected]::before,
     [data-style="pixel"] [data-skin~="board"] [data-variant="error"] > div,
     [data-style="pixel"] [data-press-motion],
     [data-style="pixel"] [data-skin~="key"][data-press-motion][data-pressed],

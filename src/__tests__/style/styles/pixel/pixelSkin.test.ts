@@ -61,6 +61,8 @@ const skin = (token: string): string => `${SCOPE} [data-skin~="${token}"]`;
 
 const BOARD = skin("board");
 const cell = (variant: string): string => `${BOARD} [data-variant="${variant}"]`;
+// The selected cell outside hint mode, whichever variant it shows (an error wins over the selection)
+const CURSOR = `${BOARD}:not([data-hint-mode]) [data-selected]`;
 
 // The declarations of the rules inside the reduced-motion block that list `selector`
 const reducedMotionDeclarationsOf = (selector: string): Map<string, string> => {
@@ -259,8 +261,14 @@ describe("pixel skin", () => {
             expect(declarationsOf(PIXEL_CSS, `${cell("selected")} *`).get("color")).toBe("var(--color-background)");
         });
 
+        it("should put the cursor on the selected cell even when an error decides its look", () => {
+            // The cursor hangs off data-selected, not the selected variant, and the cell is its anchor
+            expect(declarationsOf(PIXEL_CSS, CURSOR).get("position")).toBe("relative");
+            expect(declarationsOf(PIXEL_CSS, `${cell("selected")}::before`).size).toBe(0);
+        });
+
         it("should frame the selected cell with four blinking corner brackets", () => {
-            const cursor = declarationsOf(PIXEL_CSS, `${cell("selected")}::before`);
+            const cursor = declarationsOf(PIXEL_CSS, `${CURSOR}::before`);
             const brackets = splitTopLevel(cursor.get("background") ?? "", /,/);
 
             expect(cursor.get("content")).toBe('""');
@@ -274,7 +282,7 @@ describe("pixel skin", () => {
 
         it("should keep the grid lines over the cells, and the cursor over the lines", () => {
             const lines = declarationsOf(PIXEL_CSS, `${BOARD} > div::before`);
-            const cursor = declarationsOf(PIXEL_CSS, `${cell("selected")}::before`);
+            const cursor = declarationsOf(PIXEL_CSS, `${CURSOR}::before`);
 
             // The selected cell is positioned for its cursor, so it would otherwise paint over the overlay
             expect(declarationsOf(PIXEL_CSS, `${BOARD} > div`).get("isolation")).toBe("isolate");
@@ -302,7 +310,7 @@ describe("pixel skin", () => {
         });
 
         it("should hold the cursor and error digit still under reduced motion", () => {
-            expect(reducedMotionDeclarationsOf(`${cell("selected")}::before`).get("animation")).toBe("none");
+            expect(reducedMotionDeclarationsOf(`${CURSOR}::before`).get("animation")).toBe("none");
             expect(reducedMotionDeclarationsOf(`${cell("error")} > div`).get("animation")).toBe("none");
         });
     });
