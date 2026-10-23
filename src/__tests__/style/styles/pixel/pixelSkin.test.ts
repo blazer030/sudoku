@@ -146,6 +146,18 @@ describe("pixel skin", () => {
         expect(declarationsOf(PIXEL_CSS, `${SCOPE} .rounded-full`).get("border-radius")).toBe("0");
     });
 
+    it("should draw hint mode on the board as a doubled frame that blinks in, instead of the shared ring", () => {
+        const board = declarationsOf(PIXEL_CSS, skin("board"));
+        const hint = declarationsOf(PIXEL_CSS, `${skin("board")}[data-hint-mode]`);
+        const layers = shadowLayers(hint.get("--tw-shadow") ?? "");
+
+        // ring-primary/50 is the frame's own ink in 掌機, so the shared ring is hidden and the frame carries hint mode
+        expect(board.get("--tw-ring-color")).toBe("transparent");
+        expect(layers.filter(layer => layer.blur !== 0)).toEqual([]);
+        expect(layers.some(layer => !layer.inset && layer.offsetX === 0 && layer.offsetY === 0 && layer.spread > 4)).toBe(true);
+        expect(hint.get("animation")).toMatch(/^pixel-[\w-]+ \d+ms steps\(/);
+    });
+
     it("should move only in steps", () => {
         const moving = allDeclarations(/^(?:animation|animation-timing-function|transition|transition-timing-function)$/)
             .filter(declaration => !isInside(declaration, atRule => atRule.name === "media"))

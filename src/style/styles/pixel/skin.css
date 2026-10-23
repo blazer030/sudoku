@@ -20,6 +20,7 @@
     --pixel-ink: var(--color-foreground);
     --pixel-drop: var(--color-shadow);
     --pixel-title-shadow: var(--color-primary-light);
+    --pixel-hint: var(--color-foreground);
     /* The grid: thin lines in the mid shade, box lines in the ink, both solid */
     --board-line: var(--color-border);
     --board-box-line: var(--color-foreground);
@@ -32,9 +33,10 @@
     --tw-shadow-color: transparent;
 }
 
-/* The console's title drops a red shadow, as on its box art */
+/* The console's title drops a red shadow, as on its box art, and hint mode frames the board in gold */
 :root.dark[data-style="pixel"] {
     --pixel-title-shadow: var(--color-error);
+    --pixel-hint: var(--color-primary);
 }
 
 /* Type: Press Start 2P for digits (board, keys, timer, counts), Cubic 11 for every other text and
@@ -72,15 +74,44 @@
 }
 
 /* The board is a screen in a notched pixel frame: four 4px bars leave the corners open, and a hard
-   shadow falls to the lower right. Drawn through --tw-shadow, so the hint-mode ring still shows. */
+   shadow falls to the lower right. The shared hint ring (the primary at half strength) is the frame's
+   own ink in 掌機, so it is hidden and the frame itself shows hint mode (below). */
 [data-style="pixel"] [data-skin~="board"] {
     border-radius: 0;
+    --tw-ring-color: transparent;
     --tw-shadow:
         0 -4px 0 0 var(--pixel-ink),
         0 4px 0 0 var(--pixel-ink),
         -4px 0 0 0 var(--pixel-ink),
         4px 0 0 0 var(--pixel-ink),
         8px 8px 0 0 var(--pixel-drop);
+}
+
+/* Hint mode doubles the frame: the notched bars in the hint ink, a 2px gap of the page and a square
+   outer ring, which blinks in three steps on entry like a cartridge's title screen */
+[data-style="pixel"] [data-skin~="board"][data-hint-mode] {
+    --pixel-hint-bars:
+        0 -4px 0 0 var(--pixel-hint),
+        0 4px 0 0 var(--pixel-hint),
+        -4px 0 0 0 var(--pixel-hint),
+        4px 0 0 0 var(--pixel-hint);
+    --pixel-hint-ring:
+        0 0 0 6px var(--color-background),
+        0 0 0 8px var(--pixel-hint);
+    --tw-shadow:
+        0 -4px 0 0 var(--pixel-hint),
+        0 4px 0 0 var(--pixel-hint),
+        -4px 0 0 0 var(--pixel-hint),
+        4px 0 0 0 var(--pixel-hint),
+        0 0 0 6px var(--color-background),
+        0 0 0 8px var(--pixel-hint);
+    animation: pixel-hint-frame 480ms steps(1, end) 3;
+}
+
+@keyframes pixel-hint-frame {
+    0% { box-shadow: var(--pixel-hint-bars), var(--pixel-hint-ring); }
+    50% { box-shadow: var(--pixel-hint-bars); }
+    100% { box-shadow: var(--pixel-hint-bars), var(--pixel-hint-ring); }
 }
 
 /* The grid's outer edge in the box lines' ink. It is positioned, so the line overlay below covers
@@ -318,6 +349,7 @@
         transition: none;
     }
 
+    [data-style="pixel"] [data-skin~="board"][data-hint-mode],
     [data-style="pixel"] [data-press-motion],
     [data-style="pixel"] [data-skin~="key"][data-press-motion][data-pressed],
     [data-style="pixel"] [data-skin~="button"][data-press-motion][data-pressed],
