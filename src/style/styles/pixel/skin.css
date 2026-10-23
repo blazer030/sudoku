@@ -314,6 +314,20 @@
     transition-duration: 0ms;
 }
 
+/* A component's scoped styles weigh as much as the rule above and load after it, so they win: the
+   hint panel's buttons kept their soft shadow and a 200ms ease. A plain button (not one of the big
+   ones below) takes the frame again at one attribute more. */
+[data-style="pixel"] [data-skin~="button"]:not([data-skin~="continue"], [data-skin~="new-game"]) {
+    border-radius: 0;
+    box-shadow:
+        0 -2px 0 0 var(--pixel-ink),
+        0 2px 0 0 var(--pixel-ink),
+        -2px 0 0 0 var(--pixel-ink),
+        2px 0 0 0 var(--pixel-ink),
+        4px 4px 0 0 var(--pixel-drop);
+    transition-duration: 0ms;
+}
+
 /* A game control's label sits 4px under it, so a control has the frame without the shadow and does
    not drop when pressed; the press overlay marks it */
 [data-style="pixel"] [data-skin~="control"] {

@@ -301,6 +301,16 @@ describe("pixel skin", () => {
         });
     });
 
+    it("should frame a plain button over a component's own scoped look (the hint panel's)", () => {
+        const plain = declarationsOf(PIXEL_CSS, `${skin("button")}:not([data-skin~="continue"], [data-skin~="new-game"])`);
+        const layers = shadowLayers(plain.get("box-shadow") ?? "");
+
+        expect(plain.get("border-radius")).toBe("0");
+        expect(plain.get("transition-duration")).toBe("0ms");
+        expect(layers.filter(layer => layer.blur !== 0)).toEqual([]);
+        expect(layers.filter(layer => !layer.inset && (layer.offsetX === 0) !== (layer.offsetY === 0))).toHaveLength(4);
+    });
+
     it("should move only in steps", () => {
         const moving = allDeclarations(/^(?:animation|animation-timing-function|transition|transition-timing-function)$/)
             .filter(declaration => !isInside(declaration, atRule => atRule.name === "media"))
