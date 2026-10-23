@@ -13,7 +13,7 @@ Events go through the `AnalyticsService` port (`src/application/analytics/Analyt
 | `donate_view` | none | How many players see the donate page? |
 | `donate_tap` | `tier` | Which tier do they tap? |
 | `donate_success` | `tier`, `amount_usd` | How many purchases finish, and for how much? |
-| `walkthrough_solve` | `result` (`solved`, `no_solution`, `multiple_solutions`, `unknown_count`), `source` (`sample`, `own`), `confirmed` (0/1, only for `multiple_solutions` and `unknown_count`) | Do players use the solver on their own puzzles, and how does it end? |
+| `walkthrough_solve` | `result` (`solved` (exactly one solution, so the walkthrough starts; it does not mean the human-technique path finishes the board), `no_solution`, `multiple_solutions`, `unknown_count`), `source` (`sample`, `own`), `confirmed` (0/1, only for `multiple_solutions` and `unknown_count`) | Do players use the solver on their own puzzles, and how does it end? |
 | `walkthrough_finish` | none | How many walkthroughs are watched to the end? |
 | `screen_view` | `firebase_screen` (`home`, `game`, `statistics`, `settings`, `appearance`, `changelog`, `donate`, `game_review`, `solver`) | Which screens do players visit? |
 
@@ -33,7 +33,7 @@ Games left without an ending = `game_start − game_complete − game_abandon`.
 
 - Event params show in reports only after they are registered as custom dimensions or metrics (Admin → Custom definitions). Register `result`, `confirmed`, `source`, `undo_count`, `wrong_entries` and `used_notes`, plus the older params (`difficulty`, `time_seconds`, `hints_used`, `hints_total`, `progress_pct`, `correct_pct`, `incorrect_pct`, `hint_type`, `tier`, `amount_usd`) if they are missing.
 - `firebase_screen` (from `screen_view`) needs no registration: GA4 shows it as the built-in "Page title and screen name" (Screen name) dimension.
-- On the web data stream, turn off Enhanced measurement's "Page changes based on browser history events". Otherwise GA adds its own `page_view` next to our `screen_view`.
+- The web build suppresses gtag's automatic page_view on load in code (`send_page_view: false`). History-change page views are a separate Enhanced-measurement feature: on the web data stream, turn off Enhanced measurement's "Page changes based on browser history events". Otherwise GA adds its own `page_view` next to our `screen_view`.
 
 ## When it reports
 

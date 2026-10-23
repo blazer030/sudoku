@@ -52,8 +52,14 @@ const analytics = await chooseAnalytics({
     isNative: Capacitor.isNativePlatform(),
     webConfig: readWebFirebaseConfig(import.meta.env),
     initializeWebFirebase: async (config) => {
-        const { initializeApp } = await import("firebase/app");
-        initializeApp(config);
+        const [{ initializeApp }, { initializeAnalytics }] = await Promise.all([
+            import("firebase/app"),
+            import("firebase/analytics"),
+        ]);
+        const app = initializeApp(config);
+        // Screen tracking sends every page_view itself; this stops gtag adding one on load.
+        // The plugin's later getAnalytics() returns this same instance.
+        initializeAnalytics(app, { config: { send_page_view: false } });
     },
 });
 
