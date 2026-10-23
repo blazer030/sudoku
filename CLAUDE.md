@@ -17,8 +17,8 @@ Vue 3 + TypeScript Sudoku game following **Domain-Driven Design (DDD)** with por
 
 - **`src/domain/`** — Pure business logic, zero framework dependencies: `board/`, `game/` (the `Sudoku` engine, history, conflicts, hints, replay), `generator/` (puzzles and solution counting), `solver/` (human-style techniques, difficulty rating; shared helpers such as `cellRelations.ts`).
 - **`src/application/`** — Ports and app services, one folder each: `game/` (`GameState`, `GameRepository`), `settings/` (`SettingsStorage`), `statistics/`, `puzzleGeneration/` and `puzzleCheck/` (Web Worker services), `analytics/`, `billing/`, `icon/`, `systemBar/`, `appearanceBridge/`, `backButton/`.
-- **`src/infrastructure/`** — Adapters for those ports: IndexedDB repositories, and native adapters (Capacitor plugins, Firebase, Play Billing) that each have a no-op web twin. `src/main.ts` picks them by platform.
-- **`src/presentation/`** — `pages/` (home, game, game-review, solver-walkthrough, statistics, settings, donate), shared `components/` (one kebab-case folder each), `composables/`, `directives/`, `i18n/` (messages and label helpers), `theme/` (runtime appearance and launcher icon sync).
+- **`src/infrastructure/`** — Adapters for those ports: IndexedDB repositories, and native adapters (Capacitor plugins, Firebase, Play Billing) that each have a no-op web twin; Firebase also serves the production web build. `src/main.ts` picks them by platform.
+- **`src/presentation/`** — `pages/` (home, game, game-review, solver-walkthrough, statistics, settings, donate), shared `components/` (one kebab-case folder each), `composables/`, `directives/`, `analytics/` (screen tracking and user-property sync), `i18n/` (messages and label helpers), `theme/` (runtime appearance and launcher icon sync).
 - **`src/stores/`** — Pinia stores: game (single source of truth for the active game), statistics, settings, donate.
 - **`src/theme/`** — Framework-free look data shared with `scripts/`: `themeIds.ts` (styles, themes, light/dark), `palettes.ts`, `launcherIcon.ts`, `styleIcons.ts` (each style's app icon, also the 外觀 page's card). Relative imports only.
 - **`src/style/styles/<id>/`** — One folder per visual style (`minimal`, `tactile`, `paper`): `skin.css` (scoped by `[data-style]`), `palette.ts` (colours; run `npm run generate:theme-css` after editing). A new style registers in `theme/palettes.ts` `STYLES`, `style/index.css`, `theme/styleIcons.ts` (its app icon, also the 外觀 page's card) and `STYLE_IDS` / `THEME_IDS_BY_STYLE` / `STYLE_COLOR_MODES` in `theme/themeIds.ts`.
@@ -77,4 +77,4 @@ The app ships in English and Traditional Chinese (`src/presentation/i18n/message
 ## Environment
 
 - `.env` — `VITE_BASE_URL=/` (dev)
-- `.env.production` — `VITE_BASE_URL=/sudoku/` (deployed to subdirectory)
+- `.env.production` — `VITE_BASE_URL=/sudoku/` (deployed to subdirectory); also holds the `VITE_FIREBASE_*` web config (public identifiers)
