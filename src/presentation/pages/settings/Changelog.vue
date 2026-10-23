@@ -29,7 +29,10 @@
             {{ t("changelog.appNote") }}
         </p>
 
-        <div class="bg-card rounded-2xl px-4 shadow-card-sm divide-y divide-border">
+        <div
+            class="bg-card rounded-2xl px-4 shadow-card-sm divide-y divide-border"
+            data-skin="card"
+        >
             <div
                 v-for="entry in CHANGELOG"
                 :key="entry.version"

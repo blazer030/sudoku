@@ -71,6 +71,17 @@ describe("skin hooks", () => {
         expect(offenders).toEqual([]);
     });
 
+    // A raised card surface (a card fill, rounded, with a card shadow) is a panel a style may frame; it carries
+    // a skin hook so a style can draw it, instead of leaving it as an unframed slab
+    it("should mark every raised card panel with a skin hook", () => {
+        const offenders = VUE_FILES.flatMap(path => openingTags(readFileSync(path, "utf8"), "div|section")
+            .filter(tag => /\bbg-card\b/.test(tag) && /\brounded-(?:xl|2xl)\b/.test(tag) && /\bshadow-card/.test(tag))
+            .filter(tag => !/\bdata-skin=/.test(tag))
+            .map(tag => `${path}: ${tag.replace(/\s+/g, " ").slice(0, 90)}`));
+
+        expect(offenders).toEqual([]);
+    });
+
     it("should mark the hint menu as a card, so a style frames it like the dialogs", () => {
         const source = readFileSync("src/presentation/pages/game/components/HintMenuPopup.vue", "utf8");
         const menuTag = openingTags(source, "div").find(tag => tag.includes('data-testid="hint-menu"'));

@@ -29,6 +29,7 @@
                     <div
                         class="flex-1 flex flex-col items-center gap-1 bg-card rounded-2xl px-2 py-4 shadow-card"
                         data-testid="games-won"
+                        data-skin="card"
                     >
                         <span class="text-3xl font-bold text-primary font-mono">{{ stats.overall.gamesWon }}</span>
                         <span class="text-xs font-medium text-foreground-secondary">{{ t("statistics.gamesWon") }}</span>
@@ -36,6 +37,7 @@
                     <div
                         class="flex-1 flex flex-col items-center gap-1 bg-card rounded-2xl px-2 py-4 shadow-card"
                         data-testid="win-rate"
+                        data-skin="card"
                     >
                         <span class="text-3xl font-bold text-primary font-mono">{{ winRateDisplay }}</span>
                         <span class="text-xs font-medium text-foreground-secondary">{{ t("statistics.winRate") }}</span>
@@ -43,6 +45,7 @@
                     <div
                         class="flex-1 flex flex-col items-center gap-1 bg-card rounded-2xl px-2 py-4 shadow-card"
                         data-testid="day-streak"
+                        data-skin="card"
                     >
                         <span class="text-3xl font-bold text-foreground font-mono">{{ dayStreak }}</span>
                         <span class="text-xs font-medium text-foreground-secondary text-center">{{ t("statistics.dayStreak") }}</span>
@@ -52,7 +55,10 @@
 
             <div class="flex flex-col gap-2 mt-5">
                 <span class="text-foreground-muted text-xs font-semibold tracking-wider uppercase px-1">{{ t("statistics.byDifficulty") }}</span>
-                <div class="bg-card rounded-2xl p-4 shadow-card flex flex-col divide-y divide-border">
+                <div
+                    class="bg-card rounded-2xl p-4 shadow-card flex flex-col divide-y divide-border"
+                    data-skin="card"
+                >
                     <div
                         v-for="difficulty in DIFFICULTIES"
                         :key="difficulty"

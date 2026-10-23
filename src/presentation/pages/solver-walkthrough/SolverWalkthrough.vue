@@ -116,6 +116,7 @@
                             :style="introMaxHeight === null ? undefined : { maxHeight: `${introMaxHeight}px` }"
                             class="bg-card rounded-2xl shadow-card-lg p-4 w-full flex flex-col gap-4 overflow-y-auto"
                             data-testid="walkthrough-intro"
+                            data-skin="card"
                         >
                             <div class="flex items-start gap-3">
                                 <span class="w-10 h-10 rounded-xl bg-primary-light text-primary flex items-center justify-center shrink-0">
