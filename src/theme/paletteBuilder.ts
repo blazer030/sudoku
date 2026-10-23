@@ -33,9 +33,9 @@ export type DarkThemeColors = Pick<Palette, "primary" | "primary-hover" | "accen
 type DerivedToken = "primary-light" | "highlight" | "cell-focus" | "cell-scope" | "cell-pattern" | "cell-peer";
 // Tokens that repeat another token of the same palette unless a style sets its own
 type AliasToken = "note" | "cell-selected" | "featured" | "on-featured" | "rule" | "margin-line";
-// A style's own values for aliases, and for the same-digit fill where a fixed palette sets it
-// rather than tinting the primary
-type StyleExtras = Partial<Pick<Palette, "featured" | "on-featured" | "rule" | "margin-line" | "highlight">>;
+// A style's own values for aliases, and for the same-digit fill and the primary's light surface where a
+// fixed palette sets them rather than tinting the primary
+type StyleExtras = Partial<Pick<Palette, "featured" | "on-featured" | "rule" | "margin-line" | "highlight" | "primary-light">>;
 export type Neutrals<ThemeColors> = Omit<Palette, keyof ThemeColors | DerivedToken | AliasToken>;
 
 // Values are tuned so every pair in paletteContrast.test.ts meets WCAG AA. The board layers
