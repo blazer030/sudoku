@@ -3,7 +3,7 @@
 //
 // The artwork is a 108-unit square with no rounding; callers mask it. Digits are paths, not text:
 // the fonts the app uses are not there when the generators rasterise the icon.
-import { mixColors } from "./contrast";
+import { contrastRatio, mixColors } from "./contrast";
 import type { Palette } from "./paletteBuilder";
 import type { StyleId } from "./themeIds";
 
@@ -20,12 +20,17 @@ const svgOf = (...content: string[]): string => [
     "",
 ].join("\n");
 
-const fillSquare = (color: string): string => `<rect width="${ICON_SIZE}" height="${ICON_SIZE}" fill="${color}"/>`;
+// The square, or with a bleed a larger one past each edge
+const fillSquare = (color: string, bleed = 0): string => bleed === 0
+    ? `<rect width="${ICON_SIZE}" height="${ICON_SIZE}" fill="${color}"/>`
+    : `<rect x="${-bleed}" y="${-bleed}" width="${ICON_SIZE + 2 * bleed}" height="${ICON_SIZE + 2 * bleed}" fill="${color}"/>`;
 
-const inAdaptiveViewport = (...content: string[]): string[] => {
-    const inset = (ICON_SIZE - ADAPTIVE_VIEWPORT) / 2;
-    return [`<g transform="translate(${inset} ${inset}) scale(${ADAPTIVE_VIEWPORT / ICON_SIZE})">`, ...content, "</g>"];
-};
+const ADAPTIVE_INSET = (ICON_SIZE - ADAPTIVE_VIEWPORT) / 2;
+// How far past the artwork's edges the rest of the 108dp layer reaches, in artwork units
+const ADAPTIVE_BLEED = ADAPTIVE_INSET * ICON_SIZE / ADAPTIVE_VIEWPORT;
+
+const inAdaptiveViewport = (...content: string[]): string[] =>
+    [`<g transform="translate(${ADAPTIVE_INSET} ${ADAPTIVE_INSET}) scale(${ADAPTIVE_VIEWPORT / ICON_SIZE})">`, ...content, "</g>"];
 
 // Minimal: today's icon, a checkerboard of solid and faint tiles in on-primary on the primary
 const MINIMAL_TILE_ORIGINS = [21.6, 45, 68.4];
@@ -75,16 +80,29 @@ const tactileArtwork = (colors: TactileColors): string[] => [
     tactileFive(colors.digit),
 ];
 
-// Ledges are the skin's own edges (tactile/skin.css): 28% shadow in the background for every tile
-// (--tactile-edge), 60% shadow in the primary for the centre tile (--tactile-edge-on-primary)
-const tactileColors = (palette: Palette): TactileColors => ({
-    well: palette.border,
-    tile: palette.card,
-    ledge: mixColors(palette.shadow, 0.28, palette.background),
-    key: palette.primary,
-    keyLedge: mixColors(palette.shadow, 0.6, palette.primary),
-    digit: palette["on-primary"],
-});
+// A dark palette's background is closer to black than to white. The palette carries no mode, and
+// callers pass one from getPalette(style, theme, mode).
+const isDark = (palette: Palette): boolean =>
+    contrastRatio(palette.background, "#000000") < contrastRatio(palette.background, "#FFFFFF");
+
+// The well is the tray darkened by the shadow so it sinks in both modes: dark needs far more of
+// the shadow to show (the canvas: #DCD6CB on #EBE7E0 in light, #111214 on #1A1C1F in dark). Tiles
+// are lighter than the well: the card in light, the raised cell-clue in dark. Ledges are the skin's
+// own edges (tactile/skin.css): 28% shadow in the background for every tile (--tactile-edge), 60%
+// shadow in the primary for the centre tile (--tactile-edge-on-primary).
+const WELL_SHADOW = { light: 0.09, dark: 0.35 };
+
+const tactileColors = (palette: Palette): TactileColors => {
+    const dark = isDark(palette);
+    return {
+        well: mixColors(palette.shadow, dark ? WELL_SHADOW.dark : WELL_SHADOW.light, palette.background),
+        tile: dark ? palette["cell-clue"] : palette.card,
+        ledge: mixColors(palette.shadow, 0.28, palette.background),
+        key: palette.primary,
+        keyLedge: mixColors(palette.shadow, 0.6, palette.primary),
+        digit: palette["on-primary"],
+    };
+};
 
 // Paper: ruled loose-leaf with a margin and three holes, a hand-drawn grid in the ink, a printed 3,
 // a handwritten 7 circled in red and a handwritten 4
@@ -104,9 +122,25 @@ const PAPER_SEVEN = "M60.2 54.3Q63 53.7 66 53.7Q63.5 57.2 62.4 61.3";
 const PAPER_FOUR = "M79.6 70.6Q78.3 73.6 77 76Q80.4 75.9 84.2 75.4M82.4 71.4Q82.2 75.2 82.6 79.1";
 const PAPER_CIRCLE = "M63.5 50 Q55 50 55.5 57.5 Q56.5 64.5 64 64 Q71 63 70.5 56.5 Q69.5 50.5 62 51.5";
 
-const paperSheet = (colors: PaperColors): string[] => [
-    `<g stroke="${colors.rule}" stroke-width="1.2"><path d="M0 22H108M0 34H108M0 46H108M0 58H108M0 70H108M0 82H108M0 94H108"/></g>`,
-    `<path d="M24 0V108" stroke="${colors.margin}" stroke-width="1.6"/>`,
+// Rules every 12 units from 22 to 94, leaving the sheet's head and foot clear
+const PAPER_RULE_STEP = 12;
+const PAPER_FIRST_RULE = 22;
+const PAPER_LAST_RULE = 94;
+
+// The sheet runs `bleed` units past each edge of the artwork, rules continuing beyond it, so a
+// foreground layer has no seam where a launcher shows more than the 72dp viewport
+const paperRules = (bleed: number): number[] => {
+    const rules: number[] = [];
+    for (let rule = PAPER_FIRST_RULE - PAPER_RULE_STEP * Math.floor((PAPER_FIRST_RULE + bleed) / PAPER_RULE_STEP);
+        rule <= ICON_SIZE + bleed; rule += PAPER_RULE_STEP) {
+        if (rule < 0 || rule > ICON_SIZE || (rule >= PAPER_FIRST_RULE && rule <= PAPER_LAST_RULE)) rules.push(rule);
+    }
+    return rules;
+};
+
+const paperSheet = (colors: PaperColors, bleed = 0): string[] => [
+    `<g stroke="${colors.rule}" stroke-width="1.2"><path d="${paperRules(bleed).map(rule => `M${-bleed} ${rule}H${ICON_SIZE + bleed}`).join("")}"/></g>`,
+    `<path d="M24 ${-bleed}V${ICON_SIZE + bleed}" stroke="${colors.margin}" stroke-width="1.6"/>`,
     `<g fill="${colors.hole}"><circle cx="11" cy="28" r="4"/><circle cx="11" cy="54" r="4"/><circle cx="11" cy="80" r="4"/></g>`,
 ];
 
@@ -127,13 +161,13 @@ const paperColors = (palette: Palette): PaperColors => ({
     circle: palette.danger,
 });
 
-const artworkOf = (style: StyleId, palette: Palette): string[] => {
+const artworkOf = (style: StyleId, palette: Palette, bleed = 0): string[] => {
     switch (style) {
         case "minimal": return minimalTiles(palette["on-primary"]);
         case "tactile": return tactileArtwork(tactileColors(palette));
         case "paper": {
             const colors = paperColors(palette);
-            return [...paperSheet(colors), ...paperWriting(colors)];
+            return [...paperSheet(colors, bleed), ...paperWriting(colors)];
         }
     }
 };
@@ -146,11 +180,14 @@ export const styleIconBackground = (style: StyleId, palette: Palette): string =>
 export const styleIconSvg = (style: StyleId, palette: Palette): string =>
     svgOf(fillSquare(styleIconBackground(style, palette)), ...artworkOf(style, palette));
 
-/** The adaptive icon's foreground layer: minimal's tiles alone, tactile's and paper's whole artwork. */
+/**
+ * The adaptive icon's foreground layer: minimal's tiles alone; tactile's and paper's whole artwork,
+ * their background and paper's sheet filling the layer to its edges so no seam shows at the 72dp viewport.
+ */
 export const styleIconForeground = (style: StyleId, palette: Palette): string =>
     svgOf(...inAdaptiveViewport(...(style === "minimal"
         ? minimalTiles(palette["on-primary"])
-        : [fillSquare(styleIconBackground(style, palette)), ...artworkOf(style, palette)])));
+        : [fillSquare(styleIconBackground(style, palette), ADAPTIVE_BLEED), ...artworkOf(style, palette, ADAPTIVE_BLEED)])));
 
 const monochromeArtwork = (style: StyleId): string[] => {
     const color = MONOCHROME_COLOR;

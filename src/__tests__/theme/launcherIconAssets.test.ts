@@ -3,7 +3,7 @@ import sharp from "sharp";
 import { getPalette } from "@/theme/palettes";
 import { ALL_LAUNCHER_ALIASES, LAUNCHER_ICONS, LEGACY_LAUNCHER_ALIASES, launcherResourceName } from "@/theme/launcherIcon";
 import { styleIconBackground } from "@/theme/styleIcons";
-import { ICON_THEME_IDS, type StyleId } from "@/theme/themeIds";
+import { ICON_THEME_IDS, type ColorMode, type StyleId } from "@/theme/themeIds";
 import type { Palette, PaletteToken } from "@/theme/palettes";
 
 // The Android launcher icons are generated (npm run generate:launcher-icons); regenerate them
@@ -36,8 +36,17 @@ const pixelAt = async (path: string, across: number, down: number): Promise<{ co
 
 // Points on each style's 108-unit artwork and the colour drawn there. The legacy icon shows the
 // artwork whole; the 108dp foreground layer shows it in its middle 72dp. Fine points sit on strokes
-// too thin to fill a whole pixel below xxxhdpi.
-interface ArtworkSample { x: number; y: number; token: PaletteToken; legacyOnly?: boolean; fine?: boolean }
+// too thin to fill a whole pixel below xxxhdpi. A point outside 0..108 lies in the foreground
+// layer's bleed past the 72dp viewport.
+interface ArtworkSample {
+    x: number;
+    y: number;
+    token: PaletteToken;
+    mode?: ColorMode;
+    legacyOnly?: boolean;
+    foregroundOnly?: boolean;
+    fine?: boolean;
+}
 const SAMPLES: Record<StyleId, ArtworkSample[]> = {
     minimal: [
         { x: 5.4, y: 54, token: "primary", legacyOnly: true },
@@ -45,17 +54,22 @@ const SAMPLES: Record<StyleId, ArtworkSample[]> = {
     ],
     tactile: [
         { x: 5.4, y: 54, token: "background" },
-        { x: 31, y: 31, token: "card" },
+        { x: -20, y: 54, token: "background", foregroundOnly: true },
+        { x: 31, y: 31, token: "card", mode: "light" },
+        { x: 31, y: 31, token: "cell-clue", mode: "dark" },
         { x: 54, y: 46.5, token: "primary" },
     ],
     paper: [
         { x: 54, y: 13, token: "background" },
+        { x: 54, y: -20, token: "background", foregroundOnly: true },
         { x: 63, y: 28.4, token: "primary", fine: true },
         { x: 24, y: 40, token: "margin-line", fine: true },
+        { x: 24, y: -19.5, token: "margin-line", fine: true, foregroundOnly: true },
         { x: 55.5, y: 57.5, token: "danger", fine: true },
     ],
 };
-const samplesAt = (style: StyleId, density: string) => SAMPLES[style].filter(sample => !sample.fine || density === "xxxhdpi");
+const samplesAt = (style: StyleId, mode: ColorMode, density: string) => SAMPLES[style]
+    .filter(sample => (!sample.fine || density === "xxxhdpi") && (!sample.mode || sample.mode === mode));
 const inForeground = (point: number): number => (18 + point * 72 / 108) / 108;
 
 const manifestAliases = (): { alias: string; icon: string }[] =>
@@ -86,7 +100,7 @@ describe("launcher icon assets", () => {
             for (const density of DENSITIES) {
                 const path = `${RES_ROOT}/mipmap-${density}/${foregroundName(icon)}.png`;
 
-                for (const { x, y, token } of samplesAt(icon.style, density).filter(sample => !sample.legacyOnly)) {
+                for (const { x, y, token } of samplesAt(icon.style, icon.mode, density).filter(sample => !sample.legacyOnly)) {
                     expect(await pixelAt(path, inForeground(x), inForeground(y)), `${path} ${token}`)
                         .toEqual({ color: icon.palette[token].toUpperCase(), alpha: 255 });
                 }
@@ -99,7 +113,7 @@ describe("launcher icon assets", () => {
             for (const density of DENSITIES) {
                 const path = `${RES_ROOT}/mipmap-${density}/${icon.name}.png`;
 
-                for (const { x, y, token } of samplesAt(icon.style, density)) {
+                for (const { x, y, token } of samplesAt(icon.style, icon.mode, density).filter(sample => !sample.foregroundOnly)) {
                     expect(await pixelAt(path, x / 108, y / 108), `${path} ${token}`)
                         .toEqual({ color: icon.palette[token].toUpperCase(), alpha: 255 });
                 }

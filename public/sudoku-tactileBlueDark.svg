@@ -3,24 +3,24 @@
 <g clip-path="url(#icon-shape)">
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 108">
 <rect width="108" height="108" fill="#1A1C1F"/>
-<rect x="15" y="15" width="78" height="78" rx="12" fill="#3C4046"/>
+<rect x="15" y="15" width="78" height="78" rx="12" fill="#111214"/>
 <rect x="21" y="24" width="20" height="20" rx="5" fill="#131416"/>
-<rect x="21" y="21" width="20" height="20" rx="5" fill="#282B30"/>
+<rect x="21" y="21" width="20" height="20" rx="5" fill="#3B3F45"/>
 <rect x="44" y="24" width="20" height="20" rx="5" fill="#131416"/>
-<rect x="44" y="21" width="20" height="20" rx="5" fill="#282B30"/>
+<rect x="44" y="21" width="20" height="20" rx="5" fill="#3B3F45"/>
 <rect x="67" y="24" width="20" height="20" rx="5" fill="#131416"/>
-<rect x="67" y="21" width="20" height="20" rx="5" fill="#282B30"/>
+<rect x="67" y="21" width="20" height="20" rx="5" fill="#3B3F45"/>
 <rect x="21" y="47" width="20" height="20" rx="5" fill="#131416"/>
-<rect x="21" y="44" width="20" height="20" rx="5" fill="#282B30"/>
+<rect x="21" y="44" width="20" height="20" rx="5" fill="#3B3F45"/>
 <rect x="44" y="47" width="20" height="20" rx="5" fill="#455262"/>
 <rect x="44" y="44" width="20" height="20" rx="5" fill="#ADCDF5"/>
 <rect x="67" y="47" width="20" height="20" rx="5" fill="#131416"/>
-<rect x="67" y="44" width="20" height="20" rx="5" fill="#282B30"/>
-<rect x="21" y="70" width="20" height="20" rx="5" fill="#282B30"/>
+<rect x="67" y="44" width="20" height="20" rx="5" fill="#3B3F45"/>
+<rect x="21" y="70" width="20" height="20" rx="5" fill="#3B3F45"/>
 <rect x="44" y="70" width="20" height="20" rx="5" fill="#131416"/>
-<rect x="44" y="67" width="20" height="20" rx="5" fill="#282B30"/>
+<rect x="44" y="67" width="20" height="20" rx="5" fill="#3B3F45"/>
 <rect x="67" y="70" width="20" height="20" rx="5" fill="#131416"/>
-<rect x="67" y="67" width="20" height="20" rx="5" fill="#282B30"/>
+<rect x="67" y="67" width="20" height="20" rx="5" fill="#3B3F45"/>
 <path d="M56.9 50.9H51.6L51.3 55M51.6 54.3C52.2 53.6 53 53.3 53.9 53.3C55.4 53.3 56.6 54.4 56.6 55.9C56.6 57.4 55.4 58.4 53.9 58.4C52.7 58.4 51.7 58 50.9 57.2" fill="none" stroke="#1A1C1F" stroke-width="2.2"/>
 </svg>
 </g>
