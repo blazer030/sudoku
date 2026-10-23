@@ -36,6 +36,7 @@ import { IndexedDBGameRepository } from "@/infrastructure/game/IndexedDBGameRepo
 import type { BackButtonService } from "@/application/backButton/BackButtonService";
 import { CapacitorBackButtonAdapter } from "@/infrastructure/backButton/CapacitorBackButtonAdapter";
 import { NoopBackButtonAdapter } from "@/infrastructure/backButton/NoopBackButtonAdapter";
+import { startScreenTracking } from "@/presentation/analytics/screenTracking";
 import { handleBackButton } from "@/presentation/composables/backDismissal";
 
 if (Capacitor.isNativePlatform() && "serviceWorker" in navigator) {
@@ -49,6 +50,8 @@ if (Capacitor.isNativePlatform() && "serviceWorker" in navigator) {
 const analytics: AnalyticsService = Capacitor.isNativePlatform()
     ? new FirebaseAnalyticsAdapter()
     : new NoopAnalyticsAdapter();
+
+startScreenTracking(router, analytics);
 
 const billing: BillingService = Capacitor.isNativePlatform()
     ? new PlayBillingAdapter()
