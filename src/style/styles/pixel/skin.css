@@ -1,50 +1,279 @@
-/* 8-bit: square corners and a hard press that jumps rather than eases. A stub for now: the pixel
-   board, keys, type and motion replace it. Every rule is scoped by [data-style="pixel"]; keyframes
-   start with pixel-. */
+/* 8-bit: a 1989 handheld or a red-and-white home console. Pixel type, square corners, notched pixel
+   frames, hard shadows and presses that jump rather than ease. Every rule is scoped by
+   [data-style="pixel"]; keyframes start with pixel-. Frames and shadows are box-shadow only, so no
+   box changes size and the layout stays shared. */
+
+[data-style="pixel"] {
+    /* Pixel faces have one weight; a faked bold smears the pixels */
+    font-synthesis: none;
+    /* Every corner the shared markup rounds through a theme radius is square */
+    --radius-sm: 0;
+    --radius-md: 0;
+    --radius-lg: 0;
+    --radius-xl: 0;
+    --radius-2xl: 0;
+    --radius-3xl: 0;
+    --radius-button: 0;
+    --radius-icon: 0;
+    --radius-popup: 0;
+    /* Frames are drawn in the text ink, and shadows fall hard in the palette's shadow shade */
+    --pixel-ink: var(--color-foreground);
+    --pixel-drop: var(--color-shadow);
+    --pixel-title-shadow: var(--color-primary-light);
+    /* The grid: thin lines in the mid shade, box lines in the ink, both solid */
+    --board-line: var(--color-border);
+    --board-box-line: var(--color-foreground);
+}
+
+/* The console's title drops a red shadow, as on its box art */
+:root.dark[data-style="pixel"] {
+    --pixel-title-shadow: var(--color-error);
+}
+
+/* Type: Press Start 2P for digits (board, keys, timer, counts), Cubic 11 for every other text and
+   Silkscreen for notes. Repointed only once the faces have loaded (fonts.ts beside this sheet marks
+   it), so nothing paints in a half-loaded stack. */
+[data-style="pixel"][data-pixel-fonts="ready"] {
+    --font-sans: var(--font-pixel);
+    --font-mono: var(--font-pixel);
+    --font-clue: var(--font-pixel-digits);
+    --font-entry: var(--font-pixel-digits);
+    --font-key: var(--font-pixel-digits);
+    --font-timer: var(--font-pixel-digits);
+    --font-note: var(--font-pixel-note);
+}
+
+[data-style="pixel"][data-pixel-fonts="ready"] [data-skin~="badge"] {
+    font-family: var(--font-pixel-digits);
+}
+
+/* Pages are flat: the palette's background, no texture */
+[data-style="pixel"] [data-skin~="page"],
+[data-style="pixel"] [data-skin~="page-header"] {
+    background-color: var(--color-background);
+    background-image: none;
+}
+
+/* The Home title in wide pixel letters with a hard offset shadow */
+[data-style="pixel"] [data-skin~="title"] {
+    text-shadow: 4px 4px 0 var(--pixel-title-shadow);
+}
+
+[data-style="pixel"] [data-skin~="title-glyph"] {
+    display: inline-block;
+    margin-inline: 0.12em;
+}
+
+/* The board is a screen in a notched pixel frame: four 4px bars leave the corners open, and a hard
+   shadow falls to the lower right. Drawn through --tw-shadow, so the hint-mode ring still shows. */
+[data-style="pixel"] [data-skin~="board"] {
+    border-radius: 0;
+    --tw-shadow:
+        0 -4px 0 0 var(--pixel-ink),
+        0 4px 0 0 var(--pixel-ink),
+        -4px 0 0 0 var(--pixel-ink),
+        4px 0 0 0 var(--pixel-ink),
+        8px 8px 0 0 var(--pixel-drop);
+}
+
+/* The grid's outer edge in the box lines' ink. It is positioned, so the line overlay below covers
+   the cells on every board (game, review, walkthrough). */
+[data-style="pixel"] [data-skin~="board"] > div {
+    position: relative;
+    border-color: var(--board-box-line);
+    border-radius: 0;
+}
+
+/* The cells' own borders are 1px and 3px; this overlay redraws the inner lines 2px thin and 4px for
+   the boxes, over the same edges (the 9×9 cells fill the grid exactly). The outer edge is the grid's
+   border, so the overlay leaves it alone. It paints over the cells and under the hint links. */
+[data-style="pixel"] [data-skin~="board"] > div::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+        linear-gradient(to right,
+            transparent calc(100% / 3 - 3px), var(--board-box-line) 0 calc(100% / 3 + 1px),
+            transparent 0 calc(200% / 3 - 3px), var(--board-box-line) 0 calc(200% / 3 + 1px),
+            transparent 0),
+        linear-gradient(to bottom,
+            transparent calc(100% / 3 - 3px), var(--board-box-line) 0 calc(100% / 3 + 1px),
+            transparent 0 calc(200% / 3 - 3px), var(--board-box-line) 0 calc(200% / 3 + 1px),
+            transparent 0),
+        linear-gradient(to right,
+            transparent calc(100% / 9 - 1px), var(--board-line) 0 calc(100% / 9 + 1px),
+            transparent 0 calc(200% / 9 - 1px), var(--board-line) 0 calc(200% / 9 + 1px),
+            transparent 0 calc(400% / 9 - 1px), var(--board-line) 0 calc(400% / 9 + 1px),
+            transparent 0 calc(500% / 9 - 1px), var(--board-line) 0 calc(500% / 9 + 1px),
+            transparent 0 calc(700% / 9 - 1px), var(--board-line) 0 calc(700% / 9 + 1px),
+            transparent 0 calc(800% / 9 - 1px), var(--board-line) 0 calc(800% / 9 + 1px),
+            transparent 0),
+        linear-gradient(to bottom,
+            transparent calc(100% / 9 - 1px), var(--board-line) 0 calc(100% / 9 + 1px),
+            transparent 0 calc(200% / 9 - 1px), var(--board-line) 0 calc(200% / 9 + 1px),
+            transparent 0 calc(400% / 9 - 1px), var(--board-line) 0 calc(400% / 9 + 1px),
+            transparent 0 calc(500% / 9 - 1px), var(--board-line) 0 calc(500% / 9 + 1px),
+            transparent 0 calc(700% / 9 - 1px), var(--board-line) 0 calc(700% / 9 + 1px),
+            transparent 0 calc(800% / 9 - 1px), var(--board-line) 0 calc(800% / 9 + 1px),
+            transparent 0);
+}
+
+/* Keys, controls, buttons and tiles: square, a notched 2px frame and a hard 4px shadow. Colour
+   changes snap; there is no fading in 8-bit. */
+[data-style="pixel"] [data-skin~="key"],
+[data-style="pixel"] [data-skin~="control"],
+[data-style="pixel"] [data-skin~="button"],
+[data-style="pixel"] [data-skin~="tile"] {
+    border-radius: 0;
+    box-shadow:
+        0 -2px 0 0 var(--pixel-ink),
+        0 2px 0 0 var(--pixel-ink),
+        -2px 0 0 0 var(--pixel-ink),
+        2px 0 0 0 var(--pixel-ink),
+        4px 4px 0 0 var(--pixel-drop);
+    transition-duration: 0ms;
+}
+
+/* An option tile's own border would double the frame; it takes the tile's fill instead */
+[data-style="pixel"] [data-skin~="tile"] {
+    border-color: transparent;
+}
+
+/* In note mode a key's digit hops to its place in three steps */
+[data-style="pixel"] [data-skin~="key"] > span {
+    transition-timing-function: steps(3, end);
+}
+
+/* Continue and New Game are the big buttons: a 4px notched frame and an 8px shadow. Continue has a
+   second, inner frame like a cartridge label. */
+[data-style="pixel"] [data-skin~="continue"] {
+    box-shadow:
+        0 -4px 0 0 var(--pixel-ink),
+        0 4px 0 0 var(--pixel-ink),
+        -4px 0 0 0 var(--pixel-ink),
+        4px 0 0 0 var(--pixel-ink),
+        inset 0 0 0 4px var(--color-featured),
+        inset 0 0 0 6px var(--pixel-ink),
+        8px 8px 0 0 var(--pixel-drop);
+}
+
+[data-style="pixel"] [data-skin~="new-game"] {
+    box-shadow:
+        0 -4px 0 0 var(--pixel-ink),
+        0 4px 0 0 var(--pixel-ink),
+        -4px 0 0 0 var(--pixel-ink),
+        4px 0 0 0 var(--pixel-ink),
+        8px 8px 0 0 var(--pixel-drop);
+}
+
+/* The continue card's chips are square frames on the card, without the shared tint */
+[data-style="pixel"] [data-skin~="continue"] > span + span > span {
+    border-radius: 0;
+    background-color: transparent;
+    box-shadow: inset 0 0 0 2px var(--color-on-featured);
+}
+
+/* The remaining-count badge is a square pixel tag, cut out from the key by a ring of the page */
+[data-style="pixel"] [data-skin~="badge"] {
+    border-radius: 0;
+    box-shadow: 0 0 0 2px var(--color-background);
+}
+
+/* An option tile's mark is a square box */
+[data-style="pixel"] [data-skin~="check"] {
+    border-radius: 0;
+    border-color: var(--pixel-ink);
+}
+
+/* The segmented control is a framed strip; its selection is a solid block with no soft shadow */
+[data-style="pixel"] [data-skin~="segmented"] {
+    border-radius: 0;
+    box-shadow:
+        0 -2px 0 0 var(--pixel-ink),
+        0 2px 0 0 var(--pixel-ink),
+        -2px 0 0 0 var(--pixel-ink),
+        2px 0 0 0 var(--pixel-ink);
+}
+
+[data-style="pixel"] [data-skin~="segmented-indicator"] {
+    border-radius: 0;
+    box-shadow: none;
+}
 
 /* Press feedback. vPress sets the data attributes; input never waits for them.
    The overlay is a colour change, so it stays on under reduced motion. */
 [data-style="pixel"] [data-pressed] {
     --press-overlay: color-mix(in srgb, var(--color-foreground) 12%, transparent);
     background-image: linear-gradient(var(--press-overlay), var(--press-overlay));
-    border-radius: 0;
 }
 
 [data-style="pixel"] [data-press-motion] {
-    border-radius: 0;
     transition-property: transform, background-color, color, box-shadow, opacity;
     transition-duration: 0ms;
 }
 
-/* The key drops into its shadow in one step */
-[data-style="pixel"] [data-press-motion][data-pressed] {
+/* A framed piece drops 4px into its shadow in one step, and the shadow is gone */
+[data-style="pixel"] [data-skin~="key"][data-press-motion][data-pressed],
+[data-style="pixel"] [data-skin~="control"][data-press-motion][data-pressed],
+[data-style="pixel"] [data-skin~="button"][data-press-motion][data-pressed],
+[data-style="pixel"] [data-skin~="tile"][data-press-motion][data-pressed] {
     transform: translate(4px, 4px);
+    box-shadow:
+        0 -2px 0 0 var(--pixel-ink),
+        0 2px 0 0 var(--pixel-ink),
+        -2px 0 0 0 var(--pixel-ink),
+        2px 0 0 0 var(--pixel-ink);
 }
 
+/* The big buttons keep half their shadow while held */
+[data-style="pixel"] [data-skin~="continue"][data-press-motion][data-pressed] {
+    box-shadow:
+        0 -4px 0 0 var(--pixel-ink),
+        0 4px 0 0 var(--pixel-ink),
+        -4px 0 0 0 var(--pixel-ink),
+        4px 0 0 0 var(--pixel-ink),
+        inset 0 0 0 4px var(--color-featured),
+        inset 0 0 0 6px var(--pixel-ink),
+        4px 4px 0 0 var(--pixel-drop);
+}
+
+[data-style="pixel"] [data-skin~="new-game"][data-press-motion][data-pressed] {
+    box-shadow:
+        0 -4px 0 0 var(--pixel-ink),
+        0 4px 0 0 var(--pixel-ink),
+        -4px 0 0 0 var(--pixel-ink),
+        4px 0 0 0 var(--pixel-ink),
+        4px 4px 0 0 var(--pixel-drop);
+}
+
+/* A released key jumps back up in two steps */
 @keyframes pixel-press-release {
     0% { transform: translate(4px, 4px); }
     100% { transform: none; }
 }
 
 [data-style="pixel"] [data-press-bounce] {
-    border-radius: 0;
     animation: pixel-press-release 120ms steps(2, end);
 }
 
 /* The segmented control's selection jumps across in steps */
 [data-style="pixel"] .segmented-indicator-motion {
-    border-radius: 0;
     transition: transform 200ms steps(4, end);
 }
 
-/* Reduced motion: no pressing, releasing or sliding; the press overlay stays */
+/* Reduced motion: no dropping, jumping, hopping or sliding; the frames, shadows and press overlay
+   stay */
 @media (prefers-reduced-motion: reduce) {
     [data-style="pixel"] .segmented-indicator-motion {
         transition: none;
     }
 
     [data-style="pixel"] [data-press-motion],
-    [data-style="pixel"] [data-press-motion][data-pressed],
+    [data-style="pixel"] [data-skin~="key"][data-press-motion][data-pressed],
+    [data-style="pixel"] [data-skin~="control"][data-press-motion][data-pressed],
+    [data-style="pixel"] [data-skin~="button"][data-press-motion][data-pressed],
+    [data-style="pixel"] [data-skin~="tile"][data-press-motion][data-pressed],
     [data-style="pixel"] [data-press-bounce] {
         transform: none;
         animation: none;
