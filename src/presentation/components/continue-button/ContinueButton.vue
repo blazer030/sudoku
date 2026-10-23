@@ -15,14 +15,17 @@
         <span class="flex flex-wrap gap-1.5">
             <span
                 class="text-sm bg-on-featured/20 rounded-full px-2.5 py-0.5"
+                data-skin="chip"
                 data-testid="continue-difficulty"
             >{{ difficultyLabel(savedGame.difficulty) }}</span>
             <span
                 class="text-sm bg-on-featured/20 rounded-full px-2.5 py-0.5"
+                data-skin="chip"
                 data-testid="continue-time"
             >{{ formatTime(savedGame.elapsedSeconds) }}</span>
             <span
                 class="text-sm bg-on-featured/20 rounded-full px-2.5 py-0.5"
+                data-skin="chip"
                 data-testid="continue-progress"
             >{{ t("home.continueProgress", { percent: progressPercent }) }}</span>
         </span>
