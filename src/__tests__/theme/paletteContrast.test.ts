@@ -222,6 +222,14 @@ const HIERARCHY_CASES = modeCases((style, themeId, mode, palette) => (isExempt(O
 // on a pattern is checked on each colour rather than on their mix. Hint mode's pattern and answer cells
 // are that shade solid. The skin (--pixel-pattern-shade) draws these.
 const PIXEL_PATTERN_SHADE: Readonly<Record<ColorMode, PaletteToken>> = { light: "highlight", dark: "card" };
+// A completed group's flash (--pixel-flash-fill, --pixel-flash-ink): 掌機 inverts the cell, since its light
+// green is only 1.2:1 on the page; 紅白機 lights it in the same-digit blue under white digits
+const PIXEL_FLASH: Readonly<Record<ColorMode, { fill: PaletteToken; ink: PaletteToken }>> = {
+    light: { fill: "foreground", ink: "background" },
+    dark: { fill: "highlight", ink: "foreground" },
+};
+// Layers that must look different (SURFACE_PAIRS) stand 1.25:1 apart
+const LAYER_APART = 1.25;
 
 interface PixelBoardCase { label: string; foreground: string; background: string; minimum: number }
 
@@ -231,8 +239,8 @@ const PIXEL_BOARD_CASES: PixelBoardCase[] = STYLES.pixel.themes.flatMap(theme =>
     const shade = palette[PIXEL_PATTERN_SHADE[mode]];
     // Player digits are the accent in 紅白機 (the canvas's entry blue)
     const inks: readonly PaletteToken[] = [...BOARD_INKS, "accent"];
-    return { prefix: `pixel/${theme.id}/${mode}`, palette, board, shade, inks };
-}).flatMap(({ prefix, palette, board, shade, inks }) => {
+    return { prefix: `pixel/${theme.id}/${mode}`, palette, board, shade, inks, flash: PIXEL_FLASH[mode] };
+}).flatMap(({ prefix, palette, board, shade, inks, flash }) => {
     const drawn = (name: string, foreground: string, background: string, minimum = TEXT): PixelBoardCase => ({
         label: `${prefix}: ${name} ≥ ${minimum}`, foreground, background, minimum,
     });
@@ -254,11 +262,14 @@ const PIXEL_BOARD_CASES: PixelBoardCase[] = STYLES.pixel.themes.flatMap(theme =>
         drawn("selected cell's highlighted note (foreground on its background disc)", palette.foreground, palette.background),
         // Same-digit cells are a solid fill with the foreground ink
         drawn("same digit (foreground on highlight)", palette.foreground, palette.highlight),
-        // A completed group's cells flash to the highlight and a hint's answer glows in the primary's light
-        // surface ringed in the primary, both solid. Their digits take the foreground ink, which the cases
-        // above check on every look under them between the flashes. The selected cell does neither (it is
-        // inverted; the cursor and the pop mark it), so no page-coloured digit is drawn on these.
-        drawn("completion flash's digits (foreground) on its fill (highlight)", palette.foreground, palette.highlight),
+        // A completed group's cells flash solid, their digits in the flash's ink, and a hint's answer glows in
+        // the primary's light surface ringed in the primary. Between flashes, and around the glow, digits take
+        // the foreground ink, which the cases above check on every look under them. The selected cell does
+        // neither (it is inverted; the cursor and the pop mark it), so no page-coloured digit is drawn on these.
+        drawn(`completion flash's digits (${flash.ink}) on its fill (${flash.fill})`, palette[flash.ink], palette[flash.fill]),
+        // The flash must show on the cells it lights: the board and a dither's shaded pixels
+        drawn(`completion flash's fill (${flash.fill}) apart from the board`, palette[flash.fill], board, LAYER_APART),
+        drawn(`completion flash's fill (${flash.fill}) apart from the pattern shade`, palette[flash.fill], shade, LAYER_APART),
         drawn("hint glow's digits (foreground) on its fill (primary-light)", palette.foreground, palette["primary-light"]),
         drawn("hint glow's ring (primary) on its fill (primary-light)", palette.primary, palette["primary-light"], LARGE_OR_ICON),
         // The continue card's chip: a transparent tag on the card's page colour
@@ -313,6 +324,8 @@ describe("palette contrast", () => {
         expect(consoleCase("same digit (foreground on highlight)")).toMatchObject({ foreground: "#FCFCFC", background: "#0058F8" });
         expect(consoleCase("selection cursor (primary) on the same-digit fill")).toMatchObject({ foreground: "#F8B800", background: "#0058F8" });
         expect(handheldCase("error frame (foreground) on the hatch's shaded pixels")).toMatchObject({ foreground: "#0F380F", background: "#8BAC0F" });
+        expect(handheldCase("completion flash's digits (background) on its fill (foreground)")).toMatchObject({ foreground: "#9BBC0F", background: "#0F380F" });
+        expect(consoleCase("completion flash's digits (foreground) on its fill (highlight)")).toMatchObject({ foreground: "#FCFCFC", background: "#0058F8" });
     });
 
     it.each(PIXEL_BOARD_CASES)("$label", ({ foreground, background, minimum }) => {

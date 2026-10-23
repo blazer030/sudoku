@@ -41,6 +41,9 @@
     --pixel-burst-3: var(--color-foreground);
     --pixel-burst-4: var(--color-border);
     --pixel-burst-leave: var(--color-border);
+    /* A completed group's flash inverts the cell: the light green would be only 1.2:1 on the page */
+    --pixel-flash-fill: var(--color-foreground);
+    --pixel-flash-ink: var(--color-background);
 }
 
 /* No soft shadows or glows: the shared shadow utilities draw in --tw-shadow-color, which does not
@@ -62,6 +65,9 @@
     --pixel-burst-3: var(--color-accent);
     --pixel-burst-4: var(--color-highlight);
     --pixel-burst-leave: var(--color-foreground-secondary);
+    /* The console's flash is its same-digit blue under the foreground ink */
+    --pixel-flash-fill: var(--color-highlight);
+    --pixel-flash-ink: var(--color-foreground);
 }
 
 /* Type: Press Start 2P for digits (board, keys, timer, counts), Cubic 11 for every other text and
@@ -421,18 +427,21 @@
     }
 }
 
-/* A completed row, column or box flashes on and off rather than fading, each half in one jump, its
-   fill solid like the glow's. A hint's answer keeps its glow, which is meant to win over the flash. */
+/* A completed row, column or box flashes on and off rather than fading, each half in one jump: the
+   cell takes the flash's fill and ink at once (inverted in 掌機), solid like the glow. A hint's answer
+   keeps its glow, which is meant to win over the flash. */
 @keyframes pixel-completion-flash {
     50% {
-        background-color: var(--color-highlight);
+        background-color: var(--pixel-flash-fill);
         background-image: none;
+        color: var(--pixel-flash-ink);
     }
 }
 
-/* A flashing or glowing cell's digits take the foreground ink, which reads on the flash, the glow and
-   every cell look under them (the entry blue reads only 2.61 on the console's flash blue). The selected
-   cell is inverted, so neither is drawn behind its page-coloured digit: the cursor and the pop mark it. */
+/* Between flashes, and through a hint's glow, a cell's digits take the foreground ink, which reads on
+   the glow and every cell look under them (the entry blue reads only 2.61 on the console's flash blue).
+   A flashing cell's digit takes the cell's own colour, so it changes with the fill. The selected cell
+   is inverted, so neither is drawn behind its page-coloured digit: the cursor and the pop mark it. */
 [data-style="pixel"] [data-skin~="board"] .animate-hint-reveal-glow:not([data-selected]) {
     --pixel-clue-ink: var(--color-foreground);
     --pixel-entry-ink: var(--color-foreground);
@@ -440,9 +449,12 @@
 }
 
 [data-style="pixel"] [data-skin~="board"] .animate-completion-flash:not(.animate-hint-reveal-glow, [data-selected]) {
-    --pixel-clue-ink: var(--color-foreground);
-    --pixel-entry-ink: var(--color-foreground);
+    color: var(--color-foreground);
     animation: pixel-completion-flash 500ms steps(2, jump-none);
+}
+
+[data-style="pixel"] [data-skin~="board"] .animate-completion-flash:not(.animate-hint-reveal-glow, [data-selected]) > div {
+    color: inherit;
 }
 
 [data-style="pixel"] [data-skin~="board"] .animate-completion-flash[data-selected],
@@ -648,12 +660,13 @@
         animation: none;
     }
 
-    /* A completed group shows the flash's fill, still, for as long as each cell is marked flashing
+    /* A completed group shows the flash's lit look, still, for as long as each cell is marked flashing
        (other styles keep the colour flash itself) */
     [data-style="pixel"] [data-skin~="board"] .animate-completion-flash:not(.animate-hint-reveal-glow, [data-selected]) {
         animation: none;
-        background-color: var(--color-highlight);
+        background-color: var(--pixel-flash-fill);
         background-image: none;
+        color: var(--pixel-flash-ink);
     }
 
     /* A hint's answer shows the glow's colours, still, for as long as it is marked revealed */

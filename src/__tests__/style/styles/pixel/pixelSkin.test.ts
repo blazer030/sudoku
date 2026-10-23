@@ -419,9 +419,30 @@ describe("pixel skin", () => {
         const GLOW = `${BOARD} .animate-hint-reveal-glow:not([data-selected])`;
 
         it("should flash a completed group in steps, leaving the hint's answer to its own glow", () => {
+            const lit = keyframesOf("pixel-completion-flash").get("50%");
+
             expect(declarationsOf(PIXEL_CSS, FLASH).get("animation")).toMatch(/^pixel-completion-flash \d+ms steps\(2, jump-none\)$/);
+            expect(lit?.get("background-color")).toBe("var(--pixel-flash-fill)");
+            expect(lit?.get("color")).toBe("var(--pixel-flash-ink)");
             // The flash's fill is solid: a peer's dither would otherwise be laid over it
-            expect(keyframesOf("pixel-completion-flash").get("50%")?.get("background-image")).toBe("none");
+            expect(lit?.get("background-image")).toBe("none");
+        });
+
+        it("should invert a flashing cell in 掌機 and light it in the same-digit blue in 紅白機, as the board model counts", () => {
+            const handheld = declarationsOf(PIXEL_CSS, SCOPE);
+            const consoleMode = declarationsOf(PIXEL_CSS, ':root.dark[data-style="pixel"]');
+
+            // PIXEL_FLASH: the light green's flash (1.2:1 on the page) was all but invisible
+            expect(handheld.get("--pixel-flash-fill")).toBe("var(--color-foreground)");
+            expect(handheld.get("--pixel-flash-ink")).toBe("var(--color-background)");
+            expect(consoleMode.get("--pixel-flash-fill")).toBe("var(--color-highlight)");
+            expect(consoleMode.get("--pixel-flash-ink")).toBe("var(--color-foreground)");
+        });
+
+        it("should print a flashing cell's digits in the cell's own ink, the foreground between flashes", () => {
+            // The flash changes the cell's colour with its fill, so the digit and its underline follow it
+            expect(declarationsOf(PIXEL_CSS, FLASH).get("color")).toBe("var(--color-foreground)");
+            expect(declarationsOf(PIXEL_CSS, `${FLASH} > div`).get("color")).toBe("inherit");
         });
 
         it("should leave the selected cell's colours alone during a completion flash or a hint's glow", () => {
@@ -429,19 +450,20 @@ describe("pixel skin", () => {
             expect(declarationsOf(PIXEL_CSS, `${BOARD} .animate-hint-reveal-glow[data-selected]`).get("animation")).toBe("none");
         });
 
-        it.each([["flashing", FLASH], ["glowing", GLOW]])("should print a %s cell's digits in the foreground ink, as the board model counts", (_state, selector) => {
-            const declarations = declarationsOf(PIXEL_CSS, selector);
+        it("should print a glowing cell's digits in the foreground ink, as the board model counts", () => {
+            const glowing = declarationsOf(PIXEL_CSS, GLOW);
 
-            expect(declarations.get("--pixel-clue-ink")).toBe("var(--color-foreground)");
-            expect(declarations.get("--pixel-entry-ink")).toBe("var(--color-foreground)");
+            expect(glowing.get("--pixel-clue-ink")).toBe("var(--color-foreground)");
+            expect(glowing.get("--pixel-entry-ink")).toBe("var(--color-foreground)");
         });
 
         it("should mark a completed group with a still fill under reduced motion, as other styles keep their colour flash", () => {
             const still = reducedMotionDeclarationsOf(FLASH);
 
             expect(still.get("animation")).toBe("none");
-            // The flash's own peak colour, for the 500ms each cell keeps the class
-            expect(still.get("background-color")).toBe("var(--color-highlight)");
+            // The flash's own lit look, for the 500ms each cell keeps the class
+            expect(still.get("background-color")).toBe("var(--pixel-flash-fill)");
+            expect(still.get("color")).toBe("var(--pixel-flash-ink)");
             expect(still.get("background-image")).toBe("none");
         });
 
