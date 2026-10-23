@@ -59,16 +59,19 @@ interface Family {
     jobs: FontJob[];
 }
 
-const download = async (path: string): Promise<Buffer> => {
-    const cached = join(CACHE_DIR, GOOGLE_FONTS_COMMIT, path);
+// Fetches a pinned file once and keeps it under the cache, so a rerun works offline
+const downloadCached = async (url: string, cacheKey: string): Promise<Buffer> => {
+    const cached = join(CACHE_DIR, cacheKey);
     if (existsSync(cached)) return readFileSync(cached);
-    const response = await fetch(sourceUrl(path));
-    if (!response.ok) throw new Error(`Could not download ${path}: ${response.status}`);
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`Could not download ${url}: ${response.status}`);
     const buffer = Buffer.from(await response.arrayBuffer());
     mkdirSync(dirname(cached), { recursive: true });
     writeFileSync(cached, buffer);
     return buffer;
 };
+
+const download = (path: string): Promise<Buffer> => downloadCached(sourceUrl(path), join(GOOGLE_FONTS_COMMIT, path));
 
 const main = async (): Promise<void> => {
     const chineseText = ASCII + sourceCharacters();
