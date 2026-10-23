@@ -11,7 +11,10 @@
             />
             {{ title }}
         </h2>
-        <div class="flex flex-col bg-card rounded-2xl shadow-card-sm p-3">
+        <div
+            class="flex flex-col bg-card rounded-2xl shadow-card-sm p-3"
+            data-skin="card"
+        >
             <slot />
         </div>
     </section>

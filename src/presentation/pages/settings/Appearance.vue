@@ -23,7 +23,10 @@
         </div>
 
         <!-- Every choice applies at once: there is no apply button -->
-        <div class="flex flex-col bg-card rounded-2xl shadow-card-sm p-3">
+        <div
+            class="flex flex-col bg-card rounded-2xl shadow-card-sm p-3"
+            data-skin="card"
+        >
             <span class="text-foreground text-[15px] font-medium">{{ t("settings.style.label") }}</span>
             <div class="grid grid-cols-3 gap-2 mt-3">
                 <button

@@ -43,6 +43,7 @@
 
             <div
                 class="flex flex-col gap-3 bg-card rounded-2xl shadow-card p-3"
+                data-skin="card"
                 data-testid="new-game-card"
             >
                 <DifficultySwitcher v-model="difficulty" />
