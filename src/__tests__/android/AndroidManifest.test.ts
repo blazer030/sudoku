@@ -23,4 +23,10 @@ describe("Android manifest", () => {
             expect(alias).toContain('android:targetActivity=".MainActivity"');
         }
     });
+
+    it("should turn off automatic screen reports so analytics shows only our screen names", () => {
+        expect(readFileSync(MANIFEST_PATH, "utf8")).toMatch(
+            /<meta-data\s+android:name="google_analytics_automatic_screen_reporting_enabled"\s+android:value="false"\s*\/>/,
+        );
+    });
 });

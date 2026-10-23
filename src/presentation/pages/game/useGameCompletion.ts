@@ -4,6 +4,7 @@ import type { Sudoku } from "@/domain/game/Sudoku";
 import { useGameStore } from "@/stores/gameStore";
 import { useStatisticsStore } from "@/stores/statisticsStore";
 import type { GameReplayData } from "@/application/statistics/StatisticsRepository";
+import { summarizeReplay } from "@/application/analytics/summarizeReplay";
 import type { AnalyticsService } from "@/application/analytics/AnalyticsService";
 
 export interface CompletionOutcome {
@@ -30,12 +31,14 @@ export const useGameCompletion = ({ sudoku, difficulty, getElapsedSeconds, getRe
         // Compared before this game joins the history
         const isNewRecord = statisticsStore.isNewBestTime(difficulty.value, getElapsedSeconds());
         void gameStore.clearSavedGame();
+        const replay = getReplayData();
+        const replaySummary = summarizeReplay(replay, sudoku.answer);
         statisticsStore.recordGame({
             difficulty: difficulty.value,
             elapsedSeconds: getElapsedSeconds(),
             completed: true,
             hintsUsed: sudoku.hintTracker.recordedUsed,
-            replay: getReplayData(),
+            replay,
         });
         void analytics?.logEvent({
             name: "game_complete",
@@ -43,6 +46,11 @@ export const useGameCompletion = ({ sudoku, difficulty, getElapsedSeconds, getRe
             time_seconds: getElapsedSeconds(),
             hints_used: sudoku.hintTracker.recordedUsed,
             hints_total: sudoku.hintTracker.totalUsed,
+            ...(replaySummary && {
+                undo_count: replaySummary.undoCount,
+                wrong_entries: replaySummary.wrongEntries,
+                used_notes: replaySummary.usedNotes,
+            }),
         });
         onCompleted(origin, { isNewRecord });
     };

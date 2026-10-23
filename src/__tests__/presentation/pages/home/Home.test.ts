@@ -1,3 +1,4 @@
+import { createAnalyticsSpy } from "@/__tests__/fixtures/analyticsSpy";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { nextTick } from "vue";
 import { flushPromises, mount, type VueWrapper } from "@vue/test-utils";
@@ -361,7 +362,7 @@ describe("Home", () => {
 
         describe("staying on Home", () => {
             const openDialog = async () => {
-                const analytics = { logEvent: vi.fn(() => Promise.resolve()) };
+                const analytics = createAnalyticsSpy();
                 const { wrapper, router, pinia } = mountHome({ savedGame: dummySave, analytics });
                 await router.push("/");
                 await router.isReady();
@@ -481,7 +482,7 @@ describe("Home", () => {
         });
 
         it("should continue the saved game from the dialog", async () => {
-            const analytics = { logEvent: vi.fn(() => Promise.resolve()) };
+            const analytics = createAnalyticsSpy();
             const { wrapper, router, pinia } = mountHome({ savedGame: dummySave, analytics });
             await router.push("/");
             await router.isReady();
@@ -500,7 +501,7 @@ describe("Home", () => {
     });
 
     describe("game_abandon analytics", () => {
-        const createAnalytics = () => ({ logEvent: vi.fn(() => Promise.resolve()) });
+        const createAnalytics = () => (createAnalyticsSpy());
 
         const savedGameWithEntries: GameState = {
             ...dummySave,
