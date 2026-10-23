@@ -131,7 +131,7 @@ describe("pixel skin", () => {
     });
 
     it("should draw the continue card's chips as a frame without the tint", () => {
-        const chip = declarationsOf(PIXEL_CSS, `${skin("continue")} > span + span > span`);
+        const chip = declarationsOf(PIXEL_CSS, skin("chip"));
         const layers = shadowLayers(chip.get("box-shadow") ?? "");
 
         expect(chip.get("background-color")).toBe("transparent");

@@ -528,7 +528,7 @@
 }
 
 /* The continue card's chips are square frames on the card, without the shared tint */
-[data-style="pixel"] [data-skin~="continue"] > span + span > span {
+[data-style="pixel"] [data-skin~="chip"] {
     border-radius: 0;
     background-color: transparent;
     box-shadow: inset 0 0 0 2px var(--color-on-featured);
