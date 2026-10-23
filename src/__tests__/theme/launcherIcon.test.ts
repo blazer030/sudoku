@@ -55,6 +55,10 @@ describe("launcher icons", () => {
         ]);
     });
 
+    it("should not repeat a launcher alias", () => {
+        expect(new Set(ALL_LAUNCHER_ALIASES).size).toBe(ALL_LAUNCHER_ALIASES.length);
+    });
+
     it("should turn a key into a lower snake case resource name", () => {
         expect(launcherResourceName("green")).toBe("ic_launcher_green");
         expect(launcherResourceName("paperBlueInk")).toBe("ic_launcher_paper_blue_ink");
