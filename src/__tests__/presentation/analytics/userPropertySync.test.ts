@@ -49,11 +49,22 @@ describe("startUserPropertySync", () => {
         expect(analytics.setUserProperty).toHaveBeenCalledWith("icon_follows_theme", "true");
     });
 
-    it("should never set the icon setting when it is not reported", () => {
+    it("should never set the icon setting when it is not reported", async () => {
         const sources = start(createSources(), false);
         sources.matchLauncherIconToTheme.value = true;
+        await nextTick();
 
         expect(analytics.setUserProperty).not.toHaveBeenCalledWith("icon_follows_theme", expect.anything());
+    });
+
+    it("should set the icon setting once when it changes", async () => {
+        const sources = start();
+        analytics.setUserProperty.mockClear();
+
+        sources.matchLauncherIconToTheme.value = true;
+        await nextTick();
+
+        expect(analytics.setUserProperty).toHaveBeenCalledExactlyOnceWith("icon_follows_theme", "true");
     });
 
     it("should report the effective color mode of a light-only style", () => {
