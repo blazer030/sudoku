@@ -408,6 +408,16 @@
     animation: pixel-burst-out 480ms steps(4, jump-start);
 }
 
+/* A hint's revealed answer pops like a placed digit, and its glow (the shared keyframes) holds, then
+   snaps off at once rather than fading */
+[data-style="pixel"] [data-skin~="board"] .animate-hint-reveal-pop {
+    animation: pixel-pop 480ms steps(1, end);
+}
+
+[data-style="pixel"] [data-skin~="board"] .animate-hint-reveal-glow {
+    animation: hint-reveal-glow 1000ms steps(2, jump-none);
+}
+
 /* A completed row, column or box flashes on and off rather than fading: the shared keyframes, each
    half in one jump. A hint's answer keeps the shared glow, which is meant to win over the flash. */
 [data-style="pixel"] [data-skin~="board"] .animate-completion-flash:not(.animate-hint-reveal-glow) {
@@ -590,7 +600,8 @@
 /* Reduced motion: no dropping, jumping, blinking, sliding, popping or bursting. A pressed piece stays
    where it is but still loses its drop shadow, a change of look rather than a movement, and the press
    overlay stays; hint mode keeps its doubled frame and the selection its cursor, held still, an
-   error's digit stays lit over its hatch, and a completed group does not flash. */
+   error's digit stays lit over its hatch, a hint's answer shows its glow still, and a completed group
+   does not flash. */
 @media (prefers-reduced-motion: reduce) {
     [data-style="pixel"] .segmented-indicator-motion {
         transition: none;
@@ -602,6 +613,7 @@
     [data-style="pixel"] [data-skin~="board"] .value-arrive,
     [data-style="pixel"] [data-skin~="board"] [data-variant].value-leave::after,
     [data-style="pixel"] [data-skin~="board"] .animate-completion-flash:not(.animate-hint-reveal-glow),
+    [data-style="pixel"] [data-skin~="board"] .animate-hint-reveal-pop,
     [data-style="pixel"] [data-press-motion],
     [data-style="pixel"] [data-skin~="key"][data-press-motion][data-pressed],
     [data-style="pixel"] [data-skin~="button"][data-press-motion][data-pressed],
@@ -609,6 +621,13 @@
     [data-style="pixel"] [data-press-bounce] {
         transform: none;
         animation: none;
+    }
+
+    /* A hint's answer shows the glow's colours, still, for as long as it is marked revealed */
+    [data-style="pixel"] [data-skin~="board"] .animate-hint-reveal-glow {
+        animation: none;
+        background-color: var(--color-primary-light);
+        box-shadow: inset 0 0 0 2px var(--color-primary);
     }
 
     /* Its own rule, so a WebView without :has() still reads the list above */

@@ -420,6 +420,24 @@ describe("pixel skin", () => {
             expect(reducedMotionDeclarationsOf(FLASH).get("animation")).toBe("none");
         });
 
+        it("should step a hint's reveal: the answer pops like a placed digit and its glow snaps off", () => {
+            const glow = declarationsOf(PIXEL_CSS, `${BOARD} .animate-hint-reveal-glow`).get("animation") ?? "";
+
+            expect(declarationsOf(PIXEL_CSS, `${BOARD} .animate-hint-reveal-pop`).get("animation")).toBe(declarationsOf(PIXEL_CSS, ARRIVE).get("animation"));
+            expect(glow).toMatch(/^hint-reveal-glow (\d+)ms steps\(2, jump-none\)$/);
+            // The shared glow's own length, inside the 1100ms the revealed cell keeps its class
+            expect(Number(/(\d+)ms/.exec(glow)?.[1])).toBe(1000);
+        });
+
+        it("should hold a hint's reveal still under reduced motion, its glow a plain fill for as long as it shows", () => {
+            const glow = reducedMotionDeclarationsOf(`${BOARD} .animate-hint-reveal-glow`);
+
+            expect(reducedMotionDeclarationsOf(`${BOARD} .animate-hint-reveal-pop`).get("animation")).toBe("none");
+            expect(glow.get("animation")).toBe("none");
+            expect(glow.get("background-color")).toBe("var(--color-primary-light)");
+            expect(glow.get("box-shadow")).toBe("inset 0 0 0 2px var(--color-primary)");
+        });
+
         it("should hold every digit still under reduced motion", () => {
             expect(reducedMotionDeclarationsOf(ARRIVE).get("animation")).toBe("none");
             expect(reducedMotionDeclarationsOf(ARRIVE_BURST).get("animation")).toBe("none");
