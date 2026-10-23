@@ -34,6 +34,9 @@ export const LAUNCHER_ICONS: readonly LauncherIcon[] = STYLE_IDS.flatMap(style =
         mode,
     }))));
 
+/** Every Android launcher alias the manifest declares, named by its key. */
+export const ALL_LAUNCHER_ALIASES: readonly string[] = LAUNCHER_ICONS.map(icon => icon.key);
+
 /** The Android resource name for an icon: "paperBlueInkDark" is ic_launcher_paper_blue_ink_dark. */
 export const launcherResourceName = (key: LauncherIconKey): string =>
     `ic_launcher_${key.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`)}`;
