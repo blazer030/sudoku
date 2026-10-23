@@ -19,6 +19,14 @@
     /* Frames are drawn in the text ink, and shadows fall hard in the palette's shadow shade */
     --pixel-ink: var(--color-foreground);
     --pixel-drop: var(--color-shadow);
+    /* The small pieces' notched 2px frame (four bars that leave the corners open), and the frame with
+       its hard 4px drop shadow */
+    --pixel-frame-bars:
+        0 -2px 0 0 var(--pixel-ink),
+        0 2px 0 0 var(--pixel-ink),
+        -2px 0 0 0 var(--pixel-ink),
+        2px 0 0 0 var(--pixel-ink);
+    --pixel-frame: var(--pixel-frame-bars), 4px 4px 0 0 var(--pixel-drop);
     --pixel-title-shadow: var(--color-primary-light);
     --pixel-hint: var(--color-foreground);
     /* The grid: thin lines in the mid shade, box lines in the ink, both solid */
@@ -305,12 +313,7 @@
 [data-style="pixel"] [data-skin~="button"],
 [data-style="pixel"] [data-skin~="tile"] {
     border-radius: 0;
-    box-shadow:
-        0 -2px 0 0 var(--pixel-ink),
-        0 2px 0 0 var(--pixel-ink),
-        -2px 0 0 0 var(--pixel-ink),
-        2px 0 0 0 var(--pixel-ink),
-        4px 4px 0 0 var(--pixel-drop);
+    box-shadow: var(--pixel-frame);
     transition-duration: 0ms;
 }
 
@@ -319,12 +322,7 @@
    ones below) takes the frame again at one attribute more. */
 [data-style="pixel"] [data-skin~="button"]:not([data-skin~="continue"], [data-skin~="new-game"]) {
     border-radius: 0;
-    box-shadow:
-        0 -2px 0 0 var(--pixel-ink),
-        0 2px 0 0 var(--pixel-ink),
-        -2px 0 0 0 var(--pixel-ink),
-        2px 0 0 0 var(--pixel-ink),
-        4px 4px 0 0 var(--pixel-drop);
+    box-shadow: var(--pixel-frame);
     transition-duration: 0ms;
 }
 
@@ -332,11 +330,7 @@
    not drop when pressed; the press overlay marks it */
 [data-style="pixel"] [data-skin~="control"] {
     border-radius: 0;
-    box-shadow:
-        0 -2px 0 0 var(--pixel-ink),
-        0 2px 0 0 var(--pixel-ink),
-        -2px 0 0 0 var(--pixel-ink),
-        2px 0 0 0 var(--pixel-ink);
+    box-shadow: var(--pixel-frame-bars);
     transition-duration: 0ms;
 }
 
@@ -400,11 +394,7 @@
 /* The segmented control is a framed strip; its selection is a solid block with no soft shadow */
 [data-style="pixel"] [data-skin~="segmented"] {
     border-radius: 0;
-    box-shadow:
-        0 -2px 0 0 var(--pixel-ink),
-        0 2px 0 0 var(--pixel-ink),
-        -2px 0 0 0 var(--pixel-ink),
-        2px 0 0 0 var(--pixel-ink);
+    box-shadow: var(--pixel-frame-bars);
 }
 
 [data-style="pixel"] [data-skin~="segmented-indicator"] {
@@ -426,11 +416,7 @@
 /* The game header's pills are square tags in a 2px notched frame */
 [data-style="pixel"] [data-skin~="pill"] {
     border-radius: 0;
-    box-shadow:
-        0 -2px 0 0 var(--pixel-ink),
-        0 2px 0 0 var(--pixel-ink),
-        -2px 0 0 0 var(--pixel-ink),
-        2px 0 0 0 var(--pixel-ink);
+    box-shadow: var(--pixel-frame-bars);
 }
 
 /* Nothing in 8-bit is round: chips, dots, tags, icon wells and the play button go square too */
@@ -455,11 +441,7 @@
 [data-style="pixel"] [data-skin~="button"][data-press-motion][data-pressed],
 [data-style="pixel"] [data-skin~="tile"][data-press-motion][data-pressed] {
     transform: translate(4px, 4px);
-    box-shadow:
-        0 -2px 0 0 var(--pixel-ink),
-        0 2px 0 0 var(--pixel-ink),
-        -2px 0 0 0 var(--pixel-ink),
-        2px 0 0 0 var(--pixel-ink);
+    box-shadow: var(--pixel-frame-bars);
 }
 
 /* The big buttons keep half their shadow while held */

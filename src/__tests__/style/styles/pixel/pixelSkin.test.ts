@@ -28,7 +28,13 @@ const splitTopLevel = (value: string, separator: RegExp): string[] => {
 
 interface ShadowLayer { inset: boolean; offsetX: number; offsetY: number; blur: number; spread: number }
 
-const shadowLayers = (value: string): ShadowLayer[] => splitTopLevel(value, /,/).map((layer) => {
+// The scope's own custom properties (the shared frames) substituted in, as the browser would
+const resolveScopeProperties = (value: string): string => value.replace(/var\((--pixel-[\w-]+)\)/g, (reference, name: string) => {
+    const definition = declarationsOf(PIXEL_CSS, SCOPE).get(name);
+    return definition === undefined ? reference : resolveScopeProperties(definition);
+});
+
+const shadowLayers = (value: string): ShadowLayer[] => splitTopLevel(resolveScopeProperties(value), /,/).map((layer) => {
     const parts = splitTopLevel(layer, /\s/);
     const lengths = parts.filter(part => /^-?\d*\.?\d+(?:px|em|rem)?$/.test(part)).map(part => Number.parseFloat(part));
     return { inset: parts.includes("inset"), offsetX: lengths[0] ?? 0, offsetY: lengths[1] ?? 0, blur: lengths[2] ?? 0, spread: lengths[3] ?? 0 };
