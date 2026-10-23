@@ -39,7 +39,7 @@
     --pixel-burst-2: var(--color-border);
     --pixel-burst-3: var(--color-foreground);
     --pixel-burst-4: var(--color-border);
-    --pixel-burst-light: var(--color-highlight);
+    --pixel-burst-leave: var(--color-highlight);
 }
 
 /* No soft shadows or glows: the shared shadow utilities draw in --tw-shadow-color, which does not
@@ -60,7 +60,7 @@
     --pixel-burst-2: var(--color-primary);
     --pixel-burst-3: var(--color-accent);
     --pixel-burst-4: var(--color-highlight);
-    --pixel-burst-light: var(--color-foreground-secondary);
+    --pixel-burst-leave: var(--color-foreground-secondary);
 }
 
 /* Type: Press Start 2P for digits (board, keys, timer, counts), Cubic 11 for every other text and
@@ -377,10 +377,10 @@
 }
 
 [data-style="pixel"] [data-skin~="board"] .value-leave::after {
-    --pixel-burst-1: var(--pixel-burst-light);
-    --pixel-burst-2: var(--pixel-burst-light);
-    --pixel-burst-3: var(--pixel-burst-light);
-    --pixel-burst-4: var(--pixel-burst-light);
+    --pixel-burst-1: var(--pixel-burst-leave);
+    --pixel-burst-2: var(--pixel-burst-leave);
+    --pixel-burst-3: var(--pixel-burst-leave);
+    --pixel-burst-4: var(--pixel-burst-leave);
 }
 
 /* A completed row, column or box flashes on and off rather than fading: the shared keyframes, each

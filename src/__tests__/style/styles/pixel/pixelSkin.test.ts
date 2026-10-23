@@ -372,10 +372,10 @@ describe("pixel skin", () => {
             for (const index of [1, 2, 3, 4]) {
                 expect(scope.get(`--pixel-burst-${index}`), `burst ${index}`).toMatch(/^var\(--color-[\w-]+\)$/);
                 expect(consoleMode.get(`--pixel-burst-${index}`), `console burst ${index}`).toMatch(/^var\(--color-[\w-]+\)$/);
-                expect(leave.get(`--pixel-burst-${index}`), `leave burst ${index}`).toBe("var(--pixel-burst-light)");
+                expect(leave.get(`--pixel-burst-${index}`), `leave burst ${index}`).toBe("var(--pixel-burst-leave)");
             }
-            expect(scope.get("--pixel-burst-light")).toBe("var(--color-highlight)");
-            expect(consoleMode.get("--pixel-burst-light")).toBe("var(--color-foreground-secondary)");
+            expect(scope.get("--pixel-burst-leave")).toBe("var(--color-highlight)");
+            expect(consoleMode.get("--pixel-burst-leave")).toBe("var(--color-foreground-secondary)");
         });
 
         it("should burst over the grid lines", () => {
