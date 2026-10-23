@@ -2,10 +2,12 @@ import { readdirSync, readFileSync } from "fs";
 import sharp from "sharp";
 import { getPalette } from "@/theme/palettes";
 import { ALL_LAUNCHER_ALIASES, LAUNCHER_ICONS, LEGACY_LAUNCHER_ALIASES, launcherResourceName } from "@/theme/launcherIcon";
-import { ICON_THEME_IDS } from "@/theme/themeIds";
+import { styleIconBackground } from "@/theme/styleIcons";
+import { ICON_THEME_IDS, type StyleId } from "@/theme/themeIds";
+import type { Palette, PaletteToken } from "@/theme/palettes";
 
 // The Android launcher icons are generated (npm run generate:launcher-icons); regenerate them
-// whenever a primary or on-primary in palettes.ts changes.
+// whenever a palette or the artwork in styleIcons.ts changes.
 
 const RES_ROOT = "android/app/src/main/res";
 const MANIFEST = "android/app/src/main/AndroidManifest.xml";
@@ -13,15 +15,14 @@ const DENSITIES = ["mdpi", "hdpi", "xhdpi", "xxhdpi", "xxxhdpi"];
 
 const icons = LAUNCHER_ICONS.map((icon) => {
     const palette = getPalette(icon.style, icon.themeId, icon.mode);
-    return {
-        ...icon,
-        name: launcherResourceName(icon.key),
-        primary: palette.primary.toUpperCase(),
-        onPrimary: palette["on-primary"].toUpperCase(),
-    };
+    return { ...icon, name: launcherResourceName(icon.key), palette };
 });
 
-const foregroundName = (onPrimary: string): string => `ic_launcher_tiles_${onPrimary.slice(1).toLowerCase()}_foreground`;
+// Minimal's themes share one tile foreground per tile colour; tactile and paper have one per icon
+const foregroundName = ({ key, style, palette }: { key: string; style: StyleId; palette: Palette }): string => style === "minimal"
+    ? `ic_launcher_tiles_${palette["on-primary"].slice(1).toLowerCase()}_foreground`
+    : `${launcherResourceName(key)}_foreground`;
+const monochromeName = (style: StyleId): string => `ic_launcher_${style}_monochrome`;
 
 const hexOf = (red: number, green: number, blue: number): string =>
     `#${[red, green, blue].map(channel => channel.toString(16).padStart(2, "0")).join("")}`.toUpperCase();
@@ -33,52 +34,83 @@ const pixelAt = async (path: string, across: number, down: number): Promise<{ co
     return { color: hexOf(data[offset], data[offset + 1], data[offset + 2]), alpha: data[offset + 3] };
 };
 
-// The top row's solid tile sits at (100..140, 48..88) of the 240 artwork, and the 108dp
-// foreground layer draws the 144-wide tile grid 43.2dp wide in its centre
-const LEGACY_BACKGROUND = [0.05, 0.5] as const;
-const LEGACY_SOLID_TILE = [0.5, 68 / 240] as const;
-const FOREGROUND_SOLID_TILE = [0.5, 38.4 / 108] as const;
+// Points on each style's 108-unit artwork and the colour drawn there. The legacy icon shows the
+// artwork whole; the 108dp foreground layer shows it in its middle 72dp. Fine points sit on strokes
+// too thin to fill a whole pixel below xxxhdpi.
+interface ArtworkSample { x: number; y: number; token: PaletteToken; legacyOnly?: boolean; fine?: boolean }
+const SAMPLES: Record<StyleId, ArtworkSample[]> = {
+    minimal: [
+        { x: 5.4, y: 54, token: "primary", legacyOnly: true },
+        { x: 54, y: 30.6, token: "on-primary" },
+    ],
+    tactile: [
+        { x: 5.4, y: 54, token: "background" },
+        { x: 31, y: 31, token: "card" },
+        { x: 54, y: 46.5, token: "primary" },
+    ],
+    paper: [
+        { x: 54, y: 13, token: "background" },
+        { x: 63, y: 28.4, token: "primary", fine: true },
+        { x: 24, y: 40, token: "margin-line", fine: true },
+        { x: 55.5, y: 57.5, token: "danger", fine: true },
+    ],
+};
+const samplesAt = (style: StyleId, density: string) => SAMPLES[style].filter(sample => !sample.fine || density === "xxxhdpi");
+const inForeground = (point: number): number => (18 + point * 72 / 108) / 108;
 
 const manifestAliases = (): { alias: string; icon: string }[] =>
     [...readFileSync(MANIFEST, "utf8").matchAll(/<activity-alias\s[^>]*?android:name="\.(\w+)"[^>]*?android:icon="@mipmap\/(\w+)"/g)]
         .map(([, alias, icon]) => ({ alias, icon }));
 
 describe("launcher icon assets", () => {
-    it("should back each adaptive icon with its theme's primary in that mode", () => {
+    it("should back each adaptive icon with the colour behind its style's artwork", () => {
         const colors = readFileSync(`${RES_ROOT}/values/ic_launcher_theme_colors.xml`, "utf8");
 
-        for (const { name, primary } of icons) {
-            expect(colors, name).toContain(`<color name="${name}_background">${primary}</color>`);
+        for (const { name, style, palette } of icons) {
+            expect(colors, name).toContain(`<color name="${name}_background">${styleIconBackground(style, palette)}</color>`);
         }
     });
 
-    it("should layer each adaptive icon's tiles in its palette's on-primary", () => {
-        for (const { name, onPrimary } of icons) {
-            const xml = readFileSync(`${RES_ROOT}/mipmap-anydpi-v26/${name}.xml`, "utf8");
+    it("should layer each adaptive icon's foreground and its style's monochrome", () => {
+        for (const icon of icons) {
+            const xml = readFileSync(`${RES_ROOT}/mipmap-anydpi-v26/${icon.name}.xml`, "utf8");
 
-            expect(xml, name).toContain(`<background android:drawable="@color/${name}_background"/>`);
-            expect(xml, name).toContain(`<foreground android:drawable="@mipmap/${foregroundName(onPrimary)}"/>`);
-            expect(xml, name).toContain(`<monochrome android:drawable="@mipmap/${foregroundName(onPrimary)}"/>`);
+            expect(xml, icon.name).toContain(`<background android:drawable="@color/${icon.name}_background"/>`);
+            expect(xml, icon.name).toContain(`<foreground android:drawable="@mipmap/${foregroundName(icon)}"/>`);
+            expect(xml, icon.name).toContain(`<monochrome android:drawable="@mipmap/${monochromeName(icon.style)}"/>`);
         }
     });
 
-    it("should draw each tile foreground's solid tiles in its colour at every density", async () => {
-        for (const onPrimary of new Set(icons.map(icon => icon.onPrimary))) {
+    it("should draw each foreground's artwork in its palette at every density", async () => {
+        for (const icon of icons) {
             for (const density of DENSITIES) {
-                const path = `${RES_ROOT}/mipmap-${density}/${foregroundName(onPrimary)}.png`;
+                const path = `${RES_ROOT}/mipmap-${density}/${foregroundName(icon)}.png`;
 
-                expect(await pixelAt(path, ...FOREGROUND_SOLID_TILE), path).toEqual({ color: onPrimary, alpha: 255 });
+                for (const { x, y, token } of samplesAt(icon.style, density).filter(sample => !sample.legacyOnly)) {
+                    expect(await pixelAt(path, inForeground(x), inForeground(y)), `${path} ${token}`)
+                        .toEqual({ color: icon.palette[token].toUpperCase(), alpha: 255 });
+                }
             }
         }
     });
 
-    it("should render each legacy icon in its primary with on-primary tiles at every density", async () => {
-        for (const { name, primary, onPrimary } of icons) {
+    it("should render each legacy icon as its style's artwork in its palette at every density", async () => {
+        for (const icon of icons) {
             for (const density of DENSITIES) {
-                const path = `${RES_ROOT}/mipmap-${density}/${name}.png`;
+                const path = `${RES_ROOT}/mipmap-${density}/${icon.name}.png`;
 
-                expect(await pixelAt(path, ...LEGACY_BACKGROUND), path).toEqual({ color: primary, alpha: 255 });
-                expect(await pixelAt(path, ...LEGACY_SOLID_TILE), path).toEqual({ color: onPrimary, alpha: 255 });
+                for (const { x, y, token } of samplesAt(icon.style, density)) {
+                    expect(await pixelAt(path, x / 108, y / 108), `${path} ${token}`)
+                        .toEqual({ color: icon.palette[token].toUpperCase(), alpha: 255 });
+                }
+            }
+        }
+    });
+
+    it("should keep each style's monochrome layer at every density", () => {
+        for (const style of new Set(icons.map(icon => icon.style))) {
+            for (const density of DENSITIES) {
+                expect(readdirSync(`${RES_ROOT}/mipmap-${density}`), density).toContain(`${monochromeName(style)}.png`);
             }
         }
     });
@@ -114,12 +146,15 @@ describe("launcher icon assets", () => {
         expect(colors).not.toMatch(/ic_launcher_paper_\w+_dark_background/);
     });
 
-    it("should keep only the tile foregrounds some icon uses", () => {
-        const usedForegrounds = new Set(icons.map(({ onPrimary }) => `${foregroundName(onPrimary)}.png`));
+    it("should keep only the foreground and monochrome layers some adaptive icon uses", () => {
+        const xmlDirectory = `${RES_ROOT}/mipmap-anydpi-v26`;
+        const usedLayers = new Set(readdirSync(xmlDirectory)
+            .flatMap(file => [...readFileSync(`${xmlDirectory}/${file}`, "utf8").matchAll(/@mipmap\/(\w+)/g)])
+            .map(([, layer]) => `${layer}.png`));
         for (const density of DENSITIES) {
-            const foregrounds = readdirSync(`${RES_ROOT}/mipmap-${density}`).filter(file => file.startsWith("ic_launcher_tiles_"));
+            const layers = readdirSync(`${RES_ROOT}/mipmap-${density}`).filter(file => /_(foreground|monochrome)\.png$/.test(file));
 
-            expect(foregrounds.filter(file => !usedForegrounds.has(file)), density).toEqual([]);
+            expect(layers.filter(file => !usedLayers.has(file)), density).toEqual([]);
         }
     });
 

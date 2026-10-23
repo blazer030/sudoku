@@ -12,15 +12,15 @@
     <color name="ic_launcher_minimal_pink_dark_background">#ED9AB1</color>
     <color name="ic_launcher_teal_background">#0A5E5F</color>
     <color name="ic_launcher_minimal_teal_dark_background">#75BEBE</color>
-    <color name="ic_launcher_tactile_green_background">#1F5C3A</color>
-    <color name="ic_launcher_tactile_green_dark_background">#9CDEB4</color>
-    <color name="ic_launcher_tactile_blue_background">#24508A</color>
-    <color name="ic_launcher_tactile_blue_dark_background">#ADCDF5</color>
-    <color name="ic_launcher_tactile_rust_background">#782F16</color>
-    <color name="ic_launcher_tactile_rust_dark_background">#F7B89D</color>
-    <color name="ic_launcher_tactile_slate_background">#34506E</color>
-    <color name="ic_launcher_tactile_slate_dark_background">#B7CBE5</color>
-    <color name="ic_launcher_paper_blue_ink_background">#2B4A7A</color>
-    <color name="ic_launcher_paper_green_ink_background">#235A3C</color>
-    <color name="ic_launcher_paper_red_ink_background">#8E2533</color>
+    <color name="ic_launcher_tactile_green_background">#EBE7E0</color>
+    <color name="ic_launcher_tactile_green_dark_background">#1A1C1F</color>
+    <color name="ic_launcher_tactile_blue_background">#EBE7E0</color>
+    <color name="ic_launcher_tactile_blue_dark_background">#1A1C1F</color>
+    <color name="ic_launcher_tactile_rust_background">#EBE7E0</color>
+    <color name="ic_launcher_tactile_rust_dark_background">#1A1C1F</color>
+    <color name="ic_launcher_tactile_slate_background">#EBE7E0</color>
+    <color name="ic_launcher_tactile_slate_dark_background">#1A1C1F</color>
+    <color name="ic_launcher_paper_blue_ink_background">#F4EDE0</color>
+    <color name="ic_launcher_paper_green_ink_background">#F4EDE0</color>
+    <color name="ic_launcher_paper_red_ink_background">#F4EDE0</color>
 </resources>
