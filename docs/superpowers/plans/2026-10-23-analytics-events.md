@@ -224,7 +224,7 @@
   - The identifiers bullet adds that on the web, Google Analytics stores a random client ID in a first-party cookie.
   - The app-activity bullet adds walkthrough use and per-game undo and mistake counts.
   - The "Your choices" list adds that on the web, clearing the site's cookies resets the client ID and browser tracking protection can block collection.
-  - Update the "Last updated" date to 2026-10-23. The owner reviews the wording.
+  - Update the "Last updated" date to "October 23, 2026", in the page's own format. The owner reviews the wording.
 - [ ] **Step 3:** Update `CLAUDE.md` and `README.md`.
   - `CLAUDE.md` presentation list: add `analytics/` (screen tracking and user-property sync).
   - `CLAUDE.md` infrastructure line: Firebase now also serves the production web build.
