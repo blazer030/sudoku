@@ -3,7 +3,7 @@ import { getPalette, systemBarColor } from "@/theme/palettes";
 import { updateFavicon, updateMetaThemeColor } from "@/application/PwaThemeUpdater";
 import { launcherIconKey } from "@/theme/launcherIcon";
 import { syncPaperFonts } from "@/style/styles/paper/fonts";
-import { effectiveColorMode, type ColorMode, ColorThemeId, StyleId } from "@/theme/themeIds";
+import { effectiveColorMode, type ColorMode, type ColorThemeId, type StyleId } from "@/theme/themeIds";
 import type { SystemBarService } from "@/application/systemBar/SystemBarService";
 import type { AppearanceBridgeService } from "@/application/appearanceBridge/AppearanceBridgeService";
 

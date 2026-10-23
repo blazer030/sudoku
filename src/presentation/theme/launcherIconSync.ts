@@ -1,6 +1,6 @@
 import { computed, watch, type Ref } from "vue";
 import { launcherIconKey } from "@/theme/launcherIcon";
-import { effectiveColorMode, type ColorMode, ColorThemeId, StyleId } from "@/theme/themeIds";
+import { effectiveColorMode, type ColorMode, type ColorThemeId, type StyleId } from "@/theme/themeIds";
 import type { IconService } from "@/application/icon/IconService";
 
 export interface LauncherIconSources {
