@@ -140,6 +140,78 @@ describe("BoardCell", () => {
         });
     });
 
+    describe("leaving", () => {
+        afterEach(() => {
+            vi.unstubAllGlobals();
+        });
+
+        const stubReducedMotion = (reduce: boolean) => {
+            vi.stubGlobal("matchMedia", (query: string) => ({
+                matches: reduce && query === "(prefers-reduced-motion: reduce)",
+                media: query,
+            }));
+        };
+
+        it("should mark the cell while its digit leaves, until the cell's animation ends", async () => {
+            stubReducedMotion(false);
+            const wrapper = mountCell({ value: 5 });
+
+            await wrapper.setProps({ value: 0 });
+            expect(wrapper.classes()).toContain("value-leave");
+
+            await wrapper.trigger("animationend");
+            expect(wrapper.classes()).not.toContain("value-leave");
+        });
+
+        it("should drop the leaving mark on its own when the active style has no leaving animation", async () => {
+            // Undo, game review and the walkthrough clear digits too; the mark must never stick
+            vi.useFakeTimers();
+            try {
+                stubReducedMotion(false);
+                const wrapper = mountCell({ value: 5 });
+                await wrapper.setProps({ value: 0 });
+                expect(wrapper.classes()).toContain("value-leave");
+
+                vi.advanceTimersByTime(ARRIVAL_SETTLE_MS);
+                await nextTick();
+
+                expect(wrapper.classes()).not.toContain("value-leave");
+            } finally {
+                vi.useRealTimers();
+            }
+        });
+
+        it("should keep the leaving mark when an animation inside the cell ends", async () => {
+            stubReducedMotion(false);
+            const wrapper = mountCell({ value: 5 });
+            await wrapper.setProps({ value: 0, notes: [3] });
+
+            await wrapper.get("span").trigger("animationend");
+
+            expect(wrapper.classes()).toContain("value-leave");
+        });
+
+        it("should not mark a leaving digit under reduced motion", async () => {
+            stubReducedMotion(true);
+            const wrapper = mountCell({ value: 5 });
+
+            await wrapper.setProps({ value: 0 });
+
+            expect(wrapper.classes()).not.toContain("value-leave");
+        });
+
+        it("should settle an arrival when the cell's own animation ends", async () => {
+            // A style may draw the arrival on the cell (8-bit's burst) as well as on the digit
+            stubReducedMotion(false);
+            const wrapper = mountCell({ value: 0 });
+            await wrapper.setProps({ value: 5 });
+
+            await wrapper.trigger("animationend");
+
+            expect(wrapper.get("[data-testid='cell-value']").classes()).not.toContain("value-arrive");
+        });
+    });
+
     it("should render notes grid when value is zero and notes are provided", () => {
         const wrapper = mountCell({ value: 0, notes: [1, 3, 5] });
 

@@ -5,11 +5,13 @@
             positionClasses,
             flashing ? 'animate-completion-flash' : '',
             popping ? 'animate-hint-reveal-glow' : '',
+            leaving ? 'value-leave' : '',
         ]"
         :data-selected="selected ? '' : undefined"
         :data-value-kind="value !== 0 ? valueKind : undefined"
         :data-variant="variant"
         class="flex justify-center items-center aspect-square min-w-0 min-h-0"
+        @animationend.self="settle"
     >
         <div
             v-if="value !== 0"
@@ -118,8 +120,10 @@ const VALUE_FONT_WEIGHTS: Record<ValueFontWeight, string> = {
     medium: "font-medium",
 };
 
-// Only a style sheet gives value-arrive a look; in styles without one it settles on a timer
-const { arriving, settle } = useArrivalMotion(toRef(props, "value"), toRef(props, "popping"));
+// Only a style sheet gives value-arrive (on the digit) and value-leave (on the cell) a look; in styles
+// without one they settle on a timer. The cell's own animations (a style's burst on a pseudo-element)
+// settle them too; the cell ignores animations ending inside it.
+const { arriving, leaving, settle } = useArrivalMotion(toRef(props, "value"), toRef(props, "popping"));
 
 const backgroundClass = computed(() => VARIANT_BACKGROUNDS[props.variant]);
 
