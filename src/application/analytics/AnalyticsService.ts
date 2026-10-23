@@ -13,8 +13,23 @@ export type AnalyticsEvent =
     | { name: "donate_tap"; tier: DonateTier }
     | { name: "donate_success"; tier: DonateTier; amount_usd: number };
 
+export type ScreenName =
+    | "home"
+    | "game"
+    | "statistics"
+    | "settings"
+    | "appearance"
+    | "changelog"
+    | "donate"
+    | "game_review"
+    | "solver";
+
+export type UserPropertyName = "style" | "color_theme" | "color_mode" | "language" | "icon_follows_theme";
+
 export interface AnalyticsService {
     logEvent(event: AnalyticsEvent): Promise<void>;
+    setScreen(screen: ScreenName): Promise<void>;
+    setUserProperty(name: UserPropertyName, value: string): Promise<void>;
 }
 
 export const ANALYTICS_KEY: InjectionKey<AnalyticsService> = Symbol("AnalyticsService");
