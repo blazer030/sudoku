@@ -244,6 +244,7 @@ describe("startAppearanceSync", () => {
         afterEach(() => {
             Reflect.deleteProperty(document, "fonts");
             delete document.documentElement.dataset.paperFonts;
+            delete document.documentElement.dataset.pixelFonts;
         });
 
         it("should mark paper's fonts ready once Caveat's digits have loaded", async () => {
@@ -257,6 +258,33 @@ describe("startAppearanceSync", () => {
 
             expect(load).toHaveBeenCalledWith(expect.stringMatching(/^700 .*Caveat/), "0123456789");
             expect(fontsState()).toBe("ready");
+        });
+
+        it("should mark pixel's fonts ready once Press Start 2P, Silkscreen and Cubic 11 have loaded", async () => {
+            const load = stubFontLoading(1);
+            const sources = buildSources("classic", "light", "pixel");
+            stop = startAppearanceSync(sources, systemBar, appearanceBridge);
+            expect(document.documentElement.dataset.pixelFonts).toBeUndefined();
+
+            await finishLoadingFonts();
+
+            const families = load.mock.calls.map(([font]) => font).join(" ");
+            expect(families).toContain("Press Start 2P");
+            expect(families).toContain("Silkscreen");
+            expect(families).toContain("Cubic 11");
+            expect(document.documentElement.dataset.pixelFonts).toBe("ready");
+        });
+
+        it("should drop pixel's ready mark when leaving pixel", async () => {
+            stubFontLoading(1);
+            const sources = buildSources("classic", "light", "pixel");
+            stop = startAppearanceSync(sources, systemBar, appearanceBridge);
+            await finishLoadingFonts();
+
+            sources.style.value = "minimal";
+            await nextTick();
+
+            expect(document.documentElement.dataset.pixelFonts).toBeUndefined();
         });
 
         it("should leave paper at the fallback size when no Caveat face loads", async () => {

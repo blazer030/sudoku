@@ -1,7 +1,7 @@
 /* The app's web fonts, bundled so every style reads the same offline. Generated subsets: run
    npm run generate:fonts after adding copy with new Chinese characters. The installed web app's
-   service worker precaches all five files and the Android app ships them, so they are there
-   offline; a page only reads Caveat and LXGW WenKai TC while paper's text uses them. Each family's
+   service worker precaches all eight files and the Android app ships them, so they are there
+   offline; a page only reads Caveat and LXGW WenKai TC while paper's text uses them, and the pixel faces while the 8-bit style does. Each family's
    licence (SIL Open Font License) is in public/fonts/licenses/. */
 
 @font-face {
@@ -44,4 +44,31 @@
     font-weight: 700;
     font-display: swap;
     src: url("../assets/fonts/lxgw-wenkai-tc-bold.woff2") format("woff2");
+}
+
+/* The 8-bit style's digits: board, keys, timer and counts */
+@font-face {
+    font-family: "Press Start 2P";
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url("../assets/fonts/press-start-2p.woff2") format("woff2");
+}
+
+/* The 8-bit style's pencil marks */
+@font-face {
+    font-family: "Silkscreen";
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url("../assets/fonts/silkscreen.woff2") format("woff2");
+}
+
+/* The 8-bit style's text in both languages (俐方體 11 號), cut to the characters the app writes */
+@font-face {
+    font-family: "Cubic 11";
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url("../assets/fonts/cubic-11.woff2") format("woff2");
 }

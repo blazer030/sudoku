@@ -29,6 +29,11 @@
   --font-wenkai: "LXGW WenKai TC", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
   /* Paper's mono stack: Chinese inside mono text (「已放棄」) is written in WenKai too */
   --font-mono-paper: "Roboto Mono", "LXGW WenKai TC", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", monospace;
+  /* 8-bit style's stacks: Press Start 2P for digits only, Cubic 11 for all other text, Silkscreen for
+     notes. Nothing points at them until the pixel skin does. */
+  --font-pixel-digits: "Press Start 2P", "Cubic 11", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", monospace;
+  --font-pixel: "Cubic 11", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+  --font-pixel-note: "Silkscreen", "Cubic 11", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", monospace;
   --font-print: "Times New Roman", "Noto Serif TC", "Songti TC", "PMingLiU", serif;
   /* Board, key and timer faces; a style may point them at its own stacks */
   --font-clue: var(--font-sans);
