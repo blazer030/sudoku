@@ -256,7 +256,6 @@ describe("Appearance.vue light and dark", () => {
         expect(options.map(option => option.attributes("data-testid"))).toEqual(["appearance-light", "appearance-dark"]);
         expect(options.map(option => option.text())).toEqual([t("settings.colorMode.light"), t("settings.colorMode.dark")]);
         expect(wrapper.get("[data-testid='appearance-light']").attributes("aria-pressed")).toBe("true");
-        expect(wrapper.find("[data-testid='appearance-only-light']").exists()).toBe(false);
     });
 
     it("should switch light and dark at once and store the choice", async () => {
@@ -276,20 +275,20 @@ describe("Appearance.vue light and dark", () => {
         }
     });
 
-    it("should say a light-only style has only light, keeping the stored mode", async () => {
+    it("should leave out light and dark for a one-mode style, keeping the stored mode", async () => {
         const wrapper = mountAppearance();
         const settingsStore = useSettingsStore();
         settingsStore.setAppearance("dark");
 
         await wrapper.get("[data-testid='style-option-paper']").trigger("click");
 
+        expect(wrapper.find("[data-testid='appearance-mode-label']").exists()).toBe(false);
         expect(wrapper.find("[data-testid='appearance-switcher']").exists()).toBe(false);
-        expect(wrapper.get("[data-testid='appearance-only-light']").text()).toBe(t("settings.colorMode.onlyLight"));
         expect(settingsStore.appearance).toBe("dark");
 
         await wrapper.get("[data-testid='style-option-minimal']").trigger("click");
 
-        expect(wrapper.find("[data-testid='appearance-only-light']").exists()).toBe(false);
+        expect(wrapper.find("[data-testid='appearance-mode-label']").exists()).toBe(true);
         expect(wrapper.get("[data-testid='appearance-dark']").attributes("aria-pressed")).toBe("true");
     });
 });

@@ -77,25 +77,22 @@
                 </button>
             </div>
 
-            <span class="text-foreground text-[15px] font-medium mt-5">{{ t("settings.colorMode.label") }}</span>
-            <SegmentedControl
-                v-if="modeOptions.length > 1"
-                :model-value="settingsStore.appearance"
-                :options="modeOptions"
-                class="mt-3"
-                data-testid="appearance-switcher"
-                inset
-                test-id-prefix="appearance"
-                @update:model-value="settingsStore.setAppearance"
-            />
-            <!-- A one-mode style says so instead; the stored mode is kept for the next style that has both -->
-            <p
-                v-else
-                class="flex items-center h-12 mt-3 px-1 text-foreground-secondary text-sm"
-                data-testid="appearance-only-light"
-            >
-                {{ t("settings.colorMode.onlyLight") }}
-            </p>
+            <!-- A one-mode style has nothing to choose; the stored mode is kept for the next style that has both -->
+            <template v-if="modeOptions.length > 1">
+                <span
+                    class="text-foreground text-[15px] font-medium mt-5"
+                    data-testid="appearance-mode-label"
+                >{{ t("settings.colorMode.label") }}</span>
+                <SegmentedControl
+                    :model-value="settingsStore.appearance"
+                    :options="modeOptions"
+                    class="mt-3"
+                    data-testid="appearance-switcher"
+                    inset
+                    test-id-prefix="appearance"
+                    @update:model-value="settingsStore.setAppearance"
+                />
+            </template>
 
             <OptionTile
                 v-if="platform.isNative"

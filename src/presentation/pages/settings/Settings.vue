@@ -180,7 +180,7 @@ import { usePlatform } from "@/presentation/composables/usePlatform";
 import { appVersion } from "@/utils/appVersion";
 import { PRIVACY_POLICY_URL } from "@/presentation/pages/settings/externalLinks";
 import { ROUTER_PATH } from "@/router";
-import { effectiveColorMode } from "@/theme/themeIds";
+import { STYLE_COLOR_MODES } from "@/theme/themeIds";
 import type { LanguagePreference } from "@/application/settings/SettingsStorage";
 import { getPalette } from "@/theme/palettes";
 import { vPress } from "@/presentation/directives/press";
@@ -211,13 +211,17 @@ const languageOptions = computed((): { value: LanguagePreference; label: string 
     { value: "zh-Hant", label: t("settings.language.traditionalChinese") },
 ]);
 
-// The style's icon as the launcher would show it, and 「<mode>・<theme>」 with the mode the style actually shows
+// The style's icon as the launcher would show it, and 「<mode>・<theme>」, or just the theme when the style has one mode
 const currentPalette = computed(() => getPalette(settingsStore.style, settingsStore.colorTheme, settingsStore.appearance));
 
-const appearanceSummary = computed(() => t("settings.appearanceSummary", {
-    mode: t(`settings.colorMode.${effectiveColorMode(settingsStore.style, settingsStore.appearance)}`),
-    theme: t(`settings.colorThemes.${settingsStore.colorTheme}`),
-}));
+const appearanceSummary = computed(() => {
+    const theme = t(`settings.colorThemes.${settingsStore.colorTheme}`);
+    if (STYLE_COLOR_MODES[settingsStore.style].length < 2) return theme;
+    return t("settings.appearanceSummary", {
+        mode: t(`settings.colorMode.${settingsStore.appearance}`),
+        theme,
+    });
+});
 
 const toggles = computed(() => [
     {

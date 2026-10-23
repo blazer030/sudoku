@@ -25,7 +25,6 @@ export const zhHant: MessageSchema = {
             label: "深淺色",
             light: "淺色",
             dark: "深色",
-            onlyLight: "這個風格只有淺色",
         },
         appearanceSummary: "{mode}・{theme}",
         colorTheme: "色彩主題",

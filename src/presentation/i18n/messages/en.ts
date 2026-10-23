@@ -28,7 +28,6 @@ export const en = {
             label: "Color mode",
             light: "Light",
             dark: "Dark",
-            onlyLight: "This style is light only",
         },
         appearanceSummary: "{mode} · {theme}",
         colorTheme: "Color theme",

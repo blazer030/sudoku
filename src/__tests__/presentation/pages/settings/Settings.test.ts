@@ -283,7 +283,16 @@ describe("Settings.vue appearance row", () => {
         expect(summaryOf(wrapper)).toContain(t("settings.colorThemes.blue"));
     });
 
-    it("should name light for a light-only style even while dark is stored", async () => {
+    it("should show only the theme for a one-mode style", async () => {
+        const wrapper = mountSettings();
+        const settingsStore = useSettingsStore();
+        settingsStore.setStyle("paper");
+        await nextTick();
+
+        expect(summaryOf(wrapper)).toBe(t(`settings.colorThemes.${settingsStore.colorTheme}`));
+    });
+
+    it("should keep a one-mode style's summary while dark is stored", async () => {
         const wrapper = mountSettings();
         const settingsStore = useSettingsStore();
         settingsStore.setStyle("paper");
