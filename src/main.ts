@@ -37,6 +37,7 @@ import type { BackButtonService } from "@/application/backButton/BackButtonServi
 import { CapacitorBackButtonAdapter } from "@/infrastructure/backButton/CapacitorBackButtonAdapter";
 import { NoopBackButtonAdapter } from "@/infrastructure/backButton/NoopBackButtonAdapter";
 import { startScreenTracking } from "@/presentation/analytics/screenTracking";
+import { startUserPropertySync } from "@/presentation/analytics/userPropertySync";
 import { handleBackButton } from "@/presentation/composables/backDismissal";
 
 if (Capacitor.isNativePlatform() && "serviceWorker" in navigator) {
@@ -100,5 +101,10 @@ await Promise.all([
     gameStore.loadFromRepository(),
 ]);
 startLocaleSync(storeToRefs(useSettingsStore()).language);
+startUserPropertySync(
+    { ...storeToRefs(useSettingsStore()), locale: i18n.global.locale },
+    analytics,
+    { reportsIconSetting: Capacitor.isNativePlatform() },
+);
 
 app.mount("#root");
