@@ -44,6 +44,29 @@ describe("SettingsStorage", () => {
             expect(loadSettings().style).toBe("minimal");
         });
 
+        it("should treat saved settings that are not valid JSON as no saved settings", () => {
+            localStorage.setItem("sudoku-settings", "{not json");
+
+            expect(loadSettings().style).toBe("minimal");
+        });
+
+        it.each(["42", "[\"paper\"]", "\"paper\""])("should treat saved settings that are not an object (%s) as no saved settings", (stored) => {
+            localStorage.setItem("sudoku-settings", stored);
+
+            const settings = loadSettings();
+
+            expect(settings).toEqual(expect.objectContaining({ style: "minimal", colorTheme: "green" }));
+            expect(settings).not.toHaveProperty("0");
+        });
+
+        it("should replace unreadable saved settings with readable ones", () => {
+            localStorage.setItem("sudoku-settings", "{not json");
+
+            loadSettings();
+
+            expect(() => JSON.parse(localStorage.getItem("sudoku-settings") ?? "") as unknown).not.toThrow();
+        });
+
         it("should still return the settings when saving the migrated appearance fails", () => {
             stubSystemDark(true);
             vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {

@@ -36,6 +36,15 @@ describe("settingsStore", () => {
         expect(store.appearance).toBe("light");
     });
 
+    it("should initialise with defaults when the saved settings are not valid JSON", () => {
+        localStorage.setItem("sudoku-settings", "{\"style\": \"paper\"");
+
+        const store = useSettingsStore();
+
+        expect(store.style).toBe("minimal");
+        expect(store.appearance).toBe("light");
+    });
+
     it("should have default values on first load", () => {
         const store = useSettingsStore();
 
