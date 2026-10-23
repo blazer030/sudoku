@@ -217,11 +217,11 @@ const HIERARCHY_CASES = modeCases((style, themeId, mode, palette) => (isExempt(O
 })));
 
 // 8-bit's board: each cell state is the ink actually drawn on the surface actually drawn. Every cell lies
-// on the page colour. A dither or hatch is the pattern shade checkered or striped over it at half
-// coverage, counted as their mix: #8BAC0F over #9BBC0F in 掌機, #1E1E3C over #000000 in 紅白機; hint
-// mode's pattern and answer cells are that shade solid. The skin (--pixel-pattern-shade) draws these.
+// on the page colour. A dither or hatch is the pattern shade checkered or striped over it (#8BAC0F over
+// #9BBC0F in 掌機, #1E1E3C over #000000 in 紅白機), and a digit crosses both of its colours, so every ink
+// on a pattern is checked on each colour rather than on their mix. Hint mode's pattern and answer cells
+// are that shade solid. The skin (--pixel-pattern-shade) draws these.
 const PIXEL_PATTERN_SHADE: Readonly<Record<ColorMode, PaletteToken>> = { light: "highlight", dark: "card" };
-const PIXEL_PATTERN_COVERAGE = 0.5;
 
 interface PixelBoardCase { label: string; foreground: string; background: string; minimum: number }
 
@@ -229,26 +229,25 @@ const PIXEL_BOARD_CASES: PixelBoardCase[] = STYLES.pixel.themes.flatMap(theme =>
     const palette = getPalette("pixel", theme.id, mode);
     const board = palette.background;
     const shade = palette[PIXEL_PATTERN_SHADE[mode]];
-    const pattern = mixColors(shade, PIXEL_PATTERN_COVERAGE, board);
     // Player digits are the accent in 紅白機 (the canvas's entry blue)
     const inks: readonly PaletteToken[] = [...BOARD_INKS, "accent"];
-    return { prefix: `pixel/${theme.id}/${mode}`, palette, board, shade, pattern, inks };
-}).flatMap(({ prefix, palette, board, shade, pattern, inks }) => {
+    return { prefix: `pixel/${theme.id}/${mode}`, palette, board, shade, inks };
+}).flatMap(({ prefix, palette, board, shade, inks }) => {
     const drawn = (name: string, foreground: string, background: string, minimum = TEXT): PixelBoardCase => ({
         label: `${prefix}: ${name} ≥ ${minimum}`, foreground, background, minimum,
     });
     return [
-        // Default, clue, player digit and note cells
-        ...inks.map(ink => drawn(`${ink} on the board`, palette[ink], board)),
-        // Scope and peer cells are dithered; error and hint-wrong cells are hatched at the same coverage
-        ...inks.map(ink => drawn(`${ink} on the dither`, palette[ink], pattern)),
-        // An error cell that is also selected or the same digit is still drawn as an error (the cell gives
-        // the error precedence), so its digit is never on the inverted cell or the same-digit fill
-        drawn("error on the hatch, also when the error cell is selected or the same digit", palette.error, pattern),
-        // Error and wrong cells are framed 2px in the foreground ink inside their edge, over the hatch
-        drawn("error frame (foreground) on the hatch", palette.foreground, pattern, LARGE_OR_ICON),
-        // Hint mode's pattern and answer cells are the pattern shade solid; the answer is framed in the primary
-        ...inks.map(ink => drawn(`${ink} on the hint fill`, palette[ink], shade)),
+        // Default, clue, player digit and note cells, and the clear pixels of a dither (scope, peer) or a
+        // hatch (error, hint-wrong). An error cell that is also selected or the same digit is still drawn as
+        // an error (the cell gives the error precedence), so its digit is never on the inverted cell or the
+        // same-digit fill.
+        ...inks.map(ink => drawn(`${ink} on the board (a pattern's clear pixels too)`, palette[ink], board)),
+        // The shaded pixels of a dither or hatch, and hint mode's solid fill
+        ...inks.map(ink => drawn(`${ink} on the pattern shade (a pattern's shaded pixels and the hint fill)`, palette[ink], shade)),
+        // Error and wrong cells are framed 2px in the foreground ink inside their edge, across both of the hatch's colours
+        drawn("error frame (foreground) on the hatch's clear pixels", palette.foreground, board, LARGE_OR_ICON),
+        drawn("error frame (foreground) on the hatch's shaded pixels", palette.foreground, shade, LARGE_OR_ICON),
+        // Hint mode's answer is framed in the primary
         drawn("answer's frame (primary) on the hint fill", palette.primary, shade, LARGE_OR_ICON),
         // The selected cell is inverted; its digit, notes and a highlighted note's disc take the page colour
         drawn("selected digit (background on foreground)", palette.background, palette.foreground),
@@ -257,9 +256,10 @@ const PIXEL_BOARD_CASES: PixelBoardCase[] = STYLES.pixel.themes.flatMap(theme =>
         drawn("same digit (foreground on highlight)", palette.foreground, palette.highlight),
         // The continue card's chip: a transparent tag on the card's page colour
         drawn("continue-card chip (on-featured on featured)", palette["on-featured"], palette.featured),
-        // The blinking corner cursor around the selected cell is a UI component, so 3:1 applies
+        // The blinking corner cursor around the selected cell is a UI component, so 3:1 applies. It sits over
+        // the neighbouring cells, so it crosses both of a pattern's colours.
         drawn("selection cursor (primary) on the board", palette.primary, board, LARGE_OR_ICON),
-        drawn("selection cursor (primary) on the dither", palette.primary, pattern, LARGE_OR_ICON),
+        drawn("selection cursor (primary) on the pattern shade", palette.primary, shade, LARGE_OR_ICON),
         drawn("selection cursor (primary) on the same-digit fill", palette.primary, palette.highlight, LARGE_OR_ICON),
     ];
 }));
@@ -293,7 +293,7 @@ describe("palette contrast", () => {
         const handheldCase = (name: string) => PIXEL_BOARD_CASES.find(boardCase => boardCase.label.startsWith(`pixel/classic/light: ${name} `));
 
         expect(handheldCase("foreground on the board")).toMatchObject({ foreground: "#0F380F", background: "#9BBC0F" });
-        expect(handheldCase("foreground on the dither")).toMatchObject({ foreground: "#0F380F", background: "#93B40F" });
+        expect(handheldCase("foreground on the pattern shade")).toMatchObject({ foreground: "#0F380F", background: "#8BAC0F" });
         expect(handheldCase("selected digit (background on foreground)")).toMatchObject({ foreground: "#9BBC0F", background: "#0F380F" });
         expect(handheldCase("same digit (foreground on highlight)")).toMatchObject({ foreground: "#0F380F", background: "#8BAC0F" });
         expect(handheldCase("continue-card chip (on-featured on featured)")).toMatchObject({ foreground: "#0F380F", background: "#9BBC0F" });
@@ -301,11 +301,11 @@ describe("palette contrast", () => {
         const consoleCase = (name: string) => PIXEL_BOARD_CASES.find(boardCase => boardCase.label.startsWith(`pixel/classic/dark: ${name} `));
 
         expect(consoleCase("accent on the board")).toMatchObject({ foreground: "#3CBCFC", background: "#000000" });
-        expect(consoleCase("foreground on the dither")).toMatchObject({ foreground: "#FCFCFC", background: "#0F0F1E" });
-        expect(consoleCase("foreground on the hint fill")).toMatchObject({ foreground: "#FCFCFC", background: "#1E1E3C" });
+        expect(consoleCase("foreground on the board")).toMatchObject({ foreground: "#FCFCFC", background: "#000000" });
+        expect(consoleCase("foreground on the pattern shade")).toMatchObject({ foreground: "#FCFCFC", background: "#1E1E3C" });
         expect(consoleCase("same digit (foreground on highlight)")).toMatchObject({ foreground: "#FCFCFC", background: "#0058F8" });
         expect(consoleCase("selection cursor (primary) on the same-digit fill")).toMatchObject({ foreground: "#F8B800", background: "#0058F8" });
-        expect(handheldCase("error frame (foreground) on the hatch")).toMatchObject({ foreground: "#0F380F", background: "#93B40F" });
+        expect(handheldCase("error frame (foreground) on the hatch's shaded pixels")).toMatchObject({ foreground: "#0F380F", background: "#8BAC0F" });
     });
 
     it.each(PIXEL_BOARD_CASES)("$label", ({ foreground, background, minimum }) => {

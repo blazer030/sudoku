@@ -188,7 +188,7 @@ describe("pixel skin", () => {
 
     describe("board cells", () => {
         it("should draw the dither and hatch in the shade the board model counts", () => {
-            // PIXEL_BOARD_CASES: the highlight green in 掌機, the navy card in 紅白機, at half coverage
+            // PIXEL_BOARD_CASES checks every ink on this shade and on the board: the highlight green in 掌機, the navy card in 紅白機
             expect(declarationsOf(PIXEL_CSS, SCOPE).get("--pixel-pattern-shade")).toBe("var(--color-highlight)");
             expect(declarationsOf(PIXEL_CSS, ':root.dark[data-style="pixel"]').get("--pixel-pattern-shade")).toBe("var(--color-card)");
         });
@@ -215,7 +215,7 @@ describe("pixel skin", () => {
         });
 
         it.each(["error", "wrong"])("should hatch the %s cell diagonally", (variant) => {
-            // Two stripes of the shade in each 4px tile, each a quarter of it: half coverage, as the board model counts
+            // Two stripes of the shade in each 4px tile, each a quarter of it: half coverage
             expect(declarationsOf(PIXEL_CSS, cell(variant)).get("--pixel-cell-pattern"))
                 .toBe("linear-gradient(45deg, var(--pixel-pattern-shade) 25%, transparent 0 50%, var(--pixel-pattern-shade) 0 75%, transparent 0)");
         });
