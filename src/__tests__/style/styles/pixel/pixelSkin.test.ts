@@ -132,6 +132,20 @@ describe("pixel skin", () => {
         expect(declarationsOf(PIXEL_CSS, `${SCOPE} *`).get("--tw-shadow-color")).toBe("transparent");
     });
 
+    it.each(["card", "pill"])("should frame a %s in hard square pixels", (token) => {
+        const declarations = declarationsOf(PIXEL_CSS, skin(token));
+        const layers = shadowLayers(declarations.get("box-shadow") ?? "");
+
+        expect(declarations.get("border-radius")).toBe("0");
+        // A notched frame: four bars offset to each side, none blurred
+        expect(layers.filter(layer => layer.blur !== 0)).toEqual([]);
+        expect(layers.filter(layer => !layer.inset && (layer.offsetX === 0) !== (layer.offsetY === 0))).toHaveLength(4);
+    });
+
+    it("should square every round shape", () => {
+        expect(declarationsOf(PIXEL_CSS, `${SCOPE} .rounded-full`).get("border-radius")).toBe("0");
+    });
+
     it("should move only in steps", () => {
         const moving = allDeclarations(/^(?:animation|animation-timing-function|transition|transition-timing-function)$/)
             .filter(declaration => !isInside(declaration, atRule => atRule.name === "media"))

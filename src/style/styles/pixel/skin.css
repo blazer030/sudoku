@@ -225,6 +225,32 @@
     box-shadow: none;
 }
 
+/* Cards (settings groups, dialog panels, Home's new-game card) are framed panels: a 4px notched ink
+   frame and no drop shadow, so a card on the page colour (掌機) still reads as one */
+[data-style="pixel"] [data-skin~="card"] {
+    border-radius: 0;
+    box-shadow:
+        0 -4px 0 0 var(--pixel-ink),
+        0 4px 0 0 var(--pixel-ink),
+        -4px 0 0 0 var(--pixel-ink),
+        4px 0 0 0 var(--pixel-ink);
+}
+
+/* The game header's pills are square tags in a 2px notched frame */
+[data-style="pixel"] [data-skin~="pill"] {
+    border-radius: 0;
+    box-shadow:
+        0 -2px 0 0 var(--pixel-ink),
+        0 2px 0 0 var(--pixel-ink),
+        -2px 0 0 0 var(--pixel-ink),
+        2px 0 0 0 var(--pixel-ink);
+}
+
+/* Nothing in 8-bit is round: chips, dots, tags, icon wells and the play button go square too */
+[data-style="pixel"] .rounded-full {
+    border-radius: 0;
+}
+
 /* Press feedback. vPress sets the data attributes; input never waits for them.
    The overlay is a colour change, so it stays on under reduced motion. */
 [data-style="pixel"] [data-pressed] {
