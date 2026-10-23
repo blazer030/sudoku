@@ -346,34 +346,51 @@ describe("pixel skin", () => {
             expect(declarationsOf(PIXEL_CSS, ARRIVE).get("animation")).toMatch(/^pixel-[\w-]+ \d+ms steps\(4, jump-start\)$/);
         });
 
+        // Arriving and leaving bursts run different keyframes, so a digit that flips from one to the
+        // other before its burst ends starts a fresh burst rather than inheriting the old one's clock
+        const ARRIVE_BURST = `${BOARD} [data-variant]:has(> .value-arrive)::after`;
+        const LEAVE_BURST = `${BOARD} [data-variant].value-leave::after`;
+        const burstNameOf = (selector: string): string => /^(pixel-[\w-]+) /.exec(declarationsOf(PIXEL_CSS, selector).get("animation") ?? "")?.[1] ?? "";
+
         it("should burst eight pixels out of the cell as its digit arrives or leaves, in four steps", () => {
             const burst = declarationsOf(PIXEL_CSS, BURST);
-            const name = /^(pixel-[\w-]+) /.exec(burst.get("animation") ?? "")?.[1] ?? "";
-            const pixels = shadowLayers(keyframesOf(name).get("to")?.get("box-shadow") ?? "");
 
             // The burst hangs off the cell, so the pop's scaling never shrinks it
             expect(declarationsOf(PIXEL_CSS, BURST_CELL).get("position")).toBe("relative");
             expect(burst.get("content")).toBe('""');
             expect(burst.get("width")).toBe("4px");
             expect(burst.get("height")).toBe("4px");
-            expect(burst.get("animation")).toMatch(/^pixel-burst \d+ms steps\(4, jump-start\)$/);
-            expect(pixels).toHaveLength(8);
-            expect(pixels.filter(pixel => pixel.inset || pixel.blur !== 0 || pixel.spread !== 0)).toEqual([]);
-            // Four straight out and four on the diagonals
-            expect(pixels.filter(pixel => (pixel.offsetX === 0) !== (pixel.offsetY === 0))).toHaveLength(4);
-            expect(pixels.filter(pixel => pixel.offsetX !== 0 && Math.abs(pixel.offsetX) === Math.abs(pixel.offsetY))).toHaveLength(4);
+            for (const selector of [ARRIVE_BURST, LEAVE_BURST]) {
+                const pixels = shadowLayers(keyframesOf(burstNameOf(selector)).get("to")?.get("box-shadow") ?? "");
+
+                expect(declarationsOf(PIXEL_CSS, selector).get("animation"), selector).toMatch(/^pixel-[\w-]+ \d+ms steps\(4, jump-start\)$/);
+                expect(pixels, selector).toHaveLength(8);
+                expect(pixels.filter(pixel => pixel.inset || pixel.blur !== 0 || pixel.spread !== 0), selector).toEqual([]);
+                // Four straight out and four on the diagonals
+                expect(pixels.filter(pixel => (pixel.offsetX === 0) !== (pixel.offsetY === 0)), selector).toHaveLength(4);
+                expect(pixels.filter(pixel => pixel.offsetX !== 0 && Math.abs(pixel.offsetX) === Math.abs(pixel.offsetY)), selector).toHaveLength(4);
+            }
         });
 
-        it("should colour the arriving burst from the palette and the leaving one in the light colour", () => {
+        it("should restart the burst when a digit flips between arriving and leaving", () => {
+            expect(burstNameOf(ARRIVE_BURST)).not.toBe("");
+            expect(burstNameOf(LEAVE_BURST)).not.toBe("");
+            expect(burstNameOf(ARRIVE_BURST)).not.toBe(burstNameOf(LEAVE_BURST));
+        });
+
+        it("should colour the arriving burst from the palette and the leaving one in the leaving colour", () => {
             const scope = declarationsOf(PIXEL_CSS, SCOPE);
             const consoleMode = declarationsOf(PIXEL_CSS, ':root.dark[data-style="pixel"]');
-            const leave = declarationsOf(PIXEL_CSS, `${BOARD} .value-leave::after`);
+            const coloursOf = (selector: string): string[] => [...new Set(
+                [...(keyframesOf(burstNameOf(selector)).get("to")?.get("box-shadow") ?? "").matchAll(/var\((--[\w-]+)\)/g)].map(([, name]) => name),
+            )].sort();
 
             for (const index of [1, 2, 3, 4]) {
                 expect(scope.get(`--pixel-burst-${index}`), `burst ${index}`).toMatch(/^var\(--color-[\w-]+\)$/);
                 expect(consoleMode.get(`--pixel-burst-${index}`), `console burst ${index}`).toMatch(/^var\(--color-[\w-]+\)$/);
-                expect(leave.get(`--pixel-burst-${index}`), `leave burst ${index}`).toBe("var(--pixel-burst-leave)");
             }
+            expect(coloursOf(ARRIVE_BURST)).toEqual(["--pixel-burst-1", "--pixel-burst-2", "--pixel-burst-3", "--pixel-burst-4"]);
+            expect(coloursOf(LEAVE_BURST)).toEqual(["--pixel-burst-leave"]);
             expect(scope.get("--pixel-burst-leave")).toBe("var(--color-highlight)");
             expect(consoleMode.get("--pixel-burst-leave")).toBe("var(--color-foreground-secondary)");
         });
@@ -392,7 +409,8 @@ describe("pixel skin", () => {
 
         it("should hold every digit still under reduced motion", () => {
             expect(reducedMotionDeclarationsOf(ARRIVE).get("animation")).toBe("none");
-            expect(reducedMotionDeclarationsOf(BURST).get("animation")).toBe("none");
+            expect(reducedMotionDeclarationsOf(ARRIVE_BURST).get("animation")).toBe("none");
+            expect(reducedMotionDeclarationsOf(LEAVE_BURST).get("animation")).toBe("none");
         });
     });
 

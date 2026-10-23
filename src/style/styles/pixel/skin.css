@@ -329,7 +329,7 @@
 }
 
 /* A placed digit pops in over four steps (a quarter, half, three quarters, whole) while eight pixels
-   burst out of its cell; a cleared digit bursts the same pixels in the light colour. The burst hangs
+   burst out of its cell; a cleared digit bursts the same pixels in the leaving colour. The burst hangs
    off the cell, not the digit, so the pop's scaling never shrinks it and it outlives the digit; it is
    drawn over the grid lines and the cursor. The arrival is the digit's class, so the cell finds it
    with :has(); a WebView without :has() pops the digit without the burst. An error's blink replaces
@@ -338,7 +338,7 @@
     from { transform: scale(0); }
 }
 
-@keyframes pixel-burst {
+@keyframes pixel-burst-in {
     from {
         box-shadow:
             0 0 0 0 var(--pixel-burst-1), 0 0 0 0 var(--pixel-burst-2),
@@ -352,6 +352,25 @@
             0 24px 0 0 var(--pixel-burst-3), -24px 0 0 0 var(--pixel-burst-4),
             16px -16px 0 0 var(--pixel-burst-1), 16px 16px 0 0 var(--pixel-burst-2),
             -16px 16px 0 0 var(--pixel-burst-3), -16px -16px 0 0 var(--pixel-burst-4);
+    }
+}
+
+/* The same burst in the leaving colour, under its own name: a digit that flips between arriving and
+   leaving before its burst ends changes the animation's name, which starts the burst over */
+@keyframes pixel-burst-out {
+    from {
+        box-shadow:
+            0 0 0 0 var(--pixel-burst-leave), 0 0 0 0 var(--pixel-burst-leave),
+            0 0 0 0 var(--pixel-burst-leave), 0 0 0 0 var(--pixel-burst-leave),
+            0 0 0 0 var(--pixel-burst-leave), 0 0 0 0 var(--pixel-burst-leave),
+            0 0 0 0 var(--pixel-burst-leave), 0 0 0 0 var(--pixel-burst-leave);
+    }
+    to {
+        box-shadow:
+            0 -24px 0 0 var(--pixel-burst-leave), 24px 0 0 0 var(--pixel-burst-leave),
+            0 24px 0 0 var(--pixel-burst-leave), -24px 0 0 0 var(--pixel-burst-leave),
+            16px -16px 0 0 var(--pixel-burst-leave), 16px 16px 0 0 var(--pixel-burst-leave),
+            -16px 16px 0 0 var(--pixel-burst-leave), -16px -16px 0 0 var(--pixel-burst-leave);
     }
 }
 
@@ -373,14 +392,15 @@
     margin: -2px 0 0 -2px;
     z-index: 3;
     pointer-events: none;
-    animation: pixel-burst 480ms steps(4, jump-start);
 }
 
-[data-style="pixel"] [data-skin~="board"] .value-leave::after {
-    --pixel-burst-1: var(--pixel-burst-leave);
-    --pixel-burst-2: var(--pixel-burst-leave);
-    --pixel-burst-3: var(--pixel-burst-leave);
-    --pixel-burst-4: var(--pixel-burst-leave);
+/* Its own rule, so a WebView without :has() still reads the leaving one */
+[data-style="pixel"] [data-skin~="board"] [data-variant]:has(> .value-arrive)::after {
+    animation: pixel-burst-in 480ms steps(4, jump-start);
+}
+
+[data-style="pixel"] [data-skin~="board"] [data-variant].value-leave::after {
+    animation: pixel-burst-out 480ms steps(4, jump-start);
 }
 
 /* A completed row, column or box flashes on and off rather than fading: the shared keyframes, each
@@ -575,6 +595,7 @@
     [data-style="pixel"] [data-skin~="board"]:not([data-hint-mode]) [data-selected]::before,
     [data-style="pixel"] [data-skin~="board"] [data-variant="error"] > div,
     [data-style="pixel"] [data-skin~="board"] .value-arrive,
+    [data-style="pixel"] [data-skin~="board"] [data-variant].value-leave::after,
     [data-style="pixel"] [data-skin~="board"] .animate-completion-flash:not(.animate-hint-reveal-glow),
     [data-style="pixel"] [data-press-motion],
     [data-style="pixel"] [data-skin~="key"][data-press-motion][data-pressed],
@@ -586,7 +607,7 @@
     }
 
     /* Its own rule, so a WebView without :has() still reads the list above */
-    [data-style="pixel"] [data-skin~="board"] [data-variant]:is(.value-leave, :has(> .value-arrive))::after {
+    [data-style="pixel"] [data-skin~="board"] [data-variant]:has(> .value-arrive)::after {
         animation: none;
     }
 }
