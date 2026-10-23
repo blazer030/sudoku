@@ -26,12 +26,12 @@ const splitTopLevel = (value: string, separator: RegExp): string[] => {
     return parts.map(part => part.trim()).filter(part => part !== "");
 };
 
-interface ShadowLayer { inset: boolean; offsetX: number; offsetY: number; blur: number }
+interface ShadowLayer { inset: boolean; offsetX: number; offsetY: number; blur: number; spread: number }
 
 const shadowLayers = (value: string): ShadowLayer[] => splitTopLevel(value, /,/).map((layer) => {
     const parts = splitTopLevel(layer, /\s/);
     const lengths = parts.filter(part => /^-?\d*\.?\d+(?:px|em|rem)?$/.test(part)).map(part => Number.parseFloat(part));
-    return { inset: parts.includes("inset"), offsetX: lengths[0] ?? 0, offsetY: lengths[1] ?? 0, blur: lengths[2] ?? 0 };
+    return { inset: parts.includes("inset"), offsetX: lengths[0] ?? 0, offsetY: lengths[1] ?? 0, blur: lengths[2] ?? 0, spread: lengths[3] ?? 0 };
 });
 
 const isInside = (node: Node, test: (atRule: AtRule) => boolean): boolean => {
@@ -66,8 +66,10 @@ describe("pixel skin", () => {
     });
 
     it("should repoint no font outside the fonts-ready gate", () => {
+        // Every selector of the rule must sit under the gate, not just the first one in a list
         const ungated = allDeclarations(/^--font-/).filter(declaration =>
-            declaration.parent?.type !== "rule" || !(declaration.parent as Rule).selector.startsWith(FONTS_READY));
+            declaration.parent?.type !== "rule"
+            || (declaration.parent as Rule).selectors.some(selector => !selector.trim().startsWith(FONTS_READY)));
 
         expect(ungated.map(declaration => declaration.prop)).toEqual([]);
     });
@@ -109,7 +111,7 @@ describe("pixel skin", () => {
         const layers = shadowLayers(chip.get("box-shadow") ?? "");
 
         expect(chip.get("background-color")).toBe("transparent");
-        expect(layers).toEqual([{ inset: true, offsetX: 0, offsetY: 0, blur: 0 }]);
+        expect(layers).toEqual([{ inset: true, offsetX: 0, offsetY: 0, blur: 0, spread: 2 }]);
     });
 
     it("should keep a tile that is on framed, since a style card shows its choice only by its border", () => {
