@@ -1,15 +1,24 @@
 import { readFileSync } from "fs";
 import sharp from "sharp";
-import { getPalette } from "@/theme/palettes";
+import { STYLES, type Palette } from "@/theme/palettes";
+import type { ColorMode, ColorThemeId, StyleId } from "@/theme/themeIds";
 import { LAUNCHER_ICONS } from "@/theme/launcherIcon";
 
 // The PWA icons are generated files (npm run generate:icons); they must be regenerated whenever
 // a primary changes. The Android launcher icons are checked in launcherIconAssets.test.ts.
 
+// The icon files still exist for every mode, so they are checked against the raw palettes
+// (getPalette answers a light-only style with its light palette). Task 5 drops paper's dark icons.
+const rawPalette = (style: StyleId, themeId: ColorThemeId, mode: ColorMode): Palette => {
+    const theme = STYLES[style].themes.find(candidate => candidate.id === themeId);
+    if (theme === undefined) throw new Error(`${style} has no theme ${themeId}`);
+    return theme[mode];
+};
+
 // Every theme's icon in both modes is a favicon; installed PWAs only use the light ones
-const icons = LAUNCHER_ICONS.map(icon => ({ key: icon.key, palette: getPalette(icon.style, icon.themeId, icon.mode) }));
+const icons = LAUNCHER_ICONS.map(icon => ({ key: icon.key, palette: rawPalette(icon.style, icon.themeId, icon.mode) }));
 const lightIcons = LAUNCHER_ICONS.filter(icon => icon.mode === "light")
-    .map(icon => ({ key: icon.key, palette: getPalette(icon.style, icon.themeId, "light") }));
+    .map(icon => ({ key: icon.key, palette: rawPalette(icon.style, icon.themeId, "light") }));
 
 const hexOf = (red: number, green: number, blue: number): string =>
     `#${[red, green, blue].map(channel => channel.toString(16).padStart(2, "0")).join("")}`.toUpperCase();

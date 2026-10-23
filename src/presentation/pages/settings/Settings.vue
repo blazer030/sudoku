@@ -234,7 +234,6 @@ import { COLOR_MODES, STYLE_IDS, type ColorMode, type ColorThemeId, type StyleId
 import type { LanguagePreference } from "@/application/settings/SettingsStorage";
 import { STYLES, getPalette, rememberedThemeFor } from "@/theme/palettes";
 import { vPress } from "@/presentation/directives/press";
-import { useColorMode } from "@/presentation/theme/useColorMode";
 import SegmentedControl from "@/presentation/components/segmented-control/SegmentedControl.vue";
 import OptionTile from "@/presentation/components/option-tile/OptionTile.vue";
 import SettingsGroup from "@/presentation/pages/settings/components/SettingsGroup.vue";
@@ -266,12 +265,11 @@ const appearanceOptions = computed((): { value: ColorMode; label: string }[] =>
     COLOR_MODES.map(mode => ({ value: mode, label: t(`settings.colorMode.${mode}`) })));
 
 const { appearance } = storeToRefs(settingsStore);
-const colorMode = useColorMode(appearance);
 
 // The current style's own themes, each a solid circle of the primary the app would show in the current mode
 const swatches = computed(() => STYLES[settingsStore.style].themes.map(theme => ({
     id: theme.id,
-    palette: getPalette(settingsStore.style, theme.id, colorMode.value),
+    palette: getPalette(settingsStore.style, theme.id, appearance.value),
 })));
 
 const toggles = computed(() => [

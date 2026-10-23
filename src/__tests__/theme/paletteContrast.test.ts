@@ -2,7 +2,7 @@ import { readFileSync } from "fs";
 import postcss from "postcss";
 import { THEME_IDS_BY_STYLE, STYLE_IDS, type StyleId } from "@/theme/themeIds";
 import { contrastRatio, mixColors } from "@/theme/contrast";
-import { STYLES, systemBarColor, type Palette, type PaletteToken } from "@/theme/palettes";
+import { STYLES, type Palette, type PaletteToken } from "@/theme/palettes";
 
 const TEXT = 4.5;
 const LARGE_OR_ICON = 3;
@@ -307,11 +307,8 @@ describe("palette contrast", () => {
     });
 
     it("should fade the night lamp in from the page colour at the top edge, where the status bar meets it", () => {
-        // Below API 35 the status bar is painted flat in the page colour right above the page,
-        // and paper's dark system bar colour is that page colour
-        for (const theme of STYLES.paper.themes) {
-            expect(systemBarColor("paper", theme.id, "dark"), theme.id).toBe(theme.dark.background);
-        }
+        // Below API 35 the status bar is painted flat in the page colour right above the page
+        // (paper's dark bar colour is no longer reachable through systemBarColor; Task 4 drops the lamp)
         for (const viewportHeight of VIEWPORT_HEIGHTS) {
             expect(lampAlphaAt(0, viewportHeight), `${viewportHeight}px`).toBe(0);
             // and it rises without a step: no more than a 1.5% alpha change per px

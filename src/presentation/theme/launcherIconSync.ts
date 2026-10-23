@@ -1,6 +1,6 @@
 import { computed, watch, type Ref } from "vue";
 import { launcherIconKey } from "@/theme/launcherIcon";
-import type { ColorMode, ColorThemeId, StyleId } from "@/theme/themeIds";
+import { effectiveColorMode, type ColorMode, ColorThemeId, StyleId } from "@/theme/themeIds";
 import type { IconService } from "@/application/icon/IconService";
 
 export interface LauncherIconSources {
@@ -19,7 +19,7 @@ export const startLauncherIconSync = (sources: LauncherIconSources, iconService:
     const icon = computed(() => launcherIconKey(
         sources.style.value,
         sources.colorTheme.value,
-        sources.appearance.value,
+        effectiveColorMode(sources.style.value, sources.appearance.value),
     ));
 
     // On the immediate first run the previous values are undefined

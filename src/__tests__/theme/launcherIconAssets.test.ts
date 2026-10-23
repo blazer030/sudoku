@@ -1,18 +1,27 @@
 import { readdirSync, readFileSync } from "fs";
 import sharp from "sharp";
-import { getPalette } from "@/theme/palettes";
+import { STYLES, type Palette } from "@/theme/palettes";
+import type { ColorMode, ColorThemeId, StyleId } from "@/theme/themeIds";
 import { LAUNCHER_ICONS, launcherResourceName } from "@/theme/launcherIcon";
 import { ICON_THEME_IDS } from "@/theme/themeIds";
 
 // The Android launcher icons are generated (npm run generate:launcher-icons); regenerate them
 // whenever a primary or on-primary in palettes.ts changes.
 
+// The icon files still exist for every mode, so they are checked against the raw palettes
+// (getPalette answers a light-only style with its light palette). Task 5 drops paper's dark icons.
+const rawPalette = (style: StyleId, themeId: ColorThemeId, mode: ColorMode): Palette => {
+    const theme = STYLES[style].themes.find(candidate => candidate.id === themeId);
+    if (theme === undefined) throw new Error(`${style} has no theme ${themeId}`);
+    return theme[mode];
+};
+
 const RES_ROOT = "android/app/src/main/res";
 const MANIFEST = "android/app/src/main/AndroidManifest.xml";
 const DENSITIES = ["mdpi", "hdpi", "xhdpi", "xxhdpi", "xxxhdpi"];
 
 const icons = LAUNCHER_ICONS.map((icon) => {
-    const palette = getPalette(icon.style, icon.themeId, icon.mode);
+    const palette = rawPalette(icon.style, icon.themeId, icon.mode);
     return { ...icon, name: launcherResourceName(icon.key), primary: palette.primary.toUpperCase(), onPrimary: palette["on-primary"].toUpperCase() };
 });
 

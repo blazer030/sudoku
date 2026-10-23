@@ -71,6 +71,37 @@ describe("index.html no-flash script", () => {
         expect(root.classList.contains("dark")).toBe(true);
     });
 
+    it("should paint paper light with its light bar colour even when dark is stored", () => {
+        stubSystemDark(true);
+        storeSettings({ style: "paper", colorTheme: "blueInk", appearance: "dark" });
+
+        runInlineScript();
+
+        expect(root.classList.contains("dark")).toBe(false);
+        expect(meta.content).toBe(systemBarColor("paper", "blueInk", "light"));
+    });
+
+    it("should paint paper light for a stored system appearance on a dark system", () => {
+        stubSystemDark(true);
+        storeSettings({ style: "paper", appearance: "system" });
+
+        runInlineScript();
+
+        expect(root.classList.contains("dark")).toBe(false);
+    });
+
+    it("should switch to dark when the style changes from paper to minimal while dark is stored", () => {
+        stubSystemDark(false);
+        storeSettings({ style: "paper", appearance: "dark" });
+        runInlineScript();
+        root.className = "";
+
+        storeSettings({ style: "minimal", appearance: "dark" });
+        runInlineScript();
+
+        expect(root.classList.contains("dark")).toBe(true);
+    });
+
     it("should stay light for light appearance on a dark system", () => {
         stubSystemDark(true);
         storeSettings({ appearance: "light" });

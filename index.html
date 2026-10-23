@@ -9,7 +9,7 @@
     <!-- The inline script below fills in the colour for the stored theme and mode -->
     <meta name="theme-color" />
     <script>
-        // Applies the theme before first paint. Mirrors loadSettings(), resolveColorMode() and
+        // Applies the theme before first paint. Mirrors loadSettings(), effectiveColorMode() and
         // systemBarColor(); unknown values fall back the same way.
         (function () {
             // BEGIN theme-color data: systemBarColor() per style and theme. noFlashScript.test.ts keeps it in sync.
@@ -22,8 +22,8 @@
                     dark: "#1A1C1F",
                     light: { green: "#1F5C3A", blue: "#24508A", rust: "#782F16", slate: "#34506E" }
                 },
+                // Paper is light-only: no dark entry
                 paper: {
-                    dark: "#201D19",
                     light: { blueInk: "#2B4A7A", greenInk: "#235A3C", redInk: "#8E2533" }
                 }
             };
@@ -48,7 +48,10 @@
             root.setAttribute("data-color-theme", colorTheme);
             var systemDark = typeof window.matchMedia === "function"
                 && window.matchMedia("(prefers-color-scheme: dark)").matches;
-            var dark = settings.appearance === "dark" || (settings.appearance !== "light" && systemDark);
+            // A stored "system" (or nothing) follows the system for this first paint; the app then
+            // migrates it. A style without a dark entry is light-only.
+            var dark = has(barColors[style], "dark")
+                && (settings.appearance === "dark" || (settings.appearance !== "light" && systemDark));
             if (dark) root.classList.add("dark");
             var meta = document.querySelector('meta[name="theme-color"]');
             if (meta) meta.setAttribute("content", dark ? barColors[style].dark : lightColors[colorTheme]);

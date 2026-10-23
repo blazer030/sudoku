@@ -1,5 +1,5 @@
 import { STYLE_IDS, THEME_IDS_BY_STYLE, type ColorThemeId } from "@/theme/themeIds";
-import { STYLES, getPalette, rememberedThemeFor } from "@/theme/palettes";
+import { STYLES, getPalette, rememberedThemeFor, systemBarColor } from "@/theme/palettes";
 import { contrastRatio } from "@/theme/contrast";
 
 describe("palettes", () => {
@@ -23,6 +23,14 @@ describe("palettes", () => {
     it("should merge each theme's overrides over the shared base", () => {
         expect(getPalette("minimal", "blue", "light").primary).toBe("#2C5689");
         expect(getPalette("minimal", "blue", "light").highlight).toBe("#ABCEF1");
+    });
+
+    it("getPalette gives a light-only style its light palette whatever the mode", () => {
+        expect(getPalette("paper", "blueInk", "dark")).toEqual(getPalette("paper", "blueInk", "light"));
+    });
+
+    it("systemBarColor gives a light-only style its light bar colour whatever the mode", () => {
+        expect(systemBarColor("paper", "blueInk", "dark")).toBe(systemBarColor("paper", "blueInk", "light"));
     });
 
     it("getPalette falls back to the style's first theme", () => {

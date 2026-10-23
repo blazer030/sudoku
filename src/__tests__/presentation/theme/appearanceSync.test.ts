@@ -15,9 +15,9 @@ describe("startAppearanceSync", () => {
         setSystemBarColors: Mock<(colors: SystemBarColors) => Promise<void>>;
     };
 
-    const buildSources = (colorTheme: ColorThemeId = "green", appearance: ColorMode = "light") => ({
+    const buildSources = (colorTheme: ColorThemeId = "green", appearance: ColorMode = "light", style: StyleId = "minimal") => ({
         appearance: ref<ColorMode>(appearance),
-        style: ref<StyleId>("minimal"),
+        style: ref<StyleId>(style),
         colorTheme: ref<ColorThemeId>(colorTheme),
     });
 
@@ -169,6 +169,45 @@ describe("startAppearanceSync", () => {
         expect(appearanceBridge.setSystemBarColors).toHaveBeenLastCalledWith({
             background: getPalette("minimal", "purple", "dark").background,
             darkIcons: false,
+        });
+    });
+
+    describe("a light-only style", () => {
+        it("should show paper light with light bars and icons whatever appearance is stored", () => {
+            stop = startAppearanceSync(buildSources("blueInk", "dark", "paper"), systemBar, appearanceBridge);
+
+            expect(isDark()).toBe(false);
+            expect(meta.content).toBe(getPalette("paper", "blueInk", "light").primary);
+            expect(systemBar.apply).toHaveBeenLastCalledWith("light");
+            expect(appearanceBridge.setAppearance).toHaveBeenLastCalledWith("light");
+            expect(appearanceBridge.setSystemBarColors).toHaveBeenLastCalledWith({
+                background: getPalette("paper", "blueInk", "light").background,
+                darkIcons: true,
+            });
+        });
+
+        it("should use paper's light favicon", () => {
+            const favicon = document.createElement("link");
+            favicon.rel = "icon";
+            document.head.appendChild(favicon);
+
+            stop = startAppearanceSync(buildSources("blueInk", "dark", "paper"), systemBar, appearanceBridge);
+
+            expect(favicon.href).toMatch(/\/sudoku-paperBlueInk\.svg$/);
+            favicon.remove();
+        });
+
+        it("should go dark again when the style changes from paper to minimal", async () => {
+            const sources = buildSources("blueInk", "dark", "paper");
+            stop = startAppearanceSync(sources, systemBar, appearanceBridge);
+
+            sources.style.value = "minimal";
+            sources.colorTheme.value = "green";
+            await nextTick();
+
+            expect(isDark()).toBe(true);
+            expect(systemBar.apply).toHaveBeenLastCalledWith("dark");
+            expect(appearanceBridge.setAppearance).toHaveBeenLastCalledWith("dark");
         });
     });
 

@@ -3,7 +3,7 @@ import { getPalette, systemBarColor } from "@/theme/palettes";
 import { updateFavicon, updateMetaThemeColor } from "@/application/PwaThemeUpdater";
 import { launcherIconKey } from "@/theme/launcherIcon";
 import { syncPaperFonts } from "@/style/styles/paper/fonts";
-import type { ColorMode, ColorThemeId, StyleId } from "@/theme/themeIds";
+import { effectiveColorMode, type ColorMode, ColorThemeId, StyleId } from "@/theme/themeIds";
 import type { SystemBarService } from "@/application/systemBar/SystemBarService";
 import type { AppearanceBridgeService } from "@/application/appearanceBridge/AppearanceBridgeService";
 
@@ -23,7 +23,7 @@ export const startAppearanceSync = (
     appearanceBridge: AppearanceBridgeService,
 ): (() => void) => {
     const apply = () => {
-        const mode = sources.appearance.value;
+        const mode = effectiveColorMode(sources.style.value, sources.appearance.value);
         const root = document.documentElement;
         root.classList.toggle("dark", mode === "dark");
         root.dataset.style = sources.style.value;
@@ -39,9 +39,11 @@ export const startAppearanceSync = (
     };
 
     const stopWatching = watch([sources.appearance, sources.style, sources.colorTheme], apply, { immediate: true });
-    const stopWatchingAppearance = watch(sources.appearance, (appearance) => {
-        void appearanceBridge.setAppearance(appearance);
-    }, { immediate: true });
+    const stopWatchingAppearance = watch(
+        () => effectiveColorMode(sources.style.value, sources.appearance.value),
+        (mode) => { void appearanceBridge.setAppearance(mode); },
+        { immediate: true },
+    );
 
     return () => {
         stopWatching();
