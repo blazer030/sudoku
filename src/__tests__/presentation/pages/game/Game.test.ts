@@ -1069,6 +1069,17 @@ describe("Game", () => {
             expect(wrapper.find("[data-testid='game-inputs']").attributes("inert")).toBeUndefined();
         });
 
+        it("should mark the board while hinting, so a style can draw hint mode", async () => {
+            const wrapper = mountGame();
+            await wrapper.find("[data-testid='cell-0-2']").trigger("click");
+            await wrapper.find("[data-testid='number-4']").trigger("click");
+
+            expect(wrapper.find("[data-testid='game-board']").attributes("data-hint-mode")).toBeUndefined();
+            await openRevealCell(wrapper);
+
+            expect(wrapper.find("[data-testid='game-board']").attributes("data-hint-mode")).toBeDefined();
+        });
+
         it("should lock the board and show the hint mode badge while hinting", async () => {
             const wrapper = mountGame();
             await wrapper.find("[data-testid='cell-0-2']").trigger("click");
