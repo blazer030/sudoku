@@ -113,13 +113,15 @@ describe("bundled fonts", () => {
         expect(missing.join("")).toBe("");
     });
 
-    it("should map the digits in the pixel faces that only write digits", () => {
-        const digits = Array.from("0123456789", digit => digit.codePointAt(0) ?? 0);
+    it("should map the digits in the pixel faces that only write digits, and the timer's colon in the digit face", () => {
+        const codePoints = (text: string): number[] => Array.from(text, character => character.codePointAt(0) ?? 0);
+        // Press Start 2P sets the timer, so its colon is cut in too; otherwise it falls back to Cubic 11
+        const expected: Readonly<Record<string, string>> = { "press-start-2p.woff2": "0123456789:", "silkscreen.woff2": "0123456789" };
 
-        for (const file of ["press-start-2p.woff2", "silkscreen.woff2"]) {
-            const mapped = mappedCodePoints(readFileSync(`src/assets/fonts/${file}`), [...digits, 0x41, 0x6578]);
+        for (const [file, text] of Object.entries(expected)) {
+            const mapped = mappedCodePoints(readFileSync(`src/assets/fonts/${file}`), [...codePoints("0123456789:"), 0x41, 0x6578]);
 
-            expect([...mapped].sort(), file).toEqual([...digits].sort());
+            expect([...mapped].sort(), file).toEqual(codePoints(text).sort());
         }
     });
 
