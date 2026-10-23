@@ -383,6 +383,12 @@
     --pixel-burst-4: var(--pixel-burst-light);
 }
 
+/* A completed row, column or box flashes on and off rather than fading: the shared keyframes, each
+   half in one jump. A hint's answer keeps the shared glow, which is meant to win over the flash. */
+[data-style="pixel"] [data-skin~="board"] .animate-completion-flash:not(.animate-hint-reveal-glow) {
+    animation: completion-flash 500ms steps(2, jump-none);
+}
+
 /* Keys, buttons and tiles: square, a notched 2px frame and a hard 4px shadow. Colour changes snap;
    there is no fading in 8-bit. */
 [data-style="pixel"] [data-skin~="key"],
@@ -558,8 +564,8 @@
 
 /* Reduced motion: no dropping, jumping, blinking, sliding, popping or bursting. A pressed piece stays
    where it is but still loses its drop shadow, a change of look rather than a movement, and the press
-   overlay stays; hint mode keeps its doubled frame and the selection its cursor, held still, and an
-   error's digit stays lit over its hatch. */
+   overlay stays; hint mode keeps its doubled frame and the selection its cursor, held still, an
+   error's digit stays lit over its hatch, and a completed group does not flash. */
 @media (prefers-reduced-motion: reduce) {
     [data-style="pixel"] .segmented-indicator-motion {
         transition: none;
@@ -569,6 +575,7 @@
     [data-style="pixel"] [data-skin~="board"]:not([data-hint-mode]) [data-selected]::before,
     [data-style="pixel"] [data-skin~="board"] [data-variant="error"] > div,
     [data-style="pixel"] [data-skin~="board"] .value-arrive,
+    [data-style="pixel"] [data-skin~="board"] .animate-completion-flash:not(.animate-hint-reveal-glow),
     [data-style="pixel"] [data-press-motion],
     [data-style="pixel"] [data-skin~="key"][data-press-motion][data-pressed],
     [data-style="pixel"] [data-skin~="button"][data-press-motion][data-pressed],

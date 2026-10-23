@@ -382,6 +382,14 @@ describe("pixel skin", () => {
             expect(Number(declarationsOf(PIXEL_CSS, BURST).get("z-index"))).toBeGreaterThan(Number(declarationsOf(PIXEL_CSS, `${BOARD} > div::before`).get("z-index")));
         });
 
+        it("should flash a completed group in steps, leaving the hint's answer to its own glow, and not under reduced motion", () => {
+            // The shared glow is defined after the flash so it wins on the answer cell; the pixel flash must not outweigh it
+            const FLASH = `${BOARD} .animate-completion-flash:not(.animate-hint-reveal-glow)`;
+
+            expect(declarationsOf(PIXEL_CSS, FLASH).get("animation")).toMatch(/^completion-flash \d+ms steps\(2, jump-none\)$/);
+            expect(reducedMotionDeclarationsOf(FLASH).get("animation")).toBe("none");
+        });
+
         it("should hold every digit still under reduced motion", () => {
             expect(reducedMotionDeclarationsOf(ARRIVE).get("animation")).toBe("none");
             expect(reducedMotionDeclarationsOf(BURST).get("animation")).toBe("none");
