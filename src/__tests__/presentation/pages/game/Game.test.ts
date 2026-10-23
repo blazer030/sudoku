@@ -938,6 +938,9 @@ describe("Game", () => {
             await wrapper.find("[data-testid='hint-auto-notes']").trigger("click");
             await wrapper.find("[data-testid='hint-button']").trigger("click");
             await wrapper.find("[data-testid='hint-reveal-cell']").trigger("click");
+            await flushPromises();
+            // A shown hint is closed before the game can be left
+            await wrapper.find("[data-testid='hint-close']").trigger("click");
 
             // Save & Leave
             await wrapper.find("[data-testid='back-button']").trigger("click");
@@ -1220,29 +1223,22 @@ describe("Game", () => {
             expect(boardOf(wrapper)).toEqual(before);
         });
 
-        it("should end hint mode without changing the board when leaving from the header", async () => {
+        // A hint is finished (填入答案) or closed first; the header's Back cannot leave the game in the middle
+        it("should keep the header's Back disabled while a hint is shown", async () => {
             const wrapper = mountGame();
-            await wrapper.find("[data-testid='note-button']").trigger("click");
-            await wrapper.find("[data-testid='cell-0-3']").trigger("click");
-            await wrapper.find("[data-testid='number-6']").trigger("click");
-            await wrapper.find("[data-testid='note-button']").trigger("click");
-            await wrapper.find("[data-testid='cell-0-2']").trigger("click");
-            await wrapper.find("[data-testid='number-4']").trigger("click");
             await openRevealCell(wrapper);
             expect(wrapper.find("[data-testid='hint-panel']").exists()).toBe(true);
-            const before = boardOf(wrapper);
 
-            await wrapper.find("[data-testid='back-button']").trigger("click");
-            await flushPromises();
-            await wrapper.find("[data-testid='save-and-leave-button']").trigger("click");
+            const back = wrapper.find("[data-testid='back-button']");
+            expect(back.attributes("disabled")).toBeDefined();
+            await back.trigger("click");
             await flushPromises();
 
-            expect(wrapper.find("[data-testid='hint-panel']").exists()).toBe(false);
-            expect(wrapper.find("[data-testid='hint-mode-pill']").exists()).toBe(false);
-            expect(boardOf(wrapper)).toEqual(before);
-            const saved = useGameStore().savedGame;
-            expect(saved?.cells.flat().map(({ entry, notes }) => ({ entry, notes }))).toEqual(before);
-            expect(saved?.hintsUsed).toBe(1);
+            expect(wrapper.find("[data-testid='leave-game-dialog']").exists()).toBe(false);
+            expect(wrapper.find("[data-testid='hint-panel']").exists()).toBe(true);
+
+            await wrapper.find("[data-testid='hint-close']").trigger("click");
+            expect(wrapper.find("[data-testid='back-button']").attributes("disabled")).toBeUndefined();
         });
     });
 
