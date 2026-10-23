@@ -26,10 +26,11 @@ export const en = {
         appearance: "Appearance",
         colorMode: {
             label: "Color mode",
-            system: "System",
             light: "Light",
             dark: "Dark",
+            onlyLight: "This style is light only",
         },
+        appearanceSummary: "{mode} · {theme}",
         colorTheme: "Color theme",
         style: {
             label: "Style",

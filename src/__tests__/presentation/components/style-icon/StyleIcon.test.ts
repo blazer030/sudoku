@@ -28,6 +28,16 @@ describe("StyleIcon", () => {
         expect(wrapper.attributes("style")).toContain("64px");
     });
 
+    it("should hide from screen readers when decorative, as a visible name beside it already says it", () => {
+        const palette = getPalette("tactile", STYLES.tactile.themes[0].id, "light");
+        const wrapper = mount(StyleIcon, { props: { styleId: "tactile", palette, size: 48, decorative: true } });
+
+        expect(wrapper.attributes("aria-hidden")).toBe("true");
+        expect(wrapper.attributes("role")).toBeUndefined();
+        expect(wrapper.attributes("aria-label")).toBeUndefined();
+        expect(wrapper.find("svg").exists()).toBe(true);
+    });
+
     it("should follow the locale for its label", async () => {
         const { wrapper } = mountIcon("minimal");
         const english = wrapper.attributes("aria-label");
