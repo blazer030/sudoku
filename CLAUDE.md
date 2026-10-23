@@ -40,6 +40,8 @@ Design specs and implementation plans live under `docs/superpowers/` — never i
 
 Follow `docs/release.md` (git flow, web + Android). Bump the version only on the release/hotfix branch; `package.json` is the single source and Android derives `versionName` / `versionCode` from it.
 
+A player-facing change merged into `develop` also adds a line to `UNRELEASED_CHANGES` in `src/presentation/pages/settings/changelogData.ts` (both languages, same copy rules as the changelog). Develop builds show them as 「開發中」 on top of the changelog; the release moves them into its entry.
+
 ## Code Style
 
 - **Composition API** with `<script setup>` and arrow functions — no Options API
