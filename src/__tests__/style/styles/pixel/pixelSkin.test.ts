@@ -215,7 +215,9 @@ describe("pixel skin", () => {
         });
 
         it.each(["error", "wrong"])("should hatch the %s cell diagonally", (variant) => {
-            expect(declarationsOf(PIXEL_CSS, cell(variant)).get("--pixel-cell-pattern")).toMatch(/^linear-gradient\(45deg, var\(--pixel-pattern-shade\) 25%/);
+            // Two stripes of the shade in each 4px tile, each a quarter of it: half coverage, as the board model counts
+            expect(declarationsOf(PIXEL_CSS, cell(variant)).get("--pixel-cell-pattern"))
+                .toBe("linear-gradient(45deg, var(--pixel-pattern-shade) 25%, transparent 0 50%, var(--pixel-pattern-shade) 0 75%, transparent 0)");
         });
 
         it.each(["error", "wrong"])("should frame the %s cell 2px in the foreground ink, so it never reads as a dithered peer", (variant) => {
@@ -302,7 +304,8 @@ describe("pixel skin", () => {
             expect(note.get("color")).toBe("var(--color-foreground)");
         });
 
-        it("should draw hint mode's pattern and answer cells solid in the pattern shade, the answer framed", () => {
+        it("should draw hint mode's focus, pattern and answer cells solid in the pattern shade, the answer framed", () => {
+            expect(declarationsOf(PIXEL_CSS, cell("focus")).get("--pixel-cell-fill")).toBe("var(--pixel-pattern-shade)");
             expect(declarationsOf(PIXEL_CSS, cell("pattern")).get("--pixel-cell-fill")).toBe("var(--pixel-pattern-shade)");
             expect(declarationsOf(PIXEL_CSS, cell("answer")).get("--pixel-cell-fill")).toBe("var(--pixel-pattern-shade)");
             expect(declarationsOf(PIXEL_CSS, cell("answer")).get("box-shadow")).toBe("inset 0 0 0 3px var(--color-primary)");
