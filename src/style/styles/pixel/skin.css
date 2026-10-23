@@ -24,6 +24,8 @@
     /* The grid: thin lines in the mid shade, box lines in the ink, both solid */
     --board-line: var(--color-border);
     --board-box-line: var(--color-foreground);
+    /* The board's patterns (dither, hatch) and hint fills: the light green over the page in 掌機 */
+    --pixel-pattern-shade: var(--color-highlight);
 }
 
 /* No soft shadows or glows: the shared shadow utilities draw in --tw-shadow-color, which does not
@@ -37,6 +39,8 @@
 :root.dark[data-style="pixel"] {
     --pixel-title-shadow: var(--color-error);
     --pixel-hint: var(--color-primary);
+    /* ...and the navy card over the dark page in 紅白機 */
+    --pixel-pattern-shade: var(--color-card);
 }
 
 /* Type: Press Start 2P for digits (board, keys, timer, counts), Cubic 11 for every other text and
@@ -117,20 +121,24 @@
 }
 
 /* The grid's outer edge in the box lines' ink. It is positioned, so the line overlay below covers
-   the cells on every board (game, review, walkthrough). */
+   the cells on every board (game, review, walkthrough), and isolated, so the overlay's and the
+   cursor's stacking stays inside the grid. */
 [data-style="pixel"] [data-skin~="board"] > div {
     position: relative;
+    isolation: isolate;
     border-color: var(--board-box-line);
     border-radius: 0;
 }
 
 /* The cells' own borders are 1px and 3px; this overlay redraws the inner lines 2px thin and 4px for
    the boxes, over the same edges (the 9×9 cells fill the grid exactly). The outer edge is the grid's
-   border, so the overlay leaves it alone. It paints over the cells and under the hint links. */
+   border, so the overlay leaves it alone. It is raised over the cells, since the selected cell is
+   positioned for its cursor and would otherwise paint over it, and stays under the hint links. */
 [data-style="pixel"] [data-skin~="board"] > div::before {
     content: "";
     position: absolute;
     inset: 0;
+    z-index: 1;
     pointer-events: none;
     background-image:
         linear-gradient(to right,
@@ -157,6 +165,138 @@
             transparent 0 calc(700% / 9 - 1px), var(--board-line) 0 calc(700% / 9 + 1px),
             transparent 0 calc(800% / 9 - 1px), var(--board-line) 0 calc(800% / 9 + 1px),
             transparent 0);
+}
+
+[data-style="pixel"] [data-skin~="board"] > div > svg {
+    z-index: 2;
+}
+
+/* Cells. 掌機 has one ink, so states differ by pattern, not colour alone: every cell lies on the page
+   colour; scope and peer cells are a 2px dither and error cells a diagonal hatch, both the pattern
+   shade at half coverage; same-digit cells a solid fill; the selected cell is inverted under a
+   blinking corner cursor; and a player's digit is underlined. paletteContrast's PIXEL_BOARD_CASES
+   checks every ink on every one of these. The press overlay is laid over the pattern, and hint mode's
+   cells change in one step. */
+[data-style="pixel"] [data-skin~="board"] [data-variant] {
+    --pixel-cell-fill: var(--color-background);
+    --pixel-cell-pattern: none;
+    --pixel-clue-ink: var(--color-foreground);
+    --pixel-entry-ink: var(--color-accent);
+    --completion-flash-rest: var(--pixel-cell-fill);
+    background-color: var(--pixel-cell-fill);
+    background-image: var(--pixel-cell-pattern);
+    background-size: 4px 4px;
+    transition-duration: 0ms;
+}
+
+[data-style="pixel"] [data-skin~="board"] [data-variant][data-pressed] {
+    background-image: linear-gradient(var(--press-overlay), var(--press-overlay)), var(--pixel-cell-pattern);
+    background-size: auto, 4px 4px;
+}
+
+[data-style="pixel"] [data-skin~="board"] [data-value-kind="given"] > div {
+    color: var(--pixel-clue-ink);
+}
+
+[data-style="pixel"] [data-skin~="board"] [data-value-kind="entered"] > div {
+    position: relative;
+    color: var(--pixel-entry-ink);
+}
+
+/* A player's digit (or a hint's) carries a 2px underline in its own colour; a clue has none */
+[data-style="pixel"] [data-skin~="board"] [data-value-kind="entered"] > div::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 2px;
+    bottom: -5px;
+    height: 2px;
+    background-color: currentColor;
+}
+
+[data-style="pixel"] [data-skin~="board"] [data-variant="scope"],
+[data-style="pixel"] [data-skin~="board"] [data-variant="peer"] {
+    --pixel-cell-pattern: repeating-conic-gradient(var(--pixel-pattern-shade) 0 25%, transparent 0 50%);
+}
+
+/* An error (檢查衝突) or a hint's wrong entry is hatched; the error's digit blinks twice as it shows.
+   An error cell that is also selected or the same digit is drawn as an error: the cell gives the
+   error precedence, so the red never sits on the inverted cell or the same-digit blue. */
+[data-style="pixel"] [data-skin~="board"] [data-variant="error"],
+[data-style="pixel"] [data-skin~="board"] [data-variant="wrong"] {
+    --pixel-cell-pattern: linear-gradient(45deg, var(--pixel-pattern-shade) 25%, transparent 0 50%, var(--pixel-pattern-shade) 0 75%, transparent 0);
+    --pixel-entry-ink: var(--color-error);
+}
+
+[data-style="pixel"] [data-skin~="board"] [data-variant="error"] > div {
+    animation: pixel-blink 400ms steps(2, jump-none) 2;
+}
+
+[data-style="pixel"] [data-skin~="board"] [data-variant="wrong"] {
+    box-shadow: inset 0 0 0 3px var(--color-error);
+}
+
+/* Same digit: a solid fill. Its digits take the foreground ink (the entry blue reads only 2.61 on the
+   console's same-digit blue). */
+[data-style="pixel"] [data-skin~="board"] [data-variant="same-digit"] {
+    --pixel-cell-fill: var(--color-highlight);
+    --pixel-clue-ink: var(--color-foreground);
+    --pixel-entry-ink: var(--color-foreground);
+}
+
+/* Hint mode's pattern cells are the pattern shade solid; its answer is framed in the primary */
+[data-style="pixel"] [data-skin~="board"] [data-variant="focus"],
+[data-style="pixel"] [data-skin~="board"] [data-variant="pattern"],
+[data-style="pixel"] [data-skin~="board"] [data-variant="answer"] {
+    --pixel-cell-fill: var(--pixel-pattern-shade);
+}
+
+[data-style="pixel"] [data-skin~="board"] [data-variant="answer"] {
+    box-shadow: inset 0 0 0 3px var(--color-primary);
+}
+
+/* The selected cell is inverted, its digit, notes and underline in the page colour, and the shared
+   selection ring gives way to the cursor */
+[data-style="pixel"] [data-skin~="board"] [data-variant="selected"] {
+    --pixel-cell-fill: var(--color-foreground);
+    --pixel-clue-ink: var(--color-background);
+    --pixel-entry-ink: var(--color-background);
+    position: relative;
+    box-shadow: none;
+}
+
+[data-style="pixel"] [data-skin~="board"] [data-variant="selected"] * {
+    color: var(--color-background);
+}
+
+/* The selected digit's note keeps its disc, turned to the page colour */
+[data-style="pixel"] [data-skin~="board"] [data-variant="selected"] [data-note-highlight] {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+}
+
+/* The cursor: four corner brackets just outside the cell, over the grid lines, blinking on and off */
+[data-style="pixel"] [data-skin~="board"] [data-variant="selected"]::before {
+    content: "";
+    position: absolute;
+    inset: -7px;
+    z-index: 2;
+    pointer-events: none;
+    background:
+        linear-gradient(var(--color-primary), var(--color-primary)) top left / 12px 4px no-repeat,
+        linear-gradient(var(--color-primary), var(--color-primary)) top left / 4px 12px no-repeat,
+        linear-gradient(var(--color-primary), var(--color-primary)) top right / 12px 4px no-repeat,
+        linear-gradient(var(--color-primary), var(--color-primary)) top right / 4px 12px no-repeat,
+        linear-gradient(var(--color-primary), var(--color-primary)) bottom left / 12px 4px no-repeat,
+        linear-gradient(var(--color-primary), var(--color-primary)) bottom left / 4px 12px no-repeat,
+        linear-gradient(var(--color-primary), var(--color-primary)) bottom right / 12px 4px no-repeat,
+        linear-gradient(var(--color-primary), var(--color-primary)) bottom right / 4px 12px no-repeat;
+    animation: pixel-blink 1000ms steps(2, jump-none) infinite;
+}
+
+/* On for the first half, off for the second */
+@keyframes pixel-blink {
+    to { opacity: 0; }
 }
 
 /* Keys, buttons and tiles: square, a notched 2px frame and a hard 4px shadow. Colour changes snap;
@@ -346,13 +486,16 @@
 
 /* Reduced motion: no dropping, jumping, blinking or sliding. A pressed piece stays where it is but
    still loses its drop shadow, a change of look rather than a movement, and the press overlay stays;
-   hint mode keeps its doubled frame, held still. */
+   hint mode keeps its doubled frame and the selection its cursor, held still, and an error's digit
+   stays lit over its hatch. */
 @media (prefers-reduced-motion: reduce) {
     [data-style="pixel"] .segmented-indicator-motion {
         transition: none;
     }
 
     [data-style="pixel"] [data-skin~="board"][data-hint-mode],
+    [data-style="pixel"] [data-skin~="board"] [data-variant="selected"]::before,
+    [data-style="pixel"] [data-skin~="board"] [data-variant="error"] > div,
     [data-style="pixel"] [data-press-motion],
     [data-style="pixel"] [data-skin~="key"][data-press-motion][data-pressed],
     [data-style="pixel"] [data-skin~="button"][data-press-motion][data-pressed],

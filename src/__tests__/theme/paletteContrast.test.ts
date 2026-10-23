@@ -216,9 +216,10 @@ const HIERARCHY_CASES = modeCases((style, themeId, mode, palette) => (isExempt(O
     level,
 })));
 
-// 8-bit's board: each cell state is the ink actually drawn on the surface actually drawn. A dither or
-// hatch is the cell's lighter shade checkered over the board at half coverage, counted as their mix:
-// #8BAC0F over #9BBC0F in 掌機, #1E1E3C over #000000 in 紅白機. The skin must draw these colours.
+// 8-bit's board: each cell state is the ink actually drawn on the surface actually drawn. Every cell lies
+// on the page colour. A dither or hatch is the pattern shade checkered or striped over it at half
+// coverage, counted as their mix: #8BAC0F over #9BBC0F in 掌機, #1E1E3C over #000000 in 紅白機; hint
+// mode's pattern and answer cells are that shade solid. The skin (--pixel-pattern-shade) draws these.
 const PIXEL_PATTERN_SHADE: Readonly<Record<ColorMode, PaletteToken>> = { light: "highlight", dark: "card" };
 const PIXEL_PATTERN_COVERAGE = 0.5;
 
@@ -227,22 +228,30 @@ interface PixelBoardCase { label: string; foreground: string; background: string
 const PIXEL_BOARD_CASES: PixelBoardCase[] = STYLES.pixel.themes.flatMap(theme => STYLE_COLOR_MODES.pixel.map((mode) => {
     const palette = getPalette("pixel", theme.id, mode);
     const board = palette.background;
-    const pattern = mixColors(palette[PIXEL_PATTERN_SHADE[mode]], PIXEL_PATTERN_COVERAGE, board);
+    const shade = palette[PIXEL_PATTERN_SHADE[mode]];
+    const pattern = mixColors(shade, PIXEL_PATTERN_COVERAGE, board);
     // Player digits are the accent in 紅白機 (the canvas's entry blue)
     const inks: readonly PaletteToken[] = [...BOARD_INKS, "accent"];
-    return { prefix: `pixel/${theme.id}/${mode}`, palette, board, pattern, inks };
-}).flatMap(({ prefix, palette, board, pattern, inks }) => {
+    return { prefix: `pixel/${theme.id}/${mode}`, palette, board, shade, pattern, inks };
+}).flatMap(({ prefix, palette, board, shade, pattern, inks }) => {
     const drawn = (name: string, foreground: string, background: string, minimum = TEXT): PixelBoardCase => ({
         label: `${prefix}: ${name} ≥ ${minimum}`, foreground, background, minimum,
     });
     return [
         // Default, clue, player digit and note cells
         ...inks.map(ink => drawn(`${ink} on the board`, palette[ink], board)),
-        // Scope and peer cells are dithered; an error cell is hatched the same way
+        // Scope and peer cells are dithered; error and hint-wrong cells are hatched at the same coverage
         ...inks.map(ink => drawn(`${ink} on the dither`, palette[ink], pattern)),
-        drawn("error on the hatch", palette.error, pattern),
-        // The selected cell is inverted
+        // An error cell that is also selected or the same digit is still drawn as an error (the cell gives
+        // the error precedence), so its digit is never on the inverted cell or the same-digit fill
+        drawn("error on the hatch, also when the error cell is selected or the same digit", palette.error, pattern),
+        drawn("wrong entry's frame (error) on the hatch", palette.error, pattern, LARGE_OR_ICON),
+        // Hint mode's pattern and answer cells are the pattern shade solid; the answer is framed in the primary
+        ...inks.map(ink => drawn(`${ink} on the hint fill`, palette[ink], shade)),
+        drawn("answer's frame (primary) on the hint fill", palette.primary, shade, LARGE_OR_ICON),
+        // The selected cell is inverted; its digit, notes and a highlighted note's disc take the page colour
         drawn("selected digit (background on foreground)", palette.background, palette.foreground),
+        drawn("selected cell's highlighted note (foreground on its background disc)", palette.foreground, palette.background),
         // Same-digit cells are a solid fill with the foreground ink
         drawn("same digit (foreground on highlight)", palette.foreground, palette.highlight),
         // The continue card's chip: a transparent tag on the card's page colour
@@ -250,6 +259,7 @@ const PIXEL_BOARD_CASES: PixelBoardCase[] = STYLES.pixel.themes.flatMap(theme =>
         // The blinking corner cursor around the selected cell is a UI component, so 3:1 applies
         drawn("selection cursor (primary) on the board", palette.primary, board, LARGE_OR_ICON),
         drawn("selection cursor (primary) on the dither", palette.primary, pattern, LARGE_OR_ICON),
+        drawn("selection cursor (primary) on the same-digit fill", palette.primary, palette.highlight, LARGE_OR_ICON),
     ];
 }));
 
@@ -286,6 +296,14 @@ describe("palette contrast", () => {
         expect(handheldCase("selected digit (background on foreground)")).toMatchObject({ foreground: "#9BBC0F", background: "#0F380F" });
         expect(handheldCase("same digit (foreground on highlight)")).toMatchObject({ foreground: "#0F380F", background: "#8BAC0F" });
         expect(handheldCase("continue-card chip (on-featured on featured)")).toMatchObject({ foreground: "#0F380F", background: "#9BBC0F" });
+
+        const consoleCase = (name: string) => PIXEL_BOARD_CASES.find(boardCase => boardCase.label.startsWith(`pixel/classic/dark: ${name} `));
+
+        expect(consoleCase("accent on the board")).toMatchObject({ foreground: "#3CBCFC", background: "#000000" });
+        expect(consoleCase("foreground on the dither")).toMatchObject({ foreground: "#FCFCFC", background: "#0F0F1E" });
+        expect(consoleCase("foreground on the hint fill")).toMatchObject({ foreground: "#FCFCFC", background: "#1E1E3C" });
+        expect(consoleCase("same digit (foreground on highlight)")).toMatchObject({ foreground: "#FCFCFC", background: "#0058F8" });
+        expect(consoleCase("selection cursor (primary) on the same-digit fill")).toMatchObject({ foreground: "#F8B800", background: "#0058F8" });
     });
 
     it.each(PIXEL_BOARD_CASES)("$label", ({ foreground, background, minimum }) => {
