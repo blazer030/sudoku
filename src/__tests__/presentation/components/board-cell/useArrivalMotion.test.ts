@@ -153,12 +153,14 @@ describe("useArrivalMotion", () => {
                 const durations = [...declaration.value.matchAll(/(\d+(?:\.\d+)?)(ms|s)\b/g)]
                     .map(([, amount, unit]) => Number(amount) * (unit === "s" ? 1000 : 1));
                 for (const duration of durations) expect(duration, style).toBeLessThan(ARRIVAL_SETTLE_MS);
-                checked.add(`${style} ${MOTION_CLASSES.filter(motionClass => (rule as postcss.Rule).selector.includes(motionClass)).join(" ")}`);
+                for (const motionClass of MOTION_CLASSES) {
+                    if ((rule as postcss.Rule).selector.includes(motionClass)) checked.add(`${style} ${motionClass}`);
+                }
             });
         }
 
         // The styles that animate them, so the check above is not empty
-        expect([...checked]).toEqual(expect.arrayContaining(["tactile .value-arrive"]));
+        expect([...checked]).toEqual(expect.arrayContaining(["tactile .value-arrive", "pixel .value-arrive", "pixel .value-leave"]));
     });
 
     it.each(["minimal", "tactile", "paper"])("should leave %s's digits to go without a leaving look", (style) => {

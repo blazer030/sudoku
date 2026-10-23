@@ -321,6 +321,73 @@ describe("pixel skin", () => {
         });
     });
 
+    describe("digit motion", () => {
+        const ARRIVE = `${BOARD} .value-arrive`;
+        // The cell whose digit arrives or leaves; the arrival is the digit's class, so the cell finds it with :has()
+        const BURST_CELL = `${BOARD} [data-variant]:is(.value-leave, :has(> .value-arrive))`;
+        const BURST = `${BURST_CELL}::after`;
+
+        const keyframesOf = (name: string): Map<string, Map<string, string>> => {
+            const frames = new Map<string, Map<string, string>>();
+            postcss.parse(PIXEL_CSS).walkAtRules("keyframes", (atRule) => {
+                if (atRule.params.trim() !== name) return;
+                atRule.walkRules((frame) => {
+                    const declarations = new Map<string, string>();
+                    frame.walkDecls((declaration) => {
+                        declarations.set(declaration.prop, declaration.value.replace(/\s+/g, " ").trim());
+                    });
+                    frames.set(frame.selector, declarations);
+                });
+            });
+            return frames;
+        };
+
+        it("should pop a placed digit in over four steps", () => {
+            expect(declarationsOf(PIXEL_CSS, ARRIVE).get("animation")).toMatch(/^pixel-[\w-]+ \d+ms steps\(4, jump-start\)$/);
+        });
+
+        it("should burst eight pixels out of the cell as its digit arrives or leaves, in four steps", () => {
+            const burst = declarationsOf(PIXEL_CSS, BURST);
+            const name = /^(pixel-[\w-]+) /.exec(burst.get("animation") ?? "")?.[1] ?? "";
+            const pixels = shadowLayers(keyframesOf(name).get("to")?.get("box-shadow") ?? "");
+
+            // The burst hangs off the cell, so the pop's scaling never shrinks it
+            expect(declarationsOf(PIXEL_CSS, BURST_CELL).get("position")).toBe("relative");
+            expect(burst.get("content")).toBe('""');
+            expect(burst.get("width")).toBe("4px");
+            expect(burst.get("height")).toBe("4px");
+            expect(burst.get("animation")).toMatch(/^pixel-burst \d+ms steps\(4, jump-start\)$/);
+            expect(pixels).toHaveLength(8);
+            expect(pixels.filter(pixel => pixel.inset || pixel.blur !== 0 || pixel.spread !== 0)).toEqual([]);
+            // Four straight out and four on the diagonals
+            expect(pixels.filter(pixel => (pixel.offsetX === 0) !== (pixel.offsetY === 0))).toHaveLength(4);
+            expect(pixels.filter(pixel => pixel.offsetX !== 0 && Math.abs(pixel.offsetX) === Math.abs(pixel.offsetY))).toHaveLength(4);
+        });
+
+        it("should colour the arriving burst from the palette and the leaving one in the light colour", () => {
+            const scope = declarationsOf(PIXEL_CSS, SCOPE);
+            const consoleMode = declarationsOf(PIXEL_CSS, ':root.dark[data-style="pixel"]');
+            const leave = declarationsOf(PIXEL_CSS, `${BOARD} .value-leave::after`);
+
+            for (const index of [1, 2, 3, 4]) {
+                expect(scope.get(`--pixel-burst-${index}`), `burst ${index}`).toMatch(/^var\(--color-[\w-]+\)$/);
+                expect(consoleMode.get(`--pixel-burst-${index}`), `console burst ${index}`).toMatch(/^var\(--color-[\w-]+\)$/);
+                expect(leave.get(`--pixel-burst-${index}`), `leave burst ${index}`).toBe("var(--pixel-burst-light)");
+            }
+            expect(scope.get("--pixel-burst-light")).toBe("var(--color-highlight)");
+            expect(consoleMode.get("--pixel-burst-light")).toBe("var(--color-foreground-secondary)");
+        });
+
+        it("should burst over the grid lines", () => {
+            expect(Number(declarationsOf(PIXEL_CSS, BURST).get("z-index"))).toBeGreaterThan(Number(declarationsOf(PIXEL_CSS, `${BOARD} > div::before`).get("z-index")));
+        });
+
+        it("should hold every digit still under reduced motion", () => {
+            expect(reducedMotionDeclarationsOf(ARRIVE).get("animation")).toBe("none");
+            expect(reducedMotionDeclarationsOf(BURST).get("animation")).toBe("none");
+        });
+    });
+
     it("should frame a plain button over a component's own scoped look (the hint panel's)", () => {
         const plain = declarationsOf(PIXEL_CSS, `${skin("button")}:not([data-skin~="continue"], [data-skin~="new-game"])`);
         const layers = shadowLayers(plain.get("box-shadow") ?? "");
