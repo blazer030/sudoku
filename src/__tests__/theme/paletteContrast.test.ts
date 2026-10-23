@@ -245,7 +245,8 @@ const PIXEL_BOARD_CASES: PixelBoardCase[] = STYLES.pixel.themes.flatMap(theme =>
         // An error cell that is also selected or the same digit is still drawn as an error (the cell gives
         // the error precedence), so its digit is never on the inverted cell or the same-digit fill
         drawn("error on the hatch, also when the error cell is selected or the same digit", palette.error, pattern),
-        drawn("wrong entry's frame (error) on the hatch", palette.error, pattern, LARGE_OR_ICON),
+        // Error and wrong cells are framed 2px in the foreground ink inside their edge, over the hatch
+        drawn("error frame (foreground) on the hatch", palette.foreground, pattern, LARGE_OR_ICON),
         // Hint mode's pattern and answer cells are the pattern shade solid; the answer is framed in the primary
         ...inks.map(ink => drawn(`${ink} on the hint fill`, palette[ink], shade)),
         drawn("answer's frame (primary) on the hint fill", palette.primary, shade, LARGE_OR_ICON),
@@ -304,6 +305,7 @@ describe("palette contrast", () => {
         expect(consoleCase("foreground on the hint fill")).toMatchObject({ foreground: "#FCFCFC", background: "#1E1E3C" });
         expect(consoleCase("same digit (foreground on highlight)")).toMatchObject({ foreground: "#FCFCFC", background: "#0058F8" });
         expect(consoleCase("selection cursor (primary) on the same-digit fill")).toMatchObject({ foreground: "#F8B800", background: "#0058F8" });
+        expect(handheldCase("error frame (foreground) on the hatch")).toMatchObject({ foreground: "#0F380F", background: "#93B40F" });
     });
 
     it.each(PIXEL_BOARD_CASES)("$label", ({ foreground, background, minimum }) => {

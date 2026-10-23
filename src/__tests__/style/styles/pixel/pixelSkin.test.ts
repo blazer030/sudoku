@@ -218,6 +218,10 @@ describe("pixel skin", () => {
             expect(declarationsOf(PIXEL_CSS, cell(variant)).get("--pixel-cell-pattern")).toMatch(/^linear-gradient\(45deg, var\(--pixel-pattern-shade\) 25%/);
         });
 
+        it.each(["error", "wrong"])("should frame the %s cell 2px in the foreground ink, so it never reads as a dithered peer", (variant) => {
+            expect(declarationsOf(PIXEL_CSS, cell(variant)).get("box-shadow")).toBe("inset 0 0 0 2px var(--color-foreground)");
+        });
+
         it("should blink an error cell's digit twice, in steps", () => {
             expect(declarationsOf(PIXEL_CSS, `${cell("error")} > div`).get("animation")).toMatch(/^pixel-[\w-]+ \d+ms steps\(2, jump-none\) 2$/);
         });
@@ -302,7 +306,6 @@ describe("pixel skin", () => {
             expect(declarationsOf(PIXEL_CSS, cell("pattern")).get("--pixel-cell-fill")).toBe("var(--pixel-pattern-shade)");
             expect(declarationsOf(PIXEL_CSS, cell("answer")).get("--pixel-cell-fill")).toBe("var(--pixel-pattern-shade)");
             expect(declarationsOf(PIXEL_CSS, cell("answer")).get("box-shadow")).toBe("inset 0 0 0 3px var(--color-primary)");
-            expect(declarationsOf(PIXEL_CSS, cell("wrong")).get("box-shadow")).toBe("inset 0 0 0 3px var(--color-error)");
         });
 
         it("should snap cell colours in hint mode instead of fading them", () => {

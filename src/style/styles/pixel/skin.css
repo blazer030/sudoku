@@ -241,8 +241,11 @@
     animation: pixel-blink 400ms steps(2, jump-none) 2;
 }
 
+/* The hatch alone is faint in 掌機 (two close greens), so an error or wrong cell is also framed 2px
+   in the foreground ink inside its edge, in both modes */
+[data-style="pixel"] [data-skin~="board"] [data-variant="error"],
 [data-style="pixel"] [data-skin~="board"] [data-variant="wrong"] {
-    box-shadow: inset 0 0 0 3px var(--color-error);
+    box-shadow: inset 0 0 0 2px var(--color-foreground);
 }
 
 /* Same digit: a solid fill. Its digits take the foreground ink (the entry blue reads only 2.61 on the
