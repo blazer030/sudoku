@@ -37,6 +37,12 @@ describe("SettingsStorage", () => {
             });
         });
 
+        it("should treat saved settings that are the JSON text null as no saved settings", () => {
+            localStorage.setItem("sudoku-settings", "null");
+
+            expect(loadSettings().style).toBe("minimal");
+        });
+
         it("should start a fresh install in the mode the system shows", () => {
             stubSystemDark(true);
 

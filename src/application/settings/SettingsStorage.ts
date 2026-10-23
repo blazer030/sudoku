@@ -64,7 +64,8 @@ const systemColorMode = (): ColorMode =>
 export const loadSettings = (): Settings => {
     const stored = localStorage.getItem(STORAGE_KEY);
     // A fresh map every load, so a change to one result never leaks into the defaults
-    const parsed = stored === null ? {} : JSON.parse(stored) as Partial<Settings>;
+    // The JSON text "null" parses to null, which counts as nothing saved
+    const parsed: Partial<Settings> = (stored === null ? null : JSON.parse(stored) as Partial<Settings> | null) ?? {};
     const settings: Settings = { ...DEFAULT_SETTINGS, colorThemeByStyle: { ...DEFAULT_SETTINGS.colorThemeByStyle }, ...parsed };
     // A missing, retired "system" or unknown appearance becomes the system's current mode once, then is saved
     const appearanceChosen = (COLOR_MODES as readonly unknown[]).includes(parsed.appearance);
