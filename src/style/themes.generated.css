@@ -862,3 +862,75 @@
     --color-rule: #CFDCE4;
     --color-margin-line: #E9B9AF;
 }
+
+:root[data-style="pixel"][data-color-theme="classic"] {
+    --color-background: #9BBC0F;
+    --color-card: #9BBC0F;
+    --color-border: #306230;
+    --color-foreground: #0F380F;
+    --color-foreground-secondary: #0F380F;
+    --color-foreground-muted: #0F380F;
+    --color-primary: #0F380F;
+    --color-primary-hover: #0F380F;
+    --color-primary-light: #8BAC0F;
+    --color-accent: #0F380F;
+    --color-highlight: #8BAC0F;
+    --color-cell-clue: #9BBC0F;
+    --color-danger: #0F380F;
+    --color-danger-hover: #0F380F;
+    --color-error: #0F380F;
+    --color-error-surface: #8BAC0F;
+    --color-shadow: #306230;
+    --color-on-primary: #9BBC0F;
+    --color-on-danger: #9BBC0F;
+    --color-note: #0F380F;
+    --color-cell-focus: #7C9F0F;
+    --color-cell-scope: #90B10F;
+    --color-cell-pattern: #86A80F;
+    --color-scrim: #000000;
+    --color-on-scrim: #9BBC0F;
+    --color-toast: #0F380F;
+    --color-on-toast: #9BBC0F;
+    --color-cell-selected: #8BAC0F;
+    --color-cell-peer: #8AAC0F;
+    --color-featured: #9BBC0F;
+    --color-on-featured: #0F380F;
+    --color-rule: #9BBC0F;
+    --color-margin-line: #9BBC0F;
+}
+
+:root.dark[data-style="pixel"][data-color-theme="classic"] {
+    --color-background: #000000;
+    --color-card: #1E1E3C;
+    --color-border: #6C6C6C;
+    --color-foreground: #FCFCFC;
+    --color-foreground-secondary: #BCBCBC;
+    --color-foreground-muted: #A4A4A4;
+    --color-primary: #F8B800;
+    --color-primary-hover: #F8B800;
+    --color-primary-light: #1E1E3C;
+    --color-accent: #3CBCFC;
+    --color-highlight: #0058F8;
+    --color-cell-clue: #000000;
+    --color-danger: #F87858;
+    --color-danger-hover: #F87858;
+    --color-error: #F87858;
+    --color-error-surface: #000000;
+    --color-shadow: #3C3C3C;
+    --color-on-primary: #000000;
+    --color-on-danger: #000000;
+    --color-note: #BCBCBC;
+    --color-cell-focus: #52432E;
+    --color-cell-scope: #342D36;
+    --color-cell-pattern: #433832;
+    --color-scrim: #000000;
+    --color-on-scrim: #FCFCFC;
+    --color-toast: #1E1E3C;
+    --color-on-toast: #FCFCFC;
+    --color-cell-selected: #453A31;
+    --color-cell-peer: #383035;
+    --color-featured: #000000;
+    --color-on-featured: #FCFCFC;
+    --color-rule: #000000;
+    --color-margin-line: #000000;
+}

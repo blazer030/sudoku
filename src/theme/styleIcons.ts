@@ -161,6 +161,167 @@ const paperColors = (palette: Palette): PaperColors => ({
     circle: palette.danger,
 });
 
+// 8-bit: the board as a game screen on a 54×54 pixel grid, 2 units a pixel. Three hearts over a 3×3
+// box holding 1, 5 and 9, with a cursor in the top-right cell. 掌機 (light) draws it in the four
+// greens; 紅白機 (dark) in the console colours, with a star field around it. Ported from the
+// style-research generator (pixelicon.py).
+const PIXEL_UNIT = 2;
+const PIXEL_HEART = [
+    ".XX.XX.",
+    "XXXXXXX",
+    "XXXXXXX",
+    ".XXXXX.",
+    "..XXX..",
+    "...X...",
+];
+const PIXEL_DIGITS = {
+    1: ["..X..", ".XX..", "..X..", "..X..", "..X..", "..X..", ".XXX."],
+    5: ["XXXXX", "X....", "XXXX.", "....X", "....X", "X...X", ".XXX."],
+    9: [".XXX.", "X...X", "X...X", ".XXXX", "....X", "...X.", ".XX.."],
+} as const;
+const PIXEL_HEART_LEFTS = [14, 23, 32];
+const PIXEL_HEART_TOP = 6;
+// The box: three 10-pixel cells and four 1-pixel lines, 34 pixels square
+const PIXEL_CELL = 10;
+const PIXEL_BOX_LEFT = 10;
+const PIXEL_BOX_TOP = 14;
+const PIXEL_BOX_SIZE = 3 * PIXEL_CELL + 4;
+// The console's red: the hearts are art, not text, so they keep it on black
+const PIXEL_HEART_RED = "#F83800";
+
+type StarTone = "bright" | "dim" | "blue" | "gold";
+// A sparse star field in the margins around the hearts and the box, clear of the point at 5% across
+// and halfway down where the icon assets sample the background
+const PIXEL_STARS: readonly (readonly [number, number, StarTone])[] = [
+    [3, 4, "bright"], [8, 2, "dim"], [19, 2, "dim"], [29, 1, "bright"], [41, 4, "dim"], [47, 3, "blue"],
+    [51, 9, "bright"], [2, 13, "gold"], [46, 17, "dim"], [6, 20, "dim"], [52, 24, "blue"], [4, 30, "bright"],
+    [48, 34, "bright"], [7, 40, "blue"], [51, 44, "dim"], [2, 49, "dim"], [12, 51, "bright"], [24, 50, "dim"],
+    [33, 52, "gold"], [46, 50, "bright"],
+];
+// Two twinkling stars: a bright centre with dim arms
+const PIXEL_TWINKLES: readonly (readonly [number, number])[] = [[48, 9], [5, 45]];
+const PIXEL_TWINKLE_ARMS = [[-1, 0], [1, 0], [0, -1], [0, 1]] as const;
+
+interface PixelColors {
+    line: string;
+    given: string;
+    centreDigit: string;
+    heart: string;
+    /** Left out, the parts are not drawn: the monochrome layer has no fills, cursor or stars. */
+    centreCell?: string;
+    cursor?: string;
+    stars?: Record<StarTone, string>;
+}
+
+interface PixelDot { x: number; y: number; color: string }
+
+const pixelCellOrigin = (index: number): number => 1 + index * (PIXEL_CELL + 1);
+
+/** The pixels in paint order; a later pixel at the same spot covers an earlier one. */
+const pixelDots = (colors: PixelColors): PixelDot[] => {
+    const dots: PixelDot[] = [];
+    const put = (x: number, y: number, color: string) => { dots.push({ x, y, color }); };
+    const stamp = (rows: readonly string[], left: number, top: number, color: string) => {
+        rows.forEach((row, rowIndex) => {
+            for (let columnIndex = 0; columnIndex < row.length; columnIndex++) {
+                if (row[columnIndex] === "X") put(left + columnIndex, top + rowIndex, color);
+            }
+        });
+    };
+    const { stars, centreCell, cursor } = colors;
+    if (stars) {
+        for (const [x, y, tone] of PIXEL_STARS) put(x, y, stars[tone]);
+        for (const [x, y] of PIXEL_TWINKLES) {
+            for (const [across, down] of PIXEL_TWINKLE_ARMS) put(x + across, y + down, stars.dim);
+            put(x, y, stars.bright);
+        }
+    }
+    for (const left of PIXEL_HEART_LEFTS) stamp(PIXEL_HEART, left, PIXEL_HEART_TOP, colors.heart);
+    // The centre cell's fill sits behind the lines
+    if (centreCell) {
+        for (let down = 0; down < PIXEL_CELL; down++) {
+            for (let across = 0; across < PIXEL_CELL; across++) {
+                put(PIXEL_BOX_LEFT + pixelCellOrigin(1) + across, PIXEL_BOX_TOP + pixelCellOrigin(1) + down, centreCell);
+            }
+        }
+    }
+    for (let line = 0; line < 4; line++) {
+        const offset = line * (PIXEL_CELL + 1);
+        for (let along = 0; along < PIXEL_BOX_SIZE; along++) {
+            put(PIXEL_BOX_LEFT + offset, PIXEL_BOX_TOP + along, colors.line);
+            put(PIXEL_BOX_LEFT + along, PIXEL_BOX_TOP + offset, colors.line);
+        }
+    }
+    // A 5×7 digit sits 3 in from its cell's left and 2 down from its top
+    const digits = [[1, 0, 0, colors.given], [5, 1, 1, colors.centreDigit], [9, 2, 2, colors.given]] as const;
+    for (const [digit, column, row, color] of digits) {
+        stamp(PIXEL_DIGITS[digit], PIXEL_BOX_LEFT + pixelCellOrigin(column) + 3, PIXEL_BOX_TOP + pixelCellOrigin(row) + 2, color);
+    }
+    // The cursor: corner brackets inside the top-right cell
+    if (cursor) {
+        const left = PIXEL_BOX_LEFT + pixelCellOrigin(2) + 1;
+        const top = PIXEL_BOX_TOP + pixelCellOrigin(0) + 1;
+        const right = left + PIXEL_CELL - 3;
+        const bottom = top + PIXEL_CELL - 3;
+        for (let arm = 0; arm < 3; arm++) {
+            put(left + arm, top, cursor); put(left, top + arm, cursor);
+            put(right - arm, top, cursor); put(right, top + arm, cursor);
+            put(left + arm, bottom, cursor); put(left, bottom - arm, cursor);
+            put(right - arm, bottom, cursor); put(right, bottom - arm, cursor);
+        }
+    }
+    return dots;
+};
+
+/** One rect per horizontal run of a colour, row by row, the topmost pixel winning at each spot. */
+const pixelRects = (dots: readonly PixelDot[]): string[] => {
+    const rows = new Map<number, Map<number, string>>();
+    for (const { x, y, color } of dots) {
+        const row = rows.get(y) ?? new Map<number, string>();
+        row.set(x, color);
+        rows.set(y, row);
+    }
+    const rect = (start: number, end: number, y: number, color: string): string =>
+        `<rect x="${start * PIXEL_UNIT}" y="${y * PIXEL_UNIT}" width="${(end - start + 1) * PIXEL_UNIT}" height="${PIXEL_UNIT}" fill="${color}"/>`;
+    return [...rows.keys()].sort((first, second) => first - second).flatMap((y) => {
+        const row = rows.get(y) ?? new Map<number, string>();
+        const runs: { start: number; end: number; color: string }[] = [];
+        for (const x of [...row.keys()].sort((first, second) => first - second)) {
+            const color = row.get(x) ?? "";
+            const last = runs[runs.length - 1] as { start: number; end: number; color: string } | undefined;
+            if (last?.end === x - 1 && last.color === color) last.end = x;
+            else runs.push({ start: x, end: x, color });
+        }
+        return runs.map(run => rect(run.start, run.end, y, run.color));
+    });
+};
+
+// Square pixels stay square when a launcher scales them
+const pixelArtwork = (colors: PixelColors): string[] =>
+    [`<g shape-rendering="crispEdges">`, ...pixelRects(pixelDots(colors)), "</g>"];
+
+// 掌機: lines and digits in the darkest green, the centre cell in the light green, hearts and cursor
+// in the dark green (the canvas's shadow shade). 紅白機: white lines and digits, a gold 5 on a navy
+// cell, red hearts, a blue cursor, and stars in white, grey, blue and gold.
+const pixelColors = (palette: Palette): PixelColors => isDark(palette)
+    ? {
+        line: palette.foreground,
+        given: palette.foreground,
+        centreCell: palette.card,
+        centreDigit: palette.primary,
+        heart: PIXEL_HEART_RED,
+        cursor: palette.accent,
+        stars: { bright: palette.foreground, dim: palette.border, blue: palette.accent, gold: palette.primary },
+    }
+    : {
+        line: palette.foreground,
+        given: palette.foreground,
+        centreCell: palette.highlight,
+        centreDigit: palette.foreground,
+        heart: palette.shadow,
+        cursor: palette.shadow,
+    };
+
 const artworkOf = (style: StyleId, palette: Palette, bleed = 0): string[] => {
     switch (style) {
         case "minimal": return minimalTiles(palette["on-primary"]);
@@ -169,6 +330,7 @@ const artworkOf = (style: StyleId, palette: Palette, bleed = 0): string[] => {
             const colors = paperColors(palette);
             return [...paperSheet(colors, bleed), ...paperWriting(colors)];
         }
+        case "pixel": return pixelArtwork(pixelColors(palette));
     }
 };
 
@@ -181,7 +343,7 @@ export const styleIconSvg = (style: StyleId, palette: Palette): string =>
     svgOf(fillSquare(styleIconBackground(style, palette)), ...artworkOf(style, palette));
 
 /**
- * The adaptive icon's foreground layer: minimal's tiles alone; tactile's and paper's whole artwork,
+ * The adaptive icon's foreground layer: minimal's tiles alone; the other styles' whole artwork,
  * their background and paper's sheet filling the layer to its edges so no seam shows at the 72dp viewport.
  */
 export const styleIconForeground = (style: StyleId, palette: Palette): string =>
@@ -201,6 +363,8 @@ const monochromeArtwork = (style: StyleId): string[] => {
         })).concat(tactileFive(color));
         // The writing without the sheet: grid, digits and circle
         case "paper": return paperWriting({ ink: color, circle: color });
+        // The hearts, the box and its digits
+        case "pixel": return pixelArtwork({ line: color, given: color, centreDigit: color, heart: color });
     }
 };
 

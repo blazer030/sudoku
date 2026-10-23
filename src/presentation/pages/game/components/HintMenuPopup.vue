@@ -11,6 +11,7 @@
             />
             <div
                 class="absolute bottom-safe-24 left-1/2 -translate-x-1/2 bg-card rounded-popup shadow-popup w-72 z-10 flex flex-col gap-1 py-4 px-3"
+                data-skin="card"
                 data-testid="hint-menu"
             >
                 <div class="flex flex-col px-3 pb-1">

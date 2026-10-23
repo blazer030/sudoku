@@ -17,4 +17,12 @@ describe("DifficultySwitcher", () => {
 
         expect(wrapper.text()).toBe("簡單中等困難");
     });
+
+    it("should mark itself as a menu of choices, still a segmented control", () => {
+        const wrapper = mount(DifficultySwitcher, { props: { modelValue: "easy" } });
+        const tokens = (wrapper.attributes("data-skin") ?? "").split(" ");
+
+        expect(tokens).toContain("segmented");
+        expect(tokens).toContain("menu");
+    });
 });

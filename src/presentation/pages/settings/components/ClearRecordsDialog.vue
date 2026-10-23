@@ -5,7 +5,10 @@
             class="fixed inset-0 bg-scrim/50 flex items-center justify-center z-50"
             data-testid="clear-records-dialog"
         >
-            <div class="bg-card rounded-3xl p-8 mx-6 w-full max-w-[354px] flex flex-col items-center gap-6 shadow-modal">
+            <div
+                class="bg-card rounded-3xl p-8 mx-6 w-full max-w-[354px] flex flex-col items-center gap-6 shadow-modal"
+                data-skin="card"
+            >
                 <div class="w-16 h-16 rounded-2xl bg-danger/10 flex items-center justify-center">
                     <Trash2
                         :size="32"

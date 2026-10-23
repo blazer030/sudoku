@@ -17,8 +17,9 @@ progressive web app (PWA) and as a native Android app via Capacitor.
 - **Save & restore** with a running timer, persisted to IndexedDB
 - **Statistics** (best times, win rate, day streak) plus per-game **Review**
   with move replay
-- **Three visual styles** — Minimal Motion, Tactile Tiles and Paper Notebook — each
-  with its own colour themes, in light or dark (Paper Notebook is light only)
+- **Four visual styles** — Minimal Motion, Tactile Tiles, Paper Notebook and 8-bit — each
+  with its own colour themes, in light or dark (Paper Notebook is light only; 8-bit has
+  fixed colours, 掌機 handheld green or 紅白機 console)
 - **English and Traditional Chinese**, following the system language or chosen in Settings
 - **Offline support** via service worker (web build)
 - **Native Android app** — Google Play Billing donations and a dynamic app

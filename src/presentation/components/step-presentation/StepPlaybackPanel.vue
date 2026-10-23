@@ -4,6 +4,7 @@
         :data-testid="`${testIdPrefix}-panel`"
         :style="maxHeight === null ? undefined : { maxHeight: `${maxHeight}px` }"
         class="bg-card rounded-2xl shadow-card-lg w-full p-4 pb-3 flex flex-col gap-3 outline-none [&>*]:shrink-0"
+        data-skin="card"
         role="group"
     >
         <div class="flex items-center justify-between gap-2 min-h-8">

@@ -30,7 +30,10 @@
                 <div class="w-15" />
             </div>
 
-            <div class="flex items-center justify-between bg-card rounded-xl py-2 px-4 shadow-card-sm">
+            <div
+                class="flex items-center justify-between bg-card rounded-xl py-2 px-4 shadow-card-sm"
+                data-skin="card"
+            >
                 <div class="flex items-center gap-3">
                     <div
                         :class="game.completed

@@ -5,10 +5,13 @@
             positionClasses,
             flashing ? 'animate-completion-flash' : '',
             popping ? 'animate-hint-reveal-glow' : '',
+            leaving ? 'value-leave' : '',
         ]"
+        :data-selected="selected ? '' : undefined"
         :data-value-kind="value !== 0 ? valueKind : undefined"
         :data-variant="variant"
         class="flex justify-center items-center aspect-square min-w-0 min-h-0"
+        @animationend.self="settleFromCell"
     >
         <div
             v-if="value !== 0"
@@ -74,6 +77,8 @@ const props = withDefaults(defineProps<{
     emphasizedDigits?: number[];
     popping?: boolean;
     valueKind?: ValueKind;
+    /** The selected cell, even when another state (an error) decides its variant; a style may mark it. */
+    selected?: boolean;
 }>(), {
     notes: () => [],
     eliminatedDigits: () => [],
@@ -86,6 +91,7 @@ const props = withDefaults(defineProps<{
     emphasizedDigits: () => [],
     popping: false,
     valueKind: "given",
+    selected: false,
 });
 
 const VARIANT_BACKGROUNDS: Record<CellVariant, string> = {
@@ -114,8 +120,15 @@ const VALUE_FONT_WEIGHTS: Record<ValueFontWeight, string> = {
     medium: "font-medium",
 };
 
-// Only a style sheet gives value-arrive a look; in styles without one it settles on a timer
-const { arriving, settle } = useArrivalMotion(toRef(props, "value"), toRef(props, "popping"));
+// Only a style sheet gives value-arrive (on the digit) and value-leave (on the cell) a look; in styles
+// without one they settle on a timer. A style's burst on the cell's pseudo-elements settles them too.
+// The cell's own colour animations (a completion flash, a hint's glow) run on their own clock, and
+// animations ending inside the cell bubble up, so neither does.
+const { arriving, leaving, settle } = useArrivalMotion(toRef(props, "value"), toRef(props, "popping"));
+
+const settleFromCell = (event: AnimationEvent) => {
+    if (event.pseudoElement) settle();
+};
 
 const backgroundClass = computed(() => VARIANT_BACKGROUNDS[props.variant]);
 

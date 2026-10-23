@@ -6,7 +6,10 @@
             data-testid="game-complete-modal"
         >
             <FireworkCanvas />
-            <div class="bg-card rounded-3xl p-8 mx-6 w-full max-w-[354px] flex flex-col items-center gap-6 shadow-modal relative z-[52]">
+            <div
+                class="bg-card rounded-3xl p-8 mx-6 w-full max-w-[354px] flex flex-col items-center gap-6 shadow-modal relative z-[52]"
+                data-skin="card"
+            >
                 <div class="w-20 h-20 rounded-full bg-primary-light flex items-center justify-center">
                     <Trophy
                         :size="40"

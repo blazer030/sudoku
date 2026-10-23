@@ -36,6 +36,11 @@ describe("BoardCell", () => {
         expect(mountCell({}).attributes("data-variant")).toBe("default");
     });
 
+    it("should mark the selected cell for style sheets, whatever its variant", () => {
+        expect(mountCell({ variant: "error", selected: true }).attributes("data-selected")).toBe("");
+        expect(mountCell({ variant: "selected" }).attributes("data-selected")).toBeUndefined();
+    });
+
     it("should mark an entered digit and write it in the entry face", () => {
         const wrapper = mountCell({ value: 5, valueKind: "entered" });
 
@@ -130,6 +135,89 @@ describe("BoardCell", () => {
             const wrapper = mountCell({ value: 0, popping: true });
 
             await wrapper.setProps({ value: 5 });
+
+            expect(wrapper.get("[data-testid='cell-value']").classes()).not.toContain("value-arrive");
+        });
+    });
+
+    describe("leaving", () => {
+        afterEach(() => {
+            vi.unstubAllGlobals();
+        });
+
+        const stubReducedMotion = (reduce: boolean) => {
+            vi.stubGlobal("matchMedia", (query: string) => ({
+                matches: reduce && query === "(prefers-reduced-motion: reduce)",
+                media: query,
+            }));
+        };
+
+        it("should mark the cell while its digit leaves, until an animation on the cell's pseudo-element ends", async () => {
+            stubReducedMotion(false);
+            const wrapper = mountCell({ value: 5 });
+
+            await wrapper.setProps({ value: 0 });
+            expect(wrapper.classes()).toContain("value-leave");
+
+            await wrapper.trigger("animationend", { pseudoElement: "::after" });
+            expect(wrapper.classes()).not.toContain("value-leave");
+        });
+
+        it("should keep the leaving mark when the cell's own colour animation ends, as a completion flash does", async () => {
+            // A flash already running when the digit is erased would otherwise cut the burst short
+            stubReducedMotion(false);
+            const wrapper = mountCell({ value: 5, flashing: true });
+
+            await wrapper.setProps({ value: 0 });
+            await wrapper.trigger("animationend", { pseudoElement: "" });
+
+            expect(wrapper.classes()).toContain("value-leave");
+        });
+
+        it("should drop the leaving mark on its own when the active style has no leaving animation", async () => {
+            // Undo, game review and the walkthrough clear digits too; the mark must never stick
+            vi.useFakeTimers();
+            try {
+                stubReducedMotion(false);
+                const wrapper = mountCell({ value: 5 });
+                await wrapper.setProps({ value: 0 });
+                expect(wrapper.classes()).toContain("value-leave");
+
+                vi.advanceTimersByTime(ARRIVAL_SETTLE_MS);
+                await nextTick();
+
+                expect(wrapper.classes()).not.toContain("value-leave");
+            } finally {
+                vi.useRealTimers();
+            }
+        });
+
+        it("should keep the leaving mark when an animation inside the cell ends", async () => {
+            stubReducedMotion(false);
+            const wrapper = mountCell({ value: 5 });
+            await wrapper.setProps({ value: 0, notes: [3] });
+
+            await wrapper.get("span").trigger("animationend");
+
+            expect(wrapper.classes()).toContain("value-leave");
+        });
+
+        it("should not mark a leaving digit under reduced motion", async () => {
+            stubReducedMotion(true);
+            const wrapper = mountCell({ value: 5 });
+
+            await wrapper.setProps({ value: 0 });
+
+            expect(wrapper.classes()).not.toContain("value-leave");
+        });
+
+        it("should settle an arrival when the cell's own animation ends", async () => {
+            // A style may draw the arrival on the cell (8-bit's burst) as well as on the digit
+            stubReducedMotion(false);
+            const wrapper = mountCell({ value: 0 });
+            await wrapper.setProps({ value: 5 });
+
+            await wrapper.trigger("animationend", { pseudoElement: "::after" });
 
             expect(wrapper.get("[data-testid='cell-value']").classes()).not.toContain("value-arrive");
         });

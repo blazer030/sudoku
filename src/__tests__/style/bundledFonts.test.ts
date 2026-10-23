@@ -4,7 +4,8 @@ import postcss from "postcss";
 import { mappedCodePoints, nameStrings } from "./woff2Tables";
 
 const FONTS_CSS = "src/style/fonts.css";
-const BUNDLED_FONTS = ["outfit.woff2", "roboto-mono.woff2", "caveat.woff2", "lxgw-wenkai-tc-regular.woff2", "lxgw-wenkai-tc-bold.woff2"];
+const BUNDLED_FONTS = ["outfit.woff2", "roboto-mono.woff2", "caveat.woff2", "lxgw-wenkai-tc-regular.woff2", "lxgw-wenkai-tc-bold.woff2", "press-start-2p.woff2", "silkscreen.woff2"];
+const CUBIC_11 = "cubic-11.woff2";
 
 interface FontFace {
     family: string;
@@ -60,6 +61,9 @@ describe("bundled fonts", () => {
         ["Caveat", "500 700"],
         ["LXGW WenKai TC", "400"],
         ["LXGW WenKai TC", "700"],
+        ["Press Start 2P", "400"],
+        ["Silkscreen", "400"],
+        ["Cubic 11", "400"],
     ])("should declare %s %s from a bundled woff2 with swap", (family, weight) => {
         const face = fontFaces().find(candidate => candidate.family === family && candidate.weight === weight);
 
@@ -72,7 +76,7 @@ describe("bundled fonts", () => {
 
     it("should ship each family's licence in the build", () => {
         // public/ is copied as is into dist/, which the web build serves and the Android app packs
-        for (const licence of ["Outfit-OFL.txt", "RobotoMono-OFL.txt", "Caveat-OFL.txt", "LXGWWenKaiTC-OFL.txt"]) {
+        for (const licence of ["Outfit-OFL.txt", "RobotoMono-OFL.txt", "Caveat-OFL.txt", "LXGWWenKaiTC-OFL.txt", "PressStart2P-OFL.txt", "Silkscreen-OFL.txt", "Cubic11-OFL.txt"]) {
             expect(readFileSync(`public/fonts/licenses/${licence}`, "utf8"), licence).toContain("SIL Open Font License");
         }
     });
@@ -83,6 +87,14 @@ describe("bundled fonts", () => {
 
         expect(names.get(13), "licence description").toMatch(/Open Font License/i);
         expect(names.get(14), "licence URL").toMatch(/openfontlicense\.org|scripts\.sil\.org\/OFL/i);
+    });
+
+    it("should keep Cubic 11's copyright notice, as the source font has no licence name IDs", () => {
+        // Name IDs 13 and 14 are absent upstream; its copyright and free-software grant live in ID 0
+        const names = nameStrings(readFileSync(`src/assets/fonts/${CUBIC_11}`));
+
+        expect(names.get(13)).toBeUndefined();
+        expect(names.get(0), "copyright notice").toMatch(/Copyright.*Cubic 11 Project Authors/s);
     });
 
     it("should read a font's character map", () => {
@@ -96,6 +108,26 @@ describe("bundled fonts", () => {
         // Read from the font's own character map; emoji are left to the system's emoji font
         const wanted = [...sourceCharacters()].filter(character => !/\p{Extended_Pictographic}/u.test(character));
         const mapped = mappedCodePoints(readFileSync(`src/assets/fonts/${file}`), wanted.map(character => character.codePointAt(0) ?? 0));
+        const missing = wanted.filter(character => !mapped.has(character.codePointAt(0) ?? 0));
+
+        expect(missing.join("")).toBe("");
+    });
+
+    it("should map the digits in the pixel faces that only write digits, and the timer's colon in the digit face", () => {
+        const codePoints = (text: string): number[] => Array.from(text, character => character.codePointAt(0) ?? 0);
+        // Press Start 2P sets the timer, so its colon is cut in too; otherwise it falls back to Cubic 11
+        const expected: Readonly<Record<string, string>> = { "press-start-2p.woff2": "0123456789:", "silkscreen.woff2": "0123456789" };
+
+        for (const [file, text] of Object.entries(expected)) {
+            const mapped = mappedCodePoints(readFileSync(`src/assets/fonts/${file}`), [...codePoints("0123456789:"), 0x41, 0x6578]);
+
+            expect([...mapped].sort(), file).toEqual(codePoints(text).sort());
+        }
+    });
+
+    it("cubic-11.woff2 maps every character the app writes (run npm run generate:fonts)", () => {
+        const wanted = [...sourceCharacters()].filter(character => !/\p{Extended_Pictographic}/u.test(character));
+        const mapped = mappedCodePoints(readFileSync("src/assets/fonts/cubic-11.woff2"), wanted.map(character => character.codePointAt(0) ?? 0));
         const missing = wanted.filter(character => !mapped.has(character.codePointAt(0) ?? 0));
 
         expect(missing.join("")).toBe("");

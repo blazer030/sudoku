@@ -6,6 +6,8 @@ import { styleIconBackground, styleIconForeground, styleIconMonochrome, styleIco
 const minimalGreen = getPalette("minimal", "green", "light");
 const tactileGreenDark = getPalette("tactile", "green", "dark");
 const paperRedInk = getPalette("paper", "redInk", "light");
+const pixelHandheld = getPalette("pixel", "classic", "light");
+const pixelConsole = getPalette("pixel", "classic", "dark");
 const firstPalette = (style: StyleId) => getPalette(style, THEME_IDS_BY_STYLE[style][0], "light");
 
 // Every colour the markup paints with, fills and strokes alike
@@ -19,6 +21,15 @@ const fillOf = (svg: string, rect: string): string => {
     if (!color) throw new Error(`no <rect ${rect}> in the icon`);
     return color;
 };
+// The colours of the rects that cover a point of the artwork, in paint order
+const paintsAt = (svg: string, x: number, y: number): string[] => rectsOf(svg).flatMap((rect) => {
+    const number = (name: string, fallback: number) => Number(new RegExp(`\\b${name}="(-?[\\d.]+)"`).exec(rect)?.[1] ?? fallback);
+    const left = number("x", 0);
+    const top = number("y", 0);
+    const covers = x >= left && x < left + number("width", 0) && y >= top && y < top + number("height", 0);
+    return covers ? [/fill="(#[0-9A-F]{6})"/.exec(rect)?.[1] ?? ""] : [];
+});
+
 // Contrast against black rises with luminance, so it orders colours from dark to light
 const lightness = (color: string): number => contrastRatio(color, "#000000");
 
@@ -71,6 +82,33 @@ describe("styleIcons", () => {
         expect(svg).toMatch(new RegExp(`<path d="M63\\.5 50 [^"]*" fill="none" stroke="${paperRedInk.danger}"`));
     });
 
+    it("should draw pixel's handheld screen in the four greens on the lightest", () => {
+        const svg = styleIconSvg("pixel", pixelHandheld);
+
+        expect(svg).toContain(`<rect width="108" height="108" fill="#9BBC0F"/>`);
+        expect(new Set(paintsOf(svg))).toEqual(new Set(["#9BBC0F", "#0F380F", "#306230", "#8BAC0F"]));
+    });
+
+    it("should draw pixel's console screen on black with red hearts, a gold 5 and a star field", () => {
+        const svg = styleIconSvg("pixel", pixelConsole);
+
+        expect(svg).toContain(`<rect width="108" height="108" fill="#000000"/>`);
+        for (const color of ["#FCFCFC", "#6C6C6C", "#3CBCFC", "#F8B800", "#F83800", "#1E1E3C"]) {
+            expect(paintsOf(svg), color).toContain(color);
+        }
+    });
+
+    it("should draw pixel's artwork on a 2-unit pixel grid", () => {
+        for (const rect of rectsOf(styleIconSvg("pixel", pixelConsole)).slice(1)) {
+            expect(rect).toMatch(/^<rect x="\d*[02468]" y="\d*[02468]" width="\d*[02468]" height="2" fill="#[0-9A-F]{6}"\/>$/);
+        }
+    });
+
+    it.each([pixelHandheld, pixelConsole])("should keep pixel's background-sample point clear of stars and drawing", (palette) => {
+        // The icon assets sample the background 5% across, halfway down
+        expect(paintsAt(styleIconSvg("pixel", palette), 5.4, 54)).toEqual([palette.background]);
+    });
+
     it.each(STYLE_IDS)("should draw the %s icon as a plain 108 square with no text", (style) => {
         const svg = styleIconSvg(style, firstPalette(style));
 
@@ -83,6 +121,7 @@ describe("styleIcons", () => {
         expect(styleIconBackground("minimal", minimalGreen)).toBe(minimalGreen.primary);
         expect(styleIconBackground("tactile", tactileGreenDark)).toBe(tactileGreenDark.background);
         expect(styleIconBackground("paper", paperRedInk)).toBe(paperRedInk.background);
+        expect(styleIconBackground("pixel", pixelConsole)).toBe(pixelConsole.background);
     });
 
     it("should leave minimal's foreground to its tiles and give tactile and paper their whole artwork", () => {
@@ -92,6 +131,8 @@ describe("styleIcons", () => {
             .toContain(`<rect x="-27" y="-27" width="162" height="162" fill="${tactileGreenDark.background}"/>`);
         expect(styleIconForeground("paper", paperRedInk))
             .toContain(`<rect x="-27" y="-27" width="162" height="162" fill="${paperRedInk.background}"/>`);
+        expect(styleIconForeground("pixel", pixelConsole))
+            .toContain(`<rect x="-27" y="-27" width="162" height="162" fill="${pixelConsole.background}"/>`);
     });
 
     it("should fit each foreground's artwork into the adaptive icon's 72dp viewport", () => {

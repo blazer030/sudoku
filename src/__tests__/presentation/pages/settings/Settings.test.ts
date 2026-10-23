@@ -307,6 +307,17 @@ describe("Settings.vue appearance row", () => {
         expect(settingsStore.appearance).toBe("dark");
     });
 
+    it("should show only the mode, in the style's own name, for a one-theme style", async () => {
+        const wrapper = mountSettings();
+        const settingsStore = useSettingsStore();
+        settingsStore.setStyle("pixel");
+        settingsStore.setAppearance("dark");
+        await nextTick();
+
+        expect(summaryOf(wrapper)).toBe(t("settings.colorMode.styled.pixel.dark"));
+        expect(summaryOf(wrapper)).not.toContain(t("settings.colorThemes.classic"));
+    });
+
     it("should open the appearance page", async () => {
         const { router, wrapper } = mountSettingsWithRouter();
 

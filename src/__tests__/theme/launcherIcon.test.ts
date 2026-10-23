@@ -21,17 +21,23 @@ describe("launcher icons", () => {
         expect(launcherIconKey("tactile", "rust", "dark")).toBe("tactileRustDark");
         expect(launcherIconKey("paper", "blueInk", "light")).toBe("paperBlueInk");
         expect(launcherIconKey("paper", "redInk", "dark")).toBe("paperRedInkDark");
+        expect(launcherIconKey("pixel", "classic", "light")).toBe("pixelClassic");
+        expect(launcherIconKey("pixel", "classic", "dark")).toBe("pixelClassicDark");
     });
 
     it("should list one icon per style's theme in each mode the style has, each with its own key", () => {
         const iconCount = STYLE_IDS.reduce((sum, style) => sum + STYLES[style].themes.length * STYLE_COLOR_MODES[style].length, 0);
 
         expect(LAUNCHER_ICONS).toHaveLength(iconCount);
-        expect(LAUNCHER_ICONS).toHaveLength(23);
+        expect(LAUNCHER_ICONS).toHaveLength(25);
         expect(new Set(LAUNCHER_ICONS.map(icon => icon.key)).size).toBe(LAUNCHER_ICONS.length);
         for (const icon of LAUNCHER_ICONS) {
             expect(icon.key).toBe(launcherIconKey(icon.style, icon.themeId, icon.mode));
         }
+    });
+
+    it("should give pixel a handheld and a console icon", () => {
+        expect(LAUNCHER_ICONS.filter(icon => icon.style === "pixel").map(icon => icon.key)).toEqual(["pixelClassic", "pixelClassicDark"]);
     });
 
     it("should give paper no dark icon now that paper is light only", () => {

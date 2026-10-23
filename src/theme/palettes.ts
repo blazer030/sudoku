@@ -3,6 +3,7 @@
 import { effectiveColorMode, type ColorMode, type ColorThemeId, type RememberedThemes, type StyleId } from "./themeIds";
 import { MINIMAL_STYLE } from "../style/styles/minimal/palette";
 import { PAPER_STYLE } from "../style/styles/paper/palette";
+import { PIXEL_STYLE } from "../style/styles/pixel/palette";
 import { TACTILE_STYLE } from "../style/styles/tactile/palette";
 import type { Palette, StyleDefinition, ThemePalette } from "./paletteBuilder";
 
@@ -12,6 +13,7 @@ export const STYLES: Record<StyleId, StyleDefinition> = {
     minimal: MINIMAL_STYLE,
     tactile: TACTILE_STYLE,
     paper: PAPER_STYLE,
+    pixel: PIXEL_STYLE,
 };
 
 export const DEFAULT_STYLE_ID: StyleId = "minimal";

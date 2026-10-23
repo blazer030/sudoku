@@ -67,6 +67,15 @@ const SAMPLES: Record<StyleId, ArtworkSample[]> = {
         { x: 24, y: -19.5, token: "margin-line", fine: true, foregroundOnly: true },
         { x: 55.5, y: 57.5, token: "danger", fine: true },
     ],
+    pixel: [
+        { x: 5.4, y: 54, token: "background" },
+        { x: -20, y: 54, token: "background", foregroundOnly: true },
+        // The centre cell's fill, left of its 5
+        { x: 46, y: 62, token: "highlight", mode: "light" },
+        { x: 46, y: 62, token: "card", mode: "dark" },
+        // The box's left line
+        { x: 21, y: 40, token: "foreground", fine: true },
+    ],
 };
 const samplesAt = (style: StyleId, mode: ColorMode, density: string) => SAMPLES[style]
     .filter(sample => (!sample.fine || density === "xxxhdpi") && (!sample.mode || sample.mode === mode));

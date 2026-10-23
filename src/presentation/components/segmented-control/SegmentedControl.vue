@@ -1,6 +1,6 @@
 <template>
     <div
-        data-skin="segmented"
+        :data-skin="skin ? `segmented ${skin}` : 'segmented'"
         :class="inset ? 'bg-background' : 'bg-card shadow-card'"
         class="relative isolate flex h-12 w-full rounded-button px-1"
     >
@@ -48,6 +48,8 @@ const props = defineProps<{
     testIdPrefix: string;
     // Recessed track for use on a card surface: background tone, no shadow
     inset?: boolean;
+    /** More skin tokens for a style to tell this control apart, such as "menu" for a list of choices */
+    skin?: string;
 }>();
 
 const emit = defineEmits<{ "update:modelValue": [value: Value] }>();

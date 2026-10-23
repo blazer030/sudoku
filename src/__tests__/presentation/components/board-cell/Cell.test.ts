@@ -44,6 +44,17 @@ describe("Cell", () => {
         expect(wrapper.classes()).toContain("bg-cell-selected");
     });
 
+    it("should still mark a selected error cell as selected, though the error decides its look", () => {
+        const puzzleCell = new PuzzleCell(0);
+        puzzleCell.entry = 5;
+
+        const wrapper = mountCell({ puzzleCell, error: true, selected: true, selectedDigit: 5 });
+
+        expect(wrapper.attributes("data-variant")).toBe("error");
+        expect(wrapper.attributes("data-selected")).toBe("");
+        expect(mountCell({ puzzleCell, error: true }).attributes("data-selected")).toBeUndefined();
+    });
+
     it("should tell a player's entry from a clue", () => {
         const entered = new PuzzleCell(0);
         entered.entry = 5;

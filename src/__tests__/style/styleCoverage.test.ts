@@ -32,6 +32,7 @@ const REQUIRED_SELECTORS: Record<StyleId, readonly string[]> = {
         '[data-skin~="continue"]',
         '[data-skin~="new-game"]',
     ],
+    pixel: PRESS,
 };
 
 const selectorsOf = (style: StyleId): string[] => {

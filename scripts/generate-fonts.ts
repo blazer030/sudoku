@@ -20,6 +20,10 @@ const CACHE_DIR = join(ROOT, "node_modules/.cache/sudoku-fonts");
 const GOOGLE_FONTS_COMMIT = "45e3d5269e4a17d823f6d84470bc084dc5ae46f6";
 const sourceUrl = (path: string): string => `https://raw.githubusercontent.com/google/fonts/${GOOGLE_FONTS_COMMIT}/${path}`;
 
+// Cubic 11 (俐方體 11 號) is not on Google Fonts; pinned by commit like the rest
+const CUBIC_11_COMMIT = "4c566f7d6cc5c05ee360fe9cff56b5da1fcafd4d";
+const cubicUrl = (path: string): string => `https://raw.githubusercontent.com/ACh-K/Cubic-11/${CUBIC_11_COMMIT}/${path}`;
+
 const rangeText = (first: number, last: number): string =>
     Array.from({ length: last - first + 1 }, (_, offset) => String.fromCodePoint(first + offset)).join("");
 
@@ -55,20 +59,25 @@ interface FontJob {
 
 interface Family {
     licence: string;
+    fetch?: (path: string) => Promise<Buffer>;
     licenceOutput: string;
     jobs: FontJob[];
 }
 
-const download = async (path: string): Promise<Buffer> => {
-    const cached = join(CACHE_DIR, GOOGLE_FONTS_COMMIT, path);
+// Fetches a pinned file once and keeps it under the cache, so a rerun works offline
+const downloadCached = async (url: string, cacheKey: string): Promise<Buffer> => {
+    const cached = join(CACHE_DIR, cacheKey);
     if (existsSync(cached)) return readFileSync(cached);
-    const response = await fetch(sourceUrl(path));
-    if (!response.ok) throw new Error(`Could not download ${path}: ${response.status}`);
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`Could not download ${url}: ${response.status}`);
     const buffer = Buffer.from(await response.arrayBuffer());
     mkdirSync(dirname(cached), { recursive: true });
     writeFileSync(cached, buffer);
     return buffer;
 };
+
+const download = (path: string): Promise<Buffer> => downloadCached(sourceUrl(path), join(GOOGLE_FONTS_COMMIT, path));
+const downloadCubic = (path: string): Promise<Buffer> => downloadCached(cubicUrl(path), join("cubic-11", CUBIC_11_COMMIT, path));
 
 const main = async (): Promise<void> => {
     const chineseText = ASCII + sourceCharacters();
@@ -97,14 +106,35 @@ const main = async (): Promise<void> => {
                 { output: "lxgw-wenkai-tc-bold.woff2", source: "ofl/lxgwwenkaitc/LXGWWenKaiTC-Bold.ttf", text: chineseText },
             ],
         },
+        {
+            licence: "ofl/pressstart2p/OFL.txt",
+            licenceOutput: "PressStart2P-OFL.txt",
+            // 8-bit style's digits: board, keys, timer and counts; the timer's colon too, so it does not
+            // fall back to Cubic 11 between two pixel digits
+            jobs: [{ output: "press-start-2p.woff2", source: "ofl/pressstart2p/PressStart2P-Regular.ttf", text: "0123456789:" }],
+        },
+        {
+            licence: "ofl/silkscreen/OFL.txt",
+            licenceOutput: "Silkscreen-OFL.txt",
+            // 8-bit style's pencil marks are digits only
+            jobs: [{ output: "silkscreen.woff2", source: "ofl/silkscreen/Silkscreen-Regular.ttf", text: "0123456789" }],
+        },
+        {
+            licence: "OFL.txt",
+            licenceOutput: "Cubic11-OFL.txt",
+            fetch: downloadCubic,
+            // 8-bit style's text in both languages, cut to the characters the app writes like WenKai
+            jobs: [{ output: "cubic-11.woff2", source: "fonts/ttf/Cubic_11.ttf", text: chineseText }],
+        },
     ];
 
     mkdirSync(OUTPUT_DIR, { recursive: true });
     mkdirSync(LICENCE_DIR, { recursive: true });
     for (const family of families) {
-        writeFileSync(join(LICENCE_DIR, family.licenceOutput), await download(family.licence));
+        const fetchSource = family.fetch ?? download;
+        writeFileSync(join(LICENCE_DIR, family.licenceOutput), await fetchSource(family.licence));
         for (const job of family.jobs) {
-            const subset = await subsetFont(await download(job.source), job.text, {
+            const subset = await subsetFont(await fetchSource(job.source), job.text, {
                 targetFormat: "woff2",
                 preserveNameIds: LICENCE_NAME_IDS,
                 ...(job.weights ? { variationAxes: { wght: job.weights } } : {}),
@@ -115,7 +145,9 @@ const main = async (): Promise<void> => {
     }
     // The characters the WenKai subset was cut to; bundledFonts.test.ts checks the copy against it
     writeFileSync(join(OUTPUT_DIR, "lxgw-wenkai-tc-characters.txt"), chineseText);
-    console.log(`WenKai covers ${Array.from(chineseText).length} characters`);
+    // Cubic 11 is cut to the same characters
+    writeFileSync(join(OUTPUT_DIR, "cubic-11-characters.txt"), chineseText);
+    console.log(`WenKai and Cubic 11 cover ${Array.from(chineseText).length} characters`);
 };
 
 main().catch((error: unknown) => {

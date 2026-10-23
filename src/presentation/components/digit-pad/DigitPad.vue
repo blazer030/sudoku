@@ -30,6 +30,7 @@
                 </button>
                 <span
                     v-if="showRemainingCount && !isDigitCompleted(digit)"
+                    data-skin="badge"
                     :class="[
                         selectedDigit === digit ? 'bg-on-primary text-primary' : 'bg-foreground-secondary text-card',
                         { 'opacity-0': noteMode },
@@ -69,6 +70,7 @@
                 </button>
                 <span
                     v-if="showRemainingCount && !isDigitCompleted(digit)"
+                    data-skin="badge"
                     :class="[
                         selectedDigit === digit ? 'bg-on-primary text-primary' : 'bg-foreground-secondary text-card',
                         { 'opacity-0': noteMode },

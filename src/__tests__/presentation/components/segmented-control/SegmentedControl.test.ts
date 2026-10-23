@@ -13,6 +13,14 @@ const mountControl = (modelValue: string) => mount(SegmentedControl, {
 });
 
 describe("SegmentedControl", () => {
+    it("should add the skin tokens it is given to its own", () => {
+        expect(mountControl("small").attributes("data-skin")).toBe("segmented");
+
+        const marked = mount(SegmentedControl, { props: { options: OPTIONS, modelValue: "small", testIdPrefix: "size", skin: "menu" } });
+
+        expect(marked.attributes("data-skin")).toBe("segmented menu");
+    });
+
     it("should use the raised card track by default", () => {
         const wrapper = mountControl("small");
 
