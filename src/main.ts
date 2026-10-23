@@ -17,6 +17,7 @@ import { useStatisticsStore } from "@/stores/statisticsStore";
 import { ANALYTICS_KEY, type AnalyticsService } from "@/application/analytics/AnalyticsService";
 import { FirebaseAnalyticsAdapter } from "@/infrastructure/analytics/FirebaseAnalyticsAdapter";
 import { NoopAnalyticsAdapter } from "@/infrastructure/analytics/NoopAnalyticsAdapter";
+import { readWebFirebaseConfig } from "@/infrastructure/analytics/webFirebaseConfig";
 import { BILLING_KEY, type BillingService } from "@/application/billing/BillingService";
 import { NoopBillingAdapter } from "@/infrastructure/billing/NoopBillingAdapter";
 import { PlayBillingAdapter } from "@/infrastructure/billing/PlayBillingAdapter";
@@ -48,9 +49,20 @@ if (Capacitor.isNativePlatform() && "serviceWorker" in navigator) {
     });
 }
 
-const analytics: AnalyticsService = Capacitor.isNativePlatform()
-    ? new FirebaseAnalyticsAdapter()
-    : new NoopAnalyticsAdapter();
+const createAnalytics = async (): Promise<AnalyticsService> => {
+    if (Capacitor.isNativePlatform()) {
+        return new FirebaseAnalyticsAdapter();
+    }
+    const webFirebaseConfig = readWebFirebaseConfig(import.meta.env);
+    if (webFirebaseConfig === null) {
+        return new NoopAnalyticsAdapter();
+    }
+    const { initializeApp } = await import("firebase/app");
+    initializeApp(webFirebaseConfig);
+    return new FirebaseAnalyticsAdapter();
+};
+
+const analytics = await createAnalytics();
 
 startScreenTracking(router, analytics);
 
