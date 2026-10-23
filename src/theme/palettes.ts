@@ -28,8 +28,10 @@ export const rememberedThemeFor = (style: StyleId, remembered: RememberedThemes)
 };
 
 /** The palette the style shows for a mode; a light-only style answers with its light palette. */
-export const getPalette = (style: StyleId, themeId: ColorThemeId, mode: ColorMode): Palette =>
-    findTheme(style, themeId)[effectiveColorMode(style, mode)];
+export const getPalette = (style: StyleId, themeId: ColorThemeId, mode: ColorMode): Palette => {
+    const theme = findTheme(style, themeId);
+    return theme[effectiveColorMode(style, mode)] ?? theme.light;
+};
 
 /**
  * The browser theme-color: the primary in light mode, the page background in dark mode.

@@ -16,7 +16,7 @@ export const renderThemeCss = (): string => {
         for (const theme of style.themes) {
             const attributes = `[data-style="${style.id}"][data-color-theme="${theme.id}"]`;
             blocks.push(renderBlock(`:root${attributes}`, theme.light));
-            blocks.push(renderBlock(`:root.dark${attributes}`, theme.dark));
+            if (theme.dark !== undefined) blocks.push(renderBlock(`:root.dark${attributes}`, theme.dark));
         }
     }
     return `${HEADER}\n${blocks.join("\n\n")}\n`;

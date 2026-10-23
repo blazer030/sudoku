@@ -1,28 +1,22 @@
 import { readdirSync, readFileSync } from "fs";
 import sharp from "sharp";
-import { STYLES, type Palette } from "@/theme/palettes";
-import type { ColorMode, ColorThemeId, StyleId } from "@/theme/themeIds";
+import { getPalette } from "@/theme/palettes";
 import { LAUNCHER_ICONS, launcherResourceName } from "@/theme/launcherIcon";
-import { ICON_THEME_IDS } from "@/theme/themeIds";
+import { ICON_THEME_IDS, STYLE_COLOR_MODES } from "@/theme/themeIds";
 
 // The Android launcher icons are generated (npm run generate:launcher-icons); regenerate them
 // whenever a primary or on-primary in palettes.ts changes.
 
-// The icon files still exist for every mode, so they are checked against the raw palettes
-// (getPalette answers a light-only style with its light palette). Task 5 drops paper's dark icons.
-const rawPalette = (style: StyleId, themeId: ColorThemeId, mode: ColorMode): Palette => {
-    const theme = STYLES[style].themes.find(candidate => candidate.id === themeId);
-    if (theme === undefined) throw new Error(`${style} has no theme ${themeId}`);
-    return theme[mode];
-};
+// Paper has no dark palette now; its dark icon files are skipped here and deleted in Task 5.
 
 const RES_ROOT = "android/app/src/main/res";
 const MANIFEST = "android/app/src/main/AndroidManifest.xml";
 const DENSITIES = ["mdpi", "hdpi", "xhdpi", "xxhdpi", "xxxhdpi"];
 
-const icons = LAUNCHER_ICONS.map((icon) => {
-    const palette = rawPalette(icon.style, icon.themeId, icon.mode);
-    return { ...icon, name: launcherResourceName(icon.key), primary: palette.primary.toUpperCase(), onPrimary: palette["on-primary"].toUpperCase() };
+const allIcons = LAUNCHER_ICONS.map(icon => ({ ...icon, name: launcherResourceName(icon.key) }));
+const icons = allIcons.filter(icon => STYLE_COLOR_MODES[icon.style].includes(icon.mode)).map((icon) => {
+    const palette = getPalette(icon.style, icon.themeId, icon.mode);
+    return { ...icon, primary: palette.primary.toUpperCase(), onPrimary: palette["on-primary"].toUpperCase() };
 });
 
 const foregroundName = (onPrimary: string): string => `ic_launcher_tiles_${onPrimary.slice(1).toLowerCase()}_foreground`;
@@ -88,7 +82,7 @@ describe("launcher icon assets", () => {
         const aliases = [...manifest.matchAll(/<activity-alias\s[^>]*?android:name="\.(\w+)"[^>]*?android:icon="@mipmap\/(\w+)"/g)]
             .map(([, alias, icon]) => ({ alias, icon }));
 
-        expect(aliases).toEqual(icons.map(({ key, name }) => ({ alias: key, icon: name })));
+        expect(aliases).toEqual(allIcons.map(({ key, name }) => ({ alias: key, icon: name })));
         for (const id of ICON_THEME_IDS) {
             expect(aliases.map(({ alias }) => alias)).toContain(id);
         }
