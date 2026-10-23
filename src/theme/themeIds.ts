@@ -18,6 +18,17 @@ export const COLOR_THEME_IDS: readonly ColorThemeId[] = [...new Set(STYLE_IDS.fl
 export const APPEARANCES = ["system", "light", "dark"] as const;
 export type Appearance = typeof APPEARANCES[number];
 export type ColorMode = Exclude<Appearance, "system">;
+/** The colour modes each style has; the first is the style's fallback when a mode is missing. */
+export const STYLE_COLOR_MODES: Readonly<Record<StyleId, readonly ColorMode[]>> = {
+    minimal: ["light", "dark"],
+    tactile: ["light", "dark"],
+    paper: ["light"],
+};
+/** The mode a style actually shows for the requested one: the requested mode when the style has it, else the style's first. */
+export const effectiveColorMode = (style: StyleId, mode: ColorMode): ColorMode => {
+    const modes = STYLE_COLOR_MODES[style];
+    return modes.includes(mode) ? mode : modes[0];
+};
 
 /** The colour theme last chosen under each style, so switching styles comes back to it. */
 export type RememberedThemes = Partial<Record<StyleId, ColorThemeId>>;
