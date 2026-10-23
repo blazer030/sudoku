@@ -18,6 +18,31 @@ const setup = () => {
     return { sudoku, stepRecorder, ...interaction };
 };
 
+describe("useGameInteraction Erase with a selected cell", () => {
+    it("clears the selected cell at once, records it and stays out of Erase mode", () => {
+        const { clickCell, selectDigit, toggleEraseMode, sudoku, stepRecorder, inputMode, selectedCell } = setup();
+        clickCell(0, 2);
+        selectDigit(4);
+        clickCell(0, 2);
+
+        toggleEraseMode();
+
+        expect(sudoku.puzzle[0][2].entry).toBe(0);
+        const steps = stepRecorder.steps;
+        expect(steps[steps.length - 1].action).toBe("erase");
+        expect(inputMode.value).toBe(InputMode.Normal);
+        expect(selectedCell.value).toBeNull();
+    });
+
+    it("has nothing to erase on an empty selected cell", () => {
+        const { clickCell, eraseDisabled } = setup();
+
+        clickCell(0, 2);
+
+        expect(eraseDisabled.value).toBe(true);
+    });
+});
+
 describe("useGameInteraction quick input", () => {
     describe("tapping a clue", () => {
         it("selects the clue cell without picking its digit", () => {

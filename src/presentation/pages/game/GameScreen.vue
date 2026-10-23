@@ -69,6 +69,7 @@
                     <DigitPad
                         :digit-counts="digitCounts"
                         :erase-active="inputMode === InputMode.Erase"
+                        :erase-disabled="eraseDisabled"
                         :note-mode="inputMode === InputMode.Note"
                         :selected-digit="selectedDigit"
                         :show-remaining-count="settingsStore.showRemainingCount"
@@ -196,6 +197,7 @@ const {
     selectDigit,
     toggleNoteMode,
     toggleEraseMode,
+    eraseDisabled,
     isSelected,
     isPeerOfSelected,
     digitCounts,

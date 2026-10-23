@@ -465,6 +465,29 @@ describe("Game", () => {
         expect(wrapper.find("[data-testid='erase-button']").classes()).toContain("bg-primary");
     });
 
+    // Cell first works the same for Erase as for a digit: the selected cell is cleared at once
+    it("should clear a selected cell at once when Erase is pressed, without entering Erase mode", async () => {
+        const wrapper = mountGame();
+        const cell = wrapper.find("[data-testid='cell-0-2']");
+        await cell.trigger("click");
+        await wrapper.find("[data-testid='number-4']").trigger("click");
+        await cell.trigger("click");
+
+        await wrapper.find("[data-testid='erase-button']").trigger("click");
+
+        expect(cell.text()).toBe("");
+        expect(wrapper.find("[data-testid='erase-button']").classes()).not.toContain("bg-primary");
+        expect(wrapper.findComponent<typeof Cell>("[data-testid='cell-0-2']").props("selected")).toBe(false);
+    });
+
+    it("should disable Erase while the selected cell has nothing to erase", async () => {
+        const wrapper = mountGame();
+
+        await wrapper.find("[data-testid='cell-0-2']").trigger("click");
+
+        expect(wrapper.find("[data-testid='erase-button']").attributes("disabled")).toBeDefined();
+    });
+
     it("should clear input when clicking a filled slot cell in erase mode", async () => {
         const wrapper = mountGame();
 
