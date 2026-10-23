@@ -521,6 +521,30 @@
         8px 8px 0 0 var(--pixel-drop);
 }
 
+/* Home, as on the canvas: New Game stays the dark main button even while a save makes it the second
+   choice, and a blinking arrow marks the continue card and the chosen difficulty, like a game menu */
+[data-style="pixel"] [data-skin~="new-game"] {
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+}
+
+[data-style="pixel"] [data-skin~="caret"] {
+    color: var(--color-primary);
+    fill: currentColor;
+    stroke: none;
+    animation: pixel-blink 1000ms steps(2, jump-none) infinite;
+}
+
+[data-style="pixel"] [data-skin~="menu"] [aria-pressed="true"]::before {
+    content: "";
+    width: 6px;
+    height: 10px;
+    margin-right: 6px;
+    background-color: currentColor;
+    clip-path: polygon(0 0, 100% 50%, 0 100%);
+    animation: pixel-blink 1000ms steps(2, jump-none) infinite;
+}
+
 [data-style="pixel"] [data-skin~="new-game"] {
     box-shadow:
         0 -4px 0 0 var(--pixel-ink),
@@ -651,6 +675,8 @@
     [data-style="pixel"] [data-skin~="board"][data-hint-mode],
     [data-style="pixel"] [data-skin~="board"]:not([data-hint-mode]) [data-selected]::before,
     [data-style="pixel"] [data-skin~="board"] [data-variant="answer"]::before,
+    [data-style="pixel"] [data-skin~="caret"],
+    [data-style="pixel"] [data-skin~="menu"] [aria-pressed="true"]::before,
     [data-style="pixel"] [data-skin~="board"] [data-variant="error"] > div,
     [data-style="pixel"] [data-skin~="board"] .value-arrive,
     [data-style="pixel"] [data-skin~="board"] [data-variant].value-leave::after,

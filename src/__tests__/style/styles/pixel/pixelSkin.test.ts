@@ -182,6 +182,35 @@ describe("pixel skin", () => {
         expect(hint.get("animation")).toMatch(/^pixel-[\w-]+ \d+ms steps\(/);
     });
 
+    // Home, as on the canvas: New Game is always the dark main button, and a blinking pixel arrow marks
+    // the continue card and the chosen difficulty
+    it("should draw New Game dark even while a saved game makes it the second choice", () => {
+        const newGame = declarationsOf(PIXEL_CSS, skin("new-game"));
+
+        expect(newGame.get("background-color")).toBe("var(--color-primary)");
+        expect(newGame.get("color")).toBe("var(--color-on-primary)");
+    });
+
+    it("should fill the continue card's arrow solid and blink it in steps", () => {
+        const caret = declarationsOf(PIXEL_CSS, skin("caret"));
+
+        // The canvas draws it in the highlight: dark green in 掌機, gold in 紅白機
+        expect(caret.get("color")).toBe("var(--color-primary)");
+        expect(caret.get("fill")).toBe("currentColor");
+        expect(caret.get("stroke")).toBe("none");
+        expect(caret.get("animation")).toMatch(/^pixel-blink \d+ms steps\(/);
+        expect(reducedMotionDeclarationsOf(skin("caret")).get("animation")).toBe("none");
+    });
+
+    it("should put a blinking pixel arrow before a menu's chosen option", () => {
+        const arrow = declarationsOf(PIXEL_CSS, `${skin("menu")} [aria-pressed="true"]::before`);
+
+        expect(arrow.get("clip-path")).toBe("polygon(0 0, 100% 50%, 0 100%)");
+        expect(arrow.get("background-color")).toBe("currentColor");
+        expect(arrow.get("animation")).toMatch(/^pixel-blink \d+ms steps\(/);
+        expect(reducedMotionDeclarationsOf(`${skin("menu")} [aria-pressed="true"]::before`).get("animation")).toBe("none");
+    });
+
     it("should snap the board's frame between hint mode and play instead of easing it", () => {
         expect(declarationsOf(PIXEL_CSS, skin("board")).get("transition-duration")).toBe("0ms");
     });
