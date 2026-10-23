@@ -3,24 +3,10 @@
         class="flex flex-col gap-5 h-full px-5 bg-background overflow-y-auto"
         data-skin="page"
     >
-        <div
-            class="flex items-center justify-between sticky top-0 bg-background pt-6 pb-3 z-10"
-            data-skin="page-header"
-        >
-            <button
-                class="flex items-center gap-2 cursor-pointer"
-                data-testid="back-button"
-                @click="goBack"
-            >
-                <ChevronLeft
-                    :size="24"
-                    class="text-foreground"
-                />
-                <span class="text-foreground text-base font-medium">{{ t("common.back") }}</span>
-            </button>
-            <span class="text-foreground text-lg font-semibold">{{ t("changelog.title") }}</span>
-            <div class="w-15" />
-        </div>
+        <PageHeader
+            :title="t('changelog.title')"
+            @back="goBack"
+        />
 
         <p
             class="text-xs text-foreground-secondary px-1"
@@ -69,7 +55,7 @@ import { computed } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { useAppLocale } from "@/presentation/i18n/useAppLocale";
-import { ChevronLeft } from "lucide-vue-next";
+import PageHeader from "@/presentation/components/page-header/PageHeader.vue";
 import { CHANGELOG, UNRELEASED_CHANGES, type ChangelogChange } from "@/presentation/pages/settings/changelogData";
 import { isFeatureEnabled } from "@/utils/featureToggle";
 

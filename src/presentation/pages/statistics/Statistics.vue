@@ -3,24 +3,11 @@
         class="flex flex-col h-full px-5 pb-6 bg-background overflow-y-auto"
         data-skin="page"
     >
-        <div
-            class="flex items-center justify-between sticky top-0 bg-background pt-6 pb-3 z-10"
-            data-skin="page-header"
-        >
-            <button
-                class="flex items-center gap-2 cursor-pointer"
-                data-testid="stats-back-button"
-                @click="goHome"
-            >
-                <ChevronLeft
-                    :size="24"
-                    class="text-foreground"
-                />
-                <span class="text-foreground text-base font-medium">{{ t("common.back") }}</span>
-            </button>
-            <span class="text-foreground text-lg font-semibold">{{ t("home.statistics") }}</span>
-            <div class="w-15" />
-        </div>
+        <PageHeader
+            back-test-id="stats-back-button"
+            :title="t('home.statistics')"
+            @back="goHome"
+        />
 
         <template v-if="hasRecords">
             <div class="flex flex-col gap-2 mt-2">
@@ -219,7 +206,7 @@
 <script lang="ts" setup>
 import { computed, ref, watch } from "vue";
 import { useRouter } from "vue-router";
-import { ChartBar, ChevronLeft, ChevronRight, Lightbulb, Trophy, X } from "lucide-vue-next";
+import { ChartBar, ChevronRight, Lightbulb, Trophy, X } from "lucide-vue-next";
 import { ROUTER_PATH } from "@/router";
 import { useStatisticsStore } from "@/stores/statisticsStore";
 import type { Difficulty } from "@/domain/generator/SudokuGenerator";
@@ -231,6 +218,7 @@ import {
     RECENT_GAMES_PAGE_SIZE,
     type RecentGamesFilter,
 } from "@/presentation/pages/statistics/recentGames";
+import PageHeader from "@/presentation/components/page-header/PageHeader.vue";
 import SegmentedControl, { type SegmentedOption } from "@/presentation/components/segmented-control/SegmentedControl.vue";
 import { vPress } from "@/presentation/directives/press";
 import { useI18n } from "vue-i18n";
