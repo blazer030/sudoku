@@ -211,11 +211,12 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, nextTick, onBeforeUnmount, ref, useTemplateRef, watch, type Component } from "vue";
+import { computed, inject, nextTick, onBeforeUnmount, ref, useTemplateRef, watch, type Component } from "vue";
 import { onBeforeRouteLeave, useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { ChevronLeft, Info, ListFilter, Pencil, PencilLine, RotateCcw, Trophy, Wand2 } from "lucide-vue-next";
 import { ROUTER_PATH } from "@/router";
+import { ANALYTICS_KEY } from "@/application/analytics/AnalyticsService";
 import { BOARD_SIZE } from "@/domain/board/constants";
 import { UNKNOWN_SOLUTION_COUNT } from "@/domain/generator/SudokuSolver";
 import { checkPuzzleAsync } from "@/application/puzzleCheck/PuzzleCheckService";
@@ -236,7 +237,7 @@ import { useWalkthroughPlayback } from "@/presentation/pages/solver-walkthrough/
 import { provideWalkthroughDialog } from "@/presentation/pages/solver-walkthrough/useWalkthroughDialog";
 import WalkthroughDialog from "@/presentation/pages/solver-walkthrough/WalkthroughDialog.vue";
 import { vPress } from "@/presentation/directives/press";
-import { SAMPLE_PUZZLES } from "@/presentation/pages/solver-walkthrough/samplePuzzles";
+import { SAMPLE_PUZZLES, isSamplePuzzle } from "@/presentation/pages/solver-walkthrough/samplePuzzles";
 import { useDifficultyLabel } from "@/presentation/i18n/difficultyLabels";
 
 const props = defineProps<{
@@ -248,6 +249,7 @@ const createEmptyBoard = (): number[][] =>
     Array.from({ length: BOARD_SIZE }, () => Array.from({ length: BOARD_SIZE }, () => 0));
 
 const router = useRouter();
+const analytics = inject(ANALYTICS_KEY);
 const { t } = useI18n();
 const techniqueLabel = useTechniqueLabel();
 const explain = useHintExplanation();
@@ -268,6 +270,7 @@ const {
     stepCount,
     currentStep,
     isCompleted,
+    isLastStep,
     playState,
     next,
     previous,
@@ -372,22 +375,39 @@ const checkBehindLoader = async (): Promise<PuzzleCheck | null> => {
 };
 
 // No solution stops here; more than one, or a count too costly to settle, asks first.
-// The solver then shows what it can, even nothing.
+// The solver then shows what it can, even nothing. Each press that gets an answer is reported once.
 const runSolver = async () => {
     if (checking.value) return;
+    const source = isSamplePuzzle(userValues.value) ? "sample" : "own";
     const check = await checkBehindLoader();
     if (check === null) return;
     const { solutionCount, path: solvePath } = check;
     if (solutionCount === 0) {
         await openDialog("noSolution");
+        void analytics?.logEvent({ name: "walkthrough_solve", result: "no_solution", source });
         return;
     }
-    if (solutionCount === UNKNOWN_SOLUTION_COUNT) {
-        if (await openDialog("solutionCountUnknown") !== "confirm") return;
-    } else if (solutionCount > 1 && await openDialog("multipleSolutions") !== "confirm") return;
+    if (solutionCount === UNKNOWN_SOLUTION_COUNT || solutionCount > 1) {
+        const result = solutionCount === UNKNOWN_SOLUTION_COUNT ? "unknown_count" : "multiple_solutions";
+        const answer = await openDialog(solutionCount === UNKNOWN_SOLUTION_COUNT ? "solutionCountUnknown" : "multipleSolutions");
+        const confirmed = answer === "confirm" ? 1 : 0;
+        void analytics?.logEvent({ name: "walkthrough_solve", result, confirmed, source });
+        if (confirmed === 0) return;
+    } else {
+        void analytics?.logEvent({ name: "walkthrough_solve", result: "solved", source });
+    }
     selectedCell.value = null;
+    finishLogged = false;
     start(solvePath);
 };
+
+// Reaching the end of a path is reported once per start, however the player steps back and forth.
+let finishLogged = false;
+watch(isLastStep, (atEnd) => {
+    if (!atEnd || finishLogged) return;
+    finishLogged = true;
+    void analytics?.logEvent({ name: "walkthrough_finish" });
+});
 
 // Back, in the app or from the system, cancels a running check and keeps the player editing.
 onBeforeRouteLeave(() => {

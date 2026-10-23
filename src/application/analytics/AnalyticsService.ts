@@ -11,7 +11,10 @@ export type AnalyticsEvent =
     | { name: "hint_used"; hint_type: "auto_notes" | "check_conflicts" | "reveal_cell" }
     | { name: "donate_view" }
     | { name: "donate_tap"; tier: DonateTier }
-    | { name: "donate_success"; tier: DonateTier; amount_usd: number };
+    | { name: "donate_success"; tier: DonateTier; amount_usd: number }
+    | { name: "walkthrough_solve"; result: "solved" | "no_solution"; source: "sample" | "own" }
+    | { name: "walkthrough_solve"; result: "multiple_solutions" | "unknown_count"; confirmed: 0 | 1; source: "sample" | "own" }
+    | { name: "walkthrough_finish" };
 
 export type ScreenName =
     | "home"
