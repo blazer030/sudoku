@@ -391,7 +391,8 @@ describe("pixel skin", () => {
             }
             expect(coloursOf(ARRIVE_BURST)).toEqual(["--pixel-burst-1", "--pixel-burst-2", "--pixel-burst-3", "--pixel-burst-4"]);
             expect(coloursOf(LEAVE_BURST)).toEqual(["--pixel-burst-leave"]);
-            expect(scope.get("--pixel-burst-leave")).toBe("var(--color-highlight)");
+            // The mid green: the light green on the page is a ghost (1.2:1), and the burst is decoration
+            expect(scope.get("--pixel-burst-leave")).toBe("var(--color-border)");
             expect(consoleMode.get("--pixel-burst-leave")).toBe("var(--color-foreground-secondary)");
         });
 

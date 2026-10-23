@@ -34,12 +34,13 @@
     --board-box-line: var(--color-foreground);
     /* The board's patterns (dither, hatch) and hint fills: the light green over the page in 掌機 */
     --pixel-pattern-shade: var(--color-highlight);
-    /* A digit's burst: the two dark greens as it arrives, the light green as it leaves */
+    /* A digit's burst: the two dark greens as it arrives, the mid green alone as it leaves (the light
+       green barely shows on the page) */
     --pixel-burst-1: var(--color-foreground);
     --pixel-burst-2: var(--color-border);
     --pixel-burst-3: var(--color-foreground);
     --pixel-burst-4: var(--color-border);
-    --pixel-burst-leave: var(--color-highlight);
+    --pixel-burst-leave: var(--color-border);
 }
 
 /* No soft shadows or glows: the shared shadow utilities draw in --tw-shadow-color, which does not
