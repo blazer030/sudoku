@@ -152,15 +152,26 @@ describe("BoardCell", () => {
             }));
         };
 
-        it("should mark the cell while its digit leaves, until the cell's animation ends", async () => {
+        it("should mark the cell while its digit leaves, until an animation on the cell's pseudo-element ends", async () => {
             stubReducedMotion(false);
             const wrapper = mountCell({ value: 5 });
 
             await wrapper.setProps({ value: 0 });
             expect(wrapper.classes()).toContain("value-leave");
 
-            await wrapper.trigger("animationend");
+            await wrapper.trigger("animationend", { pseudoElement: "::after" });
             expect(wrapper.classes()).not.toContain("value-leave");
+        });
+
+        it("should keep the leaving mark when the cell's own colour animation ends, as a completion flash does", async () => {
+            // A flash already running when the digit is erased would otherwise cut the burst short
+            stubReducedMotion(false);
+            const wrapper = mountCell({ value: 5, flashing: true });
+
+            await wrapper.setProps({ value: 0 });
+            await wrapper.trigger("animationend", { pseudoElement: "" });
+
+            expect(wrapper.classes()).toContain("value-leave");
         });
 
         it("should drop the leaving mark on its own when the active style has no leaving animation", async () => {
@@ -206,7 +217,7 @@ describe("BoardCell", () => {
             const wrapper = mountCell({ value: 0 });
             await wrapper.setProps({ value: 5 });
 
-            await wrapper.trigger("animationend");
+            await wrapper.trigger("animationend", { pseudoElement: "::after" });
 
             expect(wrapper.get("[data-testid='cell-value']").classes()).not.toContain("value-arrive");
         });

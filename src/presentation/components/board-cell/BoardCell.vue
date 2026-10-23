@@ -11,7 +11,7 @@
         :data-value-kind="value !== 0 ? valueKind : undefined"
         :data-variant="variant"
         class="flex justify-center items-center aspect-square min-w-0 min-h-0"
-        @animationend.self="settle"
+        @animationend.self="settleFromCell"
     >
         <div
             v-if="value !== 0"
@@ -121,9 +121,14 @@ const VALUE_FONT_WEIGHTS: Record<ValueFontWeight, string> = {
 };
 
 // Only a style sheet gives value-arrive (on the digit) and value-leave (on the cell) a look; in styles
-// without one they settle on a timer. The cell's own animations (a style's burst on a pseudo-element)
-// settle them too; the cell ignores animations ending inside it.
+// without one they settle on a timer. A style's burst on the cell's pseudo-elements settles them too.
+// The cell's own colour animations (a completion flash, a hint's glow) run on their own clock, and
+// animations ending inside the cell bubble up, so neither does.
 const { arriving, leaving, settle } = useArrivalMotion(toRef(props, "value"), toRef(props, "popping"));
+
+const settleFromCell = (event: AnimationEvent) => {
+    if (event.pseudoElement) settle();
+};
 
 const backgroundClass = computed(() => VARIANT_BACKGROUNDS[props.variant]);
 
