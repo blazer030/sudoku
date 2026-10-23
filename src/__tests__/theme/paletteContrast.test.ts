@@ -254,6 +254,13 @@ const PIXEL_BOARD_CASES: PixelBoardCase[] = STYLES.pixel.themes.flatMap(theme =>
         drawn("selected cell's highlighted note (foreground on its background disc)", palette.foreground, palette.background),
         // Same-digit cells are a solid fill with the foreground ink
         drawn("same digit (foreground on highlight)", palette.foreground, palette.highlight),
+        // A completed group's cells flash to the highlight and a hint's answer glows in the primary's light
+        // surface ringed in the primary, both solid. Their digits take the foreground ink, which the cases
+        // above check on every look under them between the flashes. The selected cell does neither (it is
+        // inverted; the cursor and the pop mark it), so no page-coloured digit is drawn on these.
+        drawn("completion flash's digits (foreground) on its fill (highlight)", palette.foreground, palette.highlight),
+        drawn("hint glow's digits (foreground) on its fill (primary-light)", palette.foreground, palette["primary-light"]),
+        drawn("hint glow's ring (primary) on its fill (primary-light)", palette.primary, palette["primary-light"], LARGE_OR_ICON),
         // The continue card's chip: a transparent tag on the card's page colour
         drawn("continue-card chip (on-featured on featured)", palette["on-featured"], palette.featured),
         // The blinking corner cursor around the selected cell is a UI component, so 3:1 applies. It sits over

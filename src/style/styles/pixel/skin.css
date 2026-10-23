@@ -203,7 +203,6 @@
     --pixel-cell-pattern: none;
     --pixel-clue-ink: var(--color-foreground);
     --pixel-entry-ink: var(--color-accent);
-    --completion-flash-rest: var(--pixel-cell-fill);
     background-color: var(--pixel-cell-fill);
     background-image: var(--pixel-cell-pattern);
     background-size: 4px 4px;
@@ -408,20 +407,47 @@
     animation: pixel-burst-out 480ms steps(4, jump-start);
 }
 
-/* A hint's revealed answer pops like a placed digit, and its glow (the shared keyframes) holds, then
-   snaps off at once rather than fading */
+/* A hint's revealed answer pops like a placed digit. Its glow holds, then snaps off at once rather
+   than fading, and is solid, so a peer's dither is not laid over it. */
 [data-style="pixel"] [data-skin~="board"] .animate-hint-reveal-pop {
     animation: pixel-pop 480ms steps(1, end);
 }
 
-[data-style="pixel"] [data-skin~="board"] .animate-hint-reveal-glow {
-    animation: hint-reveal-glow 1000ms steps(2, jump-none);
+@keyframes pixel-hint-glow {
+    0%, 45% {
+        background-color: var(--color-primary-light);
+        background-image: none;
+        box-shadow: inset 0 0 0 2px var(--color-primary);
+    }
 }
 
-/* A completed row, column or box flashes on and off rather than fading: the shared keyframes, each
-   half in one jump. A hint's answer keeps the shared glow, which is meant to win over the flash. */
-[data-style="pixel"] [data-skin~="board"] .animate-completion-flash:not(.animate-hint-reveal-glow) {
-    animation: completion-flash 500ms steps(2, jump-none);
+/* A completed row, column or box flashes on and off rather than fading, each half in one jump, its
+   fill solid like the glow's. A hint's answer keeps its glow, which is meant to win over the flash. */
+@keyframes pixel-completion-flash {
+    50% {
+        background-color: var(--color-highlight);
+        background-image: none;
+    }
+}
+
+/* A flashing or glowing cell's digits take the foreground ink, which reads on the flash, the glow and
+   every cell look under them (the entry blue reads only 2.61 on the console's flash blue). The selected
+   cell is inverted, so neither is drawn behind its page-coloured digit: the cursor and the pop mark it. */
+[data-style="pixel"] [data-skin~="board"] .animate-hint-reveal-glow:not([data-selected]) {
+    --pixel-clue-ink: var(--color-foreground);
+    --pixel-entry-ink: var(--color-foreground);
+    animation: pixel-hint-glow 1000ms steps(2, jump-none);
+}
+
+[data-style="pixel"] [data-skin~="board"] .animate-completion-flash:not(.animate-hint-reveal-glow, [data-selected]) {
+    --pixel-clue-ink: var(--color-foreground);
+    --pixel-entry-ink: var(--color-foreground);
+    animation: pixel-completion-flash 500ms steps(2, jump-none);
+}
+
+[data-style="pixel"] [data-skin~="board"] .animate-completion-flash[data-selected],
+[data-style="pixel"] [data-skin~="board"] .animate-hint-reveal-glow[data-selected] {
+    animation: none;
 }
 
 /* Keys, buttons and tiles: square, a notched 2px frame and a hard 4px shadow. Colour changes snap;
@@ -622,17 +648,19 @@
         animation: none;
     }
 
-    /* A completed group shows the flash's colour, still, for as long as each cell is marked flashing
+    /* A completed group shows the flash's fill, still, for as long as each cell is marked flashing
        (other styles keep the colour flash itself) */
-    [data-style="pixel"] [data-skin~="board"] .animate-completion-flash:not(.animate-hint-reveal-glow) {
+    [data-style="pixel"] [data-skin~="board"] .animate-completion-flash:not(.animate-hint-reveal-glow, [data-selected]) {
         animation: none;
         background-color: var(--color-highlight);
+        background-image: none;
     }
 
     /* A hint's answer shows the glow's colours, still, for as long as it is marked revealed */
-    [data-style="pixel"] [data-skin~="board"] .animate-hint-reveal-glow {
+    [data-style="pixel"] [data-skin~="board"] .animate-hint-reveal-glow:not([data-selected]) {
         animation: none;
         background-color: var(--color-primary-light);
+        background-image: none;
         box-shadow: inset 0 0 0 2px var(--color-primary);
     }
 

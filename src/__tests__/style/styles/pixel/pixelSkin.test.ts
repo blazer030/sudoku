@@ -412,37 +412,59 @@ describe("pixel skin", () => {
             expect(Number(declarationsOf(PIXEL_CSS, BURST).get("z-index"))).toBeGreaterThan(Number(declarationsOf(PIXEL_CSS, `${BOARD} > div::before`).get("z-index")));
         });
 
-        it("should flash a completed group in steps, leaving the hint's answer to its own glow", () => {
-            // The shared glow is defined after the flash so it wins on the answer cell; the pixel flash must not outweigh it
-            const FLASH = `${BOARD} .animate-completion-flash:not(.animate-hint-reveal-glow)`;
+        // The selected cell is inverted, so a flash or glow behind it would sit under its page-coloured
+        // digit; it is marked by the cursor and the pop instead. The shared glow is defined after the flash
+        // so it wins on the answer cell; the pixel flash must not outweigh it.
+        const FLASH = `${BOARD} .animate-completion-flash:not(.animate-hint-reveal-glow, [data-selected])`;
+        const GLOW = `${BOARD} .animate-hint-reveal-glow:not([data-selected])`;
 
-            expect(declarationsOf(PIXEL_CSS, FLASH).get("animation")).toMatch(/^completion-flash \d+ms steps\(2, jump-none\)$/);
+        it("should flash a completed group in steps, leaving the hint's answer to its own glow", () => {
+            expect(declarationsOf(PIXEL_CSS, FLASH).get("animation")).toMatch(/^pixel-completion-flash \d+ms steps\(2, jump-none\)$/);
+            // The flash's fill is solid: a peer's dither would otherwise be laid over it
+            expect(keyframesOf("pixel-completion-flash").get("50%")?.get("background-image")).toBe("none");
+        });
+
+        it("should leave the selected cell's colours alone during a completion flash or a hint's glow", () => {
+            expect(declarationsOf(PIXEL_CSS, `${BOARD} .animate-completion-flash[data-selected]`).get("animation")).toBe("none");
+            expect(declarationsOf(PIXEL_CSS, `${BOARD} .animate-hint-reveal-glow[data-selected]`).get("animation")).toBe("none");
+        });
+
+        it.each([["flashing", FLASH], ["glowing", GLOW]])("should print a %s cell's digits in the foreground ink, as the board model counts", (_state, selector) => {
+            const declarations = declarationsOf(PIXEL_CSS, selector);
+
+            expect(declarations.get("--pixel-clue-ink")).toBe("var(--color-foreground)");
+            expect(declarations.get("--pixel-entry-ink")).toBe("var(--color-foreground)");
         });
 
         it("should mark a completed group with a still fill under reduced motion, as other styles keep their colour flash", () => {
-            const FLASH = `${BOARD} .animate-completion-flash:not(.animate-hint-reveal-glow)`;
             const still = reducedMotionDeclarationsOf(FLASH);
 
             expect(still.get("animation")).toBe("none");
             // The flash's own peak colour, for the 500ms each cell keeps the class
             expect(still.get("background-color")).toBe("var(--color-highlight)");
+            expect(still.get("background-image")).toBe("none");
         });
 
         it("should step a hint's reveal: the answer pops like a placed digit and its glow snaps off", () => {
-            const glow = declarationsOf(PIXEL_CSS, `${BOARD} .animate-hint-reveal-glow`).get("animation") ?? "";
+            const glow = declarationsOf(PIXEL_CSS, GLOW).get("animation") ?? "";
+            const lit = keyframesOf("pixel-hint-glow").get("0%, 45%");
 
             expect(declarationsOf(PIXEL_CSS, `${BOARD} .animate-hint-reveal-pop`).get("animation")).toBe(declarationsOf(PIXEL_CSS, ARRIVE).get("animation"));
-            expect(glow).toMatch(/^hint-reveal-glow (\d+)ms steps\(2, jump-none\)$/);
+            expect(glow).toMatch(/^pixel-hint-glow (\d+)ms steps\(2, jump-none\)$/);
             // The shared glow's own length, inside the 1100ms the revealed cell keeps its class
             expect(Number(/(\d+)ms/.exec(glow)?.[1])).toBe(1000);
+            expect(lit?.get("background-color")).toBe("var(--color-primary-light)");
+            expect(lit?.get("background-image")).toBe("none");
+            expect(lit?.get("box-shadow")).toBe("inset 0 0 0 2px var(--color-primary)");
         });
 
         it("should hold a hint's reveal still under reduced motion, its glow a plain fill for as long as it shows", () => {
-            const glow = reducedMotionDeclarationsOf(`${BOARD} .animate-hint-reveal-glow`);
+            const glow = reducedMotionDeclarationsOf(GLOW);
 
             expect(reducedMotionDeclarationsOf(`${BOARD} .animate-hint-reveal-pop`).get("animation")).toBe("none");
             expect(glow.get("animation")).toBe("none");
             expect(glow.get("background-color")).toBe("var(--color-primary-light)");
+            expect(glow.get("background-image")).toBe("none");
             expect(glow.get("box-shadow")).toBe("inset 0 0 0 2px var(--color-primary)");
         });
 
