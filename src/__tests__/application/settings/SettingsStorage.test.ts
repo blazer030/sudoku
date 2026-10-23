@@ -11,6 +11,7 @@ describe("SettingsStorage", () => {
     });
 
     afterEach(() => {
+        vi.restoreAllMocks();
         vi.unstubAllGlobals();
     });
 
@@ -41,6 +42,15 @@ describe("SettingsStorage", () => {
             localStorage.setItem("sudoku-settings", "null");
 
             expect(loadSettings().style).toBe("minimal");
+        });
+
+        it("should still return the settings when saving the migrated appearance fails", () => {
+            stubSystemDark(true);
+            vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
+                throw new DOMException("quota", "QuotaExceededError");
+            });
+
+            expect(loadSettings().appearance).toBe("dark");
         });
 
         it("should start a fresh install in the mode the system shows", () => {

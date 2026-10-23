@@ -84,7 +84,14 @@ export const loadSettings = (): Settings => {
     }
     // The current theme is the truth for the current style, which also seeds settings saved before the map existed
     settings.colorThemeByStyle = { ...remembered, [settings.style]: settings.colorTheme };
-    if (!appearanceChosen) saveSettings(settings);
+    if (!appearanceChosen) {
+        // A failed save (quota, private mode) must not block startup; the migration just retries next launch
+        try {
+            saveSettings(settings);
+        } catch {
+            // keep the loaded settings
+        }
+    }
     return settings;
 };
 
