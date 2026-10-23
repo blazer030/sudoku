@@ -25,6 +25,13 @@
     --board-box-line: var(--color-foreground);
 }
 
+/* No soft shadows or glows: the shared shadow utilities draw in --tw-shadow-color, which does not
+   inherit, so every element clears it. The pixel frames and hard shadows below set their colours
+   directly. */
+[data-style="pixel"] * {
+    --tw-shadow-color: transparent;
+}
+
 /* The console's title drops a red shadow, as on its box art */
 :root.dark[data-style="pixel"] {
     --pixel-title-shadow: var(--color-error);
@@ -119,10 +126,9 @@
             transparent 0);
 }
 
-/* Keys, controls, buttons and tiles: square, a notched 2px frame and a hard 4px shadow. Colour
-   changes snap; there is no fading in 8-bit. */
+/* Keys, buttons and tiles: square, a notched 2px frame and a hard 4px shadow. Colour changes snap;
+   there is no fading in 8-bit. */
 [data-style="pixel"] [data-skin~="key"],
-[data-style="pixel"] [data-skin~="control"],
 [data-style="pixel"] [data-skin~="button"],
 [data-style="pixel"] [data-skin~="tile"] {
     border-radius: 0;
@@ -135,9 +141,27 @@
     transition-duration: 0ms;
 }
 
-/* An option tile's own border would double the frame; it takes the tile's fill instead */
+/* A game control's label sits 4px under it, so a control has the frame without the shadow and does
+   not drop when pressed; the press overlay marks it */
+[data-style="pixel"] [data-skin~="control"] {
+    border-radius: 0;
+    box-shadow:
+        0 -2px 0 0 var(--pixel-ink),
+        0 2px 0 0 var(--pixel-ink),
+        -2px 0 0 0 var(--pixel-ink),
+        2px 0 0 0 var(--pixel-ink);
+    transition-duration: 0ms;
+}
+
+/* An option tile's own border would double the frame; it takes the tile's fill instead. A tile that
+   is on draws it in ink, so its frame doubles to 4px (the 外觀 page's style cards show their choice
+   only by the border). */
 [data-style="pixel"] [data-skin~="tile"] {
     border-color: transparent;
+}
+
+[data-style="pixel"] [data-skin~="tile"][aria-pressed="true"] {
+    border-color: var(--pixel-ink);
 }
 
 /* In note mode a key's digit hops to its place in three steps */
@@ -215,7 +239,6 @@
 
 /* A framed piece drops 4px into its shadow in one step, and the shadow is gone */
 [data-style="pixel"] [data-skin~="key"][data-press-motion][data-pressed],
-[data-style="pixel"] [data-skin~="control"][data-press-motion][data-pressed],
 [data-style="pixel"] [data-skin~="button"][data-press-motion][data-pressed],
 [data-style="pixel"] [data-skin~="tile"][data-press-motion][data-pressed] {
     transform: translate(4px, 4px);
@@ -271,7 +294,6 @@
 
     [data-style="pixel"] [data-press-motion],
     [data-style="pixel"] [data-skin~="key"][data-press-motion][data-pressed],
-    [data-style="pixel"] [data-skin~="control"][data-press-motion][data-pressed],
     [data-style="pixel"] [data-skin~="button"][data-press-motion][data-pressed],
     [data-style="pixel"] [data-skin~="tile"][data-press-motion][data-pressed],
     [data-style="pixel"] [data-press-bounce] {

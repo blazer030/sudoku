@@ -112,6 +112,24 @@ describe("pixel skin", () => {
         expect(layers).toEqual([{ inset: true, offsetX: 0, offsetY: 0, blur: 0 }]);
     });
 
+    it("should keep a tile that is on framed, since a style card shows its choice only by its border", () => {
+        const borderColor = declarationsOf(PIXEL_CSS, `${skin("tile")}[aria-pressed="true"]`).get("border-color");
+
+        expect(borderColor).toBeDefined();
+        expect(borderColor).not.toBe("transparent");
+    });
+
+    it("should leave a game control's label clear, with a frame but no drop shadow", () => {
+        const layers = shadowLayers(declarationsOf(PIXEL_CSS, skin("control")).get("box-shadow") ?? "");
+
+        expect(layers.length).toBeGreaterThan(0);
+        expect(layers.filter(layer => layer.offsetX > 0 && layer.offsetY > 0)).toEqual([]);
+    });
+
+    it("should clear the shared soft shadows and glows", () => {
+        expect(declarationsOf(PIXEL_CSS, `${SCOPE} *`).get("--tw-shadow-color")).toBe("transparent");
+    });
+
     it("should move only in steps", () => {
         const moving = allDeclarations(/^(?:animation|animation-timing-function|transition|transition-timing-function)$/)
             .filter(declaration => !isInside(declaration, atRule => atRule.name === "media"))
