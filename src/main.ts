@@ -36,8 +36,7 @@ import { IndexedDBGameRepository } from "@/infrastructure/game/IndexedDBGameRepo
 import type { BackButtonService } from "@/application/backButton/BackButtonService";
 import { CapacitorBackButtonAdapter } from "@/infrastructure/backButton/CapacitorBackButtonAdapter";
 import { NoopBackButtonAdapter } from "@/infrastructure/backButton/NoopBackButtonAdapter";
-import { startScreenTracking } from "@/presentation/analytics/screenTracking";
-import { startUserPropertySync } from "@/presentation/analytics/userPropertySync";
+import { startAnalyticsReporting } from "@/presentation/analytics/analyticsReporting";
 import { handleBackButton } from "@/presentation/composables/backDismissal";
 
 if (Capacitor.isNativePlatform() && "serviceWorker" in navigator) {
@@ -62,8 +61,6 @@ const analytics = await chooseAnalytics({
         initializeAnalytics(app, { config: { send_page_view: false } });
     },
 });
-
-startScreenTracking(router, analytics);
 
 const billing: BillingService = Capacitor.isNativePlatform()
     ? new PlayBillingAdapter()
@@ -90,6 +87,15 @@ const gameRepository: GameRepository = new IndexedDBGameRepository();
 
 const app = createApp(App);
 app.use(createPinia());
+// Before the router is installed: that starts the first navigation, whose screen view must already
+// carry the resolved language and the rest of the player's setup
+startLocaleSync(storeToRefs(useSettingsStore()).language);
+startAnalyticsReporting({
+    router,
+    analytics,
+    userProperties: { ...storeToRefs(useSettingsStore()), locale: i18n.global.locale },
+    reportsIconSetting: Capacitor.isNativePlatform(),
+});
 app.use(router);
 app.use(i18n);
 app.provide(ANALYTICS_KEY, analytics);
@@ -111,11 +117,4 @@ await Promise.all([
     statisticsStore.loadFromRepository(),
     gameStore.loadFromRepository(),
 ]);
-startLocaleSync(storeToRefs(useSettingsStore()).language);
-startUserPropertySync(
-    { ...storeToRefs(useSettingsStore()), locale: i18n.global.locale },
-    analytics,
-    { reportsIconSetting: Capacitor.isNativePlatform() },
-);
-
 app.mount("#root");
