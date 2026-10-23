@@ -255,8 +255,8 @@ const PIXEL_BOARD_CASES: PixelBoardCase[] = STYLES.pixel.themes.flatMap(theme =>
         // Error and wrong cells are framed 2px in the foreground ink inside their edge, across both of the hatch's colours
         drawn("error frame (foreground) on the hatch's clear pixels", palette.foreground, board, LARGE_OR_ICON),
         drawn("error frame (foreground) on the hatch's shaded pixels", palette.foreground, shade, LARGE_OR_ICON),
-        // Hint mode's answer is framed in the primary
-        drawn("answer's frame (primary) on the hint fill", palette.primary, shade, LARGE_OR_ICON),
+        // A step's answer cell keeps the board and is marked by the corner cursor, in the primary
+        drawn("answer's cursor (primary) on the board", palette.primary, board, LARGE_OR_ICON),
         // The selected cell is inverted; its digit, notes and a highlighted note's disc take the page colour
         drawn("selected digit (background on foreground)", palette.background, palette.foreground),
         drawn("selected cell's highlighted note (foreground on its background disc)", palette.foreground, palette.background),

@@ -304,11 +304,23 @@ describe("pixel skin", () => {
             expect(note.get("color")).toBe("var(--color-foreground)");
         });
 
-        it("should draw hint mode's focus, pattern and answer cells solid in the pattern shade, the answer framed", () => {
+        it("should draw hint mode's focus and pattern cells solid in the pattern shade", () => {
             expect(declarationsOf(PIXEL_CSS, cell("focus")).get("--pixel-cell-fill")).toBe("var(--pixel-pattern-shade)");
             expect(declarationsOf(PIXEL_CSS, cell("pattern")).get("--pixel-cell-fill")).toBe("var(--pixel-pattern-shade)");
-            expect(declarationsOf(PIXEL_CSS, cell("answer")).get("--pixel-cell-fill")).toBe("var(--pixel-pattern-shade)");
-            expect(declarationsOf(PIXEL_CSS, cell("answer")).get("box-shadow")).toBe("inset 0 0 0 3px var(--color-primary)");
+        });
+
+        // A step's target cell is marked like the game's selected cell: four blinking corners, no fill or frame
+        it("should mark a step's answer cell with the blinking corner cursor alone", () => {
+            const answer = declarationsOf(PIXEL_CSS, cell("answer"));
+            const answerCursor = declarationsOf(PIXEL_CSS, `${cell("answer")}::before`);
+            const selectedCursor = declarationsOf(PIXEL_CSS, `${CURSOR}::before`);
+
+            expect(answer.get("--pixel-cell-fill")).toBeUndefined();
+            expect(answer.get("box-shadow")).toBeUndefined();
+            expect(answer.get("position")).toBe("relative");
+            expect(answerCursor.get("background")).toBe(selectedCursor.get("background"));
+            expect(answerCursor.get("animation")).toBe(selectedCursor.get("animation"));
+            expect(reducedMotionDeclarationsOf(`${cell("answer")}::before`).get("animation")).toBe("none");
         });
 
         it("should snap cell colours in hint mode instead of fading them", () => {
