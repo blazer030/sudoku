@@ -37,8 +37,8 @@ export const UNRELEASED_CHANGES: ChangelogChange[] = [
     },
     {
         text: {
-            en: "Hints are easier to use",
-            "zh-Hant": "提示操作優化",
+            en: "Hints and controls are easier to use",
+            "zh-Hant": "提示與操作優化",
         },
     },
 ]
