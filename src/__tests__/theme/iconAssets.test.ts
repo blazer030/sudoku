@@ -1,18 +1,13 @@
-import { readFileSync } from "fs";
+import { readdirSync, readFileSync } from "fs";
 import sharp from "sharp";
 import { getPalette } from "@/theme/palettes";
-import { STYLE_COLOR_MODES } from "@/theme/themeIds";
 import { LAUNCHER_ICONS } from "@/theme/launcherIcon";
 
 // The PWA icons are generated files (npm run generate:icons); they must be regenerated whenever
 // a primary changes. The Android launcher icons are checked in launcherIconAssets.test.ts.
 
-// Paper has no dark palette now; its dark icon files are skipped here and deleted in Task 5.
-const hasMode = (icon: (typeof LAUNCHER_ICONS)[number]): boolean => STYLE_COLOR_MODES[icon.style].includes(icon.mode);
-
-// Every theme's icon in both modes is a favicon; installed PWAs only use the light ones
-const icons = LAUNCHER_ICONS.filter(hasMode)
-    .map(icon => ({ key: icon.key, palette: getPalette(icon.style, icon.themeId, icon.mode) }));
+// Every icon is a favicon; installed PWAs only use the light ones
+const icons = LAUNCHER_ICONS.map(icon => ({ key: icon.key, palette: getPalette(icon.style, icon.themeId, icon.mode) }));
 const lightIcons = LAUNCHER_ICONS.filter(icon => icon.mode === "light")
     .map(icon => ({ key: icon.key, palette: getPalette(icon.style, icon.themeId, "light") }));
 
@@ -32,6 +27,10 @@ describe("icon assets", () => {
 
         expect(svg).toContain(`<rect width="240" height="240" rx="60" fill="${palette.primary}"/>`);
         expect(svg).toContain(`rx="12" fill="${palette["on-primary"]}"/>`);
+    });
+
+    it("should leave no paper dark favicons behind", () => {
+        expect(readdirSync("public").filter(file => /^sudoku-paper\w+Dark\.svg$/.test(file))).toEqual([]);
     });
 
     it.each(lightIcons)("should give the $key web manifest the light primary and page background", ({ key, palette }) => {

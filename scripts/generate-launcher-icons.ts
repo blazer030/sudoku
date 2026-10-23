@@ -3,7 +3,7 @@ import { mkdirSync, readFileSync, writeFileSync } from "fs";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
 import { ICON_VARIANTS, iconSvg, type IconTheme } from "./iconArtwork";
-import { launcherResourceName } from "../src/theme/launcherIcon";
+import { LEGACY_LAUNCHER_ALIASES, launcherResourceName, type LauncherIconKey } from "../src/theme/launcherIcon";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -68,10 +68,10 @@ ${ICON_VARIANTS.map(variant => `    <color name="${launcherResourceName(variant.
 `;
 
 // No roundIcon: adaptive icons are masked by the launcher, and the legacy icon is already rounded
-const aliasXml = (variant: IconTheme): string => `        <activity-alias
-            android:name=".${variant.id}"
+const aliasXml = (alias: string, icon: LauncherIconKey): string => `        <activity-alias
+            android:name=".${alias}"
             android:enabled="false"
-            android:icon="@mipmap/${launcherResourceName(variant.id)}"
+            android:icon="@mipmap/${launcherResourceName(icon)}"
             android:label="@string/title_activity_main"
             android:targetActivity=".MainActivity"
             android:exported="true">
@@ -86,7 +86,11 @@ const writeManifestAliases = () => {
     const start = manifest.indexOf(ALIASES_BEGIN);
     const end = manifest.indexOf(ALIASES_END);
     if (start === -1 || end === -1) throw new Error("AndroidManifest.xml lacks the launcher alias markers");
-    const aliases = ICON_VARIANTS.map(aliasXml).join("\n\n");
+    // Each icon's own alias, then the legacy aliases drawing an icon of another key
+    const aliases = [
+        ...ICON_VARIANTS.map(variant => aliasXml(variant.id, variant.id)),
+        ...LEGACY_LAUNCHER_ALIASES.map(alias => aliasXml(alias.key, alias.icon)),
+    ].join("\n\n");
     writeFileSync(MANIFEST_PATH, `${manifest.slice(0, start + ALIASES_BEGIN.length)}\n${aliases}\n        ${manifest.slice(end)}`);
 };
 
@@ -123,7 +127,7 @@ const main = async () => {
     }
 
     writeManifestAliases();
-    console.log(`Done! ${ICON_VARIANTS.length} launcher icons and aliases generated.`);
+    console.log(`Done! ${ICON_VARIANTS.length} launcher icons and ${ICON_VARIANTS.length + LEGACY_LAUNCHER_ALIASES.length} aliases generated.`);
 };
 
 main().catch((err: unknown) => {

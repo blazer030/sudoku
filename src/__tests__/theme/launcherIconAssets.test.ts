@@ -1,22 +1,24 @@
 import { readdirSync, readFileSync } from "fs";
 import sharp from "sharp";
 import { getPalette } from "@/theme/palettes";
-import { LAUNCHER_ICONS, launcherResourceName } from "@/theme/launcherIcon";
-import { ICON_THEME_IDS, STYLE_COLOR_MODES } from "@/theme/themeIds";
+import { ALL_LAUNCHER_ALIASES, LAUNCHER_ICONS, LEGACY_LAUNCHER_ALIASES, launcherResourceName } from "@/theme/launcherIcon";
+import { ICON_THEME_IDS } from "@/theme/themeIds";
 
 // The Android launcher icons are generated (npm run generate:launcher-icons); regenerate them
 // whenever a primary or on-primary in palettes.ts changes.
-
-// Paper has no dark palette now; its dark icon files are skipped here and deleted in Task 5.
 
 const RES_ROOT = "android/app/src/main/res";
 const MANIFEST = "android/app/src/main/AndroidManifest.xml";
 const DENSITIES = ["mdpi", "hdpi", "xhdpi", "xxhdpi", "xxxhdpi"];
 
-const allIcons = LAUNCHER_ICONS.map(icon => ({ ...icon, name: launcherResourceName(icon.key) }));
-const icons = allIcons.filter(icon => STYLE_COLOR_MODES[icon.style].includes(icon.mode)).map((icon) => {
+const icons = LAUNCHER_ICONS.map((icon) => {
     const palette = getPalette(icon.style, icon.themeId, icon.mode);
-    return { ...icon, primary: palette.primary.toUpperCase(), onPrimary: palette["on-primary"].toUpperCase() };
+    return {
+        ...icon,
+        name: launcherResourceName(icon.key),
+        primary: palette.primary.toUpperCase(),
+        onPrimary: palette["on-primary"].toUpperCase(),
+    };
 });
 
 const foregroundName = (onPrimary: string): string => `ic_launcher_tiles_${onPrimary.slice(1).toLowerCase()}_foreground`;
@@ -36,6 +38,10 @@ const pixelAt = async (path: string, across: number, down: number): Promise<{ co
 const LEGACY_BACKGROUND = [0.05, 0.5] as const;
 const LEGACY_SOLID_TILE = [0.5, 68 / 240] as const;
 const FOREGROUND_SOLID_TILE = [0.5, 38.4 / 108] as const;
+
+const manifestAliases = (): { alias: string; icon: string }[] =>
+    [...readFileSync(MANIFEST, "utf8").matchAll(/<activity-alias\s[^>]*?android:name="\.(\w+)"[^>]*?android:icon="@mipmap\/(\w+)"/g)]
+        .map(([, alias, icon]) => ({ alias, icon }));
 
 describe("launcher icon assets", () => {
     it("should back each adaptive icon with its theme's primary in that mode", () => {
@@ -77,14 +83,43 @@ describe("launcher icon assets", () => {
         }
     });
 
-    it("should declare one launcher alias per icon, keeping minimal's light alias names", () => {
-        const manifest = readFileSync(MANIFEST, "utf8");
-        const aliases = [...manifest.matchAll(/<activity-alias\s[^>]*?android:name="\.(\w+)"[^>]*?android:icon="@mipmap\/(\w+)"/g)]
-            .map(([, alias, icon]) => ({ alias, icon }));
+    it("should declare one launcher alias per icon and per legacy alias, keeping minimal's light alias names", () => {
+        const aliases = manifestAliases();
 
-        expect(aliases).toEqual(allIcons.map(({ key, name }) => ({ alias: key, icon: name })));
+        expect(aliases.map(({ alias }) => alias)).toEqual(ALL_LAUNCHER_ALIASES);
+        for (const { key, name } of icons) {
+            expect(aliases, key).toContainEqual({ alias: key, icon: name });
+        }
         for (const id of ICON_THEME_IDS) {
             expect(aliases.map(({ alias }) => alias)).toContain(id);
+        }
+    });
+
+    it("should draw each legacy alias with its light twin's icon", () => {
+        const aliases = manifestAliases();
+
+        for (const { key, icon } of LEGACY_LAUNCHER_ALIASES) {
+            expect(aliases, key).toContainEqual({ alias: key, icon: launcherResourceName(icon) });
+        }
+    });
+
+    it("should leave no paper dark icon resources behind", () => {
+        const paperDarkResources = readdirSync(RES_ROOT)
+            .filter(directory => directory.startsWith("mipmap"))
+            .flatMap(directory => readdirSync(`${RES_ROOT}/${directory}`).map(file => `${directory}/${file}`))
+            .filter(path => /ic_launcher_paper_\w+_dark\./.test(path));
+        const colors = readFileSync(`${RES_ROOT}/values/ic_launcher_theme_colors.xml`, "utf8");
+
+        expect(paperDarkResources).toEqual([]);
+        expect(colors).not.toMatch(/ic_launcher_paper_\w+_dark_background/);
+    });
+
+    it("should keep only the tile foregrounds some icon uses", () => {
+        const usedForegrounds = new Set(icons.map(({ onPrimary }) => `${foregroundName(onPrimary)}.png`));
+        for (const density of DENSITIES) {
+            const foregrounds = readdirSync(`${RES_ROOT}/mipmap-${density}`).filter(file => file.startsWith("ic_launcher_tiles_"));
+
+            expect(foregrounds.filter(file => !usedForegrounds.has(file)), density).toEqual([]);
         }
     });
 

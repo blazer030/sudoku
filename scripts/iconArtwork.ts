@@ -10,7 +10,7 @@ export interface IconTheme {
     background: string;
 }
 
-/** Every style's theme in light and dark, each in its own palette's primary and on-primary. */
+/** Every launcher icon: each style's theme in each mode it has, in that palette's primary and on-primary. */
 export const ICON_VARIANTS: IconTheme[] = LAUNCHER_ICONS.map(({ key, style, themeId, mode }) => {
     const palette = getPalette(style, themeId, mode);
     return { id: key, primary: palette.primary, onPrimary: palette["on-primary"], background: palette.background };

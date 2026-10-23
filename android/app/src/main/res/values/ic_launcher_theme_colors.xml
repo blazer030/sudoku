@@ -21,9 +21,6 @@
     <color name="ic_launcher_tactile_slate_background">#34506E</color>
     <color name="ic_launcher_tactile_slate_dark_background">#B7CBE5</color>
     <color name="ic_launcher_paper_blue_ink_background">#2B4A7A</color>
-    <color name="ic_launcher_paper_blue_ink_dark_background">#BFD3F4</color>
     <color name="ic_launcher_paper_green_ink_background">#235A3C</color>
-    <color name="ic_launcher_paper_green_ink_dark_background">#ADDFBF</color>
     <color name="ic_launcher_paper_red_ink_background">#8E2533</color>
-    <color name="ic_launcher_paper_red_ink_dark_background">#F8C3CA</color>
 </resources>
