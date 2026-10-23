@@ -3,24 +3,10 @@
         class="flex flex-col gap-5 h-full px-5 pb-6 bg-background overflow-y-auto"
         data-skin="page page-ruled"
     >
-        <div
-            class="flex items-center justify-between sticky top-0 bg-background pt-6 pb-3 z-10"
-            data-skin="page-header"
-        >
-            <button
-                class="flex items-center gap-2 cursor-pointer"
-                data-testid="back-button"
-                @click="goBack"
-            >
-                <ChevronLeft
-                    :size="24"
-                    class="text-foreground"
-                />
-                <span class="text-foreground text-base font-medium">{{ t("common.back") }}</span>
-            </button>
-            <span class="text-foreground text-lg font-semibold">{{ t("settings.title") }}</span>
-            <div class="w-15" />
-        </div>
+        <PageHeader
+            :title="t('settings.title')"
+            @back="goBack"
+        />
 
         <SettingsGroup
             id="gameplay"
@@ -172,7 +158,7 @@
 import { computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
-import { ChevronLeft, ChevronRight, Crosshair, Database, Eraser, ExternalLink, Gamepad2, Hash, Highlighter, Info, Languages, Palette, Sparkles, Trash2 } from "lucide-vue-next";
+import { ChevronRight, Crosshair, Database, Eraser, ExternalLink, Gamepad2, Hash, Highlighter, Info, Languages, Palette, Sparkles, Trash2 } from "lucide-vue-next";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { useDonateStore } from "@/stores/donateStore";
 import { useStatisticsStore } from "@/stores/statisticsStore";
@@ -185,6 +171,7 @@ import { useColorModeLabel } from "@/presentation/i18n/colorModeLabels";
 import type { LanguagePreference } from "@/application/settings/SettingsStorage";
 import { STYLES, getPalette } from "@/theme/palettes";
 import { vPress } from "@/presentation/directives/press";
+import PageHeader from "@/presentation/components/page-header/PageHeader.vue";
 import SegmentedControl from "@/presentation/components/segmented-control/SegmentedControl.vue";
 import OptionTile from "@/presentation/components/option-tile/OptionTile.vue";
 import SettingsGroup from "@/presentation/pages/settings/components/SettingsGroup.vue";
