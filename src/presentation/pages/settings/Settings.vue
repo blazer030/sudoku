@@ -196,8 +196,8 @@ onMounted(() => {
 
 const languageOptions = computed((): { value: LanguagePreference; label: string }[] => [
     { value: "system", label: t("settings.language.system") },
-    { value: "en", label: t("settings.language.english") },
     { value: "zh-Hant", label: t("settings.language.traditionalChinese") },
+    { value: "en", label: t("settings.language.english") },
 ]);
 
 // The style's icon as the launcher would show it, and 「<mode>・<theme>」, or just the theme when the style has one mode
