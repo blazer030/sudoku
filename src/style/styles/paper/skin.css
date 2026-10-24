@@ -37,7 +37,7 @@
     font-weight: 700;
 }
 
-/* The page background, shared by the body, the app root and every page root and sticky header:
+/* The page background, shared by the body, the app root and every page root:
    faint dots of the border colour. It has no image, so the colour and contrast tests see it (inks
    are checked on the border at 40%). Each surface lays it on the page colour. */
 [data-style="paper"] {
@@ -47,12 +47,11 @@
 }
 
 /* The app root paints it on its own box, which takes in the safe-area padding, so edge to edge it
-   runs on under the status bar. Page roots and headers, which scroll, attach it to the viewport,
-   so it lines up with the app root behind them. */
+   runs on under the status bar. Page roots, which scroll, attach it to the viewport, so it lines up
+   with the app root behind them. */
 [data-style="paper"] body,
 [data-style="paper"] .app-safe-area,
-[data-style="paper"] [data-skin~="page"],
-[data-style="paper"] [data-skin~="page-header"] {
+[data-style="paper"] [data-skin~="page"] {
     background-color: var(--color-background);
     background-image: var(--paper-texture);
     background-size: 9px 9px, 13px 13px;
@@ -60,9 +59,26 @@
     background-repeat: repeat, repeat;
 }
 
-[data-style="paper"] [data-skin~="page"],
-[data-style="paper"] [data-skin~="page-header"] {
+[data-style="paper"] [data-skin~="page"] {
     background-attachment: fixed;
+}
+
+/* A sticky header is clear at rest, so the notebook's ruled lines, margin line and grain run straight
+   through it. The lines scroll with the content, so they cannot line up with a header that stays put:
+   once its page has scrolled (data-scrolled) the header turns opaque, in the page colour and the
+   viewport-fixed grain, with a thin rule underneath, so content does not run under the title. */
+[data-style="paper"] [data-skin~="page-header"] {
+    background-color: transparent;
+}
+
+[data-style="paper"] [data-skin~="page-header"][data-scrolled] {
+    background-color: var(--color-background);
+    background-image: var(--paper-texture);
+    background-size: 9px 9px, 13px 13px;
+    background-position: 0 0, 4px 6px;
+    background-repeat: repeat, repeat;
+    background-attachment: fixed;
+    box-shadow: 0 1px 0 0 var(--color-border);
 }
 
 /* Ruled pages: a line every 32px and a red margin line 14px in, inside the page gutter so no

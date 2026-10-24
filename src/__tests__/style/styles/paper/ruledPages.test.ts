@@ -44,4 +44,20 @@ describe("paper ruled pages", () => {
 
         expect(offenders).toEqual([]);
     });
+
+    it("should leave a sticky header clear at rest, so the lines and margin line run through it", () => {
+        const header = declarationsOf(PAPER_CSS, '[data-style="paper"] [data-skin~="page-header"]');
+
+        expect(header.get("background-color")).toBe("transparent");
+        expect(header.has("background-image")).toBe(false);
+        expect(header.has("backdrop-filter")).toBe(false);
+    });
+
+    it("should turn a scrolled sticky header opaque, in the page colour with the grain and a bottom rule", () => {
+        const scrolled = declarationsOf(PAPER_CSS, '[data-style="paper"] [data-skin~="page-header"][data-scrolled]');
+
+        expect(scrolled.get("background-color")).toBe("var(--color-background)");
+        expect(scrolled.get("background-image")).toBe("var(--paper-texture)");
+        expect(scrolled.get("box-shadow")).toContain("var(--color-border)");
+    });
 });

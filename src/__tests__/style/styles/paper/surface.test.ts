@@ -32,7 +32,7 @@ describe("paper surface", () => {
         expect(selectors).toEqual(expect.arrayContaining([
             '[data-style="paper"] body',
             '[data-style="paper"] [data-skin~="page"]',
-            '[data-style="paper"] [data-skin~="page-header"]',
+            '[data-style="paper"] [data-skin~="page-header"][data-scrolled]',
             '[data-style="paper"] [data-skin~="page-ruled"]',
         ]));
         for (const selector of selectors) {
