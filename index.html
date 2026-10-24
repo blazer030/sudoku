@@ -15,11 +15,11 @@
             // BEGIN theme-color data: systemBarColor() per style and theme. noFlashScript.test.ts keeps it in sync.
             var barColors = {
                 minimal: {
-                    dark: "#111110",
+                    dark: { green: "#111110", blue: "#111110", purple: "#111110", orange: "#111110", pink: "#111110", teal: "#111110" },
                     light: { green: "#176037", blue: "#2C5689", purple: "#614887", orange: "#7D4800", pink: "#863C55", teal: "#0A5E5F" }
                 },
                 tactile: {
-                    dark: "#1A1C1F",
+                    dark: { green: "#1A1C1F", blue: "#1A1C1F", rust: "#1A1C1F", slate: "#1A1C1F" },
                     light: { green: "#1F5C3A", blue: "#24508A", rust: "#782F16", slate: "#34506E" }
                 },
                 // A style lists only the modes it has: paper is light only, so it has no dark entry
@@ -27,7 +27,7 @@
                     light: { blueInk: "#2B4A7A", greenInk: "#235A3C", redInk: "#8E2533" }
                 },
                 pixel: {
-                    dark: "#000000",
+                    dark: { classic: "#000000" },
                     light: { classic: "#0F380F" }
                 }
             };
@@ -42,7 +42,8 @@
             var root = document.documentElement;
             var style = has(barColors, settings.style) ? settings.style : "minimal";
             var bar = barColors[style];
-            var themeColors = bar.light;
+            // The theme list is the keys of whichever mode the style has (both list the same themes)
+            var themeColors = bar.light || bar.dark;
             // A theme of another style falls back to the style's remembered theme, then its first
             // (key order follows THEME_IDS_BY_STYLE), as loadSettings() does
             var remembered = settings.colorThemeByStyle || {};
@@ -59,7 +60,7 @@
                 || (has(bar, "dark") && (settings.appearance === "dark" || (settings.appearance !== "light" && systemDark)));
             if (dark) root.classList.add("dark");
             var meta = document.querySelector('meta[name="theme-color"]');
-            if (meta) meta.setAttribute("content", dark ? bar.dark : themeColors[colorTheme]);
+            if (meta) meta.setAttribute("content", (dark ? bar.dark : bar.light)[colorTheme]);
         })();
     </script>
     <!-- Fonts are bundled (src/style/fonts.css), so every style reads the same offline -->
