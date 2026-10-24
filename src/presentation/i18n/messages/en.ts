@@ -171,6 +171,8 @@ export const en = {
             newRecord: "New record!",
             playAgain: "Play Again",
             review: "Review This Game",
+            // Paper's rubber stamp on the completion card, written in Caveat
+            stamp: "SOLVED",
         },
     },
     walkthrough: {

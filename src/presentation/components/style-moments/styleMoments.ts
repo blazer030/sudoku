@@ -5,6 +5,9 @@ import DefaultLoader from "@/presentation/components/style-moments/default/Defau
 import DefaultCelebration from "@/presentation/components/style-moments/default/DefaultCelebration.vue";
 import MinimalLoader from "@/presentation/components/style-moments/minimal/MinimalLoader.vue";
 import TactileLoader from "@/presentation/components/style-moments/tactile/TactileLoader.vue";
+import PaperLoader from "@/presentation/components/style-moments/paper/PaperLoader.vue";
+import PaperCelebration from "@/presentation/components/style-moments/paper/PaperCelebration.vue";
+import PaperGroupOverlay from "@/presentation/components/style-moments/paper/PaperGroupOverlay.vue";
 import type { CompletedGroup } from "@/domain/game/Sudoku";
 
 /** A group effect on the board: a new one gets a new id, which starts its drawings afresh. */
@@ -62,11 +65,23 @@ const TACTILE_MOMENTS: StyleMoments = {
     celebrationBoardMs: 760,
 };
 
+// From the boards: each cell's wash waits 100ms and runs 600ms, but the pencil runs longer: the box's loop
+// starts 180ms in and takes 860ms, which a box entered at its centre (two steps out) just covers. The
+// red-pen check is on the board by 680ms; the card lands as the scrim comes in.
+const PAPER_MOMENTS: StyleMoments = {
+    loader: PaperLoader,
+    celebration: null,
+    cardDecoration: PaperCelebration,
+    groupEffectMs: 920,
+    groupOverlay: PaperGroupOverlay,
+    celebrationBoardMs: 760,
+};
+
 // One entry per style, so a style added without its moments is a type error
 export const STYLE_MOMENTS: Record<StyleId, StyleMoments> = {
     minimal: MINIMAL_MOMENTS,
     tactile: TACTILE_MOMENTS,
-    paper: DEFAULT_MOMENTS,
+    paper: PAPER_MOMENTS,
     pixel: DEFAULT_MOMENTS,
     cyber: DEFAULT_MOMENTS,
 };

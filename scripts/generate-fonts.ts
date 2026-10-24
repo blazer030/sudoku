@@ -95,8 +95,9 @@ const main = async (): Promise<void> => {
         {
             licence: "ofl/caveat/OFL.txt",
             licenceOutput: "Caveat-OFL.txt",
-            // Paper writes only digits by hand; any other text falls through to WenKai
-            jobs: [{ output: "caveat.woff2", source: "ofl/caveat/Caveat[wght].ttf", text: "0123456789", weights: { min: 500, max: 700 } }],
+            // Paper writes only digits by hand, and stamps SOLVED (game.complete.stamp in English) on the
+            // completion card; any other text falls through to WenKai
+            jobs: [{ output: "caveat.woff2", source: "ofl/caveat/Caveat[wght].ttf", text: "0123456789SOLVED", weights: { min: 500, max: 700 } }],
         },
         {
             licence: "ofl/lxgwwenkaitc/OFL.txt",

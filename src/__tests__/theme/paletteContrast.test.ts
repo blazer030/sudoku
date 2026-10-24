@@ -191,7 +191,16 @@ const PAPER_BOARD_CASES: PaperBoardCase[] = STYLES.paper.themes.flatMap((theme) 
         minimum,
     }));
     const circle = { label: `${prefix}: primary on selected ≥ ${LARGE_OR_ICON}`, foreground: palette.primary, background: surface("selected"), minimum: LARGE_OR_ICON };
-    return [...inks, ...apart, circle];
+    // The completion card's 完成 stamp: its date is small text in the stamp's ink; its word is large and
+    // also crosses the mask's worn rings. The solved board's red check is a mark over the sheet.
+    const stampInk = over(paperWash("--paper-stamp-ink"), palette, palette.card);
+    const wornStampInk = over({ ...paperWash("--paper-stamp-ink"), alpha: paperWash("--paper-stamp-ink").alpha * paperWash("--paper-stamp-wear").alpha }, palette, palette.card);
+    const stamp = [
+        { label: `${prefix}: stamp ink on the card ≥ ${TEXT}`, foreground: stampInk, background: palette.card, minimum: TEXT },
+        { label: `${prefix}: stamp ink in its worn rings on the card ≥ ${LARGE_OR_ICON}`, foreground: wornStampInk, background: palette.card, minimum: LARGE_OR_ICON },
+        { label: `${prefix}: check ink on the sheet ≥ ${LARGE_OR_ICON}`, foreground: over(paperWash("--paper-check-ink"), palette, surface("default")), background: surface("default"), minimum: LARGE_OR_ICON },
+    ];
+    return [...inks, ...apart, circle, ...stamp];
 });
 
 // Each style is checked in the modes it has

@@ -2,6 +2,7 @@ import { existsSync, readdirSync, readFileSync, statSync } from "fs";
 import { dirname, join, resolve } from "path";
 import postcss from "postcss";
 import { mappedCodePoints, nameStrings } from "./woff2Tables";
+import { en } from "@/presentation/i18n/messages/en";
 
 const FONTS_CSS = "src/style/fonts.css";
 const BUNDLED_FONTS = ["outfit.woff2", "roboto-mono.woff2", "caveat.woff2", "lxgw-wenkai-tc-regular.woff2", "lxgw-wenkai-tc-bold.woff2", "press-start-2p.woff2", "silkscreen.woff2", "orbitron.woff2", "share-tech-mono.woff2"];
@@ -100,10 +101,19 @@ describe("bundled fonts", () => {
     });
 
     it("should read a font's character map", () => {
-        // Caveat was cut to digits: it maps 7 but neither a letter nor a Chinese character
+        // Caveat was cut to digits and the stamp's word: it maps 7 but neither an A nor a Chinese character
         const mapped = mappedCodePoints(readFileSync("src/assets/fonts/caveat.woff2"), [0x37, 0x41, 0x6578]);
 
         expect([...mapped]).toEqual([0x37]);
+    });
+
+    it("should map paper's English stamp in Caveat (run npm run generate:fonts)", () => {
+        const word = en.game.complete.stamp;
+        const wanted = Array.from(word, character => character.codePointAt(0) ?? 0);
+        const mapped = mappedCodePoints(readFileSync("src/assets/fonts/caveat.woff2"), wanted);
+
+        expect(word).not.toBe("");
+        expect(wanted.filter(codePoint => !mapped.has(codePoint))).toEqual([]);
     });
 
     it.each(["lxgw-wenkai-tc-regular.woff2", "lxgw-wenkai-tc-bold.woff2"])("%s maps every character the app writes (run npm run generate:fonts)", (file) => {
