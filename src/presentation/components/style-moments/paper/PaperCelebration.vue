@@ -15,7 +15,7 @@
         <b
             :class="['font-hand font-bold leading-none', isShortWord ? 'text-[26px] tracking-[0.06em]' : 'text-[20px] tracking-normal']"
         >{{ word }}</b>
-        <small class="font-mono text-[10px] font-medium leading-none tracking-[0.08em]">{{ date }}</small>
+        <small class="font-hand text-[14px] font-bold leading-none tracking-[0.04em]">{{ date }}</small>
     </span>
 </template>
 

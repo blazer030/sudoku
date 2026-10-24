@@ -22,6 +22,14 @@ describe("PaperCelebration", () => {
         expect(stamp.attributes("aria-hidden")).toBe("true");
     });
 
+    // The monospace stack is not bundled: Android drew the date's zero slashed (「1Ø/25」)
+    it("should write the date in the bundled hand face, like the stamp's word", () => {
+        const date = mount(PaperCelebration, { props: { still: false } }).get(".paper-stamp small");
+
+        expect(date.classes()).toContain("font-hand");
+        expect(date.classes()).not.toContain("font-mono");
+    });
+
     // Review Focus 4: the stamp follows the language, like every other word on the dialog
     it("should switch the stamp's word with the language", async () => {
         const word = mount(PaperCelebration, { props: { still: false } }).get(".paper-stamp b");

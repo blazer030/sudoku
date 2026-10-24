@@ -116,6 +116,14 @@ describe("bundled fonts", () => {
         expect(wanted.filter(codePoint => !mapped.has(codePoint))).toEqual([]);
     });
 
+    // The stamp's date (month/day) is written in Caveat too: an unbundled face drew a slashed zero on Android
+    it("should map paper's stamp date in Caveat, its digits and slash (run npm run generate:fonts)", () => {
+        const wanted = Array.from("0123456789/", character => character.codePointAt(0) ?? 0);
+        const mapped = mappedCodePoints(readFileSync("src/assets/fonts/caveat.woff2"), wanted);
+
+        expect(wanted.filter(codePoint => !mapped.has(codePoint))).toEqual([]);
+    });
+
     it.each(["lxgw-wenkai-tc-regular.woff2", "lxgw-wenkai-tc-bold.woff2"])("%s maps every character the app writes (run npm run generate:fonts)", (file) => {
         // Read from the font's own character map; emoji are left to the system's emoji font
         const wanted = [...sourceCharacters()].filter(character => !/\p{Extended_Pictographic}/u.test(character));
