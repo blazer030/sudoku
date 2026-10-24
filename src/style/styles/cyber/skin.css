@@ -70,7 +70,7 @@
     pointer-events: none;
     background:
         repeating-linear-gradient(180deg, color-mix(in srgb, var(--color-foreground) 3.5%, transparent) 0 1px, transparent 1px 3px),
-        radial-gradient(60% 50% at 50% 100%, color-mix(in srgb, var(--color-primary) 14%, transparent), transparent 70%) 0 50vh / 100% 200px no-repeat;
+        radial-gradient(60% 50% at 50% 50%, color-mix(in srgb, var(--color-primary) 14%, transparent), transparent 70%) 0 calc(50vh + 100px) / 100% 200px no-repeat;
 }
 
 /* The beam is a layer of its own, so it can be moved without moving the scanlines; it sweeps from above

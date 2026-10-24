@@ -221,6 +221,15 @@ describe("cyber skin", () => {
             expect(declarationsOf(CYBER_CSS, skin("page")).get("background-color")).toBe("transparent");
         });
 
+        it("should fade the horizon glow out on both sides: its ellipse sits inside its box, not on the box's edge", () => {
+            const background = collapse(declarationsOf(CYBER_CSS, `${ROOT_DECORATION}::before`).get("background") ?? "");
+            const glow = /radial-gradient\(\d+% \d+% at (\d+)% (\d+)%, /.exec(background);
+
+            expect(glow).not.toBeNull();
+            expect(Number(glow?.[2])).toBeGreaterThan(0);
+            expect(Number(glow?.[2])).toBeLessThan(100);
+        });
+
         it("should lay the perspective floor at the bottom of the screen, fading upwards", () => {
             const floor = declarationsOf(CYBER_CSS, `${ROOT_DECORATION}::after`);
 
