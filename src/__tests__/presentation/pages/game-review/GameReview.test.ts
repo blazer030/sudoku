@@ -165,6 +165,11 @@ describe("GameReview", () => {
         const panel = wrapper.get("[data-testid='review-panel']");
         expect(page.contains(panel.element)).toBe(true);
         expect(board.element.nextElementSibling).toBe(panel.element);
+
+        // Growing spacers above and below the board and panel centre them on a tall screen, as in the walkthrough
+        const group = board.element.parentElement;
+        expect(group?.previousElementSibling?.classList).toContain("flex-1");
+        expect(group?.nextElementSibling?.classList).toContain("flex-1");
     });
 
     it("should never scroll sideways, though the board reaches into the page gutter", async () => {

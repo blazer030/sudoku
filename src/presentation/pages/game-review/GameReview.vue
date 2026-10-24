@@ -139,6 +139,7 @@
                 </i18n-t>
             </StepPlaybackPanel>
         </div>
+        <div class="flex-1" />
     </div>
 </template>
 
