@@ -62,19 +62,20 @@ export const useStatisticsStore = defineStore("statistics", () => {
         history.value = await repository.load();
     };
 
-    const persist = () => {
+    const persist = (game: GameResult) => {
         if (repository === null) return;
         // Fire-and-forget; failures (e.g. storage quota) must not break the UI flow.
-        repository.save(history.value).catch(() => { /* swallowed by design */ });
+        repository.append(game).catch(() => { /* swallowed by design */ });
     };
 
     const recordGame = (input: RecordGameInput) => {
-        history.value.push({
+        const game: GameResult = {
             ...input,
             hintsUsed: input.hintsUsed ?? 0,
             date: new Date().toISOString(),
-        });
-        persist();
+        };
+        history.value.push(game);
+        persist(game);
     };
 
     /** True when this time would be the best win at this difficulty: the first win, or strictly faster. */
