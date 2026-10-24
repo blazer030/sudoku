@@ -26,6 +26,7 @@
                 arriving ? 'value-arrive' : '',
                 'leading-none',
             ]"
+            :style="digitWriter ? { '--digit-writer-mask': `url(#${writerMaskId})` } : undefined"
             data-testid="cell-value"
             @animationend="settle"
         >
@@ -50,15 +51,25 @@
                 </span>
             </div>
         </div>
+        <!-- The style's pen: it draws the mask the arriving digit is shown through, beside the digit so its
+             strokes' animations never reach the digit's own animationend -->
+        <component
+            :is="digitWriter"
+            v-if="digitWriter"
+            :digit="value"
+            :mask-id="writerMaskId"
+            @written="settle"
+        />
     </div>
 </template>
 
 <script lang="ts" setup>
-import { computed, nextTick, ref, toRef, useTemplateRef, watch } from "vue";
+import { computed, nextTick, ref, toRef, useId, useTemplateRef, watch } from "vue";
 import { BOX_SIZE } from "@/domain/board/constants";
 import type { GroupKind } from "@/domain/game/Sudoku";
 import { useMotionAllowed } from "@/presentation/composables/useMotionAllowed";
 import { useArrivalMotion } from "@/presentation/components/board-cell/useArrivalMotion";
+import { useStyleMoments } from "@/presentation/components/style-moments/styleMoments";
 
 export type CellVariant = "default" | "clue" | "selected" | "focus" | "scope" | "error" | "same-digit" | "pattern" | "answer" | "wrong" | "peer";
 /** Player notes are muted; solver candidates are bold in the theme colour so they never pass for the player's own. */
@@ -158,6 +169,11 @@ const placement = computed(() => ({
 }));
 const pops = computed(() => props.popping && motionAllowed());
 const { arriving, leaving, settle } = useArrivalMotion(toRef(props, "value"), toRef(props, "popping"));
+
+// A style may write an arriving digit in with its own pen; arriving is only ever set while motion is allowed
+const moments = useStyleMoments();
+const writerMaskId = `digit-writer-${useId()}`;
+const digitWriter = computed(() => (arriving.value && props.value !== 0 ? moments.value.digitWriter ?? null : null));
 
 const settleFromCell = (event: AnimationEvent) => {
     if (event.pseudoElement) settle();

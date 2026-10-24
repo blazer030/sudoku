@@ -1,10 +1,11 @@
 import { readFileSync } from "fs";
-import { afterEach, describe, expect, it, vi } from "vitest";
-import { nextTick } from "vue";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { defineComponent, h, nextTick } from "vue";
 import { mount } from "@vue/test-utils";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { ARRIVAL_SETTLE_MS } from "@/presentation/components/board-cell/useArrivalMotion";
 import BoardCell from "@/presentation/components/board-cell/BoardCell.vue";
+import { STYLE_MOMENTS } from "@/presentation/components/style-moments/styleMoments";
 import { declarationsOf } from "@/__tests__/style/styleSheetRules";
 
 describe("BoardCell", () => {
@@ -258,6 +259,86 @@ describe("BoardCell", () => {
             await wrapper.trigger("animationend", { pseudoElement: "::after" });
 
             expect(wrapper.get("[data-testid='cell-value']").classes()).not.toContain("value-arrive");
+        });
+    });
+
+    describe("digit writer", () => {
+        // A style's writer draws the mask its arriving digit is shown through; this one only says what it was given
+        const TestWriter = defineComponent({
+            props: { digit: { type: Number, required: true }, maskId: { type: String, required: true } },
+            emits: ["written"],
+            setup: (props) => () => h("svg", { "data-testid": "test-writer", "data-digit": props.digit, "data-mask-id": props.maskId }),
+        });
+        const originalWriter = STYLE_MOMENTS.minimal.digitWriter;
+
+        beforeEach(() => {
+            vi.stubGlobal("matchMedia", (query: string) => ({ matches: false, media: query }));
+            useSettingsStore().setStyle("minimal");
+        });
+
+        afterEach(() => {
+            STYLE_MOMENTS.minimal.digitWriter = originalWriter;
+            vi.unstubAllGlobals();
+        });
+
+        const enterDigit = async (digit: number) => {
+            const wrapper = mountCell({ value: 0 });
+            await wrapper.setProps({ value: digit });
+            return wrapper;
+        };
+
+        it("should let the style's writer draw a digit while it arrives, masking the digit by its drawing", async () => {
+            STYLE_MOMENTS.minimal.digitWriter = TestWriter;
+            const wrapper = await enterDigit(4);
+
+            const writer = wrapper.get("[data-testid='test-writer']");
+            expect(writer.attributes("data-digit")).toBe("4");
+            const maskId = writer.attributes("data-mask-id") ?? "";
+            expect(maskId).not.toBe("");
+            expect(wrapper.get("[data-testid='cell-value']").attributes("style")).toContain(`--digit-writer-mask: url(#${maskId})`);
+        });
+
+        it("should give each cell's writer its own mask", async () => {
+            STYLE_MOMENTS.minimal.digitWriter = TestWriter;
+            const board = mount(defineComponent({
+                props: { digit: { type: Number, required: true } },
+                setup: (props) => () => [0, 1].map(column => h(BoardCell, { row: 0, column, value: props.digit })),
+            }), { props: { digit: 0 } });
+            await board.setProps({ digit: 4 });
+
+            const maskIds = board.findAll("[data-testid='test-writer']").map(writer => writer.attributes("data-mask-id"));
+            expect(maskIds).toHaveLength(2);
+            expect(maskIds[0]).not.toBe(maskIds[1]);
+        });
+
+        it("should settle the arrival once the writer has written the digit", async () => {
+            STYLE_MOMENTS.minimal.digitWriter = TestWriter;
+            const wrapper = await enterDigit(4);
+
+            wrapper.findComponent(TestWriter).vm.$emit("written");
+            await nextTick();
+
+            expect(wrapper.get("[data-testid='cell-value']").classes()).not.toContain("value-arrive");
+            expect(wrapper.find("[data-testid='test-writer']").exists()).toBe(false);
+            expect(wrapper.get("[data-testid='cell-value']").attributes("style") ?? "").not.toContain("--digit-writer-mask");
+        });
+
+        it("should draw nothing for a digit already there or for a style without a writer", async () => {
+            STYLE_MOMENTS.minimal.digitWriter = TestWriter;
+            expect(mountCell({ value: 4 }).find("[data-testid='test-writer']").exists()).toBe(false);
+
+            STYLE_MOMENTS.minimal.digitWriter = originalWriter;
+            const wrapper = await enterDigit(4);
+            expect(wrapper.find("[data-testid='test-writer']").exists()).toBe(false);
+            expect(wrapper.get("[data-testid='cell-value']").attributes("style") ?? "").not.toContain("--digit-writer-mask");
+        });
+
+        it("should draw nothing while motion effects are off", async () => {
+            STYLE_MOMENTS.minimal.digitWriter = TestWriter;
+            useSettingsStore().setMotionEffects(false);
+            const wrapper = await enterDigit(4);
+
+            expect(wrapper.find("[data-testid='test-writer']").exists()).toBe(false);
         });
     });
 

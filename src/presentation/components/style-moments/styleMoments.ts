@@ -42,6 +42,13 @@ export interface StyleMoments {
     groupOverlay?: Component | null;
     /** How long the board phase of the celebration runs before the dialog opens, in milliseconds. */
     celebrationBoardMs: number;
+    /**
+     * Writes an entered digit in while it arrives (only when motion is allowed), given `{ digit, maskId }`:
+     * it renders an SVG `<mask>` with that id, which the arriving digit carries as `--digit-writer-mask` for
+     * the skin to mask it by, and emits `written` once the digit shows whole, which settles the arrival.
+     * None when the skin's `.value-arrive` carries it all.
+     */
+    digitWriter?: Component | null;
 }
 
 // From the boards: each cell's wash waits 100ms and runs 520ms; the dialog opens as the board's scrim
