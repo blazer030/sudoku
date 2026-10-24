@@ -49,13 +49,17 @@ describe("PageHeader scrolled hook", () => {
         wrapper.unmount();
     });
 
+    it("should fade over one and a half header heights, so the frost comes in gently", () => {
+        expect(HEADER_FADE_DISTANCE).toBe(96);
+    });
+
     it("should read the scroll position once per frame, not once per scroll event", async () => {
         const wrapper = mount(Page, { attachTo: document.body });
         const scroller = wrapper.get(".scroller").element;
 
-        scroller.scrollTop = 16;
+        scroller.scrollTop = HEADER_FADE_DISTANCE / 4;
         scroller.dispatchEvent(new Event("scroll"));
-        scroller.scrollTop = 32;
+        scroller.scrollTop = HEADER_FADE_DISTANCE / 2;
         scroller.dispatchEvent(new Event("scroll"));
 
         expect(pendingFrames).toHaveLength(1);

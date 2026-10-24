@@ -11,8 +11,8 @@ const scrollerOf = (element: HTMLElement): HTMLElement | null => {
     return null;
 };
 
-/** Scroll distance, in px, over which a header's frost fades in: about one header height, so it is full once content has fully slid under the title. */
-export const HEADER_FADE_DISTANCE = 64;
+/** Scroll distance, in px, over which a header's frost fades in: about one and a half header heights, so it comes in gently. */
+export const HEADER_FADE_DISTANCE = 96;
 
 /**
  * Whether the scroll container a sticky header sits in has scrolled away from its top. Skins read it
