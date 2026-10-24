@@ -152,6 +152,38 @@ describe("pixel skin", () => {
             expect(PIXEL_CSS.match(/\.app-safe-area::before \{/g)).toHaveLength(2);
         });
 
+        describe("sticky header", () => {
+            const HEADER = skin("page-header");
+            const SCROLLED = `${HEADER}[data-scrolled]`;
+
+            it("should be clear at rest, so the texture shows through", () => {
+                const header = declarationsOf(PIXEL_CSS, HEADER);
+
+                expect(header.get("background-color")).toBe("transparent");
+                expect(header.has("backdrop-filter")).toBe(false);
+            });
+
+            it("should turn opaque with the grid fixed to the screen once scrolled", () => {
+                const scrolled = declarationsOf(PIXEL_CSS, SCROLLED);
+
+                expect(scrolled.get("background-color")).toBe("var(--color-background)");
+                expect(scrolled.get("background-image")).toContain("90deg");
+                expect(scrolled.get("background-size")).toBe("3px 3px");
+                expect(scrolled.get("background-attachment")).toBe("fixed");
+                expect(scrolled.has("backdrop-filter")).toBe(false);
+                expect(scrolled.get("box-shadow")).toContain("var(--color-border)");
+            });
+
+            it("should repaint the dots and stars in 紅白機 on the root's offsets", () => {
+                const scrolled = declarationsOf(PIXEL_CSS, `:root.dark[data-style="pixel"] [data-skin~="page-header"][data-scrolled]`);
+                const stars = declarationsOf(PIXEL_CSS, DARK + "::after");
+
+                expect(scrolled.get("background-image")?.match(/radial-gradient\(/g)).toHaveLength(4);
+                expect(scrolled.get("background-size")).toBe(`${stars.get("background-size")}, 4px 4px`);
+                expect(scrolled.get("background-position")).toBe(`${stars.get("background-position")}, 0 0`);
+            });
+        });
+
         it("should hold the stars still under reduced motion", () => {
             expect(reducedMotionDeclarationsOf(`${DARK}::after`).get("animation")).toBe("none");
         });

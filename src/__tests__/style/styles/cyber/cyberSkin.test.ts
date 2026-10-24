@@ -234,6 +234,29 @@ describe("cyber skin", () => {
             expect(Number(glow?.[2])).toBeLessThan(100);
         });
 
+        describe("sticky header", () => {
+            const HEADER = skin("page-header");
+            const SCROLLED = `${HEADER}[data-scrolled]`;
+
+            it("should be clear at rest, so the scanlines and beam show through", () => {
+                const header = declarationsOf(CYBER_CSS, HEADER);
+
+                expect(header.get("background-color")).toBe("transparent");
+                expect(header.has("backdrop-filter")).toBe(false);
+            });
+
+            it("should turn opaque with the scanlines fixed to the screen once scrolled", () => {
+                const scrolled = declarationsOf(CYBER_CSS, SCROLLED);
+                const root = declarationsOf(CYBER_CSS, `${ROOT_DECORATION}::before`);
+
+                expect(scrolled.get("background-color")).toBe("var(--color-background)");
+                expect(root.get("background")).toContain(scrolled.get("background-image") ?? "missing");
+                expect(scrolled.get("background-attachment")).toBe("fixed");
+                expect(scrolled.has("backdrop-filter")).toBe(false);
+                expect(scrolled.get("box-shadow")).toContain("var(--color-border)");
+            });
+        });
+
         it("should lay the perspective floor at the bottom of the screen, fading upwards", () => {
             const floor = declarationsOf(CYBER_CSS, `${ROOT_DECORATION}::after`);
 

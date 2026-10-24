@@ -93,10 +93,19 @@
     to { transform: translateY(100vh); }
 }
 
-/* A sticky page header lets the decoration through, so it does not cut a dark band out of the page */
+/* A sticky page header is clear at rest, so the scanlines, glow and beam show through it. Once its page
+   has scrolled (data-scrolled) it turns opaque so content does not run under the title, with the
+   scanlines repainted fixed to the screen so they line up with the root's layer. The beam, floor and
+   horizon glow are not repeated there. */
 [data-style="cyber"] [data-skin~="page-header"] {
-    background-color: color-mix(in srgb, var(--color-background) 70%, transparent);
-    backdrop-filter: blur(8px);
+    background-color: transparent;
+}
+
+[data-style="cyber"] [data-skin~="page-header"][data-scrolled] {
+    background-color: var(--color-background);
+    background-image: repeating-linear-gradient(180deg, color-mix(in srgb, var(--color-foreground) 3.5%, transparent) 0 1px, transparent 1px 3px);
+    background-attachment: fixed;
+    box-shadow: 0 1px 0 0 var(--color-border);
 }
 
 [data-style="cyber"] .app-safe-area::after {
