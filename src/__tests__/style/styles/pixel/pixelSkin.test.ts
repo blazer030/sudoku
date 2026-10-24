@@ -1,6 +1,6 @@
 import { readFileSync } from "fs";
 import postcss, { type AtRule, type Declaration, type Node, type Rule } from "postcss";
-import { declarationsOf } from "../../styleSheetRules";
+import { declarationsOf, reducedMotionDeclarationsOf as reducedMotionDeclarationsIn } from "../../styleSheetRules";
 
 const PIXEL_CSS = readFileSync("src/style/styles/pixel/skin.css", "utf8");
 
@@ -64,18 +64,7 @@ const cell = (variant: string): string => `${BOARD} [data-variant="${variant}"]`
 // The selected cell outside hint mode, whichever variant it shows (an error wins over the selection)
 const CURSOR = `${BOARD}:not([data-hint-mode]) [data-selected]`;
 
-// The declarations of the rules inside the reduced-motion block that list `selector`
-const reducedMotionDeclarationsOf = (selector: string): Map<string, string> => {
-    const declarations = new Map<string, string>();
-    postcss.parse(PIXEL_CSS).walkRules((rule: Rule) => {
-        if (!isInside(rule, atRule => atRule.name === "media" && atRule.params.includes("prefers-reduced-motion: reduce"))) return;
-        if (!rule.selectors.map(item => item.replace(/\s+/g, " ").trim()).includes(selector)) return;
-        rule.walkDecls((declaration) => {
-            declarations.set(declaration.prop, declaration.value.replace(/\s+/g, " ").trim());
-        });
-    });
-    return declarations;
-};
+const reducedMotionDeclarationsOf = (selector: string): Map<string, string> => reducedMotionDeclarationsIn(PIXEL_CSS, selector);
 
 describe("pixel skin", () => {
     it("should set every text in pixel type once its fonts have loaded", () => {
