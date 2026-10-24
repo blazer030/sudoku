@@ -95,7 +95,7 @@ export const useGameSession = ({ onPlayAgain }: GameSessionOptions) => {
     });
 
     const settingsStore = useSettingsStore();
-    const { triggerFlash, isFlashing } = useCompletionFlash(() => settingsStore.completionFlash);
+    const { triggerFlash, isFlashing } = useCompletionFlash(() => settingsStore.motionEffects);
 
     const gameToast = useGameToast();
 

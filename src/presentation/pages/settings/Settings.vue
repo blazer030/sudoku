@@ -228,10 +228,10 @@ const toggles = computed(() => [
         setter: settingsStore.setHighlightScope,
     },
     {
-        key: "completionFlash",
+        key: "motionEffects",
         icon: Sparkles,
-        value: settingsStore.completionFlash,
-        setter: settingsStore.setCompletionFlash,
+        value: settingsStore.motionEffects,
+        setter: settingsStore.setMotionEffects,
     },
     {
         key: "autoRemoveNotes",

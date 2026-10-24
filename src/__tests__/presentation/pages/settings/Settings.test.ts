@@ -200,7 +200,7 @@ describe("Settings.vue groups", () => {
         expect(tiles.map(tile => tile.attributes("data-testid"))).toEqual([
             "toggle-highlightSameDigit",
             "toggle-highlightScope",
-            "toggle-completionFlash",
+            "toggle-motionEffects",
             "toggle-autoRemoveNotes",
             "toggle-showRemainingCount",
         ]);
@@ -217,7 +217,7 @@ describe("Settings.vue groups", () => {
         expect(readStoredSettings().highlightScope).toBe(false);
     });
 
-    it.each(["highlightSameDigit", "completionFlash", "autoRemoveNotes", "showRemainingCount"] as const)(
+    it.each(["highlightSameDigit", "motionEffects", "autoRemoveNotes", "showRemainingCount"] as const)(
         "should sync the %s tile with its setting",
         async (key) => {
             const wrapper = mountSettings();

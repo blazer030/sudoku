@@ -60,7 +60,7 @@ export const en = {
         toggles: {
             highlightSameDigit: { label: "Same Numbers", description: "Light up matching digits" },
             highlightScope: { label: "Row, Column & Box", description: "Shade its row, column and box" },
-            completionFlash: { label: "Completion Flash", description: "Flash a finished row, column or box, and launch fireworks on a win" },
+            motionEffects: { label: "Completion Flash", description: "Flash a finished row, column or box, and launch fireworks on a win" },
             autoRemoveNotes: { label: "Auto-Clear Notes", description: "Clear notes a digit rules out" },
             showRemainingCount: { label: "Remaining Count", description: "Show how many are left on each key" },
         },

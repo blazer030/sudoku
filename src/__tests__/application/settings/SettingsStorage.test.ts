@@ -26,7 +26,7 @@ describe("SettingsStorage", () => {
             expect(settings).toEqual({
                 colorTheme: "green",
                 highlightSameDigit: true,
-                completionFlash: true,
+                motionEffects: true,
                 autoRemoveNotes: true,
                 showRemainingCount: true,
                 matchLauncherIconToTheme: false,
@@ -146,11 +146,26 @@ describe("SettingsStorage", () => {
             expect(loadSettings().colorThemeByStyle).toEqual({ minimal: "green" });
         });
 
+        it("should carry the retired completionFlash choice over to motionEffects", () => {
+            localStorage.setItem("sudoku-settings", JSON.stringify({ completionFlash: false }));
+
+            const settings = loadSettings();
+
+            expect(settings.motionEffects).toBe(false);
+            expect(settings).not.toHaveProperty("completionFlash");
+        });
+
+        it("should prefer motionEffects over a leftover completionFlash", () => {
+            localStorage.setItem("sudoku-settings", JSON.stringify({ completionFlash: false, motionEffects: true }));
+
+            expect(loadSettings().motionEffects).toBe(true);
+        });
+
         it("should restore saved settings", () => {
             saveSettings({
                 colorTheme: "blue",
                 highlightSameDigit: false,
-                completionFlash: false,
+                motionEffects: false,
                 autoRemoveNotes: false,
                 showRemainingCount: false,
                 matchLauncherIconToTheme: true,
@@ -165,7 +180,7 @@ describe("SettingsStorage", () => {
 
             expect(settings.colorTheme).toBe("blue");
             expect(settings.highlightSameDigit).toBe(false);
-            expect(settings.completionFlash).toBe(false);
+            expect(settings.motionEffects).toBe(false);
             expect(settings.autoRemoveNotes).toBe(false);
             expect(settings.showRemainingCount).toBe(false);
             expect(settings.matchLauncherIconToTheme).toBe(true);
@@ -201,7 +216,7 @@ describe("SettingsStorage", () => {
             expect(settings.colorTheme).toBe("purple");
             expect(settings.highlightSameDigit).toBe(true);
             expect(settings.highlightScope).toBe(true);
-            expect(settings.completionFlash).toBe(true);
+            expect(settings.motionEffects).toBe(true);
             expect(settings.autoRemoveNotes).toBe(true);
             expect(settings.showRemainingCount).toBe(true);
             expect(settings.matchLauncherIconToTheme).toBe(false);

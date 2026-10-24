@@ -38,7 +38,7 @@ describe("FireworkCanvas", () => {
     });
 
     it("should not animate when the completion animation setting is off", () => {
-        useSettingsStore().setCompletionFlash(false);
+        useSettingsStore().setMotionEffects(false);
 
         const wrapper = mount(FireworkCanvas);
 

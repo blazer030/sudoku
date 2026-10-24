@@ -114,7 +114,7 @@ const scheduleNextFirework = (width: number, height: number, colors: string[]) =
 };
 
 const startAnimation = () => {
-    if (!settingsStore.completionFlash || prefersReducedMotion()) return;
+    if (!settingsStore.motionEffects || prefersReducedMotion()) return;
 
     const canvas = canvasRef.value;
     if (!canvas) return;

@@ -49,7 +49,7 @@ describe("Game Routing", () => {
         });
 
         it("should allow route leave when game is completed", async () => {
-            localStorage.setItem("sudoku-settings", JSON.stringify({ completionFlash: false }));
+            localStorage.setItem("sudoku-settings", JSON.stringify({ motionEffects: false }));
             const { wrapper, router } = await mountWithRouterView({ nearlySolved: true });
 
             const { row, column, value } = lastKnownEmptyCell;

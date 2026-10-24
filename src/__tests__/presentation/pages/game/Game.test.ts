@@ -354,7 +354,7 @@ describe("Game", () => {
     });
 
     it("should show game complete modal when all cells are correctly filled", async () => {
-        localStorage.setItem("sudoku-settings", JSON.stringify({ completionFlash: false }));
+        localStorage.setItem("sudoku-settings", JSON.stringify({ motionEffects: false }));
         const wrapper = mountGame("easy", nearlySolvedSudoku());
 
         await fillLastCell(wrapper);
@@ -641,7 +641,7 @@ describe("Game", () => {
     });
 
     it("should stop timer when game is completed", async () => {
-        localStorage.setItem("sudoku-settings", JSON.stringify({ completionFlash: false }));
+        localStorage.setItem("sudoku-settings", JSON.stringify({ motionEffects: false }));
         vi.useFakeTimers();
         const wrapper = mountGame("easy", nearlySolvedSudoku());
 
@@ -770,7 +770,7 @@ describe("Game", () => {
     });
 
     it("should record game result when game is completed", async () => {
-        localStorage.setItem("sudoku-settings", JSON.stringify({ completionFlash: false }));
+        localStorage.setItem("sudoku-settings", JSON.stringify({ motionEffects: false }));
         const wrapper = mountGame("easy", nearlySolvedSudoku());
 
         await fillLastCell(wrapper);
@@ -782,7 +782,7 @@ describe("Game", () => {
     });
 
     it("should delete saved game when game is completed", async () => {
-        localStorage.setItem("sudoku-settings", JSON.stringify({ completionFlash: false }));
+        localStorage.setItem("sudoku-settings", JSON.stringify({ motionEffects: false }));
         const savedState: GameState = {
             difficulty: "easy",
             answer: knownAnswer.map(row => [...row]),
@@ -984,7 +984,7 @@ describe("Game", () => {
         });
 
         it("should check completion after Reveal Cell", async () => {
-            localStorage.setItem("sudoku-settings", JSON.stringify({ completionFlash: false }));
+            localStorage.setItem("sudoku-settings", JSON.stringify({ motionEffects: false }));
             vi.spyOn(Sudoku.prototype, "planRevealHint").mockReturnValue({ kind: "noTechnique" });
             const wrapper = mountGame("easy", nearlySolvedSudoku());
 
@@ -1178,7 +1178,7 @@ describe("Game", () => {
         });
 
         it("should show the complete modal and log game_complete when the hint fills the last cell", async () => {
-            localStorage.setItem("sudoku-settings", JSON.stringify({ completionFlash: false }));
+            localStorage.setItem("sudoku-settings", JSON.stringify({ motionEffects: false }));
             const analytics = createAnalyticsSpy();
             const wrapper = mountGameWith(nearlySolvedSudoku(), analytics);
 

@@ -11,7 +11,7 @@ export type LanguagePreference = typeof LANGUAGE_PREFERENCES[number];
 export interface Settings {
     colorTheme: ColorThemeId;
     highlightSameDigit: boolean;
-    completionFlash: boolean;
+    motionEffects: boolean;
     autoRemoveNotes: boolean;
     showRemainingCount: boolean;
     matchLauncherIconToTheme: boolean;
@@ -29,7 +29,7 @@ const STORAGE_KEY = "sudoku-settings";
 const DEFAULT_SETTINGS: Settings = {
     colorTheme: "green",
     highlightSameDigit: true,
-    completionFlash: true,
+    motionEffects: true,
     autoRemoveNotes: true,
     showRemainingCount: true,
     matchLauncherIconToTheme: false,
@@ -84,6 +84,10 @@ export const loadSettings = (): Settings => {
     // A hand-edited unknown language falls back to following the system
     // The one-time long-press tip is gone; older saves may still carry its flag
     delete (settings as Partial<Record<"seenLongPressTip", unknown>>).seenLongPressTip;
+    // 完成動畫 (completionFlash) became the general motion switch; its saved choice carries over
+    const retired = settings as Partial<Record<"completionFlash", unknown>>;
+    if (!("motionEffects" in parsed) && typeof retired.completionFlash === "boolean") settings.motionEffects = retired.completionFlash;
+    delete retired.completionFlash;
     if (!LANGUAGE_PREFERENCES.includes(settings.language)) settings.language = "system";
     // Unknown style or theme ids (hand-edited, or from a future version) fall back too
     if (!STYLE_IDS.includes(settings.style)) settings.style = "minimal";

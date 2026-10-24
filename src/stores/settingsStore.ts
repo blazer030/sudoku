@@ -10,7 +10,7 @@ export const useSettingsStore = defineStore("settings", () => {
     const settings = loadSettings();
     const colorTheme = ref<ColorThemeId>(settings.colorTheme);
     const highlightSameDigit = ref(settings.highlightSameDigit);
-    const completionFlash = ref(settings.completionFlash);
+    const motionEffects = ref(settings.motionEffects);
     const autoRemoveNotes = ref(settings.autoRemoveNotes);
     const showRemainingCount = ref(settings.showRemainingCount);
     const matchLauncherIconToTheme = ref(settings.matchLauncherIconToTheme);
@@ -31,7 +31,7 @@ export const useSettingsStore = defineStore("settings", () => {
         saveSettings({
             colorTheme: colorTheme.value,
             highlightSameDigit: highlightSameDigit.value,
-            completionFlash: completionFlash.value,
+            motionEffects: motionEffects.value,
             autoRemoveNotes: autoRemoveNotes.value,
             showRemainingCount: showRemainingCount.value,
             matchLauncherIconToTheme: matchLauncherIconToTheme.value,
@@ -61,8 +61,8 @@ export const useSettingsStore = defineStore("settings", () => {
         persistAll();
     };
 
-    const setCompletionFlash = (value: boolean) => {
-        completionFlash.value = value;
+    const setMotionEffects = (value: boolean) => {
+        motionEffects.value = value;
         persistAll();
     };
 
@@ -101,7 +101,7 @@ export const useSettingsStore = defineStore("settings", () => {
     return {
         colorTheme,
         highlightSameDigit,
-        completionFlash,
+        motionEffects,
         autoRemoveNotes,
         showRemainingCount,
         matchLauncherIconToTheme,
@@ -113,7 +113,7 @@ export const useSettingsStore = defineStore("settings", () => {
         setColorTheme,
         setStyle,
         setHighlightSameDigit,
-        setCompletionFlash,
+        setMotionEffects,
         setAutoRemoveNotes,
         setShowRemainingCount,
         setMatchLauncherIconToTheme,

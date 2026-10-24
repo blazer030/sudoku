@@ -50,7 +50,7 @@ describe("settingsStore", () => {
 
         expect(store.colorTheme).toBe("green");
         expect(store.highlightSameDigit).toBe(true);
-        expect(store.completionFlash).toBe(true);
+        expect(store.motionEffects).toBe(true);
         expect(store.autoRemoveNotes).toBe(true);
         expect(store.showRemainingCount).toBe(true);
         expect(store.matchLauncherIconToTheme).toBe(false);
@@ -128,18 +128,18 @@ describe("settingsStore", () => {
         const store = useSettingsStore();
 
         store.setHighlightSameDigit(false);
-        store.setCompletionFlash(false);
+        store.setMotionEffects(false);
         store.setAutoRemoveNotes(false);
         store.setShowRemainingCount(false);
 
         expect(store.highlightSameDigit).toBe(false);
-        expect(store.completionFlash).toBe(false);
+        expect(store.motionEffects).toBe(false);
         expect(store.autoRemoveNotes).toBe(false);
         expect(store.showRemainingCount).toBe(false);
 
         const stored = JSON.parse(localStorage.getItem("sudoku-settings") ?? "{}") as Record<string, unknown>;
         expect(stored.highlightSameDigit).toBe(false);
-        expect(stored.completionFlash).toBe(false);
+        expect(stored.motionEffects).toBe(false);
     });
 
     it("should call PwaThemeUpdater functions when setting color theme", () => {
