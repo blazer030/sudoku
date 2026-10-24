@@ -3,7 +3,7 @@ import { ref } from "vue";
 const FLASH_DURATION = 500;
 const RIPPLE_DELAY = 60;
 
-export const useCompletionFlash = (enabled: () => boolean = () => true) => {
+export const useGroupEffect = (enabled: () => boolean = () => true) => {
     const flashingCells = ref(new Set<string>());
 
     const triggerFlash = (

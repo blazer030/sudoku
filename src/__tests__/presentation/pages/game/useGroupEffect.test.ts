@@ -1,14 +1,14 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { useCompletionFlash } from "@/presentation/pages/game/useCompletionFlash";
+import { useGroupEffect } from "@/presentation/pages/game/useGroupEffect";
 
 afterEach(() => {
     vi.useRealTimers();
 });
 
-describe("useCompletionFlash", () => {
+describe("useGroupEffect", () => {
     it("should mark origin cell as flashing immediately", () => {
         vi.useFakeTimers();
-        const { triggerFlash, isFlashing } = useCompletionFlash();
+        const { triggerFlash, isFlashing } = useGroupEffect();
 
         triggerFlash(
             [{ row: 0, column: 0 }, { row: 0, column: 1 }],
@@ -22,7 +22,7 @@ describe("useCompletionFlash", () => {
 
     it("should ripple flash outward from origin with delay", () => {
         vi.useFakeTimers();
-        const { triggerFlash, isFlashing } = useCompletionFlash();
+        const { triggerFlash, isFlashing } = useGroupEffect();
 
         triggerFlash(
             [{ row: 0, column: 0 }, { row: 0, column: 1 }, { row: 0, column: 2 }],
@@ -42,7 +42,7 @@ describe("useCompletionFlash", () => {
 
     it("should clear flashing cells after duration", () => {
         vi.useFakeTimers();
-        const { triggerFlash, isFlashing } = useCompletionFlash();
+        const { triggerFlash, isFlashing } = useGroupEffect();
 
         triggerFlash(
             [{ row: 0, column: 0 }],
@@ -57,7 +57,7 @@ describe("useCompletionFlash", () => {
 
     it("should flash symmetrically from middle origin", () => {
         vi.useFakeTimers();
-        const { triggerFlash, isFlashing } = useCompletionFlash();
+        const { triggerFlash, isFlashing } = useGroupEffect();
 
         triggerFlash(
             [{ row: 0, column: 3 }, { row: 0, column: 4 }, { row: 0, column: 5 }],
@@ -77,7 +77,7 @@ describe("useCompletionFlash", () => {
     });
 
     it("should not flash when given empty cells array", () => {
-        const { triggerFlash, isFlashing } = useCompletionFlash();
+        const { triggerFlash, isFlashing } = useGroupEffect();
 
         triggerFlash([], { row: 0, column: 0 });
 
@@ -86,7 +86,7 @@ describe("useCompletionFlash", () => {
 
     it("should call onComplete after last cell flash finishes", () => {
         vi.useFakeTimers();
-        const { triggerFlash } = useCompletionFlash();
+        const { triggerFlash } = useGroupEffect();
         const onComplete = vi.fn();
 
         triggerFlash(
@@ -104,7 +104,7 @@ describe("useCompletionFlash", () => {
     });
 
     it("should call onComplete immediately when cells array is empty", () => {
-        const { triggerFlash } = useCompletionFlash();
+        const { triggerFlash } = useGroupEffect();
         const onComplete = vi.fn();
 
         triggerFlash([], { row: 0, column: 0 }, onComplete);
@@ -113,7 +113,7 @@ describe("useCompletionFlash", () => {
     });
 
     it("should call onComplete immediately when disabled", () => {
-        const { triggerFlash } = useCompletionFlash(() => false);
+        const { triggerFlash } = useGroupEffect(() => false);
         const onComplete = vi.fn();
 
         triggerFlash(
