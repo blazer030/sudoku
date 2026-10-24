@@ -51,18 +51,17 @@
 }
 
 /* Pages: faint scanlines and the cyan beam on ::before, the neon perspective floor on ::after, fixed to
-   the screen. Pages that scroll on their own paint the page colour, so each carries the decoration
-   over its background, as its own stacking context; the app root carries it behind the pages that do
-   not (Home, Game, the walkthrough). Below every content layer, never taking taps; still in this sheet,
-   the motion comes later. */
+   the screen. They hang on the app root alone, which every screen shares, so there is exactly one copy
+   at any width (page roots fill only the app's column); the page roots that paint the page colour are
+   clear here, and the body's page colour lies under it all. Below every content layer, never taking
+   taps; still in this sheet, the motion comes later. */
 [data-style="cyber"] [data-skin~="page"] {
-    isolation: isolate;
+    background-color: transparent;
     /* The settings groups' running numbers */
     counter-reset: cyber-group;
 }
 
-[data-style="cyber"] .app-safe-area::before,
-[data-style="cyber"] [data-skin~="page"]::before {
+[data-style="cyber"] .app-safe-area::before {
     content: "";
     position: fixed;
     inset: 0;
@@ -80,8 +79,7 @@
     backdrop-filter: blur(8px);
 }
 
-[data-style="cyber"] .app-safe-area::after,
-[data-style="cyber"] [data-skin~="page"]::after {
+[data-style="cyber"] .app-safe-area::after {
     content: "";
     position: fixed;
     left: -60%;
@@ -216,6 +214,22 @@
     color: var(--color-signal);
 }
 
+/* A hint or walkthrough step's technique tag reads as before, magenta on the deep fill without an
+   edge; the final step's, which settles the cell, is lit like a chosen piece */
+[data-style="cyber"] [data-skin~="tag"][data-skin~="step"] {
+    --cyber-edge: transparent;
+    --cyber-fill: var(--color-primary-light);
+    color: var(--color-primary);
+}
+
+[data-style="cyber"] [data-skin~="tag"][data-skin~="step"][data-skin~="strong"] {
+    --cyber-edge: var(--color-primary);
+    --cyber-fill: var(--color-primary-light);
+    --cyber-glow: var(--cyber-lit-glow);
+    color: var(--color-primary-ink);
+    text-shadow: var(--cyber-lit-text-glow);
+}
+
 /* Lit and chosen pieces: a deep magenta fill with a magenta edge and pink text, glowing a little inside.
    The primary buttons (and New Game, which stays the main button beside Continue) are lit too. */
 [data-style="cyber"] [data-skin~="tile"][aria-pressed="true"],
@@ -296,6 +310,13 @@
         linear-gradient(var(--cyber-edge), var(--cyber-edge)) right / 1px 100% no-repeat border-box,
         var(--cyber-fill-image) border-box var(--cyber-fill);
     box-shadow: inset 0 0 10px var(--cyber-glow), inset 0 0 14px var(--cyber-hover-glow, transparent);
+}
+
+/* The hint panel's buttons change their background on hover in scoped styles
+   (.hint-primary[data-v][data-v]:hover, which loads after this sheet: the primary turns bright magenta);
+   a hovered button keeps its own fill, one pseudo-class heavier, and the hover glow below marks it */
+:root[data-style="cyber"] [data-skin~="button"]:enabled:hover {
+    background-color: var(--cyber-fill);
 }
 
 /* The continue card's chips are mono tags in a thin edge, without the shared tint */

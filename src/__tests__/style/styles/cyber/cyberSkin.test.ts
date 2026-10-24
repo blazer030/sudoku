@@ -169,6 +169,27 @@ describe("cyber skin", () => {
             expect(badge.get("clip-path")).toMatch(/^polygon\(/);
         });
 
+        it("should keep a hovered button's fill over a component's own hover colour (the hint panel's primary)", () => {
+            // .hint-primary[data-v][data-v]:hover (0,4,0) sets the bright primary in a scoped style that loads after this sheet
+            expect(declarationsOf(CYBER_CSS, `${PAINT_SCOPE} [data-skin~="button"]:enabled:hover`).get("background-color")).toBe("var(--cyber-fill)");
+        });
+
+        it("should light a final step's tag as a deep magenta fill behind pink text, in a magenta edge", () => {
+            const strong = declarationsOf(CYBER_CSS, `${skin("tag")}[data-skin~="step"][data-skin~="strong"]`);
+
+            expect(strong.get("--cyber-fill")).toBe("var(--color-primary-light)");
+            expect(strong.get("--cyber-edge")).toBe("var(--color-primary)");
+            expect(strong.get("color")).toBe("var(--color-primary-ink)");
+        });
+
+        it("should leave an earlier step's tag as it reads: magenta on the deep fill, without an edge", () => {
+            const step = declarationsOf(CYBER_CSS, `${skin("tag")}[data-skin~="step"]`);
+
+            expect(step.get("--cyber-fill")).toBe("var(--color-primary-light)");
+            expect(step.get("--cyber-edge")).toBe("transparent");
+            expect(step.get("color")).toBe("var(--color-primary)");
+        });
+
         it("should glow a hovered piece in its own edge colour, so a lit piece glows brighter", () => {
             const hovered = mediaDeclarationsOf("(hover: hover)", `${skin("key")}:enabled:hover`);
 
@@ -178,25 +199,29 @@ describe("cyber skin", () => {
     });
 
     describe("pages", () => {
-        it.each(["::before", "::after"])("should hang the page decoration %s under the content, never taking taps", (pseudo) => {
-            const decoration = declarationsOf(CYBER_CSS, `${skin("page")}${pseudo}`);
+        // The app root is on every screen; the decoration hangs there alone, so it exists exactly once at any width
+        const ROOT_DECORATION = `${SCOPE} .app-safe-area`;
+
+        it.each(["::before", "::after"])("should hang the page decoration %s on the app root, under the content, never taking taps", (pseudo) => {
+            const decoration = declarationsOf(CYBER_CSS, `${ROOT_DECORATION}${pseudo}`);
 
             expect(decoration.get("content")).toBe('""');
             expect(decoration.get("position")).toBe("fixed");
             expect(decoration.get("pointer-events")).toBe("none");
             expect(Number(decoration.get("z-index"))).toBeLessThan(0);
-            // The page is its own stacking context, so the decoration sits over its background and under its content
-            expect(declarationsOf(CYBER_CSS, skin("page")).get("isolation")).toBe("isolate");
         });
 
-        it("should hang the same decoration behind the pages that do not paint their own background", () => {
-            expect(declarationsOf(CYBER_CSS, `${SCOPE} .app-safe-area::before`).get("position")).toBe("fixed");
-            expect(declarationsOf(CYBER_CSS, `${SCOPE} .app-safe-area::before`)).toEqual(declarationsOf(CYBER_CSS, `${skin("page")}::before`));
-            expect(declarationsOf(CYBER_CSS, `${SCOPE} .app-safe-area::after`)).toEqual(declarationsOf(CYBER_CSS, `${skin("page")}::after`));
+        it("should draw the decoration once: no page root carries a copy, and page roots let the app root's show through", () => {
+            const pagePseudoRules = allRules()
+                .filter(rule => rule.selectors.some(selector => /\[data-skin~="page(?:-ruled)?"\]::(?:before|after)$/.test(collapse(selector))))
+                .map(rule => rule.selector);
+
+            expect(pagePseudoRules).toEqual([]);
+            expect(declarationsOf(CYBER_CSS, skin("page")).get("background-color")).toBe("transparent");
         });
 
         it("should lay the perspective floor at the bottom of the screen, fading upwards", () => {
-            const floor = declarationsOf(CYBER_CSS, `${skin("page")}::after`);
+            const floor = declarationsOf(CYBER_CSS, `${ROOT_DECORATION}::after`);
 
             expect(floor.get("transform")).toMatch(/^perspective\(\d+px\) rotateX\(\d+deg\)$/);
             expect(floor.get("mask-image")).toMatch(/^linear-gradient\(to top, /);
