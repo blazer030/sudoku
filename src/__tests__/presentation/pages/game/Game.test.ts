@@ -5,6 +5,7 @@ import { i18n } from "@/presentation/i18n";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { flushPromises, mount } from "@vue/test-utils";
 import { createPinia } from "pinia";
+import { useSettingsStore } from "@/stores/settingsStore";
 import { createMemoryHistory, createRouter, onBeforeRouteLeave } from "vue-router";
 import Game from "@/presentation/pages/game/Game.vue";
 import { knownAnswer, knownPuzzle, createKnownSudoku, fillAllButLastKnownCell, lastKnownEmptyCell } from "@/__tests__/fixtures/knownPuzzle";
@@ -987,6 +988,21 @@ describe("Game", () => {
             expect(boardOfGame(wrapper).attributes("data-celebration")).toBe("still");
             expect(modalOf(wrapper).exists()).toBe(true);
             expect((wrapper.findComponent(STYLE_MOMENTS.minimal.celebration).props() as { still: boolean }).still).toBe(true);
+        });
+
+        it("should open a still dialog, without motion, in any style when 動態效果 is off", async () => {
+            const pinia = createPinia();
+            useSettingsStore(pinia).setStyle("tactile");
+            useSettingsStore(pinia).setMotionEffects(false);
+            const gameStore = useGameStore(pinia);
+            gameStore.sudoku = nearlySolvedSudoku();
+            gameStore.setDifficulty("easy");
+            const wrapper = mount(Game, { global: { plugins: [pinia, createTestRouter()] } });
+
+            await fillLastCell(wrapper);
+
+            expect(boardOfGame(wrapper).attributes("data-celebration")).toBe("still");
+            expect(wrapper.find("[data-testid='complete-card']").attributes("data-still")).toBe("");
         });
 
         it("should leave no timer behind when the screen goes mid-celebration", async () => {

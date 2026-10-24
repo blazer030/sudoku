@@ -124,6 +124,11 @@
 .modal-leave-to > *:last-child {
   transform: scale(0.95);
 }
+/* A still dialog (motion not allowed) only fades: the card neither scales in nor out, in every style */
+.modal-enter-from > [data-still],
+.modal-leave-to > [data-still] {
+  transform: none;
+}
 
 /* Hint popup transition: overlay fades, card slides up */
 .hint-popup-enter-active,

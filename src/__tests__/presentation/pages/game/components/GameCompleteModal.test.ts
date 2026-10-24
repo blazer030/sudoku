@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { flushPromises, mount } from "@vue/test-utils";
-import { createPinia } from "pinia";
+import { createPinia, setActivePinia, type Pinia } from "pinia";
+import { useSettingsStore } from "@/stores/settingsStore";
 import { defineComponent, nextTick } from "vue";
 import { i18n } from "@/presentation/i18n";
 import { createMemoryHistory, createRouter } from "vue-router";
@@ -9,7 +10,7 @@ import { provideGameCompleteModal } from "@/presentation/pages/game/components/u
 import type { GameCompleteParams } from "@/presentation/pages/game/components/useGameCompleteModal";
 import { STYLE_MOMENTS } from "@/presentation/components/style-moments/styleMoments";
 
-const mountModal = (overrides: Partial<GameCompleteParams> = {}, onResult: (result: unknown) => void = () => { /* ignored */ }) => {
+const mountModal = (overrides: Partial<GameCompleteParams> = {}, onResult: (result: unknown) => void = () => { /* ignored */ }, pinia: Pinia = createPinia()) => {
     const router = createRouter({
         history: createMemoryHistory(),
         routes: [{ path: "/", component: { template: "<div/>" } }],
@@ -23,7 +24,7 @@ const mountModal = (overrides: Partial<GameCompleteParams> = {}, onResult: (resu
         },
         template: "<GameCompleteModal />",
     });
-    return mount(Host, { global: { plugins: [router, createPinia()] } });
+    return mount(Host, { global: { plugins: [router, pinia] } });
 };
 
 describe("GameCompleteModal", () => {
@@ -75,6 +76,17 @@ describe("GameCompleteModal", () => {
 
         expect((mountModal().findComponent(celebration).props() as { still: boolean }).still).toBe(false);
         expect((mountModal({ still: true }).findComponent(celebration).props() as { still: boolean }).still).toBe(true);
+    });
+
+    it("should mark the card still for any style, so it appears without motion", () => {
+        const pinia = createPinia();
+        setActivePinia(pinia);
+        useSettingsStore().setStyle("tactile");
+
+        const card = (still: boolean) => mountModal({ still }, undefined, pinia).find("[data-testid='complete-card']");
+
+        expect(card(true).attributes("data-still")).toBe("");
+        expect(card(false).attributes("data-still")).toBeUndefined();
     });
 
     it("should not show the record badge otherwise", () => {

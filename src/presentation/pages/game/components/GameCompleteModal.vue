@@ -11,6 +11,7 @@
             />
             <div
                 class="bg-card rounded-3xl p-8 mx-6 w-full max-w-[354px] flex flex-col items-center gap-6 shadow-modal relative z-[52]"
+                :data-still="params?.still ? '' : undefined"
                 data-skin="card celebration"
                 data-testid="complete-card"
             >
