@@ -6,8 +6,9 @@ import Game from "@/presentation/pages/game/Game.vue";
 import { createKnownSudoku, fillAllButLastKnownCell, lastKnownEmptyCell } from "@/__tests__/fixtures/knownPuzzle";
 import { useGameStore } from "@/stores/gameStore";
 import { useStatisticsStore } from "@/stores/statisticsStore";
+import { STYLE_MOMENTS } from "@/presentation/components/style-moments/styleMoments";
 
-const mountWithRouterView = async ({ nearlySolved = false } = {}) => {
+const mountWithRouterView = async ({ nearlySolved = false, fromHome = false } = {}) => {
     const pinia = createPinia();
     const router = createRouter({
         history: createMemoryHistory(),
@@ -20,6 +21,7 @@ const mountWithRouterView = async ({ nearlySolved = false } = {}) => {
     gameStore.sudoku = createKnownSudoku();
     if (nearlySolved) fillAllButLastKnownCell(gameStore.sudoku);
     gameStore.setDifficulty("easy");
+    if (fromHome) await router.push("/");
     await router.push("/game");
     await router.isReady();
     const wrapper = mount(
@@ -63,6 +65,29 @@ describe("Game Routing", () => {
             await flushPromises();
 
             expect(router.currentRoute.value.path).toBe("/");
+        });
+    });
+
+    describe("Leaving mid-celebration", () => {
+        it("should leave at once from the header Back, with no leave dialog, no second record and no late dialog", async () => {
+            const { wrapper, router } = await mountWithRouterView({ nearlySolved: true, fromHome: true });
+            vi.useFakeTimers();
+            const { row, column, value } = lastKnownEmptyCell;
+            const numberButton = wrapper.find(`[data-testid='number-${value}']`);
+            await numberButton.trigger("click");
+            await wrapper.find(`[data-testid='cell-${row}-${column}']`).trigger("click");
+            await numberButton.trigger("click");
+            expect(wrapper.find("[data-testid='game-board']").attributes("data-celebration")).toBe("playing");
+
+            await wrapper.find("[data-testid='back-button']").trigger("click");
+            await vi.advanceTimersByTimeAsync(0);
+            expect(wrapper.find("[data-testid='leave-game-dialog']").exists()).toBe(false);
+            await vi.waitFor(() => { expect(router.currentRoute.value.path).toBe("/"); });
+
+            await vi.advanceTimersByTimeAsync(STYLE_MOMENTS.minimal.celebrationBoardMs * 2);
+            expect(useStatisticsStore().history).toHaveLength(1);
+            expect(useStatisticsStore().history[0].completed).toBe(true);
+            expect(wrapper.find("[data-testid='game-complete-modal']").exists()).toBe(false);
         });
     });
 

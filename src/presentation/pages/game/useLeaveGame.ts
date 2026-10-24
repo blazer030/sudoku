@@ -40,6 +40,11 @@ export const useLeaveGame = ({ sudoku, difficulty, completed, getElapsedSeconds,
     };
 
     const showLeaveDialog = async () => {
+        // A solved game is already recorded, so Back just leaves, as the system Back does
+        if (completed.value) {
+            router.back();
+            return;
+        }
         const result = await leaveDialog.open();
         if (result === "save" || result === "giveUp") onLeave?.();
         if (result === "save") {
