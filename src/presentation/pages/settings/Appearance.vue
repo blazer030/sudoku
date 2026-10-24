@@ -12,6 +12,7 @@
         <div
             class="flex flex-col bg-card rounded-2xl shadow-card-sm p-3"
             data-skin="card"
+            data-testid="appearance-style-card"
         >
             <span class="text-foreground text-[15px] font-medium">{{ t("settings.style.label") }}</span>
             <div class="grid grid-cols-3 gap-2 mt-3">
@@ -37,10 +38,30 @@
                 </button>
             </div>
 
+            <OptionTile
+                v-if="platform.isNative"
+                :description="t('settings.matchLauncherIconNote')"
+                :icon="Smartphone"
+                :label="t('settings.matchLauncherIcon')"
+                :pressed="settingsStore.matchLauncherIconToTheme"
+                class="mt-5"
+                data-testid="toggle-matchLauncherIconToTheme"
+                wide
+                @toggle="onToggleMatchIcon"
+            />
+        </div>
+
+        <!-- The style's colours apart from the style; a style with one theme and one mode has none to choose -->
+        <div
+            v-if="swatches.length > 1 || modeOptions.length > 1"
+            class="flex flex-col bg-card rounded-2xl shadow-card-sm p-3"
+            data-skin="card"
+            data-testid="appearance-colours-card"
+        >
             <!-- A style with one theme has nothing to choose -->
             <span
                 v-if="swatches.length > 1"
-                class="text-foreground text-[15px] font-medium mt-5"
+                class="text-foreground text-[15px] font-medium"
                 data-testid="appearance-theme-label"
             >{{ t("settings.colorTheme") }}</span>
             <div
@@ -77,7 +98,8 @@
             <!-- A one-mode style has nothing to choose; the stored mode is kept for the next style that has both -->
             <template v-if="modeOptions.length > 1">
                 <span
-                    class="text-foreground text-[15px] font-medium mt-5"
+                    :class="swatches.length > 1 ? 'mt-5' : ''"
+                    class="text-foreground text-[15px] font-medium"
                     data-testid="appearance-mode-label"
                 >{{ t("settings.colorMode.label") }}</span>
                 <SegmentedControl
@@ -90,18 +112,6 @@
                     @update:model-value="settingsStore.setAppearance"
                 />
             </template>
-
-            <OptionTile
-                v-if="platform.isNative"
-                :description="t('settings.matchLauncherIconNote')"
-                :icon="Smartphone"
-                :label="t('settings.matchLauncherIcon')"
-                :pressed="settingsStore.matchLauncherIconToTheme"
-                class="mt-5"
-                data-testid="toggle-matchLauncherIconToTheme"
-                wide
-                @toggle="onToggleMatchIcon"
-            />
         </div>
 
         <div class="flex-1" />

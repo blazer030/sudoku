@@ -310,16 +310,16 @@ describe("Appearance.vue match-launcher-icon toggle", () => {
         expect(wrapper.find("[data-testid='toggle-matchLauncherIconToTheme']").exists()).toBe(false);
     });
 
-    it("shows the toggle on native as a wide unpressed tile after the light/dark control", () => {
+    it("shows the toggle on native as a wide unpressed tile in the styles card, after the styles", () => {
         vi.mocked(Capacitor.isNativePlatform).mockReturnValue(true);
         const wrapper = mountAppearance();
 
-        const tile = wrapper.get("[data-testid='toggle-matchLauncherIconToTheme']");
+        const tile = wrapper.get("[data-testid='appearance-style-card']").get("[data-testid='toggle-matchLauncherIconToTheme']");
 
         expect(tile.attributes("aria-pressed")).toBe("false");
-        const order = wrapper.findAll("[data-testid='appearance-switcher'], [data-testid='toggle-matchLauncherIconToTheme']")
+        const order = wrapper.findAll("[data-testid='style-option-pixel'], [data-testid='toggle-matchLauncherIconToTheme']")
             .map(element => element.attributes("data-testid"));
-        expect(order).toEqual(["appearance-switcher", "toggle-matchLauncherIconToTheme"]);
+        expect(order).toEqual(["style-option-pixel", "toggle-matchLauncherIconToTheme"]);
     });
 
     it("enables the setting immediately without a confirm dialog", async () => {
@@ -458,6 +458,18 @@ describe("Appearance.vue one-theme style", () => {
         expect(wrapper.find("[data-testid='appearance-theme-label']").exists()).toBe(false);
         expect(wrapper.find("[data-testid='color-theme-classic']").exists()).toBe(false);
         expect(wrapper.find("[data-testid='appearance-mode-label']").exists()).toBe(true);
+    });
+
+    it("should put the colour theme and light/dark in a card of their own, apart from the styles", () => {
+        const wrapper = mountAppearance();
+        const stylesCard = wrapper.get("[data-testid='appearance-style-card']");
+        const coloursCard = wrapper.get("[data-testid='appearance-colours-card']");
+
+        expect(stylesCard.find("[data-testid='style-option-minimal']").exists()).toBe(true);
+        expect(stylesCard.find("[data-testid='appearance-theme-label']").exists()).toBe(false);
+        expect(coloursCard.find("[data-testid='appearance-theme-label']").exists()).toBe(true);
+        expect(coloursCard.find("[data-testid='appearance-switcher']").exists()).toBe(true);
+        expect(coloursCard.attributes("data-skin")).toBe("card");
     });
 
     it("should name the modes in the style's own words, in either language", async () => {
