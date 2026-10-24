@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { flushPromises, mount } from "@vue/test-utils";
+import { createPinia } from "pinia";
 import { defineComponent, nextTick } from "vue";
 import { i18n } from "@/presentation/i18n";
 import { createMemoryHistory, createRouter } from "vue-router";
@@ -21,7 +22,7 @@ const mountModal = (overrides: Partial<GameCompleteParams> = {}, onResult: (resu
         },
         template: "<GameCompleteModal />",
     });
-    return mount(Host, { global: { plugins: [router] } });
+    return mount(Host, { global: { plugins: [router, createPinia()] } });
 };
 
 describe("GameCompleteModal", () => {

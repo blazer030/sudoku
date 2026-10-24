@@ -161,38 +161,23 @@ describe("GameReview", () => {
         expect(panel.find("[data-testid='review-play']").exists()).toBe(true);
     });
 
-    it("should pin the step panel below the area that scrolls the header, summary and board", async () => {
+    it("should follow the board with the step panel in the page's own scroll flow, like the walkthrough", async () => {
         const wrapper = await mountReview({ nextClicks: 0 });
 
-        // The page clips at its own height; only the area above the panel scrolls
+        // One scrolling page holds header, summary, board and panel; nothing is docked to the bottom
         const page = wrapper.element as HTMLElement;
-        expect(page.classList).toContain("h-full");
-        expect(page.classList).toContain("flex-col");
-        expect(page.classList).not.toContain("overflow-y-auto");
+        expect([...page.classList]).toEqual(expect.arrayContaining(["flex-col", "h-full", "overflow-y-auto"]));
+        expect(wrapper.find("[data-testid='review-panel-dock']").exists()).toBe(false);
 
-        const scrollArea = wrapper.get("[data-testid='review-scroll-area']");
-        expect(scrollArea.element.parentElement).toBe(page);
-        expect(scrollArea.classes()).toEqual(expect.arrayContaining(["flex-1", "min-h-0", "overflow-y-auto"]));
-        expect(scrollArea.find("[data-testid='review-back-button']").exists()).toBe(true);
-        expect(scrollArea.find("[data-testid='review-board']").exists()).toBe(true);
-        expect(scrollArea.find("[data-testid='review-panel']").exists()).toBe(false);
+        const board = wrapper.get("[data-testid='review-board']");
+        const panel = wrapper.get("[data-testid='review-panel']");
+        expect(page.contains(panel.element)).toBe(true);
+        expect(board.element.nextElementSibling).toBe(panel.element);
 
-        // The panel follows the scroll area as a sibling that never shrinks
-        const panelDock = wrapper.get("[data-testid='review-panel-dock']");
-        expect(panelDock.element.parentElement).toBe(page);
-        expect(panelDock.element.previousElementSibling).toBe(scrollArea.element);
-        expect(panelDock.classes()).toContain("shrink-0");
-        expect(panelDock.find("[data-testid='review-panel']").exists()).toBe(true);
-    });
-
-    it("should size the board so it ends a steady gap above the pinned panel", async () => {
-        const wrapper = await mountReview({ nextClicks: 0 });
-
-        // Review explanations fit one line, so the panel keeps a steady, short height
-        expect(wrapper.get("[data-testid='review-explanation-region']").classes()).toContain("min-h-[1.45rem]");
-        // The scroll area ends 16px below the board, the game page's spacing; the rest of the page
-        // takes less than the shared cap leaves, so a capped board keeps at least that gap
-        expect(wrapper.get("[data-testid='review-scroll-area']").classes()).toContain("pb-4");
+        // Growing spacers above and below the board and panel centre them on a tall screen, as in the walkthrough
+        const group = board.element.parentElement;
+        expect(group?.previousElementSibling?.classList).toContain("flex-1");
+        expect(group?.nextElementSibling?.classList).toContain("flex-1");
     });
 
     it("should never scroll sideways, though the board reaches into the page gutter", async () => {

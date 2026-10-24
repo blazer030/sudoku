@@ -135,6 +135,12 @@ describe("Settings.vue language switcher", () => {
         expect(wrapper.find("[data-testid='language-system']").text()).toBe("System");
     });
 
+    it("should list Traditional Chinese before English", () => {
+        const wrapper = mountSettings();
+        const options = wrapper.find("[data-testid='language-switcher']").findAll("button");
+        expect(options.map(option => option.attributes("data-testid"))).toEqual(["language-system", "language-zh-Hant", "language-en"]);
+    });
+
     it("should mark system as selected by default", () => {
         const wrapper = mountSettings();
         expect(wrapper.find("[data-testid='language-system']").attributes("aria-pressed")).toBe("true");
