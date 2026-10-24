@@ -513,7 +513,7 @@
 }
 
 /* The dialog: the card lands on the page like a slip of paper, a little askew, and its title gets a
-   wavy underline in the theme's ink. Last, a round stamp (PaperCelebration) thuds into its corner: the
+   wavy underline in the theme's ink, clear of the tags below. Last, a round stamp (PaperCelebration) thuds into its corner: the
    card sinks under it and a faint red ring spreads out. A still card (data-still) only fades in, like
    every style's, with the underline and stamp already there. Board timings minus the 780ms the card
    waits. */
@@ -539,7 +539,7 @@
     content: "";
     position: absolute;
     left: calc(50% - 92px);
-    bottom: -11px;
+    bottom: -3px;
     width: 184px;
     height: 14px;
     pointer-events: none;

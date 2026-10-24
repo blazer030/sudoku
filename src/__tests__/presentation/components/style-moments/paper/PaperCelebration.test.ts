@@ -15,10 +15,10 @@ describe("PaperCelebration", () => {
         i18n.global.locale.value = "en";
     });
 
-    it("should stamp the card with today's date, month and day without the year", () => {
+    it("should stamp the card with today's date, month and day unpadded and without the year", () => {
         const stamp = mount(PaperCelebration, { props: { still: false } }).get(".paper-stamp");
 
-        expect(stamp.get("small").text()).toBe("03/07");
+        expect(stamp.get("small").text()).toBe("3/7");
         expect(stamp.attributes("aria-hidden")).toBe("true");
     });
 
@@ -33,6 +33,17 @@ describe("PaperCelebration", () => {
         expect(english).not.toBe("");
         expect(word.text()).not.toBe(english);
         expect(word.text()).not.toBe("");
+    });
+
+    it("should set a long stamp word smaller than a short one, so it stays inside the ring", async () => {
+        const word = mount(PaperCelebration, { props: { still: false } }).get(".paper-stamp b");
+        const englishSize = word.classes().find(name => name.startsWith("text-["));
+
+        i18n.global.locale.value = "zh-Hant";
+        await nextTick();
+
+        expect(englishSize).toBe("text-[20px]");
+        expect(word.classes()).toContain("text-[26px]");
     });
 
     it("should spread the stamp's ring only when the stamp lands with motion", () => {

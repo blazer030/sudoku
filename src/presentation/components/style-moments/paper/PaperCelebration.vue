@@ -11,18 +11,19 @@
         class="paper-stamp pointer-events-none absolute -top-5 -right-3 z-[2] flex size-24 flex-col items-center justify-center gap-px rounded-full border-3"
         aria-hidden="true"
     >
-        <!-- Two characters fill the ring at the board's size; the English word in Caveat is wider, so it is set smaller -->
+        <!-- A short word fills the ring at the board's size; a longer one is set smaller so it stays inside -->
         <b
-            :class="['font-hand font-bold leading-none', locale === 'zh-Hant' ? 'text-[26px] tracking-[0.06em]' : 'text-[20px] tracking-normal']"
-        >{{ t("game.complete.stamp") }}</b>
+            :class="['font-hand font-bold leading-none', isShortWord ? 'text-[26px] tracking-[0.06em]' : 'text-[20px] tracking-normal']"
+        >{{ word }}</b>
         <small class="font-mono text-[10px] font-medium leading-none tracking-[0.08em]">{{ date }}</small>
     </span>
 </template>
 
 <script lang="ts" setup>
+import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 
-const { t, locale } = useI18n();
+const { t } = useI18n();
 
 withDefaults(defineProps<{
     still?: boolean;
@@ -30,9 +31,11 @@ withDefaults(defineProps<{
     still: false,
 });
 
-const pad = (value: number): string => String(value).padStart(2, "0");
+const word = computed(() => t("game.complete.stamp"));
+// Up to three characters fit the ring at 26px (「完成」); "SOLVED" in Caveat needs 20px
+const isShortWord = computed(() => Array.from(word.value).length <= 3);
 
-// The day it was solved, as a slash date without the year
+// The day it was solved, as the app writes short dates: month/day, no year, no padding
 const today = new Date();
-const date = `${pad(today.getMonth() + 1)}/${pad(today.getDate())}`;
+const date = `${today.getMonth() + 1}/${today.getDate()}`;
 </script>
