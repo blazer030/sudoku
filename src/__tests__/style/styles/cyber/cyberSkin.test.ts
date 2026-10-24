@@ -1,5 +1,6 @@
 import { readFileSync } from "fs";
 import postcss, { type AtRule, type Declaration, type Rule } from "postcss";
+import { ARRIVAL_SETTLE_MS } from "@/presentation/components/board-cell/useArrivalMotion";
 import { declarationsOf } from "../../styleSheetRules";
 
 const CYBER_CSS = readFileSync("src/style/styles/cyber/skin.css", "utf8");
@@ -370,6 +371,110 @@ describe("cyber skin", () => {
 
             expect(rows.get("border-style")).toBe("dashed");
             expect(rows.get("border-color")).toBe("var(--color-border)");
+        });
+    });
+
+    describe("motion", () => {
+        const CELL = `${skin("board")} [data-variant]`;
+        const keyframesOf = (name: string): AtRule => {
+            let found: AtRule | undefined;
+            postcss.parse(CYBER_CSS).walkAtRules("keyframes", (atRule) => {
+                if (atRule.params === name) found = atRule;
+            });
+            if (found === undefined) throw new Error(`no @keyframes ${name}`);
+            return found;
+        };
+        const propertiesOf = (name: string): Set<string> => {
+            const properties = new Set<string>();
+            keyframesOf(name).walkDecls((declaration) => {
+                properties.add(declaration.prop);
+            });
+            return properties;
+        };
+        const outsideReducedMotion = (declaration: Declaration): boolean => {
+            const parent = declaration.parent?.parent;
+            return !(parent?.type === "atrule" && (parent as AtRule).params.includes("prefers-reduced-motion"));
+        };
+
+        it("should glitch a filled digit in over held frames, within the settle time", () => {
+            const digit = declarationsOf(CYBER_CSS, `${skin("board")} .value-arrive`).get("animation") ?? "";
+
+            expect(digit).toMatch(/^cyber-glitch \d+ms steps\(/);
+            expect(Number.parseInt(digit.split(" ")[1], 10)).toBeLessThanOrEqual(550);
+        });
+
+        it("should run a cyan scan line down the cell as a digit arrives, and a magenta one up as it leaves, on the cell's ::before", () => {
+            const down = declarationsOf(CYBER_CSS, `${CELL}:has(> .value-arrive)::before`);
+            const up = declarationsOf(CYBER_CSS, `${CELL}.value-leave::before`);
+
+            expect(down.get("animation")).toMatch(/^cyber-scan-down \d+ms /);
+            expect(up.get("animation")).toMatch(/^cyber-scan-up \d+ms /);
+            expect(down.get("background")).toContain("var(--color-accent)");
+            expect(up.get("background")).toContain("var(--color-primary)");
+            expect(declarationsOf(CYBER_CSS, `${CELL}:is(.value-leave, :has(> .value-arrive))::before`).get("pointer-events")).toBe("none");
+        });
+
+        it("should leave the cell's ::after to the selected brackets while a digit arrives or leaves", () => {
+            expect(declarationsOf(CYBER_CSS, `${CELL}:is(.value-leave, :has(> .value-arrive))::before`).get("content")).toBe('""');
+            expect(allRules().filter(rule => /value-(?:arrive|leave)[^,]*::after/.test(rule.selector))).toEqual([]);
+        });
+
+        it("should sweep the beam and scroll the floor with transform and opacity only", () => {
+            for (const name of ["cyber-sweep", "cyber-floor", "cyber-scan-down", "cyber-scan-up"]) {
+                for (const property of propertiesOf(name)) expect(["transform", "opacity"], `${name} ${property}`).toContain(property);
+            }
+            const banned = new Set(["top", "left", "right", "bottom", "background-position"]);
+            postcss.parse(CYBER_CSS).walkAtRules("keyframes", (atRule) => {
+                atRule.walkDecls((declaration) => {
+                    expect(banned.has(declaration.prop), `${atRule.params} animates ${declaration.prop}`).toBe(false);
+                });
+            });
+            expect(declarationsOf(CYBER_CSS, `${SCOPE} body::before`).get("animation")).toMatch(/^cyber-sweep \d+s linear infinite$/);
+            expect(declarationsOf(CYBER_CSS, `${SCOPE} .app-safe-area::after`).get("animation")).toMatch(/^cyber-floor \d+(?:\.\d+)?s linear infinite$/);
+        });
+
+        it("should glitch the Home title now and then", () => {
+            expect(declarationsOf(CYBER_CSS, skin("title")).get("animation")).toMatch(/^cyber-title-glitch [\d.]+s steps\(1, end\) infinite$/);
+        });
+
+        it("should turn a dashed HUD ring behind the completion card and write MISSION COMPLETE in glowing yellow", () => {
+            const ring = declarationsOf(CYBER_CSS, `${skin("celebration")}::before`);
+            const text = declarationsOf(CYBER_CSS, `${skin("celebration")}::after`);
+
+            expect(ring.get("border")).toContain("dashed");
+            expect(ring.get("animation")).toMatch(/^cyber-spin \d+s linear infinite$/);
+            expect(Number(ring.get("z-index"))).toBeLessThan(0);
+            expect(propertiesOf("cyber-spin")).toEqual(new Set(["transform"]));
+            expect(text.get("content")).toContain("// MISSION COMPLETE");
+            expect(text.get("color")).toBe("var(--color-signal)");
+            expect(text.get("animation")).toMatch(/^cyber-title-glitch /);
+        });
+
+        it("should stop every animation under reduced motion", () => {
+            const animated = allDeclarations(/^animation$/).filter(declaration => outsideReducedMotion(declaration) && declaration.value.trim() !== "none");
+            const stopped = new Set<string>();
+            postcss.parse(CYBER_CSS).walkAtRules("media", (media) => {
+                if (!media.params.includes("prefers-reduced-motion")) return;
+                media.walkRules((rule) => {
+                    if (rule.nodes.some(node => node.type === "decl" && node.prop === "animation" && node.value.trim() === "none")) {
+                        for (const selector of rule.selectors) stopped.add(collapse(selector));
+                    }
+                });
+            });
+
+            expect(animated.length).toBeGreaterThan(5);
+            for (const declaration of animated) {
+                for (const selector of (declaration.parent as Rule).selectors.map(collapse)) expect(stopped, selector).toContain(selector);
+            }
+        });
+
+        it("should outlast every finite animation with the settle time, the looping ones aside", () => {
+            for (const declaration of allDeclarations(/^animation$/)) {
+                if (!outsideReducedMotion(declaration) || declaration.value.includes("infinite")) continue;
+                const milliseconds = [...declaration.value.matchAll(/(\d+(?:\.\d+)?)(ms|s)\b/g)]
+                    .map(([, amount, unit]) => Number(amount) * (unit === "s" ? 1000 : 1));
+                for (const duration of milliseconds) expect(duration, declaration.value).toBeLessThan(ARRIVAL_SETTLE_MS);
+            }
         });
     });
 });

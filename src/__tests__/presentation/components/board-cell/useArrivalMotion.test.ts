@@ -160,10 +160,10 @@ describe("useArrivalMotion", () => {
         }
 
         // The styles that animate them, so the check above is not empty
-        expect([...checked]).toEqual(expect.arrayContaining(["tactile .value-arrive", "pixel .value-arrive", "pixel .value-leave"]));
+        expect([...checked]).toEqual(expect.arrayContaining(["tactile .value-arrive", "pixel .value-arrive", "pixel .value-leave", "cyber .value-arrive", "cyber .value-leave"]));
     });
 
-    it.each(STYLE_IDS.filter(style => style !== "pixel"))("should leave %s's digits to go without a leaving look", (style) => {
+    it.each(STYLE_IDS.filter(style => style !== "pixel" && style !== "cyber"))("should leave %s's digits to go without a leaving look", (style) => {
         const selectors: string[] = [];
         postcss.parse(readFileSync(`src/style/styles/${style}/skin.css`, "utf8")).walkRules((rule) => {
             selectors.push(...rule.selectors);

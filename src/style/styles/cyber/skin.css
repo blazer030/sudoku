@@ -50,11 +50,12 @@
     color: var(--color-accent);
 }
 
-/* Pages: faint scanlines and the cyan beam on ::before, the neon perspective floor on ::after, fixed to
-   the screen. They hang on the app root alone, which every screen shares, so there is exactly one copy
-   at any width (page roots fill only the app's column); the page roots that paint the page colour are
-   clear here, and the body's page colour lies under it all. Below every content layer, never taking
-   taps; still in this sheet, the motion comes later. */
+/* Pages: faint scanlines and the floor's glow on the app root's ::before, the neon perspective floor on
+   its ::after, and the cyan beam on the body's ::before, all fixed to the screen. The app root is
+   shared by every screen, so there is exactly one copy at any width (page roots fill only the app's
+   column); the page roots that paint the page colour are clear here, and the body's page colour lies
+   under it all. Below every content layer, never taking taps. The beam and the floor move by transform
+   alone, so no frame repaints the screen. */
 [data-style="cyber"] [data-skin~="page"] {
     background-color: transparent;
     /* The settings groups' running numbers */
@@ -68,9 +69,28 @@
     z-index: -1;
     pointer-events: none;
     background:
-        linear-gradient(transparent, color-mix(in srgb, var(--color-accent) 7%, transparent), transparent) 0 28% / 100% 140px no-repeat,
         repeating-linear-gradient(180deg, color-mix(in srgb, var(--color-foreground) 3.5%, transparent) 0 1px, transparent 1px 3px),
         radial-gradient(60% 50% at 50% 100%, color-mix(in srgb, var(--color-primary) 14%, transparent), transparent 70%) 0 50vh / 100% 200px no-repeat;
+}
+
+/* The beam is a layer of its own, so it can be moved without moving the scanlines; it sweeps from above
+   the screen to below it */
+[data-style="cyber"] body::before {
+    content: "";
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 140px;
+    z-index: -1;
+    pointer-events: none;
+    background: linear-gradient(transparent, color-mix(in srgb, var(--color-accent) 7%, transparent), transparent);
+    animation: cyber-sweep 7s linear infinite;
+}
+
+@keyframes cyber-sweep {
+    from { transform: translateY(-140px); }
+    to { transform: translateY(100vh); }
 }
 
 /* A sticky page header lets the decoration through, so it does not cut a dark band out of the page */
@@ -85,7 +105,7 @@
     left: -60%;
     right: -60%;
     bottom: -6%;
-    height: 46%;
+    height: calc(46% + 44px);
     z-index: -1;
     pointer-events: none;
     --cyber-floor-line: color-mix(in srgb, var(--color-primary) 38%, transparent);
@@ -97,6 +117,14 @@
     transform-origin: 50% 100%;
     -webkit-mask-image: linear-gradient(to top, var(--color-foreground) 10%, transparent 85%);
     mask-image: linear-gradient(to top, var(--color-foreground) 10%, transparent 85%);
+    animation: cyber-floor 2.4s linear infinite;
+}
+
+/* The grid is one cell period taller than the floor, and slides down by exactly that, so the loop is
+   seamless */
+@keyframes cyber-floor {
+    from { transform: perspective(300px) rotateX(64deg) translateY(-44px); }
+    to { transform: perspective(300px) rotateX(64deg) translateY(0); }
 }
 
 /* Home: the logo loses its filled square and becomes the HUD mark, a 3×3 grid of edge squares with
@@ -137,6 +165,16 @@
 [data-style="cyber"] [data-skin~="title"] {
     font-weight: 900;
     text-shadow: 2px 0 var(--color-primary), -2px 0 var(--color-accent);
+    animation: cyber-title-glitch 2.6s steps(1, end) infinite;
+}
+
+/* Mostly still; for a moment it tears into slices and the split widens */
+@keyframes cyber-title-glitch {
+    0%, 90%, 100% { transform: none; clip-path: none; }
+    91% { transform: translate(-4px, 0) skewX(-10deg); clip-path: inset(0 0 55% 0); }
+    92.5% { transform: translate(5px, 1px); clip-path: inset(50% 0 0 0); }
+    94% { transform: translate(-2px, 0); clip-path: inset(20% 0 30% 0); }
+    95.5% { transform: none; clip-path: none; text-shadow: 5px 0 var(--color-primary), -5px 0 var(--color-accent); }
 }
 
 [data-style="cyber"] [data-skin~="title-glyph"] {
@@ -473,6 +511,102 @@
         linear-gradient(var(--color-signal), var(--color-signal)) bottom right / 2px 10px no-repeat;
 }
 
+/* Filling a digit: it tears in over held frames, in offset slices with a magenta/cyan split, while a cyan
+   scan line runs down its cell. Erasing runs a magenta one up. The scan lines are the cell's ::before (the
+   brackets are its ::after, so they stay), and their animationend settles arriving / leaving like the
+   digit's own. */
+[data-style="cyber"] [data-skin~="board"] .value-arrive {
+    animation: cyber-glitch 520ms steps(1, end);
+}
+
+@keyframes cyber-glitch {
+    0% { opacity: 0; transform: translate(-5px, 0) skewX(-14deg); clip-path: inset(0 0 55% 0); text-shadow: 4px 0 var(--color-primary), -4px 0 var(--color-accent); }
+    14% { opacity: 1; transform: translate(5px, -1px); clip-path: inset(45% 0 0 0); }
+    28% { transform: translate(-3px, 1px) skewX(10deg); clip-path: inset(0 0 25% 0); text-shadow: -4px 0 var(--color-primary), 4px 0 var(--color-accent); }
+    42% { transform: translate(2px, 0); clip-path: inset(30% 0 10% 0); }
+    56% { opacity: 0.3; transform: none; clip-path: inset(0); }
+    70% { opacity: 1; text-shadow: 2px 0 var(--color-primary), -2px 0 var(--color-accent); }
+    100% { opacity: 1; transform: none; clip-path: inset(0); }
+}
+
+[data-style="cyber"] [data-skin~="board"] [data-variant]:is(.value-leave, :has(> .value-arrive)) {
+    position: relative;
+}
+
+[data-style="cyber"] [data-skin~="board"] [data-variant]:is(.value-leave, :has(> .value-arrive))::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    pointer-events: none;
+}
+
+/* Their own rules, so a WebView without :has() still reads the leaving one */
+[data-style="cyber"] [data-skin~="board"] [data-variant]:has(> .value-arrive)::before {
+    background: linear-gradient(var(--color-accent), var(--color-accent)) top / 100% 2px no-repeat;
+    filter: drop-shadow(0 0 4px var(--color-accent));
+    animation: cyber-scan-down 480ms ease-out;
+}
+
+[data-style="cyber"] [data-skin~="board"] [data-variant].value-leave::before {
+    background: linear-gradient(var(--color-primary), var(--color-primary)) top / 100% 2px no-repeat;
+    filter: drop-shadow(0 0 4px var(--color-primary));
+    animation: cyber-scan-up 480ms ease-out;
+}
+
+/* The line is the top 2px of a cell-sized layer, which slides by its own height */
+@keyframes cyber-scan-down {
+    0% { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(calc(100% - 2px)); }
+}
+
+@keyframes cyber-scan-up {
+    0% { opacity: 1; transform: translateY(calc(100% - 2px)); }
+    100% { opacity: 0; transform: translateY(0); }
+}
+
+/* Completing the puzzle: the card gets a slowly turning dashed HUD ring behind its content and the
+   system's 「// MISSION COMPLETE」 above it, glitching like the title. The card is clipped to its cut
+   corners, so the ring sits inside the card (300px across, under the card's padding and content) rather
+   than hanging out as the canvas's does. Decoration, so screen readers skip the text. */
+[data-style="cyber"] [data-skin~="celebration"]::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 300px;
+    height: 300px;
+    margin: -150px 0 0 -150px;
+    z-index: -1;
+    pointer-events: none;
+    border: 1px dashed color-mix(in srgb, var(--color-accent) 35%, transparent);
+    border-radius: 50%;
+    box-shadow: inset 0 0 60px color-mix(in srgb, var(--color-primary) 20%, transparent);
+    animation: cyber-spin 18s linear infinite;
+}
+
+@keyframes cyber-spin {
+    to { transform: rotate(360deg); }
+}
+
+[data-style="cyber"] [data-skin~="celebration"]::after {
+    content: "// MISSION COMPLETE";
+    content: "// MISSION COMPLETE" / "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 10px;
+    text-align: center;
+    pointer-events: none;
+    font-family: var(--cyber-mono);
+    font-size: 12px;
+    line-height: 1;
+    letter-spacing: 0.3em;
+    color: var(--color-signal);
+    text-shadow: 0 0 12px color-mix(in srgb, var(--color-signal) 70%, transparent);
+    animation: cyber-title-glitch 2.6s steps(1, end) infinite;
+}
+
 /* Hint mode: the answer cell is a yellow wash inside a yellow inset outline (the shared ring is the
    primary's) */
 [data-style="cyber"] [data-skin~="board"] [data-variant="answer"] {
@@ -559,6 +693,26 @@
 @media (prefers-reduced-motion: reduce) {
     [data-style="cyber"] .segmented-indicator-motion {
         transition: none;
+    }
+
+    [data-style="cyber"] body::before,
+    [data-style="cyber"] .app-safe-area::after,
+    [data-style="cyber"] [data-skin~="title"],
+    [data-style="cyber"] [data-skin~="board"] .value-arrive,
+    [data-style="cyber"] [data-skin~="board"] [data-variant].value-leave::before,
+    [data-style="cyber"] [data-skin~="celebration"]::before,
+    [data-style="cyber"] [data-skin~="celebration"]::after {
+        animation: none;
+    }
+
+    /* Its own rule, so a WebView without :has() still reads the list above */
+    [data-style="cyber"] [data-skin~="board"] [data-variant]:has(> .value-arrive)::before {
+        animation: none;
+    }
+
+    /* The beam rests out of sight above the screen; the floor rests as the plain tilted grid */
+    [data-style="cyber"] body::before {
+        transform: translateY(-140px);
     }
 
     [data-style="cyber"] [data-pressed],
