@@ -1,5 +1,5 @@
 import { computed, type Component, type ComputedRef } from "vue";
-import { STYLE_IDS, type StyleId } from "@/theme/themeIds";
+import type { StyleId } from "@/theme/themeIds";
 import { useSettingsStore } from "@/stores/settingsStore";
 import DefaultLoader from "@/presentation/components/style-moments/default/DefaultLoader.vue";
 import DefaultCelebration from "@/presentation/components/style-moments/default/DefaultCelebration.vue";
@@ -33,9 +33,14 @@ const DEFAULT_MOMENTS: StyleMoments = {
     celebrationBoardMs: 1460,
 };
 
-export const STYLE_MOMENTS: Record<StyleId, StyleMoments> = Object.fromEntries(
-    STYLE_IDS.map(style => [style, DEFAULT_MOMENTS]),
-) as Record<StyleId, StyleMoments>;
+// One entry per style, so a style added without its moments is a type error
+export const STYLE_MOMENTS: Record<StyleId, StyleMoments> = {
+    minimal: DEFAULT_MOMENTS,
+    tactile: DEFAULT_MOMENTS,
+    paper: DEFAULT_MOMENTS,
+    pixel: DEFAULT_MOMENTS,
+    cyber: DEFAULT_MOMENTS,
+};
 
 export const useStyleMoments = (): ComputedRef<StyleMoments> => {
     const settings = useSettingsStore();

@@ -974,7 +974,7 @@ describe("Game", () => {
 
             await vi.advanceTimersByTimeAsync(1);
             expect(modalOf(wrapper).exists()).toBe(true);
-            expect(modalOf(wrapper).find("canvas").exists()).toBe(true);
+            expect((wrapper.findComponent(STYLE_MOMENTS.minimal.celebration).props() as { still: boolean }).still).toBe(false);
             expect(boardOfGame(wrapper).attributes("data-celebration")).toBe("done");
         });
 
@@ -986,7 +986,7 @@ describe("Game", () => {
 
             expect(boardOfGame(wrapper).attributes("data-celebration")).toBe("still");
             expect(modalOf(wrapper).exists()).toBe(true);
-            expect(modalOf(wrapper).find("canvas").exists()).toBe(false);
+            expect((wrapper.findComponent(STYLE_MOMENTS.minimal.celebration).props() as { still: boolean }).still).toBe(true);
         });
 
         it("should leave no timer behind when the screen goes mid-celebration", async () => {

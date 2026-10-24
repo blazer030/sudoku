@@ -7,6 +7,7 @@ import { createMemoryHistory, createRouter } from "vue-router";
 import GameCompleteModal from "@/presentation/pages/game/components/GameCompleteModal.vue";
 import { provideGameCompleteModal } from "@/presentation/pages/game/components/useGameCompleteModal";
 import type { GameCompleteParams } from "@/presentation/pages/game/components/useGameCompleteModal";
+import { STYLE_MOMENTS } from "@/presentation/components/style-moments/styleMoments";
 
 const mountModal = (overrides: Partial<GameCompleteParams> = {}, onResult: (result: unknown) => void = () => { /* ignored */ }) => {
     const router = createRouter({
@@ -69,8 +70,10 @@ describe("GameCompleteModal", () => {
     });
 
     it("should play the style's celebration, or show its still end state when asked", () => {
-        expect(mountModal().find("canvas").exists()).toBe(true);
-        expect(mountModal({ still: true }).find("canvas").exists()).toBe(false);
+        const celebration = STYLE_MOMENTS.minimal.celebration;
+
+        expect((mountModal().findComponent(celebration).props() as { still: boolean }).still).toBe(false);
+        expect((mountModal({ still: true }).findComponent(celebration).props() as { still: boolean }).still).toBe(true);
     });
 
     it("should not show the record badge otherwise", () => {
