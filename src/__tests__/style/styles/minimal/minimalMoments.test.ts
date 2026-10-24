@@ -63,6 +63,11 @@ describe("minimal moments", () => {
             expect(declarationsOf(MINIMAL_CSS, `${RISING_CARD} [data-skin~="trophy"] > svg`).get("animation")).toMatch(/^minimal-trophy-bounce /);
         });
 
+        // Held only before it starts, so the shared leave transition can scale the card out
+        it("should let the card leave like any dialog once it has risen", () => {
+            expect(declarationsOf(MINIMAL_CSS, RISING_CARD).get("animation")).toMatch(/ backwards$/);
+        });
+
         it("should show the still end state: tinted entries and the ring already drawn", () => {
             expect(declarationsOf(MINIMAL_CSS, STILL_ENTRY).get("background-color")).toContain("var(--color-primary-light)");
             expect(declarationsOf(MINIMAL_CSS, STILL_ENTRY).has("animation")).toBe(false);
