@@ -42,6 +42,8 @@ const REQUIRED_SELECTORS: Record<StyleId, readonly string[]> = {
         '[data-note-highlight]::after',
         '[data-skin~="board"]',
         '[data-skin~="board"] [data-variant="clue"]',
+        ".value-arrive",
+        ".value-leave::before",
         '[data-skin~="check"]',
         '[data-skin~="continue"]',
         '[data-skin~="new-game"]',

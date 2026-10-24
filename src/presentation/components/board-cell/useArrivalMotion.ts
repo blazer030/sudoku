@@ -3,8 +3,8 @@ import { useMotionAllowed } from "@/presentation/composables/useMotionAllowed";
 
 /**
  * How long a digit stays flagged as arriving or leaving when no animation ends first. Styles without
- * such an animation (minimal, paper; every style but 8-bit for leaving) never fire animationend;
- * every style's animation is shorter.
+ * such an animation (minimal; tactile for leaving) never fire animationend; every style's animation
+ * is shorter.
  */
 export const ARRIVAL_SETTLE_MS = 1000;
 

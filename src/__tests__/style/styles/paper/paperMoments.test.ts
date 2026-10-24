@@ -2,6 +2,7 @@ import { readFileSync } from "fs";
 import postcss from "postcss";
 import { STYLE_MOMENTS } from "@/presentation/components/style-moments/styleMoments";
 import { GROUP_RIPPLE_STEP_MS } from "@/presentation/pages/game/useGroupEffect";
+import { ARRIVAL_SETTLE_MS } from "@/presentation/components/board-cell/useArrivalMotion";
 import { animationTimingOf, declarationsOf, reducedMotionDeclarationsOf as reducedMotionDeclarationsIn } from "../../styleSheetRules";
 
 const PAPER_CSS = readFileSync("src/style/styles/paper/skin.css", "utf8");
@@ -9,6 +10,9 @@ const PAPER_CSS = readFileSync("src/style/styles/paper/skin.css", "utf8");
 const SCOPE = '[data-style="paper"]';
 const BOARD = `${SCOPE} [data-skin~="board"]`;
 const GROUP_CELL = `${BOARD} [data-group]:not(.animate-hint-reveal-glow)`;
+const ARRIVING_DIGIT = `${BOARD} .value-arrive`;
+const LEAVING_CELL = `${BOARD} [data-variant].value-leave`;
+const RUB = `${LEAVING_CELL}::before`;
 const STRIKE = `${SCOPE} :is(.paper-group-row, .paper-group-column) .paper-group-stroke`;
 const LOOP = `${SCOPE} .paper-group-box .paper-group-stroke`;
 const CHECK = `${BOARD}:is([data-celebration="playing"], [data-celebration="done"], [data-celebration="still"]) > div::after`;
@@ -43,6 +47,67 @@ const keyframeEnds = (name: string): { from: Map<string, string>; to: Map<string
 };
 
 describe("paper moments", () => {
+    describe("digits", () => {
+        // The digit is written in with the pen, left to right, its ink still settling as the stroke ends
+        it("should write an entered digit in by hand, left to right, settling its ink", () => {
+            const timing = animationTimingOf(animationOf(ARRIVING_DIGIT), "paper-digit-write");
+            const { from, to } = keyframeEnds("paper-digit-write");
+
+            expect(timing?.durationMs ?? 0).toBeGreaterThanOrEqual(300);
+            expect(timing?.durationMs ?? 0).toBeLessThanOrEqual(450);
+            // Clipped from the right, so the ink (from about a quarter of the box) starts hidden
+            expect(Number.parseFloat(/^inset\(\S+ (\S+) \S+ \S+\)$/.exec(from.get("clip-path") ?? "")?.[1] ?? "")).toBeGreaterThanOrEqual(75);
+            expect(Number(from.get("opacity"))).toBeLessThan(1);
+            expect(to.get("clip-path")).toMatch(/^inset\(\S+ -\d+% \S+ \S+\)$/);
+            expect(to.get("opacity")).toBe("1");
+        });
+
+        // The digit is gone once erased, so the cell's ::before rubs out a smudge where it was. It is the
+        // cell's only pseudo-element animation while it leaves, so its end is what settles the flag.
+        it("should rub an erased digit out as a fading smudge on the cell's ::before", () => {
+            const rub = declarationsOf(PAPER_CSS, RUB);
+            const timing = animationTimingOf(rub.get("animation") ?? "", "paper-digit-rub");
+            const { from, to } = keyframeEnds("paper-digit-rub");
+
+            expect(declarationsOf(PAPER_CSS, LEAVING_CELL).get("position")).toBe("relative");
+            expect(rub.get("content")).toBe('""');
+            expect(rub.get("pointer-events")).toBe("none");
+            // Hidden before and after the rub, so nothing is left when it ends before the class drops
+            expect(rub.get("opacity")).toBe("0");
+            expect(timing?.durationMs ?? 0).toBeGreaterThanOrEqual(300);
+            expect(timing?.durationMs ?? 0).toBeLessThanOrEqual(400);
+            expect(from.get("opacity")).not.toBe("0");
+            expect(to.get("opacity")).toBe("0");
+        });
+
+        it("should end both before the arrival flags settle on their own", () => {
+            for (const [selector, name] of [[ARRIVING_DIGIT, "paper-digit-write"], [RUB, "paper-digit-rub"]] as const) {
+                const timing = animationTimingOf(declarationsOf(PAPER_CSS, selector).get("animation") ?? "", name);
+
+                expect((timing?.fixedDelayMs ?? 0) + (timing?.durationMs ?? 0), name).toBeLessThan(ARRIVAL_SETTLE_MS);
+            }
+        });
+
+        // The entered digit sits in its own completed group: a group rule animating the digit would
+        // replace its writing. Paper's wash is on the cell, so the completing digit is still written in.
+        it("should keep writing the completing digit while its group washes", () => {
+            const groupDigitAnimations: string[] = [];
+            postcss.parse(PAPER_CSS).walkRules((rule) => {
+                if (rule.parent?.type === "atrule" && (rule.parent as postcss.AtRule).name === "keyframes") return;
+                const groupDigits = rule.selectors.filter(selector => selector.includes("[data-group]") && /(?:>\s*div|value-arrive)/.test(selector));
+                if (groupDigits.length > 0 && rule.some(node => node.type === "decl" && node.prop.startsWith("animation"))) groupDigitAnimations.push(...groupDigits);
+            });
+
+            expect(groupDigitAnimations).toEqual([]);
+            expect(animationOf(GROUP_CELL)).toMatch(/^paper-group-wash /);
+        });
+
+        it("should stop the writing and the rub under reduced motion", () => {
+            expect(reducedMotionDeclarationsOf(ARRIVING_DIGIT).get("animation")).toBe("none");
+            expect(reducedMotionDeclarationsOf(RUB).get("animation")).toBe("none");
+        });
+    });
+
     describe("group completion", () => {
         it("should wash a completed group's cells in pale ink, rippling from the entered cell", () => {
             expect(animationOf(GROUP_CELL)).toMatch(/^paper-group-wash .*var\(--group-delay/);
