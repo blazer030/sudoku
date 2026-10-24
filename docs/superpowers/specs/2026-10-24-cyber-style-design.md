@@ -120,7 +120,9 @@ The owner likes the canvas as a whole (2026-10-24). The only change they asked f
   - the contrast tests
   - the PWA icon and manifest, which take the light icon key
 
-  A dark-only style needs a real place in these, the mirror of `lightOnlyThemeBuilder`. A style's first mode in `STYLE_COLOR_MODES` is already its fallback, so cyberpunk's fallback is dark.
+  A style's first mode in `STYLE_COLOR_MODES` is already its fallback, so cyberpunk's fallback is dark.
+
+  **Single-mode styles are one mechanism, not two (owner, 2026-10-24).** More light-only styles are coming. Light-only and dark-only are the same case: a style with one mode. So a theme carries a palette for each mode its style has, and every place listed above asks for the style's modes rather than assuming light. Light-only (paper's `lightOnlyThemeBuilder`) moves onto the same model. Paper's look and its tests' outcomes stay as they are.
 - **Skin rules** (`styleSheetRules.ts`):
   - Selectors are scoped to `[data-style="cyber"]`, and keyframes are prefixed `cyber-`.
   - No layout properties outside `::before`/`::after`.
@@ -170,7 +172,7 @@ The owner likes the canvas as a whole (2026-10-24). The only change they asked f
 
 ## Left to the builder
 
-- How dark-only is modelled in `paletteBuilder` (a `darkOnlyThemeBuilder`, `light` made optional, or a per-mode map) and in `index.html`'s first-paint script, within the anti-goal above.
+- How the single-mode model looks in `paletteBuilder` (for example a per-mode map, or `light` and `dark` both optional with one builder per mode) and in `index.html`'s first-paint script, within the anti-goal above and the one-mechanism rule.
 - The exact token mapping inside the palette for every `PALETTE_TOKENS` entry, within the colours and contrast rules above.
 - How the cut corners and edges are drawn. The canvas uses `clip-path` on `::before` (edge) and `::after` (fill), but the app's components may already use those pseudo-elements.
 - Where the page-wide scanlines, beam and floor hang: a fixed pseudo-element on the page root, or the `page` skin hook.
