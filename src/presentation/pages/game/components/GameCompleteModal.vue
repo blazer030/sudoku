@@ -5,7 +5,7 @@
             class="fixed inset-0 bg-scrim/60 flex items-center justify-center z-50"
             data-testid="game-complete-modal"
         >
-            <FireworkCanvas />
+            <component :is="moments.celebration" />
             <div
                 class="bg-card rounded-3xl p-8 mx-6 w-full max-w-[354px] flex flex-col items-center gap-6 shadow-modal relative z-[52]"
                 data-skin="card celebration"
@@ -107,10 +107,11 @@ import { useDifficultyLabel } from "@/presentation/i18n/difficultyLabels";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import { useGameCompleteModal } from "@/presentation/pages/game/components/useGameCompleteModal";
-import FireworkCanvas from "@/presentation/components/firework-canvas/FireworkCanvas.vue";
+import { useStyleMoments } from "@/presentation/components/style-moments/styleMoments";
 import { vPress } from "@/presentation/directives/press";
 
 const { t } = useI18n();
+const moments = useStyleMoments();
 const { visible, params, close } = useGameCompleteModal();
 
 const difficultyText = useDifficultyLabel();
