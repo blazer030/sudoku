@@ -19,11 +19,10 @@ describe("STYLE_MOMENTS", () => {
         expect(Object.keys(STYLE_MOMENTS).sort()).toEqual([...STYLE_IDS].sort());
     });
 
-    it.each(STYLE_IDS)("should give %s a loader, a celebration and positive durations", (style) => {
+    it.each(STYLE_IDS)("should give %s a loader and positive durations", (style) => {
         const moments = STYLE_MOMENTS[style];
 
         expect(moments.loader).toBeTruthy();
-        expect(moments.celebration).toBeTruthy();
         expect(moments.groupEffectMs).toBeGreaterThan(0);
         expect(moments.celebrationBoardMs).toBeGreaterThan(0);
     });

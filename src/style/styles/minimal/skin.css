@@ -110,8 +110,8 @@
 }
 
 /* The dialog: the card rises on the elastic curve, a thin ring draws round the trophy from the top, the
-   new-record badge pops in and the trophy gives one bounce. MinimalCelebration marks a still scene, where
-   the ring is simply there and the card only fades in. */
+   new-record badge pops in and the trophy gives one bounce. A still card (data-still) only fades in, like
+   every style's, and its ring is simply there. */
 @property --minimal-ring-sweep {
     syntax: "<angle>";
     inherits: false;
@@ -142,19 +142,15 @@
     100% { transform: scale(1); }
 }
 
-[data-style="minimal"] .minimal-celebration:not([data-still]) ~ [data-skin~="celebration"] {
+[data-style="minimal"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) {
     animation: minimal-card-rise 460ms cubic-bezier(0.34, 1.4, 0.64, 1) 60ms both;
 }
 
-[data-style="minimal"] .minimal-celebration[data-still] ~ [data-skin~="celebration"] {
-    transform: none;
-}
-
-[data-style="minimal"] .minimal-celebration ~ [data-skin~="celebration"] [data-skin~="trophy"] {
+[data-style="minimal"] [data-skin~="card"][data-skin~="celebration"] [data-skin~="trophy"] {
     position: relative;
 }
 
-[data-style="minimal"] .minimal-celebration ~ [data-skin~="celebration"] [data-skin~="trophy"]::before {
+[data-style="minimal"] [data-skin~="card"][data-skin~="celebration"] [data-skin~="trophy"]::before {
     content: "";
     position: absolute;
     inset: -5px;
@@ -165,15 +161,15 @@
     pointer-events: none;
 }
 
-[data-style="minimal"] .minimal-celebration:not([data-still]) ~ [data-skin~="celebration"] [data-skin~="trophy"]::before {
+[data-style="minimal"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) [data-skin~="trophy"]::before {
     animation: minimal-ring-draw 760ms cubic-bezier(0.4, 0, 0.2, 1) 380ms both;
 }
 
-[data-style="minimal"] .minimal-celebration:not([data-still]) ~ [data-skin~="celebration"] [data-skin~="new-record"] {
+[data-style="minimal"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) [data-skin~="new-record"] {
     animation: minimal-badge-pop 380ms cubic-bezier(0.34, 1.4, 0.64, 1) 560ms both;
 }
 
-[data-style="minimal"] .minimal-celebration:not([data-still]) ~ [data-skin~="celebration"] [data-skin~="trophy"] > svg {
+[data-style="minimal"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) [data-skin~="trophy"] > svg {
     animation: minimal-trophy-bounce 300ms ease-out 1060ms both;
 }
 
@@ -197,10 +193,10 @@
     [data-style="minimal"] [data-skin~="board"] [data-group]:not(.animate-hint-reveal-glow) > div,
     [data-style="minimal"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"]) [data-variant],
     [data-style="minimal"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"]) [data-variant] > div,
-    [data-style="minimal"] .minimal-celebration:not([data-still]) ~ [data-skin~="celebration"],
-    [data-style="minimal"] .minimal-celebration:not([data-still]) ~ [data-skin~="celebration"] [data-skin~="trophy"]::before,
-    [data-style="minimal"] .minimal-celebration:not([data-still]) ~ [data-skin~="celebration"] [data-skin~="new-record"],
-    [data-style="minimal"] .minimal-celebration:not([data-still]) ~ [data-skin~="celebration"] [data-skin~="trophy"] > svg {
+    [data-style="minimal"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]),
+    [data-style="minimal"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) [data-skin~="trophy"]::before,
+    [data-style="minimal"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) [data-skin~="new-record"],
+    [data-style="minimal"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) [data-skin~="trophy"] > svg {
         animation: none;
     }
 

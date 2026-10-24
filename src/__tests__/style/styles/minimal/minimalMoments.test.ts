@@ -11,10 +11,10 @@ const BOARD = `${SCOPE} [data-skin~="board"]`;
 const GROUP_CELL = `${BOARD} [data-group]:not(.animate-hint-reveal-glow)`;
 const CELEBRATING_CELL = `${BOARD}:is([data-celebration="playing"], [data-celebration="done"]) [data-variant]`;
 const STILL_ENTRY = `${BOARD}[data-celebration="still"] [data-value-kind="entered"]`;
-const RISING_CARD = `${SCOPE} .minimal-celebration:not([data-still]) ~ [data-skin~="celebration"]`;
-const STILL_CARD = `${SCOPE} .minimal-celebration[data-still] ~ [data-skin~="celebration"]`;
-const RING = `${SCOPE} .minimal-celebration ~ [data-skin~="celebration"] [data-skin~="trophy"]::before`;
-const DRAWING_RING = `${SCOPE} .minimal-celebration:not([data-still]) ~ [data-skin~="celebration"] [data-skin~="trophy"]::before`;
+const CARD = `${SCOPE} [data-skin~="card"][data-skin~="celebration"]`;
+const RISING_CARD = `${CARD}:not([data-still])`;
+const RING = `${CARD} [data-skin~="trophy"]::before`;
+const DRAWING_RING = `${RISING_CARD} [data-skin~="trophy"]::before`;
 const LOADER_SQUARE = `${SCOPE} .minimal-loader-square`;
 
 const isInReducedMotion = (rule: Rule): boolean => {
@@ -77,12 +77,11 @@ describe("minimal moments", () => {
             expect(declarationsOf(MINIMAL_CSS, `${RISING_CARD} [data-skin~="trophy"] > svg`).get("animation")).toMatch(/^minimal-trophy-bounce /);
         });
 
-        it("should show the still end state: tinted entries, the ring drawn and a card that only fades in", () => {
+        it("should show the still end state: tinted entries and the ring already drawn", () => {
             expect(declarationsOf(MINIMAL_CSS, STILL_ENTRY).get("background-color")).toContain("var(--color-primary-light)");
             expect(declarationsOf(MINIMAL_CSS, STILL_ENTRY).has("animation")).toBe(false);
             expect(declarationsOf(MINIMAL_CSS, RING).has("animation")).toBe(false);
-            expect(declarationsOf(MINIMAL_CSS, STILL_CARD).get("transform")).toBe("none");
-            expect(declarationsOf(MINIMAL_CSS, STILL_CARD).has("animation")).toBe(false);
+            expect(declarationsOf(MINIMAL_CSS, CARD).has("animation")).toBe(false);
         });
 
         it("should stop every part of it under reduced motion", () => {

@@ -9,6 +9,7 @@ import GameCompleteModal from "@/presentation/pages/game/components/GameComplete
 import { provideGameCompleteModal } from "@/presentation/pages/game/components/useGameCompleteModal";
 import type { GameCompleteParams } from "@/presentation/pages/game/components/useGameCompleteModal";
 import { STYLE_MOMENTS } from "@/presentation/components/style-moments/styleMoments";
+import { STYLE_IDS } from "@/theme/themeIds";
 
 const mountModal = (overrides: Partial<GameCompleteParams> = {}, onResult: (result: unknown) => void = () => { /* ignored */ }, pinia: Pinia = createPinia()) => {
     const router = createRouter({
@@ -26,6 +27,12 @@ const mountModal = (overrides: Partial<GameCompleteParams> = {}, onResult: (resu
     });
     return mount(Host, { global: { plugins: [router, pinia] } });
 };
+
+// Styles that draw decoration over the scene; the others leave it to their skin
+const STYLES_WITH_CELEBRATION = STYLE_IDS.flatMap((style) => {
+    const celebration = STYLE_MOMENTS[style].celebration;
+    return celebration === null ? [] : [{ style, celebration }];
+});
 
 describe("GameCompleteModal", () => {
     it.each([2, 0])("should show %i hints used in the Hints stat", (hintsUsed) => {
@@ -71,11 +78,14 @@ describe("GameCompleteModal", () => {
         expect(wrapper.find("[data-testid='new-record-badge']").attributes("data-skin")).toBe("tag new-record");
     });
 
-    it("should play the style's celebration, or show its still end state when asked", () => {
-        const celebration = STYLE_MOMENTS.minimal.celebration;
+    it.each(STYLES_WITH_CELEBRATION)("should play $style's celebration decoration, or its still end state when asked", ({ style, celebration }) => {
+        const pinia = createPinia();
+        setActivePinia(pinia);
+        useSettingsStore().setStyle(style);
+        const stillOf = (still: boolean) => (mountModal({ still }, undefined, pinia).findComponent(celebration).props() as { still: boolean }).still;
 
-        expect((mountModal().findComponent(celebration).props() as { still: boolean }).still).toBe(false);
-        expect((mountModal({ still: true }).findComponent(celebration).props() as { still: boolean }).still).toBe(true);
+        expect(stillOf(false)).toBe(false);
+        expect(stillOf(true)).toBe(true);
     });
 
     it("should mark the card still for any style, so it appears without motion", () => {

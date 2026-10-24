@@ -975,7 +975,7 @@ describe("Game", () => {
 
             await vi.advanceTimersByTimeAsync(1);
             expect(modalOf(wrapper).exists()).toBe(true);
-            expect((wrapper.findComponent(STYLE_MOMENTS.minimal.celebration).props() as { still: boolean }).still).toBe(false);
+            expect(wrapper.find("[data-testid='complete-card']").attributes("data-still")).toBeUndefined();
             expect(boardOfGame(wrapper).attributes("data-celebration")).toBe("done");
         });
 
@@ -987,7 +987,7 @@ describe("Game", () => {
 
             expect(boardOfGame(wrapper).attributes("data-celebration")).toBe("still");
             expect(modalOf(wrapper).exists()).toBe(true);
-            expect((wrapper.findComponent(STYLE_MOMENTS.minimal.celebration).props() as { still: boolean }).still).toBe(true);
+            expect(wrapper.find("[data-testid='complete-card']").attributes("data-still")).toBe("");
         });
 
         it("should open a still dialog, without motion, in any style when 動態效果 is off", async () => {

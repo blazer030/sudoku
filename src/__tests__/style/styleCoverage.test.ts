@@ -13,7 +13,7 @@ const REQUIRED_SELECTORS: Record<StyleId, readonly string[]> = {
         '[data-celebration="playing"]',
         '[data-celebration="still"]',
         '[data-skin~="trophy"]',
-        ".minimal-celebration",
+        '[data-skin~="celebration"]:not([data-still])',
         ".minimal-loader-square",
     ],
     tactile: [

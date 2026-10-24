@@ -7,6 +7,7 @@
         >
             <component
                 :is="moments.celebration"
+                v-if="moments.celebration !== null"
                 :still="params?.still ?? false"
             />
             <div

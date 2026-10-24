@@ -4,7 +4,6 @@ import { useSettingsStore } from "@/stores/settingsStore";
 import DefaultLoader from "@/presentation/components/style-moments/default/DefaultLoader.vue";
 import DefaultCelebration from "@/presentation/components/style-moments/default/DefaultCelebration.vue";
 import MinimalLoader from "@/presentation/components/style-moments/minimal/MinimalLoader.vue";
-import MinimalCelebration from "@/presentation/components/style-moments/minimal/MinimalCelebration.vue";
 import type { CompletedGroup } from "@/domain/game/Sudoku";
 
 /** A group effect on the board: a new one gets a new id, which starts its drawings afresh. */
@@ -16,7 +15,11 @@ export interface GroupEffect {
 
 export interface StyleMoments {
     loader: Component;
-    celebration: Component;
+    /**
+     * Decoration drawn over the completion scene, given `{ still }`; null when the board's and the card's
+     * skin carry it all. The card itself carries `data-still` when motion is not allowed.
+     */
+    celebration: Component | null;
     /**
      * How long one cell's group effect runs, in milliseconds. Each cell starts a ripple step later
      * for each row and column it lies from the origin; the effect ends when the farthest cell's has run.
@@ -39,7 +42,7 @@ const DEFAULT_MOMENTS: StyleMoments = {
 // comes in, while the diagonal wash is still crossing the board
 const MINIMAL_MOMENTS: StyleMoments = {
     loader: MinimalLoader,
-    celebration: MinimalCelebration,
+    celebration: null,
     groupEffectMs: 620,
     celebrationBoardMs: 640,
 };
