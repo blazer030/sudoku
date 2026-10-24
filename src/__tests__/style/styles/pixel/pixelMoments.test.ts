@@ -14,6 +14,7 @@ const BOARD = `${SCOPE} [data-skin~="board"]`;
 const GROUP_CELL = `${BOARD} [data-group]:not(.animate-hint-reveal-glow)`;
 const SPARK = `${SCOPE} .pixel-group-spark`;
 const CELEBRATING_CELL = `${BOARD}:is([data-celebration="playing"], [data-celebration="done"]) [data-variant]`;
+const CONSOLE_CELEBRATING_CELL = `${CONSOLE} [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"]) [data-variant]`;
 const CARD = `${SCOPE} [data-skin~="card"][data-skin~="celebration"]`;
 const OPENING_CARD = `${CARD}:not([data-still])`;
 const CELEBRATION = `${SCOPE} .pixel-celebration`;
@@ -104,14 +105,20 @@ describe("pixel moments", () => {
             expect(declarationsOf(PIXEL_CSS, GROUP_CELL).has("--group-ripple-step")).toBe(false);
         });
 
-        it("should invert the cell in both modes, as the board does", () => {
+        it("should invert the cell in 掌機, as the board does", () => {
             const handheld = declarationsOf(PIXEL_CSS, SCOPE);
-            const consoleMode = declarationsOf(PIXEL_CSS, CONSOLE);
 
             expect(handheld.get("--pixel-flash-fill")).toBe("var(--color-foreground)");
             expect(handheld.get("--pixel-flash-ink")).toBe("var(--color-background)");
-            expect(consoleMode.has("--pixel-flash-fill")).toBe(false);
-            expect(consoleMode.has("--pixel-flash-ink")).toBe(false);
+        });
+
+        // Near-white on black swung too much of the screen too often (photosensitivity): 紅白機 lights the
+        // cell in the console blue, which keeps the digit's white ink, so only a dark fill changes
+        it("should light the cell in the console blue under its white ink in 紅白機", () => {
+            const consoleMode = declarationsOf(PIXEL_CSS, CONSOLE);
+
+            expect(consoleMode.get("--pixel-flash-fill")).toBe("var(--color-highlight)");
+            expect(consoleMode.get("--pixel-flash-ink")).toBe("var(--color-foreground)");
         });
 
         it("should pop pixel sparks at the group's ends as its last cells blink", () => {
@@ -165,6 +172,17 @@ describe("pixel moments", () => {
             expectLit(frames.get("66.67%, 100%"));
             expect(frames.get("33.33%")?.get("background-color")).toBe("var(--pixel-pattern-shade)");
             expect(frames.get("33.33%")?.get("--pixel-entry-ink")).toBe("var(--color-foreground)");
+        });
+
+        // 紅白機 rows are only 80ms apart, so two flashes a row swung any band of rows several times a
+        // second: there each row lights once, for the first half of its turn, then shows its own look
+        it("should flash each row once in 紅白機", () => {
+            const frames = keyframesOf("pixel-row-clear-once");
+
+            expect(animationOf(CONSOLE_CELEBRATING_CELL)).toMatch(/^pixel-row-clear-once \d+ms steps\(1, jump-start\) calc\(var\(--cell-row\) \* 80ms\)$/);
+            expect([...frames.keys()]).toEqual(["0%, 50%"]);
+            expectLit(frames.get("0%, 50%"));
+            expect(reducedMotionDeclarationsOf(CONSOLE_CELEBRATING_CELL).get("animation")).toBe("none");
         });
 
         it("should start the last row's clear before the dialog opens", () => {

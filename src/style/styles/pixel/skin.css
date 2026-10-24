@@ -41,8 +41,8 @@
     --pixel-burst-3: var(--color-foreground);
     --pixel-burst-4: var(--color-border);
     --pixel-burst-leave: var(--color-border);
-    /* A completed group's blink and the solved board's line clear invert the cell, in both modes, as on
-       the boards: the light green would be only 1.2:1 on the page */
+    /* A completed group's blink and the solved board's line clear invert the cell, as on the boards: the
+       light green would be only 1.2:1 on the page */
     --pixel-flash-fill: var(--color-foreground);
     --pixel-flash-ink: var(--color-background);
     /* A completed group's sparks, in the ink (掌機) or the gold (紅白機) */
@@ -84,6 +84,10 @@
     --pixel-fx-4: var(--color-highlight);
     --pixel-stage-clear-ink: var(--color-primary);
     --pixel-stage-clear-shadow: var(--color-error);
+    /* A completed group's blink and the line clear light the cell in the console blue under the text
+       ink: the inverted cell, the brightest ink on the darkest page, swung too much of the screen too hard */
+    --pixel-flash-fill: var(--color-highlight);
+    --pixel-flash-ink: var(--color-foreground);
 }
 
 /* Type: Press Start 2P for digits (board, keys, timer, counts), Cubic 11 for every other text and
@@ -513,8 +517,8 @@
 }
 
 /* Moments, from the MomentsPixel and GroupPixel boards: the loader, a completed group and the solved
-   puzzle. Everything moves in steps, never eases; a row flashes at most twice, and nothing blinks more
-   than three times a second. */
+   puzzle. Everything moves in steps, never eases; a row flashes at most twice (once in 紅白機's line
+   clear), and nothing blinks more than three times a second. */
 
 /* A completed row, column or box clears like a line in a block game: after a short beat each cell blinks
    inverted twice in hard steps, outward from the entered cell at the shared step. Each round is lit for its
@@ -560,8 +564,8 @@
     animation: pixel-group-spark 360ms steps(3, end) calc(100ms + var(--pixel-spark-reach) * var(--group-ripple-step, 60ms));
 }
 
-/* The solved board clears row by row from the top, 80ms apart, like a line clear: each row lit, dimmed to
-   the pattern shade, lit again, then back to its own look; two flashes a row. It runs on under the dialog,
+/* The solved board clears row by row from the top, 80ms apart, like a line clear: in 掌機 each row lit,
+   dimmed to the pattern shade, lit again, then back to its own look; two flashes a row. It runs on under the dialog,
    which opens as the last rows clear. */
 @keyframes pixel-row-clear {
     0% {
@@ -589,6 +593,22 @@
 
 [data-style="pixel"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"]) [data-variant] {
     animation: pixel-row-clear 300ms steps(1, end) calc(var(--cell-row) * 80ms);
+}
+
+/* 紅白機 rows light once each, for the first half of their turn, then show their own look: at 80ms apart,
+   two flashes a row swung any band of rows several times a second */
+@keyframes pixel-row-clear-once {
+    0%, 50% {
+        background-color: var(--pixel-flash-fill);
+        background-image: none;
+        color: var(--pixel-flash-ink);
+        --pixel-clue-ink: var(--pixel-flash-ink);
+        --pixel-entry-ink: var(--pixel-flash-ink);
+    }
+}
+
+:root.dark[data-style="pixel"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"]) [data-variant] {
+    animation: pixel-row-clear-once 300ms steps(1, jump-start) calc(var(--cell-row) * 80ms);
 }
 
 /* The dialog: the window opens from its middle in four steps, framed with its hard shadow, and once open
@@ -1039,6 +1059,7 @@
     [data-style="pixel"] [data-skin~="board"] [data-group]:not(.animate-hint-reveal-glow),
     [data-style="pixel"] .pixel-group-spark,
     [data-style="pixel"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"]) [data-variant],
+    :root.dark[data-style="pixel"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"]) [data-variant],
     [data-style="pixel"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]),
     [data-style="pixel"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) [data-skin~="trophy"],
     [data-style="pixel"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) [data-skin~="new-record"],
