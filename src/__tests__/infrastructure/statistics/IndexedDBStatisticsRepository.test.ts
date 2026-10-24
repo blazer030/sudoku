@@ -46,7 +46,7 @@ describe("IndexedDBStatisticsRepository", () => {
 
     it("save then load roundtrips the history", async () => {
         const repo = new IndexedDBStatisticsRepository();
-        await repo.save([sampleGame]);
+        await repo.append(sampleGame);
         await expect(repo.load()).resolves.toEqual([sampleGame]);
     });
 
@@ -59,17 +59,51 @@ describe("IndexedDBStatisticsRepository", () => {
 
     it("clear removes the saved history", async () => {
         const repo = new IndexedDBStatisticsRepository();
-        await repo.save([sampleGame]);
+        await repo.append(sampleGame);
         await repo.clear();
         await expect(repo.load()).resolves.toEqual([]);
     });
 
     it("save strips Vue reactivity wrappers before storing (IndexedDB DataCloneError fix)", async () => {
         const repo = new IndexedDBStatisticsRepository();
-        const reactiveHistory = reactive([sampleGame]);
-        await repo.save(reactiveHistory);
-        const stored = mocks.store.get("history");
+        await repo.append(reactive({ ...sampleGame }));
+        const stored = mocks.store.get("game-0");
         expect(isReactive(stored)).toBe(false);
-        expect(stored).toEqual([sampleGame]);
+        expect(stored).toEqual(sampleGame);
+    });
+
+    it("append writes one record and leaves the stored history untouched", async () => {
+        const legacy = Array.from({ length: 20 }, () => ({ ...sampleGame }));
+        mocks.store.set("history", legacy);
+        const repo = new IndexedDBStatisticsRepository();
+        const stringify = vi.spyOn(JSON, "stringify");
+        mocks.instance.setItem.mockClear();
+
+        await repo.append(sampleGame);
+
+        const serialised = stringify.mock.calls.length;
+        stringify.mockRestore();
+        expect(serialised).toBe(1);
+        expect(mocks.instance.setItem.mock.calls.map(([key]) => key)).toEqual(["game-0", "game-count"]);
+        expect(mocks.store.get("history")).toBe(legacy);
+    });
+
+    it("load returns the legacy array followed by games appended later, in order", async () => {
+        mocks.store.set("history", [{ ...sampleGame, elapsedSeconds: 1 }]);
+        const repo = new IndexedDBStatisticsRepository();
+        await repo.append({ ...sampleGame, elapsedSeconds: 2 });
+        await repo.append({ ...sampleGame, elapsedSeconds: 3 });
+        const result = await repo.load();
+        expect(result.map((game) => game.elapsedSeconds)).toEqual([1, 2, 3]);
+    });
+
+    it("clear removes legacy and appended games alike", async () => {
+        mocks.store.set("history", [sampleGame]);
+        const repo = new IndexedDBStatisticsRepository();
+        await repo.append(sampleGame);
+        await repo.clear();
+        expect(mocks.store.size).toBe(0);
+        await repo.append(sampleGame);
+        await expect(repo.load()).resolves.toEqual([sampleGame]);
     });
 });

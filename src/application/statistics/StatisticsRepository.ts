@@ -19,7 +19,8 @@ export interface GameResult {
 
 export interface StatisticsRepository {
     load(): Promise<GameResult[]>;
-    save(history: GameResult[]): Promise<void>;
+    /** Stores one finished game; the cost must not grow with the history already saved. */
+    append(game: GameResult): Promise<void>;
     clear(): Promise<void>;
 }
 
