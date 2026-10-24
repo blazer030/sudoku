@@ -26,6 +26,12 @@ const REQUIRED_SELECTORS: Record<StyleId, readonly string[]> = {
         ".value-arrive",
         '[data-skin~="title-glyph"]',
         '[data-skin~="segmented-indicator"]',
+        "[data-group]",
+        '[data-celebration="playing"]',
+        '[data-celebration="still"]',
+        '[data-skin~="trophy"]',
+        '[data-skin~="celebration"]:not([data-still])',
+        ".tactile-loader-tile",
     ],
     paper: [
         ...PRESS,

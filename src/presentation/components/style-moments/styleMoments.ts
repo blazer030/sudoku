@@ -4,6 +4,7 @@ import { useSettingsStore } from "@/stores/settingsStore";
 import DefaultLoader from "@/presentation/components/style-moments/default/DefaultLoader.vue";
 import DefaultCelebration from "@/presentation/components/style-moments/default/DefaultCelebration.vue";
 import MinimalLoader from "@/presentation/components/style-moments/minimal/MinimalLoader.vue";
+import TactileLoader from "@/presentation/components/style-moments/tactile/TactileLoader.vue";
 import type { CompletedGroup } from "@/domain/game/Sudoku";
 
 /** A group effect on the board: a new one gets a new id, which starts its drawings afresh. */
@@ -47,10 +48,19 @@ const MINIMAL_MOMENTS: StyleMoments = {
     celebrationBoardMs: 640,
 };
 
+// From the boards: each piece's press waits 100ms and runs 440ms; the card drops in once the boxes have
+// sprung up from the top left, while the last ones are still settling
+const TACTILE_MOMENTS: StyleMoments = {
+    loader: TactileLoader,
+    celebration: null,
+    groupEffectMs: 540,
+    celebrationBoardMs: 760,
+};
+
 // One entry per style, so a style added without its moments is a type error
 export const STYLE_MOMENTS: Record<StyleId, StyleMoments> = {
     minimal: MINIMAL_MOMENTS,
-    tactile: DEFAULT_MOMENTS,
+    tactile: TACTILE_MOMENTS,
     paper: DEFAULT_MOMENTS,
     pixel: DEFAULT_MOMENTS,
     cyber: DEFAULT_MOMENTS,
