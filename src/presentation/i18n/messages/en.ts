@@ -53,7 +53,7 @@ export const en = {
             redInk: "Red Ink",
             classic: "Classic",
         },
-        matchLauncherIcon: "Match launcher icon to theme",
+        matchLauncherIcon: "Match launcher icon to style",
         matchLauncherIconNote: "The icon updates after you leave the app",
         gameplay: "Gameplay",
         toggles: {

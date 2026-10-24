@@ -50,7 +50,7 @@ export const zhHant: MessageSchema = {
             redInk: "紅墨",
             classic: "經典",
         },
-        matchLauncherIcon: "App 圖示配合主題",
+        matchLauncherIcon: "App 圖示配合風格",
         matchLauncherIconNote: "離開 App 後圖示才會更新",
         gameplay: "遊戲",
         toggles: {
