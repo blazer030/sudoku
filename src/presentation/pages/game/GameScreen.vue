@@ -11,6 +11,7 @@
         <div class="flex flex-col items-center gap-6">
             <div
                 :class="hintMode.active.value ? 'ring-2 ring-primary/50' : 'ring-0 ring-transparent'"
+                :data-celebration="celebration ?? undefined"
                 :data-group-effect="groupEffect?.id"
                 :data-hint-mode="hintMode.active.value || undefined"
                 :data-selected-cell="selectedCellName"
@@ -163,6 +164,7 @@ const {
     showLeaveDialog,
     checkAndComplete,
     playGroupEffect,
+    celebration,
     groupEffect,
     isInGroupEffect,
 } = useGameSession({ onPlayAgain: () => { emit("playAgain"); } });

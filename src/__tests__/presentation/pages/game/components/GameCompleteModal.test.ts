@@ -17,7 +17,7 @@ const mountModal = (overrides: Partial<GameCompleteParams> = {}, onResult: (resu
         components: { GameCompleteModal },
         setup() {
             const modal = provideGameCompleteModal();
-            void modal.open({ elapsedSeconds: 120, difficulty: "easy", hintsUsed: 0, isNewRecord: false, ...overrides }).then(onResult);
+            void modal.open({ elapsedSeconds: 120, difficulty: "easy", hintsUsed: 0, isNewRecord: false, still: false, ...overrides }).then(onResult);
             return {};
         },
         template: "<GameCompleteModal />",
@@ -66,6 +66,11 @@ describe("GameCompleteModal", () => {
         expect(wrapper.find("[data-testid='complete-card']").attributes("data-skin")).toBe("card celebration");
         expect(wrapper.find("[data-testid='complete-difficulty']").attributes("data-skin")).toBe("tag");
         expect(wrapper.find("[data-testid='new-record-badge']").attributes("data-skin")).toBe("tag new-record");
+    });
+
+    it("should play the style's celebration, or show its still end state when asked", () => {
+        expect(mountModal().find("canvas").exists()).toBe(true);
+        expect(mountModal({ still: true }).find("canvas").exists()).toBe(false);
     });
 
     it("should not show the record badge otherwise", () => {

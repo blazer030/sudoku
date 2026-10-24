@@ -5,7 +5,10 @@
             class="fixed inset-0 bg-scrim/60 flex items-center justify-center z-50"
             data-testid="game-complete-modal"
         >
-            <component :is="moments.celebration" />
+            <component
+                :is="moments.celebration"
+                :still="params?.still ?? false"
+            />
             <div
                 class="bg-card rounded-3xl p-8 mx-6 w-full max-w-[354px] flex flex-col items-center gap-6 shadow-modal relative z-[52]"
                 data-skin="card celebration"

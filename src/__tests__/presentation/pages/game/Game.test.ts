@@ -907,6 +907,87 @@ describe("Game", () => {
         });
     });
 
+    describe("Celebration", () => {
+        const BOARD_MS = STYLE_MOMENTS.minimal.celebrationBoardMs;
+        const boardOfGame = (wrapper: GameWrapper) => wrapper.find("[data-testid='game-board']");
+        const modalOf = (wrapper: GameWrapper) => wrapper.find("[data-testid='game-complete-modal']");
+
+        afterEach(() => {
+            vi.unstubAllGlobals();
+        });
+
+        it("should play only the celebration on the solving entry, though it also completes a row, column and box", async () => {
+            vi.useFakeTimers();
+            const wrapper = mountGame("easy", nearlySolvedSudoku());
+
+            await fillLastCell(wrapper);
+
+            expect(wrapper.findAll("[data-group]")).toHaveLength(0);
+            expect(boardOfGame(wrapper).attributes("data-group-effect")).toBeUndefined();
+            expect(boardOfGame(wrapper).attributes("data-celebration")).toBe("playing");
+            expect(modalOf(wrapper).exists()).toBe(false);
+        });
+
+        it("should play only the celebration when Reveal Cell fills the last cell", async () => {
+            vi.useFakeTimers();
+            vi.spyOn(Sudoku.prototype, "planRevealHint").mockReturnValue({ kind: "noTechnique" });
+            const wrapper = mountGame("easy", nearlySolvedSudoku());
+
+            await openRevealCell(wrapper);
+
+            expect(wrapper.findAll("[data-group]")).toHaveLength(0);
+            expect(boardOfGame(wrapper).attributes("data-celebration")).toBe("playing");
+        });
+
+        it("should open the dialog once the board phase has run, and keep the board's end state", async () => {
+            vi.useFakeTimers();
+            const wrapper = mountGame("easy", nearlySolvedSudoku());
+            await fillLastCell(wrapper);
+
+            await vi.advanceTimersByTimeAsync(BOARD_MS - 1);
+            expect(modalOf(wrapper).exists()).toBe(false);
+
+            await vi.advanceTimersByTimeAsync(1);
+            expect(modalOf(wrapper).exists()).toBe(true);
+            expect(modalOf(wrapper).find("canvas").exists()).toBe(true);
+            expect(boardOfGame(wrapper).attributes("data-celebration")).toBe("done");
+        });
+
+        it("should show the still end state and open the dialog at once when motion is not allowed", async () => {
+            vi.stubGlobal("matchMedia", (query: string) => ({ matches: query === "(prefers-reduced-motion: reduce)", media: query }));
+            const wrapper = mountGame("easy", nearlySolvedSudoku());
+
+            await fillLastCell(wrapper);
+
+            expect(boardOfGame(wrapper).attributes("data-celebration")).toBe("still");
+            expect(modalOf(wrapper).exists()).toBe(true);
+            expect(modalOf(wrapper).find("canvas").exists()).toBe(false);
+        });
+
+        it("should leave no timer behind when the screen goes mid-celebration", async () => {
+            vi.useFakeTimers();
+            // Whatever an unsolved screen leaves behind is not the celebration's
+            mountGame("easy", nearlySolvedSudoku()).unmount();
+            const leftoverOfAnyScreen = vi.getTimerCount();
+            const wrapper = mountGame("easy", nearlySolvedSudoku());
+            await fillLastCell(wrapper);
+            expect(boardOfGame(wrapper).attributes("data-celebration")).toBe("playing");
+
+            wrapper.unmount();
+
+            expect(vi.getTimerCount()).toBe(leftoverOfAnyScreen);
+        });
+
+        it("should show no celebration for a game loaded already solved", () => {
+            const sudoku = nearlySolvedSudoku();
+            sudoku.fill(lastKnownEmptyCell.row, lastKnownEmptyCell.column, lastKnownEmptyCell.value);
+            const wrapper = mountGame("easy", sudoku);
+
+            expect(boardOfGame(wrapper).attributes("data-celebration")).toBeUndefined();
+            expect(modalOf(wrapper).exists()).toBe(false);
+        });
+    });
+
     describe("Hint System", () => {
         it("should show HintMenuPopup when clicking Hint button", async () => {
             const wrapper = mountGame();

@@ -6,6 +6,8 @@ export interface GameCompleteParams {
     difficulty: Difficulty;
     hintsUsed: number;
     isNewRecord: boolean;
+    /** Motion is not allowed: the celebration shows its still end state. */
+    still: boolean;
 }
 
 export type GameCompleteAction = "playAgain" | "review" | "home";
