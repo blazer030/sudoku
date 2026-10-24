@@ -89,7 +89,7 @@ describe("GameCompleteModal", () => {
     });
 
     it("should tag the title for styles to decorate", () => {
-        expect(mountModal().find("[data-testid='complete-card'] h2").attributes("data-skin")).toBe("title");
+        expect(mountModal().find("[data-testid='complete-card'] h2").attributes("data-skin")).toBe("complete-title");
     });
 
     describe("card decoration", () => {

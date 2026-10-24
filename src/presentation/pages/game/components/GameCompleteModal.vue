@@ -35,7 +35,7 @@
                 <div class="flex flex-col items-center gap-2">
                     <h2
                         class="text-[28px] font-bold text-foreground tracking-tight"
-                        data-skin="title"
+                        data-skin="complete-title"
                     >
                         {{ t("game.complete.title") }}
                     </h2>

@@ -531,11 +531,11 @@
     animation: paper-card-land 480ms ease-out 20ms backwards, paper-card-sink 180ms ease-out 1020ms;
 }
 
-[data-style="paper"] [data-skin~="card"][data-skin~="celebration"] [data-skin~="title"] {
+[data-style="paper"] [data-skin~="card"][data-skin~="celebration"] [data-skin~="complete-title"] {
     position: relative;
 }
 
-[data-style="paper"] [data-skin~="card"][data-skin~="celebration"] [data-skin~="title"]::after {
+[data-style="paper"] [data-skin~="card"][data-skin~="celebration"] [data-skin~="complete-title"]::after {
     content: "";
     position: absolute;
     left: calc(50% - 92px);
@@ -548,7 +548,7 @@
     mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 184 14'%3E%3Cpath d='M3 9C33 3 59 13 94 7S154 3 181 8' fill='none' stroke='currentColor' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
 }
 
-[data-style="paper"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) [data-skin~="title"]::after {
+[data-style="paper"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) [data-skin~="complete-title"]::after {
     animation: paper-circle-draw 480ms ease-out 420ms backwards;
 }
 
@@ -624,7 +624,7 @@
     [data-style="paper"] .paper-group-box .paper-group-stroke,
     [data-style="paper"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"]) > div::after,
     [data-style="paper"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]),
-    [data-style="paper"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) [data-skin~="title"]::after,
+    [data-style="paper"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) [data-skin~="complete-title"]::after,
     [data-style="paper"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) .paper-stamp,
     [data-style="paper"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) .paper-stamp-splat {
         animation: none;

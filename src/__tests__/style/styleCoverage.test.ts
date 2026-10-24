@@ -48,7 +48,7 @@ const REQUIRED_SELECTORS: Record<StyleId, readonly string[]> = {
         "[data-group]",
         '[data-celebration="playing"]',
         '[data-celebration="still"]',
-        '[data-skin~="title"]',
+        '[data-skin~="complete-title"]',
         '[data-skin~="celebration"]:not([data-still])',
         ".paper-loader-line",
         ".paper-group-stroke",

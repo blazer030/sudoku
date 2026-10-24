@@ -15,8 +15,8 @@ const CHECK = `${BOARD}:is([data-celebration="playing"], [data-celebration="done
 const DRAWING_CHECK = `${BOARD}:is([data-celebration="playing"], [data-celebration="done"]) > div::after`;
 const CARD = `${SCOPE} [data-skin~="card"][data-skin~="celebration"]`;
 const LANDING_CARD = `${CARD}:not([data-still])`;
-const UNDERLINE = `${CARD} [data-skin~="title"]::after`;
-const DRAWING_UNDERLINE = `${LANDING_CARD} [data-skin~="title"]::after`;
+const UNDERLINE = `${CARD} [data-skin~="complete-title"]::after`;
+const DRAWING_UNDERLINE = `${LANDING_CARD} [data-skin~="complete-title"]::after`;
 const STAMP = `${SCOPE} .paper-stamp`;
 const STAMPING = `${LANDING_CARD} .paper-stamp`;
 const SPLAT = `${SCOPE} .paper-stamp-splat`;
