@@ -139,6 +139,21 @@ describe("useGroupEffect", () => {
         expect(first).toHaveBeenCalledOnce();
     });
 
+    it("should stop a running effect without calling its onComplete, leaving no timer", () => {
+        vi.useFakeTimers();
+        const { play, stop, effect, isInEffect } = useGroupEffect(() => true, () => EFFECT_MS);
+        const onComplete = vi.fn();
+        play(ROW_0, rowCells(0), { row: 0, column: 4 }, onComplete);
+
+        stop();
+
+        expect(effect.value).toBeNull();
+        expect(isInEffect(0, 0)).toEqual([]);
+        expect(vi.getTimerCount()).toBe(0);
+        vi.advanceTimersByTime(4 * GROUP_RIPPLE_STEP_MS + EFFECT_MS);
+        expect(onComplete).not.toHaveBeenCalled();
+    });
+
     it("should leave no timer behind when its scope ends", () => {
         vi.useFakeTimers();
         const scope = effectScope();

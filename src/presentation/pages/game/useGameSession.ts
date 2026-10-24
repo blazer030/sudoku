@@ -94,7 +94,9 @@ export const useGameSession = ({ onPlayAgain }: GameSessionOptions) => {
                     still,
                 }).then(handleCompleteAction);
             };
-            // The solving entry plays the style's celebration alone: its board phase, then the dialog
+            // The solving entry plays the style's celebration alone: its board phase, then the dialog.
+            // A group effect still running from the entry before ends here.
+            groupEffect.stop();
             if (!motionAllowed()) {
                 celebration.value = "still";
                 openDialog(true);

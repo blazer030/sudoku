@@ -928,6 +928,31 @@ describe("Game", () => {
             expect(modalOf(wrapper).exists()).toBe(false);
         });
 
+        it("should stop a group effect still running from the entry before, once the celebration starts", async () => {
+            vi.useFakeTimers();
+            // Every gap filled but the last and one outside its row, column and box, which completes a row
+            const last = lastKnownEmptyCell;
+            const sameBox = (row: number, column: number) =>
+                Math.floor(row / 3) === Math.floor(last.row / 3) && Math.floor(column / 3) === Math.floor(last.column / 3);
+            const gaps = knownPuzzle.flatMap((cells, row) => cells.flatMap((clue, column) => clue === 0 ? [{ row, column }] : []));
+            const [before] = gaps.filter(({ row, column }) => row !== last.row && column !== last.column && !sameBox(row, column));
+            const sudoku = createKnownSudoku();
+            for (const { row, column } of gaps) {
+                if ((row === before.row && column === before.column) || (row === last.row && column === last.column)) continue;
+                sudoku.fill(row, column, knownAnswer[row][column]);
+            }
+            const wrapper = mountGame("easy", sudoku);
+            await wrapper.find(`[data-testid='cell-${before.row}-${before.column}']`).trigger("click");
+            await wrapper.find(`[data-testid='number-${knownAnswer[before.row][before.column]}']`).trigger("click");
+            expect(wrapper.findAll("[data-group]").length).toBeGreaterThan(0);
+
+            await fillLastCell(wrapper);
+
+            expect(wrapper.findAll("[data-group]")).toHaveLength(0);
+            expect(boardOfGame(wrapper).attributes("data-group-effect")).toBeUndefined();
+            expect(boardOfGame(wrapper).attributes("data-celebration")).toBe("playing");
+        });
+
         it("should play only the celebration when Reveal Cell fills the last cell", async () => {
             vi.useFakeTimers();
             vi.spyOn(Sudoku.prototype, "planRevealHint").mockReturnValue({ kind: "noTechnique" });

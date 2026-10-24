@@ -33,6 +33,12 @@ export const useGroupEffect = (motionAllowed: () => boolean, durationMs: () => n
         onComplete?.();
     };
 
+    // Ends the running effect at once, its onComplete dropped: what waited on it no longer applies
+    const stop = () => {
+        pendingComplete = undefined;
+        end();
+    };
+
     const play = (groups: CompletedGroup[], cells: CellPosition[], origin: CellPosition, onComplete?: () => void) => {
         // A new effect replaces a running one; whatever waited on the old one is not left hanging
         if (effect.value !== null) end();
@@ -71,5 +77,5 @@ export const useGroupEffect = (motionAllowed: () => boolean, durationMs: () => n
         });
     }
 
-    return { play, effect, isInEffect };
+    return { play, stop, effect, isInEffect };
 };
