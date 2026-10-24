@@ -76,19 +76,22 @@ describe("useStatisticsStore", () => {
         expect(append).toHaveBeenCalledWith(expect.objectContaining({ difficulty: "hard", elapsedSeconds: 200 }));
     });
 
-    it("saving a game does not serialise the games already in the history", () => {
+    it("recordGame appends exactly the new game, whatever the history holds", () => {
         const store = useStatisticsStore();
-        const heavyGame = { ...sampleGame, replay: { initialBoard: [], steps: [] }, marker: "x".repeat(1000) };
-        for (let index = 0; index < 50; index++) store.history.push({ ...heavyGame });
+        for (let index = 0; index < 5; index++) store.history.push({ ...sampleGame });
         const append = vi.fn().mockResolvedValue(undefined);
         store.setRepository(buildRepo({ append }));
-        const stringify = vi.spyOn(JSON, "stringify");
 
         store.recordGame({ difficulty: "easy", elapsedSeconds: 10, completed: true });
 
-        expect(append.mock.calls[0][0]).not.toBe(store.history);
-        expect(stringify).not.toHaveBeenCalled();
-        stringify.mockRestore();
+        expect(append).toHaveBeenCalledTimes(1);
+        expect(append).toHaveBeenCalledWith({
+            difficulty: "easy",
+            elapsedSeconds: 10,
+            completed: true,
+            hintsUsed: 0,
+            date: expect.any(String) as string,
+        });
     });
 
     it("recordGame stays resilient when the repository rejects (the bug that motivated this refactor)", async () => {

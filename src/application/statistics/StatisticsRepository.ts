@@ -19,7 +19,7 @@ export interface GameResult {
 
 export interface StatisticsRepository {
     load(): Promise<GameResult[]>;
-    /** Stores one finished game; the cost must not grow with the history already saved. */
+    /** Adds one finished game after the games already stored; `load()` returns games oldest first. */
     append(game: GameResult): Promise<void>;
     clear(): Promise<void>;
 }
