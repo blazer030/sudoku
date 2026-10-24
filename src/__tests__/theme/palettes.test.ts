@@ -1,5 +1,6 @@
 import { STYLE_IDS, THEME_IDS_BY_STYLE, STYLE_COLOR_MODES, type ColorThemeId } from "@/theme/themeIds";
 import { STYLES, getPalette, rememberedThemeFor, systemBarColor } from "@/theme/palettes";
+import { darkOnlyThemeBuilder } from "@/theme/paletteBuilder";
 import { contrastRatio } from "@/theme/contrast";
 
 describe("palettes", () => {
@@ -10,10 +11,65 @@ describe("palettes", () => {
         }
     });
 
+    it("should give each theme a palette for exactly the modes its style has", () => {
+        for (const style of STYLE_IDS) {
+            for (const theme of STYLES[style].themes) {
+                const modes = (["light", "dark"] as const).filter(mode => theme[mode] !== undefined);
+                expect(modes, `${style}/${theme.id}`).toEqual([...STYLE_COLOR_MODES[style]]);
+            }
+        }
+    });
+
+    // Cyber sets its own neon ink, signal and signal surface
+    it("should alias primary-ink, signal and signal-surface to the primary, highlight and primary-light outside cyber", () => {
+        for (const style of STYLE_IDS.filter(id => id !== "cyber")) {
+            for (const theme of STYLES[style].themes) {
+                for (const palette of [theme.light, theme.dark]) {
+                    if (palette === undefined) continue;
+                    expect(palette["primary-ink"], `${style}/${theme.id}`).toBe(palette.primary);
+                    expect(palette.signal, `${style}/${theme.id}`).toBe(palette.highlight);
+                    expect(palette["signal-surface"], `${style}/${theme.id}`).toBe(palette["primary-light"]);
+                }
+            }
+        }
+    });
+
+    it("should give cyber its own neon ink, signal and signal surface", () => {
+        const palette = getPalette("cyber", "neon", "dark");
+
+        expect(palette["primary-ink"]).toBe("#FF5AE0");
+        expect(palette.signal).toBe("#FCEE0A");
+        expect(palette["signal-surface"]).toBe("#3A3506");
+    });
+
+    it("should give cyber one dark-only theme on a near-black page", () => {
+        expect(STYLES.cyber.themes.map(theme => theme.id)).toEqual(["neon"]);
+        expect(STYLES.cyber.themes[0].light).toBeUndefined();
+        expect(getPalette("cyber", "neon", "light")).toEqual(getPalette("cyber", "neon", "dark"));
+        expect(getPalette("cyber", "neon", "dark").background).toBe("#07070D");
+    });
+
+    it("should let a style set a board tint directly instead of deriving it from the primary", () => {
+        const build = darkOnlyThemeBuilder({ ...getPalette("minimal", "green", "dark") }, { "cell-peer": "#123456", signal: "#FFE600" });
+        const theme = build("green", { primary: "#00F0FF", "primary-hover": "#40F4FF", accent: "#FF2BD6" });
+
+        expect(theme.dark?.["cell-peer"]).toBe("#123456");
+        expect(theme.dark?.signal).toBe("#FFE600");
+    });
+
+    it("should build a dark-only theme with a dark palette and no light one", () => {
+        const neutrals = { ...getPalette("minimal", "green", "dark") };
+        const build = darkOnlyThemeBuilder(neutrals);
+        const theme = build("green", { primary: "#00F0FF", "primary-hover": "#40F4FF", accent: "#FF2BD6" });
+
+        expect(theme.light).toBeUndefined();
+        expect(theme.dark?.primary).toBe("#00F0FF");
+    });
+
     it("should use upper-case six-digit hex values everywhere", () => {
         for (const style of Object.values(STYLES)) {
             for (const theme of style.themes) {
-                for (const value of [...Object.values(theme.light), ...Object.values(theme.dark ?? {})]) {
+                for (const value of [...Object.values(theme.light ?? {}), ...Object.values(theme.dark ?? {})]) {
                     expect(value).toMatch(/^#[0-9A-F]{6}$/);
                 }
             }
@@ -92,7 +148,7 @@ describe("palettes", () => {
     });
 
     it("should keep paper's lines invisible in other styles", () => {
-        for (const style of [STYLES.minimal, STYLES.tactile, STYLES.pixel]) {
+        for (const style of [STYLES.minimal, STYLES.tactile, STYLES.pixel, STYLES.cyber]) {
             for (const theme of style.themes) {
                 for (const mode of STYLE_COLOR_MODES[style.id]) {
                     const palette = getPalette(style.id, theme.id, mode);

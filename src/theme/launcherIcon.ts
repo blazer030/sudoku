@@ -1,6 +1,7 @@
 // The app icons: one per style's theme in each colour mode the style has. The generator scripts
 // import this too, so relative imports only.
 import {
+    effectiveColorMode,
     STYLE_COLOR_MODES,
     STYLE_IDS,
     THEME_IDS_BY_STYLE,
@@ -30,6 +31,10 @@ export const launcherIconKey = (style: StyleId, themeId: ColorThemeId, mode: Col
     if (style === "minimal" && mode === "light") return themeId;
     return `${style}${capitalize(themeId)}${mode === "dark" ? "Dark" : ""}`;
 };
+
+/** The icon an installed web app uses: the style's light icon, or its only one. */
+export const pwaIconKey = (style: StyleId, themeId: ColorThemeId): LauncherIconKey =>
+    launcherIconKey(style, themeId, effectiveColorMode(style, "light"));
 
 export const LAUNCHER_ICONS: readonly LauncherIcon[] = STYLE_IDS.flatMap(style =>
     STYLES[style].themes.flatMap(theme => STYLE_COLOR_MODES[style].map(mode => ({

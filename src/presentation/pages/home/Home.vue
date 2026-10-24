@@ -6,6 +6,8 @@
         <div class="flex flex-col items-center gap-2">
             <div
                 class="w-20 h-20 bg-primary rounded-popup flex items-center justify-center shadow-primary-lg"
+                data-skin="logo"
+                data-testid="home-logo"
             >
                 <div class="grid grid-cols-3 gap-1 w-12 h-12">
                     <div class="rounded-sm bg-on-primary/40" />

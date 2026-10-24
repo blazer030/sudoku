@@ -15,20 +15,24 @@
             // BEGIN theme-color data: systemBarColor() per style and theme. noFlashScript.test.ts keeps it in sync.
             var barColors = {
                 minimal: {
-                    dark: "#111110",
+                    dark: { green: "#111110", blue: "#111110", purple: "#111110", orange: "#111110", pink: "#111110", teal: "#111110" },
                     light: { green: "#176037", blue: "#2C5689", purple: "#614887", orange: "#7D4800", pink: "#863C55", teal: "#0A5E5F" }
                 },
                 tactile: {
-                    dark: "#1A1C1F",
+                    dark: { green: "#1A1C1F", blue: "#1A1C1F", rust: "#1A1C1F", slate: "#1A1C1F" },
                     light: { green: "#1F5C3A", blue: "#24508A", rust: "#782F16", slate: "#34506E" }
                 },
-                // Paper is light-only: no dark entry
+                // A style lists only the modes it has: paper is light only, so it has no dark entry
                 paper: {
                     light: { blueInk: "#2B4A7A", greenInk: "#235A3C", redInk: "#8E2533" }
                 },
                 pixel: {
-                    dark: "#000000",
+                    dark: { classic: "#000000" },
                     light: { classic: "#0F380F" }
+                },
+                // Dark only: no light entry
+                cyber: {
+                    dark: { neon: "#07070D" }
                 }
             };
             // END theme-color data
@@ -41,24 +45,26 @@
             }
             var root = document.documentElement;
             var style = has(barColors, settings.style) ? settings.style : "minimal";
-            var lightColors = barColors[style].light;
+            var bar = barColors[style];
+            // The theme list is the keys of whichever mode the style has (both list the same themes)
+            var themeColors = bar.light || bar.dark;
             // A theme of another style falls back to the style's remembered theme, then its first
             // (key order follows THEME_IDS_BY_STYLE), as loadSettings() does
             var remembered = settings.colorThemeByStyle || {};
-            var colorTheme = has(lightColors, settings.colorTheme) ? settings.colorTheme
-                : has(lightColors, remembered[style]) ? remembered[style]
-                    : Object.keys(lightColors)[0];
+            var colorTheme = has(themeColors, settings.colorTheme) ? settings.colorTheme
+                : has(themeColors, remembered[style]) ? remembered[style]
+                    : Object.keys(themeColors)[0];
             root.setAttribute("data-style", style);
             root.setAttribute("data-color-theme", colorTheme);
             var systemDark = typeof window.matchMedia === "function"
                 && window.matchMedia("(prefers-color-scheme: dark)").matches;
             // A stored "system" (or nothing) follows the system for this first paint; the app then
-            // migrates it. A style without a dark entry is light-only.
-            var dark = has(barColors[style], "dark")
-                && (settings.appearance === "dark" || (settings.appearance !== "light" && systemDark));
+            // migrates it. A style with one mode is always in it.
+            var dark = !has(bar, "light")
+                || (has(bar, "dark") && (settings.appearance === "dark" || (settings.appearance !== "light" && systemDark)));
             if (dark) root.classList.add("dark");
             var meta = document.querySelector('meta[name="theme-color"]');
-            if (meta) meta.setAttribute("content", dark ? barColors[style].dark : lightColors[colorTheme]);
+            if (meta) meta.setAttribute("content", (dark ? bar.dark : bar.light)[colorTheme]);
         })();
     </script>
     <!-- Fonts are bundled (src/style/fonts.css), so every style reads the same offline -->

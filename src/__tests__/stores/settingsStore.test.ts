@@ -2,7 +2,7 @@ import { createPinia, setActivePinia } from "pinia";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { updateManifestLink, updateAppleTouchIcon } from "@/application/PwaThemeUpdater";
 import { STYLE_IDS, THEME_IDS_BY_STYLE } from "@/theme/themeIds";
-import { launcherIconKey } from "@/theme/launcherIcon";
+import { pwaIconKey } from "@/theme/launcherIcon";
 
 // Spies that still update the page links, so tests can read the hrefs too
 vi.mock("@/application/PwaThemeUpdater", async (importOriginal) => {
@@ -93,6 +93,18 @@ describe("settingsStore", () => {
         expect(store.style).toBe("minimal");
     });
 
+    it("should keep a light appearance through a visit to the dark-only cyber", () => {
+        const store = useSettingsStore();
+        store.setAppearance("light");
+        store.setColorTheme("blue");
+
+        store.setStyle("cyber");
+        store.setStyle("minimal");
+
+        expect(store.appearance).toBe("light");
+        expect(store.colorTheme).toBe("blue");
+    });
+
     it("should persist the chosen style", () => {
         const store = useSettingsStore();
 
@@ -173,7 +185,7 @@ describe("settingsStore", () => {
                 store.setStyle(style);
                 for (const theme of THEME_IDS_BY_STYLE[style]) {
                     store.setColorTheme(theme);
-                    const key = launcherIconKey(style, theme, "light");
+                    const key = pwaIconKey(style, theme);
                     expect(linkHref("manifest"), `${style}/${theme}`).toMatch(new RegExp(`/manifest-${key}\\.webmanifest$`));
                     expect(linkHref("apple-touch-icon"), `${style}/${theme}`).toMatch(new RegExp(`/apple-touch-icon-${key}\\.png$`));
                 }

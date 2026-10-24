@@ -100,6 +100,12 @@ describe("Home", () => {
         for (const glyph of glyphs) expect(glyph.attributes("data-skin")).toBe("title-glyph");
     });
 
+    it("should mark the logo box for styles to decorate", () => {
+        const { wrapper } = mountHome();
+
+        expect(wrapper.get("[data-testid='home-logo']").attributes("data-skin")).toBe("logo");
+    });
+
     it("should keep an English title whole", () => {
         const { wrapper } = mountHome();
 

@@ -126,8 +126,22 @@ describe("pixel skin", () => {
         expect(layers.some(layer => layer.offsetX > 0 && layer.offsetY > 0)).toBe(false);
     });
 
-    it.each(["key", "control", "button", "tile", "segmented", "badge", "board"])("should square the corners of %s", (token) => {
+    it.each(["key", "control", "button", "tile", "segmented", "segment", "badge", "board"])("should square the corners of %s", (token) => {
         expect(declarationsOf(PIXEL_CSS, skin(token)).get("border-radius")).toBe("0");
+    });
+
+    it("should draw a segmented control as separate framed blocks, the chosen one solid, with no strip or sliding indicator", () => {
+        const strip = declarationsOf(PIXEL_CSS, skin("segmented"));
+        const segment = declarationsOf(PIXEL_CSS, skin("segment"));
+        const chosen = declarationsOf(PIXEL_CSS, `${skin("segment")}[aria-pressed="true"]`);
+
+        expect(strip.get("--segmented-gap")).toBe("10px");
+        expect(strip.get("--segmented-padding")).toBe("0px");
+        expect(strip.get("background")).toBe("none");
+        expect(strip.get("box-shadow")).toBe("none");
+        expect(declarationsOf(PIXEL_CSS, skin("segmented-indicator")).get("visibility")).toBe("hidden");
+        expect(segment.get("box-shadow")).toBe("var(--pixel-frame-bars)");
+        expect(chosen.get("background-color")).toBe("var(--pixel-ink)");
     });
 
     it("should draw the continue card's chips as a frame without the tint", () => {

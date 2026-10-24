@@ -3,7 +3,7 @@ import { writeFileSync, mkdirSync } from "fs";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
 import { ICON_VARIANTS, roundedIconSvg, type IconVariant } from "./iconArtwork";
-import { LAUNCHER_ICONS } from "../src/theme/launcherIcon";
+import { LAUNCHER_ICONS, pwaIconKey } from "../src/theme/launcherIcon";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -36,8 +36,8 @@ const generateManifest = ({ id, palette }: IconVariant): string =>
         2,
     );
 
-// Installed web apps keep the light icon, so only the light variants get a manifest and PNGs
-const LIGHT_KEYS = new Set(LAUNCHER_ICONS.filter(icon => icon.mode === "light").map(icon => icon.key));
+// Installed web apps keep the light icon (or the style's only one), so only those get a manifest and PNGs
+const PWA_KEYS = new Set(LAUNCHER_ICONS.filter(icon => icon.key === pwaIconKey(icon.style, icon.themeId)).map(icon => icon.key));
 
 const main = async () => {
     mkdirSync(PUBLIC_DIR, { recursive: true });
@@ -45,7 +45,7 @@ const main = async () => {
     for (const variant of ICON_VARIANTS) {
         const svg = roundedIconSvg(variant);
         writeFileSync(resolve(PUBLIC_DIR, `sudoku-${variant.id}.svg`), svg);
-        if (!LIGHT_KEYS.has(variant.id)) continue;
+        if (!PWA_KEYS.has(variant.id)) continue;
 
         const [png192, png512] = await Promise.all([
             generatePngFromSvg(svg, 192),
@@ -57,7 +57,7 @@ const main = async () => {
         writeFileSync(resolve(PUBLIC_DIR, `manifest-${variant.id}.webmanifest`), generateManifest(variant));
     }
 
-    console.log(`Done! ${ICON_VARIANTS.length} favicons and ${LIGHT_KEYS.size} PWA icon sets generated.`);
+    console.log(`Done! ${ICON_VARIANTS.length} favicons and ${PWA_KEYS.size} PWA icon sets generated.`);
 };
 
 main().catch((err: unknown) => {

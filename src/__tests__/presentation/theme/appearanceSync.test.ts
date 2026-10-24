@@ -245,6 +245,7 @@ describe("startAppearanceSync", () => {
             Reflect.deleteProperty(document, "fonts");
             delete document.documentElement.dataset.paperFonts;
             delete document.documentElement.dataset.pixelFonts;
+            delete document.documentElement.dataset.cyberFonts;
         });
 
         it("should mark paper's fonts ready once Caveat's digits have loaded", async () => {
@@ -273,6 +274,20 @@ describe("startAppearanceSync", () => {
             expect(families).toContain("Silkscreen");
             expect(families).toContain("Cubic 11");
             expect(document.documentElement.dataset.pixelFonts).toBe("ready");
+        });
+
+        it("should mark cyber's fonts ready once Orbitron and Share Tech Mono have loaded", async () => {
+            const load = stubFontLoading(1);
+            const sources = buildSources("neon", "dark", "cyber");
+            stop = startAppearanceSync(sources, systemBar, appearanceBridge);
+            expect(document.documentElement.dataset.cyberFonts).toBeUndefined();
+
+            await finishLoadingFonts();
+
+            const families = load.mock.calls.map(([font]) => font).join(" ");
+            expect(families).toContain("Orbitron");
+            expect(families).toContain("Share Tech Mono");
+            expect(document.documentElement.dataset.cyberFonts).toBe("ready");
         });
 
         it("should drop pixel's ready mark when leaving pixel", async () => {

@@ -76,6 +76,12 @@ const SAMPLES: Record<StyleId, ArtworkSample[]> = {
         // The box's left line
         { x: 21, y: 40, token: "foreground", fine: true },
     ],
+    cyber: [
+        { x: 5.4, y: 54, token: "background" },
+        { x: -20, y: 54, token: "background", foregroundOnly: true },
+        // The cursor bar's yellow bracket; the glowing parts blur, so a rasteriser's rounding moves their colours
+        { x: 42, y: 47, token: "signal", fine: true },
+    ],
 };
 const samplesAt = (style: StyleId, mode: ColorMode, density: string) => SAMPLES[style]
     .filter(sample => (!sample.fine || density === "xxxhdpi") && (!sample.mode || sample.mode === mode));

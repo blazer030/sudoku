@@ -322,7 +322,41 @@ const pixelColors = (palette: Palette): PixelColors => isDark(palette)
         cursor: palette.shadow,
     };
 
-const artworkOf = (style: StyleId, palette: Palette, bleed = 0): string[] => {
+// Cyberpunk: a cut-corner board outline in a cyan-to-magenta glow over a perspective floor, a cyan grid,
+// a magenta cursor bar with yellow corner brackets, and two cyan squares. Ported from the style-research
+// generator (icons.py). The gradient and glow are referenced by id, so an icon given a suffix keeps its
+// ids apart from every other copy on the page (the 外觀 page draws several icons).
+const CYBER_FLOOR = [
+    `M0 78 L108 78`,
+    `M0 86 L108 86 M0 96 L108 96 M20 108 L42 78 M54 108 L54 78 M88 108 L66 78`,
+];
+const CYBER_OUTLINE = "M32 22 H86 V70 L76 80 H22 V32 Z";
+const CYBER_GRID = "M40 30 V72 M68 30 V72 M30 44 H78 M30 58 H78";
+const CYBER_BRACKETS = "M44 47 h-4 v4 M64 55 h4 v-4";
+const CYBER_SQUARES = [[31, 31], [71, 61]] as const;
+
+const cyberIds = (idSuffix: string) => {
+    const tail = idSuffix === "" ? "" : `-${idSuffix}`;
+    return { edge: `cyber-edge${tail}`, glow: `cyber-glow${tail}` };
+};
+
+const cyberArtwork = (palette: Palette, idSuffix: string): string[] => {
+    const ids = cyberIds(idSuffix);
+    const glow = `filter="url(#${ids.glow})"`;
+    return [
+        `<defs><linearGradient id="${ids.edge}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${palette.accent}"/><stop offset="1" stop-color="${palette.primary}"/></linearGradient>`,
+        `<filter id="${ids.glow}" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="2.2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>`,
+        `<path d="${CYBER_FLOOR[0]}" stroke="${palette.primary}" stroke-opacity="0.25"/>`,
+        `<path d="${CYBER_FLOOR[1]}" stroke="${palette.primary}" stroke-opacity="0.18"/>`,
+        `<path d="${CYBER_OUTLINE}" fill="none" stroke="url(#${ids.edge})" stroke-width="2.4" ${glow}/>`,
+        `<path d="${CYBER_GRID}" stroke="${palette.accent}" stroke-opacity="0.45" stroke-width="1.2"/>`,
+        `<rect x="44" y="47" width="20" height="8" fill="${palette.primary}" ${glow}/>`,
+        `<path d="${CYBER_BRACKETS}" fill="none" stroke="${palette.signal}" stroke-width="2"/>`,
+        ...CYBER_SQUARES.map(([x, y]) => `<rect x="${x}" y="${y}" width="6" height="6" fill="${palette.accent}" ${glow}/>`),
+    ];
+};
+
+const artworkOf = (style: StyleId, palette: Palette, bleed = 0, idSuffix = ""): string[] => {
     switch (style) {
         case "minimal": return minimalTiles(palette["on-primary"]);
         case "tactile": return tactileArtwork(tactileColors(palette));
@@ -331,6 +365,7 @@ const artworkOf = (style: StyleId, palette: Palette, bleed = 0): string[] => {
             return [...paperSheet(colors, bleed), ...paperWriting(colors)];
         }
         case "pixel": return pixelArtwork(pixelColors(palette));
+        case "cyber": return cyberArtwork(palette, idSuffix);
     }
 };
 
@@ -338,9 +373,12 @@ const artworkOf = (style: StyleId, palette: Palette, bleed = 0): string[] => {
 export const styleIconBackground = (style: StyleId, palette: Palette): string =>
     style === "minimal" ? palette.primary : palette.background;
 
-/** A style's icon as a full 108-unit square SVG in the palette's colours, unrounded. */
-export const styleIconSvg = (style: StyleId, palette: Palette): string =>
-    svgOf(fillSquare(styleIconBackground(style, palette)), ...artworkOf(style, palette));
+/**
+ * A style's icon as a full 108-unit square SVG in the palette's colours, unrounded. An icon that uses
+ * ids (cyberpunk's gradient and glow) takes `idSuffix` into them, so copies on one page do not share.
+ */
+export const styleIconSvg = (style: StyleId, palette: Palette, idSuffix = ""): string =>
+    svgOf(fillSquare(styleIconBackground(style, palette)), ...artworkOf(style, palette, 0, idSuffix));
 
 /**
  * The adaptive icon's foreground layer: minimal's tiles alone; the other styles' whole artwork,
@@ -365,6 +403,13 @@ const monochromeArtwork = (style: StyleId): string[] => {
         case "paper": return paperWriting({ ink: color, circle: color });
         // The hearts, the box and its digits
         case "pixel": return pixelArtwork({ line: color, given: color, centreDigit: color, heart: color });
+        // The board outline, grid, cursor bar and squares
+        case "cyber": return [
+            `<path d="${CYBER_OUTLINE}" fill="none" stroke="${color}" stroke-width="2.4"/>`,
+            `<path d="${CYBER_GRID}" stroke="${color}" stroke-width="1.2"/>`,
+            `<rect x="44" y="47" width="20" height="8" fill="${color}"/>`,
+            ...CYBER_SQUARES.map(([x, y]) => `<rect x="${x}" y="${y}" width="6" height="6" fill="${color}"/>`),
+        ];
     }
 };
 

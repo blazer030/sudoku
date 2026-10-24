@@ -6,6 +6,7 @@
 @import "./styles/tactile/skin.css";
 @import "./styles/paper/skin.css";
 @import "./styles/pixel/skin.css";
+@import "./styles/cyber/skin.css";
 
 @variant dark (&:where(.dark, .dark *));
 
@@ -34,6 +35,8 @@
   --font-pixel-digits: "Press Start 2P", "Cubic 11", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", monospace;
   --font-pixel: "Cubic 11", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
   --font-pixel-note: "Silkscreen", "Cubic 11", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", monospace;
+  --font-cyber-digits: "Orbitron", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+  --font-cyber-mono: "Share Tech Mono", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", monospace;
   --font-print: "Times New Roman", "Noto Serif TC", "Songti TC", "PMingLiU", serif;
   /* Board, key and timer faces; a style may point them at its own stacks */
   --font-clue: var(--font-sans);

@@ -3,12 +3,20 @@ import {
     LAUNCHER_ICONS,
     LEGACY_LAUNCHER_ALIASES,
     launcherIconKey,
+    pwaIconKey,
     launcherResourceName,
 } from "@/theme/launcherIcon";
 import { STYLES } from "@/theme/palettes";
 import { ICON_THEME_IDS, STYLE_COLOR_MODES, STYLE_IDS } from "@/theme/themeIds";
 
 describe("launcher icons", () => {
+    it("should name the icon an installed web app uses: the light one, or the style's only one", () => {
+        expect(pwaIconKey("paper", "blueInk")).toBe("paperBlueInk");
+        expect(pwaIconKey("minimal", "green")).toBe("green");
+        expect(pwaIconKey("pixel", "classic")).toBe("pixelClassic");
+        expect(pwaIconKey("cyber", "neon")).toBe("cyberNeonDark");
+    });
+
     it("should keep the bare theme id for minimal's light icons, whose aliases existing shortcuts point at", () => {
         for (const id of ICON_THEME_IDS) {
             expect(launcherIconKey("minimal", id, "light")).toBe(id);
@@ -29,7 +37,7 @@ describe("launcher icons", () => {
         const iconCount = STYLE_IDS.reduce((sum, style) => sum + STYLES[style].themes.length * STYLE_COLOR_MODES[style].length, 0);
 
         expect(LAUNCHER_ICONS).toHaveLength(iconCount);
-        expect(LAUNCHER_ICONS).toHaveLength(25);
+        expect(LAUNCHER_ICONS).toHaveLength(26);
         expect(new Set(LAUNCHER_ICONS.map(icon => icon.key)).size).toBe(LAUNCHER_ICONS.length);
         for (const icon of LAUNCHER_ICONS) {
             expect(icon.key).toBe(launcherIconKey(icon.style, icon.themeId, icon.mode));
@@ -38,6 +46,13 @@ describe("launcher icons", () => {
 
     it("should give pixel a handheld and a console icon", () => {
         expect(LAUNCHER_ICONS.filter(icon => icon.style === "pixel").map(icon => icon.key)).toEqual(["pixelClassic", "pixelClassicDark"]);
+    });
+
+    it("should give cyber its one dark icon and no light one", () => {
+        const keys = LAUNCHER_ICONS.map(icon => icon.key);
+
+        expect(keys).toContain("cyberNeonDark");
+        expect(keys).not.toContain("cyberNeon");
     });
 
     it("should give paper no dark icon now that paper is light only", () => {

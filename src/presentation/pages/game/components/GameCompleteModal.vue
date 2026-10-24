@@ -8,7 +8,8 @@
             <FireworkCanvas />
             <div
                 class="bg-card rounded-3xl p-8 mx-6 w-full max-w-[354px] flex flex-col items-center gap-6 shadow-modal relative z-[52]"
-                data-skin="card"
+                data-skin="card celebration"
+                data-testid="complete-card"
             >
                 <div class="w-20 h-20 rounded-full bg-primary-light flex items-center justify-center">
                     <Trophy
@@ -24,11 +25,13 @@
                     <div class="flex flex-wrap items-center justify-center gap-2">
                         <span
                             class="bg-accent/10 text-accent text-[13px] font-semibold rounded-full px-2.5 py-1"
+                            data-skin="tag"
                             data-testid="complete-difficulty"
                         >{{ difficultyLabel }}</span>
                         <span
                             v-if="params?.isNewRecord"
                             class="bg-primary text-on-primary text-[13px] font-semibold rounded-full px-2.5 py-1"
+                            data-skin="tag new-record"
                             data-testid="new-record-badge"
                         >{{ t("game.complete.newRecord") }}</span>
                     </div>

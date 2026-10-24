@@ -249,6 +249,14 @@ describe("SolverWalkthrough", () => {
             expect(cellAt(wrapper, 3, 4).text()).toBe("7");
         });
 
+        it("should name the selected cell on the board, and none during playback", async () => {
+            const { wrapper } = await mountEntering();
+            expect(wrapper.find("[data-testid='walkthrough-board']").attributes("data-selected-cell")).toBeUndefined();
+
+            await cellAt(wrapper, 3, 6).trigger("click");
+            expect(wrapper.find("[data-testid='walkthrough-board']").attributes("data-selected-cell")).toBe("R4C7");
+        });
+
         it("should navigate back to Home when clicking Back button", async () => {
             const { wrapper, router } = mountWalkthrough();
             await router.push("/solver");
@@ -370,6 +378,7 @@ describe("SolverWalkthrough", () => {
             await cellAt(wrapper, 0, 0).trigger("click");
 
             expect(cellAt(wrapper, 0, 0).classes()).not.toContain("bg-cell-selected");
+            expect(wrapper.find("[data-testid='walkthrough-board']").attributes("data-selected-cell")).toBeUndefined();
         });
 
         it("should not present the cells as buttons during playback", async () => {

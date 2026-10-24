@@ -87,6 +87,14 @@ describe("Settings.vue Support section", () => {
         expect(wrapper.get("[data-testid='settings-group-about']").find("[data-testid='donate-link']").exists()).toBe(true);
     });
 
+    it("should mark each group's title for styles to decorate", async () => {
+        const wrapper = mountSettings();
+        await flushPromises();
+
+        const heading = wrapper.get("[data-testid='settings-group-about']").get("h2");
+        expect(heading.attributes("data-skin")).toBe("group-heading");
+    });
+
     it("should keep the about rows in order", async () => {
         vi.mocked(Capacitor.isNativePlatform).mockReturnValue(true);
         const wrapper = mountSettings(buildBilling(vi.fn().mockResolvedValue(fakeProducts)));
@@ -322,6 +330,16 @@ describe("Settings.vue appearance row", () => {
 
         expect(summaryOf(wrapper)).toBe(t("settings.colorMode.styled.pixel.dark"));
         expect(summaryOf(wrapper)).not.toContain(t("settings.colorThemes.classic"));
+    });
+
+    it("should show only the style's name for a style with one mode and one theme", async () => {
+        const wrapper = mountSettings();
+        const settingsStore = useSettingsStore();
+        settingsStore.setStyle("cyber");
+        await nextTick();
+
+        expect(summaryOf(wrapper)).toBe(t("settings.style.names.cyber"));
+        expect(summaryOf(wrapper)).not.toContain(t("settings.colorThemes.neon"));
     });
 
     it("should open the appearance page", async () => {

@@ -9,12 +9,16 @@ const extractInlineScript = (): string => {
     return match[1];
 };
 
-const runInlineScript = () => {
+const runInlineScript = (source: string = extractInlineScript()) => {
     // index.html's script is plain text; running it is the point of this test
     // eslint-disable-next-line @typescript-eslint/no-implied-eval
-    const script = new Function(extractInlineScript()) as () => void;
+    const script = new Function(source) as () => void;
     script();
 };
+
+// The script with one more style entry, to exercise shapes no shipped style has yet
+const withBarColors = (entries: string): string =>
+    extractInlineScript().replace("var barColors = {", `var barColors = {\n${entries},`);
 
 const stubSystemDark = (dark: boolean) => {
     vi.stubGlobal("matchMedia", (query: string) => ({
@@ -81,6 +85,28 @@ describe("index.html no-flash script", () => {
         expect(meta.content).toBe(systemBarColor("paper", "blueInk", "light"));
     });
 
+    it("should paint a dark-only style dark with its bar colour even when light is stored", () => {
+        stubSystemDark(false);
+        storeSettings({ style: "night", colorTheme: "ember", appearance: "light" });
+
+        runInlineScript(withBarColors('night: { dark: { glow: "#010203", ember: "#040506" } }'));
+
+        expect(root.dataset.style).toBe("night");
+        expect(root.dataset.colorTheme).toBe("ember");
+        expect(root.classList.contains("dark")).toBe(true);
+        expect(meta.content).toBe("#040506");
+    });
+
+    it("should fall to a dark-only style's first theme when the stored one is not its own", () => {
+        stubSystemDark(false);
+        storeSettings({ style: "night", colorTheme: "green" });
+
+        runInlineScript(withBarColors('night: { dark: { glow: "#010203", ember: "#040506" } }'));
+
+        expect(root.dataset.colorTheme).toBe("glow");
+        expect(meta.content).toBe("#010203");
+    });
+
     // Review Focus 3: no flash of minimal on a cold start in pixel
     it.each([
         { appearance: "light", dark: false, barColor: "#0F380F" },
@@ -96,6 +122,20 @@ describe("index.html no-flash script", () => {
         expect(root.classList.contains("dark")).toBe(dark);
         expect(meta.content).toBe(barColor);
         expect(meta.content).toBe(systemBarColor("pixel", "classic", appearance as "light" | "dark"));
+    });
+
+    // Review Focus 1: cyber is dark only, whatever appearance is stored
+    it.each([{ appearance: "light" }, { appearance: undefined }])("should paint cyber dark with its bar colour when appearance is $appearance", ({ appearance }) => {
+        stubSystemDark(false);
+        storeSettings({ style: "cyber", appearance });
+
+        runInlineScript();
+
+        expect(root.dataset.style).toBe("cyber");
+        expect(root.dataset.colorTheme).toBe("neon");
+        expect(root.classList.contains("dark")).toBe(true);
+        expect(meta.content).toBe("#07070D");
+        expect(meta.content).toBe(systemBarColor("cyber", "neon", "dark"));
     });
 
     it("should paint paper light for a stored system appearance on a dark system", () => {

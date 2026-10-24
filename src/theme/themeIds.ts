@@ -1,6 +1,6 @@
 // The vocabulary of looks: styles, their colour themes and light/dark. Relative imports only:
 // scripts/ import this file through src/theme/palettes.ts.
-export const STYLE_IDS = ["minimal", "tactile", "paper", "pixel"] as const;
+export const STYLE_IDS = ["minimal", "tactile", "paper", "pixel", "cyber"] as const;
 export type StyleId = typeof STYLE_IDS[number];
 /** Minimal's themes; their light launcher aliases are named by these bare ids (launcherIcon.ts). */
 export const ICON_THEME_IDS = ["green", "blue", "purple", "orange", "pink", "teal"] as const;
@@ -13,6 +13,8 @@ export const THEME_IDS_BY_STYLE = {
     paper: ["blueInk", "greenInk", "redInk"],
     // 8-bit's colours are fixed: one theme, the handheld greens in light and the console colours in dark
     pixel: ["classic"],
+    // Cyberpunk's colours are fixed too: one neon theme, dark only
+    cyber: ["neon"],
 } as const satisfies Record<StyleId, readonly string[]>;
 export type ColorThemeId = typeof THEME_IDS_BY_STYLE[StyleId][number];
 /** Every style's theme ids together, in first-seen order. */
@@ -25,6 +27,7 @@ export const STYLE_COLOR_MODES: Readonly<Record<StyleId, readonly ColorMode[]>> 
     tactile: ["light", "dark"],
     paper: ["light"],
     pixel: ["light", "dark"],
+    cyber: ["dark"],
 };
 /** Styles that give light and dark their own names (the i18n keys settings.colorMode.styled.<style>.<mode>). */
 export const STYLE_MODE_NAMES: Readonly<Partial<Record<StyleId, true>>> = { pixel: true };

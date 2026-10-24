@@ -1,6 +1,7 @@
 // Every style's colours, gathered from src/style/styles/<id>/palette.ts. src/style/themes.generated.css
 // is rendered from them by `npm run generate:theme-css`. Relative imports only: scripts/ import this file.
 import { effectiveColorMode, type ColorMode, type ColorThemeId, type RememberedThemes, type StyleId } from "./themeIds";
+import { CYBER_STYLE } from "../style/styles/cyber/palette";
 import { MINIMAL_STYLE } from "../style/styles/minimal/palette";
 import { PAPER_STYLE } from "../style/styles/paper/palette";
 import { PIXEL_STYLE } from "../style/styles/pixel/palette";
@@ -14,6 +15,7 @@ export const STYLES: Record<StyleId, StyleDefinition> = {
     tactile: TACTILE_STYLE,
     paper: PAPER_STYLE,
     pixel: PIXEL_STYLE,
+    cyber: CYBER_STYLE,
 };
 
 export const DEFAULT_STYLE_ID: StyleId = "minimal";
@@ -29,10 +31,12 @@ export const rememberedThemeFor = (style: StyleId, remembered: RememberedThemes)
     return themes.find(theme => theme.id === remembered[style])?.id ?? themes[0].id;
 };
 
-/** The palette the style shows for a mode; a light-only style answers with its light palette. */
+/** The palette the style shows for a mode; a style with one mode answers with that mode's palette. */
 export const getPalette = (style: StyleId, themeId: ColorThemeId, mode: ColorMode): Palette => {
     const theme = findTheme(style, themeId);
-    return theme[effectiveColorMode(style, mode)] ?? theme.light;
+    const palette = theme[effectiveColorMode(style, mode)];
+    if (palette === undefined) throw new Error(`${style}/${themeId} has no palette for ${mode}`);
+    return palette;
 };
 
 /**

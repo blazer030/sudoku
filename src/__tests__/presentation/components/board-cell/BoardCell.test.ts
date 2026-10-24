@@ -114,6 +114,26 @@ describe("BoardCell", () => {
             }
         });
 
+        it("should mark a digit typed over another as arriving, again on each change", async () => {
+            vi.useFakeTimers();
+            try {
+                stubReducedMotion(false);
+                const wrapper = mountCell({ value: 5 });
+
+                await wrapper.setProps({ value: 3 });
+                expect(wrapper.get("[data-testid='cell-value']").classes()).toContain("value-arrive");
+
+                // Changing again while the class is still on drops it for a moment, so the animation replays
+                await wrapper.setProps({ value: 7 });
+                expect(wrapper.get("[data-testid='cell-value']").classes()).not.toContain("value-arrive");
+                vi.advanceTimersByTime(100);
+                await nextTick();
+                expect(wrapper.get("[data-testid='cell-value']").classes()).toContain("value-arrive");
+            } finally {
+                vi.useRealTimers();
+            }
+        });
+
         it("should not animate digits present on mount", () => {
             stubReducedMotion(false);
             const wrapper = mountCell({ value: 5 });

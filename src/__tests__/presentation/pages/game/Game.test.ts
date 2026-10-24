@@ -149,6 +149,15 @@ describe("Game", () => {
         expect(wrapper.find("[data-testid='timer']").text()).toBe("01:03");
     });
 
+    it("should name the selected cell on the board, and none before a selection", async () => {
+        const wrapper = mountGame();
+        expect(wrapper.find("[data-testid='game-board']").attributes("data-selected-cell")).toBeUndefined();
+
+        await wrapper.find("[data-testid='cell-3-6']").trigger("click");
+
+        expect(wrapper.find("[data-testid='game-board']").attributes("data-selected-cell")).toBe("R4C7");
+    });
+
     it("should highlight the selected cell when clicked", async () => {
         const wrapper = mountGame();
 
@@ -1127,6 +1136,7 @@ describe("Game", () => {
             const before = boardOf(wrapper);
 
             expect(wrapper.find("[data-testid='hint-mode-pill']").exists()).toBe(true);
+            expect(wrapper.find("[data-testid='hint-mode-pill']").attributes("data-skin")).toBe("pill hint");
             expect(wrapper.find("[data-testid='game-inputs']").attributes("inert")).toBeDefined();
             await wrapper.find("[data-testid='cell-0-3']").trigger("click");
             await wrapper.find("[data-testid='number-6']").trigger("click");

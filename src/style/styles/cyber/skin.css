@@ -1,0 +1,752 @@
+/* Cyberpunk: a neon HUD on a near-black page, dark only. Panels have cut corners (a notch top left and
+   bottom right) and a thin glowing edge around a deep fill; a lit or chosen piece is a deep fill with a
+   neon edge and neon text, never a bright block with text on it (the one exception is the small
+   remaining-count badge). Every rule is scoped by [data-style="cyber"]; keyframes start with cyber-.
+   Panels are drawn on their own box (clip-path and background layers), so no box changes size, the
+   layout stays shared, and their ::before and ::after stay free. */
+
+[data-style="cyber"] {
+    /* Every corner the shared markup rounds through a theme radius is square; the panels cut theirs */
+    --radius-sm: 0;
+    --radius-md: 0;
+    --radius-lg: 0;
+    --radius-xl: 0;
+    --radius-2xl: 0;
+    --radius-3xl: 0;
+    --radius-button: 0;
+    --radius-icon: 0;
+    --radius-popup: 0;
+    /* The system voice (HUD tags, the Home mark, group numbers, chips): the fallback mono until Share
+       Tech Mono has loaded */
+    --cyber-mono: ui-monospace, monospace;
+    /* The grid: magenta box lines, faint cyan cell lines */
+    --board-line: color-mix(in srgb, var(--color-accent) 16%, transparent);
+    --board-box-line: var(--color-primary);
+    /* A lit piece's inner glow and its text's glow */
+    --cyber-lit-glow: color-mix(in srgb, var(--color-primary) 40%, transparent);
+    --cyber-lit-text-glow: 0 0 8px color-mix(in srgb, var(--color-primary) 60%, transparent);
+}
+
+/* Type: Orbitron for digits (board, keys, counts), Share Tech Mono for the system voice (timer, notes),
+   and the system sans for every other text, without Outfit. Repointed only once the faces have loaded
+   (fonts.ts beside this sheet marks it), so nothing paints in a half-loaded stack. */
+[data-style="cyber"][data-cyber-fonts="ready"] {
+    --font-sans: "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+    --font-mono: var(--font-cyber-digits);
+    --font-clue: var(--font-cyber-digits);
+    --font-entry: var(--font-cyber-digits);
+    --font-key: var(--font-cyber-digits);
+    --font-timer: var(--font-cyber-mono);
+    --font-note: var(--font-cyber-mono);
+    --cyber-mono: var(--font-cyber-mono);
+}
+
+[data-style="cyber"][data-cyber-fonts="ready"] [data-skin~="badge"] {
+    font-family: var(--font-cyber-digits);
+}
+
+/* The timer is cyan, like the HUD */
+[data-style="cyber"] .font-timer {
+    color: var(--color-accent);
+}
+
+/* Pages: faint scanlines and the floor's glow on the app root's ::before, the neon perspective floor on
+   its ::after, and the cyan beam on the body's ::before, all fixed to the screen. The app root is
+   shared by every screen, so there is exactly one copy at any width (page roots fill only the app's
+   column); the page roots that paint the page colour are clear here, and the body's page colour lies
+   under it all. Below every content layer, never taking taps. The beam and the floor move by transform
+   alone, so no frame repaints the screen. */
+[data-style="cyber"] [data-skin~="page"] {
+    background-color: transparent;
+    /* The settings groups' running numbers */
+    counter-reset: cyber-group;
+}
+
+[data-style="cyber"] .app-safe-area::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+        repeating-linear-gradient(180deg, color-mix(in srgb, var(--color-foreground) 3.5%, transparent) 0 1px, transparent 1px 3px),
+        radial-gradient(60% 50% at 50% 50%, color-mix(in srgb, var(--color-primary) 14%, transparent), transparent 70%) 0 calc(50vh + 100px) / 100% 200px no-repeat;
+}
+
+/* The beam is a layer of its own, so it can be moved without moving the scanlines; it sweeps from above
+   the screen to below it */
+[data-style="cyber"] body::before {
+    content: "";
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 140px;
+    z-index: -1;
+    pointer-events: none;
+    background: linear-gradient(transparent, color-mix(in srgb, var(--color-accent) 7%, transparent), transparent);
+    animation: cyber-sweep 7s linear infinite;
+}
+
+@keyframes cyber-sweep {
+    from { transform: translateY(-140px); }
+    to { transform: translateY(100vh); }
+}
+
+/* A sticky page header lets the decoration through, so it does not cut a dark band out of the page */
+[data-style="cyber"] [data-skin~="page-header"] {
+    background-color: color-mix(in srgb, var(--color-background) 70%, transparent);
+    backdrop-filter: blur(8px);
+}
+
+[data-style="cyber"] .app-safe-area::after {
+    content: "";
+    position: fixed;
+    left: -60%;
+    right: -60%;
+    bottom: -6%;
+    height: calc(46% + 44px);
+    z-index: -1;
+    pointer-events: none;
+    --cyber-floor-line: color-mix(in srgb, var(--color-primary) 38%, transparent);
+    background-image:
+        linear-gradient(var(--cyber-floor-line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--cyber-floor-line) 1px, transparent 1px);
+    background-size: 44px 44px;
+    transform: perspective(300px) rotateX(64deg);
+    transform-origin: 50% 100%;
+    -webkit-mask-image: linear-gradient(to top, var(--color-foreground) 10%, transparent 85%);
+    mask-image: linear-gradient(to top, var(--color-foreground) 10%, transparent 85%);
+    animation: cyber-floor 2.4s linear infinite;
+}
+
+/* The grid is one cell period taller than the floor, and slides down by exactly that, so the loop is
+   seamless */
+@keyframes cyber-floor {
+    from { transform: perspective(300px) rotateX(64deg) translateY(-44px); }
+    to { transform: perspective(300px) rotateX(64deg) translateY(0); }
+}
+
+/* Home: the logo loses its filled square and becomes the HUD mark, a 3×3 grid of edge squares with
+   the diagonal lit magenta, labelled SYS://SUDOKU. The title has a magenta/cyan split shadow. */
+[data-style="cyber"] [data-skin~="logo"] {
+    position: relative;
+    background-color: transparent;
+    box-shadow: none;
+}
+
+[data-style="cyber"] [data-skin~="logo"] > * > * {
+    border-radius: 0;
+    background-color: transparent;
+    box-shadow: inset 0 0 0 1px var(--color-border);
+}
+
+[data-style="cyber"] [data-skin~="logo"] > * > :nth-child(4n + 1) {
+    background-color: var(--color-primary);
+    box-shadow: 0 0 6px var(--color-primary);
+}
+
+/* Decoration, so screen readers skip it where the alt text is understood */
+[data-style="cyber"] [data-skin~="logo"]::after {
+    content: "SYS://SUDOKU";
+    content: "SYS://SUDOKU" / "";
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    font-family: var(--cyber-mono);
+    font-size: 12px;
+    line-height: 1;
+    letter-spacing: 0.12em;
+    color: var(--color-accent);
+}
+
+[data-style="cyber"] [data-skin~="title"] {
+    font-weight: 900;
+    text-shadow: 2px 0 var(--color-primary), -2px 0 var(--color-accent);
+    animation: cyber-title-glitch 2.6s steps(1, end) infinite;
+}
+
+/* Mostly still; for a moment it tears into slices and the split widens */
+@keyframes cyber-title-glitch {
+    0%, 90%, 100% { transform: none; clip-path: none; }
+    91% { transform: translate(-4px, 0) skewX(-10deg); clip-path: inset(0 0 55% 0); }
+    92.5% { transform: translate(5px, 1px); clip-path: inset(50% 0 0 0); }
+    94% { transform: translate(-2px, 0); clip-path: inset(20% 0 30% 0); }
+    95.5% { transform: none; clip-path: none; text-shadow: 5px 0 var(--color-primary), -5px 0 var(--color-accent); }
+}
+
+[data-style="cyber"] [data-skin~="title-glyph"] {
+    display: inline-block;
+    margin-inline: 0.12em;
+}
+
+/* Panels. Each one sets its cut and colours here; the paint below draws them. At rest the edge is
+   the translucent cyan and the fill the panel colour. */
+[data-style="cyber"] [data-skin~="card"],
+[data-style="cyber"] [data-skin~="button"],
+[data-style="cyber"] [data-skin~="tile"],
+[data-style="cyber"] [data-skin~="key"],
+[data-style="cyber"] [data-skin~="control"],
+[data-style="cyber"] [data-skin~="segment"],
+[data-style="cyber"] [data-skin~="pill"],
+[data-style="cyber"] [data-skin~="tag"] {
+    --cyber-cut: 10px;
+    --cyber-edge: var(--color-border);
+    --cyber-fill: var(--color-card);
+    --cyber-fill-image: none;
+    --cyber-glow: transparent;
+}
+
+[data-style="cyber"] [data-skin~="card"] {
+    --cyber-cut: 14px;
+}
+
+[data-style="cyber"] [data-skin~="button"] {
+    --cyber-cut: 12px;
+}
+
+[data-style="cyber"] [data-skin~="key"] {
+    --cyber-cut: 9px;
+}
+
+/* A game control's edge is the secondary text, quieter than the keys' */
+[data-style="cyber"] [data-skin~="control"] {
+    --cyber-cut: 8px;
+    --cyber-edge: color-mix(in srgb, var(--color-foreground-secondary) 35%, transparent);
+}
+
+/* A segmented control is separate panels, one per option, six pixels apart: the strip has no edge or
+   fill of its own and the sliding indicator is not drawn, since the chosen segment is lit itself */
+[data-style="cyber"] [data-skin~="segmented"] {
+    --segmented-gap: 6px;
+    --segmented-padding: 0px;
+    background: none;
+    box-shadow: none;
+}
+
+[data-style="cyber"] [data-skin~="segmented-indicator"] {
+    visibility: hidden;
+}
+
+[data-style="cyber"] [data-skin~="segment"] {
+    --cyber-cut: 7px;
+}
+
+/* The game header's difficulty pill and the completion card's difficulty tag: deep magenta, pink text */
+[data-style="cyber"] [data-skin~="pill"],
+[data-style="cyber"] [data-skin~="tag"] {
+    --cyber-cut: 6px;
+    --cyber-edge: var(--color-primary);
+    --cyber-fill: var(--color-primary-light);
+    color: var(--color-primary-ink);
+}
+
+[data-style="cyber"] [data-skin~="pill"] > span {
+    color: inherit;
+}
+
+/* The hint-mode pill and the new-record badge: deep yellow, yellow edge and text */
+[data-style="cyber"] [data-skin~="pill"][data-skin~="hint"],
+[data-style="cyber"] [data-skin~="tag"][data-skin~="new-record"] {
+    --cyber-edge: var(--color-signal);
+    --cyber-fill: var(--color-signal-surface);
+    color: var(--color-signal);
+}
+
+/* A hint or walkthrough step's technique tag reads as before, magenta on the deep fill without an
+   edge; the final step's, which settles the cell, is lit like a chosen piece */
+[data-style="cyber"] [data-skin~="tag"][data-skin~="step"] {
+    --cyber-edge: transparent;
+    --cyber-fill: var(--color-primary-light);
+    color: var(--color-primary);
+}
+
+[data-style="cyber"] [data-skin~="tag"][data-skin~="step"][data-skin~="strong"] {
+    --cyber-edge: var(--color-primary);
+    --cyber-fill: var(--color-primary-light);
+    --cyber-glow: var(--cyber-lit-glow);
+    color: var(--color-primary-ink);
+    text-shadow: var(--cyber-lit-text-glow);
+}
+
+/* Lit and chosen pieces: a deep magenta fill with a magenta edge and pink text, glowing a little inside.
+   The primary buttons (and New Game, which stays the main button beside Continue) are lit too. */
+[data-style="cyber"] [data-skin~="tile"][aria-pressed="true"],
+[data-style="cyber"] [data-skin~="tile"][aria-checked="true"],
+[data-style="cyber"] [data-skin~="key"][aria-pressed="true"],
+[data-style="cyber"] [data-skin~="segment"][aria-pressed="true"],
+[data-style="cyber"] [aria-pressed="true"] > [data-skin~="control"],
+[data-style="cyber"] [data-skin~="button"]:is(.bg-primary, .hint-primary, [data-skin~="new-game"]) {
+    --cyber-edge: var(--color-primary);
+    --cyber-fill: var(--color-primary-light);
+    --cyber-glow: var(--cyber-lit-glow);
+    color: var(--color-primary-ink);
+    text-shadow: var(--cyber-lit-text-glow);
+}
+
+/* Text inside a lit piece that the markup inks for a bright block takes the piece's ink; a toggle's
+   description is a paler pink */
+[data-style="cyber"] [data-skin~="button"]:is(.bg-primary, .hint-primary, [data-skin~="new-game"]) .text-on-primary,
+[data-style="cyber"] [data-skin~="tile"]:is([aria-pressed="true"], [aria-checked="true"]) > .text-on-primary {
+    color: inherit;
+}
+
+[data-style="cyber"] [data-skin~="tile"]:is([aria-pressed="true"], [aria-checked="true"]) > span .text-on-primary {
+    color: color-mix(in srgb, var(--color-primary-ink) 45%, var(--color-foreground));
+}
+
+/* The danger button: deep red, red edge and text */
+[data-style="cyber"] [data-skin~="button"].bg-danger {
+    --cyber-edge: var(--color-error);
+    --cyber-fill: var(--color-error-surface);
+    color: var(--color-error);
+}
+
+[data-style="cyber"] [data-skin~="button"].bg-danger .text-on-danger {
+    color: inherit;
+}
+
+/* Continue: a magenta edge around a fill that fades from deep magenta into the panel; its play mark pink */
+[data-style="cyber"] [data-skin~="continue"] {
+    --cyber-cut: 14px;
+    --cyber-edge: var(--color-primary);
+    --cyber-fill-image: linear-gradient(120deg, var(--color-primary-light), var(--color-card) 70%);
+    color: var(--color-foreground);
+}
+
+[data-style="cyber"] [data-skin~="caret"] {
+    color: var(--color-primary-ink);
+}
+
+/* The paint. One pseudo-class more than a component's scoped styles, which load after this sheet (the
+   hint panel's buttons), so every panel takes it. The corners are cut by clip-path; the edge is four 1px
+   lines and the two diagonals, as background layers on the border box (a tile's own border is
+   transparent over them); the press overlay lies on top. The glows are inset, since the clip cuts any
+   shadow outside the box. */
+:root[data-style="cyber"] [data-skin~="card"],
+:root[data-style="cyber"] [data-skin~="button"],
+:root[data-style="cyber"] [data-skin~="tile"],
+:root[data-style="cyber"] [data-skin~="key"],
+:root[data-style="cyber"] [data-skin~="control"],
+:root[data-style="cyber"] [data-skin~="segment"],
+:root[data-style="cyber"] [data-skin~="pill"],
+:root[data-style="cyber"] [data-skin~="tag"] {
+    --cyber-diagonal: calc(var(--cyber-cut) * 0.7071 + 1px);
+    border-color: transparent;
+    border-radius: 0;
+    clip-path: polygon(var(--cyber-cut) 0, 100% 0, 100% calc(100% - var(--cyber-cut)), calc(100% - var(--cyber-cut)) 100%, 0 100%, 0 var(--cyber-cut));
+    background:
+        linear-gradient(var(--press-overlay, transparent), var(--press-overlay, transparent)) border-box,
+        linear-gradient(135deg, var(--cyber-edge) 0 var(--cyber-diagonal), transparent 0 calc(100% - var(--cyber-diagonal)), var(--cyber-edge) 0) border-box,
+        linear-gradient(var(--cyber-edge), var(--cyber-edge)) top / 100% 1px no-repeat border-box,
+        linear-gradient(var(--cyber-edge), var(--cyber-edge)) bottom / 100% 1px no-repeat border-box,
+        linear-gradient(var(--cyber-edge), var(--cyber-edge)) left / 1px 100% no-repeat border-box,
+        linear-gradient(var(--cyber-edge), var(--cyber-edge)) right / 1px 100% no-repeat border-box,
+        var(--cyber-fill-image) border-box var(--cyber-fill);
+    box-shadow: inset 0 0 10px var(--cyber-glow), inset 0 0 14px var(--cyber-hover-glow, transparent);
+}
+
+/* The hint panel's buttons change their background on hover in scoped styles
+   (.hint-primary[data-v][data-v]:hover, which loads after this sheet: the primary turns bright magenta);
+   a hovered button keeps its own fill, one pseudo-class heavier, and the hover glow below marks it */
+:root[data-style="cyber"] [data-skin~="button"]:enabled:hover {
+    background-color: var(--cyber-fill);
+}
+
+/* The continue card's chips are mono tags in a thin edge, without the shared tint */
+[data-style="cyber"] [data-skin~="chip"] {
+    border-radius: 0;
+    background-color: transparent;
+    box-shadow: inset 0 0 0 1px var(--color-border);
+    font-family: var(--cyber-mono);
+}
+
+/* The remaining-count badge is a small yellow tag with a notched corner and near-black digits */
+[data-style="cyber"] [data-skin~="badge"] {
+    border-radius: 0;
+    background-color: var(--color-signal);
+    color: var(--color-background);
+    clip-path: polygon(4px 0, 100% 0, 100% 100%, 0 100%, 0 4px);
+}
+
+/* A toggle's mark is a short bar instead of a check in a circle: dim when off, glowing magenta when on */
+[data-style="cyber"] [data-skin~="check"] {
+    --cyber-indicator: color-mix(in srgb, var(--color-foreground-secondary) 50%, transparent);
+    border-radius: 0;
+    border-color: transparent;
+    background-color: transparent;
+    background-image: linear-gradient(var(--cyber-indicator), var(--cyber-indicator));
+    background-size: 100% 6px;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+[data-style="cyber"] [data-skin~="check"] > svg {
+    visibility: hidden;
+}
+
+[data-style="cyber"] [data-skin~="tile"][aria-pressed="true"] [data-skin~="check"],
+[data-style="cyber"] [data-skin~="tile"][aria-checked="true"] [data-skin~="check"] {
+    --cyber-indicator: var(--color-primary);
+    filter: drop-shadow(0 0 4px var(--color-primary));
+}
+
+/* The board: a 2px frame in a cyan-to-magenta gradient with 16px cut corners, around the panel. The
+   fill is one gradient layer 2px in from the edge, transparent past its own cut on both diagonals, so
+   the frame runs on round the corners. The clip reaches 12px out at the top and bottom, where the HUD
+   tags sit on the frame. Hint mode turns the frame's cyan to yellow, since the clip hides the shared
+   ring. */
+[data-style="cyber"] [data-skin~="board"] {
+    --cyber-frame-from: var(--color-accent);
+}
+
+[data-style="cyber"] [data-skin~="board"][data-hint-mode] {
+    --cyber-frame-from: var(--color-signal);
+}
+
+:root[data-style="cyber"] [data-skin~="board"] {
+    position: relative;
+    border-radius: 0;
+    box-shadow: none;
+    clip-path: polygon(16px 0, 16px -12px, 100% -12px, 100% calc(100% - 16px), calc(100% - 16px) 100%, calc(100% - 16px) calc(100% + 12px), 0 calc(100% + 12px), 0 16px);
+    background:
+        linear-gradient(135deg, transparent 10.5px, var(--color-card) 0 calc(100% - 10.5px), transparent 0) center / calc(100% - 4px) calc(100% - 4px) no-repeat,
+        linear-gradient(135deg, var(--cyber-frame-from), var(--color-primary));
+}
+
+/* The grid inside is cut 8px at the same two corners, so it follows the frame (the cut stays small enough
+   for a corner cell's brackets to clear it). The clip would take the magenta outer line with it, so each
+   cut edge is redrawn as a 3px diagonal band of that colour, from a 12px square at the corner that starts
+   at the border's outer edge (the 8px cut is a third of the square's 24px diagonal, the 3px band 51%). */
+[data-style="cyber"] [data-skin~="board"] > div {
+    border-color: var(--board-box-line);
+    border-radius: 0;
+    position: relative;
+    clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+}
+
+[data-style="cyber"] [data-skin~="board"] > div::before,
+[data-style="cyber"] [data-skin~="board"] > div::after {
+    content: "";
+    position: absolute;
+    z-index: 1;
+    width: 12px;
+    height: 12px;
+    pointer-events: none;
+}
+
+[data-style="cyber"] [data-skin~="board"] > div::before {
+    top: -3px;
+    left: -3px;
+    background: linear-gradient(135deg, transparent 33.33%, var(--board-box-line) 0 51%, transparent 0);
+}
+
+[data-style="cyber"] [data-skin~="board"] > div::after {
+    right: -3px;
+    bottom: -3px;
+    background: linear-gradient(315deg, transparent 33.33%, var(--board-box-line) 0 51%, transparent 0);
+}
+
+/* The HUD tags: GRID 9×9 at the top left and the selected cell's name at the bottom right, on the page
+   colour over the frame, in the mono face. They sit outside the grid, so they never cover a digit, and
+   never take taps. With nothing selected (the walkthrough's playback) the board has no
+   data-selected-cell, so the cell tag is not drawn at all. */
+[data-style="cyber"] [data-skin~="board"]::before,
+[data-style="cyber"] [data-skin~="board"][data-selected-cell]::after {
+    position: absolute;
+    z-index: 1;
+    padding: 3px 6px;
+    pointer-events: none;
+    background-color: var(--color-background);
+    font-family: var(--cyber-mono);
+    font-size: 11px;
+    line-height: 1;
+    letter-spacing: 0.1em;
+}
+
+[data-style="cyber"] [data-skin~="board"]::before {
+    content: "GRID 9×9";
+    content: "GRID 9×9" / "";
+    top: -8px;
+    left: 24px;
+    color: var(--color-accent);
+}
+
+[data-style="cyber"] [data-skin~="board"][data-selected-cell]::after {
+    content: "CELL " attr(data-selected-cell);
+    content: "CELL " attr(data-selected-cell) / "";
+    bottom: -8px;
+    right: 24px;
+    color: var(--color-primary-ink);
+}
+
+/* Cells. Every state is a faint wash over the one dark panel (the palette's cell tokens); the ink and the
+   glow tell the rest. A clue keeps the foreground ink; a player's digit (or a hint's) is cyan with a soft
+   glow; the selected cell is yellow, its digit glowing, under four corner brackets; the same digit is
+   pink. A glow is only decoration, so every ink reads on its wash without it (paletteContrast's
+   CYBER_BOARD_CASES). An error or wrong cell is red, whatever else is true of it. */
+[data-style="cyber"] [data-skin~="board"] [data-value-kind="entered"] > div {
+    color: var(--color-accent);
+    text-shadow: 0 0 8px color-mix(in srgb, var(--color-accent) 55%, transparent);
+}
+
+[data-style="cyber"] [data-skin~="board"] [data-variant="error"][data-value-kind="entered"] > div,
+[data-style="cyber"] [data-skin~="board"] [data-variant="wrong"][data-value-kind="entered"] > div {
+    color: var(--color-error);
+    text-shadow: none;
+}
+
+[data-style="cyber"] [data-skin~="board"] [data-variant="same-digit"][data-value-kind] > div {
+    color: var(--color-primary-ink);
+    text-shadow: none;
+}
+
+/* The shared selection ring gives way to the brackets */
+[data-style="cyber"] [data-skin~="board"] [data-variant="selected"] {
+    box-shadow: none;
+}
+
+[data-style="cyber"] [data-skin~="board"] [data-variant="selected"][data-value-kind] > div {
+    color: var(--color-signal);
+    text-shadow: 0 0 10px color-mix(in srgb, var(--color-signal) 70%, transparent);
+}
+
+/* The brackets mark the selected cell whatever its variant, so a selected error still shows where the
+   player is; hint mode shows its own cells instead. They use the cell's ::after, the ::before stays free
+   for the arrival and leaving scan lines. */
+[data-style="cyber"] [data-skin~="board"]:not([data-hint-mode]) [data-selected] {
+    position: relative;
+}
+
+[data-style="cyber"] [data-skin~="board"]:not([data-hint-mode]) [data-selected]::after {
+    content: "";
+    position: absolute;
+    inset: 2px;
+    z-index: 2;
+    pointer-events: none;
+    background:
+        linear-gradient(var(--color-signal), var(--color-signal)) top left / 10px 2px no-repeat,
+        linear-gradient(var(--color-signal), var(--color-signal)) top left / 2px 10px no-repeat,
+        linear-gradient(var(--color-signal), var(--color-signal)) top right / 10px 2px no-repeat,
+        linear-gradient(var(--color-signal), var(--color-signal)) top right / 2px 10px no-repeat,
+        linear-gradient(var(--color-signal), var(--color-signal)) bottom left / 10px 2px no-repeat,
+        linear-gradient(var(--color-signal), var(--color-signal)) bottom left / 2px 10px no-repeat,
+        linear-gradient(var(--color-signal), var(--color-signal)) bottom right / 10px 2px no-repeat,
+        linear-gradient(var(--color-signal), var(--color-signal)) bottom right / 2px 10px no-repeat;
+}
+
+/* Filling a digit: it tears in over held frames, in offset slices with a magenta/cyan split, while a cyan
+   scan line runs down its cell. Erasing runs a magenta one up. The scan lines are the cell's ::before (the
+   brackets are its ::after, so they stay), and their animationend settles arriving / leaving like the
+   digit's own. */
+[data-style="cyber"] [data-skin~="board"] .value-arrive {
+    animation: cyber-glitch 520ms steps(1, end);
+}
+
+@keyframes cyber-glitch {
+    0% { opacity: 0; transform: translate(-5px, 0) skewX(-14deg); clip-path: inset(0 0 55% 0); text-shadow: 4px 0 var(--color-primary), -4px 0 var(--color-accent); }
+    14% { opacity: 1; transform: translate(5px, -1px); clip-path: inset(45% 0 0 0); }
+    28% { transform: translate(-3px, 1px) skewX(10deg); clip-path: inset(0 0 25% 0); text-shadow: -4px 0 var(--color-primary), 4px 0 var(--color-accent); }
+    42% { transform: translate(2px, 0); clip-path: inset(30% 0 10% 0); }
+    56% { opacity: 0.3; transform: none; clip-path: inset(0); }
+    70% { opacity: 1; text-shadow: 2px 0 var(--color-primary), -2px 0 var(--color-accent); }
+    100% { opacity: 1; transform: none; clip-path: inset(0); }
+}
+
+[data-style="cyber"] [data-skin~="board"] [data-variant]:is(.value-leave, :has(> .value-arrive)) {
+    position: relative;
+}
+
+[data-style="cyber"] [data-skin~="board"] [data-variant]:is(.value-leave, :has(> .value-arrive))::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    pointer-events: none;
+}
+
+/* Their own rules, so a WebView without :has() still reads the leaving one */
+[data-style="cyber"] [data-skin~="board"] [data-variant]:has(> .value-arrive)::before {
+    background: linear-gradient(var(--color-accent), var(--color-accent)) top / 100% 2px no-repeat;
+    filter: drop-shadow(0 0 4px var(--color-accent));
+    animation: cyber-scan-down 480ms ease-out;
+}
+
+[data-style="cyber"] [data-skin~="board"] [data-variant].value-leave::before {
+    background: linear-gradient(var(--color-primary), var(--color-primary)) top / 100% 2px no-repeat;
+    filter: drop-shadow(0 0 4px var(--color-primary));
+    animation: cyber-scan-up 480ms ease-out;
+}
+
+/* The line is the top 2px of a cell-sized layer, which slides by its own height */
+@keyframes cyber-scan-down {
+    0% { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(calc(100% - 2px)); }
+}
+
+@keyframes cyber-scan-up {
+    0% { opacity: 1; transform: translateY(calc(100% - 2px)); }
+    100% { opacity: 0; transform: translateY(0); }
+}
+
+/* Completing the puzzle: the card gets a slowly turning dashed HUD ring behind its content and the
+   system's 「// MISSION COMPLETE」 above it, glitching like the title. The card is clipped to its cut
+   corners, so the ring sits inside the card (300px across, under the card's padding and content) rather
+   than hanging out as the canvas's does. Decoration, so screen readers skip the text. */
+[data-style="cyber"] [data-skin~="celebration"]::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 300px;
+    height: 300px;
+    margin: -150px 0 0 -150px;
+    z-index: -1;
+    pointer-events: none;
+    border: 1px dashed color-mix(in srgb, var(--color-accent) 35%, transparent);
+    border-radius: 50%;
+    box-shadow: inset 0 0 60px color-mix(in srgb, var(--color-primary) 20%, transparent);
+    animation: cyber-spin 18s linear infinite;
+}
+
+@keyframes cyber-spin {
+    to { transform: rotate(360deg); }
+}
+
+[data-style="cyber"] [data-skin~="celebration"]::after {
+    content: "// MISSION COMPLETE";
+    content: "// MISSION COMPLETE" / "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 10px;
+    text-align: center;
+    pointer-events: none;
+    font-family: var(--cyber-mono);
+    font-size: 12px;
+    line-height: 1;
+    letter-spacing: 0.3em;
+    color: var(--color-signal);
+    text-shadow: 0 0 12px color-mix(in srgb, var(--color-signal) 70%, transparent);
+    animation: cyber-title-glitch 2.6s steps(1, end) infinite;
+}
+
+/* Hint mode: the answer cell is a yellow wash inside a yellow inset outline (the shared ring is the
+   primary's) */
+[data-style="cyber"] [data-skin~="board"] [data-variant="answer"] {
+    background-color: color-mix(in srgb, var(--color-signal) 12%, var(--color-card));
+    box-shadow: inset 0 0 0 1.5px var(--color-signal);
+}
+
+/* Notes: a hint's candidates are cyan and its eliminated ones red; the selected digit's note, or a
+   hint's emphasised candidate, is a square pink on the deep magenta fill, not a bright disc */
+[data-style="cyber"] [data-skin~="board"] .font-note.text-primary {
+    color: var(--color-accent);
+}
+
+[data-style="cyber"] [data-skin~="board"] [data-testid^="eliminated-note-"] {
+    color: var(--color-error);
+}
+
+[data-style="cyber"] [data-skin~="board"] [data-note-highlight] {
+    border-radius: 0;
+    background-color: var(--color-primary-light);
+    color: var(--color-primary-ink);
+}
+
+/* Settings: each group's heading carries its running number (01, 02, …) on the right */
+[data-style="cyber"] [data-skin~="group-heading"]::after {
+    counter-increment: cyber-group;
+    content: counter(cyber-group, decimal-leading-zero);
+    content: counter(cyber-group, decimal-leading-zero) / "";
+    margin-left: auto;
+    font-family: var(--cyber-mono);
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--color-foreground-secondary);
+}
+
+/* A card's rows are separated by dashed edge lines */
+[data-style="cyber"] [data-skin~="card"] .divide-y > * {
+    border-style: dashed;
+    border-color: var(--color-border);
+}
+
+/* Hover: a piece glows inside in its own edge colour, so a lit piece glows brighter magenta. The
+   palette's hover colour is the primary itself, so this is the change a pointer sees. */
+@media (hover: hover) {
+    [data-style="cyber"] [data-skin~="key"]:enabled:hover,
+    [data-style="cyber"] [data-skin~="button"]:enabled:hover,
+    [data-style="cyber"] [data-skin~="tile"]:hover,
+    [data-style="cyber"] [data-skin~="segment"]:hover,
+    [data-style="cyber"] :enabled:hover > [data-skin~="control"] {
+        --cyber-hover-glow: color-mix(in srgb, var(--cyber-edge) 55%, transparent);
+    }
+}
+
+/* Press feedback: a cyan wash. It is a colour change, so it stays on under reduced motion. */
+[data-style="cyber"] [data-pressed] {
+    --press-overlay: color-mix(in srgb, var(--color-accent) 12%, transparent);
+    background-image: linear-gradient(var(--press-overlay), var(--press-overlay));
+}
+
+[data-style="cyber"] [data-press-motion] {
+    transition-property: transform, background-color, color, box-shadow, opacity;
+    transition-duration: 140ms;
+    transition-timing-function: ease-out;
+}
+
+[data-style="cyber"] [data-press-motion][data-pressed] {
+    transform: scale(0.97);
+    transition-duration: 60ms;
+}
+
+@keyframes cyber-press-bounce {
+    0% { transform: scale(0.97); }
+    100% { transform: scale(1); }
+}
+
+[data-style="cyber"] [data-press-bounce] {
+    animation: cyber-press-bounce 160ms ease-out;
+}
+
+[data-style="cyber"] .segmented-indicator-motion {
+    transition: transform 160ms ease-out;
+}
+
+/* Reduced motion: no scaling or sliding; the press wash stays */
+@media (prefers-reduced-motion: reduce) {
+    [data-style="cyber"] .segmented-indicator-motion {
+        transition: none;
+    }
+
+    [data-style="cyber"] body::before,
+    [data-style="cyber"] .app-safe-area::after,
+    [data-style="cyber"] [data-skin~="title"],
+    [data-style="cyber"] [data-skin~="board"] .value-arrive,
+    [data-style="cyber"] [data-skin~="board"] [data-variant].value-leave::before,
+    [data-style="cyber"] [data-skin~="celebration"]::before,
+    [data-style="cyber"] [data-skin~="celebration"]::after {
+        animation: none;
+    }
+
+    /* Its own rule, so a WebView without :has() still reads the list above */
+    [data-style="cyber"] [data-skin~="board"] [data-variant]:has(> .value-arrive)::before {
+        animation: none;
+    }
+
+    /* The beam rests out of sight above the screen; the floor rests as the plain tilted grid */
+    [data-style="cyber"] body::before {
+        transform: translateY(-140px);
+    }
+
+    [data-style="cyber"] [data-pressed],
+    [data-style="cyber"] [data-press-motion],
+    [data-style="cyber"] [data-press-motion][data-pressed],
+    [data-style="cyber"] [data-press-bounce] {
+        transform: none;
+        animation: none;
+    }
+}

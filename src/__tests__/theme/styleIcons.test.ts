@@ -8,6 +8,7 @@ const tactileGreenDark = getPalette("tactile", "green", "dark");
 const paperRedInk = getPalette("paper", "redInk", "light");
 const pixelHandheld = getPalette("pixel", "classic", "light");
 const pixelConsole = getPalette("pixel", "classic", "dark");
+const cyberNeon = getPalette("cyber", "neon", "dark");
 const firstPalette = (style: StyleId) => getPalette(style, THEME_IDS_BY_STYLE[style][0], "light");
 
 // Every colour the markup paints with, fills and strokes alike
@@ -107,6 +108,35 @@ describe("styleIcons", () => {
     it.each([pixelHandheld, pixelConsole])("should keep pixel's background-sample point clear of stars and drawing", (palette) => {
         // The icon assets sample the background 5% across, halfway down
         expect(paintsAt(styleIconSvg("pixel", palette), 5.4, 54)).toEqual([palette.background]);
+    });
+
+    it("should draw cyber's icon in the page, magenta, cyan and yellow of its palette", () => {
+        const svg = styleIconSvg("cyber", cyberNeon);
+
+        expect(svg).toContain(`<rect width="108" height="108" fill="#07070D"/>`);
+        for (const color of ["#FF2BD6", "#00F0FF", "#FCEE0A"]) expect(svg).toContain(color);
+    });
+
+    it("should keep cyber's background-sample point clear of drawing", () => {
+        // The icon assets sample the background 5% across, halfway down
+        expect(paintsAt(styleIconSvg("cyber", cyberNeon), 5.4, 54)).toEqual([cyberNeon.background]);
+    });
+
+    it("should give each cyber icon copy its own gradient and glow ids when given a suffix", () => {
+        const idsOf = (svg: string) => [...svg.matchAll(/\bid="([^"]+)"/g)].map(([, id]) => id);
+        const ids = ["a", "b"].flatMap(suffix => idsOf(styleIconSvg("cyber", cyberNeon, suffix)));
+
+        expect(ids).toHaveLength(4);
+        expect(new Set(ids).size).toBe(4);
+    });
+
+    it("should point every cyber reference at an id the icon defines", () => {
+        const svg = styleIconSvg("cyber", cyberNeon, "x1");
+        const defined = [...svg.matchAll(/\bid="([^"]+)"/g)].map(([, id]) => id);
+        const used = [...svg.matchAll(/url\(#([^)]+)\)/g)].map(([, id]) => id);
+
+        expect(used.length).toBeGreaterThan(0);
+        for (const id of used) expect(defined).toContain(id);
     });
 
     it.each(STYLE_IDS)("should draw the %s icon as a plain 108 square with no text", (style) => {

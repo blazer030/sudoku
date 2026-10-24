@@ -4,7 +4,7 @@ import postcss from "postcss";
 import { mappedCodePoints, nameStrings } from "./woff2Tables";
 
 const FONTS_CSS = "src/style/fonts.css";
-const BUNDLED_FONTS = ["outfit.woff2", "roboto-mono.woff2", "caveat.woff2", "lxgw-wenkai-tc-regular.woff2", "lxgw-wenkai-tc-bold.woff2", "press-start-2p.woff2", "silkscreen.woff2"];
+const BUNDLED_FONTS = ["outfit.woff2", "roboto-mono.woff2", "caveat.woff2", "lxgw-wenkai-tc-regular.woff2", "lxgw-wenkai-tc-bold.woff2", "press-start-2p.woff2", "silkscreen.woff2", "orbitron.woff2", "share-tech-mono.woff2"];
 const CUBIC_11 = "cubic-11.woff2";
 
 interface FontFace {
@@ -64,6 +64,8 @@ describe("bundled fonts", () => {
         ["Press Start 2P", "400"],
         ["Silkscreen", "400"],
         ["Cubic 11", "400"],
+        ["Orbitron", "500 900"],
+        ["Share Tech Mono", "400"],
     ])("should declare %s %s from a bundled woff2 with swap", (family, weight) => {
         const face = fontFaces().find(candidate => candidate.family === family && candidate.weight === weight);
 
@@ -76,7 +78,7 @@ describe("bundled fonts", () => {
 
     it("should ship each family's licence in the build", () => {
         // public/ is copied as is into dist/, which the web build serves and the Android app packs
-        for (const licence of ["Outfit-OFL.txt", "RobotoMono-OFL.txt", "Caveat-OFL.txt", "LXGWWenKaiTC-OFL.txt", "PressStart2P-OFL.txt", "Silkscreen-OFL.txt", "Cubic11-OFL.txt"]) {
+        for (const licence of ["Outfit-OFL.txt", "RobotoMono-OFL.txt", "Caveat-OFL.txt", "LXGWWenKaiTC-OFL.txt", "PressStart2P-OFL.txt", "Silkscreen-OFL.txt", "Cubic11-OFL.txt", "Orbitron-OFL.txt", "ShareTechMono-OFL.txt"]) {
             expect(readFileSync(`public/fonts/licenses/${licence}`, "utf8"), licence).toContain("SIL Open Font License");
         }
     });
@@ -123,6 +125,18 @@ describe("bundled fonts", () => {
 
             expect([...mapped].sort(), file).toEqual(codePoints(text).sort());
         }
+    });
+
+    it("should map the digits in Orbitron and printable ASCII in Share Tech Mono", () => {
+        const codePoints = (text: string): number[] => Array.from(text, character => character.codePointAt(0) ?? 0);
+        const digits = codePoints("0123456789");
+        const ascii = Array.from({ length: 0x7e - 0x20 + 1 }, (_, offset) => 0x20 + offset);
+
+        const orbitron = mappedCodePoints(readFileSync("src/assets/fonts/orbitron.woff2"), digits);
+        const shareTechMono = mappedCodePoints(readFileSync("src/assets/fonts/share-tech-mono.woff2"), ascii);
+
+        expect([...orbitron].sort()).toEqual(digits.sort());
+        expect([...shareTechMono].sort((first, second) => first - second)).toEqual(ascii);
     });
 
     it("cubic-11.woff2 maps every character the app writes (run npm run generate:fonts)", () => {

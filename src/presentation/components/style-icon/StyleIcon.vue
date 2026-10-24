@@ -12,7 +12,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, useId } from "vue";
 import { useI18n } from "vue-i18n";
 import type { Palette } from "@/theme/palettes";
 import { styleIconSvg } from "@/theme/styleIcons";
@@ -28,7 +28,9 @@ const props = defineProps<{
 
 const { t } = useI18n();
 
-const svg = computed(() => styleIconSvg(props.styleId, props.palette));
+// An icon with ids (cyberpunk's glow) must not share them with the page's other icons
+const idSuffix = useId().replace(/\W/g, "");
+const svg = computed(() => styleIconSvg(props.styleId, props.palette, idSuffix));
 </script>
 
 <style scoped>

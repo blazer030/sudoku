@@ -1,4 +1,4 @@
-import { nextTick } from "vue";
+import { defineComponent, h, nextTick } from "vue";
 import { mount } from "@vue/test-utils";
 import StyleIcon from "@/presentation/components/style-icon/StyleIcon.vue";
 import { i18n } from "@/presentation/i18n";
@@ -17,8 +17,20 @@ describe("StyleIcon", () => {
 
         expect(wrapper.find(`[data-testid='style-icon-${styleId}']`).exists()).toBe(true);
         const host = document.createElement("div");
-        host.innerHTML = styleIconSvg(styleId, palette);
-        expect(wrapper.get("svg").element.outerHTML).toBe(host.innerHTML.trim());
+        const rendered = wrapper.get("svg").element.outerHTML;
+        // An icon with ids carries this instance's own suffix
+        host.innerHTML = styleIconSvg(styleId, palette, /id="cyber-edge-([^"]+)"/.exec(rendered)?.[1]);
+        expect(rendered).toBe(host.innerHTML.trim());
+    });
+
+    it("should keep the ids of two cyber icons on one page apart", () => {
+        const palette = getPalette("cyber", "neon", "dark");
+        const props = { styleId: "cyber", palette, size: 48 } as const;
+        const page = mount(defineComponent({ render: () => h("div", [h(StyleIcon, props), h(StyleIcon, props)]) }));
+        const ids = [...page.html().matchAll(/\bid="([^"]+)"/g)].map(([, id]) => id);
+
+        expect(ids).toHaveLength(4);
+        expect(new Set(ids).size).toBe(4);
     });
 
     it("should be an image sized by the size prop", () => {

@@ -12,6 +12,7 @@
             <div
                 :class="hintMode.active.value ? 'ring-2 ring-primary/50' : 'ring-0 ring-transparent'"
                 :data-hint-mode="hintMode.active.value || undefined"
+                :data-selected-cell="selectedCellName"
                 class="bg-card rounded-2xl shadow-card-lg p-2 self-center w-[calc(100%+1.5rem)] max-w-board-fit transition-shadow duration-300"
                 data-skin="board"
                 data-testid="game-board"
@@ -130,6 +131,7 @@ import HintMenuPopup from "@/presentation/pages/game/components/HintMenuPopup.vu
 import GameToast from "@/presentation/pages/game/components/GameToast.vue";
 import DigitPad from "@/presentation/components/digit-pad/DigitPad.vue";
 import Cell from "@/presentation/components/board-cell/Cell.vue";
+import { cellName } from "@/presentation/components/board-cell/cellName";
 import StepLinkOverlay from "@/presentation/components/step-presentation/StepLinkOverlay.vue";
 import HintPanel from "@/presentation/pages/game/hint-mode/HintPanel.vue";
 import { useRoomBelow } from "@/presentation/composables/useRoomBelow";
@@ -189,6 +191,7 @@ watch(
 );
 
 const {
+    selectedCell,
     selectedDigit,
     highlightedDigit,
     inputMode,
@@ -211,6 +214,8 @@ const {
     autoRemoveNotes: () => settingsStore.autoRemoveNotes,
     isLocked: () => hintMode.active.value,
 });
+
+const selectedCellName = computed(() => selectedCell.value === null ? undefined : cellName(selectedCell.value.row, selectedCell.value.column));
 </script>
 
 <style scoped>

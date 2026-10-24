@@ -3,7 +3,7 @@ import { defineStore } from "pinia";
 import type { ColorMode, ColorThemeId, RememberedThemes, StyleId } from "@/theme/themeIds";
 import { loadSettings, saveSettings, type LanguagePreference } from "@/application/settings/SettingsStorage";
 import { rememberedThemeFor } from "@/theme/palettes";
-import { launcherIconKey } from "@/theme/launcherIcon";
+import { pwaIconKey } from "@/theme/launcherIcon";
 import { updateManifestLink, updateAppleTouchIcon } from "@/application/PwaThemeUpdater";
 
 export const useSettingsStore = defineStore("settings", () => {
@@ -22,7 +22,7 @@ export const useSettingsStore = defineStore("settings", () => {
 
     // Installed web apps keep the light icon; the favicon also follows light or dark, so appearanceSync keeps it
     const applyColorTheme = () => {
-        const icon = launcherIconKey(style.value, colorTheme.value, "light");
+        const icon = pwaIconKey(style.value, colorTheme.value);
         updateManifestLink(icon);
         updateAppleTouchIcon(icon);
     };
