@@ -97,30 +97,16 @@
 }
 
 /* A sticky header is clear at rest, so the texture shows straight through it. Once its page has scrolled
-   (data-scrolled) it turns opaque so content does not run under the title, and repaints the same texture
-   fixed to the screen, so it lines up with the root's layer where they meet. */
+   (data-scrolled) it frosts: a translucent page colour over a blur, so content under the title is
+   subdued while the grid still reads through, with no rule underneath. */
 [data-style="pixel"] [data-skin~="page-header"] {
     background-color: transparent;
 }
 
 [data-style="pixel"] [data-skin~="page-header"][data-scrolled] {
-    background-color: var(--color-background);
-    background-image:
-        linear-gradient(color-mix(in srgb, var(--color-foreground) 5.5%, transparent) 1px, transparent 1px),
-        linear-gradient(90deg, color-mix(in srgb, var(--color-foreground) 5.5%, transparent) 1px, transparent 1px);
-    background-size: 3px 3px;
-    background-attachment: fixed;
-    box-shadow: 0 1px 0 0 var(--color-border);
-}
-
-:root.dark[data-style="pixel"] [data-skin~="page-header"][data-scrolled] {
-    background-image:
-        radial-gradient(var(--color-foreground) 1px, transparent 1.2px),
-        radial-gradient(var(--color-primary) 1px, transparent 1.2px),
-        radial-gradient(var(--color-accent) 1px, transparent 1.2px),
-        radial-gradient(color-mix(in srgb, var(--color-foreground) 7%, transparent) 1px, transparent 1.2px);
-    background-size: 97px 61px, 151px 89px, 123px 113px, 4px 4px;
-    background-position: 13px 7px, 61px 41px, 29px 71px, 0 0;
+    background-color: color-mix(in srgb, var(--color-background) 62%, transparent);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
 }
 
 [data-style="pixel"] .app-safe-area::before {

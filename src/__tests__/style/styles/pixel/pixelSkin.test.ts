@@ -163,24 +163,14 @@ describe("pixel skin", () => {
                 expect(header.has("backdrop-filter")).toBe(false);
             });
 
-            it("should turn opaque with the grid fixed to the screen once scrolled", () => {
+            it("should frost once scrolled, with no rule underneath", () => {
                 const scrolled = declarationsOf(PIXEL_CSS, SCROLLED);
 
-                expect(scrolled.get("background-color")).toBe("var(--color-background)");
-                expect(scrolled.get("background-image")).toContain("90deg");
-                expect(scrolled.get("background-size")).toBe("3px 3px");
-                expect(scrolled.get("background-attachment")).toBe("fixed");
-                expect(scrolled.has("backdrop-filter")).toBe(false);
-                expect(scrolled.get("box-shadow")).toContain("var(--color-border)");
-            });
-
-            it("should repaint the dots and stars in 紅白機 on the root's offsets", () => {
-                const scrolled = declarationsOf(PIXEL_CSS, `:root.dark[data-style="pixel"] [data-skin~="page-header"][data-scrolled]`);
-                const stars = declarationsOf(PIXEL_CSS, DARK + "::after");
-
-                expect(scrolled.get("background-image")?.match(/radial-gradient\(/g)).toHaveLength(4);
-                expect(scrolled.get("background-size")).toBe(`${stars.get("background-size")}, 4px 4px`);
-                expect(scrolled.get("background-position")).toBe(`${stars.get("background-position")}, 0 0`);
+                expect(scrolled.get("background-color")).toMatch(/^color-mix\(in srgb, var\(--color-background\) \d+%, transparent\)$/);
+                expect(scrolled.get("backdrop-filter")).toMatch(/^blur\(\d+px\)$/);
+                expect(scrolled.get("-webkit-backdrop-filter")).toBe(scrolled.get("backdrop-filter"));
+                expect(scrolled.has("background-image")).toBe(false);
+                expect(scrolled.has("box-shadow")).toBe(false);
             });
         });
 

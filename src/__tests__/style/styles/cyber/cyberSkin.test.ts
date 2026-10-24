@@ -245,15 +245,14 @@ describe("cyber skin", () => {
                 expect(header.has("backdrop-filter")).toBe(false);
             });
 
-            it("should turn opaque with the scanlines fixed to the screen once scrolled", () => {
+            it("should frost once scrolled, with no rule underneath", () => {
                 const scrolled = declarationsOf(CYBER_CSS, SCROLLED);
-                const root = declarationsOf(CYBER_CSS, `${ROOT_DECORATION}::before`);
 
-                expect(scrolled.get("background-color")).toBe("var(--color-background)");
-                expect(root.get("background")).toContain(scrolled.get("background-image") ?? "missing");
-                expect(scrolled.get("background-attachment")).toBe("fixed");
-                expect(scrolled.has("backdrop-filter")).toBe(false);
-                expect(scrolled.get("box-shadow")).toContain("var(--color-border)");
+                expect(scrolled.get("background-color")).toMatch(/^color-mix\(in srgb, var\(--color-background\) \d+%, transparent\)$/);
+                expect(scrolled.get("backdrop-filter")).toMatch(/^blur\(\d+px\)$/);
+                expect(scrolled.get("-webkit-backdrop-filter")).toBe(scrolled.get("backdrop-filter"));
+                expect(scrolled.has("background-image")).toBe(false);
+                expect(scrolled.has("box-shadow")).toBe(false);
             });
         });
 

@@ -2,7 +2,7 @@ import { readFileSync } from "fs";
 import postcss, { type Rule } from "postcss";
 
 // Paper's page surface (the page colour and the dot texture) is painted on the body, the app root
-// and every page root and sticky header. Each lays the whole surface down on the page colour.
+// and every page root. Each lays the whole surface down on the page colour.
 
 const PAPER_CSS = readFileSync("src/style/styles/paper/skin.css", "utf8");
 
@@ -32,7 +32,6 @@ describe("paper surface", () => {
         expect(selectors).toEqual(expect.arrayContaining([
             '[data-style="paper"] body',
             '[data-style="paper"] [data-skin~="page"]',
-            '[data-style="paper"] [data-skin~="page-header"][data-scrolled]',
             '[data-style="paper"] [data-skin~="page-ruled"]',
         ]));
         for (const selector of selectors) {

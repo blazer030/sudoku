@@ -53,11 +53,13 @@ describe("paper ruled pages", () => {
         expect(header.has("backdrop-filter")).toBe(false);
     });
 
-    it("should turn a scrolled sticky header opaque, in the page colour with the grain and a bottom rule", () => {
+    it("should frost a scrolled sticky header, with no rule underneath", () => {
         const scrolled = declarationsOf(PAPER_CSS, '[data-style="paper"] [data-skin~="page-header"][data-scrolled]');
 
-        expect(scrolled.get("background-color")).toBe("var(--color-background)");
-        expect(scrolled.get("background-image")).toBe("var(--paper-texture)");
-        expect(scrolled.get("box-shadow")).toContain("var(--color-border)");
+        expect(scrolled.get("background-color")).toMatch(/^color-mix\(in srgb, var\(--color-background\) \d+%, transparent\)$/);
+        expect(scrolled.get("backdrop-filter")).toMatch(/^blur\(\d+px\)$/);
+        expect(scrolled.get("-webkit-backdrop-filter")).toBe(scrolled.get("backdrop-filter"));
+        expect(scrolled.has("background-image")).toBe(false);
+        expect(scrolled.has("box-shadow")).toBe(false);
     });
 });
