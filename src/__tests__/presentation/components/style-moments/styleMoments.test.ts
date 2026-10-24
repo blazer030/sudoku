@@ -1,18 +1,10 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { mount } from "@vue/test-utils";
 import { createPinia, setActivePinia } from "pinia";
 import { STYLE_IDS } from "@/theme/themeIds";
 import { STYLE_MOMENTS } from "@/presentation/components/style-moments/styleMoments";
 import { useSettingsStore } from "@/stores/settingsStore";
 import PuzzleLoader from "@/presentation/components/puzzle-loader/PuzzleLoader.vue";
-
-vi.mock("vue3-lottie", () => ({
-    Vue3Lottie: {
-        name: "Vue3Lottie",
-        props: ["animationData", "height", "width", "loop", "autoPlay"],
-        template: "<div data-testid='lottie-stub' />",
-    },
-}));
 
 describe("STYLE_MOMENTS", () => {
     it("should have an entry for every style", () => {
