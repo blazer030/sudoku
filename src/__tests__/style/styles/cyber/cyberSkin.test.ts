@@ -238,6 +238,25 @@ describe("cyber skin", () => {
             expect(board.get("clip-path")).toContain("16px");
         });
 
+        it("should cut the grid's top left and bottom right corners to follow the frame", () => {
+            const grid = declarationsOf(CYBER_CSS, `${skin("board")} > div`);
+
+            expect(grid.get("clip-path")).toBe("polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)");
+        });
+
+        it("should run the magenta outer line along each cut edge, under the selection brackets", () => {
+            const brackets = declarationsOf(CYBER_CSS, `${skin("board")}:not([data-hint-mode]) [data-selected]::after`);
+            for (const [corner, direction] of [["before", "135deg"], ["after", "315deg"]]) {
+                const edge = declarationsOf(CYBER_CSS, `${skin("board")} > div::${corner}`);
+
+                expect(edge.get("content"), corner).toBe('""');
+                expect(edge.get("position"), corner).toBe("absolute");
+                expect(edge.get("pointer-events"), corner).toBe("none");
+                expect(edge.get("background"), corner).toContain(`linear-gradient(${direction}, transparent 33.33%, var(--board-box-line) 0 51%, transparent 0)`);
+                expect(Number(edge.get("z-index")), corner).toBeLessThan(Number(brackets.get("z-index")));
+            }
+        });
+
         it("should draw magenta box lines and faint cyan cell lines", () => {
             const scope = declarationsOf(CYBER_CSS, SCOPE);
 
