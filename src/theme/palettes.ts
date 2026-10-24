@@ -29,10 +29,12 @@ export const rememberedThemeFor = (style: StyleId, remembered: RememberedThemes)
     return themes.find(theme => theme.id === remembered[style])?.id ?? themes[0].id;
 };
 
-/** The palette the style shows for a mode; a light-only style answers with its light palette. */
+/** The palette the style shows for a mode; a style with one mode answers with that mode's palette. */
 export const getPalette = (style: StyleId, themeId: ColorThemeId, mode: ColorMode): Palette => {
     const theme = findTheme(style, themeId);
-    return theme[effectiveColorMode(style, mode)] ?? theme.light;
+    const palette = theme[effectiveColorMode(style, mode)];
+    if (palette === undefined) throw new Error(`${style}/${themeId} has no palette for ${mode}`);
+    return palette;
 };
 
 /**

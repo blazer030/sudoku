@@ -155,7 +155,7 @@ const paperCellSurface = (variant: PaperCellVariant, palette: Palette, page: str
 interface PaperBoardCase { label: string; foreground: string; background: string; minimum: number }
 
 const PAPER_BOARD_CASES: PaperBoardCase[] = STYLES.paper.themes.flatMap((theme) => {
-    const palette = theme.light;
+    const palette = getPalette("paper", theme.id, "light");
     const prefix = `paper/${theme.id}/light`;
     const surface = (variant: PaperCellVariant) => paperCellSurface(variant, palette, palette.background);
     // Each surface alone, under a grain dot, and for clue squares under a hatch stroke

@@ -3,12 +3,19 @@ import {
     LAUNCHER_ICONS,
     LEGACY_LAUNCHER_ALIASES,
     launcherIconKey,
+    pwaIconKey,
     launcherResourceName,
 } from "@/theme/launcherIcon";
 import { STYLES } from "@/theme/palettes";
 import { ICON_THEME_IDS, STYLE_COLOR_MODES, STYLE_IDS } from "@/theme/themeIds";
 
 describe("launcher icons", () => {
+    it("should name the icon an installed web app uses: the light one, or the style's only one", () => {
+        expect(pwaIconKey("paper", "blueInk")).toBe("paperBlueInk");
+        expect(pwaIconKey("minimal", "green")).toBe("green");
+        expect(pwaIconKey("pixel", "classic")).toBe("pixelClassic");
+    });
+
     it("should keep the bare theme id for minimal's light icons, whose aliases existing shortcuts point at", () => {
         for (const id of ICON_THEME_IDS) {
             expect(launcherIconKey("minimal", id, "light")).toBe(id);

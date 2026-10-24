@@ -1,5 +1,6 @@
 import { STYLE_IDS, THEME_IDS_BY_STYLE, STYLE_COLOR_MODES, type ColorThemeId } from "@/theme/themeIds";
 import { STYLES, getPalette, rememberedThemeFor, systemBarColor } from "@/theme/palettes";
+import { darkOnlyThemeBuilder } from "@/theme/paletteBuilder";
 import { contrastRatio } from "@/theme/contrast";
 
 describe("palettes", () => {
@@ -10,10 +11,28 @@ describe("palettes", () => {
         }
     });
 
+    it("should give each theme a palette for exactly the modes its style has", () => {
+        for (const style of STYLE_IDS) {
+            for (const theme of STYLES[style].themes) {
+                const modes = (["light", "dark"] as const).filter(mode => theme[mode] !== undefined);
+                expect(modes, `${style}/${theme.id}`).toEqual([...STYLE_COLOR_MODES[style]]);
+            }
+        }
+    });
+
+    it("should build a dark-only theme with a dark palette and no light one", () => {
+        const neutrals = { ...getPalette("minimal", "green", "dark") };
+        const build = darkOnlyThemeBuilder(neutrals);
+        const theme = build("green", { primary: "#00F0FF", "primary-hover": "#40F4FF", accent: "#FF2BD6" });
+
+        expect(theme.light).toBeUndefined();
+        expect(theme.dark?.primary).toBe("#00F0FF");
+    });
+
     it("should use upper-case six-digit hex values everywhere", () => {
         for (const style of Object.values(STYLES)) {
             for (const theme of style.themes) {
-                for (const value of [...Object.values(theme.light), ...Object.values(theme.dark ?? {})]) {
+                for (const value of [...Object.values(theme.light ?? {}), ...Object.values(theme.dark ?? {})]) {
                     expect(value).toMatch(/^#[0-9A-F]{6}$/);
                 }
             }

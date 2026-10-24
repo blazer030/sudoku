@@ -17,8 +17,8 @@ export type Palette = Record<PaletteToken, string>;
 
 export interface ThemePalette {
     id: ColorThemeId;
-    light: Palette;
-    /** Missing for a style that is light only (STYLE_COLOR_MODES). */
+    /** A palette for each mode the theme's style has (STYLE_COLOR_MODES), and none for a mode it lacks. */
+    light?: Palette;
     dark?: Palette;
 }
 
@@ -72,11 +72,25 @@ const lightPalette = (neutrals: Neutrals<LightThemeColors>, light: LightThemeCol
         ...tintsOf(light.primary, neutrals.card, LIGHT_TINTS),
     }, extras);
 
+const darkPalette = (neutrals: Neutrals<DarkThemeColors>, dark: DarkThemeColors, extras: StyleExtras): Palette =>
+    withAliases({
+        ...neutrals,
+        ...dark,
+        ...tintsOf(dark.primary, neutrals.card, DARK_TINTS),
+    }, extras);
+
 // A light-only style's theme builder: its own neutrals under each theme's colours and tints
 export const lightOnlyThemeBuilder = (lightNeutrals: Neutrals<LightThemeColors>, lightExtras: StyleExtras = {}) =>
     (id: ColorThemeId, light: LightThemeColors): ThemePalette => ({
         id,
         light: lightPalette(lightNeutrals, light, lightExtras),
+    });
+
+// A dark-only style's theme builder, the mirror of the light-only one
+export const darkOnlyThemeBuilder = (darkNeutrals: Neutrals<DarkThemeColors>, darkExtras: StyleExtras = {}) =>
+    (id: ColorThemeId, dark: DarkThemeColors): ThemePalette => ({
+        id,
+        dark: darkPalette(darkNeutrals, dark, darkExtras),
     });
 
 // A style's theme builder: its own neutrals under each theme's colours and tints
@@ -89,9 +103,5 @@ export const themeBuilder = (
     (id: ColorThemeId, light: LightThemeColors, dark: DarkThemeColors): ThemePalette => ({
         id,
         light: lightPalette(lightNeutrals, light, lightExtras),
-        dark: withAliases({
-            ...darkNeutrals,
-            ...dark,
-            ...tintsOf(dark.primary, darkNeutrals.card, DARK_TINTS),
-        }, darkExtras),
+        dark: darkPalette(darkNeutrals, dark, darkExtras),
     });
