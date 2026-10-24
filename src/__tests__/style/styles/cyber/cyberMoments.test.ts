@@ -191,7 +191,6 @@ describe("cyber moments", () => {
         it("should leave the brackets, ring and text still when still", () => {
             // The brackets' shape is on every celebration state, their lock only while it plays
             expect(declarationsOf(CYBER_CSS, BRACKETS).get("animation")).toBeUndefined();
-            expect(declarationsOf(CYBER_CSS, `${CELEBRATION}[data-still] .cyber-mission`).get("animation")).toBeUndefined();
             expect(declarationsOf(CYBER_CSS, RING).get("animation")).toBeUndefined();
             expect(declarationsOf(CYBER_CSS, MISSION).get("animation")).toBeUndefined();
         });

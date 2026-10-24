@@ -280,8 +280,9 @@ const PIXEL_BOARD_CASES: PixelBoardCase[] = STYLES.pixel.themes.flatMap(theme =>
         drawn("same digit (foreground on highlight)", palette.foreground, palette.highlight),
         // A completed group's cells flash solid, their digits in the flash's ink, and a hint's answer glows in
         // the primary's light surface ringed in the primary. Between flashes, and around the glow, digits take
-        // the foreground ink, which the cases above check on every look under them. The selected cell does
-        // neither (it is inverted; the cursor and the pop mark it), so no page-coloured digit is drawn on these.
+        // the foreground ink, which the cases above check on every look under them. The selected cell flashes
+        // like the rest (its digit takes the flash's ink too, so the case above covers it); only the hint glow
+        // skips it (it is inverted; the cursor and the pop mark it), so no page-coloured digit is drawn on that.
         drawn(`completion flash's digits (${flash.ink}) on its fill (${flash.fill})`, palette[flash.ink], palette[flash.fill]),
         // The flash must show on the cells it lights: the board and a dither's shaded pixels
         drawn(`completion flash's fill (${flash.fill}) apart from the board`, palette[flash.fill], board, LAYER_APART),
