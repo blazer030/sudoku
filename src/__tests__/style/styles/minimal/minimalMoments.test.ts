@@ -1,8 +1,7 @@
 import { readFileSync } from "fs";
-import postcss, { type AtRule, type Node, type Rule } from "postcss";
 import { STYLE_MOMENTS } from "@/presentation/components/style-moments/styleMoments";
 import { GROUP_RIPPLE_STEP_MS } from "@/presentation/pages/game/useGroupEffect";
-import { declarationsOf } from "../../styleSheetRules";
+import { animationTimingOf, declarationsOf, reducedMotionDeclarationsOf as reducedMotionDeclarationsIn } from "../../styleSheetRules";
 
 const MINIMAL_CSS = readFileSync("src/style/styles/minimal/skin.css", "utf8");
 
@@ -17,29 +16,7 @@ const RING = `${CARD} [data-skin~="trophy"]::before`;
 const DRAWING_RING = `${RISING_CARD} [data-skin~="trophy"]::before`;
 const LOADER_SQUARE = `${SCOPE} .minimal-loader-square`;
 
-const isInReducedMotion = (rule: Rule): boolean => {
-    let current: Node | undefined = rule.parent;
-    while (current !== undefined) {
-        if (current.type === "atrule" && (current as AtRule).params.includes("prefers-reduced-motion: reduce")) return true;
-        current = current.parent;
-    }
-    return false;
-};
-
-// The declarations of the rules inside the reduced-motion block that list `selector`
-const reducedMotionDeclarationsOf = (selector: string): Map<string, string> => {
-    const declarations = new Map<string, string>();
-    postcss.parse(MINIMAL_CSS).walkRules((rule: Rule) => {
-        if (!isInReducedMotion(rule)) return;
-        if (!rule.selectors.map(item => item.replace(/\s+/g, " ").trim()).includes(selector)) return;
-        rule.walkDecls((declaration) => {
-            declarations.set(declaration.prop, declaration.value.replace(/\s+/g, " ").trim());
-        });
-    });
-    return declarations;
-};
-
-const millisecondsIn = (value: string): number[] => [...value.matchAll(/(\d+)ms/g)].map(match => Number(match[1]));
+const reducedMotionDeclarationsOf = (selector: string): Map<string, string> => reducedMotionDeclarationsIn(MINIMAL_CSS, selector);
 
 describe("minimal moments", () => {
     describe("group completion", () => {
@@ -48,12 +25,21 @@ describe("minimal moments", () => {
             expect(declarationsOf(MINIMAL_CSS, `${GROUP_CELL} > div`).get("animation")).toMatch(/^minimal-digit-lift .*var\(--group-delay/);
         });
 
-        it("should end every cell's wash before the group effect's timer, its ripple step included", () => {
-            const [duration, leadIn] = millisecondsIn(declarationsOf(MINIMAL_CSS, GROUP_CELL).get("animation") ?? "");
-            const rippleStep = millisecondsIn(declarationsOf(MINIMAL_CSS, GROUP_CELL).get("--group-ripple-step") ?? "")[0];
+        it.each([
+            [GROUP_CELL, "minimal-group-wash"],
+            [`${GROUP_CELL} > div`, "minimal-digit-lift"],
+        ])("should end %s's %s within the group effect's own time", (selector, name) => {
+            const timing = animationTimingOf(declarationsOf(MINIMAL_CSS, selector).get("animation") ?? "", name);
 
-            expect(leadIn + duration).toBeLessThanOrEqual(STYLE_MOMENTS.minimal.groupEffectMs);
-            expect(rippleStep).toBeLessThanOrEqual(GROUP_RIPPLE_STEP_MS);
+            expect(timing).not.toBeNull();
+            expect((timing?.fixedDelayMs ?? 0) + (timing?.durationMs ?? 0)).toBeLessThanOrEqual(STYLE_MOMENTS.minimal.groupEffectMs);
+        });
+
+        it("should ripple no slower than the group effect's timer counts", () => {
+            const rippleStep = declarationsOf(MINIMAL_CSS, GROUP_CELL).get("--group-ripple-step") ?? "";
+
+            expect(rippleStep).toMatch(/^\d+ms$/);
+            expect(Number.parseFloat(rippleStep)).toBeLessThanOrEqual(GROUP_RIPPLE_STEP_MS);
         });
 
         it("should stop the wash and the lift under reduced motion", () => {
