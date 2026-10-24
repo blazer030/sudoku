@@ -428,8 +428,9 @@
 
 /* The grid inside is cut 8px at the same two corners, so it follows the frame (the cut stays small enough
    for a corner cell's brackets to clear it). The clip would take the magenta outer line with it, so each
-   cut edge is redrawn as a 3px diagonal band of that colour, from a 12px square at the corner that starts
-   at the border's outer edge (the 8px cut is a third of the square's 24px diagonal, the 3px band 51%). */
+   cut edge is redrawn as a 3px diagonal band of that colour, in a 12px square at the corner that starts
+   at the border's outer edge (the 8px cut is a third of the square's 24px diagonal, the 3px band 51%).
+   Both bands are layers of the grid's ::before, so its ::after stays free. */
 [data-style="cyber"] [data-skin~="board"] > div {
     border-color: var(--board-box-line);
     border-radius: 0;
@@ -437,26 +438,15 @@
     clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
 }
 
-[data-style="cyber"] [data-skin~="board"] > div::before,
-[data-style="cyber"] [data-skin~="board"] > div::after {
+[data-style="cyber"] [data-skin~="board"] > div::before {
     content: "";
     position: absolute;
+    inset: -3px;
     z-index: 1;
-    width: 12px;
-    height: 12px;
     pointer-events: none;
-}
-
-[data-style="cyber"] [data-skin~="board"] > div::before {
-    top: -3px;
-    left: -3px;
-    background: linear-gradient(135deg, transparent 33.33%, var(--board-box-line) 0 51%, transparent 0);
-}
-
-[data-style="cyber"] [data-skin~="board"] > div::after {
-    right: -3px;
-    bottom: -3px;
-    background: linear-gradient(315deg, transparent 33.33%, var(--board-box-line) 0 51%, transparent 0);
+    background:
+        linear-gradient(135deg, transparent 33.33%, var(--board-box-line) 0 51%, transparent 0) top left / 12px 12px no-repeat,
+        linear-gradient(315deg, transparent 33.33%, var(--board-box-line) 0 51%, transparent 0) bottom right / 12px 12px no-repeat;
 }
 
 /* The HUD tags: GRID 9×9 at the top left and the selected cell's name at the bottom right, on the page

@@ -283,15 +283,18 @@ describe("cyber skin", () => {
 
         it("should run the magenta outer line along each cut edge, under the selection brackets", () => {
             const brackets = declarationsOf(CYBER_CSS, `${skin("board")}:not([data-hint-mode]) [data-selected]::after`);
-            for (const [corner, direction] of [["before", "135deg"], ["after", "315deg"]]) {
-                const edge = declarationsOf(CYBER_CSS, `${skin("board")} > div::${corner}`);
+            const edge = declarationsOf(CYBER_CSS, `${skin("board")} > div::before`);
 
-                expect(edge.get("content"), corner).toBe('""');
-                expect(edge.get("position"), corner).toBe("absolute");
-                expect(edge.get("pointer-events"), corner).toBe("none");
-                expect(edge.get("background"), corner).toContain(`linear-gradient(${direction}, transparent 33.33%, var(--board-box-line) 0 51%, transparent 0)`);
-                expect(Number(edge.get("z-index")), corner).toBeLessThan(Number(brackets.get("z-index")));
+            expect(edge.get("content")).toBe('""');
+            expect(edge.get("position")).toBe("absolute");
+            expect(edge.get("pointer-events")).toBe("none");
+            for (const [corner, direction] of [["top left", "135deg"], ["bottom right", "315deg"]]) {
+                expect(edge.get("background"), corner)
+                    .toContain(`linear-gradient(${direction}, transparent 33.33%, var(--board-box-line) 0 51%, transparent 0) ${corner} / 12px 12px no-repeat`);
             }
+            expect(Number(edge.get("z-index"))).toBeLessThan(Number(brackets.get("z-index")));
+            // Both bands are on the ::before, so the grid's ::after stays free
+            expect(declarationsOf(CYBER_CSS, `${skin("board")} > div::after`).get("content")).toBeUndefined();
         });
 
         it("should draw magenta box lines and faint cyan cell lines", () => {
