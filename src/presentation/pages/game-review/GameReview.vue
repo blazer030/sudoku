@@ -7,6 +7,7 @@
     >
         <div
             ref="header"
+            :data-scrolled="headerScrolled ? '' : undefined"
             class="flex items-center justify-between sticky top-0 bg-background -mx-5 px-5 pt-6 pb-1 z-10"
             data-skin="page-header"
             data-testid="review-header"
@@ -149,6 +150,7 @@ import { computed, useTemplateRef, watch, type Component } from "vue";
 import { useRouter } from "vue-router";
 import { ChevronLeft, Eraser, LayoutGrid, Lightbulb, Pencil, Sparkles, StickyNote, Trophy, Undo2, X } from "lucide-vue-next";
 import { ROUTER_PATH } from "@/router";
+import { useScrolledHeader } from "@/presentation/composables/useScrolledHeader";
 import type { GameStepAction } from "@/domain/game/GameStep";
 import { useStatisticsStore } from "@/stores/statisticsStore";
 import { formatTime } from "@/utils/formatTime";
@@ -225,6 +227,7 @@ const isChanged = (row: number, column: number): boolean => {
 // cell (auto notes, undo, the first and last boards) leave the scroll where the player put it.
 const scrollArea = useTemplateRef<HTMLElement>("scrollArea");
 const header = useTemplateRef<HTMLElement>("header");
+const headerScrolled = useScrolledHeader(header);
 const boardGrid = useTemplateRef<HTMLElement>("boardGrid");
 watch(currentStep, () => {
     const cell = changedCell.value;
