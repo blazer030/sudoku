@@ -263,6 +263,66 @@ describe("cyber skin", () => {
         });
     });
 
+    describe("cells", () => {
+        const BOARD = skin("board");
+        const cell = (rest: string): Map<string, string> => declarationsOf(CYBER_CSS, `${BOARD} ${rest}`);
+
+        it("should set a player's digit in cyan with a soft cyan glow", () => {
+            const entered = cell('[data-value-kind="entered"] > div');
+
+            expect(entered.get("color")).toBe("var(--color-accent)");
+            expect(entered.get("text-shadow")).toMatch(/var\(--color-accent\)/);
+        });
+
+        it("should keep a wrong or conflicting entry red", () => {
+            for (const variant of ["error", "wrong"]) {
+                expect(cell(`[data-variant="${variant}"][data-value-kind="entered"] > div`).get("color"), variant).toBe("var(--color-error)");
+            }
+        });
+
+        it("should set the selected cell's digit in yellow with a glow, and drop the shared ring", () => {
+            const digit = cell('[data-variant="selected"][data-value-kind] > div');
+
+            expect(digit.get("color")).toBe("var(--color-signal)");
+            expect(digit.get("text-shadow")).toMatch(/var\(--color-signal\)/);
+            expect(cell('[data-variant="selected"]').get("box-shadow")).toBe("none");
+        });
+
+        it("should draw four yellow corner brackets on the selected cell's ::after, leaving ::before free", () => {
+            const selected = `${BOARD}:not([data-hint-mode]) [data-selected]`;
+            const brackets = declarationsOf(CYBER_CSS, `${selected}::after`);
+
+            expect(declarationsOf(CYBER_CSS, selected).get("position")).toBe("relative");
+            expect(brackets.get("pointer-events")).toBe("none");
+            expect(brackets.get("background")?.match(/var\(--color-signal\)/g)?.length).toBeGreaterThanOrEqual(8);
+            expect(allRules().some(rule => rule.selectors.some(selector => collapse(selector).endsWith("[data-selected]::before")))).toBe(false);
+        });
+
+        it("should set the same digit in pink", () => {
+            expect(cell('[data-variant="same-digit"][data-value-kind] > div').get("color")).toBe("var(--color-primary-ink)");
+        });
+
+        it("should set an emphasised note square, in pink on the deep magenta fill", () => {
+            const emphasised = cell("[data-note-highlight]");
+
+            expect(emphasised.get("color")).toBe("var(--color-primary-ink)");
+            expect(emphasised.get("background-color")).toBe("var(--color-primary-light)");
+            expect(emphasised.get("border-radius")).toBe("0");
+        });
+
+        it("should draw a hint's answer cell as a yellow wash inside a yellow inset outline", () => {
+            const answer = cell('[data-variant="answer"]');
+
+            expect(answer.get("background-color")).toMatch(/^color-mix\(in srgb, var\(--color-signal\) 12%, var\(--color-card\)\)$/);
+            expect(answer.get("box-shadow")).toBe("inset 0 0 0 1.5px var(--color-signal)");
+        });
+
+        it("should set a hint's candidate notes in cyan and its eliminated notes in red", () => {
+            expect(cell(".font-note.text-primary").get("color")).toBe("var(--color-accent)");
+            expect(cell('[data-testid^="eliminated-note-"]').get("color")).toBe("var(--color-error)");
+        });
+    });
+
     describe("Home", () => {
         it("should drop the logo's filled square and light the diagonal squares in magenta", () => {
             const logo = declarationsOf(CYBER_CSS, skin("logo"));

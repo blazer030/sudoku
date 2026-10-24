@@ -289,24 +289,50 @@ const PIXEL_BOARD_CASES: PixelBoardCase[] = STYLES.pixel.themes.flatMap(theme =>
     ];
 }));
 
-// Cyberpunk's board: each ink on the wash it sits on, all on the card. Lit cells are a neon wash over the
-// card with the cell's own ink on it. Task 7 aligns these with what the skin actually draws.
+// Cyberpunk's board: the ink actually drawn on the surface actually drawn (skin.css). Cells are washes
+// over the card; glows (a digit's text-shadow, a cell's inner glow) do not count toward contrast.
 interface CyberBoardCase { label: string; foreground: string; background: string; minimum: number }
 
 const CYBER_BOARD_CASES: CyberBoardCase[] = STYLES.cyber.themes.flatMap(theme => STYLE_COLOR_MODES.cyber.flatMap((mode) => {
     const palette = getPalette("cyber", theme.id, mode);
     const prefix = `cyber/${theme.id}/${mode}`;
-    const drawn = (name: string, foreground: PaletteToken, background: PaletteToken): CyberBoardCase => ({
-        label: `${prefix}: ${name} ≥ ${TEXT}`, foreground: palette[foreground], background: palette[background], minimum: TEXT,
+    const drawn = (name: string, foreground: string, background: string, minimum = TEXT): CyberBoardCase => ({
+        label: `${prefix}: ${name} ≥ ${minimum}`, foreground, background, minimum,
     });
-    const boardInks = { "clue (foreground)": "foreground", "entry (accent)": "accent", "note": "note" } as const;
-    const washes: readonly PaletteToken[] = ["cell-peer", "cell-scope", "cell-pattern"];
+    // The hint's answer cell: a yellow wash (12% of the signal over the card) inside a signal outline
+    const answerWash = mixColors(palette.signal, 0.12, palette.card);
+    const surfaces: readonly (readonly [string, string])[] = [
+        ["the card", palette.card],
+        ["cell-peer", palette["cell-peer"]],
+        ["cell-scope", palette["cell-scope"]],
+        ["cell-pattern", palette["cell-pattern"]],
+        ["cell-focus", palette["cell-focus"]],
+        ["cell-selected", palette["cell-selected"]],
+        ["highlight", palette.highlight],
+        ["the answer wash", answerWash],
+    ];
+    // A clue, a player's digit and a note can lie on any wash a hint or the selection puts under them;
+    // a hint's candidate note is cyan and an eliminated one red, on the hint's cells and the card
+    const onEverySurface = (name: string, ink: string) => surfaces.map(([surface, background]) => drawn(`${name} on ${surface}`, ink, background));
     return [
-        ...Object.entries(boardInks).map(([name, ink]) => drawn(`${name} on the card`, ink, "card")),
-        drawn("selected cell's signal on cell-selected", "signal", "cell-selected"),
-        drawn("same digit's primary-ink on highlight", "primary-ink", "highlight"),
-        ...washes.flatMap(wash => (["foreground", "accent"] as const).map(ink => drawn(`${ink} on ${wash}`, ink, wash))),
-        drawn("error cell's error on error-surface", "error", "error-surface"),
+        ...onEverySurface("clue (foreground)", palette.foreground),
+        ...onEverySurface("entry (accent)", palette.accent),
+        ...onEverySurface("note", palette.note),
+        ...onEverySurface("candidate note (accent)", palette.accent),
+        ...onEverySurface("eliminated note (error)", palette.error),
+        drawn("clue on a clue cell", palette.foreground, palette["cell-clue"]),
+        drawn("entry on a clue cell", palette.accent, palette["cell-clue"]),
+        drawn("note on a clue cell", palette.note, palette["cell-clue"]),
+        drawn("selected digit (signal) on cell-selected", palette.signal, palette["cell-selected"]),
+        drawn("same digit (primary-ink) on highlight", palette["primary-ink"], palette.highlight),
+        drawn("emphasised note (primary-ink) on primary-light", palette["primary-ink"], palette["primary-light"]),
+        drawn("error digit (error) on error-surface", palette.error, palette["error-surface"]),
+        drawn("clue in an error cell (foreground) on error-surface", palette.foreground, palette["error-surface"]),
+        drawn("note in an error cell on error-surface", palette.note, palette["error-surface"]),
+        drawn("selected cell's brackets (signal) on cell-selected", palette.signal, palette["cell-selected"], LARGE_OR_ICON),
+        drawn("selected error cell's brackets (signal) on error-surface", palette.signal, palette["error-surface"], LARGE_OR_ICON),
+        drawn("answer outline (signal) on the answer wash", palette.signal, answerWash, LARGE_OR_ICON),
+        drawn("wrong cell's outline (error) on error-surface", palette.error, palette["error-surface"], LARGE_OR_ICON),
     ];
 }));
 

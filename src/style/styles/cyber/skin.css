@@ -418,6 +418,84 @@
     color: var(--color-primary-ink);
 }
 
+/* Cells. Every state is a faint wash over the one dark panel (the palette's cell tokens); the ink and the
+   glow tell the rest. A clue keeps the foreground ink; a player's digit (or a hint's) is cyan with a soft
+   glow; the selected cell is yellow, its digit glowing, under four corner brackets; the same digit is
+   pink. A glow is only decoration, so every ink reads on its wash without it (paletteContrast's
+   CYBER_BOARD_CASES). An error or wrong cell is red, whatever else is true of it. */
+[data-style="cyber"] [data-skin~="board"] [data-value-kind="entered"] > div {
+    color: var(--color-accent);
+    text-shadow: 0 0 8px color-mix(in srgb, var(--color-accent) 55%, transparent);
+}
+
+[data-style="cyber"] [data-skin~="board"] [data-variant="error"][data-value-kind="entered"] > div,
+[data-style="cyber"] [data-skin~="board"] [data-variant="wrong"][data-value-kind="entered"] > div {
+    color: var(--color-error);
+    text-shadow: none;
+}
+
+[data-style="cyber"] [data-skin~="board"] [data-variant="same-digit"][data-value-kind] > div {
+    color: var(--color-primary-ink);
+    text-shadow: none;
+}
+
+/* The shared selection ring gives way to the brackets */
+[data-style="cyber"] [data-skin~="board"] [data-variant="selected"] {
+    box-shadow: none;
+}
+
+[data-style="cyber"] [data-skin~="board"] [data-variant="selected"][data-value-kind] > div {
+    color: var(--color-signal);
+    text-shadow: 0 0 10px color-mix(in srgb, var(--color-signal) 70%, transparent);
+}
+
+/* The brackets mark the selected cell whatever its variant, so a selected error still shows where the
+   player is; hint mode shows its own cells instead. They use the cell's ::after, the ::before stays free
+   for the arrival and leaving scan lines. */
+[data-style="cyber"] [data-skin~="board"]:not([data-hint-mode]) [data-selected] {
+    position: relative;
+}
+
+[data-style="cyber"] [data-skin~="board"]:not([data-hint-mode]) [data-selected]::after {
+    content: "";
+    position: absolute;
+    inset: 2px;
+    z-index: 2;
+    pointer-events: none;
+    background:
+        linear-gradient(var(--color-signal), var(--color-signal)) top left / 10px 2px no-repeat,
+        linear-gradient(var(--color-signal), var(--color-signal)) top left / 2px 10px no-repeat,
+        linear-gradient(var(--color-signal), var(--color-signal)) top right / 10px 2px no-repeat,
+        linear-gradient(var(--color-signal), var(--color-signal)) top right / 2px 10px no-repeat,
+        linear-gradient(var(--color-signal), var(--color-signal)) bottom left / 10px 2px no-repeat,
+        linear-gradient(var(--color-signal), var(--color-signal)) bottom left / 2px 10px no-repeat,
+        linear-gradient(var(--color-signal), var(--color-signal)) bottom right / 10px 2px no-repeat,
+        linear-gradient(var(--color-signal), var(--color-signal)) bottom right / 2px 10px no-repeat;
+}
+
+/* Hint mode: the answer cell is a yellow wash inside a yellow inset outline (the shared ring is the
+   primary's) */
+[data-style="cyber"] [data-skin~="board"] [data-variant="answer"] {
+    background-color: color-mix(in srgb, var(--color-signal) 12%, var(--color-card));
+    box-shadow: inset 0 0 0 1.5px var(--color-signal);
+}
+
+/* Notes: a hint's candidates are cyan and its eliminated ones red; the selected digit's note, or a
+   hint's emphasised candidate, is a square pink on the deep magenta fill, not a bright disc */
+[data-style="cyber"] [data-skin~="board"] .font-note.text-primary {
+    color: var(--color-accent);
+}
+
+[data-style="cyber"] [data-skin~="board"] [data-testid^="eliminated-note-"] {
+    color: var(--color-error);
+}
+
+[data-style="cyber"] [data-skin~="board"] [data-note-highlight] {
+    border-radius: 0;
+    background-color: var(--color-primary-light);
+    color: var(--color-primary-ink);
+}
+
 /* Settings: each group's heading carries its running number (01, 02, …) on the right */
 [data-style="cyber"] [data-skin~="group-heading"]::after {
     counter-increment: cyber-group;
