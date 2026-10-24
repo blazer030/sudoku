@@ -48,21 +48,18 @@ describe("useGroupEffect", () => {
         expect(typeof effect.value?.id).toBe("number");
     });
 
-    it("should clear the effect and call onComplete once the farthest cell's effect has run", () => {
+    it("should clear the effect once the farthest cell's effect has run", () => {
         vi.useFakeTimers();
         const { play, effect, isInEffect } = useGroupEffect(() => true, () => EFFECT_MS);
-        const onComplete = vi.fn();
 
         // The farthest cell is 4 steps from the origin
-        play(ROW_0, rowCells(0), { row: 0, column: 4 }, onComplete);
+        play(ROW_0, rowCells(0), { row: 0, column: 4 });
         const total = 4 * GROUP_RIPPLE_STEP_MS + EFFECT_MS;
 
         vi.advanceTimersByTime(total - 1);
-        expect(onComplete).not.toHaveBeenCalled();
         expect(effect.value).not.toBeNull();
 
         vi.advanceTimersByTime(1);
-        expect(onComplete).toHaveBeenCalledOnce();
         expect(effect.value).toBeNull();
         expect(isInEffect(0, 0)).toEqual([]);
     });
@@ -70,38 +67,33 @@ describe("useGroupEffect", () => {
     it("should take each style's effect length from the duration it is given", () => {
         vi.useFakeTimers();
         let duration = 300;
-        const { play } = useGroupEffect(() => true, () => duration);
-        const onComplete = vi.fn();
+        const { play, effect } = useGroupEffect(() => true, () => duration);
 
         duration = 800;
-        play(ROW_0, [{ row: 0, column: 0 }], { row: 0, column: 0 }, onComplete);
+        play(ROW_0, [{ row: 0, column: 0 }], { row: 0, column: 0 });
 
         vi.advanceTimersByTime(799);
-        expect(onComplete).not.toHaveBeenCalled();
+        expect(effect.value).not.toBeNull();
         vi.advanceTimersByTime(1);
-        expect(onComplete).toHaveBeenCalledOnce();
+        expect(effect.value).toBeNull();
     });
 
-    it("should set nothing and call onComplete at once when motion is not allowed", () => {
+    it("should set nothing when motion is not allowed", () => {
         vi.useFakeTimers();
         const { play, effect, isInEffect } = useGroupEffect(() => false, () => EFFECT_MS);
-        const onComplete = vi.fn();
 
-        play(ROW_0, rowCells(0), { row: 0, column: 0 }, onComplete);
+        play(ROW_0, rowCells(0), { row: 0, column: 0 });
 
-        expect(onComplete).toHaveBeenCalledOnce();
         expect(effect.value).toBeNull();
         expect(isInEffect(0, 0)).toEqual([]);
         expect(vi.getTimerCount()).toBe(0);
     });
 
-    it("should call onComplete at once when there are no cells", () => {
+    it("should set nothing when there are no cells", () => {
         const { play, effect } = useGroupEffect(() => true, () => EFFECT_MS);
-        const onComplete = vi.fn();
 
-        play([], [], { row: 0, column: 0 }, onComplete);
+        play([], [], { row: 0, column: 0 });
 
-        expect(onComplete).toHaveBeenCalledOnce();
         expect(effect.value).toBeNull();
     });
 
@@ -128,44 +120,28 @@ describe("useGroupEffect", () => {
         expect(vi.getTimerCount()).toBe(0);
     });
 
-    it("should still call the replaced effect's onComplete, so nothing waiting on it is lost", () => {
-        vi.useFakeTimers();
-        const { play } = useGroupEffect(() => true, () => EFFECT_MS);
-        const first = vi.fn();
-
-        play(ROW_0, rowCells(0), { row: 0, column: 0 }, first);
-        play([{ kind: "column", index: 8 }], columnCells(8), { row: 4, column: 8 });
-
-        expect(first).toHaveBeenCalledOnce();
-    });
-
-    it("should stop a running effect without calling its onComplete, leaving no timer", () => {
+    it("should stop a running effect at once, leaving no timer", () => {
         vi.useFakeTimers();
         const { play, stop, effect, isInEffect } = useGroupEffect(() => true, () => EFFECT_MS);
-        const onComplete = vi.fn();
-        play(ROW_0, rowCells(0), { row: 0, column: 4 }, onComplete);
+        play(ROW_0, rowCells(0), { row: 0, column: 4 });
 
         stop();
 
         expect(effect.value).toBeNull();
         expect(isInEffect(0, 0)).toEqual([]);
         expect(vi.getTimerCount()).toBe(0);
-        vi.advanceTimersByTime(4 * GROUP_RIPPLE_STEP_MS + EFFECT_MS);
-        expect(onComplete).not.toHaveBeenCalled();
     });
 
     it("should leave no timer behind when its scope ends", () => {
         vi.useFakeTimers();
         const scope = effectScope();
-        const onComplete = vi.fn();
         scope.run(() => {
             const { play } = useGroupEffect(() => true, () => EFFECT_MS);
-            play(ROW_0, rowCells(0), { row: 0, column: 0 }, onComplete);
+            play(ROW_0, rowCells(0), { row: 0, column: 0 });
         });
 
         scope.stop();
-        vi.runAllTimers();
 
-        expect(onComplete).not.toHaveBeenCalled();
+        expect(vi.getTimerCount()).toBe(0);
     });
 });

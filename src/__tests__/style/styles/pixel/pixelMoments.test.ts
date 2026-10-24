@@ -83,7 +83,7 @@ describe("pixel moments", () => {
             const onTheAttribute: string[] = [];
             postcss.parse(PIXEL_CSS).walkRules((rule: Rule) => {
                 if (isInside(rule, "media") || isInside(rule, "keyframes")) return;
-                if (!/animate-completion-flash|\[data-group\]/.test(rule.selector)) return;
+                if (!rule.selector.includes("[data-group]")) return;
                 rule.walkDecls((declaration) => {
                     if (declaration.prop !== "animation") onTheAttribute.push(`${rule.selector} { ${declaration.prop} }`);
                 });
@@ -147,7 +147,7 @@ describe("pixel moments", () => {
             const stillGroupRules: string[] = [];
             postcss.parse(PIXEL_CSS).walkRules((rule: Rule) => {
                 if (!isInside(rule, "media")) return;
-                if (!/animate-completion-flash|\[data-group\]/.test(rule.selector)) return;
+                if (!rule.selector.includes("[data-group]")) return;
                 rule.walkDecls((declaration) => {
                     if (declaration.prop !== "animation") stillGroupRules.push(`${rule.selector} { ${declaration.prop} }`);
                 });

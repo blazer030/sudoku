@@ -69,16 +69,6 @@ describe("paper board", () => {
         expect(pressed).toContain("var(--paper-clue-hatch)");
     });
 
-    it("should flash a completed group from and back to the cell's own wash", () => {
-        // The shared flash starts and ends on the card colour unless a style says what the cell rests on
-        const indexCss = readFileSync("src/style/index.css", "utf8");
-        const flash = /@keyframes completion-flash \{([^@]*?)\n\}/.exec(indexCss)?.[1] ?? "";
-
-        expect(flash).toContain("0% { background-color: var(--completion-flash-rest, var(--color-card)); }");
-        expect(flash).toContain("100% { background-color: var(--completion-flash-rest, var(--color-card)); }");
-        expect(declarationsOf(PAPER_CSS, `${BOARD} [data-variant]`).get("--completion-flash-rest")).toBe("var(--paper-cell-wash)");
-    });
-
     it("should square the board's corners like a ruled sheet", () => {
         expect(declarationsOf(PAPER_CSS, `${BOARD} [data-variant]`).get("border-radius")).toBe("0");
     });

@@ -520,12 +520,6 @@ describe("BoardCell", () => {
         expect(wrapper.find("[data-testid='eliminated-note-2']").text()).toBe("2");
     });
 
-    it("should play the group effect while in one", () => {
-        const wrapper = mountCell({ value: 0, groupKinds: ["row"], groupEffectId: 1 });
-
-        expect(wrapper.classes()).toContain("animate-completion-flash");
-    });
-
     it("should place itself on the board through its row, column and box, counted from zero", () => {
         const style = mountCell({ row: 4, column: 7 }).attributes("style");
 
@@ -542,27 +536,24 @@ describe("BoardCell", () => {
     it("should restart its effect when a new effect takes over while it is still marked", async () => {
         // A CSS animation starts again only once its cell has been seen without it
         const wrapper = mountCell({ groupKinds: ["row"], groupEffectId: 1 });
-        const classHistory: string[] = [];
+        const groupHistory: (string | null)[] = [];
         const observer = new MutationObserver((records) => {
-            for (const record of records) classHistory.push(record.oldValue ?? "");
+            for (const record of records) groupHistory.push((record.target as HTMLElement).getAttribute("data-group"));
         });
-        observer.observe(wrapper.element as HTMLElement, { attributes: true, attributeFilter: ["class"], attributeOldValue: true });
+        observer.observe(wrapper.element as HTMLElement, { attributes: true, attributeFilter: ["data-group"] });
 
         await wrapper.setProps({ groupKinds: ["row", "column"], groupEffectId: 2 });
         await nextTick();
         await nextTick();
         observer.disconnect();
 
-        expect(classHistory.some(classes => !classes.includes("animate-completion-flash"))).toBe(true);
-        expect(wrapper.classes()).toContain("animate-completion-flash");
+        expect(groupHistory).toContain(null);
         expect(wrapper.attributes("data-group")).toBe("row column");
     });
 
-    it("should run the default group effect from the cell's own delay, rippling from the origin", () => {
+    it("should give a cell in a group effect its own delay, rippling from the origin", () => {
         const indexCss = readFileSync("src/style/index.css", "utf8");
 
-        expect(declarationsOf(indexCss, ".animate-completion-flash").get("animation"))
-            .toBe("completion-flash var(--group-effect-duration, 500ms) ease-in-out var(--group-delay, 0ms)");
         const delay = declarationsOf(indexCss, "[data-group-effect] [data-group]").get("--group-delay") ?? "";
         expect(delay).toContain("max(var(--cell-row) - var(--origin-row), var(--origin-row) - var(--cell-row))");
         expect(delay).toContain("max(var(--cell-column) - var(--origin-column), var(--origin-column) - var(--cell-column))");
@@ -580,7 +571,7 @@ describe("BoardCell", () => {
         useSettingsStore().setMotionEffects(false);
         const wrapper = mountCell({ value: 5, groupKinds: ["row"], groupEffectId: 1, popping: true });
 
-        expect(wrapper.classes()).not.toContain("animate-completion-flash");
+        expect(wrapper.attributes("data-group")).toBeUndefined();
         expect(wrapper.classes()).not.toContain("animate-hint-reveal-glow");
         expect(wrapper.find("[data-testid='cell-value']").classes()).not.toContain("animate-hint-reveal-pop");
     });

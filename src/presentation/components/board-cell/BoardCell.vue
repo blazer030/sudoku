@@ -4,7 +4,6 @@
         :class="[
             backgroundClass,
             positionClasses,
-            inGroupEffect ? 'animate-completion-flash' : '',
             pops ? 'animate-hint-reveal-glow' : '',
             leaving ? 'value-leave' : '',
         ]"
@@ -144,7 +143,7 @@ const VALUE_FONT_WEIGHTS: Record<ValueFontWeight, string> = {
 
 // Only a style sheet gives value-arrive (on the digit) and value-leave (on the cell) a look; in styles
 // without one they settle on a timer. A style's burst on the cell's pseudo-elements settles them too.
-// The cell's own colour animations (a completion flash, a hint's glow) run on their own clock, and
+// The cell's own colour animations (a group effect, a hint's glow) run on their own clock, and
 // animations ending inside the cell bubble up, so neither does.
 const motionAllowed = useMotionAllowed();
 // While a new effect takes over a cell still in the old one, the cell is shown out of it for a moment,

@@ -190,18 +190,6 @@
   --group-delay: calc((max(var(--cell-row) - var(--origin-row), var(--origin-row) - var(--cell-row)) + max(var(--cell-column) - var(--origin-column), var(--origin-column) - var(--cell-column))) * var(--group-ripple-step));
 }
 
-/* Completion flash animation, the default group effect. It starts and ends on the card colour unless a
-   style says what the cell rests on (--completion-flash-rest). */
-@keyframes completion-flash {
-  0% { background-color: var(--completion-flash-rest, var(--color-card)); }
-  50% { background-color: var(--color-highlight); }
-  100% { background-color: var(--completion-flash-rest, var(--color-card)); }
-}
-
-.animate-completion-flash {
-  animation: completion-flash var(--group-effect-duration, 500ms) ease-in-out var(--group-delay, 0ms);
-}
-
 /* The answer a Reveal Cell hint fills in grows past its size and settles back. */
 @keyframes hint-reveal-pop {
   0% { transform: scale(0.3); opacity: 0; }
@@ -213,11 +201,9 @@
   animation: hint-reveal-pop 450ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-
 /* The answer cell keeps the hint's highlight for a beat, then fades back, so the fill
-   reads clearly while the panel slides away. Defined after the completion flash so it
-   wins on the answer cell when the fill also completes a row, column or box.
-   It is only a colour change, so it stays on under reduced motion. */
+   reads clearly while the panel slides away. It is only a colour change, so it stays on
+   under reduced motion. */
 @keyframes hint-reveal-glow {
   0%, 45% {
     background-color: var(--color-primary-light);

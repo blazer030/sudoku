@@ -199,7 +199,6 @@
 [data-style="tactile"] [data-skin~="board"] [data-group]:not(.animate-hint-reveal-glow) {
     --group-ripple-step: 45ms;
     position: relative;
-    animation: none;
 }
 
 [data-style="tactile"] [data-skin~="board"] [data-group]:not(.animate-hint-reveal-glow)::before {

@@ -879,7 +879,6 @@ describe("Game", () => {
 
             expect(wrapper.find("[data-testid='game-board']").attributes("data-group-effect")).toBeUndefined();
             expect(wrapper.find("[data-testid='cell-4-0']").attributes("data-group")).toBeUndefined();
-            expect(wrapper.find("[data-testid='cell-4-0']").classes()).not.toContain("animate-completion-flash");
         });
 
         it("should hand the board to a second completed group at once, leaving none of the first marked", async () => {

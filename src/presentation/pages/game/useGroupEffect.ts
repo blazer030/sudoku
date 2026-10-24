@@ -21,31 +21,19 @@ export const useGroupEffect = (motionAllowed: () => boolean, durationMs: () => n
     let cellKinds = new Map<string, GroupKind[]>();
     let nextId = 1;
     let endTimer: ReturnType<typeof setTimeout> | null = null;
-    let pendingComplete: (() => void) | undefined;
 
-    const end = () => {
+    // Ends the running effect, at its timer or at once
+    const stop = () => {
         if (endTimer !== null) clearTimeout(endTimer);
         endTimer = null;
         effect.value = null;
         cellKinds = new Map();
-        const onComplete = pendingComplete;
-        pendingComplete = undefined;
-        onComplete?.();
     };
 
-    // Ends the running effect at once, its onComplete dropped: what waited on it no longer applies
-    const stop = () => {
-        pendingComplete = undefined;
-        end();
-    };
-
-    const play = (groups: CompletedGroup[], cells: CellPosition[], origin: CellPosition, onComplete?: () => void) => {
-        // A new effect replaces a running one; whatever waited on the old one is not left hanging
-        if (effect.value !== null) end();
-        if (!motionAllowed() || cells.length === 0) {
-            onComplete?.();
-            return;
-        }
+    const play = (groups: CompletedGroup[], cells: CellPosition[], origin: CellPosition) => {
+        // A new effect replaces a running one
+        if (effect.value !== null) stop();
+        if (!motionAllowed() || cells.length === 0) return;
 
         const isIn = (group: CompletedGroup, cell: CellPosition): boolean => {
             if (group.kind === "row") return cell.row === group.index;
@@ -57,9 +45,8 @@ export const useGroupEffect = (motionAllowed: () => boolean, durationMs: () => n
 
         const farthest = Math.max(...cells.map(cell =>
             Math.abs(cell.row - origin.row) + Math.abs(cell.column - origin.column)));
-        pendingComplete = onComplete;
         effect.value = { id: nextId++, groups, origin };
-        endTimer = setTimeout(end, farthest * GROUP_RIPPLE_STEP_MS + durationMs());
+        endTimer = setTimeout(stop, farthest * GROUP_RIPPLE_STEP_MS + durationMs());
     };
 
     // Reading `effect` makes callers re-render: every play and end replaces it, and the kinds with it
@@ -73,7 +60,6 @@ export const useGroupEffect = (motionAllowed: () => boolean, durationMs: () => n
         onScopeDispose(() => {
             if (endTimer !== null) clearTimeout(endTimer);
             endTimer = null;
-            pendingComplete = undefined;
         });
     }
 

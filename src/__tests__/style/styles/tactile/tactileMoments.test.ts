@@ -55,10 +55,6 @@ describe("tactile moments", () => {
             expect(shade.get("opacity")).toBe("0");
         });
 
-        it("should replace the shared flash on the cell itself", () => {
-            expect(declarationsOf(TACTILE_CSS, GROUP_CELL).get("animation")).toBe("none");
-        });
-
         it.each([
             [GROUP_SHADE, "tactile-group-shade"],
             [GROUP_DIGIT, "tactile-group-press"],

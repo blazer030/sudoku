@@ -138,10 +138,9 @@
     border-radius: 2px;
 }
 
-/* Each cell shows its wash; a completed group's flash starts and ends on it */
+/* Each cell shows its wash */
 [data-style="paper"] [data-skin~="board"] [data-variant] {
     --paper-cell-wash: transparent;
-    --completion-flash-rest: var(--paper-cell-wash);
     border-radius: 0;
     background-color: var(--paper-cell-wash);
     /* The wash stops at the cell's lines, so the ink reads the same over every wash */
