@@ -7,7 +7,15 @@ const PRESS = ["[data-pressed]", "[data-press-motion][data-pressed]", "[data-pre
 
 // Each fragment must occur in some selector of that style's sheet
 const REQUIRED_SELECTORS: Record<StyleId, readonly string[]> = {
-    minimal: PRESS,
+    minimal: [
+        ...PRESS,
+        "[data-group]",
+        '[data-celebration="playing"]',
+        '[data-celebration="still"]',
+        '[data-skin~="trophy"]',
+        ".minimal-celebration",
+        ".minimal-loader-square",
+    ],
     tactile: [
         ...PRESS,
         '[data-skin~="key"]',

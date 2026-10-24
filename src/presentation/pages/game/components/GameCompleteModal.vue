@@ -14,7 +14,11 @@
                 data-skin="card celebration"
                 data-testid="complete-card"
             >
-                <div class="w-20 h-20 rounded-full bg-primary-light flex items-center justify-center">
+                <div
+                    class="w-20 h-20 rounded-full bg-primary-light flex items-center justify-center"
+                    data-skin="trophy"
+                    data-testid="complete-trophy"
+                >
                     <Trophy
                         :size="40"
                         class="text-primary"

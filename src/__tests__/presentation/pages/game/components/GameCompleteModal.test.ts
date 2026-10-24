@@ -61,10 +61,11 @@ describe("GameCompleteModal", () => {
         expect(wrapper.find("[data-testid='new-record-badge']").text()).toBe("New record!");
     });
 
-    it("should tag the card, the difficulty and the record badge for styles to decorate", () => {
+    it("should tag the card, the trophy, the difficulty and the record badge for styles to decorate", () => {
         const wrapper = mountModal({ isNewRecord: true });
 
         expect(wrapper.find("[data-testid='complete-card']").attributes("data-skin")).toBe("card celebration");
+        expect(wrapper.find("[data-testid='complete-trophy']").attributes("data-skin")).toBe("trophy");
         expect(wrapper.find("[data-testid='complete-difficulty']").attributes("data-skin")).toBe("tag");
         expect(wrapper.find("[data-testid='new-record-badge']").attributes("data-skin")).toBe("tag new-record");
     });
