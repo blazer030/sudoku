@@ -3,8 +3,8 @@
         :class="[
             backgroundClass,
             positionClasses,
-            flashing ? 'animate-completion-flash' : '',
-            popping ? 'animate-hint-reveal-glow' : '',
+            flashes ? 'animate-completion-flash' : '',
+            pops ? 'animate-hint-reveal-glow' : '',
             leaving ? 'value-leave' : '',
         ]"
         :data-selected="selected ? '' : undefined"
@@ -19,7 +19,7 @@
                 valueTextColorClass,
                 valueFontWeightClass,
                 valueFaceClass,
-                popping ? 'animate-hint-reveal-pop' : '',
+                pops ? 'animate-hint-reveal-pop' : '',
                 arriving ? 'value-arrive' : '',
                 'leading-none',
             ]"
@@ -52,6 +52,7 @@
 
 <script lang="ts" setup>
 import { computed, toRef } from "vue";
+import { useMotionAllowed } from "@/presentation/composables/useMotionAllowed";
 import { useArrivalMotion } from "@/presentation/components/board-cell/useArrivalMotion";
 
 export type CellVariant = "default" | "clue" | "selected" | "focus" | "scope" | "error" | "same-digit" | "pattern" | "answer" | "wrong" | "peer";
@@ -124,6 +125,9 @@ const VALUE_FONT_WEIGHTS: Record<ValueFontWeight, string> = {
 // without one they settle on a timer. A style's burst on the cell's pseudo-elements settles them too.
 // The cell's own colour animations (a completion flash, a hint's glow) run on their own clock, and
 // animations ending inside the cell bubble up, so neither does.
+const motionAllowed = useMotionAllowed();
+const flashes = computed(() => props.flashing && motionAllowed());
+const pops = computed(() => props.popping && motionAllowed());
 const { arriving, leaving, settle } = useArrivalMotion(toRef(props, "value"), toRef(props, "popping"));
 
 const settleFromCell = (event: AnimationEvent) => {

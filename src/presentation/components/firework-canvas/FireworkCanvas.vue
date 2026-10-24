@@ -9,8 +9,7 @@
 <script lang="ts" setup>
 import { onBeforeUnmount, onMounted, ref } from "vue";
 import { FIREWORK_COLORS } from "@/theme/fireworkColors";
-import { useSettingsStore } from "@/stores/settingsStore";
-import { prefersReducedMotion } from "@/presentation/composables/prefersReducedMotion";
+import { useMotionAllowed } from "@/presentation/composables/useMotionAllowed";
 
 interface Particle {
     x: number;
@@ -45,7 +44,7 @@ const SPAWN_INTERVAL_MAX = 600;
 const SHELL_SPEED = -8;
 const TRAIL_INTERVAL = 3;
 
-const settingsStore = useSettingsStore();
+const motionAllowed = useMotionAllowed();
 const canvasRef = ref<HTMLCanvasElement | null>(null);
 let fireworks: Firework[] = [];
 let animationFrameId = 0;
@@ -114,7 +113,7 @@ const scheduleNextFirework = (width: number, height: number, colors: string[]) =
 };
 
 const startAnimation = () => {
-    if (!settingsStore.motionEffects || prefersReducedMotion()) return;
+    if (!motionAllowed()) return;
 
     const canvas = canvasRef.value;
     if (!canvas) return;

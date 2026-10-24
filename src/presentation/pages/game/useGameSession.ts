@@ -14,6 +14,7 @@ import { useGameCompletion } from "@/presentation/pages/game/useGameCompletion";
 import { useLeaveGame } from "@/presentation/pages/game/useLeaveGame";
 import { useHintActions } from "@/presentation/pages/game/useHintActions";
 import { useGameToast } from "@/presentation/pages/game/useGameToast";
+import { useMotionAllowed } from "@/presentation/composables/useMotionAllowed";
 import { useCompletionFlash } from "@/presentation/pages/game/useCompletionFlash";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { ANALYTICS_KEY } from "@/application/analytics/AnalyticsService";
@@ -95,7 +96,7 @@ export const useGameSession = ({ onPlayAgain }: GameSessionOptions) => {
     });
 
     const settingsStore = useSettingsStore();
-    const { triggerFlash, isFlashing } = useCompletionFlash(() => settingsStore.motionEffects);
+    const { triggerFlash, isFlashing } = useCompletionFlash(useMotionAllowed());
 
     const gameToast = useGameToast();
 

@@ -1,5 +1,5 @@
 import { onScopeDispose, ref, watch, type Ref } from "vue";
-import { prefersReducedMotion } from "@/presentation/composables/prefersReducedMotion";
+import { useMotionAllowed } from "@/presentation/composables/useMotionAllowed";
 
 /**
  * How long a digit stays flagged as arriving or leaving when no animation ends first. Styles without
@@ -20,6 +20,7 @@ export const useArrivalMotion = (
     value: Ref<number>,
     popping: Ref<boolean>,
 ): { arriving: Ref<boolean>; leaving: Ref<boolean>; settle: () => void } => {
+    const motionAllowed = useMotionAllowed();
     const arriving = ref(false);
     const leaving = ref(false);
     let settleTimer: ReturnType<typeof setTimeout> | undefined;
@@ -60,7 +61,7 @@ export const useArrivalMotion = (
     watch(value, (current, previous) => {
         stopSettleTimer();
         stopRestart();
-        const moving = !popping.value && !prefersReducedMotion();
+        const moving = !popping.value && motionAllowed();
         const wasArriving = arriving.value;
         const arrives = moving && current !== 0 && current !== previous;
         leaving.value = moving && previous !== 0 && current === 0;

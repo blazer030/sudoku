@@ -2,10 +2,15 @@ import { readFileSync } from "fs";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { nextTick } from "vue";
 import { mount } from "@vue/test-utils";
+import { useSettingsStore } from "@/stores/settingsStore";
 import { ARRIVAL_SETTLE_MS } from "@/presentation/components/board-cell/useArrivalMotion";
 import BoardCell from "@/presentation/components/board-cell/BoardCell.vue";
 
 describe("BoardCell", () => {
+    afterEach(() => {
+        localStorage.clear();
+    });
+
     const mountCell = (props: Record<string, unknown>) =>
         mount(BoardCell, { props: { row: 0, column: 0, value: 0, ...props } });
 
@@ -148,6 +153,18 @@ describe("BoardCell", () => {
             await wrapper.setProps({ value: 5 });
 
             expect(wrapper.get("[data-testid='cell-value']").classes()).not.toContain("value-arrive");
+        });
+
+        it("should not animate a fill or an erase while motion effects are off", async () => {
+            stubReducedMotion(false);
+            useSettingsStore().setMotionEffects(false);
+            const wrapper = mountCell({ value: 0 });
+
+            await wrapper.setProps({ value: 5 });
+            expect(wrapper.get("[data-testid='cell-value']").classes()).not.toContain("value-arrive");
+
+            await wrapper.setProps({ value: 0 });
+            expect(wrapper.classes()).not.toContain("value-leave");
         });
 
         it("should leave a hint reveal to its own pop", async () => {
@@ -397,6 +414,15 @@ describe("BoardCell", () => {
 
         expect(wrapper.classes()).toContain("animate-hint-reveal-glow");
         expect(wrapper.find("[data-testid='cell-value']").classes()).toContain("animate-hint-reveal-pop");
+    });
+
+    it("should neither flash, glow nor pop while motion effects are off", () => {
+        useSettingsStore().setMotionEffects(false);
+        const wrapper = mountCell({ value: 5, flashing: true, popping: true });
+
+        expect(wrapper.classes()).not.toContain("animate-completion-flash");
+        expect(wrapper.classes()).not.toContain("animate-hint-reveal-glow");
+        expect(wrapper.find("[data-testid='cell-value']").classes()).not.toContain("animate-hint-reveal-pop");
     });
 
     it("should not glow when not popping", () => {
