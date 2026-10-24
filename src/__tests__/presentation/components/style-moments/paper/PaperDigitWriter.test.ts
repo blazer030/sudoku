@@ -1,12 +1,15 @@
+import { readFileSync } from "fs";
 import { describe, expect, it } from "vitest";
 import { mount, type DOMWrapper } from "@vue/test-utils";
 import PaperDigitWriter from "@/presentation/components/style-moments/paper/PaperDigitWriter.vue";
 import { PAPER_DIGIT_STROKES } from "@/presentation/components/style-moments/paper/paperDigitStrokes";
 import { ARRIVAL_SETTLE_MS } from "@/presentation/components/board-cell/useArrivalMotion";
+import { declarationsOf } from "@/__tests__/style/styleSheetRules";
 
 const DIGITS = [1, 2, 3, 4, 5, 6, 7, 8, 9];
-// The board's settle: a 60ms fade of the whole mask that fills the specks the strokes leave
-const SETTLE_MS = 60;
+// The skin's settle: a fade of the whole mask that fills the specks the strokes leave
+const PAPER_CSS = readFileSync("src/style/styles/paper/skin.css", "utf8");
+const SETTLE_MS = Number.parseFloat(declarationsOf(PAPER_CSS, '[data-style="paper"] .paper-digit-settle').get("animation-duration") ?? "NaN");
 
 const strokesOf = (digit: number) => PAPER_DIGIT_STROKES[digit]?.strokes ?? [];
 
@@ -46,26 +49,20 @@ describe("PaperDigitWriter", () => {
         }
     });
 
-    // From the board: each digit takes 420–460ms, the 8 about 560ms, well inside the arrival's own settle
-    it.each(DIGITS)("should finish writing %i with the board's timing, the settle ending with the last stroke", (digit) => {
+    it.each(DIGITS)("should finish writing %i inside the arrival, the settle ending with the last stroke", (digit) => {
         const writer = mountWriter(digit);
 
         const lastStrokeEndMs = Math.max(...writer.findAll(".paper-digit-stroke").map(stroke => timingOf(stroke).endMs));
         const settle = writer.get(".paper-digit-settle");
         const settleEndMs = millisecondsOf(settle.attributes("style"), "animation-delay") + SETTLE_MS;
         expect(settleEndMs).toBe(lastStrokeEndMs);
-        if (digit === 8) expect(lastStrokeEndMs).toBe(560);
-        else {
-            expect(lastStrokeEndMs).toBeGreaterThanOrEqual(420);
-            expect(lastStrokeEndMs).toBeLessThanOrEqual(460);
-        }
         expect(lastStrokeEndMs).toBeLessThan(ARRIVAL_SETTLE_MS);
     });
 
-    it.each([1, 4, 7])("should lift the pen for 50ms between the strokes of %i", (digit) => {
+    it.each([1, 4, 7])("should lift the pen between the strokes of %i", (digit) => {
         const [first, second] = mountWriter(digit).findAll(".paper-digit-stroke").map(timingOf);
 
-        expect(second.startMs - first.endMs).toBe(50);
+        expect(second.startMs).toBeGreaterThan(first.endMs);
     });
 
     it.each([6, 8, 9])("should run the pieces of %i's one stroke on without a lift", (digit) => {

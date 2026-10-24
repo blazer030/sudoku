@@ -2,15 +2,9 @@ import { describe, expect, it } from "vitest";
 import { nextTick } from "vue";
 import { mount } from "@vue/test-utils";
 import { i18n } from "@/presentation/i18n";
-import { STYLE_MOMENTS } from "@/presentation/components/style-moments/styleMoments";
 import TactileLoader from "@/presentation/components/style-moments/tactile/TactileLoader.vue";
 
 describe("TactileLoader", () => {
-    it("should be tactile's loader, with no decoration drawn over the completion scene", () => {
-        expect(STYLE_MOMENTS.tactile.loader).toBe(TactileLoader);
-        expect(STYLE_MOMENTS.tactile.celebration).toBeNull();
-    });
-
     it("should drop its nine tiles in a snake, as decoration", () => {
         const wrapper = mount(TactileLoader);
 

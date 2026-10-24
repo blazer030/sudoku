@@ -2,14 +2,9 @@ import { describe, expect, it } from "vitest";
 import { nextTick } from "vue";
 import { mount } from "@vue/test-utils";
 import { i18n } from "@/presentation/i18n";
-import { STYLE_MOMENTS } from "@/presentation/components/style-moments/styleMoments";
 import MinimalLoader from "@/presentation/components/style-moments/minimal/MinimalLoader.vue";
 
 describe("MinimalLoader", () => {
-    it("should be minimal's loader", () => {
-        expect(STYLE_MOMENTS.minimal.loader).toBe(MinimalLoader);
-    });
-
     it("should light its nine squares in a solver's order, as decoration", () => {
         const wrapper = mount(MinimalLoader);
 

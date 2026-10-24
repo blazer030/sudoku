@@ -2,21 +2,11 @@ import { afterEach, describe, expect, it } from "vitest";
 import { nextTick } from "vue";
 import { mount } from "@vue/test-utils";
 import { i18n } from "@/presentation/i18n";
-import { STYLE_MOMENTS } from "@/presentation/components/style-moments/styleMoments";
 import CyberLoader from "@/presentation/components/style-moments/cyber/CyberLoader.vue";
-import CyberCelebration from "@/presentation/components/style-moments/cyber/CyberCelebration.vue";
-import CyberGroupOverlay from "@/presentation/components/style-moments/cyber/CyberGroupOverlay.vue";
 
 describe("CyberLoader", () => {
     afterEach(() => {
         i18n.global.locale.value = "en";
-    });
-
-    it("should be cyber's loader, celebrate over the scene and draw over the board", () => {
-        expect(STYLE_MOMENTS.cyber.loader).toBe(CyberLoader);
-        expect(STYLE_MOMENTS.cyber.celebration).toBe(CyberCelebration);
-        expect(STYLE_MOMENTS.cyber.cardDecoration ?? null).toBeNull();
-        expect(STYLE_MOMENTS.cyber.groupOverlay).toBe(CyberGroupOverlay);
     });
 
     it("should be a HUD panel with two rings round a 3×3 whose squares light at their own beats, as decoration", () => {

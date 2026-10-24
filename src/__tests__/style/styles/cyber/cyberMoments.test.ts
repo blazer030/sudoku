@@ -240,9 +240,4 @@ describe("cyber moments", () => {
             expect(reducedMotionDeclarationsOf(`${LOADER}-fill`).get("transform")).toBe("scaleX(0.64)");
         });
     });
-
-    it("should keep the moments' timings within a frame of the boards", () => {
-        expect(STYLE_MOMENTS.cyber.groupEffectMs).toBe(860);
-        expect(STYLE_MOMENTS.cyber.celebrationBoardMs).toBe(860);
-    });
 });

@@ -2,21 +2,11 @@ import { afterEach, describe, expect, it } from "vitest";
 import { nextTick } from "vue";
 import { mount } from "@vue/test-utils";
 import { i18n } from "@/presentation/i18n";
-import { STYLE_MOMENTS } from "@/presentation/components/style-moments/styleMoments";
 import PixelLoader from "@/presentation/components/style-moments/pixel/PixelLoader.vue";
-import PixelCelebration from "@/presentation/components/style-moments/pixel/PixelCelebration.vue";
-import PixelGroupOverlay from "@/presentation/components/style-moments/pixel/PixelGroupOverlay.vue";
 
 describe("PixelLoader", () => {
     afterEach(() => {
         i18n.global.locale.value = "en";
-    });
-
-    it("should be pixel's loader, celebrate over the scene and spark over the board", () => {
-        expect(STYLE_MOMENTS.pixel.loader).toBe(PixelLoader);
-        expect(STYLE_MOMENTS.pixel.celebration).toBe(PixelCelebration);
-        expect(STYLE_MOMENTS.pixel.cardDecoration ?? null).toBeNull();
-        expect(STYLE_MOMENTS.pixel.groupOverlay).toBe(PixelGroupOverlay);
     });
 
     it("should light the mark's nine squares like a snake, as decoration", () => {

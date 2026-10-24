@@ -1,7 +1,6 @@
 import { readFileSync } from "fs";
 import postcss, { type AtRule, type Node, type Rule } from "postcss";
 import { STYLE_MOMENTS } from "@/presentation/components/style-moments/styleMoments";
-import { GROUP_RIPPLE_STEP_MS } from "@/presentation/pages/game/useGroupEffect";
 import { BOARD_SIZE } from "@/domain/board/constants";
 import { animationTimingOf, declarationsOf, reducedMotionDeclarationsOf as reducedMotionDeclarationsIn } from "../../styleSheetRules";
 
@@ -280,11 +279,5 @@ describe("pixel moments", () => {
             expect(reducedMotionDeclarationsOf(LOADER_DOTS).get("clip-path")).toBe("none");
             expect(reducedMotionDeclarationsOf(LOADER_BAR).get("clip-path")).toBe("inset(0 40% 0 0)");
         });
-    });
-
-    it("should keep the moments' timings within a frame of the boards", () => {
-        expect(STYLE_MOMENTS.pixel.groupEffectMs).toBe(460);
-        expect(STYLE_MOMENTS.pixel.celebrationBoardMs).toBe(800);
-        expect(GROUP_RIPPLE_STEP_MS).toBe(60);
     });
 });

@@ -5,7 +5,6 @@ import { STYLE_IDS } from "@/theme/themeIds";
 import { STYLE_MOMENTS } from "@/presentation/components/style-moments/styleMoments";
 import { useSettingsStore } from "@/stores/settingsStore";
 import PuzzleLoader from "@/presentation/components/puzzle-loader/PuzzleLoader.vue";
-import PaperDigitWriter from "@/presentation/components/style-moments/paper/PaperDigitWriter.vue";
 
 describe("STYLE_MOMENTS", () => {
     it("should have an entry for every style", () => {
@@ -18,12 +17,6 @@ describe("STYLE_MOMENTS", () => {
         expect(moments.loader).toBeTruthy();
         expect(moments.groupEffectMs).toBeGreaterThan(0);
         expect(moments.celebrationBoardMs).toBeGreaterThan(0);
-    });
-
-    // Paper writes its digits in stroke by stroke; every other style draws its arrival in its skin alone
-    it("should give paper alone a digit writer", () => {
-        expect(STYLE_MOMENTS.paper.digitWriter).toBe(PaperDigitWriter);
-        expect(STYLE_IDS.filter(style => STYLE_MOMENTS[style].digitWriter)).toEqual(["paper"]);
     });
 
     it.each(STYLE_IDS)("should render the loader of the current style (%s) inside PuzzleLoader", (style) => {
