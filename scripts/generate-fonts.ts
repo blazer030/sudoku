@@ -126,6 +126,18 @@ const main = async (): Promise<void> => {
             // 8-bit style's text in both languages, cut to the characters the app writes like WenKai
             jobs: [{ output: "cubic-11.woff2", source: "fonts/ttf/Cubic_11.ttf", text: chineseText }],
         },
+        {
+            licence: "ofl/orbitron/OFL.txt",
+            licenceOutput: "Orbitron-OFL.txt",
+            // Cyberpunk's digits and buttons: the variable face cut to the weights the skin uses
+            jobs: [{ output: "orbitron.woff2", source: "ofl/orbitron/Orbitron[wght].ttf", text: LATIN, weights: { min: 500, max: 900 } }],
+        },
+        {
+            licence: "ofl/sharetechmono/OFL.txt",
+            licenceOutput: "ShareTechMono-OFL.txt",
+            // Cyberpunk's notes, timer and labels: printable ASCII only
+            jobs: [{ output: "share-tech-mono.woff2", source: "ofl/sharetechmono/ShareTechMono-Regular.ttf", text: ASCII }],
+        },
     ];
 
     mkdirSync(OUTPUT_DIR, { recursive: true });

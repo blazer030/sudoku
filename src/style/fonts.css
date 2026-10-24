@@ -1,7 +1,7 @@
 /* The app's web fonts, bundled so every style reads the same offline. Generated subsets: run
    npm run generate:fonts after adding copy with new Chinese characters. The installed web app's
-   service worker precaches all eight files and the Android app ships them, so they are there
-   offline; a page only reads Caveat and LXGW WenKai TC while paper's text uses them, and the pixel faces while the 8-bit style does. Each family's
+   service worker precaches all of them and the Android app ships them, so they are there
+   offline; a page only reads Caveat and LXGW WenKai TC while paper's text uses them, and the pixel faces while the 8-bit style does, and the cyberpunk faces while that style does. Each family's
    licence (SIL Open Font License) is in public/fonts/licenses/. */
 
 @font-face {
@@ -71,4 +71,22 @@
     font-weight: 400;
     font-display: swap;
     src: url("../assets/fonts/cubic-11.woff2") format("woff2");
+}
+
+/* Cyberpunk's digits and buttons */
+@font-face {
+    font-family: "Orbitron";
+    font-style: normal;
+    font-weight: 500 900;
+    font-display: swap;
+    src: url("../assets/fonts/orbitron.woff2") format("woff2");
+}
+
+/* Cyberpunk's notes, timer and labels */
+@font-face {
+    font-family: "Share Tech Mono";
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url("../assets/fonts/share-tech-mono.woff2") format("woff2");
 }
