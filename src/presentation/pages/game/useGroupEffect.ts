@@ -56,6 +56,7 @@ export const useGroupEffect = (motionAllowed: () => boolean, durationMs: () => n
         endTimer = setTimeout(end, farthest * GROUP_RIPPLE_STEP_MS + durationMs());
     };
 
+    // Reading `effect` makes callers re-render: every play and end replaces it, and the kinds with it
     const isInEffect = (row: number, column: number): GroupKind[] => {
         if (effect.value === null) return [];
         return cellKinds.get(`${row},${column}`) ?? [];

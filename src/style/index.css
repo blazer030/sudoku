@@ -194,7 +194,7 @@
 }
 
 .animate-completion-flash {
-  animation: completion-flash var(--group-effect-duration) ease-in-out var(--group-delay);
+  animation: completion-flash var(--group-effect-duration, 500ms) ease-in-out var(--group-delay, 0ms);
 }
 
 /* The answer a Reveal Cell hint fills in grows past its size and settles back. */

@@ -551,7 +551,7 @@ describe("pixel skin", () => {
         it("should flash a completed group in steps, leaving the hint's answer to its own glow", () => {
             const lit = keyframesOf("pixel-completion-flash").get("50%");
 
-            expect(declarationsOf(PIXEL_CSS, FLASH).get("animation")).toBe("pixel-completion-flash var(--group-effect-duration) steps(2, jump-none) var(--group-delay)");
+            expect(declarationsOf(PIXEL_CSS, FLASH).get("animation")).toBe("pixel-completion-flash var(--group-effect-duration, 500ms) steps(2, jump-none) var(--group-delay, 0ms)");
             expect(lit?.get("background-color")).toBe("var(--pixel-flash-fill)");
             expect(lit?.get("color")).toBe("var(--pixel-flash-ink)");
             // The flash's fill is solid: a peer's dither would otherwise be laid over it
@@ -569,10 +569,31 @@ describe("pixel skin", () => {
             expect(consoleMode.get("--pixel-flash-ink")).toBe("var(--color-foreground)");
         });
 
-        it("should print a flashing cell's digits in the cell's own ink, the foreground between flashes", () => {
-            // The flash changes the cell's colour with its fill, so the digit and its underline follow it
-            expect(declarationsOf(PIXEL_CSS, FLASH).get("color")).toBe("var(--color-foreground)");
-            expect(declarationsOf(PIXEL_CSS, `${FLASH} > div`).get("color")).toBe("inherit");
+        it("should print a flashing cell's digits in the flash's ink, the foreground between flashes", () => {
+            // The digits and their underline follow the fill; the entry blue would not read on it
+            const frames = keyframesOf("pixel-completion-flash");
+            const resting = frames.get("0%, 100%");
+            const lit = frames.get("50%");
+
+            for (const ink of ["color", "--pixel-clue-ink", "--pixel-entry-ink"]) {
+                expect(resting?.get(ink)).toBe("var(--color-foreground)");
+                expect(lit?.get(ink)).toBe("var(--pixel-flash-ink)");
+            }
+        });
+
+        it("should keep every colour of the flash in its keyframes, so a cell keeps its own look before and after its flash", () => {
+            // A cell carries the flash class for the whole group effect, from before the ripple reaches it
+            // to after its own flash: anything set on the class itself would show all that time
+            const onTheClass: string[] = [];
+            postcss.parse(PIXEL_CSS).walkRules((rule: Rule) => {
+                if (isInside(rule, atRule => atRule.name === "media" || atRule.name === "keyframes")) return;
+                if (!rule.selector.includes("animate-completion-flash")) return;
+                rule.walkDecls((declaration) => {
+                    if (declaration.prop !== "animation") onTheClass.push(`${rule.selector} { ${declaration.prop} }`);
+                });
+            });
+
+            expect(onTheClass).toEqual([]);
         });
 
         it("should leave the selected cell's colours alone during a completion flash or a hint's glow", () => {
@@ -594,6 +615,7 @@ describe("pixel skin", () => {
             // The flash's own lit look, for as long as the cell is in the effect
             expect(still.get("background-color")).toBe("var(--pixel-flash-fill)");
             expect(still.get("color")).toBe("var(--pixel-flash-ink)");
+            expect(still.get("--pixel-entry-ink")).toBe("var(--pixel-flash-ink)");
             expect(still.get("background-image")).toBe("none");
         });
 

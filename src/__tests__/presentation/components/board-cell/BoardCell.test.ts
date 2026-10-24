@@ -446,7 +446,7 @@ describe("BoardCell", () => {
         const indexCss = readFileSync("src/style/index.css", "utf8");
 
         expect(declarationsOf(indexCss, ".animate-completion-flash").get("animation"))
-            .toBe("completion-flash var(--group-effect-duration) ease-in-out var(--group-delay)");
+            .toBe("completion-flash var(--group-effect-duration, 500ms) ease-in-out var(--group-delay, 0ms)");
         const delay = declarationsOf(indexCss, "[data-group-effect] [data-group]").get("--group-delay") ?? "";
         expect(delay).toContain("max(var(--cell-row) - var(--origin-row), var(--origin-row) - var(--cell-row))");
         expect(delay).toContain("max(var(--cell-column) - var(--origin-column), var(--origin-column) - var(--cell-column))");

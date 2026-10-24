@@ -485,19 +485,28 @@
 
 /* A completed row, column or box flashes on and off rather than fading, each half in one jump: the
    cell takes the flash's fill and ink at once (inverted in 掌機), solid like the glow. A hint's answer
-   keeps its glow, which is meant to win over the flash. */
+   keeps its glow, which is meant to win over the flash. Between flashes its digits take the foreground
+   ink, which reads on every cell look (the entry blue reads only 2.61 on the console's flash blue).
+   Every colour lives in the keyframes, so a cell keeps its own look while it waits for the ripple and
+   once its flash is over. */
 @keyframes pixel-completion-flash {
+    0%, 100% {
+        color: var(--color-foreground);
+        --pixel-clue-ink: var(--color-foreground);
+        --pixel-entry-ink: var(--color-foreground);
+    }
     50% {
         background-color: var(--pixel-flash-fill);
         background-image: none;
         color: var(--pixel-flash-ink);
+        --pixel-clue-ink: var(--pixel-flash-ink);
+        --pixel-entry-ink: var(--pixel-flash-ink);
     }
 }
 
-/* Between flashes, and through a hint's glow, a cell's digits take the foreground ink, which reads on
-   the glow and every cell look under them (the entry blue reads only 2.61 on the console's flash blue).
-   A flashing cell's digit takes the cell's own colour, so it changes with the fill. The selected cell
-   is inverted, so neither is drawn behind its page-coloured digit: the cursor and the pop mark it. */
+/* Through a hint's glow a cell's digits take the foreground ink, which reads on the glow. The selected
+   cell is inverted, so neither the glow nor the flash is drawn behind its page-coloured digit: the
+   cursor and the pop mark it. */
 [data-style="pixel"] [data-skin~="board"] .animate-hint-reveal-glow:not([data-selected]) {
     --pixel-clue-ink: var(--color-foreground);
     --pixel-entry-ink: var(--color-foreground);
@@ -505,12 +514,7 @@
 }
 
 [data-style="pixel"] [data-skin~="board"] .animate-completion-flash:not(.animate-hint-reveal-glow, [data-selected]) {
-    color: var(--color-foreground);
-    animation: pixel-completion-flash var(--group-effect-duration) steps(2, jump-none) var(--group-delay);
-}
-
-[data-style="pixel"] [data-skin~="board"] .animate-completion-flash:not(.animate-hint-reveal-glow, [data-selected]) > div {
-    color: inherit;
+    animation: pixel-completion-flash var(--group-effect-duration, 500ms) steps(2, jump-none) var(--group-delay, 0ms);
 }
 
 [data-style="pixel"] [data-skin~="board"] .animate-completion-flash[data-selected],
@@ -770,6 +774,8 @@
     /* A completed group shows the flash's lit look, still, for as long as each cell is in the effect
        (other styles keep the colour flash itself) */
     [data-style="pixel"] [data-skin~="board"] .animate-completion-flash:not(.animate-hint-reveal-glow, [data-selected]) {
+        --pixel-clue-ink: var(--pixel-flash-ink);
+        --pixel-entry-ink: var(--pixel-flash-ink);
         animation: none;
         background-color: var(--pixel-flash-fill);
         background-image: none;
