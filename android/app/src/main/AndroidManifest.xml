@@ -355,6 +355,19 @@
         </activity-alias>
 
         <activity-alias
+            android:name=".cyberNeonDark"
+            android:enabled="false"
+            android:icon="@mipmap/ic_launcher_cyber_neon_dark"
+            android:label="@string/title_activity_main"
+            android:targetActivity=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <activity-alias
             android:name=".paperBlueInkDark"
             android:enabled="false"
             android:icon="@mipmap/ic_launcher_paper_blue_ink"

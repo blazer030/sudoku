@@ -25,4 +25,5 @@
     <color name="ic_launcher_paper_red_ink_background">#F4EDE0</color>
     <color name="ic_launcher_pixel_classic_background">#9BBC0F</color>
     <color name="ic_launcher_pixel_classic_dark_background">#000000</color>
+    <color name="ic_launcher_cyber_neon_dark_background">#07070D</color>
 </resources>

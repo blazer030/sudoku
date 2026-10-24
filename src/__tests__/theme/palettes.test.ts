@@ -20,8 +20,9 @@ describe("palettes", () => {
         }
     });
 
-    it("should alias primary-ink, signal and signal-surface to the primary, highlight and primary-light", () => {
-        for (const style of STYLE_IDS) {
+    // Cyber sets its own neon ink, signal and signal surface
+    it("should alias primary-ink, signal and signal-surface to the primary, highlight and primary-light outside cyber", () => {
+        for (const style of STYLE_IDS.filter(id => id !== "cyber")) {
             for (const theme of STYLES[style].themes) {
                 for (const palette of [theme.light, theme.dark]) {
                     if (palette === undefined) continue;
@@ -31,6 +32,21 @@ describe("palettes", () => {
                 }
             }
         }
+    });
+
+    it("should give cyber its own neon ink, signal and signal surface", () => {
+        const palette = getPalette("cyber", "neon", "dark");
+
+        expect(palette["primary-ink"]).toBe("#FF5AE0");
+        expect(palette.signal).toBe("#FCEE0A");
+        expect(palette["signal-surface"]).toBe("#3A3506");
+    });
+
+    it("should give cyber one dark-only theme on a near-black page", () => {
+        expect(STYLES.cyber.themes.map(theme => theme.id)).toEqual(["neon"]);
+        expect(STYLES.cyber.themes[0].light).toBeUndefined();
+        expect(getPalette("cyber", "neon", "light")).toEqual(getPalette("cyber", "neon", "dark"));
+        expect(getPalette("cyber", "neon", "dark").background).toBe("#07070D");
     });
 
     it("should let a style set a board tint directly instead of deriving it from the primary", () => {
@@ -132,7 +148,7 @@ describe("palettes", () => {
     });
 
     it("should keep paper's lines invisible in other styles", () => {
-        for (const style of [STYLES.minimal, STYLES.tactile, STYLES.pixel]) {
+        for (const style of [STYLES.minimal, STYLES.tactile, STYLES.pixel, STYLES.cyber]) {
             for (const theme of style.themes) {
                 for (const mode of STYLE_COLOR_MODES[style.id]) {
                     const palette = getPalette(style.id, theme.id, mode);

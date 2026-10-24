@@ -64,6 +64,10 @@ const TEXT_PAIRS: readonly ContrastPair[] = [
     pair("on-toast", "toast"),
     // The continue card
     pair("on-featured", "featured"),
+    // Cyberpunk's neon inks on their deep fills (lit and chosen pieces, signal tags). Its error ink on the
+    // deep red is the generic pair above.
+    { ...pair("primary-ink", "primary-light"), styles: ["cyber"] },
+    { ...pair("signal", "signal-surface"), styles: ["cyber"] },
 ];
 
 const BOARD_SURFACES: readonly PaletteToken[] = [
@@ -78,16 +82,19 @@ const BOARD_PAIRS: readonly ContrastPair[] = BOARD_SURFACES.flatMap(surface => B
 
 // Board layers must look different from each other, not just carry readable ink. 8-bit's four shades
 // cannot sit that far apart (#8BAC0F on #9BBC0F is about 1.2): it tells its layers apart by pattern
-// (dither, hatch, inversion), and its board model checks the ink on each pattern instead.
+// (dither, hatch, inversion), and its board model checks the ink on each pattern instead. Cyberpunk's
+// states are neon washes over one dark panel, 7 to 18 percent of a colour on the card, so its layers
+// differ in hue rather than in lightness; its edges and the cell's outlines tell them apart, and its
+// board model checks the ink drawn on each.
 const SURFACE_PAIRS: readonly ContrastPair[] = [
-    pair("cell-clue", "card", 1.25),
-    pair("highlight", "cell-clue", 1.25),
-    pair("highlight", "card", 1.25),
-    pair("highlight", "cell-peer", 1.25),
-    pair("cell-peer", "card", 1.08),
+    { ...pair("cell-clue", "card", 1.25), exceptIn: ["pixel", "cyber"] },
+    { ...pair("highlight", "cell-clue", 1.25), exceptIn: ["pixel", "cyber"] },
+    { ...pair("highlight", "card", 1.25), exceptIn: ["pixel", "cyber"] },
+    { ...pair("highlight", "cell-peer", 1.25), exceptIn: ["pixel", "cyber"] },
+    { ...pair("cell-peer", "card", 1.08), exceptIn: ["pixel", "cyber"] },
     // The selection outline is a UI component, so 3:1 applies
-    pair("primary", "cell-selected", LARGE_OR_ICON),
-].map(contrastPair => ({ ...contrastPair, exceptIn: ["pixel"] as const }));
+    { ...pair("primary", "cell-selected", LARGE_OR_ICON), exceptIn: ["pixel"] },
+];
 
 const TINTED_PAIRS: readonly ContrastPair[] = [
     tinted("accent", "accent", 0.1, "card", TEXT),
@@ -282,6 +289,27 @@ const PIXEL_BOARD_CASES: PixelBoardCase[] = STYLES.pixel.themes.flatMap(theme =>
     ];
 }));
 
+// Cyberpunk's board: each ink on the wash it sits on, all on the card. Lit cells are a neon wash over the
+// card with the cell's own ink on it. Task 7 aligns these with what the skin actually draws.
+interface CyberBoardCase { label: string; foreground: string; background: string; minimum: number }
+
+const CYBER_BOARD_CASES: CyberBoardCase[] = STYLES.cyber.themes.flatMap(theme => STYLE_COLOR_MODES.cyber.flatMap((mode) => {
+    const palette = getPalette("cyber", theme.id, mode);
+    const prefix = `cyber/${theme.id}/${mode}`;
+    const drawn = (name: string, foreground: PaletteToken, background: PaletteToken): CyberBoardCase => ({
+        label: `${prefix}: ${name} ≥ ${TEXT}`, foreground: palette[foreground], background: palette[background], minimum: TEXT,
+    });
+    const boardInks = { "clue (foreground)": "foreground", "entry (accent)": "accent", "note": "note" } as const;
+    const washes: readonly PaletteToken[] = ["cell-peer", "cell-scope", "cell-pattern"];
+    return [
+        ...Object.entries(boardInks).map(([name, ink]) => drawn(`${name} on the card`, ink, "card")),
+        drawn("selected cell's signal on cell-selected", "signal", "cell-selected"),
+        drawn("same digit's primary-ink on highlight", "primary-ink", "highlight"),
+        ...washes.flatMap(wash => (["foreground", "accent"] as const).map(ink => drawn(`${ink} on ${wash}`, ink, wash))),
+        drawn("error cell's error on error-surface", "error", "error-surface"),
+    ];
+}));
+
 describe("palette contrast", () => {
     it("should check every style, theme and the modes the style has", () => {
         const expected = STYLE_IDS.flatMap(style => THEME_IDS_BY_STYLE[style].flatMap(theme =>
@@ -326,6 +354,14 @@ describe("palette contrast", () => {
         expect(handheldCase("error frame (foreground) on the hatch's shaded pixels")).toMatchObject({ foreground: "#0F380F", background: "#8BAC0F" });
         expect(handheldCase("completion flash's digits (background) on its fill (foreground)")).toMatchObject({ foreground: "#9BBC0F", background: "#0F380F" });
         expect(consoleCase("completion flash's digits (foreground) on its fill (highlight)")).toMatchObject({ foreground: "#FCFCFC", background: "#0058F8" });
+    });
+
+    it("should check cyber's board in its one mode", () => {
+        expect(new Set(CYBER_BOARD_CASES.map(boardCase => boardCase.label.split(":")[0]))).toEqual(new Set(["cyber/neon/dark"]));
+    });
+
+    it.each(CYBER_BOARD_CASES)("$label", ({ foreground, background, minimum }) => {
+        expect(contrastRatio(foreground, background)).toBeGreaterThanOrEqual(minimum);
     });
 
     it.each(PIXEL_BOARD_CASES)("$label", ({ foreground, background, minimum }) => {

@@ -1,0 +1,48 @@
+/* Cyberpunk: a neon HUD on a near-black page, dark only. This is a stub that gives the press states and
+   the segmented indicator their feedback; the panels, board and type come with the skin proper.
+   Every rule is scoped by [data-style="cyber"]; keyframes start with cyber-. */
+
+/* Press feedback: a cyan wash. It is a colour change, so it stays on under reduced motion. */
+[data-style="cyber"] [data-pressed] {
+    --press-overlay: color-mix(in srgb, var(--color-accent) 12%, transparent);
+    background-image: linear-gradient(var(--press-overlay), var(--press-overlay));
+}
+
+[data-style="cyber"] [data-press-motion] {
+    transition-property: transform, background-color, color, box-shadow, opacity;
+    transition-duration: 140ms;
+    transition-timing-function: ease-out;
+}
+
+[data-style="cyber"] [data-press-motion][data-pressed] {
+    transform: scale(0.97);
+    transition-duration: 60ms;
+}
+
+@keyframes cyber-press-bounce {
+    0% { transform: scale(0.97); }
+    100% { transform: scale(1); }
+}
+
+[data-style="cyber"] [data-press-bounce] {
+    animation: cyber-press-bounce 160ms ease-out;
+}
+
+[data-style="cyber"] .segmented-indicator-motion {
+    transition: transform 160ms ease-out;
+}
+
+/* Reduced motion: no scaling or sliding; the press wash stays */
+@media (prefers-reduced-motion: reduce) {
+    [data-style="cyber"] .segmented-indicator-motion {
+        transition: none;
+    }
+
+    [data-style="cyber"] [data-pressed],
+    [data-style="cyber"] [data-press-motion],
+    [data-style="cyber"] [data-press-motion][data-pressed],
+    [data-style="cyber"] [data-press-bounce] {
+        transform: none;
+        animation: none;
+    }
+}

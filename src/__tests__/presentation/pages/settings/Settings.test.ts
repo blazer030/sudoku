@@ -318,6 +318,16 @@ describe("Settings.vue appearance row", () => {
         expect(summaryOf(wrapper)).not.toContain(t("settings.colorThemes.classic"));
     });
 
+    it("should show only the style's name for a style with one mode and one theme", async () => {
+        const wrapper = mountSettings();
+        const settingsStore = useSettingsStore();
+        settingsStore.setStyle("cyber");
+        await nextTick();
+
+        expect(summaryOf(wrapper)).toBe(t("settings.style.names.cyber"));
+        expect(summaryOf(wrapper)).not.toContain(t("settings.colorThemes.neon"));
+    });
+
     it("should open the appearance page", async () => {
         const { router, wrapper } = mountSettingsWithRouter();
 

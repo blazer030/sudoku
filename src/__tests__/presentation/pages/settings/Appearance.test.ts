@@ -51,15 +51,17 @@ const startSync = () => startAppearanceSync(
 );
 
 // The icon's markup as the DOM serialises it
-const svgOf = (style: StyleId, palette: Palette) => {
+const svgOf = (style: StyleId, palette: Palette, idSuffix = "") => {
     const host = document.createElement("div");
-    host.innerHTML = styleIconSvg(style, palette);
+    host.innerHTML = styleIconSvg(style, palette, idSuffix);
     return host.innerHTML.trim();
 };
 
-const iconSvgFor = (style: StyleId) => {
+// The icon the settings should have drawn. A card's ids carry its own suffix, so the expected icon takes it from the rendered one.
+const iconSvgFor = (style: StyleId, rendered: string) => {
     const settingsStore = useSettingsStore();
-    return svgOf(style, getPalette(style, rememberedThemeFor(style, settingsStore.colorThemeByStyle), settingsStore.appearance));
+    const idSuffix = /id="cyber-edge-([^"]+)"/.exec(rendered)?.[1];
+    return svgOf(style, getPalette(style, rememberedThemeFor(style, settingsStore.colorThemeByStyle), settingsStore.appearance), idSuffix);
 };
 
 describe("Appearance.vue style cards", () => {
@@ -68,14 +70,15 @@ describe("Appearance.vue style cards", () => {
         vi.mocked(Capacitor.isNativePlatform).mockReturnValue(false);
     });
 
-    it("should list the four styles, each with its app icon and name", () => {
+    it("should list the five styles, each with its app icon and name", () => {
         const wrapper = mountAppearance();
         const cards = wrapper.findAll("button[data-testid^='style-option-']");
 
-        expect(cards.map(card => card.attributes("data-testid"))).toEqual(["style-option-minimal", "style-option-tactile", "style-option-paper", "style-option-pixel"]);
+        expect(cards.map(card => card.attributes("data-testid"))).toEqual(["style-option-minimal", "style-option-tactile", "style-option-paper", "style-option-pixel", "style-option-cyber"]);
         for (const style of STYLE_IDS) {
             const card = wrapper.get(`[data-testid='style-option-${style}']`);
-            expect(card.get(`[data-testid='style-icon-${style}'] svg`).element.outerHTML, style).toBe(iconSvgFor(style));
+            const rendered = card.get(`[data-testid='style-icon-${style}'] svg`).element.outerHTML;
+            expect(rendered, style).toBe(iconSvgFor(style, rendered));
             expect(card.text(), style).toBe(t(`settings.style.names.${style}`));
         }
     });
@@ -90,7 +93,8 @@ describe("Appearance.vue style cards", () => {
         await nextTick();
 
         for (const style of STYLE_IDS) {
-            expect(wrapper.get(`[data-testid='style-icon-${style}'] svg`).element.outerHTML, style).toBe(iconSvgFor(style));
+            const rendered = wrapper.get(`[data-testid='style-icon-${style}'] svg`).element.outerHTML;
+            expect(rendered, style).toBe(iconSvgFor(style, rendered));
         }
         expect(wrapper.get("[data-testid='style-icon-tactile'] svg").element.outerHTML)
             .toBe(svgOf("tactile", getPalette("tactile", "rust", "dark")));
@@ -458,6 +462,17 @@ describe("Appearance.vue one-theme style", () => {
         expect(wrapper.find("[data-testid='appearance-theme-label']").exists()).toBe(false);
         expect(wrapper.find("[data-testid='color-theme-classic']").exists()).toBe(false);
         expect(wrapper.find("[data-testid='appearance-mode-label']").exists()).toBe(true);
+    });
+
+    it("should hide the colour-mode control and the theme heading for the dark-only, one-theme cyber", async () => {
+        const wrapper = mountAppearance();
+        useSettingsStore().setStyle("cyber");
+        await nextTick();
+
+        expect(wrapper.find("[data-testid='appearance-mode-label']").exists()).toBe(false);
+        expect(wrapper.find("[data-testid='appearance-light']").exists()).toBe(false);
+        expect(wrapper.find("[data-testid='appearance-dark']").exists()).toBe(false);
+        expect(wrapper.find("[data-testid='appearance-theme-label']").exists()).toBe(false);
     });
 
     it("should name the modes in the style's own words, in either language", async () => {

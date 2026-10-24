@@ -9,9 +9,14 @@ describe("themeIds colour modes", () => {
         expect(effectiveColorMode("tactile", "dark")).toBe("dark");
     });
 
-    it("gives every style light", () => {
-        STYLE_IDS.forEach(style => {
+    it("lets cyber be dark only", () => {
+        expect(effectiveColorMode("cyber", "light")).toBe("dark");
+    });
+
+    it("gives every style light, except the dark-only cyber", () => {
+        STYLE_IDS.filter(style => style !== "cyber").forEach(style => {
             expect(STYLE_COLOR_MODES[style]).toContain("light");
         });
+        expect(STYLE_COLOR_MODES.cyber).toEqual(["dark"]);
     });
 });

@@ -93,6 +93,18 @@ describe("settingsStore", () => {
         expect(store.style).toBe("minimal");
     });
 
+    it("should keep a light appearance through a visit to the dark-only cyber", () => {
+        const store = useSettingsStore();
+        store.setAppearance("light");
+        store.setColorTheme("blue");
+
+        store.setStyle("cyber");
+        store.setStyle("minimal");
+
+        expect(store.appearance).toBe("light");
+        expect(store.colorTheme).toBe("blue");
+    });
+
     it("should persist the chosen style", () => {
         const store = useSettingsStore();
 

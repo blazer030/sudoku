@@ -124,6 +124,20 @@ describe("index.html no-flash script", () => {
         expect(meta.content).toBe(systemBarColor("pixel", "classic", appearance as "light" | "dark"));
     });
 
+    // Review Focus 1: cyber is dark only, whatever appearance is stored
+    it.each([{ appearance: "light" }, { appearance: undefined }])("should paint cyber dark with its bar colour when appearance is $appearance", ({ appearance }) => {
+        stubSystemDark(false);
+        storeSettings({ style: "cyber", appearance });
+
+        runInlineScript();
+
+        expect(root.dataset.style).toBe("cyber");
+        expect(root.dataset.colorTheme).toBe("neon");
+        expect(root.classList.contains("dark")).toBe(true);
+        expect(meta.content).toBe("#07070D");
+        expect(meta.content).toBe(systemBarColor("cyber", "neon", "dark"));
+    });
+
     it("should paint paper light for a stored system appearance on a dark system", () => {
         stubSystemDark(true);
         storeSettings({ style: "paper", appearance: "system" });
