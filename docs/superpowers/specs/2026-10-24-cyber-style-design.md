@@ -10,7 +10,7 @@ Cyberpunk should feel like solving sudoku on a HUD in a neon city at night:
 - a monospace "system" voice
 - digits that glitch into place
 
-The owner likes the canvas as a whole (2026-10-24). The only change they asked for is now on the canvas (commits `4a25b23`, `c422642`, `c0167f3` on `feature/style-research`):
+The owner likes the canvas as a whole (2026-10-24). The only change they asked for is now on the canvas (commits `2784d6a`, `a343f2c`, `8af6dda` on `feature/style-research`):
 - **Before:** every lit or chosen piece was a bright pink (or yellow) block, so text on it was hard to read.
 - **Now:** it is a **deep fill with a neon edge and neon text**.
 
