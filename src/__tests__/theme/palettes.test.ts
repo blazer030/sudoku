@@ -20,6 +20,27 @@ describe("palettes", () => {
         }
     });
 
+    it("should alias primary-ink, signal and signal-surface to the primary, highlight and primary-light", () => {
+        for (const style of STYLE_IDS) {
+            for (const theme of STYLES[style].themes) {
+                for (const palette of [theme.light, theme.dark]) {
+                    if (palette === undefined) continue;
+                    expect(palette["primary-ink"], `${style}/${theme.id}`).toBe(palette.primary);
+                    expect(palette.signal, `${style}/${theme.id}`).toBe(palette.highlight);
+                    expect(palette["signal-surface"], `${style}/${theme.id}`).toBe(palette["primary-light"]);
+                }
+            }
+        }
+    });
+
+    it("should let a style set a board tint directly instead of deriving it from the primary", () => {
+        const build = darkOnlyThemeBuilder({ ...getPalette("minimal", "green", "dark") }, { "cell-peer": "#123456", signal: "#FFE600" });
+        const theme = build("green", { primary: "#00F0FF", "primary-hover": "#40F4FF", accent: "#FF2BD6" });
+
+        expect(theme.dark?.["cell-peer"]).toBe("#123456");
+        expect(theme.dark?.signal).toBe("#FFE600");
+    });
+
     it("should build a dark-only theme with a dark palette and no light one", () => {
         const neutrals = { ...getPalette("minimal", "green", "dark") };
         const build = darkOnlyThemeBuilder(neutrals);

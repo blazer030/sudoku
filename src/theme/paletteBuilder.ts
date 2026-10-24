@@ -11,6 +11,9 @@ export const PALETTE_TOKENS = [
     "toast", "on-toast", "cell-selected", "cell-peer", "featured", "on-featured",
     // Paper's ruled lines and margin line; other styles paint them as their background
     "rule", "margin-line",
+    // A neon ink, a signal colour and its deep surface; other styles alias them to the primary, highlight
+    // and primary-light
+    "primary-ink", "signal", "signal-surface",
 ] as const;
 export type PaletteToken = typeof PALETTE_TOKENS[number];
 export type Palette = Record<PaletteToken, string>;
@@ -32,10 +35,14 @@ export type LightThemeColors = Pick<Palette, "primary" | "primary-hover" | "prim
 export type DarkThemeColors = Pick<Palette, "primary" | "primary-hover" | "accent">;
 type DerivedToken = "primary-light" | "highlight" | "cell-focus" | "cell-scope" | "cell-pattern" | "cell-peer";
 // Tokens that repeat another token of the same palette unless a style sets its own
-type AliasToken = "note" | "cell-selected" | "featured" | "on-featured" | "rule" | "margin-line";
-// A style's own values for aliases, and for the same-digit fill and the primary's light surface where a
-// fixed palette sets them rather than tinting the primary
-type StyleExtras = Partial<Pick<Palette, "featured" | "on-featured" | "rule" | "margin-line" | "highlight" | "primary-light">>;
+type AliasToken = "note" | "cell-selected" | "featured" | "on-featured" | "rule" | "margin-line"
+    | "primary-ink" | "signal" | "signal-surface";
+// A style's own values for aliases, and for the same-digit fill, the primary's light surface and the board
+// tints where a fixed palette sets them rather than tinting the primary
+type StyleExtras = Partial<Pick<Palette,
+    "featured" | "on-featured" | "rule" | "margin-line" | "highlight" | "primary-light"
+    | "primary-ink" | "signal" | "signal-surface"
+    | "cell-selected" | "cell-focus" | "cell-scope" | "cell-pattern" | "cell-peer">>;
 export type Neutrals<ThemeColors> = Omit<Palette, keyof ThemeColors | DerivedToken | AliasToken>;
 
 // Values are tuned so every pair in paletteContrast.test.ts meets WCAG AA. The board layers
@@ -53,17 +60,26 @@ const tintsOf = <Token extends DerivedToken>(primary: string, card: string, stre
         [token, mixColors(primary, alpha, card)])) as Record<Token, string>;
 
 // Notes use the secondary text colour; the selected cell uses the primary tint; the continue
-// card is a primary surface; lines vanish into the background unless a style draws them
-const withAliases = (palette: Omit<Palette, AliasToken>, extras: StyleExtras): Palette => ({
-    ...palette,
-    "note": palette["foreground-secondary"],
-    "cell-selected": palette["primary-light"],
-    "featured": palette.primary,
-    "on-featured": palette["on-primary"],
-    "rule": palette.background,
-    "margin-line": palette.background,
-    ...extras,
-});
+// card is a primary surface; lines vanish into the background unless a style draws them; the neon ink,
+// signal and its surface follow the primary, highlight and primary-light as the style finally sets them
+const withAliases = (palette: Omit<Palette, AliasToken>, extras: StyleExtras): Palette => {
+    const settled = {
+        ...palette,
+        "note": palette["foreground-secondary"],
+        "cell-selected": palette["primary-light"],
+        "featured": palette.primary,
+        "on-featured": palette["on-primary"],
+        "rule": palette.background,
+        "margin-line": palette.background,
+        ...extras,
+    };
+    return {
+        ...settled,
+        "primary-ink": extras["primary-ink"] ?? settled.primary,
+        "signal": extras.signal ?? settled.highlight,
+        "signal-surface": extras["signal-surface"] ?? settled["primary-light"],
+    };
+};
 
 const lightPalette = (neutrals: Neutrals<LightThemeColors>, light: LightThemeColors, extras: StyleExtras): Palette =>
     withAliases({
