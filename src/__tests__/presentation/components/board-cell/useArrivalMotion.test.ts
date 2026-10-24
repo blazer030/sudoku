@@ -117,14 +117,56 @@ describe("useArrivalMotion", () => {
             expect(leaving.value).toBe(false);
         });
 
-        it("should flag neither when one digit replaces another", async () => {
+        it("should flag a replaced digit as arriving, not leaving", async () => {
             const { leaving, arriving, value } = startMotion(5);
 
             value.value = 3;
             await nextTick();
 
             expect(leaving.value).toBe(false);
+            expect(arriving.value).toBe(true);
+        });
+
+        it("should not flag a replaced digit while a hint pops", async () => {
+            const { arriving, value } = startMotion(5, true);
+
+            value.value = 3;
+            await nextTick();
+
             expect(arriving.value).toBe(false);
+        });
+
+        it("should restart the arrival when the digit changes again before it settles", async () => {
+            const { arriving, value } = startMotion(5);
+            value.value = 3;
+            await nextTick();
+            vi.advanceTimersByTime(ARRIVAL_SETTLE_MS / 2);
+
+            value.value = 7;
+            await nextTick();
+            // Dropped for two frames so a style sheet replays its animation
+            expect(arriving.value).toBe(false);
+            vi.advanceTimersByTime(100);
+
+            expect(arriving.value).toBe(true);
+            vi.advanceTimersByTime(ARRIVAL_SETTLE_MS - 100);
+            expect(arriving.value).toBe(true);
+            vi.advanceTimersByTime(100);
+            expect(arriving.value).toBe(false);
+        });
+
+        it("should not restart an arrival once its scope ends", async () => {
+            const { arriving, scope, value } = startMotion(5);
+            value.value = 3;
+            await nextTick();
+            value.value = 7;
+            await nextTick();
+
+            scope.stop();
+            vi.advanceTimersByTime(100);
+
+            expect(arriving.value).toBe(false);
+            expect(vi.getTimerCount()).toBe(0);
         });
 
         it("should drop a leave when a digit arrives in the same cell", async () => {
