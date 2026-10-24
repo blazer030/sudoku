@@ -64,7 +64,17 @@ const REQUIRED_SELECTORS: Record<StyleId, readonly string[]> = {
         ".pixel-group-spark",
         ".pixel-stage-letter",
     ],
-    cyber: PRESS,
+    cyber: [
+        ...PRESS,
+        "[data-group]",
+        '[data-celebration="playing"]',
+        '[data-skin~="trophy"]',
+        '[data-skin~="complete-title"]',
+        '[data-skin~="celebration"]:not([data-still])',
+        ".cyber-loader-square",
+        ".cyber-group-frame",
+        ".cyber-mission",
+    ],
 };
 
 const selectorsOf = (style: StyleId): string[] => {

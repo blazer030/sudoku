@@ -1,8 +1,6 @@
 import { computed, type Component, type ComputedRef } from "vue";
 import type { StyleId } from "@/theme/themeIds";
 import { useSettingsStore } from "@/stores/settingsStore";
-import DefaultLoader from "@/presentation/components/style-moments/default/DefaultLoader.vue";
-import DefaultCelebration from "@/presentation/components/style-moments/default/DefaultCelebration.vue";
 import MinimalLoader from "@/presentation/components/style-moments/minimal/MinimalLoader.vue";
 import TactileLoader from "@/presentation/components/style-moments/tactile/TactileLoader.vue";
 import PaperLoader from "@/presentation/components/style-moments/paper/PaperLoader.vue";
@@ -11,6 +9,9 @@ import PaperGroupOverlay from "@/presentation/components/style-moments/paper/Pap
 import PixelLoader from "@/presentation/components/style-moments/pixel/PixelLoader.vue";
 import PixelCelebration from "@/presentation/components/style-moments/pixel/PixelCelebration.vue";
 import PixelGroupOverlay from "@/presentation/components/style-moments/pixel/PixelGroupOverlay.vue";
+import CyberLoader from "@/presentation/components/style-moments/cyber/CyberLoader.vue";
+import CyberCelebration from "@/presentation/components/style-moments/cyber/CyberCelebration.vue";
+import CyberGroupOverlay from "@/presentation/components/style-moments/cyber/CyberGroupOverlay.vue";
 import type { CompletedGroup } from "@/domain/game/Sudoku";
 
 /** A group effect on the board: a new one gets a new id, which starts its drawings afresh. */
@@ -42,13 +43,6 @@ export interface StyleMoments {
     /** How long the board phase of the celebration runs before the dialog opens, in milliseconds. */
     celebrationBoardMs: number;
 }
-
-const DEFAULT_MOMENTS: StyleMoments = {
-    loader: DefaultLoader,
-    celebration: DefaultCelebration,
-    groupEffectMs: 500,
-    celebrationBoardMs: 1460,
-};
 
 // From the boards: each cell's wash waits 100ms and runs 520ms; the dialog opens as the board's scrim
 // comes in, while the diagonal wash is still crossing the board
@@ -91,13 +85,25 @@ const PIXEL_MOMENTS: StyleMoments = {
     celebrationBoardMs: 800,
 };
 
+// From the boards: each cell's light waits 100ms and runs 480ms, but a box's outline steps out over 760ms
+// from 100ms and its tag shows for 760ms from 220ms, which a box entered at its centre (two steps out)
+// just covers. The scan beam crosses the board in 760ms and the brackets lock on; the dialog opens as the
+// board's scrim comes in.
+const CYBER_MOMENTS: StyleMoments = {
+    loader: CyberLoader,
+    celebration: CyberCelebration,
+    groupEffectMs: 860,
+    groupOverlay: CyberGroupOverlay,
+    celebrationBoardMs: 860,
+};
+
 // One entry per style, so a style added without its moments is a type error
 export const STYLE_MOMENTS: Record<StyleId, StyleMoments> = {
     minimal: MINIMAL_MOMENTS,
     tactile: TACTILE_MOMENTS,
     paper: PAPER_MOMENTS,
     pixel: PIXEL_MOMENTS,
-    cyber: DEFAULT_MOMENTS,
+    cyber: CYBER_MOMENTS,
 };
 
 export const useStyleMoments = (): ComputedRef<StyleMoments> => {

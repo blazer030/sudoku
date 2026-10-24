@@ -496,19 +496,6 @@ describe("cyber skin", () => {
             expect(declarationsOf(CYBER_CSS, skin("title")).get("animation")).toMatch(/^cyber-title-glitch [\d.]+s steps\(1, end\) infinite$/);
         });
 
-        it("should turn a dashed HUD ring behind the completion card and write MISSION COMPLETE in glowing yellow", () => {
-            const ring = declarationsOf(CYBER_CSS, `${skin("celebration")}::before`);
-            const text = declarationsOf(CYBER_CSS, `${skin("celebration")}::after`);
-
-            expect(ring.get("border")).toContain("dashed");
-            expect(ring.get("animation")).toMatch(/^cyber-spin \d+s linear infinite$/);
-            expect(Number(ring.get("z-index"))).toBeLessThan(0);
-            expect(propertiesOf("cyber-spin")).toEqual(new Set(["transform"]));
-            expect(text.get("content")).toContain("// MISSION COMPLETE");
-            expect(text.get("color")).toBe("var(--color-signal)");
-            expect(text.get("animation")).toMatch(/^cyber-title-glitch /);
-        });
-
         it("should stop every animation under reduced motion", () => {
             const animated = allDeclarations(/^animation$/).filter(declaration => outsideReducedMotion(declaration) && declaration.value.trim() !== "none");
             const stopped = new Set<string>();
