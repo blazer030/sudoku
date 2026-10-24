@@ -22,3 +22,11 @@ describe("PageHeader", () => {
         expect(wrapper.find("[data-testid='stats-back-button']").exists()).toBe(true);
     });
 });
+
+describe("PageHeader width", () => {
+    it("should run across the page gutter, so cards scrolling under it stay hidden", () => {
+        const wrapper = mount(PageHeader, { props: { title: "Settings" } });
+
+        expect(wrapper.get("[data-skin='page-header']").classes()).toEqual(expect.arrayContaining(["-mx-5", "px-5"]));
+    });
+});
