@@ -74,6 +74,9 @@
     background-color: color-mix(in srgb, var(--color-background) calc(65% * var(--header-scroll, 0)), transparent);
     -webkit-backdrop-filter: blur(calc(10px * var(--header-scroll, 0)));
     backdrop-filter: blur(calc(10px * var(--header-scroll, 0)));
+    /* The frost tapers out over the header\'s empty bottom padding, so the title and back button stay fully frosted. */
+    -webkit-mask-image: linear-gradient(to bottom, var(--color-foreground) calc(100% - 12px), transparent);
+    mask-image: linear-gradient(to bottom, var(--color-foreground) calc(100% - 12px), transparent);
 }
 
 /* Ruled pages: a line every 32px and a red margin line 14px in, inside the page gutter so no

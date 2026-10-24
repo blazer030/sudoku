@@ -251,6 +251,8 @@ describe("cyber skin", () => {
                 expect(scrolled.get("background-color")).toMatch(/^color-mix\(in srgb, var\(--color-background\) calc\(\d+% \* var\(--header-scroll, 0\)\), transparent\)$/);
                 expect(scrolled.get("backdrop-filter")).toMatch(/^blur\(calc\(\d+px \* var\(--header-scroll, 0\)\)\)$/);
                 expect(scrolled.get("-webkit-backdrop-filter")).toBe(scrolled.get("backdrop-filter"));
+                expect(scrolled.get("mask-image")).toBe("linear-gradient(to bottom, var(--color-foreground) calc(100% - 12px), transparent)");
+                expect(scrolled.get("-webkit-mask-image")).toBe(scrolled.get("mask-image"));
                 expect(scrolled.has("background-image")).toBe(false);
                 expect(scrolled.has("box-shadow")).toBe(false);
             });
