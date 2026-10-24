@@ -64,16 +64,16 @@
 }
 
 /* A sticky header is clear at rest, so the notebook's ruled lines, margin line and grain run straight
-   through it. Once its page has scrolled (data-scrolled) it frosts: a translucent page colour over a
+   through it. Once its page has scrolled (data-scrolled) it frosts, fading in over the first 64px of scroll (--header-scroll, 0 to 1): a translucent page colour over a
    blur, so content under the title is subdued and the page still shows through, with no rule underneath. */
 [data-style="paper"] [data-skin~="page-header"] {
     background-color: transparent;
 }
 
 [data-style="paper"] [data-skin~="page-header"][data-scrolled] {
-    background-color: color-mix(in srgb, var(--color-background) 65%, transparent);
-    -webkit-backdrop-filter: blur(10px);
-    backdrop-filter: blur(10px);
+    background-color: color-mix(in srgb, var(--color-background) calc(65% * var(--header-scroll, 0)), transparent);
+    -webkit-backdrop-filter: blur(calc(10px * var(--header-scroll, 0)));
+    backdrop-filter: blur(calc(10px * var(--header-scroll, 0)));
 }
 
 /* Ruled pages: a line every 32px and a red margin line 14px in, inside the page gutter so no

@@ -97,16 +97,16 @@
 }
 
 /* A sticky header is clear at rest, so the texture shows straight through it. Once its page has scrolled
-   (data-scrolled) it frosts: a translucent page colour over a blur, so content under the title is
+   (data-scrolled) it frosts, fading in over the first 64px of scroll (--header-scroll, 0 to 1): a translucent page colour over a blur, so content under the title is
    subdued while the grid still reads through, with no rule underneath. */
 [data-style="pixel"] [data-skin~="page-header"] {
     background-color: transparent;
 }
 
 [data-style="pixel"] [data-skin~="page-header"][data-scrolled] {
-    background-color: color-mix(in srgb, var(--color-background) 62%, transparent);
-    -webkit-backdrop-filter: blur(6px);
-    backdrop-filter: blur(6px);
+    background-color: color-mix(in srgb, var(--color-background) calc(62% * var(--header-scroll, 0)), transparent);
+    -webkit-backdrop-filter: blur(calc(6px * var(--header-scroll, 0)));
+    backdrop-filter: blur(calc(6px * var(--header-scroll, 0)));
 }
 
 [data-style="pixel"] .app-safe-area::before {

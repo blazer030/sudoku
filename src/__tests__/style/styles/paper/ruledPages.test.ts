@@ -56,8 +56,8 @@ describe("paper ruled pages", () => {
     it("should frost a scrolled sticky header, with no rule underneath", () => {
         const scrolled = declarationsOf(PAPER_CSS, '[data-style="paper"] [data-skin~="page-header"][data-scrolled]');
 
-        expect(scrolled.get("background-color")).toMatch(/^color-mix\(in srgb, var\(--color-background\) \d+%, transparent\)$/);
-        expect(scrolled.get("backdrop-filter")).toMatch(/^blur\(\d+px\)$/);
+        expect(scrolled.get("background-color")).toMatch(/^color-mix\(in srgb, var\(--color-background\) calc\(\d+% \* var\(--header-scroll, 0\)\), transparent\)$/);
+        expect(scrolled.get("backdrop-filter")).toMatch(/^blur\(calc\(\d+px \* var\(--header-scroll, 0\)\)\)$/);
         expect(scrolled.get("-webkit-backdrop-filter")).toBe(scrolled.get("backdrop-filter"));
         expect(scrolled.has("background-image")).toBe(false);
         expect(scrolled.has("box-shadow")).toBe(false);
