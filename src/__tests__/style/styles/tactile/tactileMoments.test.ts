@@ -38,6 +38,15 @@ describe("tactile moments", () => {
             expect(declarationsOf(TACTILE_CSS, GROUP_DIGIT).get("animation")).toMatch(/^tactile-group-press .*var\(--group-delay/);
         });
 
+        // The entered digit is always in its own completed group, so it must still drop in under the press
+        it("should keep the entered digit's drop-in under the press", () => {
+            const animation = declarationsOf(TACTILE_CSS, `${GROUP_DIGIT}.value-arrive`).get("animation") ?? "";
+
+            expect(animationTimingOf(animation, "tactile-drop")).not.toBeNull();
+            expect(animationTimingOf(animation, "tactile-group-press")).not.toBeNull();
+            expect(reducedMotionDeclarationsOf(`${GROUP_DIGIT}.value-arrive`).get("animation")).toBe("none");
+        });
+
         it("should draw the pressed piece as a sunk tray tinted with the theme colour", () => {
             const shade = declarationsOf(TACTILE_CSS, GROUP_SHADE);
 
