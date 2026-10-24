@@ -189,8 +189,7 @@
 [data-style="cyber"] [data-skin~="tile"],
 [data-style="cyber"] [data-skin~="key"],
 [data-style="cyber"] [data-skin~="control"],
-[data-style="cyber"] [data-skin~="segmented"],
-[data-style="cyber"] [data-skin~="segmented-indicator"],
+[data-style="cyber"] [data-skin~="segment"],
 [data-style="cyber"] [data-skin~="pill"],
 [data-style="cyber"] [data-skin~="tag"] {
     --cyber-cut: 10px;
@@ -218,17 +217,21 @@
     --cyber-edge: color-mix(in srgb, var(--color-foreground-secondary) 35%, transparent);
 }
 
-/* The segmented strip is an edge around whatever it sits on; its indicator is the chosen segment, lit */
+/* A segmented control is separate panels, one per option, six pixels apart: the strip has no edge or
+   fill of its own and the sliding indicator is not drawn, since the chosen segment is lit itself */
 [data-style="cyber"] [data-skin~="segmented"] {
-    --cyber-cut: 7px;
-    --cyber-fill: transparent;
+    --segmented-gap: 6px;
+    --segmented-padding: 0px;
+    background: none;
+    box-shadow: none;
 }
 
 [data-style="cyber"] [data-skin~="segmented-indicator"] {
+    visibility: hidden;
+}
+
+[data-style="cyber"] [data-skin~="segment"] {
     --cyber-cut: 7px;
-    --cyber-edge: var(--color-primary);
-    --cyber-fill: var(--color-primary-light);
-    --cyber-glow: var(--cyber-lit-glow);
 }
 
 /* The game header's difficulty pill and the completion card's difficulty tag: deep magenta, pink text */
@@ -273,16 +276,12 @@
 [data-style="cyber"] [data-skin~="tile"][aria-pressed="true"],
 [data-style="cyber"] [data-skin~="tile"][aria-checked="true"],
 [data-style="cyber"] [data-skin~="key"][aria-pressed="true"],
+[data-style="cyber"] [data-skin~="segment"][aria-pressed="true"],
 [data-style="cyber"] [aria-pressed="true"] > [data-skin~="control"],
 [data-style="cyber"] [data-skin~="button"]:is(.bg-primary, .hint-primary, [data-skin~="new-game"]) {
     --cyber-edge: var(--color-primary);
     --cyber-fill: var(--color-primary-light);
     --cyber-glow: var(--cyber-lit-glow);
-    color: var(--color-primary-ink);
-    text-shadow: var(--cyber-lit-text-glow);
-}
-
-[data-style="cyber"] [data-skin~="segmented"] > [aria-pressed="true"] {
     color: var(--color-primary-ink);
     text-shadow: var(--cyber-lit-text-glow);
 }
@@ -331,8 +330,7 @@
 :root[data-style="cyber"] [data-skin~="tile"],
 :root[data-style="cyber"] [data-skin~="key"],
 :root[data-style="cyber"] [data-skin~="control"],
-:root[data-style="cyber"] [data-skin~="segmented"],
-:root[data-style="cyber"] [data-skin~="segmented-indicator"],
+:root[data-style="cyber"] [data-skin~="segment"],
 :root[data-style="cyber"] [data-skin~="pill"],
 :root[data-style="cyber"] [data-skin~="tag"] {
     --cyber-diagonal: calc(var(--cyber-cut) * 0.7071 + 1px);
@@ -682,6 +680,7 @@
     [data-style="cyber"] [data-skin~="key"]:enabled:hover,
     [data-style="cyber"] [data-skin~="button"]:enabled:hover,
     [data-style="cyber"] [data-skin~="tile"]:hover,
+    [data-style="cyber"] [data-skin~="segment"]:hover,
     [data-style="cyber"] :enabled:hover > [data-skin~="control"] {
         --cyber-hover-glow: color-mix(in srgb, var(--cyber-edge) 55%, transparent);
     }

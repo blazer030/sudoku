@@ -50,6 +50,7 @@ const LIT = {
     "a tile that is on": `${skin("tile")}[aria-pressed="true"]`,
     "a checked tile": `${skin("tile")}[aria-checked="true"]`,
     "the chosen key": `${skin("key")}[aria-pressed="true"]`,
+    "the chosen segment": `${skin("segment")}[aria-pressed="true"]`,
     "an active game control": `${SCOPE} [aria-pressed="true"] > [data-skin~="control"]`,
     "a primary button": `${skin("button")}:is(.bg-primary, .hint-primary, [data-skin~="new-game"])`,
 } as const;
@@ -83,7 +84,7 @@ describe("cyber skin", () => {
     });
 
     describe("panels", () => {
-        const CUT = ["card", "button", "tile", "key", "control", "segmented", "pill", "tag", "board"];
+        const CUT = ["card", "button", "tile", "key", "control", "segment", "pill", "tag", "board"];
 
         it.each(CUT)("should cut the corners of %s", (token) => {
             const ending = new RegExp(`\\[data-skin~="${token}"\\](?:::before|::after)?$`);
@@ -94,7 +95,7 @@ describe("cyber skin", () => {
             expect(clipPaths.some(declaration => declaration.value.trim().startsWith("polygon("))).toBe(true);
         });
 
-        it.each(["card", "button", "tile", "key", "control", "segmented", "segmented-indicator", "pill", "tag"])(
+        it.each(["card", "button", "tile", "key", "control", "segment", "pill", "tag"])(
             "should draw %s as its edge around its fill",
             (token) => {
                 const paint = paintOf(token);
@@ -120,12 +121,15 @@ describe("cyber skin", () => {
             expect(lit.get("color")).toBe("var(--color-primary-ink)");
         });
 
-        it("should light the chosen segment: a deep magenta indicator under pink text", () => {
-            const indicator = declarationsOf(CYBER_CSS, skin("segmented-indicator"));
+        it("should draw a segmented control as separate panels, with no strip edge and no sliding indicator", () => {
+            const strip = declarationsOf(CYBER_CSS, skin("segmented"));
 
-            expect(indicator.get("--cyber-fill")).toBe("var(--color-primary-light)");
-            expect(indicator.get("--cyber-edge")).toBe("var(--color-primary)");
-            expect(declarationsOf(CYBER_CSS, `${skin("segmented")} > [aria-pressed="true"]`).get("color")).toBe("var(--color-primary-ink)");
+            expect(strip.get("--segmented-gap")).toBe("6px");
+            expect(strip.get("--segmented-padding")).toBe("0px");
+            expect(strip.get("background")).toBe("none");
+            expect(strip.get("box-shadow")).toBe("none");
+            expect(paintOf("segmented").has("clip-path")).toBe(false);
+            expect(declarationsOf(CYBER_CSS, skin("segmented-indicator")).get("visibility")).toBe("hidden");
         });
 
         it("should put no text on a bright magenta or yellow block, except the remaining-count badge", () => {
