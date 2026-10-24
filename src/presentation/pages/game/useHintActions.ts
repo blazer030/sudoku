@@ -11,7 +11,7 @@ interface HintActionsOptions {
     sudoku: Sudoku;
     stepRecorder: StepRecorder;
     autoRemoveNotes: () => boolean;
-    onRevealComplete: (origin: { row: number; column: number }) => void;
+    onRevealComplete: () => void;
     onGroupCompleted?: (completed: CompletedCells, origin: { row: number; column: number }) => void;
     onHintReveal?: (outcome: RevealOutcome) => void;
     /** Check Conflicts found no repeated digits; the hint is still spent. */
@@ -69,7 +69,7 @@ export const useHintActions = ({
             const completed = sudoku.findCompletedGroups(cell.row, cell.column);
             if (completed.cells.length > 0) onGroupCompleted?.(completed, cell);
         }
-        onRevealComplete(cell);
+        onRevealComplete();
     };
 
     const hintMode = useHintMode(sudoku, {
@@ -86,7 +86,7 @@ export const useHintActions = ({
     const revealRandomCell = () => {
         const target = sudoku.revealRandomCell();
         if (target === null) {
-            onRevealComplete({ row: 4, column: 4 });
+            onRevealComplete();
             return;
         }
         const outcome: RevealOutcome = {

@@ -66,7 +66,7 @@ describe("useGameCompletion", () => {
             analytics,
         });
 
-        checkAndComplete({ row: 0, column: 0 });
+        checkAndComplete();
 
         expect(analytics.logEvent).toHaveBeenCalledWith({
             name: "game_complete",
@@ -93,7 +93,7 @@ describe("useGameCompletion", () => {
             analytics,
         });
 
-        checkAndComplete({ row: 0, column: 0 });
+        checkAndComplete();
 
         expect(analytics.logEvent).toHaveBeenCalledWith(expect.objectContaining({
             name: "game_complete",
@@ -121,7 +121,7 @@ describe("useGameCompletion", () => {
             analytics,
         });
 
-        checkAndComplete({ row: 0, column: 0 });
+        checkAndComplete();
 
         const event = analytics.logEvent.mock.calls[0][0] as AnalyticsEvent;
         expect(event.name).toBe("game_complete");
@@ -144,7 +144,7 @@ describe("useGameCompletion", () => {
             analytics,
         });
 
-        checkAndComplete({ row: 0, column: 0 });
+        checkAndComplete();
 
         expect(analytics.logEvent).toHaveBeenCalledWith(expect.objectContaining({ hints_used: 0, hints_total: 1 }));
     });
@@ -161,7 +161,7 @@ describe("useGameCompletion", () => {
             analytics,
         });
 
-        checkAndComplete({ row: 0, column: 0 });
+        checkAndComplete();
 
         expect(analytics.logEvent).not.toHaveBeenCalled();
     });
@@ -177,9 +177,9 @@ describe("useGameCompletion", () => {
                 onCompleted,
             });
 
-            checkAndComplete({ row: 0, column: 0 });
+            checkAndComplete();
 
-            expect(onCompleted).toHaveBeenCalledWith({ row: 0, column: 0 }, { isNewRecord: true });
+            expect(onCompleted).toHaveBeenCalledWith({ isNewRecord: true });
         });
 
         it("compares against the history before this game", () => {
@@ -193,9 +193,9 @@ describe("useGameCompletion", () => {
                 onCompleted,
             });
 
-            checkAndComplete({ row: 0, column: 0 });
+            checkAndComplete();
 
-            expect(onCompleted).toHaveBeenCalledWith({ row: 0, column: 0 }, { isNewRecord: false });
+            expect(onCompleted).toHaveBeenCalledWith({ isNewRecord: false });
         });
     });
 });

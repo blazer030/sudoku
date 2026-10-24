@@ -8,7 +8,7 @@ interface GameInteractionOptions {
     sudoku: Sudoku;
     stepRecorder: StepRecorder;
     clearErrors: () => void;
-    checkAndComplete: (origin: { row: number; column: number }) => void;
+    checkAndComplete: () => void;
     onGroupCompleted?: (completed: CompletedCells, origin: { row: number; column: number }) => void;
     autoRemoveNotes: () => boolean;
     /** True while the board ignores the player, e.g. during hint mode. */
@@ -100,7 +100,7 @@ export const useGameInteraction = ({
             const completed = sudoku.findCompletedGroups(row, column);
             if (completed.cells.length > 0) onGroupCompleted?.(completed, { row, column });
         }
-        checkAndComplete({ row, column });
+        checkAndComplete();
         if (isDigitCompleted(value)) selectedDigit.value = null;
     };
 

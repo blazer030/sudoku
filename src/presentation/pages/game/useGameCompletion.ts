@@ -16,7 +16,7 @@ interface GameCompletionOptions {
     difficulty: Ref<Difficulty>;
     getElapsedSeconds: () => number;
     getReplayData: () => GameReplayData;
-    onCompleted: (origin: { row: number; column: number }, outcome: CompletionOutcome) => void;
+    onCompleted: (outcome: CompletionOutcome) => void;
     analytics?: AnalyticsService;
 }
 
@@ -25,7 +25,7 @@ export const useGameCompletion = ({ sudoku, difficulty, getElapsedSeconds, getRe
     const statisticsStore = useStatisticsStore();
     const gameStore = useGameStore();
 
-    const checkAndComplete = (origin: { row: number; column: number }) => {
+    const checkAndComplete = () => {
         if (!sudoku.isCompleted()) return;
         completed.value = true;
         // Compared before this game joins the history
@@ -52,7 +52,7 @@ export const useGameCompletion = ({ sudoku, difficulty, getElapsedSeconds, getRe
                 used_notes: replaySummary.usedNotes,
             }),
         });
-        onCompleted(origin, { isNewRecord });
+        onCompleted({ isNewRecord });
     };
 
     return { completed, checkAndComplete };

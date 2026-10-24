@@ -9,7 +9,7 @@ import { ROUTER_PATH } from "@/router";
 import { captureInitialBoard } from "@/application/game/GameState";
 import type { GameReplayData } from "@/application/statistics/StatisticsRepository";
 import { useGameTimer } from "@/presentation/pages/game/useGameTimer";
-import { useGameCompletion } from "@/presentation/pages/game/useGameCompletion";
+import { useGameCompletion, type CompletionOutcome } from "@/presentation/pages/game/useGameCompletion";
 import { useLeaveGame } from "@/presentation/pages/game/useLeaveGame";
 import { useHintActions } from "@/presentation/pages/game/useHintActions";
 import { useGameToast } from "@/presentation/pages/game/useGameToast";
@@ -30,7 +30,13 @@ interface GameSessionOptions {
 export const useGameSession = ({ onPlayAgain }: GameSessionOptions) => {
     const router = useRouter();
     const gameStore = useGameStore();
+    const statisticsStore = useStatisticsStore();
+    const settingsStore = useSettingsStore();
     const analytics = inject(ANALYTICS_KEY);
+    const motionAllowed = useMotionAllowed();
+    const styleMoments = useStyleMoments();
+    const gameCompleteModal = provideGameCompleteModal();
+    const gameToast = useGameToast();
 
     const sudoku = (() => {
         if (gameStore.sudoku) {
@@ -49,13 +55,20 @@ export const useGameSession = ({ onPlayAgain }: GameSessionOptions) => {
     }
     const initialBoard = savedReplay?.initialBoard ?? captureInitialBoard(sudoku.raw());
 
+    const celebration = ref<CelebrationPhase | null>(null);
+    let celebrationTimer: ReturnType<typeof setTimeout> | null = null;
+
+    const difficulty = computed(() => gameStore.difficulty ?? "easy");
+
     const getReplayData = (): GameReplayData => ({
         initialBoard,
         steps: stepRecorder.steps,
     });
 
-    const gameCompleteModal = provideGameCompleteModal();
-    const statisticsStore = useStatisticsStore();
+    const groupEffect = useGroupEffect(motionAllowed, () => styleMoments.value.groupEffectMs);
+    const playGroupEffect = (completed: CompletedCells, origin: { row: number; column: number }) => {
+        groupEffect.play(completed.groups, completed.cells, origin);
+    };
 
     const handleCompleteAction = (action: GameCompleteAction) => {
         switch (action) {
@@ -72,65 +85,48 @@ export const useGameSession = ({ onPlayAgain }: GameSessionOptions) => {
         }
     };
 
-    const difficulty = computed(() => gameStore.difficulty ?? "easy");
+    // The solving entry plays the style's celebration alone: its board phase, then the dialog
+    const celebrate = ({ isNewRecord }: CompletionOutcome) => {
+        const openDialog = (still: boolean) => {
+            void gameCompleteModal.open({
+                elapsedSeconds: elapsedSeconds.value,
+                difficulty: difficulty.value,
+                hintsUsed: sudoku.hintTracker.recordedUsed,
+                isNewRecord,
+                still,
+            }).then(handleCompleteAction);
+        };
+        // A group effect still running from the entry before ends here
+        groupEffect.stop();
+        if (!motionAllowed()) {
+            celebration.value = "still";
+            openDialog(true);
+            return;
+        }
+        celebration.value = "playing";
+        celebrationTimer = setTimeout(() => {
+            celebrationTimer = null;
+            celebration.value = "done";
+            openDialog(false);
+        }, styleMoments.value.celebrationBoardMs);
+    };
 
-    const motionAllowed = useMotionAllowed();
-    const celebration = ref<CelebrationPhase | null>(null);
-    let celebrationTimer: ReturnType<typeof setTimeout> | null = null;
-
+    // The timer comes last, as it pauses on completion and on the leave dialog; the callbacks before it
+    // read its time only once the game runs
     const { completed, checkAndComplete } = useGameCompletion({
         sudoku: sudoku.raw(),
         difficulty,
         getElapsedSeconds: () => elapsedSeconds.value,
         getReplayData,
         analytics,
-        onCompleted: (_origin, { isNewRecord }) => {
-            const openDialog = (still: boolean) => {
-                void gameCompleteModal.open({
-                    elapsedSeconds: elapsedSeconds.value,
-                    difficulty: difficulty.value,
-                    hintsUsed: sudoku.hintTracker.recordedUsed,
-                    isNewRecord,
-                    still,
-                }).then(handleCompleteAction);
-            };
-            // The solving entry plays the style's celebration alone: its board phase, then the dialog.
-            // A group effect still running from the entry before ends here.
-            groupEffect.stop();
-            if (!motionAllowed()) {
-                celebration.value = "still";
-                openDialog(true);
-                return;
-            }
-            celebration.value = "playing";
-            celebrationTimer = setTimeout(() => {
-                celebrationTimer = null;
-                celebration.value = "done";
-                openDialog(false);
-            }, styleMoments.value.celebrationBoardMs);
-        },
+        onCompleted: celebrate,
     });
-
-    // Leaving mid-celebration leaves no timer to open the dialog later
-    onScopeDispose(() => {
-        if (celebrationTimer !== null) clearTimeout(celebrationTimer);
-        celebrationTimer = null;
-    });
-
-    const settingsStore = useSettingsStore();
-    const styleMoments = useStyleMoments();
-    const groupEffect = useGroupEffect(motionAllowed, () => styleMoments.value.groupEffectMs);
-    const playGroupEffect = (completed: CompletedCells, origin: { row: number; column: number }) => {
-        groupEffect.play(completed.groups, completed.cells, origin);
-    };
-
-    const gameToast = useGameToast();
 
     const { clearErrors, isError, isRevealed, openHintMenu, hintMode, dismissOverlay } = useHintActions({
         sudoku: sudoku.raw(),
         stepRecorder,
         autoRemoveNotes: () => settingsStore.autoRemoveNotes,
-        onRevealComplete: (origin) => { checkAndComplete(origin); },
+        onRevealComplete: checkAndComplete,
         onGroupCompleted: playGroupEffect,
         onHintReveal: outcome => { gameToast.show({ kind: "randomReveal", outcome }); },
         onNoConflicts: () => { gameToast.show({ kind: "noConflicts" }); },
@@ -153,6 +149,12 @@ export const useGameSession = ({ onPlayAgain }: GameSessionOptions) => {
     const { elapsedSeconds } = useGameTimer({
         initialSeconds: gameStore.elapsedSeconds,
         paused: timerPaused,
+    });
+
+    // Leaving mid-celebration leaves no timer to open the dialog later
+    onScopeDispose(() => {
+        if (celebrationTimer !== null) clearTimeout(celebrationTimer);
+        celebrationTimer = null;
     });
 
     return {
