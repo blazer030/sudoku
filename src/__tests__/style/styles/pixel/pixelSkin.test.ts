@@ -177,7 +177,7 @@ describe("pixel skin", () => {
         expect(declarationsOf(PIXEL_CSS, skin(token)).get("border-radius")).toBe("0");
     });
 
-    it("should draw a segmented control as separate framed blocks, the chosen one solid, with no strip or sliding indicator", () => {
+    it("should draw a segmented control as separate blocks, only the chosen one solid and framed, with no strip or sliding indicator", () => {
         const strip = declarationsOf(PIXEL_CSS, skin("segmented"));
         const segment = declarationsOf(PIXEL_CSS, skin("segment"));
         const chosen = declarationsOf(PIXEL_CSS, `${skin("segment")}[aria-pressed="true"]`);
@@ -187,7 +187,10 @@ describe("pixel skin", () => {
         expect(strip.get("background")).toBe("none");
         expect(strip.get("box-shadow")).toBe("none");
         expect(declarationsOf(PIXEL_CSS, skin("segmented-indicator")).get("visibility")).toBe("hidden");
-        expect(segment.get("box-shadow")).toBe("var(--pixel-frame-bars)");
+        expect(segment.get("box-shadow")).toBe("none");
+        expect(segment.get("background-color")).toBe("transparent");
+        expect(segment.get("color")).toBe("var(--pixel-ink)");
+        expect(chosen.get("box-shadow")).toBe("var(--pixel-frame-bars)");
         expect(chosen.get("background-color")).toBe("var(--pixel-ink)");
     });
 

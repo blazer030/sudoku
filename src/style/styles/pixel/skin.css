@@ -616,8 +616,9 @@
 }
 
 /* A segmented control is separate blocks ten pixels apart, as on the canvas: the strip has no frame or
-   fill, and the chosen option is itself a solid block, so the sliding indicator is not drawn. Each option
-   has the control's notched frame without a shadow, since the gap leaves no room for one. */
+   fill, and the chosen option is itself a solid block, so the sliding indicator is not drawn. Only the
+   chosen option has the control's notched frame, without a shadow since the gap leaves no room for one;
+   the others are bare text on the card. */
 [data-style="pixel"] [data-skin~="segmented"] {
     --segmented-gap: 10px;
     --segmented-padding: 0px;
@@ -632,12 +633,14 @@
 
 [data-style="pixel"] [data-skin~="segment"] {
     border-radius: 0;
-    box-shadow: var(--pixel-frame-bars);
+    box-shadow: none;
+    background-color: transparent;
     color: var(--pixel-ink);
     transition-duration: 0ms;
 }
 
 [data-style="pixel"] [data-skin~="segment"][aria-pressed="true"] {
+    box-shadow: var(--pixel-frame-bars);
     background-color: var(--pixel-ink);
     color: var(--color-card);
 }
