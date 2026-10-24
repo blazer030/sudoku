@@ -6,6 +6,7 @@ import { useSettingsStore } from "@/stores/settingsStore";
 import { ARRIVAL_SETTLE_MS } from "@/presentation/components/board-cell/useArrivalMotion";
 import BoardCell from "@/presentation/components/board-cell/BoardCell.vue";
 import { STYLE_MOMENTS } from "@/presentation/components/style-moments/styleMoments";
+import PaperDigitWriter from "@/presentation/components/style-moments/paper/PaperDigitWriter.vue";
 import { declarationsOf } from "@/__tests__/style/styleSheetRules";
 
 describe("BoardCell", () => {
@@ -331,6 +332,21 @@ describe("BoardCell", () => {
             const wrapper = await enterDigit(4);
             expect(wrapper.find("[data-testid='test-writer']").exists()).toBe(false);
             expect(wrapper.get("[data-testid='cell-value']").attributes("style") ?? "").not.toContain("--digit-writer-mask");
+        });
+
+        it("should write a digit in with paper's pen and settle when it is written", async () => {
+            useSettingsStore().setStyle("paper");
+            const wrapper = await enterDigit(7);
+
+            const writer = wrapper.findComponent(PaperDigitWriter);
+            const maskId = String(writer.props("maskId"));
+            expect(writer.props("digit")).toBe(7);
+            expect(wrapper.get("[data-testid='cell-value']").attributes("style")).toContain(`url(#${maskId})`);
+
+            await wrapper.get(".paper-digit-settle").trigger("animationend");
+
+            expect(wrapper.get("[data-testid='cell-value']").classes()).not.toContain("value-arrive");
+            expect(wrapper.findComponent(PaperDigitWriter).exists()).toBe(false);
         });
 
         it("should draw nothing while motion effects are off", async () => {

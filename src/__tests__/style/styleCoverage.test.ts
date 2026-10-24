@@ -43,6 +43,7 @@ const REQUIRED_SELECTORS: Record<StyleId, readonly string[]> = {
         '[data-skin~="board"]',
         '[data-skin~="board"] [data-variant="clue"]',
         ".value-arrive",
+        ".paper-digit-stroke",
         ".value-leave::before",
         '[data-skin~="check"]',
         '[data-skin~="continue"]',

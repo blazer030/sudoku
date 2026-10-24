@@ -11,6 +11,9 @@ const SCOPE = '[data-style="paper"]';
 const BOARD = `${SCOPE} [data-skin~="board"]`;
 const GROUP_CELL = `${BOARD} [data-group]:not(.animate-hint-reveal-glow)`;
 const ARRIVING_DIGIT = `${BOARD} .value-arrive`;
+const WRITTEN_DIGIT = `${SCOPE}[data-paper-fonts="ready"] [data-skin~="board"] .font-entry.value-arrive`;
+const PEN_STROKE = `${SCOPE} .paper-digit-stroke`;
+const PEN_SETTLE = `${SCOPE} .paper-digit-settle`;
 const LEAVING_CELL = `${BOARD} [data-variant].value-leave`;
 const RUB = `${LEAVING_CELL}::before`;
 const STRIKE = `${SCOPE} :is(.paper-group-row, .paper-group-column) .paper-group-stroke`;
@@ -48,18 +51,31 @@ const keyframeEnds = (name: string): { from: Map<string, string>; to: Map<string
 
 describe("paper moments", () => {
     describe("digits", () => {
-        // The digit is written in with the pen, left to right, its ink still settling as the stroke ends
-        it("should write an entered digit in by hand, left to right, settling its ink", () => {
-            const timing = animationTimingOf(animationOf(ARRIVING_DIGIT), "paper-digit-write");
-            const { from, to } = keyframeEnds("paper-digit-write");
+        // PaperDigitWriter draws the strokes into a mask; the digit is its own glyph seen through it, so
+        // the last frame is the digit itself. The strokes follow Caveat's digits, so only once it has loaded.
+        it("should show an entered digit through its writer's mask, once Caveat has loaded", () => {
+            const written = declarationsOf(PAPER_CSS, WRITTEN_DIGIT);
 
-            expect(timing?.durationMs ?? 0).toBeGreaterThanOrEqual(300);
-            expect(timing?.durationMs ?? 0).toBeLessThanOrEqual(450);
-            // Clipped from the right, so the ink (from about a quarter of the box) starts hidden
-            expect(Number.parseFloat(/^inset\(\S+ (\S+) \S+ \S+\)$/.exec(from.get("clip-path") ?? "")?.[1] ?? "")).toBeGreaterThanOrEqual(75);
-            expect(Number(from.get("opacity"))).toBeLessThan(1);
-            expect(to.get("clip-path")).toMatch(/^inset\(\S+ -\d+% \S+ \S+\)$/);
-            expect(to.get("opacity")).toBe("1");
+            expect(written.get("mask-image")).toBe("var(--digit-writer-mask, none)");
+            // The overhang of Caveat's ink is masked only as far as the box's overflow reaches
+            expect(written.get("box-shadow")).toMatch(/^0 0 0 0\.\d+em transparent$/);
+            expect(declarationsOf(PAPER_CSS, ARRIVING_DIGIT).has("animation")).toBe(false);
+            expect(PAPER_CSS).not.toContain("paper-digit-write ");
+        });
+
+        it("should draw each stroke on along its length and settle the mask whole in 60ms", () => {
+            const stroke = declarationsOf(PAPER_CSS, PEN_STROKE);
+            const settle = declarationsOf(PAPER_CSS, PEN_SETTLE);
+
+            expect(stroke.get("animation-name")).toBe("paper-digit-stroke");
+            expect(stroke.get("animation-fill-mode")).toBe("both");
+            expect(keyframeEnds("paper-digit-stroke").to.get("stroke-dashoffset")).toBe("0");
+            // The settle starts clear, so until it fades in the mask is the strokes alone
+            expect(settle.get("opacity")).toBe("0");
+            expect(settle.get("animation-name")).toBe("paper-digit-settle");
+            expect(settle.get("animation-duration")).toBe("60ms");
+            expect(settle.get("animation-fill-mode")).toBe("both");
+            expect(keyframeEnds("paper-digit-settle").to.get("opacity")).toBe("1");
         });
 
         // The digit is gone once erased, so the cell's ::before rubs out a smudge where it was. It is the
@@ -80,12 +96,11 @@ describe("paper moments", () => {
             expect(to.get("opacity")).toBe("0");
         });
 
-        it("should end both before the arrival flags settle on their own", () => {
-            for (const [selector, name] of [[ARRIVING_DIGIT, "paper-digit-write"], [RUB, "paper-digit-rub"]] as const) {
-                const timing = animationTimingOf(declarationsOf(PAPER_CSS, selector).get("animation") ?? "", name);
+        // The writing's own timing is the writer's (PaperDigitWriter.test.ts)
+        it("should end the rub before the leaving flag settles on its own", () => {
+            const timing = animationTimingOf(declarationsOf(PAPER_CSS, RUB).get("animation") ?? "", "paper-digit-rub");
 
-                expect((timing?.fixedDelayMs ?? 0) + (timing?.durationMs ?? 0), name).toBeLessThan(ARRIVAL_SETTLE_MS);
-            }
+            expect((timing?.fixedDelayMs ?? 0) + (timing?.durationMs ?? 0)).toBeLessThan(ARRIVAL_SETTLE_MS);
         });
 
         // The entered digit sits in its own completed group: a group rule animating the digit would
@@ -102,8 +117,10 @@ describe("paper moments", () => {
             expect(animationOf(GROUP_CELL)).toMatch(/^paper-group-wash /);
         });
 
-        it("should stop the writing and the rub under reduced motion", () => {
-            expect(reducedMotionDeclarationsOf(ARRIVING_DIGIT).get("animation")).toBe("none");
+        it("should stop the writing and the rub under reduced motion, showing the digit unmasked", () => {
+            expect(reducedMotionDeclarationsOf(PEN_STROKE).get("animation")).toBe("none");
+            expect(reducedMotionDeclarationsOf(PEN_SETTLE).get("animation")).toBe("none");
+            expect(reducedMotionDeclarationsOf(WRITTEN_DIGIT).get("mask-image")).toBe("none");
             expect(reducedMotionDeclarationsOf(RUB).get("animation")).toBe("none");
         });
     });

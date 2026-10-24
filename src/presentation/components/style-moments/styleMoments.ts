@@ -6,6 +6,7 @@ import TactileLoader from "@/presentation/components/style-moments/tactile/Tacti
 import PaperLoader from "@/presentation/components/style-moments/paper/PaperLoader.vue";
 import PaperCelebration from "@/presentation/components/style-moments/paper/PaperCelebration.vue";
 import PaperGroupOverlay from "@/presentation/components/style-moments/paper/PaperGroupOverlay.vue";
+import PaperDigitWriter from "@/presentation/components/style-moments/paper/PaperDigitWriter.vue";
 import PixelLoader from "@/presentation/components/style-moments/pixel/PixelLoader.vue";
 import PixelCelebration from "@/presentation/components/style-moments/pixel/PixelCelebration.vue";
 import PixelGroupOverlay from "@/presentation/components/style-moments/pixel/PixelGroupOverlay.vue";
@@ -71,7 +72,8 @@ const TACTILE_MOMENTS: StyleMoments = {
 
 // From the boards: each cell's wash waits 100ms and runs 600ms, but the pencil runs longer: the box's loop
 // starts 180ms in and takes 860ms, which a box entered at its centre (two steps out) just covers. The
-// red-pen check is on the board by 680ms; the card lands as the scrim comes in.
+// red-pen check is on the board by 680ms; the card lands as the scrim comes in. An entered digit is written
+// in stroke by stroke, in 420–560ms.
 const PAPER_MOMENTS: StyleMoments = {
     loader: PaperLoader,
     celebration: null,
@@ -79,6 +81,7 @@ const PAPER_MOMENTS: StyleMoments = {
     groupEffectMs: 920,
     groupOverlay: PaperGroupOverlay,
     celebrationBoardMs: 760,
+    digitWriter: PaperDigitWriter,
 };
 
 // From the boards: each cell waits 100ms and blinks twice in 360ms, and the sparks pop as the group's

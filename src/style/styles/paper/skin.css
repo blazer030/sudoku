@@ -274,18 +274,38 @@
     animation: paper-check-draw 300ms ease-out;
 }
 
-/* A digit entered is written in by hand: the pen reveals it left to right, its ink still wet (a little
-   pale) until the stroke ends. Caveat's ink runs from about a quarter of the digit's box to a quarter
-   past it, so the pen starts there and ends past it. The group wash animates only the cell, so the
-   digit that completes a group is written in too. */
-@keyframes paper-digit-write {
-    0% { clip-path: inset(-50% 75% -50% -50%); opacity: 0.55; }
-    80% { clip-path: inset(-50% -30% -50% -50%); opacity: 0.8; }
-    100% { clip-path: inset(-50% -30% -50% -50%); opacity: 1; }
+/* A digit entered is written in by hand, stroke by stroke: PaperDigitWriter draws its strokes, in writing
+   order with short pen lifts, into the mask the digit is shown through, then settles the whole mask in to
+   fill the specks, so the last frame is the digit itself. Its timing is the digit's own, set on each
+   stroke. The strokes follow Caveat's digits, so the mask applies only once Caveat has loaded. It is not
+   an animation on the digit, so the digit that completes a group is written in too. */
+@keyframes paper-digit-stroke {
+    to { stroke-dashoffset: 0; }
 }
 
-[data-style="paper"] [data-skin~="board"] .value-arrive {
-    animation: paper-digit-write 400ms linear;
+@keyframes paper-digit-settle {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Caveat's ink overhangs the digit's box to the right, and Chromium masks only what the box's overflow
+   reaches, so a clear shadow carries it past the ink: without it the last frame loses the overhang */
+[data-style="paper"][data-paper-fonts="ready"] [data-skin~="board"] .font-entry.value-arrive {
+    -webkit-mask-image: var(--digit-writer-mask, none);
+    mask-image: var(--digit-writer-mask, none);
+    box-shadow: 0 0 0 0.3em transparent;
+}
+
+[data-style="paper"] .paper-digit-stroke {
+    animation-name: paper-digit-stroke;
+    animation-fill-mode: both;
+}
+
+[data-style="paper"] .paper-digit-settle {
+    opacity: 0;
+    animation-name: paper-digit-settle;
+    animation-duration: 60ms;
+    animation-fill-mode: both;
 }
 
 /* A digit erased is rubbed out: the digit is gone at once, so the cell's ::before leaves a smudge
@@ -646,9 +666,15 @@
     [data-style="paper"] [data-variant="wrong"]::after,
     [data-style="paper"] [data-variant="answer"] [data-note-highlight]::after,
     [data-style="paper"] [data-skin~="check"] svg,
-    [data-style="paper"] [data-skin~="board"] .value-arrive,
+    [data-style="paper"] .paper-digit-stroke,
+    [data-style="paper"] .paper-digit-settle,
     [data-style="paper"] [data-skin~="board"] [data-variant].value-leave::before {
         animation: none;
+    }
+
+    [data-style="paper"][data-paper-fonts="ready"] [data-skin~="board"] .font-entry.value-arrive {
+        -webkit-mask-image: none;
+        mask-image: none;
     }
 
     [data-style="paper"] .segmented-indicator-motion {
