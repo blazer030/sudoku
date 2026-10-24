@@ -96,7 +96,9 @@ const main = async (): Promise<void> => {
             licence: "ofl/caveat/OFL.txt",
             licenceOutput: "Caveat-OFL.txt",
             // Paper writes only digits by hand, and stamps SOLVED (game.complete.stamp in English) and the
-            // month/day on the completion card; any other text falls through to WenKai
+            // month/day on the completion card; any other text falls through to WenKai. Paper's stroke writing
+            // (style-moments/paper/paperDigitStrokes.ts) holds Caveat's digit advances and baseline: re-measure
+            // them if this face changes
             jobs: [{ output: "caveat.woff2", source: "ofl/caveat/Caveat[wght].ttf", text: "0123456789/SOLVED", weights: { min: 500, max: 700 } }],
         },
         {
