@@ -9,6 +9,12 @@ import { STYLE_MOMENTS } from "@/presentation/components/style-moments/styleMome
 import PaperDigitWriter from "@/presentation/components/style-moments/paper/PaperDigitWriter.vue";
 import { declarationsOf } from "@/__tests__/style/styleSheetRules";
 
+// Whether the browser can mask an HTML element by an SVG <mask>; jsdom's own answer is no
+const maskSupport = vi.hoisted(() => ({ supported: true }));
+vi.mock("@/presentation/components/style-moments/maskReferenceSupport", () => ({
+    canMaskByReference: () => maskSupport.supported,
+}));
+
 describe("BoardCell", () => {
     afterEach(() => {
         localStorage.clear();
@@ -279,6 +285,7 @@ describe("BoardCell", () => {
 
         afterEach(() => {
             STYLE_MOMENTS.minimal.digitWriter = originalWriter;
+            maskSupport.supported = true;
             vi.unstubAllGlobals();
         });
 
@@ -347,6 +354,18 @@ describe("BoardCell", () => {
 
             expect(wrapper.get("[data-testid='cell-value']").classes()).not.toContain("value-arrive");
             expect(wrapper.findComponent(PaperDigitWriter).exists()).toBe(false);
+        });
+
+        // A browser that cannot mask an HTML element by an SVG <mask> (WebKit) would hide the digit, so it
+        // shows the digit plainly instead
+        it("should show the digit plainly where the browser cannot mask by an SVG mask", async () => {
+            STYLE_MOMENTS.minimal.digitWriter = TestWriter;
+            maskSupport.supported = false;
+            const wrapper = await enterDigit(4);
+
+            expect(wrapper.find("[data-testid='test-writer']").exists()).toBe(false);
+            expect(wrapper.get("[data-testid='cell-value']").text()).toBe("4");
+            expect(wrapper.get("[data-testid='cell-value']").attributes("style") ?? "").not.toContain("--digit-writer-mask");
         });
 
         it("should draw nothing while motion effects are off", async () => {

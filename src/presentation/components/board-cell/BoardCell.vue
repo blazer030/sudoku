@@ -70,6 +70,7 @@ import type { GroupKind } from "@/domain/game/Sudoku";
 import { useMotionAllowed } from "@/presentation/composables/useMotionAllowed";
 import { useArrivalMotion } from "@/presentation/components/board-cell/useArrivalMotion";
 import { useStyleMoments } from "@/presentation/components/style-moments/styleMoments";
+import { canMaskByReference } from "@/presentation/components/style-moments/maskReferenceSupport";
 
 export type CellVariant = "default" | "clue" | "selected" | "focus" | "scope" | "error" | "same-digit" | "pattern" | "answer" | "wrong" | "peer";
 /** Player notes are muted; solver candidates are bold in the theme colour so they never pass for the player's own. */
@@ -170,10 +171,11 @@ const placement = computed(() => ({
 const pops = computed(() => props.popping && motionAllowed());
 const { arriving, leaving, settle } = useArrivalMotion(toRef(props, "value"), toRef(props, "popping"));
 
-// A style may write an arriving digit in with its own pen; arriving is only ever set while motion is allowed
+// A style may write an arriving digit in with its own pen; arriving is only ever set while motion is allowed.
+// The pen is a mask, so a browser that cannot mask by one shows the digit plainly.
 const moments = useStyleMoments();
 const writerMaskId = `digit-writer-${useId()}`;
-const digitWriter = computed(() => (arriving.value && props.value !== 0 ? moments.value.digitWriter ?? null : null));
+const digitWriter = computed(() => (arriving.value && props.value !== 0 && canMaskByReference() ? moments.value.digitWriter ?? null : null));
 
 const settleFromCell = (event: AnimationEvent) => {
     if (event.pseudoElement) settle();
