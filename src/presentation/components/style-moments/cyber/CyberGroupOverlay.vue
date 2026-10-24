@@ -9,12 +9,12 @@
         <span
             v-if="group.kind === 'box'"
             class="cyber-group-frame absolute z-[3] border"
-            :style="{ ...placementOf(group), transformOrigin: growthOriginOf() }"
+            :style="{ ...groupPlacement(group), transformOrigin: growthOriginOf() }"
         />
         <span
             v-else
             :class="['cyber-group-line absolute z-[3]', `cyber-group-${group.kind}`]"
-            :style="placementOf(group)"
+            :style="groupPlacement(group)"
         >
             <span
                 class="cyber-group-beam cyber-group-beam-back absolute"
@@ -41,6 +41,7 @@
 import { BOARD_SIZE, BOX_SIZE } from "@/domain/board/constants";
 import type { CompletedGroup } from "@/domain/game/Sudoku";
 import type { GroupEffect } from "@/presentation/components/style-moments/styleMoments";
+import { boardPercent, boxCorner, groupPlacement } from "@/presentation/components/style-moments/groupPlacement";
 
 const props = defineProps<{
     effect: GroupEffect;
@@ -62,20 +63,6 @@ const TAG_TRACKING = "0.1em";
 // The tags sit across a grid line, by half their height
 const TAG_HALF_HEIGHT = "7px";
 
-const percent = (cells: number): string => `${(cells / BOARD_SIZE) * 100}%`;
-
-// The first row and column of a box, numbered from the top left
-const boxCorner = (index: number): { row: number; column: number } =>
-    ({ row: Math.floor(index / BOX_SIZE) * BOX_SIZE, column: (index % BOX_SIZE) * BOX_SIZE });
-
-// Where the group lies on the board, in board percentages
-const placementOf = (group: CompletedGroup): Record<string, string> => {
-    if (group.kind === "row") return { left: "0%", top: percent(group.index), width: "100%", height: percent(1) };
-    if (group.kind === "column") return { left: percent(group.index), top: "0%", width: percent(1), height: "100%" };
-    const corner = boxCorner(group.index);
-    return { left: percent(corner.column), top: percent(corner.row), width: percent(BOX_SIZE), height: percent(BOX_SIZE) };
-};
-
 // A box's outline grows from the entered cell: scaled to a third about this point, it covers that cell
 const growthOriginOf = (): string => {
     const { origin } = props.effect;
@@ -88,8 +75,8 @@ const beamsOf = (group: CompletedGroup): { back: Record<string, string>; forward
     const [start, size, crossStart, crossSize] = group.kind === "row" ? ["left", "width", "top", "height"] : ["top", "height", "left", "width"];
     const across = { [crossStart]: "0%", [crossSize]: "100%" };
     return {
-        back: { ...across, [start]: "0%", [size]: percent(centre) },
-        forward: { ...across, [start]: percent(centre), [size]: percent(BOARD_SIZE - centre) },
+        back: { ...across, [start]: "0%", [size]: boardPercent(centre) },
+        forward: { ...across, [start]: boardPercent(centre), [size]: boardPercent(BOARD_SIZE - centre) },
     };
 };
 
@@ -101,7 +88,7 @@ const tagLineOf = (group: CompletedGroup): number => {
     return top === 0 ? BOX_SIZE : top;
 };
 
-const tagTop = (line: number): string => `calc(${percent(line)} - ${TAG_HALF_HEIGHT})`;
+const tagTop = (line: number): string => `calc(${boardPercent(line)} - ${TAG_HALF_HEIGHT})`;
 
 // A box completed with a row holds that row, so a box at the row's head would have the row's tag inside its
 // outline, near its own tag: the row's moves to the far end
@@ -116,9 +103,9 @@ const tagPlacementOf = (group: CompletedGroup): Record<string, string> => {
         // Centred under the column near its foot, or held to the board's edge for an edge column
         if (group.index === 0) return { bottom: "18px", left: "2px" };
         if (group.index === BOARD_SIZE - 1) return { bottom: "18px", right: "2px" };
-        return { bottom: "18px", left: percent(group.index + 0.5), transform: "translateX(-50%)" };
+        return { bottom: "18px", left: boardPercent(group.index + 0.5), transform: "translateX(-50%)" };
     }
-    return { top: tagTop(tagLineOf(group)), left: `calc(${percent(boxCorner(group.index).column)} + 6px)` };
+    return { top: tagTop(tagLineOf(group)), left: `calc(${boardPercent(boxCorner(group.index).column)} + 6px)` };
 };
 
 const labelOf = (group: CompletedGroup): string => `${LABELS[group.kind]} ${group.index + 1} OK`;

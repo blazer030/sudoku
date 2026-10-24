@@ -6,7 +6,7 @@
         v-for="group in effect.groups"
         :key="`${group.kind}-${group.index}`"
         :class="['pixel-group-mark absolute z-[3]', `pixel-group-${group.kind}`]"
-        :style="{ ...placementOf(group), '--pixel-spark-reach': reachOf(group) }"
+        :style="{ ...groupPlacement(group), '--pixel-spark-reach': reachOf(group) }"
     >
         <span
             v-for="spark in SPARKS[group.kind]"
@@ -20,6 +20,7 @@
 import { BOARD_SIZE, BOX_SIZE } from "@/domain/board/constants";
 import type { CompletedGroup, GroupKind } from "@/domain/game/Sudoku";
 import type { GroupEffect } from "@/presentation/components/style-moments/styleMoments";
+import { boxCorner, groupPlacement } from "@/presentation/components/style-moments/groupPlacement";
 
 const props = defineProps<{
     effect: GroupEffect;
@@ -30,20 +31,6 @@ const SPARKS: Record<GroupKind, string[]> = {
     row: ["-left-2.5 top-1/2", "left-[calc(100%+10px)] top-1/2"],
     column: ["left-1/2 -top-2.5", "left-1/2 top-[calc(100%+10px)]"],
     box: ["left-0 top-0", "left-full top-0", "left-0 top-full", "left-full top-full"],
-};
-
-const percent = (cells: number): string => `${(cells / BOARD_SIZE) * 100}%`;
-
-// The first row and column of a box, numbered from the top left
-const boxCorner = (index: number): { row: number; column: number } =>
-    ({ row: Math.floor(index / BOX_SIZE) * BOX_SIZE, column: (index % BOX_SIZE) * BOX_SIZE });
-
-// Where the group lies on the board, in board percentages
-const placementOf = (group: CompletedGroup): Record<string, string> => {
-    if (group.kind === "row") return { left: "0%", top: percent(group.index), width: "100%", height: percent(1) };
-    if (group.kind === "column") return { left: percent(group.index), top: "0%", width: percent(1), height: "100%" };
-    const corner = boxCorner(group.index);
-    return { left: percent(corner.column), top: percent(corner.row), width: percent(BOX_SIZE), height: percent(BOX_SIZE) };
 };
 
 const cellsOf = (group: CompletedGroup): { row: number; column: number }[] => {

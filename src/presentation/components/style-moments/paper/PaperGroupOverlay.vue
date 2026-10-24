@@ -5,7 +5,7 @@
         v-for="group in effect.groups"
         :key="`${group.kind}-${group.index}`"
         :class="['paper-group-mark absolute overflow-visible', `paper-group-${group.kind}`]"
-        :style="placementOf(group)"
+        :style="groupPlacement(group)"
         :viewBox="MARKS[group.kind].viewBox"
         preserveAspectRatio="none"
     >
@@ -17,9 +17,9 @@
 </template>
 
 <script lang="ts" setup>
-import { BOARD_SIZE, BOX_SIZE } from "@/domain/board/constants";
-import type { CompletedGroup, GroupKind } from "@/domain/game/Sudoku";
+import type { GroupKind } from "@/domain/game/Sudoku";
 import type { GroupEffect } from "@/presentation/components/style-moments/styleMoments";
+import { groupPlacement } from "@/presentation/components/style-moments/groupPlacement";
 
 defineProps<{
     effect: GroupEffect;
@@ -33,19 +33,5 @@ const MARKS: Record<GroupKind, { viewBox: string; path: string }> = {
         viewBox: "0 0 117 117",
         path: "M58 5 C 100 3, 114 30, 112 62 C 108 100, 80 113, 52 111 C 19 109, 4 84, 7 52 C 10 22, 34 7, 72 7",
     },
-};
-
-const percent = (cells: number): string => `${(cells / BOARD_SIZE) * 100}%`;
-
-// Where the group lies on the board, in board percentages
-const placementOf = (group: CompletedGroup): Record<string, string> => {
-    if (group.kind === "row") return { left: "0%", top: percent(group.index), width: "100%", height: percent(1) };
-    if (group.kind === "column") return { left: percent(group.index), top: "0%", width: percent(1), height: "100%" };
-    return {
-        left: percent((group.index % BOX_SIZE) * BOX_SIZE),
-        top: percent(Math.floor(group.index / BOX_SIZE) * BOX_SIZE),
-        width: percent(BOX_SIZE),
-        height: percent(BOX_SIZE),
-    };
 };
 </script>
