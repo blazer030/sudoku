@@ -8,6 +8,9 @@ import TactileLoader from "@/presentation/components/style-moments/tactile/Tacti
 import PaperLoader from "@/presentation/components/style-moments/paper/PaperLoader.vue";
 import PaperCelebration from "@/presentation/components/style-moments/paper/PaperCelebration.vue";
 import PaperGroupOverlay from "@/presentation/components/style-moments/paper/PaperGroupOverlay.vue";
+import PixelLoader from "@/presentation/components/style-moments/pixel/PixelLoader.vue";
+import PixelCelebration from "@/presentation/components/style-moments/pixel/PixelCelebration.vue";
+import PixelGroupOverlay from "@/presentation/components/style-moments/pixel/PixelGroupOverlay.vue";
 import type { CompletedGroup } from "@/domain/game/Sudoku";
 
 /** A group effect on the board: a new one gets a new id, which starts its drawings afresh. */
@@ -77,12 +80,23 @@ const PAPER_MOMENTS: StyleMoments = {
     celebrationBoardMs: 760,
 };
 
+// From the boards: each cell waits 100ms and blinks twice in 360ms, and the sparks pop as the group's
+// farthest cell blinks, so they end with it. The rows clear from the top 80ms apart; the dialog opens as
+// the board's scrim comes in, while the last rows are still clearing.
+const PIXEL_MOMENTS: StyleMoments = {
+    loader: PixelLoader,
+    celebration: PixelCelebration,
+    groupEffectMs: 460,
+    groupOverlay: PixelGroupOverlay,
+    celebrationBoardMs: 800,
+};
+
 // One entry per style, so a style added without its moments is a type error
 export const STYLE_MOMENTS: Record<StyleId, StyleMoments> = {
     minimal: MINIMAL_MOMENTS,
     tactile: TACTILE_MOMENTS,
     paper: PAPER_MOMENTS,
-    pixel: DEFAULT_MOMENTS,
+    pixel: PIXEL_MOMENTS,
     cyber: DEFAULT_MOMENTS,
 };
 

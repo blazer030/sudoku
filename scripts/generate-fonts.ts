@@ -111,8 +111,9 @@ const main = async (): Promise<void> => {
             licence: "ofl/pressstart2p/OFL.txt",
             licenceOutput: "PressStart2P-OFL.txt",
             // 8-bit style's digits: board, keys, timer and counts; the timer's colon too, so it does not
-            // fall back to Cubic 11 between two pixel digits
-            jobs: [{ output: "press-start-2p.woff2", source: "ofl/pressstart2p/PressStart2P-Regular.ttf", text: "0123456789:" }],
+            // fall back to Cubic 11 between two pixel digits; and the loader's and the celebration's
+            // English decoration, NOW LOADING... and STAGE CLEAR
+            jobs: [{ output: "press-start-2p.woff2", source: "ofl/pressstart2p/PressStart2P-Regular.ttf", text: "0123456789:NOW LOADING... STAGE CLEAR" }],
         },
         {
             licence: "ofl/silkscreen/OFL.txt",

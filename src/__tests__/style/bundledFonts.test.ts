@@ -125,10 +125,19 @@ describe("bundled fonts", () => {
         expect(missing.join("")).toBe("");
     });
 
-    it("should map the digits in the pixel faces that only write digits, and the timer's colon in the digit face", () => {
+    // The loader's and the celebration's decoration, in English in both languages
+    it("should map pixel's NOW LOADING and STAGE CLEAR in Press Start 2P (run npm run generate:fonts)", () => {
+        const wanted = Array.from(new Set("NOW LOADING... STAGE CLEAR"), character => character.codePointAt(0) ?? 0);
+        const mapped = mappedCodePoints(readFileSync("src/assets/fonts/press-start-2p.woff2"), wanted);
+
+        expect(wanted.filter(codePoint => !mapped.has(codePoint)).map(codePoint => String.fromCodePoint(codePoint))).toEqual([]);
+    });
+
+    it("should map the digits in the pixel faces, and the timer's colon and the moments' letters in the digit face", () => {
         const codePoints = (text: string): number[] => Array.from(text, character => character.codePointAt(0) ?? 0);
-        // Press Start 2P sets the timer, so its colon is cut in too; otherwise it falls back to Cubic 11
-        const expected: Readonly<Record<string, string>> = { "press-start-2p.woff2": "0123456789:", "silkscreen.woff2": "0123456789" };
+        // Press Start 2P sets the timer, so its colon is cut in too; otherwise it falls back to Cubic 11. It
+        // also sets the moments' English decoration, so of the probes it maps the A as well.
+        const expected: Readonly<Record<string, string>> = { "press-start-2p.woff2": "0123456789:A", "silkscreen.woff2": "0123456789" };
 
         for (const [file, text] of Object.entries(expected)) {
             const mapped = mappedCodePoints(readFileSync(`src/assets/fonts/${file}`), [...codePoints("0123456789:"), 0x41, 0x6578]);

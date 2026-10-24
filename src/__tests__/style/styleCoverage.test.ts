@@ -54,7 +54,16 @@ const REQUIRED_SELECTORS: Record<StyleId, readonly string[]> = {
         ".paper-group-stroke",
         ".paper-stamp",
     ],
-    pixel: PRESS,
+    pixel: [
+        ...PRESS,
+        "[data-group]",
+        '[data-celebration="playing"]',
+        '[data-skin~="trophy"]',
+        '[data-skin~="celebration"]:not([data-still])',
+        ".pixel-loader-square",
+        ".pixel-group-spark",
+        ".pixel-stage-letter",
+    ],
     cyber: PRESS,
 };
 

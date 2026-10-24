@@ -238,11 +238,11 @@ const HIERARCHY_CASES = modeCases((style, themeId, mode, palette) => (isExempt(O
 // on a pattern is checked on each colour rather than on their mix. Hint mode's pattern and answer cells
 // are that shade solid. The skin (--pixel-pattern-shade) draws these.
 const PIXEL_PATTERN_SHADE: Readonly<Record<ColorMode, PaletteToken>> = { light: "highlight", dark: "card" };
-// A completed group's flash (--pixel-flash-fill, --pixel-flash-ink): 掌機 inverts the cell, since its light
-// green is only 1.2:1 on the page; 紅白機 lights it in the same-digit blue under white digits
+// A completed group's blink and the solved board's line clear (--pixel-flash-fill, --pixel-flash-ink)
+// invert the cell in both modes, as the GroupPixel board does; the light green would be only 1.2:1 on the page
 const PIXEL_FLASH: Readonly<Record<ColorMode, { fill: PaletteToken; ink: PaletteToken }>> = {
     light: { fill: "foreground", ink: "background" },
-    dark: { fill: "highlight", ink: "foreground" },
+    dark: { fill: "foreground", ink: "background" },
 };
 // Layers that must look different (SURFACE_PAIRS) stand 1.25:1 apart
 const LAYER_APART = 1.25;
@@ -388,7 +388,7 @@ describe("palette contrast", () => {
         expect(consoleCase("selection cursor (primary) on the same-digit fill")).toMatchObject({ foreground: "#F8B800", background: "#0058F8" });
         expect(handheldCase("error frame (foreground) on the hatch's shaded pixels")).toMatchObject({ foreground: "#0F380F", background: "#8BAC0F" });
         expect(handheldCase("completion flash's digits (background) on its fill (foreground)")).toMatchObject({ foreground: "#9BBC0F", background: "#0F380F" });
-        expect(consoleCase("completion flash's digits (foreground) on its fill (highlight)")).toMatchObject({ foreground: "#FCFCFC", background: "#0058F8" });
+        expect(consoleCase("completion flash's digits (background) on its fill (foreground)")).toMatchObject({ foreground: "#000000", background: "#FCFCFC" });
     });
 
     it("should check cyber's board in its one mode", () => {
