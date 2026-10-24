@@ -1,8 +1,8 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 import { flushPromises, mount } from "@vue/test-utils";
 import { createPinia, setActivePinia, type Pinia } from "pinia";
 import { useSettingsStore } from "@/stores/settingsStore";
-import { defineComponent, nextTick } from "vue";
+import { defineComponent, h, nextTick } from "vue";
 import { i18n } from "@/presentation/i18n";
 import { createMemoryHistory, createRouter } from "vue-router";
 import GameCompleteModal from "@/presentation/pages/game/components/GameCompleteModal.vue";
@@ -86,6 +86,44 @@ describe("GameCompleteModal", () => {
 
         expect(stillOf(false)).toBe(false);
         expect(stillOf(true)).toBe(true);
+    });
+
+    it("should tag the title for styles to decorate", () => {
+        expect(mountModal().find("[data-testid='complete-card'] h2").attributes("data-skin")).toBe("title");
+    });
+
+    describe("card decoration", () => {
+        const tactile = STYLE_MOMENTS.tactile;
+        const CardPieces = defineComponent({
+            props: { still: { type: Boolean, required: true } },
+            setup: () => () => h("span", { "data-testid": "card-pieces" }),
+        });
+
+        afterEach(() => {
+            STYLE_MOMENTS.tactile = tactile;
+        });
+
+        const mountAs = (still: boolean) => {
+            const pinia = createPinia();
+            setActivePinia(pinia);
+            useSettingsStore().setStyle("tactile");
+            return mountModal({ still }, undefined, pinia);
+        };
+
+        it("should draw the current style's decoration on the card itself, still when asked", () => {
+            STYLE_MOMENTS.tactile = { ...tactile, cardDecoration: CardPieces };
+
+            const card = mountAs(true).get("[data-testid='complete-card']");
+
+            expect(card.find("[data-testid='card-pieces']").exists()).toBe(true);
+            expect(card.findComponent(CardPieces).props("still")).toBe(true);
+        });
+
+        it("should draw nothing on the card for a style without decoration", () => {
+            STYLE_MOMENTS.tactile = { ...tactile, cardDecoration: null };
+
+            expect(mountAs(false).find("[data-testid='card-pieces']").exists()).toBe(false);
+        });
     });
 
     it("should mark the card still for any style, so it appears without motion", () => {

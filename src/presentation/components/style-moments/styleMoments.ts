@@ -22,6 +22,11 @@ export interface StyleMoments {
      */
     celebration: Component | null;
     /**
+     * Decoration drawn on the completion card itself, so it moves with the card, given `{ still }`; none when
+     * the card's skin carries it all.
+     */
+    cardDecoration?: Component | null;
+    /**
      * How long one cell's group effect runs, in milliseconds. Each cell starts a ripple step later
      * for each row and column it lies from the origin; the effect ends when the farthest cell's has run.
      */

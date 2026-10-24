@@ -16,6 +16,11 @@
                 data-skin="card celebration"
                 data-testid="complete-card"
             >
+                <component
+                    :is="moments.cardDecoration"
+                    v-if="moments.cardDecoration"
+                    :still="params?.still ?? false"
+                />
                 <div
                     class="w-20 h-20 rounded-full bg-primary-light flex items-center justify-center"
                     data-skin="trophy"
@@ -28,7 +33,10 @@
                 </div>
 
                 <div class="flex flex-col items-center gap-2">
-                    <h2 class="text-[28px] font-bold text-foreground tracking-tight">
+                    <h2
+                        class="text-[28px] font-bold text-foreground tracking-tight"
+                        data-skin="title"
+                    >
                         {{ t("game.complete.title") }}
                     </h2>
                     <div class="flex flex-wrap items-center justify-center gap-2">
