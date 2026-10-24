@@ -24,6 +24,7 @@
         <div class="flex-1" />
         <div class="flex flex-col items-center gap-6">
             <div
+                :data-selected-cell="selectedCellName"
                 data-skin="board"
                 :class="boardEditable ? '' : 'pointer-events-none'"
                 class="bg-card rounded-2xl shadow-card-lg p-2 self-center w-[calc(100%+1.5rem)] max-w-board-fit"
@@ -226,6 +227,7 @@ import PuzzleLoader from "@/presentation/components/puzzle-loader/PuzzleLoader.v
 import { usePuzzleLoader } from "@/presentation/components/puzzle-loader/usePuzzleLoader";
 import { useTechniqueLabel } from "@/presentation/i18n/techniqueLabels";
 import Cell from "@/presentation/components/board-cell/Cell.vue";
+import { cellName } from "@/presentation/components/board-cell/cellName";
 import DigitPad from "@/presentation/components/digit-pad/DigitPad.vue";
 import StepLinkOverlay from "@/presentation/components/step-presentation/StepLinkOverlay.vue";
 import StepPlaybackPanel from "@/presentation/components/step-presentation/StepPlaybackPanel.vue";
@@ -303,6 +305,8 @@ const {
     selectCell,
     pickDigit,
 } = useWalkthroughInput(userValues, boardEditable);
+
+const selectedCellName = computed(() => boardEditable.value && selectedCell.value !== null ? cellName(selectedCell.value.row, selectedCell.value.column) : undefined);
 
 // A solver step names its technique; the solved board, which ends a path that solves, gets a stage tag
 const tag = computed((): { label: string; icon: Component; strong: boolean; testId: string } | null => {

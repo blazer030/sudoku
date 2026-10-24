@@ -87,6 +87,14 @@ describe("Settings.vue Support section", () => {
         expect(wrapper.get("[data-testid='settings-group-about']").find("[data-testid='donate-link']").exists()).toBe(true);
     });
 
+    it("should mark each group's title for styles to decorate", async () => {
+        const wrapper = mountSettings();
+        await flushPromises();
+
+        const heading = wrapper.get("[data-testid='settings-group-about']").get("h2");
+        expect(heading.attributes("data-skin")).toBe("group-heading");
+    });
+
     it("should keep the about rows in order", async () => {
         vi.mocked(Capacitor.isNativePlatform).mockReturnValue(true);
         const wrapper = mountSettings(buildBilling(vi.fn().mockResolvedValue(fakeProducts)));

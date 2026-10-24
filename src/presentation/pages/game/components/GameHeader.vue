@@ -34,7 +34,7 @@
             <div
                 v-if="hintMode"
                 class="justify-self-end flex items-center gap-1 bg-primary text-on-primary rounded-full pl-2 pr-3 py-1.5 shadow-primary-sm"
-                data-skin="pill"
+                data-skin="pill hint"
                 data-testid="hint-mode-pill"
             >
                 <Lightbulb :size="13" />

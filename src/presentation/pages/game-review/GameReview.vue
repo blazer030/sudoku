@@ -79,6 +79,7 @@
                 <!-- Everything else here (header, summary, gaps, panel and the room under it) takes 326px,
                      within the 331px the shared cap leaves, so a capped board ends 16px or more above the panel -->
                 <div
+                    :data-selected-cell="changedCellName"
                     data-skin="board"
                     class="bg-card rounded-2xl shadow-card-lg p-2 self-center w-[calc(100%+1.5rem)] max-w-board-fit pointer-events-none"
                     data-testid="review-board"
@@ -167,6 +168,7 @@ import { useAppLocale } from "@/presentation/i18n/useAppLocale";
 import { formatDate } from "@/presentation/i18n/formatDate";
 import { useDifficultyLabel } from "@/presentation/i18n/difficultyLabels";
 import Cell from "@/presentation/components/board-cell/Cell.vue";
+import { cellName } from "@/presentation/components/board-cell/cellName";
 import StepPlaybackPanel from "@/presentation/components/step-presentation/StepPlaybackPanel.vue";
 import StepTag from "@/presentation/components/step-presentation/StepTag.vue";
 import { useGameReview } from "@/presentation/pages/game-review/useGameReview";
@@ -222,6 +224,8 @@ const tag = computed((): { label: string; icon: Component } => {
     if (stage.value === "initial" || step === null) return { label: t("review.stages.initial"), icon: LayoutGrid };
     return { label: t(`review.actions.${step.action}`), icon: ACTION_ICONS[step.action] };
 });
+
+const changedCellName = computed(() => changedCell.value === null ? undefined : cellName(changedCell.value.row, changedCell.value.column));
 
 const isChanged = (row: number, column: number): boolean => {
     const cell = changedCell.value;

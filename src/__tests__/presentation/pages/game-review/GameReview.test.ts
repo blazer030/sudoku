@@ -113,6 +113,14 @@ describe("GameReview", () => {
         expect(wrapper.find("[data-testid='review-cell-0-0']").classes()).not.toContain("ring-primary");
     });
 
+    it("should name the step's cell on the board, and none before the first step", async () => {
+        const initial = await mountReview({ nextClicks: 0 });
+        expect(initial.find("[data-testid='review-board']").attributes("data-selected-cell")).toBeUndefined();
+
+        const stepped = await mountReview({ nextClicks: 1 });
+        expect(stepped.find("[data-testid='review-board']").attributes("data-selected-cell")).toBe("R1C2");
+    });
+
     it.each(["autoNotes", "undo"] as const)("should not outline any cell for auto notes or undo (%s)", async (action) => {
         const wrapper = await mountReview({ action, nextClicks: 1 });
 
