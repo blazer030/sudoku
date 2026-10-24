@@ -95,8 +95,11 @@ const main = async (): Promise<void> => {
         {
             licence: "ofl/caveat/OFL.txt",
             licenceOutput: "Caveat-OFL.txt",
-            // Paper writes only digits by hand; any other text falls through to WenKai
-            jobs: [{ output: "caveat.woff2", source: "ofl/caveat/Caveat[wght].ttf", text: "0123456789", weights: { min: 500, max: 700 } }],
+            // Paper writes only digits by hand, and stamps SOLVED (game.complete.stamp in English) and the
+            // month/day on the completion card; any other text falls through to WenKai. Paper's stroke writing
+            // (style-moments/paper/paperDigitStrokes.ts) holds Caveat's digit advances and baseline: re-measure
+            // them if this face changes
+            jobs: [{ output: "caveat.woff2", source: "ofl/caveat/Caveat[wght].ttf", text: "0123456789/SOLVED", weights: { min: 500, max: 700 } }],
         },
         {
             licence: "ofl/lxgwwenkaitc/OFL.txt",
@@ -110,8 +113,9 @@ const main = async (): Promise<void> => {
             licence: "ofl/pressstart2p/OFL.txt",
             licenceOutput: "PressStart2P-OFL.txt",
             // 8-bit style's digits: board, keys, timer and counts; the timer's colon too, so it does not
-            // fall back to Cubic 11 between two pixel digits
-            jobs: [{ output: "press-start-2p.woff2", source: "ofl/pressstart2p/PressStart2P-Regular.ttf", text: "0123456789:" }],
+            // fall back to Cubic 11 between two pixel digits; and the loader's and the celebration's
+            // English decoration, NOW LOADING... and STAGE CLEAR
+            jobs: [{ output: "press-start-2p.woff2", source: "ofl/pressstart2p/PressStart2P-Regular.ttf", text: "0123456789:NOW LOADING... STAGE CLEAR" }],
         },
         {
             licence: "ofl/silkscreen/OFL.txt",

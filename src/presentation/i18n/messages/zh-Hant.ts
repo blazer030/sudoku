@@ -168,6 +168,7 @@ export const zhHant: MessageSchema = {
             newRecord: "新紀錄！",
             playAgain: "再玩一局",
             review: "看這局回顧",
+            stamp: "完成",
         },
     },
     walkthrough: {

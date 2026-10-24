@@ -133,7 +133,221 @@
         0 4px 4px 0.06em var(--tactile-drop-shadow);
 }
 
-/* Reduced motion: no sinking, springing, popping, dropping or sliding; the overlay stays */
+/* Moments, from the MomentsTactile and GroupTactile boards: the loader, a completed group and the solved
+   puzzle. A piece's thickness is drawn once (an edge, a shade) and only moved or faded, never animated
+   as box-shadow, so the 81 pieces of the solved board stay cheap. Keyframes that name only their peak
+   start and end on each element's own look. */
+
+/* Loading: a raised card holds a recessed tray. Nine tiles drop in one by one along a snake (the
+   drop-and-settle of a placed digit), sit, sink together onto their edges, then lift away, 2.8s a round.
+   Each tile is its edge (the lower half and a lip below); its face sinks on it, so only transform moves. */
+[data-style="tactile"] .tactile-loader {
+    box-shadow:
+        inset 0 1px 0 var(--tactile-highlight),
+        0 6px 0 var(--tactile-edge),
+        0 18px 30px -10px color-mix(in srgb, var(--color-scrim) 40%, transparent);
+}
+
+[data-style="tactile"] .tactile-loader-tray {
+    box-shadow:
+        inset 0 2px 5px color-mix(in srgb, var(--color-shadow) 16%, transparent),
+        inset 0 -1px 0 var(--tactile-highlight);
+}
+
+[data-style="tactile"] .tactile-loader-slot {
+    background-color: color-mix(in srgb, var(--color-foreground) 7%, transparent);
+}
+
+@keyframes tactile-loader-stack {
+    0% { opacity: 0; transform: translateY(-22px) scale(1.2); }
+    9% { opacity: 1; transform: translateY(2px) scale(1); }
+    13%, 68% { opacity: 1; transform: none; }
+    74% { opacity: 1; transform: translateY(-3px); }
+    84%, 100% { opacity: 0; transform: translateY(-12px); }
+}
+
+@keyframes tactile-loader-press {
+    0%, 62% { transform: none; }
+    68% { transform: translateY(2px); }
+    74%, 100% { transform: none; }
+}
+
+[data-style="tactile"] .tactile-loader-tile {
+    background-image: linear-gradient(transparent 50%, var(--tactile-edge-on-primary) 50%);
+    box-shadow: 0 3px 0 var(--tactile-edge-on-primary);
+    animation: tactile-loader-stack 2800ms cubic-bezier(0.3, 0.8, 0.4, 1) calc(var(--tactile-loader-step) * 110ms) infinite both;
+}
+
+[data-style="tactile"] .tactile-loader-face {
+    background-color: var(--color-primary);
+    animation: tactile-loader-press 2800ms cubic-bezier(0.3, 0.8, 0.4, 1) calc(var(--tactile-loader-step) * 110ms) infinite both;
+}
+
+/* A completed row, column or box: like a finger run along a row of keys, each piece sinks 3px into a
+   shaded tray and springs back, outward from the entered cell, 45ms a step. The digit moves on its own
+   translate, which adds to the entered digit's drop. A cell in two groups is pressed once; a hint's
+   answer keeps its glow. */
+@keyframes tactile-group-shade {
+    30% { opacity: 1; }
+}
+
+@keyframes tactile-group-press {
+    30% { translate: 0 3px; }
+    65% { translate: 0 -2px; }
+}
+
+[data-style="tactile"] [data-skin~="board"] [data-group]:not(.animate-hint-reveal-glow) {
+    --group-ripple-step: 45ms;
+    position: relative;
+    animation: none;
+}
+
+[data-style="tactile"] [data-skin~="board"] [data-group]:not(.animate-hint-reveal-glow)::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background-color: color-mix(in srgb, var(--color-primary) 12%, var(--color-card));
+    box-shadow: inset 0 3px 5px color-mix(in srgb, var(--color-shadow) 16%, transparent);
+    opacity: 0;
+    pointer-events: none;
+    animation: tactile-group-shade 440ms ease-out calc(100ms + var(--group-delay, 0ms));
+}
+
+[data-style="tactile"] [data-skin~="board"] [data-group]:not(.animate-hint-reveal-glow) > div {
+    position: relative;
+    animation: tactile-group-press 440ms ease-out calc(100ms + var(--group-delay, 0ms));
+}
+
+/* The entered digit is in its own completed group: it drops in as usual, and the press moves it on top */
+[data-style="tactile"] [data-skin~="board"] [data-group]:not(.animate-hint-reveal-glow) > div.value-arrive {
+    animation:
+        tactile-drop 380ms cubic-bezier(0.3, 0.8, 0.4, 1),
+        tactile-group-press 440ms ease-out calc(100ms + var(--group-delay, 0ms));
+}
+
+/* The solved board: box 1 to box 9 spring up one after another, 72ms apart, and drop back. A strip of
+   edge below each piece grows as far as the piece rises, so the risen box shows its side; inside a box
+   the next row covers it. It runs on under the dialog, which drops in as the last boxes settle. */
+@keyframes tactile-box-lift {
+    30% { transform: translateY(-6px); }
+    55% { transform: translateY(2px); }
+    75% { transform: translateY(-1px); }
+}
+
+@keyframes tactile-box-edge {
+    30% { transform: scaleY(1); }
+    55% { transform: scaleY(0); }
+    75% { transform: scaleY(0.17); }
+}
+
+[data-style="tactile"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"]) [data-variant] {
+    position: relative;
+    animation: tactile-box-lift 560ms ease-out calc(var(--cell-box) * 72ms);
+}
+
+[data-style="tactile"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"]) [data-variant]::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -6px;
+    height: 6px;
+    background-color: var(--tactile-edge);
+    transform: scaleY(0);
+    transform-origin: top;
+    pointer-events: none;
+    animation: tactile-box-edge 560ms ease-out calc(var(--cell-box) * 72ms);
+}
+
+/* Without motion the player's pieces rest on a thicker edge instead */
+[data-style="tactile"] [data-skin~="board"][data-celebration="still"] [data-value-kind="entered"] {
+    --tw-inset-shadow:
+        inset 0 1px 0 var(--tactile-highlight),
+        inset 0 -4px 0 color-mix(in srgb, var(--color-primary) 30%, transparent);
+}
+
+/* The dialog is a thick card. It drops in from above like a tile and bounces on landing; the trophy, a
+   solid key, is pressed once; the new-record tag drops in last. A still card (data-still) only fades in,
+   like every style's, with the trophy key resting pressed: the still cue that it is done.
+   The trophy is drawn as its edge (the lower half and a lip below) with its face on top, so pressing
+   moves only the face and the icon. */
+@keyframes tactile-card-drop {
+    0% { opacity: 0; transform: translateY(-70px) scale(1.05); }
+    55% { opacity: 1; transform: translateY(7px) scale(1); }
+    76% { transform: translateY(-2px); }
+    100% { opacity: 1; transform: none; }
+}
+
+@keyframes tactile-trophy-press {
+    35% { transform: translateY(4px); }
+    70% { transform: translateY(-2px); }
+}
+
+@keyframes tactile-badge-drop {
+    0% { opacity: 0; transform: translateY(-10px) scale(1.15); }
+    60% { opacity: 1; transform: translateY(1px) scale(1); }
+    100% { opacity: 1; transform: none; }
+}
+
+[data-style="tactile"] [data-skin~="card"][data-skin~="celebration"] {
+    box-shadow:
+        inset 0 1px 0 var(--tactile-highlight),
+        0 6px 0 var(--tactile-edge),
+        0 18px 36px -10px color-mix(in srgb, var(--color-scrim) 40%, transparent);
+}
+
+[data-style="tactile"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) {
+    animation: tactile-card-drop 560ms cubic-bezier(0.3, 0.8, 0.4, 1) backwards;
+}
+
+[data-style="tactile"] [data-skin~="card"][data-skin~="celebration"] [data-skin~="tag"] {
+    box-shadow: 0 2px 0 var(--tactile-edge);
+}
+
+[data-style="tactile"] [data-skin~="card"][data-skin~="celebration"] [data-skin~="new-record"] {
+    box-shadow: 0 2px 0 var(--tactile-edge-on-primary);
+}
+
+[data-style="tactile"] [data-skin~="card"][data-skin~="celebration"] [data-skin~="trophy"] {
+    position: relative;
+    background-color: transparent;
+    background-image: linear-gradient(transparent 50%, var(--tactile-edge-on-primary) 50%);
+    box-shadow:
+        0 5px 0 var(--tactile-edge-on-primary),
+        0 7px 8px var(--tactile-drop-shadow);
+}
+
+[data-style="tactile"] [data-skin~="card"][data-skin~="celebration"] [data-skin~="trophy"]::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background-color: var(--color-primary);
+}
+
+[data-style="tactile"] [data-skin~="card"][data-skin~="celebration"] [data-skin~="trophy"] > svg {
+    position: relative;
+    color: var(--color-on-primary);
+}
+
+[data-style="tactile"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) [data-skin~="trophy"]::before,
+[data-style="tactile"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) [data-skin~="trophy"] > svg {
+    animation: tactile-trophy-press 380ms ease-out 440ms;
+}
+
+[data-style="tactile"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) [data-skin~="new-record"] {
+    animation: tactile-badge-drop 360ms cubic-bezier(0.3, 0.8, 0.4, 1) 660ms backwards;
+}
+
+[data-style="tactile"] [data-skin~="card"][data-skin~="celebration"][data-still] [data-skin~="trophy"]::before,
+[data-style="tactile"] [data-skin~="card"][data-skin~="celebration"][data-still] [data-skin~="trophy"] > svg {
+    transform: translateY(4px);
+}
+
+/* Reduced motion: no sinking, springing, popping, dropping or sliding; the overlay stays. The loader
+   holds four tiles in the tray; the group effect and the celebration never start without motion, so
+   they are only stopped. */
 @media (prefers-reduced-motion: reduce) {
     [data-style="tactile"] [data-press-motion],
     [data-style="tactile"] [data-press-motion][data-pressed],
@@ -145,5 +359,23 @@
 
     [data-style="tactile"] .segmented-indicator-motion {
         transition: none;
+    }
+
+    [data-style="tactile"] .tactile-loader-tile,
+    [data-style="tactile"] .tactile-loader-face,
+    [data-style="tactile"] [data-skin~="board"] [data-group]:not(.animate-hint-reveal-glow)::before,
+    [data-style="tactile"] [data-skin~="board"] [data-group]:not(.animate-hint-reveal-glow) > div,
+    [data-style="tactile"] [data-skin~="board"] [data-group]:not(.animate-hint-reveal-glow) > div.value-arrive,
+    [data-style="tactile"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"]) [data-variant],
+    [data-style="tactile"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"]) [data-variant]::after,
+    [data-style="tactile"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]),
+    [data-style="tactile"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) [data-skin~="trophy"]::before,
+    [data-style="tactile"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) [data-skin~="trophy"] > svg,
+    [data-style="tactile"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) [data-skin~="new-record"] {
+        animation: none;
+    }
+
+    [data-style="tactile"] .tactile-loader-cell:nth-child(n+5) .tactile-loader-tile {
+        opacity: 0;
     }
 }

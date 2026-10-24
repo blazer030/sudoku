@@ -41,9 +41,21 @@
     --pixel-burst-3: var(--color-foreground);
     --pixel-burst-4: var(--color-border);
     --pixel-burst-leave: var(--color-border);
-    /* A completed group's flash inverts the cell: the light green would be only 1.2:1 on the page */
+    /* A completed group's blink and the solved board's line clear invert the cell, as on the boards: the
+       light green would be only 1.2:1 on the page */
     --pixel-flash-fill: var(--color-foreground);
     --pixel-flash-ink: var(--color-background);
+    /* A completed group's sparks, in the ink (掌機) or the gold (紅白機) */
+    --pixel-spark: var(--color-primary);
+    /* The celebration's bursts and stars, and the console loader's squares: the two light greens over the
+       dimmed scene in 掌機 */
+    --pixel-fx-1: var(--color-background);
+    --pixel-fx-2: var(--color-highlight);
+    --pixel-fx-3: var(--color-background);
+    --pixel-fx-4: var(--color-highlight);
+    /* STAGE CLEAR: the light green over a mid-green shadow, or gold over the console's red */
+    --pixel-stage-clear-ink: var(--color-background);
+    --pixel-stage-clear-shadow: var(--color-border);
 }
 
 /* No soft shadows or glows: the shared shadow utilities draw in --tw-shadow-color, which does not
@@ -65,7 +77,15 @@
     --pixel-burst-3: var(--color-accent);
     --pixel-burst-4: var(--color-highlight);
     --pixel-burst-leave: var(--color-foreground-secondary);
-    /* The console's flash is its same-digit blue under the foreground ink */
+    /* The console's red, gold and two blues */
+    --pixel-fx-1: var(--color-error);
+    --pixel-fx-2: var(--color-primary);
+    --pixel-fx-3: var(--color-accent);
+    --pixel-fx-4: var(--color-highlight);
+    --pixel-stage-clear-ink: var(--color-primary);
+    --pixel-stage-clear-shadow: var(--color-error);
+    /* A completed group's blink and the line clear light the cell in the console blue under the text
+       ink: the inverted cell, the brightest ink on the darkest page, swung too much of the screen too hard */
     --pixel-flash-fill: var(--color-highlight);
     --pixel-flash-ink: var(--color-foreground);
 }
@@ -483,39 +503,306 @@
     }
 }
 
-/* A completed row, column or box flashes on and off rather than fading, each half in one jump: the
-   cell takes the flash's fill and ink at once (inverted in 掌機), solid like the glow. A hint's answer
-   keeps its glow, which is meant to win over the flash. */
-@keyframes pixel-completion-flash {
-    50% {
-        background-color: var(--pixel-flash-fill);
-        background-image: none;
-        color: var(--pixel-flash-ink);
-    }
-}
-
-/* Between flashes, and through a hint's glow, a cell's digits take the foreground ink, which reads on
-   the glow and every cell look under them (the entry blue reads only 2.61 on the console's flash blue).
-   A flashing cell's digit takes the cell's own colour, so it changes with the fill. The selected cell
-   is inverted, so neither is drawn behind its page-coloured digit: the cursor and the pop mark it. */
+/* Through a hint's glow a cell's digits take the foreground ink, which reads on the glow. The selected
+   cell is inverted, so the glow is not drawn behind its page-coloured digit: the cursor and the pop
+   mark it. */
 [data-style="pixel"] [data-skin~="board"] .animate-hint-reveal-glow:not([data-selected]) {
     --pixel-clue-ink: var(--color-foreground);
     --pixel-entry-ink: var(--color-foreground);
     animation: pixel-hint-glow 1000ms steps(2, jump-none);
 }
 
-[data-style="pixel"] [data-skin~="board"] .animate-completion-flash:not(.animate-hint-reveal-glow, [data-selected]) {
-    color: var(--color-foreground);
-    animation: pixel-completion-flash 500ms steps(2, jump-none);
-}
-
-[data-style="pixel"] [data-skin~="board"] .animate-completion-flash:not(.animate-hint-reveal-glow, [data-selected]) > div {
-    color: inherit;
-}
-
-[data-style="pixel"] [data-skin~="board"] .animate-completion-flash[data-selected],
 [data-style="pixel"] [data-skin~="board"] .animate-hint-reveal-glow[data-selected] {
     animation: none;
+}
+
+/* Moments, from the MomentsPixel and GroupPixel boards: the loader, a completed group and the solved
+   puzzle. Everything moves in steps, never eases; a row flashes at most twice (once in 紅白機's line
+   clear), and nothing blinks more than three times a second. */
+
+/* A completed row, column or box clears like a line in a block game: after a short beat each cell blinks
+   inverted twice in hard steps, outward from the entered cell at the shared step. Each round is lit for its
+   first half and has no 100% frame, so its second half is the cell's own look: its pattern, its selection
+   and its own ink. The digit's own pop and burst carry on, since the blink is on the cell. A hint's answer
+   keeps its glow. */
+@keyframes pixel-group-blink {
+    0%, 50% {
+        background-color: var(--pixel-flash-fill);
+        background-image: none;
+        color: var(--pixel-flash-ink);
+        --pixel-clue-ink: var(--pixel-flash-ink);
+        --pixel-entry-ink: var(--pixel-flash-ink);
+    }
+}
+
+[data-style="pixel"] [data-skin~="board"] [data-group]:not(.animate-hint-reveal-glow) {
+    animation: pixel-group-blink 180ms steps(1, jump-start) calc(100ms + var(--group-delay, 0ms)) 2;
+}
+
+/* Pixel sparks pop at the ends of a line or the corners of a box as its farthest cell blinks
+   (PixelGroupOverlay places them and says how far that cell is), four pixels flying out in three steps */
+@keyframes pixel-group-spark {
+    0% {
+        opacity: 1;
+        background-color: var(--pixel-spark);
+        box-shadow: 0 -5px 0 var(--pixel-spark), 5px 0 0 var(--pixel-spark), 0 5px 0 var(--pixel-spark), -5px 0 0 var(--pixel-spark);
+    }
+    50% {
+        opacity: 1;
+        background-color: transparent;
+        box-shadow: 0 -10px 0 var(--pixel-spark), 10px 0 0 var(--pixel-spark), 0 10px 0 var(--pixel-spark), -10px 0 0 var(--pixel-spark);
+    }
+    100% {
+        opacity: 1;
+        background-color: transparent;
+        box-shadow: 0 -14px 0 var(--pixel-spark), 14px 0 0 var(--pixel-spark), 0 14px 0 var(--pixel-spark), -14px 0 0 var(--pixel-spark);
+    }
+}
+
+[data-style="pixel"] .pixel-group-spark {
+    opacity: 0;
+    animation: pixel-group-spark 360ms steps(3, end) calc(100ms + var(--pixel-spark-reach) * var(--group-ripple-step, 60ms));
+}
+
+/* The solved board clears row by row from the top, 80ms apart, like a line clear: in 掌機 each row lit,
+   dimmed to the pattern shade, lit again, then back to its own look; two flashes a row. It runs on under the dialog,
+   which opens as the last rows clear. */
+@keyframes pixel-row-clear {
+    0% {
+        background-color: var(--pixel-flash-fill);
+        background-image: none;
+        color: var(--pixel-flash-ink);
+        --pixel-clue-ink: var(--pixel-flash-ink);
+        --pixel-entry-ink: var(--pixel-flash-ink);
+    }
+    33.33% {
+        background-color: var(--pixel-pattern-shade);
+        background-image: none;
+        color: var(--color-foreground);
+        --pixel-clue-ink: var(--color-foreground);
+        --pixel-entry-ink: var(--color-foreground);
+    }
+    66.67%, 100% {
+        background-color: var(--pixel-flash-fill);
+        background-image: none;
+        color: var(--pixel-flash-ink);
+        --pixel-clue-ink: var(--pixel-flash-ink);
+        --pixel-entry-ink: var(--pixel-flash-ink);
+    }
+}
+
+[data-style="pixel"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"]) [data-variant] {
+    animation: pixel-row-clear 300ms steps(1, end) calc(var(--cell-row) * 80ms);
+}
+
+/* 紅白機 rows light once each, for the first half of their turn, then show their own look: at 80ms apart,
+   two flashes a row swung any band of rows several times a second */
+@keyframes pixel-row-clear-once {
+    0%, 50% {
+        background-color: var(--pixel-flash-fill);
+        background-image: none;
+        color: var(--pixel-flash-ink);
+        --pixel-clue-ink: var(--pixel-flash-ink);
+        --pixel-entry-ink: var(--pixel-flash-ink);
+    }
+}
+
+:root.dark[data-style="pixel"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"]) [data-variant] {
+    animation: pixel-row-clear-once 300ms steps(1, jump-start) calc(var(--cell-row) * 80ms);
+}
+
+/* The dialog: the window opens from its middle in four steps, framed with its hard shadow, and once open
+   the trophy (solid, like a sprite) and the new-record tag blink once a second. A still card (data-still)
+   only fades in, like every style's. Board timings minus the 800ms the dialog waits. */
+@keyframes pixel-card-open {
+    0% { transform: scaleY(0); }
+    100% { transform: scaleY(1); }
+}
+
+[data-style="pixel"] [data-skin~="card"][data-skin~="celebration"] {
+    box-shadow:
+        0 -4px 0 0 var(--pixel-ink),
+        0 4px 0 0 var(--pixel-ink),
+        -4px 0 0 0 var(--pixel-ink),
+        4px 0 0 0 var(--pixel-ink),
+        8px 8px 0 0 var(--pixel-drop);
+}
+
+[data-style="pixel"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) {
+    animation: pixel-card-open 280ms steps(4, end) 200ms backwards;
+}
+
+[data-style="pixel"] [data-skin~="card"][data-skin~="celebration"] [data-skin~="trophy"] {
+    background-color: var(--color-primary);
+}
+
+[data-style="pixel"] [data-skin~="card"][data-skin~="celebration"] [data-skin~="trophy"] > svg {
+    color: var(--color-on-primary);
+}
+
+/* The difficulty is a square tag framed in the ink, beside the solid new-record tag */
+[data-style="pixel"] [data-skin~="card"][data-skin~="celebration"] [data-skin~="tag"]:not([data-skin~="new-record"]) {
+    background-color: transparent;
+    color: var(--color-foreground);
+    box-shadow: inset 0 0 0 2px var(--color-foreground);
+}
+
+[data-style="pixel"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) [data-skin~="trophy"],
+[data-style="pixel"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) [data-skin~="new-record"] {
+    animation: pixel-blink 1000ms steps(2, jump-none) 600ms infinite;
+}
+
+/* Over the scene (PixelCelebration): STAGE CLEAR drops in a letter at a time, each falling in four steps;
+   the stars come out and twinkle twice a second; and pixel bursts pop round the dialog, each once every
+   1.6s. Still, STAGE CLEAR and the stars are simply there. */
+[data-style="pixel"][data-pixel-fonts="ready"] :is(.pixel-stage-clear, .pixel-loader-now) {
+    font-family: var(--font-pixel-digits);
+}
+
+[data-style="pixel"] .pixel-stage-clear {
+    color: var(--pixel-stage-clear-ink);
+    text-shadow: 3px 3px 0 var(--pixel-stage-clear-shadow);
+}
+
+@keyframes pixel-stage-drop {
+    0% { opacity: 0; transform: translateY(-40px); }
+    1% { opacity: 1; transform: translateY(-40px); animation-timing-function: steps(4, end); }
+    100% { opacity: 1; transform: none; }
+}
+
+[data-style="pixel"] .pixel-celebration:not([data-still]) .pixel-stage-letter {
+    animation: pixel-stage-drop 320ms steps(1, end) calc(100ms + var(--pixel-letter-step) * 70ms) both;
+}
+
+[data-style="pixel"] .pixel-celebration-stars {
+    background-image:
+        radial-gradient(var(--pixel-fx-2) 2px, transparent 2.4px),
+        radial-gradient(var(--pixel-fx-3) 2px, transparent 2.4px),
+        radial-gradient(var(--pixel-fx-1) 2px, transparent 2.4px),
+        radial-gradient(var(--pixel-fx-4) 2px, transparent 2.4px);
+    background-size: 83px 71px, 131px 97px, 107px 119px, 149px 89px;
+    background-position: 11px 19px, 47px 61px, 73px 7px, 23px 43px;
+}
+
+/* On for the first half, then the hidden base for the second, and hidden until they come out */
+@keyframes pixel-celebration-twinkle {
+    0% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+[data-style="pixel"] .pixel-celebration:not([data-still]) .pixel-celebration-stars {
+    opacity: 0;
+    animation: pixel-celebration-twinkle 500ms steps(1, end) 100ms infinite;
+}
+
+@keyframes pixel-celebration-burst {
+    0% {
+        opacity: 1;
+        box-shadow:
+            0 -6px 0 0 var(--pixel-fx-1), 6px 0 0 0 var(--pixel-fx-2), 0 6px 0 0 var(--pixel-fx-3), -6px 0 0 0 var(--pixel-fx-4),
+            4px -4px 0 0 var(--pixel-fx-1), 4px 4px 0 0 var(--pixel-fx-2), -4px 4px 0 0 var(--pixel-fx-3), -4px -4px 0 0 var(--pixel-fx-4);
+    }
+    12% {
+        opacity: 1;
+        box-shadow:
+            0 -16px 0 0 var(--pixel-fx-1), 16px 0 0 0 var(--pixel-fx-2), 0 16px 0 0 var(--pixel-fx-3), -16px 0 0 0 var(--pixel-fx-4),
+            11px -11px 0 0 var(--pixel-fx-1), 11px 11px 0 0 var(--pixel-fx-2), -11px 11px 0 0 var(--pixel-fx-3), -11px -11px 0 0 var(--pixel-fx-4);
+    }
+    24% {
+        opacity: 1;
+        box-shadow:
+            0 -26px 0 0 var(--pixel-fx-1), 26px 0 0 0 var(--pixel-fx-2), 0 26px 0 0 var(--pixel-fx-3), -26px 0 0 0 var(--pixel-fx-4),
+            18px -18px 0 0 var(--pixel-fx-1), 18px 18px 0 0 var(--pixel-fx-2), -18px 18px 0 0 var(--pixel-fx-3), -18px -18px 0 0 var(--pixel-fx-4);
+    }
+    36% {
+        opacity: 1;
+        box-shadow:
+            0 -34px 0 0 var(--pixel-fx-1), 34px 0 0 0 var(--pixel-fx-2), 0 34px 0 0 var(--pixel-fx-3), -34px 0 0 0 var(--pixel-fx-4),
+            24px -24px 0 0 var(--pixel-fx-1), 24px 24px 0 0 var(--pixel-fx-2), -24px 24px 0 0 var(--pixel-fx-3), -24px -24px 0 0 var(--pixel-fx-4);
+    }
+    48%, 100% { opacity: 0; }
+}
+
+[data-style="pixel"] .pixel-burst {
+    opacity: 0;
+}
+
+[data-style="pixel"] .pixel-celebration:not([data-still]) .pixel-burst {
+    animation: pixel-celebration-burst 1600ms steps(1, end) var(--pixel-burst-delay) infinite;
+}
+
+/* Loading: an RPG text window with its hard shadow. The mark's squares light one at a time like a snake
+   (PixelLoader gives each its step), NOW LOADING counts its dots, a cursor blinks before the caption and
+   the bar fills a block at a time. In 紅白機 the squares light in the console's four colours in turn. */
+[data-style="pixel"] .pixel-loader {
+    --pixel-loader-lit: var(--color-foreground);
+    --pixel-loader-unlit: var(--pixel-pattern-shade);
+    box-shadow:
+        0 -4px 0 0 var(--pixel-ink),
+        0 4px 0 0 var(--pixel-ink),
+        -4px 0 0 0 var(--pixel-ink),
+        4px 0 0 0 var(--pixel-ink),
+        8px 8px 0 0 var(--pixel-drop);
+}
+
+[data-style="pixel"] .pixel-loader-mark {
+    box-shadow:
+        0 -4px 0 0 var(--pixel-ink),
+        0 4px 0 0 var(--pixel-ink),
+        -4px 0 0 0 var(--pixel-ink),
+        4px 0 0 0 var(--pixel-ink);
+}
+
+:root.dark[data-style="pixel"] .pixel-loader-square:nth-child(4n + 1) { --pixel-loader-lit: var(--pixel-fx-1); }
+:root.dark[data-style="pixel"] .pixel-loader-square:nth-child(4n + 2) { --pixel-loader-lit: var(--pixel-fx-2); }
+:root.dark[data-style="pixel"] .pixel-loader-square:nth-child(4n + 3) { --pixel-loader-lit: var(--pixel-fx-3); }
+:root.dark[data-style="pixel"] .pixel-loader-square:nth-child(4n) { --pixel-loader-lit: var(--pixel-fx-4); }
+
+@keyframes pixel-loader-hop {
+    0% { background-color: var(--pixel-loader-lit); }
+    22.2%, 100% { background-color: var(--pixel-loader-unlit); }
+}
+
+[data-style="pixel"] .pixel-loader-square {
+    background-color: var(--pixel-loader-unlit);
+    animation: pixel-loader-hop 1800ms steps(1, end) calc(var(--pixel-loader-step) * 200ms) infinite;
+}
+
+[data-style="pixel"] .pixel-loader-now {
+    color: var(--color-primary);
+}
+
+/* No dot, one, two, then all three: the clip runs a third past the dots so the last step shows them all */
+@keyframes pixel-loader-dots {
+    0% { clip-path: inset(0 100% 0 0); }
+    100% { clip-path: inset(0 -34% 0 0); }
+}
+
+[data-style="pixel"] .pixel-loader-dots {
+    clip-path: inset(0 100% 0 0);
+    animation: pixel-loader-dots 1600ms steps(4, end) infinite;
+}
+
+[data-style="pixel"] .pixel-loader-cursor {
+    background-color: currentColor;
+    clip-path: polygon(0 0, 100% 50%, 0 100%);
+    animation: pixel-blink 1000ms steps(2, jump-none) infinite;
+}
+
+[data-style="pixel"] .pixel-loader-bar {
+    box-shadow: inset 0 0 0 2px var(--pixel-ink);
+}
+
+/* Eleven steps of a block, the last a tenth past the end so the tenth step fills it; it holds full a beat */
+@keyframes pixel-loader-fill {
+    0% { clip-path: inset(0 100% 0 0); }
+    86%, 100% { clip-path: inset(0 -10% 0 0); }
+}
+
+[data-style="pixel"] .pixel-loader-bar-fill {
+    background-image: repeating-linear-gradient(90deg, var(--color-primary) 0 8px, transparent 8px 10px);
+    clip-path: inset(0 100% 0 0);
+    animation: pixel-loader-fill 2200ms steps(11, end) infinite;
 }
 
 /* Keys, buttons and tiles: square, a notched 2px frame and a hard 4px shadow. Colour changes snap;
@@ -737,8 +1024,10 @@
 /* Reduced motion: no dropping, jumping, blinking, sliding, popping or bursting. A pressed piece stays
    where it is but still loses its drop shadow, a change of look rather than a movement, and the press
    overlay stays; hint mode keeps its doubled frame and the selection its cursor, held still, an
-   error's digit stays lit over its hatch, and a hint's answer and a completed group show their colour
-   still instead of flashing. */
+   error's digit stays lit over its hatch, and a hint's answer shows its colour still instead of
+   flashing. The loader holds a still mark, its dots and a part-filled bar; the group effect and the
+   celebration never start without motion, so they are only stopped, and a completed group shows
+   nothing. */
 @media (prefers-reduced-motion: reduce) {
     [data-style="pixel"] .segmented-indicator-motion {
         transition: none;
@@ -767,13 +1056,33 @@
         animation: none;
     }
 
-    /* A completed group shows the flash's lit look, still, for as long as each cell is marked flashing
-       (other styles keep the colour flash itself) */
-    [data-style="pixel"] [data-skin~="board"] .animate-completion-flash:not(.animate-hint-reveal-glow, [data-selected]) {
+    [data-style="pixel"] [data-skin~="board"] [data-group]:not(.animate-hint-reveal-glow),
+    [data-style="pixel"] .pixel-group-spark,
+    [data-style="pixel"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"]) [data-variant],
+    :root.dark[data-style="pixel"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"]) [data-variant],
+    [data-style="pixel"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]),
+    [data-style="pixel"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) [data-skin~="trophy"],
+    [data-style="pixel"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) [data-skin~="new-record"],
+    [data-style="pixel"] .pixel-celebration:not([data-still]) .pixel-stage-letter,
+    [data-style="pixel"] .pixel-celebration:not([data-still]) .pixel-celebration-stars,
+    [data-style="pixel"] .pixel-celebration:not([data-still]) .pixel-burst,
+    [data-style="pixel"] .pixel-loader-square,
+    [data-style="pixel"] .pixel-loader-cursor {
         animation: none;
-        background-color: var(--pixel-flash-fill);
-        background-image: none;
-        color: var(--pixel-flash-ink);
+    }
+
+    [data-style="pixel"] .pixel-loader-square:nth-child(odd) {
+        background-color: var(--pixel-loader-lit);
+    }
+
+    [data-style="pixel"] .pixel-loader-dots {
+        animation: none;
+        clip-path: none;
+    }
+
+    [data-style="pixel"] .pixel-loader-bar-fill {
+        animation: none;
+        clip-path: inset(0 40% 0 0);
     }
 
     /* A hint's answer shows the glow's colours, still, for as long as it is marked revealed */

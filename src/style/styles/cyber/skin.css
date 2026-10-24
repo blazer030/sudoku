@@ -428,8 +428,9 @@
 
 /* The grid inside is cut 8px at the same two corners, so it follows the frame (the cut stays small enough
    for a corner cell's brackets to clear it). The clip would take the magenta outer line with it, so each
-   cut edge is redrawn as a 3px diagonal band of that colour, from a 12px square at the corner that starts
-   at the border's outer edge (the 8px cut is a third of the square's 24px diagonal, the 3px band 51%). */
+   cut edge is redrawn as a 3px diagonal band of that colour, in a 12px square at the corner that starts
+   at the border's outer edge (the 8px cut is a third of the square's 24px diagonal, the 3px band 51%).
+   Both bands are layers of the grid's ::before, so its ::after stays free. */
 [data-style="cyber"] [data-skin~="board"] > div {
     border-color: var(--board-box-line);
     border-radius: 0;
@@ -437,26 +438,15 @@
     clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
 }
 
-[data-style="cyber"] [data-skin~="board"] > div::before,
-[data-style="cyber"] [data-skin~="board"] > div::after {
+[data-style="cyber"] [data-skin~="board"] > div::before {
     content: "";
     position: absolute;
+    inset: -3px;
     z-index: 1;
-    width: 12px;
-    height: 12px;
     pointer-events: none;
-}
-
-[data-style="cyber"] [data-skin~="board"] > div::before {
-    top: -3px;
-    left: -3px;
-    background: linear-gradient(135deg, transparent 33.33%, var(--board-box-line) 0 51%, transparent 0);
-}
-
-[data-style="cyber"] [data-skin~="board"] > div::after {
-    right: -3px;
-    bottom: -3px;
-    background: linear-gradient(315deg, transparent 33.33%, var(--board-box-line) 0 51%, transparent 0);
+    background:
+        linear-gradient(135deg, transparent 33.33%, var(--board-box-line) 0 51%, transparent 0) top left / 12px 12px no-repeat,
+        linear-gradient(315deg, transparent 33.33%, var(--board-box-line) 0 51%, transparent 0) bottom right / 12px 12px no-repeat;
 }
 
 /* The HUD tags: GRID 9×9 at the top left and the selected cell's name at the bottom right, on the page
@@ -601,46 +591,360 @@
     100% { opacity: 0; transform: translateY(0); }
 }
 
-/* Completing the puzzle: the card gets a slowly turning dashed HUD ring behind its content and the
-   system's 「// MISSION COMPLETE」 above it, glitching like the title. The card is clipped to its cut
-   corners, so the ring sits inside the card (300px across, under the card's padding and content) rather
-   than hanging out as the canvas's does. Decoration, so screen readers skip the text. */
-[data-style="cyber"] [data-skin~="celebration"]::before {
-    content: "";
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    width: 300px;
-    height: 300px;
-    margin: -150px 0 0 -150px;
-    z-index: -1;
-    pointer-events: none;
-    border: 1px dashed color-mix(in srgb, var(--color-accent) 35%, transparent);
-    border-radius: 50%;
-    box-shadow: inset 0 0 60px color-mix(in srgb, var(--color-primary) 20%, transparent);
-    animation: cyber-spin 18s linear infinite;
-}
-
 @keyframes cyber-spin {
     to { transform: rotate(360deg); }
 }
 
-[data-style="cyber"] [data-skin~="celebration"]::after {
-    content: "// MISSION COMPLETE";
-    content: "// MISSION COMPLETE" / "";
+/* Moments, from the MomentsCyber and GroupCyber boards: the loader, a completed group and the solved
+   puzzle. Glitches hold their frames; beams, rings and brackets move by transform and opacity. The glows
+   (box-shadows, text-shadows and a few drop-shadows) and the card's clip-path opening are the costly part
+   on a low-end phone. */
+
+/* A completed row, column or box: each cell lights cyan as the ripple reaches it, 42ms a step as on the
+   board. The light is the cell's own background, so the entered digit keeps its glitch; a hint's answer
+   keeps its glow. CyberGroupOverlay draws the beams, the box's outline and the tags. */
+@keyframes cyber-group-hit {
+    0% { background-color: color-mix(in srgb, var(--color-accent) 26%, var(--color-card)); }
+}
+
+[data-style="cyber"] [data-skin~="board"] [data-group]:not(.animate-hint-reveal-glow) {
+    --group-ripple-step: 42ms;
+    animation: cyber-group-hit 480ms ease-out calc(100ms + var(--group-delay, 0ms));
+}
+
+/* Two scan beams shoot from the entered cell to both ends of a row (or up and down a column): each spans
+   from the cell's centre to its end, its line on the cell's side, and slides its own length outward */
+[data-style="cyber"] .cyber-group-row {
+    --cyber-beam-x: 1;
+    --cyber-beam-y: 0;
+}
+
+[data-style="cyber"] .cyber-group-column {
+    --cyber-beam-x: 0;
+    --cyber-beam-y: 1;
+}
+
+[data-style="cyber"] .cyber-group-beam {
+    opacity: 0;
+}
+
+[data-style="cyber"] .cyber-group-beam-line {
+    background-color: var(--color-accent);
+    box-shadow: 0 0 10px var(--color-accent), 0 0 2px var(--color-foreground);
+}
+
+@keyframes cyber-group-beam-forward {
+    0% { opacity: 1; transform: none; }
+    85% { opacity: 1; }
+    100% { opacity: 0; transform: translate(calc(var(--cyber-beam-x) * 100%), calc(var(--cyber-beam-y) * 100%)); }
+}
+
+@keyframes cyber-group-beam-back {
+    0% { opacity: 1; transform: none; }
+    85% { opacity: 1; }
+    100% { opacity: 0; transform: translate(calc(var(--cyber-beam-x) * -100%), calc(var(--cyber-beam-y) * -100%)); }
+}
+
+[data-style="cyber"] .cyber-group-beam-forward {
+    animation: cyber-group-beam-forward 380ms linear 100ms;
+}
+
+[data-style="cyber"] .cyber-group-beam-back {
+    animation: cyber-group-beam-back 380ms linear 100ms;
+}
+
+/* A box: a cyan outline with yellow corners steps out from the entered cell to the whole box in eight
+   held frames, holds, then goes */
+@keyframes cyber-group-box {
+    0% { opacity: 1; transform: scale(0.3333); }
+    40% { opacity: 1; transform: none; }
+    80% { opacity: 1; transform: none; }
+    100% { opacity: 0; transform: none; }
+}
+
+[data-style="cyber"] .cyber-group-frame {
+    opacity: 0;
+    border-color: var(--color-accent);
+    box-shadow:
+        0 0 10px color-mix(in srgb, var(--color-accent) 45%, transparent),
+        inset 0 0 10px color-mix(in srgb, var(--color-accent) 20%, transparent);
+    background:
+        linear-gradient(var(--color-signal), var(--color-signal)) top left / 8px 2px no-repeat,
+        linear-gradient(var(--color-signal), var(--color-signal)) top left / 2px 8px no-repeat,
+        linear-gradient(var(--color-signal), var(--color-signal)) bottom right / 8px 2px no-repeat,
+        linear-gradient(var(--color-signal), var(--color-signal)) bottom right / 2px 8px no-repeat;
+    animation: cyber-group-box 760ms steps(8, end) 100ms;
+}
+
+/* Each group's tag (ROW 5 OK, COL 5 OK, BOX 5 OK) sits on its line for a moment, in the mono face on the
+   page colour: cyan for a line, yellow for a box */
+@keyframes cyber-group-tag {
+    0%, 100% { opacity: 1; }
+}
+
+[data-style="cyber"] .cyber-group-tag {
+    opacity: 0;
+    background-color: var(--color-background);
+    color: var(--color-accent);
+    font-family: var(--cyber-mono);
+    animation: cyber-group-tag 760ms steps(1, end) 220ms;
+}
+
+[data-style="cyber"] .cyber-group-tag.cyber-group-tag-box {
+    color: var(--color-signal);
+}
+
+/* The solved board: a cyan scan beam runs down the grid (its ::after, a grid-tall layer with the beam at
+   its top, slid by its own height) and each row lights as the beam reaches it. It runs on under the
+   dialog, which opens as the scrim comes in. */
+@keyframes cyber-row-light {
+    0% { background-color: color-mix(in srgb, var(--color-accent) 26%, var(--color-card)); }
+}
+
+[data-style="cyber"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"]) [data-variant] {
+    animation: cyber-row-light 520ms ease-out calc(var(--cell-row) * 84ms);
+}
+
+@keyframes cyber-board-scan {
+    0% { opacity: 1; transform: none; }
+    92% { opacity: 1; }
+    100% { opacity: 0; transform: translateY(100%); }
+}
+
+[data-style="cyber"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"]) > div::after {
+    content: "";
     position: absolute;
     left: 0;
     right: 0;
-    top: 10px;
-    text-align: center;
+    top: -12px;
+    height: 100%;
+    z-index: 4;
     pointer-events: none;
+    opacity: 0;
+    background: linear-gradient(transparent, color-mix(in srgb, var(--color-accent) 30%, transparent) 8px, var(--color-accent) 11px, var(--color-foreground) 12px, var(--color-accent) 13px, color-mix(in srgb, var(--color-accent) 30%, transparent) 16px, transparent) top / 100% 24px no-repeat;
+    animation: cyber-board-scan 760ms linear;
+}
+
+/* Four yellow brackets lock onto the board, closing in over its frame in three held frames, and stay while
+   the game is solved (still too). They sit 3px inside the frame, where the board's clip lets the closing
+   frames show; the top left and bottom right follow the frame's cut corners (its 16px cut is 10px from the
+   layer's corner, so the 2px band lies from 50% to 64% of a 10px square). They take the board's ::after,
+   so the selected cell's tag gives way to them. */
+[data-style="cyber"] [data-skin~="board"][data-celebration]::after {
+    content: "";
+    position: absolute;
+    inset: 3px;
+    padding: 0;
+    z-index: 2;
+    pointer-events: none;
+    background:
+        linear-gradient(135deg, transparent 50%, var(--color-signal) 0 64%, transparent 0) top left / 10px 10px no-repeat,
+        linear-gradient(var(--color-signal), var(--color-signal)) top left / 40px 2px no-repeat,
+        linear-gradient(var(--color-signal), var(--color-signal)) top left / 2px 40px no-repeat,
+        linear-gradient(var(--color-signal), var(--color-signal)) top right / 24px 2px no-repeat,
+        linear-gradient(var(--color-signal), var(--color-signal)) top right / 2px 24px no-repeat,
+        linear-gradient(var(--color-signal), var(--color-signal)) bottom left / 24px 2px no-repeat,
+        linear-gradient(var(--color-signal), var(--color-signal)) bottom left / 2px 24px no-repeat,
+        linear-gradient(315deg, transparent 50%, var(--color-signal) 0 64%, transparent 0) bottom right / 10px 10px no-repeat,
+        linear-gradient(var(--color-signal), var(--color-signal)) bottom right / 40px 2px no-repeat,
+        linear-gradient(var(--color-signal), var(--color-signal)) bottom right / 2px 40px no-repeat;
+    filter: drop-shadow(0 0 4px color-mix(in srgb, var(--color-signal) 70%, transparent));
+}
+
+@keyframes cyber-bracket-lock {
+    0% { opacity: 0; transform: scale(1.06); }
+    100% { opacity: 1; transform: none; }
+}
+
+[data-style="cyber"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"])::after {
+    animation: cyber-bracket-lock 300ms steps(3, end) 680ms backwards;
+}
+
+/* The dialog powers on like a CRT: a line across its middle opens to the whole card, which flickers twice;
+   the title then glitches in and keeps its magenta/cyan split. A still card (data-still) only fades in,
+   like every style's, with its title split. The trophy is yellow on a deep yellow wash with cut corners.
+   Board timings minus the 860ms the dialog waits. */
+@keyframes cyber-crt-open {
+    0% {
+        clip-path: polygon(var(--cyber-cut) 50%, 100% 50%, 100% 50%, calc(100% - var(--cyber-cut)) 50%, 0 50%, 0 50%);
+        opacity: 1;
+    }
+    40% {
+        clip-path: polygon(var(--cyber-cut) 49.6%, 100% 49.6%, 100% 50.4%, calc(100% - var(--cyber-cut)) 50.4%, 0 50.4%, 0 49.6%);
+    }
+    70% {
+        clip-path: polygon(var(--cyber-cut) 0, 100% 0, 100% calc(100% - var(--cyber-cut)), calc(100% - var(--cyber-cut)) 100%, 0 100%, 0 var(--cyber-cut));
+        opacity: 0.55;
+    }
+    80% { opacity: 1; }
+    90% { opacity: 0.7; }
+    100% {
+        clip-path: polygon(var(--cyber-cut) 0, 100% 0, 100% calc(100% - var(--cyber-cut)), calc(100% - var(--cyber-cut)) 100%, 0 100%, 0 var(--cyber-cut));
+        opacity: 1;
+    }
+}
+
+[data-style="cyber"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) {
+    animation: cyber-crt-open 440ms linear 140ms backwards;
+}
+
+[data-style="cyber"] [data-skin~="card"][data-skin~="celebration"] [data-skin~="complete-title"] {
+    font-weight: 900;
+    text-shadow: 2px 0 var(--color-primary), -2px 0 var(--color-accent);
+}
+
+[data-style="cyber"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) [data-skin~="complete-title"] {
+    animation: cyber-glitch 520ms steps(1, end) 560ms backwards;
+}
+
+[data-style="cyber"] [data-skin~="card"][data-skin~="celebration"] [data-skin~="trophy"] {
+    border-radius: 0;
+    clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+    background-color: color-mix(in srgb, var(--color-signal) 12%, transparent);
+}
+
+[data-style="cyber"] [data-skin~="card"][data-skin~="celebration"] [data-skin~="trophy"] > svg {
+    color: var(--color-signal);
+    filter: drop-shadow(0 0 6px color-mix(in srgb, var(--color-signal) 45%, transparent));
+}
+
+/* The time reads in the pink ink, glowing */
+[data-style="cyber"] [data-skin~="card"][data-skin~="celebration"] .text-primary {
+    color: var(--color-primary-ink);
+    text-shadow: 0 0 10px color-mix(in srgb, var(--color-primary) 50%, transparent);
+}
+
+/* Over the scene (CyberCelebration), behind the dialog: faint scanlines on the scrim, a dashed HUD ring
+   that turns in and keeps turning, and 「// MISSION COMPLETE」 glitching in above, then again every 2.6s.
+   Still, the ring and the text sit in place. */
+[data-style="cyber"] .cyber-celebration {
+    background-image: repeating-linear-gradient(180deg, color-mix(in srgb, var(--color-accent) 5%, transparent) 0 1px, transparent 1px 3px);
+}
+
+[data-style="cyber"] .cyber-celebration-ring {
+    border-color: color-mix(in srgb, var(--color-accent) 35%, transparent);
+    box-shadow:
+        0 0 0 40px color-mix(in srgb, var(--color-primary) 4%, transparent),
+        inset 0 0 60px color-mix(in srgb, var(--color-primary) 20%, transparent);
+}
+
+@keyframes cyber-ring-in {
+    0% { opacity: 0; transform: scale(0.5) rotate(-90deg); }
+    100% { opacity: 1; transform: none; }
+}
+
+[data-style="cyber"] .cyber-celebration:not([data-still]) .cyber-celebration-ring-in {
+    animation: cyber-ring-in 640ms cubic-bezier(0.2, 0.8, 0.2, 1) 40ms backwards;
+}
+
+[data-style="cyber"] .cyber-celebration:not([data-still]) .cyber-celebration-ring {
+    animation: cyber-spin 18s linear infinite;
+}
+
+[data-style="cyber"] .cyber-mission {
     font-family: var(--cyber-mono);
-    font-size: 12px;
-    line-height: 1;
-    letter-spacing: 0.3em;
     color: var(--color-signal);
     text-shadow: 0 0 12px color-mix(in srgb, var(--color-signal) 70%, transparent);
-    animation: cyber-title-glitch 2.6s steps(1, end) infinite;
+}
+
+[data-style="cyber"] .cyber-celebration:not([data-still]) .cyber-mission {
+    animation: cyber-glitch 520ms steps(1, end) 80ms backwards, cyber-title-glitch 2.6s steps(1, end) 740ms infinite;
+}
+
+/* Loading: a HUD panel (CyberLoader, painted as a card). Two rings counter-rotate round a 3×3 whose
+   squares light magenta at their own beats, the generator's log types itself a line at a time (by clip,
+   one character a step) and the bar runs up, jumps back once and runs on. */
+[data-style="cyber"] .cyber-loader-head {
+    font-family: var(--cyber-mono);
+    color: var(--color-accent);
+}
+
+[data-style="cyber"] .cyber-loader-grid {
+    color: var(--color-primary-ink);
+}
+
+[data-style="cyber"] .cyber-loader-orbit {
+    border-color: color-mix(in srgb, var(--color-accent) 60%, transparent);
+    animation: cyber-spin 6s linear infinite;
+}
+
+[data-style="cyber"] .cyber-loader-arc {
+    border-color: var(--color-primary) transparent;
+    filter: drop-shadow(0 0 6px var(--color-primary));
+    animation: cyber-spin 1.4s linear infinite reverse;
+}
+
+@keyframes cyber-loader-lit {
+    0% { background-color: var(--color-primary); border-color: var(--color-primary); box-shadow: 0 0 6px var(--color-primary); }
+    20%, 100% { background-color: transparent; border-color: var(--color-border); box-shadow: none; }
+}
+
+[data-style="cyber"] .cyber-loader-square {
+    border-color: var(--color-border);
+    animation: cyber-loader-lit 1.5s steps(1, end) var(--cyber-loader-delay) infinite;
+}
+
+[data-style="cyber"] .cyber-loader-log {
+    font-family: var(--cyber-mono);
+    color: var(--color-foreground-secondary);
+}
+
+[data-style="cyber"] .cyber-loader-ok {
+    color: var(--color-signal);
+}
+
+[data-style="cyber"] .cyber-loader-line {
+    clip-path: inset(0 100% 0 0);
+}
+
+@keyframes cyber-loader-type-1 {
+    0% { clip-path: inset(0 100% 0 0); animation-timing-function: steps(15, end); }
+    18%, 94% { clip-path: inset(0); }
+    95%, 100% { clip-path: inset(0 100% 0 0); }
+}
+
+@keyframes cyber-loader-type-2 {
+    0%, 24% { clip-path: inset(0 100% 0 0); animation-timing-function: steps(19, end); }
+    46%, 94% { clip-path: inset(0); }
+    95%, 100% { clip-path: inset(0 100% 0 0); }
+}
+
+@keyframes cyber-loader-type-3 {
+    0%, 52% { clip-path: inset(0 100% 0 0); animation-timing-function: steps(21, end); }
+    74%, 94% { clip-path: inset(0); }
+    95%, 100% { clip-path: inset(0 100% 0 0); }
+}
+
+[data-style="cyber"] .cyber-loader-line:nth-child(1) {
+    animation: cyber-loader-type-1 3.4s linear infinite;
+}
+
+[data-style="cyber"] .cyber-loader-line:nth-child(2) {
+    animation: cyber-loader-type-2 3.4s linear infinite;
+}
+
+[data-style="cyber"] .cyber-loader-line:nth-child(3) {
+    animation: cyber-loader-type-3 3.4s linear infinite;
+}
+
+[data-style="cyber"] .cyber-loader-progress {
+    background-color: color-mix(in srgb, var(--color-accent) 15%, transparent);
+}
+
+@keyframes cyber-loader-progress {
+    0% { transform: translateX(0) scaleX(0); }
+    30% { transform: translateX(0) scaleX(0.34); }
+    31% { transform: translateX(8px) scaleX(0.22); }
+    33% { transform: translateX(0) scaleX(0.42); }
+    70% { transform: translateX(0) scaleX(0.76); }
+    86%, 100% { transform: translateX(0) scaleX(1); }
+}
+
+[data-style="cyber"] .cyber-loader-fill {
+    background-image: linear-gradient(90deg, var(--color-accent), var(--color-primary));
+    box-shadow: 0 0 10px var(--color-primary);
+    transform: scaleX(0);
+    animation: cyber-loader-progress 3.4s linear infinite;
 }
 
 /* Hint mode: the answer cell is a yellow wash inside a yellow inset outline (the shared ring is the
@@ -737,9 +1041,42 @@
     [data-style="cyber"] [data-skin~="title"],
     [data-style="cyber"] [data-skin~="board"] .value-arrive,
     [data-style="cyber"] [data-skin~="board"] [data-variant].value-leave::before,
-    [data-style="cyber"] [data-skin~="celebration"]::before,
-    [data-style="cyber"] [data-skin~="celebration"]::after {
+    [data-style="cyber"] [data-skin~="board"] [data-group]:not(.animate-hint-reveal-glow),
+    [data-style="cyber"] .cyber-group-beam-forward,
+    [data-style="cyber"] .cyber-group-beam-back,
+    [data-style="cyber"] .cyber-group-frame,
+    [data-style="cyber"] .cyber-group-tag,
+    [data-style="cyber"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"]) [data-variant],
+    [data-style="cyber"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"]) > div::after,
+    [data-style="cyber"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"])::after,
+    [data-style="cyber"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]),
+    [data-style="cyber"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) [data-skin~="complete-title"],
+    [data-style="cyber"] .cyber-celebration:not([data-still]) .cyber-celebration-ring-in,
+    [data-style="cyber"] .cyber-celebration:not([data-still]) .cyber-celebration-ring,
+    [data-style="cyber"] .cyber-celebration:not([data-still]) .cyber-mission,
+    [data-style="cyber"] .cyber-loader-orbit,
+    [data-style="cyber"] .cyber-loader-arc,
+    [data-style="cyber"] .cyber-loader-square,
+    [data-style="cyber"] .cyber-loader-fill {
         animation: none;
+    }
+
+    /* The loader holds still: its rings stand, the odd squares are lit, the log is written out and the
+       bar is part-filled */
+    [data-style="cyber"] .cyber-loader-square:nth-child(odd) {
+        background-color: var(--color-primary);
+        border-color: var(--color-primary);
+    }
+
+    [data-style="cyber"] .cyber-loader-line:nth-child(1),
+    [data-style="cyber"] .cyber-loader-line:nth-child(2),
+    [data-style="cyber"] .cyber-loader-line:nth-child(3) {
+        animation: none;
+        clip-path: none;
+    }
+
+    [data-style="cyber"] .cyber-loader-fill {
+        transform: scaleX(0.64);
     }
 
     /* Its own rule, so a WebView without :has() still reads the list above */

@@ -274,6 +274,69 @@
     animation: paper-check-draw 300ms ease-out;
 }
 
+/* A digit entered is written in by hand, stroke by stroke: PaperDigitWriter draws its strokes, in writing
+   order with short pen lifts, into the mask the digit is shown through, then settles the whole mask in to
+   fill the specks, so the last frame is the digit itself. Its timing is the digit's own, set on each
+   stroke. The strokes follow Caveat's digits, so the mask applies only once Caveat has loaded. It is not
+   an animation on the digit, so the digit that completes a group is written in too. */
+@keyframes paper-digit-stroke {
+    to { stroke-dashoffset: 0; }
+}
+
+@keyframes paper-digit-settle {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Caveat's ink overhangs the digit's box to the right, and Chromium masks only what the box's overflow
+   reaches, so a clear shadow carries it past the ink: without it the last frame loses the overhang */
+[data-style="paper"][data-paper-fonts="ready"] [data-skin~="board"] .font-entry.value-arrive {
+    -webkit-mask-image: var(--digit-writer-mask, none);
+    mask-image: var(--digit-writer-mask, none);
+    box-shadow: 0 0 0 0.3em transparent;
+}
+
+[data-style="paper"] .paper-digit-stroke {
+    animation-name: paper-digit-stroke;
+    animation-fill-mode: both;
+}
+
+[data-style="paper"] .paper-digit-settle {
+    opacity: 0;
+    animation-name: paper-digit-settle;
+    animation-duration: 60ms;
+    animation-fill-mode: both;
+}
+
+/* A digit erased is rubbed out: the digit is gone at once, so the cell's ::before leaves a smudge
+   of its ink where it was, with two crumbs, that the eraser rubs side to side until it fades. Hidden
+   outside the rub; its end settles the cell's leaving flag. */
+@keyframes paper-digit-rub {
+    0% { opacity: 1; translate: -3px 0; scale: 1 1; }
+    25% { translate: 3px 0; }
+    50% { opacity: 0.7; translate: -2px 0; scale: 1.1 0.9; }
+    75% { opacity: 0.35; translate: 1.5px 0; }
+    100% { opacity: 0; translate: 0 0; scale: 1.2 0.8; }
+}
+
+[data-style="paper"] [data-skin~="board"] [data-variant].value-leave {
+    position: relative;
+}
+
+[data-style="paper"] [data-skin~="board"] [data-variant].value-leave::before {
+    content: "";
+    position: absolute;
+    inset: 28% 18%;
+    pointer-events: none;
+    opacity: 0;
+    background-image:
+        radial-gradient(ellipse 50% 50% at 50% 50%, color-mix(in srgb, var(--color-primary) 30%, transparent) 0 35%, transparent 100%),
+        radial-gradient(circle at 92% 96%, color-mix(in srgb, var(--color-foreground) 35%, transparent) 0 1px, transparent 1.5px),
+        radial-gradient(circle at 12% 90%, color-mix(in srgb, var(--color-foreground) 30%, transparent) 0 1px, transparent 1.5px);
+    rotate: -8deg;
+    animation: paper-digit-rub 360ms ease-out;
+}
+
 /* Presses land like a stamp. vPress sets the data attributes; input never waits for them.
    The ink overlay is a colour change, so it stays on under reduced motion. */
 [data-style="paper"] [data-pressed] {
@@ -344,7 +407,252 @@
     transition: transform 300ms ease-in-out;
 }
 
-/* Reduced motion: no stamping, settling, drawing or sliding; tilts and the ink overlay stay */
+/* Moments, from the MomentsPaper and GroupPaper boards: the loader, a completed group and the solved
+   puzzle. The red is the paper's danger ink; paletteContrast.test.ts reads the stamp's and the check's
+   inks from here. */
+[data-style="paper"] {
+    --paper-stamp-ink: color-mix(in srgb, var(--color-danger) 92%, transparent);
+    /* The stamp's worn rings let this much of its ink through (only the mask's alpha counts) */
+    --paper-stamp-wear: color-mix(in srgb, var(--color-foreground) 78%, transparent);
+    --paper-check-ink: color-mix(in srgb, var(--color-danger) 92%, transparent);
+}
+
+/* Loading: a yellow sticky note taped on askew. A pen draws the grid a stroke at a time, writes four
+   digits, then the note is wiped, 3.4s a round; every stroke and digit is hidden at each round's start
+   and end, so the loop has no seam. */
+[data-style="paper"] .paper-loader {
+    rotate: -2deg;
+    box-shadow:
+        0 1px 1px color-mix(in srgb, var(--color-shadow) 8%, transparent),
+        0 12px 20px -8px color-mix(in srgb, var(--color-shadow) 40%, transparent);
+}
+
+[data-style="paper"] .paper-loader::before {
+    content: "";
+    position: absolute;
+    top: -11px;
+    left: calc(50% - 38px);
+    width: 76px;
+    height: 22px;
+    pointer-events: none;
+    background-color: color-mix(in srgb, var(--color-card) 60%, transparent);
+    box-shadow: 0 1px 2px color-mix(in srgb, var(--color-shadow) 8%, transparent);
+    rotate: 3deg;
+}
+
+[data-style="paper"] .paper-loader-line {
+    fill: none;
+    stroke: var(--color-primary);
+    stroke-width: 2.4;
+    stroke-linecap: round;
+    stroke-dasharray: 100;
+    stroke-dashoffset: 100;
+    opacity: 0;
+}
+
+[data-style="paper"] .paper-loader-digit {
+    color: var(--color-primary);
+    clip-path: inset(0 100% 0 0);
+    opacity: 0;
+}
+
+@keyframes paper-loader-line-0 {
+    0%, 4% { stroke-dashoffset: 100; opacity: 0; }
+    4.5% { stroke-dashoffset: 99; opacity: 1; }
+    13%, 82% { stroke-dashoffset: 0; opacity: 1; }
+    92%, 100% { stroke-dashoffset: 0; opacity: 0; }
+}
+
+@keyframes paper-loader-line-1 {
+    0%, 12% { stroke-dashoffset: 100; opacity: 0; }
+    12.5% { stroke-dashoffset: 99; opacity: 1; }
+    21%, 82% { stroke-dashoffset: 0; opacity: 1; }
+    92%, 100% { stroke-dashoffset: 0; opacity: 0; }
+}
+
+@keyframes paper-loader-line-2 {
+    0%, 20% { stroke-dashoffset: 100; opacity: 0; }
+    20.5% { stroke-dashoffset: 99; opacity: 1; }
+    29%, 82% { stroke-dashoffset: 0; opacity: 1; }
+    92%, 100% { stroke-dashoffset: 0; opacity: 0; }
+}
+
+@keyframes paper-loader-line-3 {
+    0%, 28% { stroke-dashoffset: 100; opacity: 0; }
+    28.5% { stroke-dashoffset: 99; opacity: 1; }
+    37%, 82% { stroke-dashoffset: 0; opacity: 1; }
+    92%, 100% { stroke-dashoffset: 0; opacity: 0; }
+}
+
+@keyframes paper-loader-digit-0 {
+    0%, 42% { clip-path: inset(0 100% 0 0); opacity: 0; }
+    42.5% { clip-path: inset(0 96% 0 0); opacity: 1; }
+    48%, 82% { clip-path: inset(0 0 0 0); opacity: 1; }
+    92%, 100% { clip-path: inset(0 0 0 0); opacity: 0; }
+}
+
+@keyframes paper-loader-digit-1 {
+    0%, 50% { clip-path: inset(0 100% 0 0); opacity: 0; }
+    50.5% { clip-path: inset(0 96% 0 0); opacity: 1; }
+    56%, 82% { clip-path: inset(0 0 0 0); opacity: 1; }
+    92%, 100% { clip-path: inset(0 0 0 0); opacity: 0; }
+}
+
+@keyframes paper-loader-digit-2 {
+    0%, 58% { clip-path: inset(0 100% 0 0); opacity: 0; }
+    58.5% { clip-path: inset(0 96% 0 0); opacity: 1; }
+    64%, 82% { clip-path: inset(0 0 0 0); opacity: 1; }
+    92%, 100% { clip-path: inset(0 0 0 0); opacity: 0; }
+}
+
+@keyframes paper-loader-digit-3 {
+    0%, 66% { clip-path: inset(0 100% 0 0); opacity: 0; }
+    66.5% { clip-path: inset(0 96% 0 0); opacity: 1; }
+    72%, 82% { clip-path: inset(0 0 0 0); opacity: 1; }
+    92%, 100% { clip-path: inset(0 0 0 0); opacity: 0; }
+}
+
+[data-style="paper"] .paper-loader-line:nth-child(1) { animation: paper-loader-line-0 3400ms linear infinite both; }
+[data-style="paper"] .paper-loader-line:nth-child(2) { animation: paper-loader-line-1 3400ms linear infinite both; }
+[data-style="paper"] .paper-loader-line:nth-child(3) { animation: paper-loader-line-2 3400ms linear infinite both; }
+[data-style="paper"] .paper-loader-line:nth-child(4) { animation: paper-loader-line-3 3400ms linear infinite both; }
+[data-style="paper"] .paper-loader-digit:nth-of-type(1) { animation: paper-loader-digit-0 3400ms linear infinite both; }
+[data-style="paper"] .paper-loader-digit:nth-of-type(2) { animation: paper-loader-digit-1 3400ms linear infinite both; }
+[data-style="paper"] .paper-loader-digit:nth-of-type(3) { animation: paper-loader-digit-2 3400ms linear infinite both; }
+[data-style="paper"] .paper-loader-digit:nth-of-type(4) { animation: paper-loader-digit-3 3400ms linear infinite both; }
+
+/* A completed row, column or box: a pale ink wash passes under its cells from the entered one, 45ms a
+   step, while a pencil strikes the row or column through (PaperGroupOverlay places the marks) and loops
+   a box 80ms later, like a second stroke. The pencil is at 60%, so the digits read through it, and
+   fades by the end. A cell in two groups washes once; a hint's answer keeps its glow. */
+@keyframes paper-group-wash {
+    40% { background-color: color-mix(in srgb, var(--color-highlight) 45%, var(--paper-cell-wash)); }
+}
+
+[data-style="paper"] [data-skin~="board"] [data-group]:not(.animate-hint-reveal-glow) {
+    --group-ripple-step: 45ms;
+    animation: paper-group-wash 600ms ease-out calc(100ms + var(--group-delay, 0ms));
+}
+
+[data-style="paper"] .paper-group-stroke {
+    fill: none;
+    stroke: var(--color-primary);
+    stroke-width: 2.2;
+    stroke-linecap: round;
+    stroke-dasharray: 420;
+    stroke-dashoffset: 420;
+    opacity: 0;
+}
+
+@keyframes paper-group-strike {
+    0% { stroke-dashoffset: 420; opacity: 0.6; }
+    55%, 75% { stroke-dashoffset: 0; opacity: 0.6; }
+    100% { stroke-dashoffset: 0; opacity: 0; }
+}
+
+[data-style="paper"] :is(.paper-group-row, .paper-group-column) .paper-group-stroke {
+    animation: paper-group-strike 800ms ease-out 100ms;
+}
+
+[data-style="paper"] .paper-group-box .paper-group-stroke {
+    animation: paper-group-strike 860ms ease-out 180ms;
+}
+
+/* The solved board: a big red-pen check sweeps over it, left to right as the pen moves, and stays under
+   the dialog. Without motion it is simply there. */
+[data-style="paper"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"], [data-celebration="still"]) > div::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-color: var(--paper-check-ink);
+    mix-blend-mode: multiply;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M17 55C25 61 32 69 39 79C50 58 64 36 88 15' fill='none' stroke='currentColor' stroke-width='4.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M17 55C25 61 32 69 39 79C50 58 64 36 88 15' fill='none' stroke='currentColor' stroke-width='4.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+}
+
+[data-style="paper"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"]) > div::after {
+    animation: paper-circle-draw 600ms cubic-bezier(0.6, 0, 0.35, 1) 80ms backwards;
+}
+
+/* The dialog: the card lands on the page like a slip of paper, a little askew, and its title gets a
+   wavy underline in the theme's ink, clear of the tags below. Last, a round stamp (PaperCelebration) thuds into its corner: the
+   card sinks under it and a faint red ring spreads out. A still card (data-still) only fades in, like
+   every style's, with the underline and stamp already there. Board timings minus the 780ms the card
+   waits. */
+@keyframes paper-card-land {
+    0% { opacity: 0; transform: translateY(-16px) rotate(-2.5deg); }
+    70% { opacity: 1; transform: translateY(2px) rotate(0.4deg); }
+    100% { opacity: 1; transform: none; }
+}
+
+@keyframes paper-card-sink {
+    40% { transform: translateY(2px); }
+}
+
+[data-style="paper"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) {
+    animation: paper-card-land 480ms ease-out 20ms backwards, paper-card-sink 180ms ease-out 1020ms;
+}
+
+[data-style="paper"] [data-skin~="card"][data-skin~="celebration"] [data-skin~="complete-title"] {
+    position: relative;
+}
+
+[data-style="paper"] [data-skin~="card"][data-skin~="celebration"] [data-skin~="complete-title"]::after {
+    content: "";
+    position: absolute;
+    left: calc(50% - 92px);
+    bottom: -3px;
+    width: 184px;
+    height: 14px;
+    pointer-events: none;
+    background-color: var(--color-primary);
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 184 14'%3E%3Cpath d='M3 9C33 3 59 13 94 7S154 3 181 8' fill='none' stroke='currentColor' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 184 14'%3E%3Cpath d='M3 9C33 3 59 13 94 7S154 3 181 8' fill='none' stroke='currentColor' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+}
+
+[data-style="paper"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) [data-skin~="complete-title"]::after {
+    animation: paper-circle-draw 480ms ease-out 420ms backwards;
+}
+
+/* The stamp: a double ring in the red, worn in rings like a real impression, tilted */
+[data-style="paper"] .paper-stamp {
+    color: var(--paper-stamp-ink);
+    border-color: var(--paper-stamp-ink);
+    box-shadow: inset 0 0 0 3px var(--color-card), inset 0 0 0 4.5px var(--paper-stamp-ink);
+    transform: rotate(-14deg);
+    -webkit-mask-image: repeating-radial-gradient(circle at 38% 62%, var(--color-foreground) 0 2px, var(--paper-stamp-wear) 2px 3px);
+    mask-image: repeating-radial-gradient(circle at 38% 62%, var(--color-foreground) 0 2px, var(--paper-stamp-wear) 2px 3px);
+}
+
+[data-style="paper"] .paper-stamp-splat {
+    border-color: var(--paper-stamp-ink);
+    opacity: 0;
+}
+
+/* Hidden until it lands, so nothing of it shows before the last beat */
+@keyframes paper-stamp-thud {
+    0% { opacity: 0; transform: scale(1.9) rotate(-4deg); }
+    55% { opacity: 1; transform: scale(0.93) rotate(-14deg); }
+    100% { opacity: 1; transform: rotate(-14deg); }
+}
+
+@keyframes paper-stamp-splat {
+    0% { opacity: 0; transform: scale(0.88); }
+    1% { opacity: 0.45; transform: scale(0.88); }
+    100% { opacity: 0; transform: scale(1.3); }
+}
+
+[data-style="paper"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) .paper-stamp {
+    animation: paper-stamp-thud 420ms cubic-bezier(0.5, 0, 0.6, 1.3) 800ms both;
+}
+
+[data-style="paper"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) .paper-stamp-splat {
+    animation: paper-stamp-splat 460ms ease-out 1020ms both;
+}
+
+/* Reduced motion: no stamping, settling, drawing, writing, rubbing or sliding; tilts and the ink overlay
+   stay */
 @media (prefers-reduced-motion: reduce) {
     [data-style="paper"] [data-press-motion],
     [data-style="paper"] [data-press-motion][data-pressed],
@@ -357,11 +665,50 @@
     [data-style="paper"] [data-variant="answer"]::after,
     [data-style="paper"] [data-variant="wrong"]::after,
     [data-style="paper"] [data-variant="answer"] [data-note-highlight]::after,
-    [data-style="paper"] [data-skin~="check"] svg {
+    [data-style="paper"] [data-skin~="check"] svg,
+    [data-style="paper"] .paper-digit-stroke,
+    [data-style="paper"] .paper-digit-settle,
+    [data-style="paper"] [data-skin~="board"] [data-variant].value-leave::before {
         animation: none;
+    }
+
+    [data-style="paper"][data-paper-fonts="ready"] [data-skin~="board"] .font-entry.value-arrive {
+        -webkit-mask-image: none;
+        mask-image: none;
     }
 
     [data-style="paper"] .segmented-indicator-motion {
         transition: none;
+    }
+
+    /* The group effect and the celebration never start without motion, so they are only stopped; the
+       loader shows its note already written */
+    [data-style="paper"] .paper-loader-line:nth-child(1),
+    [data-style="paper"] .paper-loader-line:nth-child(2),
+    [data-style="paper"] .paper-loader-line:nth-child(3),
+    [data-style="paper"] .paper-loader-line:nth-child(4),
+    [data-style="paper"] .paper-loader-digit:nth-of-type(1),
+    [data-style="paper"] .paper-loader-digit:nth-of-type(2),
+    [data-style="paper"] .paper-loader-digit:nth-of-type(3),
+    [data-style="paper"] .paper-loader-digit:nth-of-type(4),
+    [data-style="paper"] [data-skin~="board"] [data-group]:not(.animate-hint-reveal-glow),
+    [data-style="paper"] :is(.paper-group-row, .paper-group-column) .paper-group-stroke,
+    [data-style="paper"] .paper-group-box .paper-group-stroke,
+    [data-style="paper"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"]) > div::after,
+    [data-style="paper"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]),
+    [data-style="paper"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) [data-skin~="complete-title"]::after,
+    [data-style="paper"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) .paper-stamp,
+    [data-style="paper"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) .paper-stamp-splat {
+        animation: none;
+    }
+
+    [data-style="paper"] .paper-loader-line {
+        stroke-dashoffset: 0;
+        opacity: 1;
+    }
+
+    [data-style="paper"] .paper-loader-digit {
+        clip-path: none;
+        opacity: 1;
     }
 }

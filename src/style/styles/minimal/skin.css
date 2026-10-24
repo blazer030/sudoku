@@ -37,7 +37,144 @@
     transition: transform 250ms cubic-bezier(0.34, 1.4, 0.64, 1);
 }
 
-/* Reduced motion: no scaling, bouncing or sliding; the press overlay stays */
+/* Moments, from the MomentsMinimal and GroupMinimal boards: the loader, a completed group and the
+   solved puzzle. Keyframes that name only their peak start and end on each element's own look. */
+
+/* Loading: the frosted card's nine squares light one at a time in a solver's order (MinimalLoader gives
+   each square its step), hold, then clear together, 2.4s a round. The dark card is raised a shade and
+   its squares lit brighter, so the pattern reads on the dimmed page. */
+[data-style="minimal"] .minimal-loader {
+    --minimal-loader-unlit: color-mix(in srgb, var(--color-on-scrim) 16%, transparent);
+    --minimal-loader-lit: var(--color-highlight);
+}
+
+:root.dark[data-style="minimal"] .minimal-loader {
+    --minimal-loader-unlit: color-mix(in srgb, var(--color-foreground) 20%, transparent);
+    --minimal-loader-lit: color-mix(in srgb, var(--color-primary) 65%, var(--color-on-scrim));
+    background-color: color-mix(in srgb, color-mix(in srgb, var(--color-foreground) 8%, var(--color-card)) 78%, transparent);
+    box-shadow:
+        inset 0 0 0 1px color-mix(in srgb, var(--color-foreground) 14%, transparent),
+        0 20px 40px -12px color-mix(in srgb, var(--color-scrim) 70%, transparent);
+}
+
+@keyframes minimal-loader-place {
+    0% { transform: scale(0.55); background-color: var(--minimal-loader-unlit); }
+    10% { transform: scale(1.1); background-color: var(--minimal-loader-lit); }
+    16%, 64% { transform: scale(1); background-color: var(--minimal-loader-lit); }
+    76%, 100% { transform: scale(0.55); background-color: var(--minimal-loader-unlit); }
+}
+
+[data-style="minimal"] .minimal-loader-square {
+    background-color: var(--minimal-loader-unlit);
+    animation: minimal-loader-place 2400ms cubic-bezier(0.34, 1.4, 0.64, 1) calc(var(--minimal-loader-step) * 90ms) infinite both;
+}
+
+/* A digit lifts a touch and settles on the elastic curve; the solved board lifts it a little more */
+@keyframes minimal-digit-lift {
+    40% { transform: scale(var(--minimal-lift, 1.12)); }
+}
+
+/* A completed row, column or box: after a short beat a quiet wash spreads from the entered cell, 45ms a
+   step, and the digits lift with it. A cell in two groups washes once; a hint's answer keeps its glow. */
+@keyframes minimal-group-wash {
+    35% { background-color: color-mix(in srgb, var(--color-primary) 22%, var(--color-card)); }
+}
+
+[data-style="minimal"] [data-skin~="board"] [data-group]:not(.animate-hint-reveal-glow) {
+    --group-ripple-step: 45ms;
+    animation: minimal-group-wash 520ms ease-out calc(100ms + var(--group-delay, 0ms));
+}
+
+[data-style="minimal"] [data-skin~="board"] [data-group]:not(.animate-hint-reveal-glow) > div {
+    animation: minimal-digit-lift 440ms cubic-bezier(0.34, 1.4, 0.64, 1) calc(100ms + var(--group-delay, 0ms));
+}
+
+/* The solved board: one diagonal wash from the top left, 38ms a step, the digits lifting with it. It
+   runs on under the dialog, which opens as the scrim comes in. */
+@keyframes minimal-board-wash {
+    28% { background-color: var(--color-primary-light); }
+}
+
+[data-style="minimal"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"]) [data-variant] {
+    animation: minimal-board-wash 760ms ease-out calc((var(--cell-row) + var(--cell-column)) * 38ms);
+}
+
+[data-style="minimal"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"]) [data-variant] > div {
+    --minimal-lift: 1.18;
+    animation: minimal-digit-lift 520ms cubic-bezier(0.34, 1.4, 0.64, 1) calc((var(--cell-row) + var(--cell-column)) * 38ms);
+}
+
+/* Without motion the player's entries rest on a soft tint instead */
+[data-style="minimal"] [data-skin~="board"][data-celebration="still"] [data-value-kind="entered"] {
+    background-color: color-mix(in srgb, var(--color-primary-light) 70%, transparent);
+}
+
+/* The dialog: the card rises on the elastic curve, a thin ring draws round the trophy from the top, the
+   new-record badge pops in and the trophy gives one bounce. A still card (data-still) only fades in, like
+   every style's, and its ring is simply there. */
+@property --minimal-ring-sweep {
+    syntax: "<angle>";
+    inherits: false;
+    initial-value: 360deg;
+}
+
+@keyframes minimal-card-rise {
+    0% { opacity: 0; transform: translateY(28px) scale(0.96); }
+    100% { opacity: 1; transform: none; }
+}
+
+/* Hidden until it starts, or the mask's seam leaves a hairline at the top */
+@keyframes minimal-ring-draw {
+    0% { --minimal-ring-sweep: 0deg; opacity: 0; }
+    1% { opacity: 1; }
+    100% { --minimal-ring-sweep: 360deg; }
+}
+
+@keyframes minimal-badge-pop {
+    0% { opacity: 0; transform: scale(0.6); }
+    100% { opacity: 1; transform: none; }
+}
+
+@keyframes minimal-trophy-bounce {
+    0% { transform: scale(0.96); }
+    45% { transform: scale(1.08); }
+    75% { transform: scale(0.99); }
+    100% { transform: scale(1); }
+}
+
+[data-style="minimal"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) {
+    animation: minimal-card-rise 460ms cubic-bezier(0.34, 1.4, 0.64, 1) 60ms backwards;
+}
+
+[data-style="minimal"] [data-skin~="card"][data-skin~="celebration"] [data-skin~="trophy"] {
+    position: relative;
+}
+
+[data-style="minimal"] [data-skin~="card"][data-skin~="celebration"] [data-skin~="trophy"]::before {
+    content: "";
+    position: absolute;
+    inset: -5px;
+    border-radius: 50%;
+    box-shadow: inset 0 0 0 2px var(--color-primary);
+    -webkit-mask-image: conic-gradient(currentColor var(--minimal-ring-sweep), transparent 0);
+    mask-image: conic-gradient(currentColor var(--minimal-ring-sweep), transparent 0);
+    pointer-events: none;
+}
+
+[data-style="minimal"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) [data-skin~="trophy"]::before {
+    animation: minimal-ring-draw 760ms cubic-bezier(0.4, 0, 0.2, 1) 380ms both;
+}
+
+[data-style="minimal"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) [data-skin~="new-record"] {
+    animation: minimal-badge-pop 380ms cubic-bezier(0.34, 1.4, 0.64, 1) 560ms both;
+}
+
+[data-style="minimal"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) [data-skin~="trophy"] > svg {
+    animation: minimal-trophy-bounce 300ms ease-out 1060ms both;
+}
+
+/* Reduced motion: no scaling, bouncing or sliding; the press overlay stays. The loader holds a still
+   pattern; the group effect and the celebration never start without motion, so they are only stopped. */
 @media (prefers-reduced-motion: reduce) {
     [data-style="minimal"] .segmented-indicator-motion {
         transition: none;
@@ -49,5 +186,21 @@
     [data-style="minimal"] [data-press-bounce] {
         transform: none;
         animation: none;
+    }
+
+    [data-style="minimal"] .minimal-loader-square,
+    [data-style="minimal"] [data-skin~="board"] [data-group]:not(.animate-hint-reveal-glow),
+    [data-style="minimal"] [data-skin~="board"] [data-group]:not(.animate-hint-reveal-glow) > div,
+    [data-style="minimal"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"]) [data-variant],
+    [data-style="minimal"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"]) [data-variant] > div,
+    [data-style="minimal"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]),
+    [data-style="minimal"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) [data-skin~="trophy"]::before,
+    [data-style="minimal"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) [data-skin~="new-record"],
+    [data-style="minimal"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) [data-skin~="trophy"] > svg {
+        animation: none;
+    }
+
+    [data-style="minimal"] .minimal-loader-square:nth-child(odd) {
+        background-color: var(--minimal-loader-lit);
     }
 }

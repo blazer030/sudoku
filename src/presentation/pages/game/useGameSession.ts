@@ -1,7 +1,6 @@
-import { computed, inject, reactive } from "vue";
+import { computed, inject, onScopeDispose, reactive, ref } from "vue";
 import { provideGameCompleteModal, type GameCompleteAction } from "@/presentation/pages/game/components/useGameCompleteModal";
-import { BOARD_SIZE } from "@/domain/board/constants";
-import { Sudoku } from "@/domain/game/Sudoku";
+import { Sudoku, type CompletedCells } from "@/domain/game/Sudoku";
 import { StepRecorder } from "@/domain/game/StepRecorder";
 import { useRouter } from "vue-router";
 import { useGameStore } from "@/stores/gameStore";
@@ -15,9 +14,13 @@ import { useLeaveGame } from "@/presentation/pages/game/useLeaveGame";
 import { useHintActions } from "@/presentation/pages/game/useHintActions";
 import { useGameToast } from "@/presentation/pages/game/useGameToast";
 import { useMotionAllowed } from "@/presentation/composables/useMotionAllowed";
-import { useCompletionFlash } from "@/presentation/pages/game/useCompletionFlash";
+import { useGroupEffect } from "@/presentation/pages/game/useGroupEffect";
+import { useStyleMoments } from "@/presentation/components/style-moments/styleMoments";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { ANALYTICS_KEY } from "@/application/analytics/AnalyticsService";
+
+/** The board's part of the celebration: its phase playing, its end state after, or the still end state. */
+export type CelebrationPhase = "playing" | "done" | "still";
 
 interface GameSessionOptions {
     /** The player chose Play Again on the completion modal. */
@@ -71,32 +74,55 @@ export const useGameSession = ({ onPlayAgain }: GameSessionOptions) => {
 
     const difficulty = computed(() => gameStore.difficulty ?? "easy");
 
+    const motionAllowed = useMotionAllowed();
+    const celebration = ref<CelebrationPhase | null>(null);
+    let celebrationTimer: ReturnType<typeof setTimeout> | null = null;
+
     const { completed, checkAndComplete } = useGameCompletion({
         sudoku: sudoku.raw(),
         difficulty,
         getElapsedSeconds: () => elapsedSeconds.value,
         getReplayData,
         analytics,
-        onCompleted: (origin, { isNewRecord }) => {
-            const allCells: { row: number; column: number }[] = [];
-            for (let row = 0; row < BOARD_SIZE; row++) {
-                for (let column = 0; column < BOARD_SIZE; column++) {
-                    allCells.push({ row, column });
-                }
-            }
-            triggerFlash(allCells, origin, () => {
+        onCompleted: (_origin, { isNewRecord }) => {
+            const openDialog = (still: boolean) => {
                 void gameCompleteModal.open({
                     elapsedSeconds: elapsedSeconds.value,
                     difficulty: difficulty.value,
                     hintsUsed: sudoku.hintTracker.recordedUsed,
                     isNewRecord,
+                    still,
                 }).then(handleCompleteAction);
-            });
+            };
+            // The solving entry plays the style's celebration alone: its board phase, then the dialog.
+            // A group effect still running from the entry before ends here.
+            groupEffect.stop();
+            if (!motionAllowed()) {
+                celebration.value = "still";
+                openDialog(true);
+                return;
+            }
+            celebration.value = "playing";
+            celebrationTimer = setTimeout(() => {
+                celebrationTimer = null;
+                celebration.value = "done";
+                openDialog(false);
+            }, styleMoments.value.celebrationBoardMs);
         },
     });
 
+    // Leaving mid-celebration leaves no timer to open the dialog later
+    onScopeDispose(() => {
+        if (celebrationTimer !== null) clearTimeout(celebrationTimer);
+        celebrationTimer = null;
+    });
+
     const settingsStore = useSettingsStore();
-    const { triggerFlash, isFlashing } = useCompletionFlash(useMotionAllowed());
+    const styleMoments = useStyleMoments();
+    const groupEffect = useGroupEffect(motionAllowed, () => styleMoments.value.groupEffectMs);
+    const playGroupEffect = (completed: CompletedCells, origin: { row: number; column: number }) => {
+        groupEffect.play(completed.groups, completed.cells, origin);
+    };
 
     const gameToast = useGameToast();
 
@@ -105,7 +131,7 @@ export const useGameSession = ({ onPlayAgain }: GameSessionOptions) => {
         stepRecorder,
         autoRemoveNotes: () => settingsStore.autoRemoveNotes,
         onRevealComplete: (origin) => { checkAndComplete(origin); },
-        onGroupCompleted: triggerFlash,
+        onGroupCompleted: playGroupEffect,
         onHintReveal: outcome => { gameToast.show({ kind: "randomReveal", outcome }); },
         onNoConflicts: () => { gameToast.show({ kind: "noConflicts" }); },
         analytics,
@@ -145,7 +171,9 @@ export const useGameSession = ({ onPlayAgain }: GameSessionOptions) => {
         toastContent: gameToast.content,
         showToast: gameToast.show,
         showLeaveDialog,
-        triggerFlash,
-        isFlashing,
+        playGroupEffect,
+        celebration,
+        groupEffect: groupEffect.effect,
+        isInGroupEffect: groupEffect.isInEffect,
     };
 };

@@ -5,6 +5,7 @@ import { i18n } from "@/presentation/i18n";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { flushPromises, mount } from "@vue/test-utils";
 import { createPinia } from "pinia";
+import { useSettingsStore } from "@/stores/settingsStore";
 import { createMemoryHistory, createRouter, onBeforeRouteLeave } from "vue-router";
 import Game from "@/presentation/pages/game/Game.vue";
 import { knownAnswer, knownPuzzle, createKnownSudoku, fillAllButLastKnownCell, lastKnownEmptyCell } from "@/__tests__/fixtures/knownPuzzle";
@@ -18,6 +19,8 @@ import type { PuzzleCell } from "@/domain/board/PuzzleCell";
 import { createMultiStepSudoku } from "@/__tests__/fixtures/multiStepPuzzle";
 import { ANALYTICS_KEY, type AnalyticsService } from "@/application/analytics/AnalyticsService";
 import { expectKeyRowsToShrinkToFit } from "@/__tests__/fixtures/digitKeyRows";
+import { STYLE_MOMENTS } from "@/presentation/components/style-moments/styleMoments";
+import { GROUP_RIPPLE_STEP_MS } from "@/presentation/pages/game/useGroupEffect";
 
 const createTestRouter = () => {
     return createRouter({
@@ -819,6 +822,211 @@ describe("Game", () => {
                 expect(cell.text()).toBe(knownPuzzle[row][column] === 0 ? "" : String(knownPuzzle[row][column]));
             }
         }
+    });
+
+    describe("Group effects", () => {
+        // Row 4's gaps and their answers; the last one, (4, 7), completes the row
+        const ROW_4_GAPS: readonly (readonly [number, number])[] = [[1, 2], [2, 6], [4, 5], [6, 7], [7, 9]];
+        const EFFECT_MS = STYLE_MOMENTS.minimal.groupEffectMs;
+
+        const fillCell = async (wrapper: GameWrapper, row: number, column: number, value: number) => {
+            await wrapper.find(`[data-testid='cell-${row}-${column}']`).trigger("click");
+            await wrapper.find(`[data-testid='number-${value}']`).trigger("click");
+        };
+
+        const completeRow4 = async (wrapper: GameWrapper) => {
+            for (const [column, value] of ROW_4_GAPS) await fillCell(wrapper, 4, column, value);
+        };
+
+        afterEach(() => {
+            vi.unstubAllGlobals();
+        });
+
+        it("should place every cell on the board through its row, column and box", () => {
+            const style = mountGame().find("[data-testid='cell-4-7']").attributes("style");
+
+            expect(style).toContain("--cell-row: 4");
+            expect(style).toContain("--cell-column: 7");
+            expect(style).toContain("--cell-box: 5");
+        });
+
+        it("should mark a completed row's cells, and the board with the effect and its origin, until it ends", async () => {
+            vi.useFakeTimers();
+            const wrapper = mountGame();
+            const board = wrapper.find("[data-testid='game-board']");
+
+            await completeRow4(wrapper);
+
+            expect(board.attributes("data-group-effect")).toBeDefined();
+            expect(board.attributes("style")).toContain("--origin-row: 4");
+            expect(board.attributes("style")).toContain("--origin-column: 7");
+            expect(wrapper.find("[data-testid='cell-4-0']").attributes("data-group")).toBe("row");
+            expect(wrapper.find("[data-testid='cell-3-0']").attributes("data-group")).toBeUndefined();
+
+            // The farthest cell, (4, 0), is 7 steps from the origin
+            vi.advanceTimersByTime(7 * GROUP_RIPPLE_STEP_MS + EFFECT_MS);
+            await nextTick();
+
+            expect(board.attributes("data-group-effect")).toBeUndefined();
+            expect(wrapper.find("[data-testid='cell-4-0']").attributes("data-group")).toBeUndefined();
+        });
+
+        it("should show nothing at all for a completed row when motion is not allowed", async () => {
+            vi.stubGlobal("matchMedia", (query: string) => ({ matches: query === "(prefers-reduced-motion: reduce)", media: query }));
+            const wrapper = mountGame();
+
+            await completeRow4(wrapper);
+
+            expect(wrapper.find("[data-testid='game-board']").attributes("data-group-effect")).toBeUndefined();
+            expect(wrapper.find("[data-testid='cell-4-0']").attributes("data-group")).toBeUndefined();
+            expect(wrapper.find("[data-testid='cell-4-0']").classes()).not.toContain("animate-completion-flash");
+        });
+
+        it("should hand the board to a second completed group at once, leaving none of the first marked", async () => {
+            vi.useFakeTimers();
+            const wrapper = mountGame();
+            const board = wrapper.find("[data-testid='game-board']");
+            await completeRow4(wrapper);
+            const firstId = board.attributes("data-group-effect");
+
+            // Column 4's other gaps: (2, 4) → 4, then (6, 4) → 3 completes it
+            vi.advanceTimersByTime(100);
+            await fillCell(wrapper, 2, 4, 4);
+            await fillCell(wrapper, 6, 4, 3);
+
+            expect(board.attributes("data-group-effect")).not.toBe(firstId);
+            expect(wrapper.find("[data-testid='cell-4-0']").attributes("data-group")).toBeUndefined();
+            expect(wrapper.find("[data-testid='cell-4-4']").attributes("data-group")).toBe("column");
+
+            // Input is never blocked while it plays
+            await fillCell(wrapper, 0, 2, 4);
+            expect(wrapper.find("[data-testid='cell-0-2']").text()).toBe("4");
+
+            vi.advanceTimersByTime(6 * GROUP_RIPPLE_STEP_MS + EFFECT_MS);
+            await nextTick();
+            expect(wrapper.findAll("[data-group]")).toHaveLength(0);
+        });
+    });
+
+    describe("Celebration", () => {
+        const BOARD_MS = STYLE_MOMENTS.minimal.celebrationBoardMs;
+        const boardOfGame = (wrapper: GameWrapper) => wrapper.find("[data-testid='game-board']");
+        const modalOf = (wrapper: GameWrapper) => wrapper.find("[data-testid='game-complete-modal']");
+
+        afterEach(() => {
+            vi.unstubAllGlobals();
+        });
+
+        it("should play only the celebration on the solving entry, though it also completes a row, column and box", async () => {
+            vi.useFakeTimers();
+            const wrapper = mountGame("easy", nearlySolvedSudoku());
+
+            await fillLastCell(wrapper);
+
+            expect(wrapper.findAll("[data-group]")).toHaveLength(0);
+            expect(boardOfGame(wrapper).attributes("data-group-effect")).toBeUndefined();
+            expect(boardOfGame(wrapper).attributes("data-celebration")).toBe("playing");
+            expect(modalOf(wrapper).exists()).toBe(false);
+        });
+
+        it("should stop a group effect still running from the entry before, once the celebration starts", async () => {
+            vi.useFakeTimers();
+            // Every gap filled but the last and one outside its row, column and box, which completes a row
+            const last = lastKnownEmptyCell;
+            const sameBox = (row: number, column: number) =>
+                Math.floor(row / 3) === Math.floor(last.row / 3) && Math.floor(column / 3) === Math.floor(last.column / 3);
+            const gaps = knownPuzzle.flatMap((cells, row) => cells.flatMap((clue, column) => clue === 0 ? [{ row, column }] : []));
+            const [before] = gaps.filter(({ row, column }) => row !== last.row && column !== last.column && !sameBox(row, column));
+            const sudoku = createKnownSudoku();
+            for (const { row, column } of gaps) {
+                if ((row === before.row && column === before.column) || (row === last.row && column === last.column)) continue;
+                sudoku.fill(row, column, knownAnswer[row][column]);
+            }
+            const wrapper = mountGame("easy", sudoku);
+            await wrapper.find(`[data-testid='cell-${before.row}-${before.column}']`).trigger("click");
+            await wrapper.find(`[data-testid='number-${knownAnswer[before.row][before.column]}']`).trigger("click");
+            expect(wrapper.findAll("[data-group]").length).toBeGreaterThan(0);
+
+            await fillLastCell(wrapper);
+
+            expect(wrapper.findAll("[data-group]")).toHaveLength(0);
+            expect(boardOfGame(wrapper).attributes("data-group-effect")).toBeUndefined();
+            expect(boardOfGame(wrapper).attributes("data-celebration")).toBe("playing");
+        });
+
+        it("should play only the celebration when Reveal Cell fills the last cell", async () => {
+            vi.useFakeTimers();
+            vi.spyOn(Sudoku.prototype, "planRevealHint").mockReturnValue({ kind: "noTechnique" });
+            const wrapper = mountGame("easy", nearlySolvedSudoku());
+
+            await openRevealCell(wrapper);
+
+            expect(wrapper.findAll("[data-group]")).toHaveLength(0);
+            expect(boardOfGame(wrapper).attributes("data-celebration")).toBe("playing");
+        });
+
+        it("should open the dialog once the board phase has run, and keep the board's end state", async () => {
+            vi.useFakeTimers();
+            const wrapper = mountGame("easy", nearlySolvedSudoku());
+            await fillLastCell(wrapper);
+
+            await vi.advanceTimersByTimeAsync(BOARD_MS - 1);
+            expect(modalOf(wrapper).exists()).toBe(false);
+
+            await vi.advanceTimersByTimeAsync(1);
+            expect(modalOf(wrapper).exists()).toBe(true);
+            expect(wrapper.find("[data-testid='complete-card']").attributes("data-still")).toBeUndefined();
+            expect(boardOfGame(wrapper).attributes("data-celebration")).toBe("done");
+        });
+
+        it("should show the still end state and open the dialog at once when motion is not allowed", async () => {
+            vi.stubGlobal("matchMedia", (query: string) => ({ matches: query === "(prefers-reduced-motion: reduce)", media: query }));
+            const wrapper = mountGame("easy", nearlySolvedSudoku());
+
+            await fillLastCell(wrapper);
+
+            expect(boardOfGame(wrapper).attributes("data-celebration")).toBe("still");
+            expect(modalOf(wrapper).exists()).toBe(true);
+            expect(wrapper.find("[data-testid='complete-card']").attributes("data-still")).toBe("");
+        });
+
+        it("should open a still dialog, without motion, in any style when 動態效果 is off", async () => {
+            const pinia = createPinia();
+            useSettingsStore(pinia).setStyle("tactile");
+            useSettingsStore(pinia).setMotionEffects(false);
+            const gameStore = useGameStore(pinia);
+            gameStore.sudoku = nearlySolvedSudoku();
+            gameStore.setDifficulty("easy");
+            const wrapper = mount(Game, { global: { plugins: [pinia, createTestRouter()] } });
+
+            await fillLastCell(wrapper);
+
+            expect(boardOfGame(wrapper).attributes("data-celebration")).toBe("still");
+            expect(wrapper.find("[data-testid='complete-card']").attributes("data-still")).toBe("");
+        });
+
+        it("should leave no timer behind when the screen goes mid-celebration", async () => {
+            vi.useFakeTimers();
+            // Whatever an unsolved screen leaves behind is not the celebration's
+            mountGame("easy", nearlySolvedSudoku()).unmount();
+            const leftoverOfAnyScreen = vi.getTimerCount();
+            const wrapper = mountGame("easy", nearlySolvedSudoku());
+            await fillLastCell(wrapper);
+            expect(boardOfGame(wrapper).attributes("data-celebration")).toBe("playing");
+
+            wrapper.unmount();
+
+            expect(vi.getTimerCount()).toBe(leftoverOfAnyScreen);
+        });
+
+        it("should show no celebration for a game loaded already solved", () => {
+            const sudoku = nearlySolvedSudoku();
+            sudoku.fill(lastKnownEmptyCell.row, lastKnownEmptyCell.column, lastKnownEmptyCell.value);
+            const wrapper = mountGame("easy", sudoku);
+
+            expect(boardOfGame(wrapper).attributes("data-celebration")).toBeUndefined();
+            expect(modalOf(wrapper).exists()).toBe(false);
+        });
     });
 
     describe("Hint System", () => {

@@ -1,16 +1,8 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { nextTick } from "vue";
 import { mount } from "@vue/test-utils";
 import { i18n } from "@/presentation/i18n";
 import PuzzleLoader from "@/presentation/components/puzzle-loader/PuzzleLoader.vue";
-
-vi.mock("vue3-lottie", () => ({
-    Vue3Lottie: {
-        name: "Vue3Lottie",
-        props: ["animationData", "height", "width", "loop", "autoPlay"],
-        template: "<div data-testid='lottie-stub' />",
-    },
-}));
 
 describe("PuzzleLoader", () => {
     it("should not render when visible is false", () => {
@@ -29,13 +21,12 @@ describe("PuzzleLoader", () => {
         expect(wrapper.find("[data-testid='puzzle-loader']").exists()).toBe(true);
     });
 
-    it("should render the Lottie stub and custom message when visible", () => {
+    it("should hand a custom message to the style's loader", () => {
         const wrapper = mount(PuzzleLoader, {
-            props: { visible: true, message: "Generating…" },
+            props: { visible: true, message: "Checking…" },
         });
 
-        expect(wrapper.find("[data-testid='lottie-stub']").exists()).toBe(true);
-        expect(wrapper.text()).toContain("Generating…");
+        expect(wrapper.text()).toContain("Checking…");
     });
 
     it("should show the default message and follow the language when no message is passed", async () => {

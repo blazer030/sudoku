@@ -191,7 +191,16 @@ const PAPER_BOARD_CASES: PaperBoardCase[] = STYLES.paper.themes.flatMap((theme) 
         minimum,
     }));
     const circle = { label: `${prefix}: primary on selected ≥ ${LARGE_OR_ICON}`, foreground: palette.primary, background: surface("selected"), minimum: LARGE_OR_ICON };
-    return [...inks, ...apart, circle];
+    // The completion card's 完成 stamp: its date is small text in the stamp's ink; its word is large and
+    // also crosses the mask's worn rings. The solved board's red check is a mark over the sheet.
+    const stampInk = over(paperWash("--paper-stamp-ink"), palette, palette.card);
+    const wornStampInk = over({ ...paperWash("--paper-stamp-ink"), alpha: paperWash("--paper-stamp-ink").alpha * paperWash("--paper-stamp-wear").alpha }, palette, palette.card);
+    const stamp = [
+        { label: `${prefix}: stamp ink on the card ≥ ${TEXT}`, foreground: stampInk, background: palette.card, minimum: TEXT },
+        { label: `${prefix}: stamp ink in its worn rings on the card ≥ ${LARGE_OR_ICON}`, foreground: wornStampInk, background: palette.card, minimum: LARGE_OR_ICON },
+        { label: `${prefix}: check ink on the sheet ≥ ${LARGE_OR_ICON}`, foreground: over(paperWash("--paper-check-ink"), palette, surface("default")), background: surface("default"), minimum: LARGE_OR_ICON },
+    ];
+    return [...inks, ...apart, circle, ...stamp];
 });
 
 // Each style is checked in the modes it has
@@ -229,8 +238,9 @@ const HIERARCHY_CASES = modeCases((style, themeId, mode, palette) => (isExempt(O
 // on a pattern is checked on each colour rather than on their mix. Hint mode's pattern and answer cells
 // are that shade solid. The skin (--pixel-pattern-shade) draws these.
 const PIXEL_PATTERN_SHADE: Readonly<Record<ColorMode, PaletteToken>> = { light: "highlight", dark: "card" };
-// A completed group's flash (--pixel-flash-fill, --pixel-flash-ink): 掌機 inverts the cell, since its light
-// green is only 1.2:1 on the page; 紅白機 lights it in the same-digit blue under white digits
+// A completed group's blink and the solved board's line clear (--pixel-flash-fill, --pixel-flash-ink)
+// invert the cell in 掌機, as the GroupPixel board does; the light green would be only 1.2:1 on the page.
+// 紅白機 lights it in the console blue under the white ink, since near-white on black flashed too hard.
 const PIXEL_FLASH: Readonly<Record<ColorMode, { fill: PaletteToken; ink: PaletteToken }>> = {
     light: { fill: "foreground", ink: "background" },
     dark: { fill: "highlight", ink: "foreground" },
@@ -271,8 +281,9 @@ const PIXEL_BOARD_CASES: PixelBoardCase[] = STYLES.pixel.themes.flatMap(theme =>
         drawn("same digit (foreground on highlight)", palette.foreground, palette.highlight),
         // A completed group's cells flash solid, their digits in the flash's ink, and a hint's answer glows in
         // the primary's light surface ringed in the primary. Between flashes, and around the glow, digits take
-        // the foreground ink, which the cases above check on every look under them. The selected cell does
-        // neither (it is inverted; the cursor and the pop mark it), so no page-coloured digit is drawn on these.
+        // the foreground ink, which the cases above check on every look under them. The selected cell flashes
+        // like the rest (its digit takes the flash's ink too, so the case above covers it); only the hint glow
+        // skips it (it is inverted; the cursor and the pop mark it), so no page-coloured digit is drawn on that.
         drawn(`completion flash's digits (${flash.ink}) on its fill (${flash.fill})`, palette[flash.ink], palette[flash.fill]),
         // The flash must show on the cells it lights: the board and a dither's shaded pixels
         drawn(`completion flash's fill (${flash.fill}) apart from the board`, palette[flash.fill], board, LAYER_APART),
