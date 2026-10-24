@@ -31,6 +31,12 @@ export const UNRELEASED_CHANGES: ChangelogChange[] = [
     },
     {
         text: {
+            en: "Each style has its own loading and celebration effects",
+            "zh-Hant": "每種風格都有專屬的載入與過關效果",
+        },
+    },
+    {
+        text: {
             en: "Game progress is saved more reliably",
             "zh-Hant": "遊戲進度保存更可靠",
         },
