@@ -110,6 +110,53 @@ describe("pixel skin", () => {
         }
     });
 
+    describe("page background", () => {
+        const ROOT = `${SCOPE} .app-safe-area`;
+        const DARK = ':root.dark[data-style="pixel"] .app-safe-area';
+
+        it("should lay a faint LCD grid over the whole screen in 掌機", () => {
+            const grid = declarationsOf(PIXEL_CSS, `${ROOT}::before`);
+
+            expect(grid.get("background-image")).toContain("linear-gradient(");
+            expect(grid.get("background-image")).toContain("90deg");
+            expect(grid.get("background-image")).toContain("color-mix(");
+            expect(grid.get("background-size")).toBe("3px 3px");
+        });
+
+        it("should lay dots over the whole screen in 紅白機, instead of the grid", () => {
+            const dots = declarationsOf(PIXEL_CSS, `${DARK}::before`);
+
+            expect(dots.get("background-image")).toContain("radial-gradient(");
+            expect(dots.get("background-size")).toBe("4px 4px");
+        });
+
+        it("should scatter blinking stars in the top of 紅白機 only", () => {
+            const stars = declarationsOf(PIXEL_CSS, `${DARK}::after`);
+
+            expect(stars.get("background-image")?.match(/radial-gradient\(/g)).toHaveLength(3);
+            expect(stars.get("animation")).toMatch(/^pixel-blink [\d.]+s steps\(2, jump-none\) infinite$/);
+            expect(declarationsOf(PIXEL_CSS, `${ROOT}::after`).has("animation")).toBe(false);
+            expect(declarationsOf(PIXEL_CSS, `${ROOT}::after`).has("background-image")).toBe(false);
+        });
+
+        it.each(["::before", "::after"])("should fix %s behind the content, taking no taps", (pseudo) => {
+            const rule = declarationsOf(PIXEL_CSS, `${pseudo === "::before" ? ROOT : DARK}${pseudo}`);
+
+            expect(rule.get("position")).toBe("fixed");
+            expect(rule.get("z-index")).toBe("-1");
+            expect(rule.get("pointer-events")).toBe("none");
+        });
+
+        it("should draw it once, on the app root, and let the pages show it", () => {
+            expect(declarationsOf(PIXEL_CSS, skin("page")).get("background-color")).toBe("transparent");
+            expect(PIXEL_CSS.match(/\.app-safe-area::before \{/g)).toHaveLength(2);
+        });
+
+        it("should hold the stars still under reduced motion", () => {
+            expect(reducedMotionDeclarationsOf(`${DARK}::after`).get("animation")).toBe("none");
+        });
+    });
+
     it("should give a key a hard drop shadow", () => {
         const layers = shadowLayers(declarationsOf(PIXEL_CSS, skin("key")).get("box-shadow") ?? "");
 

@@ -87,11 +87,53 @@
     font-family: var(--font-pixel-digits);
 }
 
-/* Pages are flat: the palette's background, no texture */
-[data-style="pixel"] [data-skin~="page"],
+/* Pages: an LCD grid (掌機) or console dots (紅白機) over the whole screen on the app root's ::before, and
+   in 紅白機 a field of blinking stars across the top on its ::after, both fixed to the screen. The app
+   root is shared by every screen, so there is exactly one copy at any width; the page roots are clear so
+   it shows through, and the body's page colour lies under it. Below every content layer, never taking
+   taps; cards are opaque, so text and the board keep their contrast. */
+[data-style="pixel"] [data-skin~="page"] {
+    background-color: transparent;
+}
+
+/* A sticky header lets the texture through, so it does not cut a flat band out of the page */
 [data-style="pixel"] [data-skin~="page-header"] {
-    background-color: var(--color-background);
-    background-image: none;
+    background-color: color-mix(in srgb, var(--color-background) 70%, transparent);
+}
+
+[data-style="pixel"] .app-safe-area::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-image:
+        linear-gradient(color-mix(in srgb, var(--color-foreground) 5.5%, transparent) 1px, transparent 1px),
+        linear-gradient(90deg, color-mix(in srgb, var(--color-foreground) 5.5%, transparent) 1px, transparent 1px);
+    background-size: 3px 3px;
+}
+
+:root.dark[data-style="pixel"] .app-safe-area::before {
+    background-image: radial-gradient(color-mix(in srgb, var(--color-foreground) 7%, transparent) 1px, transparent 1.2px);
+    background-size: 4px 4px;
+}
+
+:root.dark[data-style="pixel"] .app-safe-area::after {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 280px;
+    z-index: -1;
+    pointer-events: none;
+    background-image:
+        radial-gradient(var(--color-foreground) 1px, transparent 1.2px),
+        radial-gradient(var(--color-primary) 1px, transparent 1.2px),
+        radial-gradient(var(--color-accent) 1px, transparent 1.2px);
+    background-size: 97px 61px, 151px 89px, 123px 113px;
+    background-position: 13px 7px, 61px 41px, 29px 71px;
+    animation: pixel-blink 1.6s steps(2, jump-none) infinite;
 }
 
 /* The Home title in wide pixel letters with a hard offset shadow */
@@ -686,6 +728,11 @@
 @media (prefers-reduced-motion: reduce) {
     [data-style="pixel"] .segmented-indicator-motion {
         transition: none;
+    }
+
+    /* The stars stay, not blinking */
+    :root.dark[data-style="pixel"] .app-safe-area::after {
+        animation: none;
     }
 
     [data-style="pixel"] [data-skin~="board"][data-hint-mode],
