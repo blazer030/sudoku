@@ -551,7 +551,7 @@ describe("pixel skin", () => {
         it("should flash a completed group in steps, leaving the hint's answer to its own glow", () => {
             const lit = keyframesOf("pixel-completion-flash").get("50%");
 
-            expect(declarationsOf(PIXEL_CSS, FLASH).get("animation")).toMatch(/^pixel-completion-flash \d+ms steps\(2, jump-none\)$/);
+            expect(declarationsOf(PIXEL_CSS, FLASH).get("animation")).toBe("pixel-completion-flash var(--group-effect-duration) steps(2, jump-none) var(--group-delay)");
             expect(lit?.get("background-color")).toBe("var(--pixel-flash-fill)");
             expect(lit?.get("color")).toBe("var(--pixel-flash-ink)");
             // The flash's fill is solid: a peer's dither would otherwise be laid over it
@@ -591,7 +591,7 @@ describe("pixel skin", () => {
             const still = reducedMotionDeclarationsOf(FLASH);
 
             expect(still.get("animation")).toBe("none");
-            // The flash's own lit look, for the 500ms each cell keeps the class
+            // The flash's own lit look, for as long as the cell is in the effect
             expect(still.get("background-color")).toBe("var(--pixel-flash-fill)");
             expect(still.get("color")).toBe("var(--pixel-flash-ink)");
             expect(still.get("background-image")).toBe("none");

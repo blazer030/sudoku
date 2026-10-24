@@ -506,7 +506,7 @@
 
 [data-style="pixel"] [data-skin~="board"] .animate-completion-flash:not(.animate-hint-reveal-glow, [data-selected]) {
     color: var(--color-foreground);
-    animation: pixel-completion-flash 500ms steps(2, jump-none);
+    animation: pixel-completion-flash var(--group-effect-duration) steps(2, jump-none) var(--group-delay);
 }
 
 [data-style="pixel"] [data-skin~="board"] .animate-completion-flash:not(.animate-hint-reveal-glow, [data-selected]) > div {
@@ -767,7 +767,7 @@
         animation: none;
     }
 
-    /* A completed group shows the flash's lit look, still, for as long as each cell is marked flashing
+    /* A completed group shows the flash's lit look, still, for as long as each cell is in the effect
        (other styles keep the colour flash itself) */
     [data-style="pixel"] [data-skin~="board"] .animate-completion-flash:not(.animate-hint-reveal-glow, [data-selected]) {
         animation: none;

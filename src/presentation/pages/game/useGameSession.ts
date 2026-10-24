@@ -1,7 +1,7 @@
 import { computed, inject, reactive } from "vue";
 import { provideGameCompleteModal, type GameCompleteAction } from "@/presentation/pages/game/components/useGameCompleteModal";
 import { BOARD_SIZE } from "@/domain/board/constants";
-import { Sudoku } from "@/domain/game/Sudoku";
+import { Sudoku, type CompletedCells, type CompletedGroup } from "@/domain/game/Sudoku";
 import { StepRecorder } from "@/domain/game/StepRecorder";
 import { useRouter } from "vue-router";
 import { useGameStore } from "@/stores/gameStore";
@@ -16,6 +16,7 @@ import { useHintActions } from "@/presentation/pages/game/useHintActions";
 import { useGameToast } from "@/presentation/pages/game/useGameToast";
 import { useMotionAllowed } from "@/presentation/composables/useMotionAllowed";
 import { useGroupEffect } from "@/presentation/pages/game/useGroupEffect";
+import { useStyleMoments } from "@/presentation/components/style-moments/styleMoments";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { ANALYTICS_KEY } from "@/application/analytics/AnalyticsService";
 
@@ -78,13 +79,16 @@ export const useGameSession = ({ onPlayAgain }: GameSessionOptions) => {
         getReplayData,
         analytics,
         onCompleted: (origin, { isNewRecord }) => {
+            // The whole board ripples, as every row completed at once
+            const allRows: CompletedGroup[] = [];
             const allCells: { row: number; column: number }[] = [];
             for (let row = 0; row < BOARD_SIZE; row++) {
+                allRows.push({ kind: "row", index: row });
                 for (let column = 0; column < BOARD_SIZE; column++) {
                     allCells.push({ row, column });
                 }
             }
-            triggerFlash(allCells, origin, () => {
+            groupEffect.play(allRows, allCells, origin, () => {
                 void gameCompleteModal.open({
                     elapsedSeconds: elapsedSeconds.value,
                     difficulty: difficulty.value,
@@ -96,7 +100,11 @@ export const useGameSession = ({ onPlayAgain }: GameSessionOptions) => {
     });
 
     const settingsStore = useSettingsStore();
-    const { triggerFlash, isFlashing } = useGroupEffect(useMotionAllowed());
+    const styleMoments = useStyleMoments();
+    const groupEffect = useGroupEffect(useMotionAllowed(), () => styleMoments.value.groupEffectMs);
+    const playGroupEffect = (completed: CompletedCells, origin: { row: number; column: number }) => {
+        groupEffect.play(completed.groups, completed.cells, origin);
+    };
 
     const gameToast = useGameToast();
 
@@ -105,7 +113,7 @@ export const useGameSession = ({ onPlayAgain }: GameSessionOptions) => {
         stepRecorder,
         autoRemoveNotes: () => settingsStore.autoRemoveNotes,
         onRevealComplete: (origin) => { checkAndComplete(origin); },
-        onGroupCompleted: triggerFlash,
+        onGroupCompleted: playGroupEffect,
         onHintReveal: outcome => { gameToast.show({ kind: "randomReveal", outcome }); },
         onNoConflicts: () => { gameToast.show({ kind: "noConflicts" }); },
         analytics,
@@ -145,7 +153,8 @@ export const useGameSession = ({ onPlayAgain }: GameSessionOptions) => {
         toastContent: gameToast.content,
         showToast: gameToast.show,
         showLeaveDialog,
-        triggerFlash,
-        isFlashing,
+        playGroupEffect,
+        groupEffect: groupEffect.effect,
+        isInGroupEffect: groupEffect.isInEffect,
     };
 };

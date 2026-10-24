@@ -1,15 +1,18 @@
 <template>
     <div
+        ref="cellElement"
         :class="[
             backgroundClass,
             positionClasses,
-            flashes ? 'animate-completion-flash' : '',
+            inGroupEffect ? 'animate-completion-flash' : '',
             pops ? 'animate-hint-reveal-glow' : '',
             leaving ? 'value-leave' : '',
         ]"
+        :data-group="inGroupEffect ? groupKinds.join(' ') : undefined"
         :data-selected="selected ? '' : undefined"
         :data-value-kind="value !== 0 ? valueKind : undefined"
         :data-variant="variant"
+        :style="placement"
         class="flex justify-center items-center aspect-square min-w-0 min-h-0"
         @animationend.self="settleFromCell"
     >
@@ -51,7 +54,9 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, toRef } from "vue";
+import { computed, nextTick, ref, toRef, useTemplateRef, watch } from "vue";
+import { BOX_SIZE } from "@/domain/board/constants";
+import type { GroupKind } from "@/domain/game/Sudoku";
 import { useMotionAllowed } from "@/presentation/composables/useMotionAllowed";
 import { useArrivalMotion } from "@/presentation/components/board-cell/useArrivalMotion";
 
@@ -73,7 +78,10 @@ const props = withDefaults(defineProps<{
     valueTextColor?: ValueTextColor;
     valueFontWeight?: ValueFontWeight;
     highlightedNote?: number | null;
-    flashing?: boolean;
+    /** The kinds of completed group (row, column, box) whose effect this cell is in; none outside one. */
+    groupKinds?: GroupKind[];
+    /** The running group effect's id; a new one restarts the cell's effect. */
+    groupEffectId?: number | null;
     noteTone?: NoteTone;
     emphasizedDigits?: number[];
     popping?: boolean;
@@ -87,7 +95,8 @@ const props = withDefaults(defineProps<{
     valueTextColor: "normal",
     valueFontWeight: "semibold",
     highlightedNote: null,
-    flashing: false,
+    groupKinds: () => [],
+    groupEffectId: null,
     noteTone: "player",
     emphasizedDigits: () => [],
     popping: false,
@@ -126,7 +135,27 @@ const VALUE_FONT_WEIGHTS: Record<ValueFontWeight, string> = {
 // The cell's own colour animations (a completion flash, a hint's glow) run on their own clock, and
 // animations ending inside the cell bubble up, so neither does.
 const motionAllowed = useMotionAllowed();
-const flashes = computed(() => props.flashing && motionAllowed());
+// While a new effect takes over a cell still in the old one, the cell is shown out of it for a moment,
+// so its CSS animations start again from the new origin
+const restartingGroupEffect = ref(false);
+const inGroupEffect = computed(() => props.groupKinds.length > 0 && !restartingGroupEffect.value && motionAllowed());
+const cellElement = useTemplateRef<HTMLElement>("cellElement");
+watch(() => props.groupEffectId, (id, previousId) => {
+    if (id === null || previousId === null || props.groupKinds.length === 0) return;
+    restartingGroupEffect.value = true;
+    void nextTick(() => {
+        // Reading its size makes the browser see the cell without the effect before it comes back
+        void cellElement.value?.offsetWidth;
+        restartingGroupEffect.value = false;
+    });
+});
+
+// Where the cell sits, counted from 0, for a style's effects to work from
+const placement = computed(() => ({
+    "--cell-row": props.row,
+    "--cell-column": props.column,
+    "--cell-box": Math.floor(props.row / BOX_SIZE) * BOX_SIZE + Math.floor(props.column / BOX_SIZE),
+}));
 const pops = computed(() => props.popping && motionAllowed());
 const { arriving, leaving, settle } = useArrivalMotion(toRef(props, "value"), toRef(props, "popping"));
 

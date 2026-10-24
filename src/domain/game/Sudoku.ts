@@ -10,8 +10,17 @@ import { BoardState } from "@/domain/solver/BoardState";
 import { CellReference, Elimination } from "@/domain/solver/SolveStep";
 import { TechniqueSolver } from "@/domain/solver/TechniqueSolver";
 
+export type GroupKind = "row" | "column" | "box";
+
+/** A completed row, column or box; boxes are numbered from 0 at the top left, in reading order. */
+export interface CompletedGroup {
+    kind: GroupKind;
+    index: number;
+}
+
 export interface CompletedCells {
     cells: { row: number; column: number }[];
+    groups: CompletedGroup[];
 }
 
 export class Sudoku {
@@ -72,6 +81,7 @@ export class Sudoku {
 
     public findCompletedGroups(row: number, column: number): CompletedCells {
         const cells: { row: number; column: number }[] = [];
+        const groups: CompletedGroup[] = [];
         const seen = new Set<string>();
 
         const addCell = (cellRow: number, cellColumn: number) => {
@@ -83,16 +93,19 @@ export class Sudoku {
         };
 
         if (this.isRowComplete(row)) {
+            groups.push({ kind: "row", index: row });
             for (let columnIndex = 0; columnIndex < BOARD_SIZE; columnIndex++) addCell(row, columnIndex);
         }
 
         if (this.isColumnComplete(column)) {
+            groups.push({ kind: "column", index: column });
             for (let rowIndex = 0; rowIndex < BOARD_SIZE; rowIndex++) addCell(rowIndex, column);
         }
 
         if (this.isBoxComplete(row, column)) {
             const boxRowStart = Math.floor(row / BOX_SIZE) * BOX_SIZE;
             const boxColStart = Math.floor(column / BOX_SIZE) * BOX_SIZE;
+            groups.push({ kind: "box", index: boxRowStart + boxColStart / BOX_SIZE });
             for (let boxRow = boxRowStart; boxRow < boxRowStart + BOX_SIZE; boxRow++) {
                 for (let boxColumn = boxColStart; boxColumn < boxColStart + BOX_SIZE; boxColumn++) {
                     addCell(boxRow, boxColumn);
@@ -100,7 +113,7 @@ export class Sudoku {
             }
         }
 
-        return { cells };
+        return { cells, groups };
     }
 
     private isRowComplete(row: number): boolean {

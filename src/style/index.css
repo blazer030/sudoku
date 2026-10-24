@@ -178,8 +178,15 @@
     pointer-events: none;
 }
 
-/* Completion flash animation. It starts and ends on the card colour unless a style says what
-   the cell rests on (--completion-flash-rest). */
+/* A group effect ripples out from the cell that completed it: a cell starts one ripple step later for
+   each row and column between it and the origin (max(a, -a) is |a|). The board sets the origin, the
+   step and one cell's duration while the effect runs. */
+[data-group-effect] [data-group] {
+  --group-delay: calc((max(var(--cell-row) - var(--origin-row), var(--origin-row) - var(--cell-row)) + max(var(--cell-column) - var(--origin-column), var(--origin-column) - var(--cell-column))) * var(--group-ripple-step));
+}
+
+/* Completion flash animation, the default group effect. It starts and ends on the card colour unless a
+   style says what the cell rests on (--completion-flash-rest). */
 @keyframes completion-flash {
   0% { background-color: var(--completion-flash-rest, var(--color-card)); }
   50% { background-color: var(--color-highlight); }
@@ -187,7 +194,7 @@
 }
 
 .animate-completion-flash {
-  animation: completion-flash 500ms ease-in-out;
+  animation: completion-flash var(--group-effect-duration) ease-in-out var(--group-delay);
 }
 
 /* The answer a Reveal Cell hint fills in grows past its size and settles back. */

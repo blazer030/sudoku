@@ -601,6 +601,45 @@ describe("Sudoku", () => {
             expect(uniqueKeys.size).toBe(17); // 9 + 9 - 1 shared
         });
 
+        it("should name a completed row by its kind and index", () => {
+            const sudoku = createKnownSudoku();
+            // Row 4 empty: 1→2, 2→6, 4→5, 6→7, 7→9
+            sudoku.fill(4, 1, 2);
+            sudoku.fill(4, 2, 6);
+            sudoku.fill(4, 4, 5);
+            sudoku.fill(4, 6, 7);
+            sudoku.fill(4, 7, 9);
+
+            const result = sudoku.findCompletedGroups(4, 7);
+
+            expect(result.groups).toEqual([{ kind: "row", index: 4 }]);
+        });
+
+        it("should name a row and a box completed by one entry together", () => {
+            const sudoku = createKnownSudoku();
+            // Row 4 but (4,2), then the rest of box 3: (3,1)→5, (3,2)→9, (5,1)→1, (5,2)→3
+            sudoku.fill(4, 1, 2);
+            sudoku.fill(4, 4, 5);
+            sudoku.fill(4, 6, 7);
+            sudoku.fill(4, 7, 9);
+            sudoku.fill(3, 1, 5);
+            sudoku.fill(3, 2, 9);
+            sudoku.fill(5, 1, 1);
+            sudoku.fill(5, 2, 3);
+            sudoku.fill(4, 2, 6);
+
+            const result = sudoku.findCompletedGroups(4, 2);
+
+            expect(result.groups).toEqual([{ kind: "row", index: 4 }, { kind: "box", index: 3 }]);
+        });
+
+        it("should name no group when none is complete", () => {
+            const sudoku = createKnownSudoku();
+            sudoku.fill(0, 2, 4);
+
+            expect(sudoku.findCompletedGroups(0, 2).groups).toEqual([]);
+        });
+
         it("should return empty when cell has wrong value even if all filled", () => {
             const sudoku = createKnownSudoku();
             // Fill row 0 but with wrong value at (0,8)

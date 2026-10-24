@@ -5,6 +5,7 @@ import { mount } from "@vue/test-utils";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { ARRIVAL_SETTLE_MS } from "@/presentation/components/board-cell/useArrivalMotion";
 import BoardCell from "@/presentation/components/board-cell/BoardCell.vue";
+import { declarationsOf } from "@/__tests__/style/styleSheetRules";
 
 describe("BoardCell", () => {
     afterEach(() => {
@@ -203,7 +204,7 @@ describe("BoardCell", () => {
         it("should keep the leaving mark when the cell's own colour animation ends, as a completion flash does", async () => {
             // A flash already running when the digit is erased would otherwise cut the burst short
             stubReducedMotion(false);
-            const wrapper = mountCell({ value: 5, flashing: true });
+            const wrapper = mountCell({ value: 5, groupKinds: ["row"], groupEffectId: 1 });
 
             await wrapper.setProps({ value: 0 });
             await wrapper.trigger("animationend", { pseudoElement: "" });
@@ -403,10 +404,53 @@ describe("BoardCell", () => {
         expect(wrapper.find("[data-testid='eliminated-note-2']").text()).toBe("2");
     });
 
-    it("should apply flash animation class when flashing", () => {
-        const wrapper = mountCell({ value: 0, flashing: true });
+    it("should play the group effect while in one", () => {
+        const wrapper = mountCell({ value: 0, groupKinds: ["row"], groupEffectId: 1 });
 
         expect(wrapper.classes()).toContain("animate-completion-flash");
+    });
+
+    it("should place itself on the board through its row, column and box, counted from zero", () => {
+        const style = mountCell({ row: 4, column: 7 }).attributes("style");
+
+        expect(style).toContain("--cell-row: 4");
+        expect(style).toContain("--cell-column: 7");
+        expect(style).toContain("--cell-box: 5");
+    });
+
+    it("should name the kinds of completed group it belongs to while in an effect", () => {
+        expect(mountCell({ groupKinds: ["row", "box"], groupEffectId: 1 }).attributes("data-group")).toBe("row box");
+        expect(mountCell({}).attributes("data-group")).toBeUndefined();
+    });
+
+    it("should restart its effect when a new effect takes over while it is still marked", async () => {
+        // A CSS animation starts again only once its cell has been seen without it
+        const wrapper = mountCell({ groupKinds: ["row"], groupEffectId: 1 });
+        const classHistory: string[] = [];
+        const observer = new MutationObserver((records) => {
+            for (const record of records) classHistory.push(record.oldValue ?? "");
+        });
+        observer.observe(wrapper.element as HTMLElement, { attributes: true, attributeFilter: ["class"], attributeOldValue: true });
+
+        await wrapper.setProps({ groupKinds: ["row", "column"], groupEffectId: 2 });
+        await nextTick();
+        await nextTick();
+        observer.disconnect();
+
+        expect(classHistory.some(classes => !classes.includes("animate-completion-flash"))).toBe(true);
+        expect(wrapper.classes()).toContain("animate-completion-flash");
+        expect(wrapper.attributes("data-group")).toBe("row column");
+    });
+
+    it("should run the default group effect from the cell's own delay, rippling from the origin", () => {
+        const indexCss = readFileSync("src/style/index.css", "utf8");
+
+        expect(declarationsOf(indexCss, ".animate-completion-flash").get("animation"))
+            .toBe("completion-flash var(--group-effect-duration) ease-in-out var(--group-delay)");
+        const delay = declarationsOf(indexCss, "[data-group-effect] [data-group]").get("--group-delay") ?? "";
+        expect(delay).toContain("max(var(--cell-row) - var(--origin-row), var(--origin-row) - var(--cell-row))");
+        expect(delay).toContain("max(var(--cell-column) - var(--origin-column), var(--origin-column) - var(--cell-column))");
+        expect(delay).toContain("* var(--group-ripple-step)");
     });
 
     it("should glow the whole cell and pop the digit while popping", () => {
@@ -418,7 +462,7 @@ describe("BoardCell", () => {
 
     it("should neither flash, glow nor pop while motion effects are off", () => {
         useSettingsStore().setMotionEffects(false);
-        const wrapper = mountCell({ value: 5, flashing: true, popping: true });
+        const wrapper = mountCell({ value: 5, groupKinds: ["row"], groupEffectId: 1, popping: true });
 
         expect(wrapper.classes()).not.toContain("animate-completion-flash");
         expect(wrapper.classes()).not.toContain("animate-hint-reveal-glow");

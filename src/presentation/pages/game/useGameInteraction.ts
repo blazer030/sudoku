@@ -1,6 +1,6 @@
 import { computed, ref } from "vue";
 import { BOARD_SIZE, BOX_SIZE } from "@/domain/board/constants";
-import type { Sudoku } from "@/domain/game/Sudoku";
+import type { CompletedCells, Sudoku } from "@/domain/game/Sudoku";
 import type { StepRecorder } from "@/domain/game/StepRecorder";
 import { InputMode } from "@/presentation/pages/game/InputMode";
 
@@ -9,7 +9,7 @@ interface GameInteractionOptions {
     stepRecorder: StepRecorder;
     clearErrors: () => void;
     checkAndComplete: (origin: { row: number; column: number }) => void;
-    onGroupCompleted?: (cells: { row: number; column: number }[], origin: { row: number; column: number }) => void;
+    onGroupCompleted?: (completed: CompletedCells, origin: { row: number; column: number }) => void;
     autoRemoveNotes: () => boolean;
     /** True while the board ignores the player, e.g. during hint mode. */
     isLocked?: () => boolean;
@@ -98,7 +98,7 @@ export const useGameInteraction = ({
         stepRecorder.record(sudoku.puzzle, "fill", row, column, value);
         if (!sudoku.isCompleted()) {
             const completed = sudoku.findCompletedGroups(row, column);
-            if (completed.cells.length > 0) onGroupCompleted?.(completed.cells, { row, column });
+            if (completed.cells.length > 0) onGroupCompleted?.(completed, { row, column });
         }
         checkAndComplete({ row, column });
         if (isDigitCompleted(value)) selectedDigit.value = null;

@@ -12,7 +12,8 @@
         :value-font-weight="valueFontWeight"
         :value-kind="puzzleCell.isClue ? 'given' : 'entered'"
         :highlighted-note="highlightedNote"
-        :flashing="flashing"
+        :group-kinds="groupKinds"
+        :group-effect-id="groupEffectId"
         :note-tone="hint?.candidates ? 'solver' : 'player'"
         :eliminated-digits="hint?.eliminated ?? []"
         :emphasized-digits="hint?.emphasized ?? []"
@@ -34,6 +35,7 @@ import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import BoardCell, { type CellVariant, type ValueTextColor, type ValueFontWeight } from "@/presentation/components/board-cell/BoardCell.vue";
 import { PuzzleCell } from "@/domain/board/PuzzleCell";
+import type { GroupKind } from "@/domain/game/Sudoku";
 import { useLongPress } from "@/presentation/composables/useLongPress";
 import type { StepCellView, StepHighlight } from "@/presentation/components/step-presentation/stepCellView";
 import { vPress } from "@/presentation/directives/press";
@@ -47,7 +49,9 @@ const props = withDefaults(defineProps<{
     peer?: boolean;
     selectedDigit?: number | null;
     error?: boolean;
-    flashing?: boolean;
+    /** The kinds of completed group whose effect this cell is in. */
+    groupKinds?: GroupKind[];
+    groupEffectId?: number | null;
     highlightSameDigit?: boolean;
     /** While hint mode is on, how the hint wants this cell shown; it replaces the normal highlights. */
     hint?: StepCellView | null;
@@ -59,6 +63,8 @@ const props = withDefaults(defineProps<{
     selectedDigit: null,
     highlightSameDigit: true,
     hint: null,
+    groupKinds: () => [],
+    groupEffectId: null,
     revealed: false,
     interactive: true,
 });

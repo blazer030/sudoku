@@ -1,46 +1,74 @@
-import { ref } from "vue";
+import { getCurrentScope, onScopeDispose, ref } from "vue";
+import { BOX_SIZE } from "@/domain/board/constants";
+import type { CompletedGroup, GroupKind } from "@/domain/game/Sudoku";
+import type { GroupEffect } from "@/presentation/components/style-moments/styleMoments";
 
-const FLASH_DURATION = 500;
-const RIPPLE_DELAY = 60;
+/** How much later a cell's effect starts for each row and column between it and the origin. */
+export const GROUP_RIPPLE_STEP_MS = 60;
 
-export const useGroupEffect = (enabled: () => boolean = () => true) => {
-    const flashingCells = ref(new Set<string>());
+interface CellPosition {
+    row: number;
+    column: number;
+}
 
-    const triggerFlash = (
-        cells: { row: number; column: number }[],
-        origin: { row: number; column: number },
-        onComplete?: () => void,
-    ) => {
-        if (!enabled() || cells.length === 0) {
+/**
+ * The effect a completed row, column or box plays. The cells are marked all at once with the kinds
+ * of group they belong to; each cell's own CSS delay (from its distance to the origin) makes the
+ * ripple. `durationMs` is one cell's effect, so the whole effect ends once the farthest cell's has run.
+ */
+export const useGroupEffect = (motionAllowed: () => boolean, durationMs: () => number) => {
+    const effect = ref<GroupEffect | null>(null);
+    let cellKinds = new Map<string, GroupKind[]>();
+    let nextId = 1;
+    let endTimer: ReturnType<typeof setTimeout> | null = null;
+    let pendingComplete: (() => void) | undefined;
+
+    const end = () => {
+        if (endTimer !== null) clearTimeout(endTimer);
+        endTimer = null;
+        effect.value = null;
+        cellKinds = new Map();
+        const onComplete = pendingComplete;
+        pendingComplete = undefined;
+        onComplete?.();
+    };
+
+    const play = (groups: CompletedGroup[], cells: CellPosition[], origin: CellPosition, onComplete?: () => void) => {
+        // A new effect replaces a running one; whatever waited on the old one is not left hanging
+        if (effect.value !== null) end();
+        if (!motionAllowed() || cells.length === 0) {
             onComplete?.();
             return;
         }
 
-        let maxDelay = 0;
-        for (const cell of cells) {
-            const key = `${cell.row},${cell.column}`;
-            const distance = Math.abs(cell.row - origin.row) + Math.abs(cell.column - origin.column);
-            const delay = distance * RIPPLE_DELAY;
-            if (delay > maxDelay) maxDelay = delay;
+        const isIn = (group: CompletedGroup, cell: CellPosition): boolean => {
+            if (group.kind === "row") return cell.row === group.index;
+            if (group.kind === "column") return cell.column === group.index;
+            return Math.floor(cell.row / BOX_SIZE) * BOX_SIZE + Math.floor(cell.column / BOX_SIZE) === group.index;
+        };
+        cellKinds = new Map(cells.map(cell =>
+            [`${cell.row},${cell.column}`, groups.filter(group => isIn(group, cell)).map(group => group.kind)]));
 
-            setTimeout(() => {
-                flashingCells.value = new Set([...flashingCells.value, key]);
-                setTimeout(() => {
-                    const next = new Set(flashingCells.value);
-                    next.delete(key);
-                    flashingCells.value = next;
-                }, FLASH_DURATION);
-            }, delay);
-        }
-
-        if (onComplete) {
-            setTimeout(onComplete, maxDelay + FLASH_DURATION);
-        }
+        const farthest = Math.max(...cells.map(cell =>
+            Math.abs(cell.row - origin.row) + Math.abs(cell.column - origin.column)));
+        pendingComplete = onComplete;
+        effect.value = { id: nextId++, groups, origin };
+        endTimer = setTimeout(end, farthest * GROUP_RIPPLE_STEP_MS + durationMs());
     };
 
-    const isFlashing = (row: number, column: number): boolean => {
-        return flashingCells.value.has(`${row},${column}`);
+    const isInEffect = (row: number, column: number): GroupKind[] => {
+        if (effect.value === null) return [];
+        return cellKinds.get(`${row},${column}`) ?? [];
     };
 
-    return { triggerFlash, isFlashing };
+    // Leaving the screen mid-effect leaves no timer to call back into it
+    if (getCurrentScope()) {
+        onScopeDispose(() => {
+            if (endTimer !== null) clearTimeout(endTimer);
+            endTimer = null;
+            pendingComplete = undefined;
+        });
+    }
+
+    return { play, effect, isInEffect };
 };

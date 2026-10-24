@@ -18,6 +18,8 @@ import type { PuzzleCell } from "@/domain/board/PuzzleCell";
 import { createMultiStepSudoku } from "@/__tests__/fixtures/multiStepPuzzle";
 import { ANALYTICS_KEY, type AnalyticsService } from "@/application/analytics/AnalyticsService";
 import { expectKeyRowsToShrinkToFit } from "@/__tests__/fixtures/digitKeyRows";
+import { STYLE_MOMENTS } from "@/presentation/components/style-moments/styleMoments";
+import { GROUP_RIPPLE_STEP_MS } from "@/presentation/pages/game/useGroupEffect";
 
 const createTestRouter = () => {
     return createRouter({
@@ -819,6 +821,90 @@ describe("Game", () => {
                 expect(cell.text()).toBe(knownPuzzle[row][column] === 0 ? "" : String(knownPuzzle[row][column]));
             }
         }
+    });
+
+    describe("Group effects", () => {
+        // Row 4's gaps and their answers; the last one, (4, 7), completes the row
+        const ROW_4_GAPS: readonly (readonly [number, number])[] = [[1, 2], [2, 6], [4, 5], [6, 7], [7, 9]];
+        const EFFECT_MS = STYLE_MOMENTS.minimal.groupEffectMs;
+
+        const fillCell = async (wrapper: GameWrapper, row: number, column: number, value: number) => {
+            await wrapper.find(`[data-testid='cell-${row}-${column}']`).trigger("click");
+            await wrapper.find(`[data-testid='number-${value}']`).trigger("click");
+        };
+
+        const completeRow4 = async (wrapper: GameWrapper) => {
+            for (const [column, value] of ROW_4_GAPS) await fillCell(wrapper, 4, column, value);
+        };
+
+        afterEach(() => {
+            vi.unstubAllGlobals();
+        });
+
+        it("should place every cell on the board through its row, column and box", () => {
+            const style = mountGame().find("[data-testid='cell-4-7']").attributes("style");
+
+            expect(style).toContain("--cell-row: 4");
+            expect(style).toContain("--cell-column: 7");
+            expect(style).toContain("--cell-box: 5");
+        });
+
+        it("should mark a completed row's cells, and the board with the effect and its origin, until it ends", async () => {
+            vi.useFakeTimers();
+            const wrapper = mountGame();
+            const board = wrapper.find("[data-testid='game-board']");
+
+            await completeRow4(wrapper);
+
+            expect(board.attributes("data-group-effect")).toBeDefined();
+            expect(board.attributes("style")).toContain("--origin-row: 4");
+            expect(board.attributes("style")).toContain("--origin-column: 7");
+            expect(wrapper.find("[data-testid='cell-4-0']").attributes("data-group")).toBe("row");
+            expect(wrapper.find("[data-testid='cell-3-0']").attributes("data-group")).toBeUndefined();
+
+            // The farthest cell, (4, 0), is 7 steps from the origin
+            vi.advanceTimersByTime(7 * GROUP_RIPPLE_STEP_MS + EFFECT_MS);
+            await nextTick();
+
+            expect(board.attributes("data-group-effect")).toBeUndefined();
+            expect(wrapper.find("[data-testid='cell-4-0']").attributes("data-group")).toBeUndefined();
+        });
+
+        it("should show nothing at all for a completed row when motion is not allowed", async () => {
+            vi.stubGlobal("matchMedia", (query: string) => ({ matches: query === "(prefers-reduced-motion: reduce)", media: query }));
+            const wrapper = mountGame();
+
+            await completeRow4(wrapper);
+
+            expect(wrapper.find("[data-testid='game-board']").attributes("data-group-effect")).toBeUndefined();
+            expect(wrapper.find("[data-testid='cell-4-0']").attributes("data-group")).toBeUndefined();
+            expect(wrapper.find("[data-testid='cell-4-0']").classes()).not.toContain("animate-completion-flash");
+        });
+
+        it("should hand the board to a second completed group at once, leaving none of the first marked", async () => {
+            vi.useFakeTimers();
+            const wrapper = mountGame();
+            const board = wrapper.find("[data-testid='game-board']");
+            await completeRow4(wrapper);
+            const firstId = board.attributes("data-group-effect");
+
+            // Column 4's other gaps: (2, 4) → 4, then (6, 4) → 3 completes it
+            vi.advanceTimersByTime(100);
+            await fillCell(wrapper, 2, 4, 4);
+            await fillCell(wrapper, 6, 4, 3);
+
+            expect(board.attributes("data-group-effect")).not.toBe(firstId);
+            expect(wrapper.find("[data-testid='cell-4-0']").attributes("data-group")).toBeUndefined();
+            expect(wrapper.find("[data-testid='cell-4-4']").attributes("data-group")).toBe("column");
+
+            // Input is never blocked while it plays
+            await fillCell(wrapper, 0, 2, 4);
+            expect(wrapper.find("[data-testid='cell-0-2']").text()).toBe("4");
+
+            vi.advanceTimersByTime(6 * GROUP_RIPPLE_STEP_MS + EFFECT_MS);
+            await nextTick();
+            expect(wrapper.findAll("[data-group]")).toHaveLength(0);
+        });
     });
 
     describe("Hint System", () => {
