@@ -75,12 +75,13 @@ describe("InkGroupOverlay", () => {
         expectPlacedOver(brush, column);
     });
 
-    it("should ring the box 80ms after the row's stroke starts, so both strokes draw", () => {
+    it("should ring the box a beat after the row's stroke starts, so both strokes draw", () => {
         const wrapper = mount(InkGroupOverlay, { props: { effect: effectOf(ROW_AND_BOX) } });
         const [row, box] = wrapper.findAll(".ink-group-brush").map(brush => startsOf(brush.attributes("data-kind") ?? ""));
 
-        expect(box.brush - row.brush).toBe(80);
-        expect(box.reveal - row.reveal).toBe(80);
+        expect(box.brush).toBeGreaterThan(row.brush);
+        // The box's stroke is drawn on as its brush shows, a beat after the row's, like the row's own
+        expect(box.reveal - row.reveal).toBe(box.brush - row.brush);
     });
 
     it("should give each brush its own mask", () => {

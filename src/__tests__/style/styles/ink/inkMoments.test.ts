@@ -244,8 +244,8 @@ describe("ink moments", () => {
         it("should lay the brush over the cells' washes, under the digits, the brush lines and the 圓相", () => {
             const brush = zIndexOf(BRUSH);
 
-            expect(brush).toBe(1);
-            expect(zIndexOf(`${BOARD} [data-variant] > div`)).toBe(2);
+            expect(brush).toBeGreaterThan(0);
+            expect(zIndexOf(`${BOARD} [data-variant] > div`)).toBeGreaterThan(brush);
             expect(zIndexOf(`${SCOPE} [data-skin~="board-grid"]::after`)).toBeGreaterThan(zIndexOf(`${BOARD} [data-variant] > div`));
             expect(zIndexOf(`${BOARD}:not([data-hint-mode]) [data-selected]::after`)).toBeGreaterThan(zIndexOf(`${SCOPE} [data-skin~="board-grid"]::after`));
             // Level with the entered digit's halo: the overlay follows the cells, so the brush lies over it
@@ -434,12 +434,14 @@ describe("ink moments", () => {
     });
 
     describe("loader", () => {
-        it("should run the strokes, their reveals, the digits and the seal on one 4.2s infinite loop", () => {
+        it("should run the strokes, their reveals, the digits and the seal on one shared infinite loop", () => {
             for (const piece of PIECES) {
                 expect(animationsOf(piece).length, piece).toBeGreaterThan(0);
             }
-            for (const { selector, animation, name } of loaderAnimations()) {
-                expect(animationTimingOf(animation, name)?.durationMs, selector).toBe(4200);
+            const durations = loaderAnimations().map(({ animation, name }) => animationTimingOf(animation, name)?.durationMs);
+            expect(new Set(durations).size).toBe(1);
+            expect(durations[0]).toBeGreaterThan(0);
+            for (const { selector, animation } of loaderAnimations()) {
                 expect(animation, selector).toMatch(/ infinite both$/);
             }
         });

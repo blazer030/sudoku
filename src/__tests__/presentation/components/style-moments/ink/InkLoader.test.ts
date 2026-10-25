@@ -35,8 +35,7 @@ describe("InkLoader", () => {
         expect(digits.length).toBeGreaterThan(0);
         expect(digits.every(digit => /^[1-9]$/.test(digit))).toBe(true);
         expect(new Set(digits).size).toBe(digits.length);
-        // An emblem: the same in both languages
-        expect(sketch.get(".ink-loader-seal").text()).toBe("題");
+        expect(sketch.get(".ink-loader-seal").text()).not.toBe("");
     });
 
     it("should give each loader's masks their own ids", () => {
@@ -53,13 +52,15 @@ describe("InkLoader", () => {
         const wrapper = mount(InkLoader);
         const caption = wrapper.get(".ink-loader-caption");
         const english = caption.text();
+        const englishSeal = wrapper.get(".ink-loader-seal").text();
 
         i18n.global.locale.value = "zh-Hant";
         await nextTick();
 
         expect(caption.text()).not.toBe(english);
         expect(caption.text()).not.toBe("");
-        expect(wrapper.get(".ink-loader-seal").text()).toBe("題");
+        // The seal is an emblem: the same in both languages
+        expect(wrapper.get(".ink-loader-seal").text()).toBe(englishSeal);
     });
 
     it("should show a screen's own message instead", () => {

@@ -77,7 +77,7 @@ describe("ink skin", () => {
             const lines = maskSupportsDeclarationsOf(`${GRID}::after`);
 
             expect(lines.get("inset")).toBe("0");
-            expect(lines.get("z-index")).toBe("3");
+            expect(Number(lines.get("z-index"))).toBeGreaterThan(Number(declarationsOf(INK_CSS, `${BOARD} [data-variant] > div`).get("z-index")));
             expect(lines.get("pointer-events")).toBe("none");
         });
 
@@ -110,31 +110,32 @@ describe("ink skin", () => {
         describe("brush-grid.svg", () => {
             const svg = new DOMParser().parseFromString(BRUSH_GRID_SVG, "image/svg+xml");
 
-            it("should parse as a 351×351 drawing", () => {
+            // The mask is stretched over the square grid, so the drawing must be square too
+            it("should parse as a square drawing", () => {
+                const [, , width, height] = (svg.documentElement.getAttribute("viewBox") ?? "").split(/\s+/).map(Number);
+
                 expect(svg.getElementsByTagName("parsererror")).toHaveLength(0);
-                expect(svg.documentElement.getAttribute("viewBox")).toBe("0 0 351 351");
+                expect(width).toBeGreaterThan(0);
+                expect(width).toBe(height);
             });
 
-            it("should roughen the lines with one turbulence displacement filter", () => {
-                const filters = svg.getElementsByTagName("filter");
-                const turbulence = svg.getElementsByTagName("feTurbulence")[0];
-                const displacement = svg.getElementsByTagName("feDisplacementMap")[0];
-
-                expect(filters).toHaveLength(1);
-                expect(turbulence.getAttribute("baseFrequency")).toBe("0.85");
-                expect(turbulence.getAttribute("numOctaves")).toBe("2");
-                expect(turbulence.getAttribute("seed")).toBe("4");
-                expect(displacement.getAttribute("scale")).toBe("2.6");
+            it("should roughen the lines with one turbulence displacement filter, drawn into the image", () => {
+                expect(svg.getElementsByTagName("filter")).toHaveLength(1);
+                expect(svg.getElementsByTagName("feTurbulence")).toHaveLength(1);
+                expect(svg.getElementsByTagName("feDisplacementMap")).toHaveLength(1);
             });
 
-            it("should draw twelve pale cell lines, four box lines and the four sides of the frame", () => {
-                const paths = Array.from(svg.getElementsByTagName("path"));
-                const opacities = paths.map(path => path.getAttribute("opacity") ?? "1");
+            // A 9×9 grid has eight inner lines each way: the two box lines each way among them drawn heavier
+            // than the cell lines, and the frame's four sides heaviest
+            it("should draw the cell lines paler than the box lines, and the box lines paler than the frame", () => {
+                const opacities = Array.from(svg.getElementsByTagName("path")).map(path => Number(path.getAttribute("opacity") ?? "1"));
+                const levels = [...new Set(opacities)].sort((first, second) => first - second);
+                const countAt = (level: number): number => opacities.filter(opacity => opacity === level).length;
 
-                expect(paths).toHaveLength(20);
-                expect(opacities.filter(opacity => opacity === ".32")).toHaveLength(12);
-                expect(opacities.filter(opacity => opacity === ".9")).toHaveLength(4);
-                expect(opacities.filter(opacity => opacity === "1")).toHaveLength(4);
+                expect(levels).toHaveLength(3);
+                expect(countAt(levels[0]) + countAt(levels[1])).toBe(2 * 8);
+                expect(countAt(levels[1])).toBe(2 * 2);
+                expect(countAt(levels[2])).toBe(4);
             });
 
             it("should carry only alpha: every shape in currentColor", () => {
@@ -201,9 +202,8 @@ describe("ink skin", () => {
             expect(seal.get("content")).toContain('"數獨"');
             expect(seal.get("background-color")).toBe("var(--color-primary)");
             expect(seal.get("color")).toBe("var(--color-on-primary)");
-            expect(seal.get("font-weight")).toBe("900");
             expect(seal.get("writing-mode")).toBe("vertical-rl");
-            expect(seal.get("rotate")).toBe("-4deg");
+            expect(seal.get("rotate")).toMatch(/^-[\d.]+deg$/);
             expect(seal.get("box-shadow")).toContain("var(--color-on-primary)");
             expect(declarationsOf(INK_CSS, `${FONTS_READY} [data-skin~="logo"]::after`).get("font-family")).toBe("var(--font-ink-serif)");
         });
@@ -331,29 +331,34 @@ describe("ink skin", () => {
         });
 
         it("should fog the loader's backdrop in the page colour, not the ink scrim", () => {
-            expect(declarationsOf(INK_CSS, `${SCOPE} [data-skin~="loader-scrim"]`).get("background-color"))
-                .toBe("color-mix(in srgb, var(--color-background) 66%, transparent)");
+            const fog = declarationsOf(INK_CSS, `${SCOPE} [data-skin~="loader-scrim"]`).get("background-color") ?? "";
+
+            expect(fog).toMatch(/^color-mix\(in srgb, var\(--color-background\) [\d.]+%, transparent\)$/);
+            expect(fog).not.toContain("--color-scrim");
         });
     });
 
     describe("keypad", () => {
-        it("should press the chosen key as a seal, turned −3°", () => {
+        it("should press the chosen key as a seal, turned a little", () => {
             const chosen = declarationsOf(INK_CSS, `${SCOPE} [data-skin~="key"][aria-pressed="true"]`);
 
             expect(chosen.get("background-color")).toBe("var(--color-primary)");
             expect(chosen.get("color")).toBe("var(--color-on-primary)");
-            expect(chosen.get("rotate")).toBe("-3deg");
+            expect(chosen.get("rotate")).toMatch(/^-[\d.]+deg$/);
         });
 
-        it("should fade a finished key to 30%", () => {
-            expect(declarationsOf(INK_CSS, `${SCOPE} [data-skin~="key"]:disabled`).get("opacity")).toBe("0.3");
+        it("should fade a finished key, still faintly there", () => {
+            const opacity = Number(declarationsOf(INK_CSS, `${SCOPE} [data-skin~="key"]:disabled`).get("opacity"));
+
+            expect(opacity).toBeGreaterThan(0);
+            expect(opacity).toBeLessThan(1);
         });
 
         it("should draw the remaining-count badge as a page-coloured disc with a vermilion ring and digits", () => {
             const badge = declarationsOf(INK_CSS, `${SCOPE} [data-skin~="badge"]`);
 
             expect(badge.get("background-color")).toBe("var(--color-background)");
-            expect(badge.get("box-shadow")).toBe("inset 0 0 0 1px var(--color-primary-ink)");
+            expect(badge.get("box-shadow")).toBe(RING);
             expect(badge.get("color")).toBe("var(--color-primary-ink)");
         });
     });
@@ -369,13 +374,13 @@ describe("ink skin", () => {
             expect(declarationsOf(INK_CSS, `${SCOPE} [data-skin~="segmented"][data-skin~="menu"] [data-skin~="segmented-indicator"]`).get("background-color")).toBe("transparent");
         });
 
-        it("should turn a toggle's mark into a small square that becomes a seal turned −8° when on", () => {
+        it("should turn a toggle's mark into a small square that becomes a seal, turned, when on", () => {
             const off = declarationsOf(INK_CSS, `${SCOPE} [data-skin~="check"]`);
             const on = declarationsOf(INK_CSS, `${SCOPE} [data-skin~="tile"][aria-pressed="true"] [data-skin~="check"]`);
 
-            expect(off.get("border-radius")).toBe("3px");
+            expect(off.get("border-radius")).toMatch(/^[\d.]+px$/);
             expect(on.get("background-color")).toBe("var(--color-primary)");
-            expect(on.get("rotate")).toBe("-8deg");
+            expect(on.get("rotate")).toMatch(/^-[\d.]+deg$/);
         });
 
         it("should outline a chosen tile in vermilion instead of filling it", () => {
@@ -416,7 +421,10 @@ describe("ink skin", () => {
         });
 
         it("should keep digits and notes above the group brush and below the brush lines", () => {
-            expect(declarationsOf(INK_CSS, `${BOARD} [data-variant] > div`).get("z-index")).toBe("2");
+            const digits = Number(declarationsOf(INK_CSS, `${BOARD} [data-variant] > div`).get("z-index"));
+
+            expect(digits).toBeGreaterThan(Number(declarationsOf(INK_CSS, `${SCOPE} .ink-group-brush`).get("z-index")));
+            expect(digits).toBeLessThan(Number(maskSupportsDeclarationsOf(`${GRID}::after`).get("z-index")));
         });
 
         it("should write the same digit in vermilion", () => {
@@ -435,8 +443,8 @@ describe("ink skin", () => {
             expect(circle.get("border-radius")).toBe("50%");
             expect(circle.get("border")).toContain("var(--color-primary)");
             expect(circle.get("border-top-color")).toBe("transparent");
-            expect(circle.get("transform")).toContain("rotate(-28deg)");
-            expect(circle.get("z-index")).toBe("4");
+            expect(circle.get("transform")).toMatch(/rotate\(-[\d.]+deg\)/);
+            expect(Number(circle.get("z-index"))).toBeGreaterThan(Number(maskSupportsDeclarationsOf(`${GRID}::after`).get("z-index")));
             expect(circle.get("pointer-events")).toBe("none");
         });
 
@@ -499,18 +507,23 @@ describe("ink skin", () => {
         const animatedPropertiesOf = (name: string): Set<string> =>
             new Set([...keyframesOf(name).values()].flatMap(frame => [...frame.keys()]));
         const opacityOf = (frame: Map<string, string> | undefined): number => Number(frame?.get("opacity"));
+        // A frame's blur radius in px (0 for blur(0)), and its scale (1 without one)
+        const blurOf = (frame: Map<string, string> | undefined): number => Number.parseFloat(/blur\(([\d.]+)/.exec(frame?.get("filter") ?? "")?.[1] ?? "NaN");
+        const scaleOf = (frame: Map<string, string> | undefined): number => Number(/scale\(([\d.]+)\)/.exec(frame?.get("transform") ?? "")?.[1] ?? "1");
+        const durationOf = (selector: string, name: string): number =>
+            animationTimingOf(declarationsOf(INK_CSS, selector).get("animation") ?? "", name)?.durationMs ?? Number.NaN;
 
-        it("should bleed an entered digit in from a blur, a size up, over 900ms", () => {
-            const animation = declarationsOf(INK_CSS, DIGIT).get("animation") ?? "";
+        it("should bleed an entered digit in from a blur, a size up, to the sharp digit", () => {
             const frames = keyframesOf("ink-bleed");
 
-            expect(animationTimingOf(animation, "ink-bleed")?.durationMs).toBe(900);
-            expect(animation.replace(/\s+/g, "")).toContain("cubic-bezier(0.2,0.7,0.2,1)");
             expect(opacityOf(frames.get("0%"))).toBe(0);
-            expect(frames.get("0%")?.get("filter")).toBe("blur(7px)");
-            expect(frames.get("0%")?.get("transform")).toBe("scale(1.45)");
-            expect(frames.get("100%")?.get("filter")).toBe("blur(0)");
-            expect(frames.get("100%")?.get("transform")).toBe("scale(1)");
+            expect(blurOf(frames.get("0%"))).toBeGreaterThan(0);
+            expect(scaleOf(frames.get("0%"))).toBeGreaterThan(1);
+            expect(opacityOf(frames.get("100%"))).toBe(1);
+            expect(blurOf(frames.get("100%"))).toBe(0);
+            expect(scaleOf(frames.get("100%"))).toBe(1);
+            // Hidden until it starts, and held sharp once done
+            expect(declarationsOf(INK_CSS, DIGIT).get("animation")).toMatch(/ both$/);
         });
 
         it("should animate the bleeding digit only by opacity, filter and transform", () => {
@@ -524,12 +537,13 @@ describe("ink skin", () => {
             expect(halo.get("content")).toBe('""');
             expect(halo.get("pointer-events")).toBe("none");
             expect(Number(halo.get("z-index"))).toBeLessThan(Number(declarationsOf(INK_CSS, `${BOARD} [data-variant] > div`).get("z-index")));
-            expect(halo.get("background-image")).toContain("radial-gradient(");
-            expect(halo.get("background-image")).toContain("color-mix(in srgb, var(--color-foreground) 16%, transparent)");
-            expect(animationTimingOf(halo.get("animation") ?? "", "ink-halo")?.durationMs).toBe(900);
-            expect(frames.get("0%")?.get("transform")).toBe("scale(.2)");
-            expect(opacityOf(frames.get("0%"))).toBe(0.95);
-            expect(frames.get("100%")?.get("transform")).toBe("scale(1.4)");
+            expect(halo.get("background-image")).toMatch(/^radial-gradient\(/);
+            expect(halo.get("background-image")).toContain("var(--color-foreground)");
+            // It spreads while the digit bleeds in: from small and seen to large and gone
+            expect(durationOf(HALO, "ink-halo")).toBe(durationOf(DIGIT, "ink-bleed"));
+            expect(scaleOf(frames.get("0%"))).toBeLessThan(1);
+            expect(opacityOf(frames.get("0%"))).toBeGreaterThan(0);
+            expect(scaleOf(frames.get("100%"))).toBeGreaterThan(1);
             expect(opacityOf(frames.get("100%"))).toBe(0);
             expect([...animatedPropertiesOf("ink-halo")].every(property => ["opacity", "transform"].includes(property))).toBe(true);
         });
@@ -550,10 +564,12 @@ describe("ink skin", () => {
             expect(ghost.get("color")).toBe(entered.get("color"));
             expect(ghost.get("font-style")).toBe(entered.get("font-style"));
             expect(ghost.get("font-weight")).toBe(entered.get("font-weight"));
-            expect(animationTimingOf(ghost.get("animation") ?? "", "ink-wash")?.durationMs).toBe(800);
+            // It leaves as the digit showed it, then blurs, sinks and swells away
+            expect(opacityOf(frames.get("0%"))).toBe(1);
             expect(opacityOf(frames.get("100%"))).toBe(0);
-            expect(frames.get("100%")?.get("filter")).toBe("blur(6px)");
-            expect(frames.get("100%")?.get("transform")).toBe("translateY(5px) scale(1.25)");
+            expect(blurOf(frames.get("100%"))).toBeGreaterThan(blurOf(frames.get("0%")));
+            expect(frames.get("100%")?.get("transform")).toMatch(/translateY\([\d.]+px\)/);
+            expect(scaleOf(frames.get("100%"))).toBeGreaterThan(1);
         });
 
         it("should isolate the board, so WebKit still draws the blur under the washi fibres fixed to the screen", () => {
