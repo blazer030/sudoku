@@ -20,7 +20,10 @@
                 data-skin="board"
                 data-testid="game-board"
             >
-                <div class="relative flex flex-col border-3 border-foreground/20 rounded-xl">
+                <div
+                    class="relative flex flex-col border-3 border-foreground/20 rounded-xl"
+                    data-skin="board-grid"
+                >
                     <div
                         v-for="(row, rowIndex) in sudoku.puzzle"
                         :key="rowIndex"

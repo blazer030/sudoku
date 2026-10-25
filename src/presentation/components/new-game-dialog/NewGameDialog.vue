@@ -18,7 +18,10 @@
                 </div>
 
                 <div class="flex flex-col items-center gap-2">
-                    <h2 class="text-2xl font-bold text-foreground tracking-tight">
+                    <h2
+                        class="text-2xl font-bold text-foreground tracking-tight"
+                        data-skin="dialog-title"
+                    >
                         {{ t("home.giveUp.title") }}
                     </h2>
                     <p

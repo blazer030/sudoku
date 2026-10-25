@@ -83,6 +83,7 @@
                 <div
                     ref="boardGrid"
                     class="flex flex-col border-3 border-foreground/20 rounded-xl"
+                    data-skin="board-grid"
                 >
                     <div
                         v-for="(row, rowIndex) in board"

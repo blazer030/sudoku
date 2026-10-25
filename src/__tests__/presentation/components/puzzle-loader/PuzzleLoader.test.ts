@@ -21,6 +21,14 @@ describe("PuzzleLoader", () => {
         expect(wrapper.find("[data-testid='puzzle-loader']").exists()).toBe(true);
     });
 
+    it("should mark its fixed layer as the loader scrim", () => {
+        const wrapper = mount(PuzzleLoader, {
+            props: { visible: true },
+        });
+
+        expect(wrapper.get("[data-testid='puzzle-loader']").attributes("data-skin")).toBe("loader-scrim");
+    });
+
     it("should hand a custom message to the style's loader", () => {
         const wrapper = mount(PuzzleLoader, {
             props: { visible: true, message: "Checking…" },

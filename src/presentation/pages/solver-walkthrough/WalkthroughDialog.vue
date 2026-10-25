@@ -27,6 +27,7 @@
                     <h2
                         :id="titleId"
                         class="text-2xl font-bold text-foreground tracking-tight text-center"
+                        data-skin="dialog-title"
                         data-testid="walkthrough-dialog-title"
                     >
                         {{ t(content.titleKey) }}

@@ -152,6 +152,13 @@ describe("Game", () => {
         expect(wrapper.find("[data-testid='timer']").text()).toBe("01:03");
     });
 
+    it("should hold the 81 cells in the board's grid hook", () => {
+        const grid = mountGame().find("[data-testid='game-board'] [data-skin~='board-grid']");
+
+        expect(grid.exists()).toBe(true);
+        expect(grid.findAll("[data-testid^='cell-']").filter(cell => /^cell-\d-\d$/.test(cell.attributes("data-testid") ?? ""))).toHaveLength(81);
+    });
+
     it("should name the selected cell on the board, and none before a selection", async () => {
         const wrapper = mountGame();
         expect(wrapper.find("[data-testid='game-board']").attributes("data-selected-cell")).toBeUndefined();

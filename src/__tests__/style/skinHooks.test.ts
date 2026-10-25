@@ -97,6 +97,21 @@ describe("skin hooks", () => {
         expect(hasSkinToken(menuTag ?? "", "card")).toBe(true);
     });
 
+    it("should mark every dialog heading as a dialog title", () => {
+        const dialogs = [
+            "src/presentation/components/new-game-dialog/NewGameDialog.vue",
+            "src/presentation/pages/game/components/LeaveGameDialog.vue",
+            "src/presentation/pages/settings/components/ClearRecordsDialog.vue",
+            "src/presentation/pages/solver-walkthrough/WalkthroughDialog.vue",
+        ];
+
+        for (const path of dialogs) {
+            const headings = openingTags(readFileSync(path, "utf8"), "h2");
+            expect(headings.length, path).toBeGreaterThan(0);
+            expect(headings.every(tag => hasSkinToken(tag, "dialog-title")), path).toBe(true);
+        }
+    });
+
     it("should keep the skin hooks GameScreen measures", () => {
         const source = readFileSync("src/presentation/pages/game/GameScreen.vue", "utf8");
         const boardTag = openingTags(source, "\\w+").find(tag => tag.includes('data-testid="game-board"'));
