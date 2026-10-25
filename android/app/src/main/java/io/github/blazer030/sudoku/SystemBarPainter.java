@@ -15,9 +15,6 @@ import androidx.core.view.WindowInsetsControllerCompat;
  */
 final class SystemBarPainter {
 
-    /** The colours last painted, for repainting after something else resets the bars. */
-    private static AppearanceStore.SystemBarColors lastPainted;
-
     private SystemBarPainter() {}
 
     static boolean paintsBars() {
@@ -27,7 +24,6 @@ final class SystemBarPainter {
     @SuppressWarnings("deprecation") // setStatusBarColor and setNavigationBarColor only run below API 35
     static void paint(Activity activity, AppearanceStore.SystemBarColors colors) {
         if (!paintsBars()) return;
-        lastPainted = colors;
 
         Window window = activity.getWindow();
         WindowInsetsControllerCompat controller = WindowCompat.getInsetsController(window, window.getDecorView());
@@ -41,10 +37,5 @@ final class SystemBarPainter {
         boolean navigationBarCanTakeBackground = !colors.darkIcons() || Build.VERSION.SDK_INT >= Build.VERSION_CODES.O;
         window.setNavigationBarColor(navigationBarCanTakeBackground ? colors.background() : Color.BLACK);
         controller.setAppearanceLightNavigationBars(navigationBarCanTakeBackground && colors.darkIcons());
-    }
-
-    /** Paints the last colours again, if any were painted. */
-    static void repaint(Activity activity) {
-        if (lastPainted != null) paint(activity, lastPainted);
     }
 }
