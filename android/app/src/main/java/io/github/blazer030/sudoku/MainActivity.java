@@ -27,5 +27,14 @@ public class MainActivity extends BridgeActivity {
         if (systemBarColors != null && systemBarColors.darkIcons() != isNight) {
             SystemBarPainter.paint(this, systemBarColors);
         }
+
+        // From API 31 the system splash screen sets the bar icons back to the theme's light ones
+        // as it leaves, so remove it ourselves and paint the bars again
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && SystemBarPainter.paintsBars()) {
+            getSplashScreen().setOnExitAnimationListener(splashScreenView -> {
+                splashScreenView.remove();
+                SystemBarPainter.repaint(this);
+            });
+        }
     }
 }
