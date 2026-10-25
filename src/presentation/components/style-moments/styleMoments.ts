@@ -14,6 +14,7 @@ import CyberLoader from "@/presentation/components/style-moments/cyber/CyberLoad
 import CyberCelebration from "@/presentation/components/style-moments/cyber/CyberCelebration.vue";
 import CyberGroupOverlay from "@/presentation/components/style-moments/cyber/CyberGroupOverlay.vue";
 import InkLoader from "@/presentation/components/style-moments/ink/InkLoader.vue";
+import InkGroupOverlay from "@/presentation/components/style-moments/ink/InkGroupOverlay.vue";
 import type { CompletedGroup } from "@/domain/game/Sudoku";
 
 /** A group effect on the board: a new one gets a new id, which starts its drawings afresh. */
@@ -108,11 +109,15 @@ const CYBER_MOMENTS: StyleMoments = {
     celebrationBoardMs: 860,
 };
 
-// Ink borrows minimal's timings until its own group and celebration moments come
+// From the boards: the whole group plays at once. A line's brush shows from 80ms for 1000ms, its stroke
+// drawn on in the first 440ms, and the digits' halo of paper runs with it; a box's 圓相 starts 80ms later
+// and runs 1060ms, which a box's farthest cell (two steps out) just covers. The celebration still borrows
+// minimal's board phase until its own moment comes.
 const INK_MOMENTS: StyleMoments = {
     loader: InkLoader,
     celebration: null,
-    groupEffectMs: 620,
+    groupEffectMs: 1100,
+    groupOverlay: InkGroupOverlay,
     celebrationBoardMs: 640,
 };
 

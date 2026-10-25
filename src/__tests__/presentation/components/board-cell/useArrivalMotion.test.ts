@@ -192,7 +192,10 @@ describe("useArrivalMotion", () => {
                 const rule = declaration.parent;
                 if (rule?.type !== "rule" || !MOTION_CLASSES.some(motionClass => (rule as postcss.Rule).selector.includes(motionClass))) return;
                 if (declaration.value.trim() === "none") return;
-                const durations = [...declaration.value.matchAll(/(\d+(?:\.\d+)?)(ms|s)\b/g)]
+                // A completed group's own animation rides along in a combined rule (the entered digit is in
+                // its group); it is timed by the group effect, not by the arrival
+                const arrivalLayers = declaration.value.split(/,(?![^(]*\))/).filter(layer => !/\b[\w-]+-group-[\w-]+\b/.test(layer));
+                const durations = arrivalLayers.flatMap(layer => [...layer.matchAll(/(\d+(?:\.\d+)?)(ms|s)\b/g)])
                     .map(([, amount, unit]) => Number(amount) * (unit === "s" ? 1000 : 1));
                 for (const duration of durations) expect(duration, style).toBeLessThan(ARRIVAL_SETTLE_MS);
                 for (const motionClass of MOTION_CLASSES) {

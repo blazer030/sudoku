@@ -1,5 +1,7 @@
 import { readFileSync } from "fs";
 import postcss, { type AtRule } from "postcss";
+import { STYLE_MOMENTS } from "@/presentation/components/style-moments/styleMoments";
+import { GROUP_RIPPLE_STEP_MS } from "@/presentation/pages/game/useGroupEffect";
 import { animationTimingOf, declarationsOf, reducedMotionDeclarationsOf as reducedMotionDeclarationsIn } from "../../styleSheetRules";
 
 const INK_CSS = readFileSync("src/style/styles/ink/skin.css", "utf8");
@@ -10,6 +12,15 @@ const REVEAL = `${SCOPE} .ink-loader-reveal`;
 const DIGIT = `${SCOPE} .ink-loader-digit`;
 const SEAL = `${SCOPE} .ink-loader-seal`;
 const PIECES = [STROKE, REVEAL, DIGIT, SEAL];
+const BOARD = `${SCOPE} [data-skin~="board"]`;
+const GROUP_CELL = `${BOARD} [data-group]`;
+const GROUP_DIGIT = `${GROUP_CELL} > div`;
+const ARRIVING_GROUP_DIGIT = `${GROUP_DIGIT}.value-arrive`;
+const ARRIVING_DIGIT = `${BOARD} .value-arrive`;
+const BRUSH = `${SCOPE} .ink-group-brush`;
+const BRUSH_OF = { row: `${BRUSH}[data-kind="row"]`, column: `${BRUSH}[data-kind="column"]`, box: `${BRUSH}[data-kind="box"]` };
+const REVEAL_OF = { row: `${BRUSH_OF.row} .ink-group-reveal`, column: `${BRUSH_OF.column} .ink-group-reveal`, box: `${BRUSH_OF.box} .ink-group-reveal` };
+const KINDS = ["row", "column", "box"] as const;
 
 const collapse = (text: string): string => text.replace(/\s+/g, " ").trim();
 
@@ -61,7 +72,126 @@ const fadeFrom = (name: string): number =>
 
 const byStep = <T extends { step: number | null }>(animations: T[]): T[] => [...animations].sort((first, second) => (first.step ?? 0) - (second.step ?? 0));
 
+const animationOf = (selector: string): string => declarationsOf(INK_CSS, selector).get("animation") ?? "";
+
+interface Span { startMs: number; endMs: number }
+
+const spanOf = (selector: string, name: string): Span => {
+    const timing = animationTimingOf(animationOf(selector), name);
+    if (timing === null) throw new Error(`${selector} does not run ${name}`);
+    return { startMs: timing.fixedDelayMs, endMs: timing.fixedDelayMs + timing.durationMs };
+};
+
+const animatedPropertiesOf = (name: string): Set<string> => new Set(framesOf(name).flatMap(frame => [...frame.declarations.keys()]));
+
+// The z-index a selector sets anywhere outside keyframes and reduced motion (the grid lines sit in @supports)
+const zIndexOf = (selector: string): number => {
+    let zIndex = Number.NaN;
+    postcss.parse(INK_CSS).walkRules((rule) => {
+        if (!rule.selectors.map(collapse).includes(selector)) return;
+        rule.walkDecls("z-index", (declaration) => { zIndex = Number(declaration.value); });
+    });
+    return zIndex;
+};
+
 describe("ink moments", () => {
+    describe("group completion", () => {
+        it("should sweep a row's brush and a column's alike, and ring a box after them", () => {
+            for (const name of ["ink-brush-life", "ink-brush-reveal"]) {
+                const selectors = name === "ink-brush-life" ? BRUSH_OF : REVEAL_OF;
+                expect(spanOf(selectors.column, name)).toEqual(spanOf(selectors.row, name));
+                expect(spanOf(selectors.box, name).startMs).toBeGreaterThan(spanOf(selectors.row, name).startMs);
+            }
+        });
+
+        it("should draw each stroke along its mask as it shows, and finish it while the brush is held", () => {
+            const lastHeld = Math.max(...framesOf("ink-brush-life").filter(frame => frame.declarations.get("opacity") === "1").flatMap(frame => frame.offsets));
+            for (const kind of KINDS) {
+                const life = spanOf(BRUSH_OF[kind], "ink-brush-life");
+                const reveal = spanOf(REVEAL_OF[kind], "ink-brush-reveal");
+
+                expect(reveal.startMs, kind).toBe(life.startMs);
+                expect(reveal.endMs, kind).toBeLessThanOrEqual(life.startMs + ((life.endMs - life.startMs) * lastHeld) / 100);
+                // Hidden along its whole length until it starts
+                expect(animationOf(REVEAL_OF[kind]), kind).toMatch(/ both$/);
+            }
+            const dash = declarationsOf(INK_CSS, `${SCOPE} .ink-group-reveal`);
+            expect(dash.get("stroke-dashoffset")).toBe(dash.get("stroke-dasharray"));
+            const boxDash = declarationsOf(INK_CSS, REVEAL_OF.box);
+            expect(boxDash.get("stroke-dashoffset")).toBe(boxDash.get("stroke-dasharray"));
+        });
+
+        it("should reveal the strokes by their dash offset only, and show the brush by opacity only", () => {
+            expect([...animatedPropertiesOf("ink-brush-reveal")]).toEqual(["stroke-dashoffset"]);
+            expect(framesOf("ink-brush-reveal").slice(-1)[0]?.declarations.get("stroke-dashoffset")).toBe("0");
+            expect([...animatedPropertiesOf("ink-brush-life")]).toEqual(["opacity"]);
+            // Unseen without its animation, so a stopped effect leaves nothing on the board
+            expect(declarationsOf(INK_CSS, BRUSH).get("opacity")).toBe("0");
+            const frames = framesOf("ink-brush-life");
+            expect(frames[0]?.declarations.get("opacity")).toBe("0");
+            expect(frames[frames.length - 1]?.declarations.get("opacity")).toBe("0");
+        });
+
+        it("should play every group cell at once, never above the timer's ripple step", () => {
+            const step = declarationsOf(INK_CSS, GROUP_CELL).get("--group-ripple-step") ?? "";
+
+            expect(Number.parseFloat(step)).toBe(0);
+            expect(Number.parseFloat(step)).toBeLessThanOrEqual(GROUP_RIPPLE_STEP_MS);
+        });
+
+        it("should halo a completed group's digits in the paper's colour while the brush is over them", () => {
+            const frames = framesOf("ink-group-halo");
+            const life = spanOf(BRUSH_OF.row, "ink-brush-life");
+            const halo = spanOf(GROUP_DIGIT, "ink-group-halo");
+
+            expect([...animatedPropertiesOf("ink-group-halo")]).toEqual(["text-shadow"]);
+            expect(frames.some(frame => frame.declarations.get("text-shadow")?.includes("var(--color-card)"))).toBe(true);
+            for (const edge of [0, 100]) {
+                expect(frames.find(frame => frame.offsets.includes(edge))?.declarations.get("text-shadow"), `${edge}%`).toBe("none");
+            }
+            expect(halo).toEqual(life);
+        });
+
+        // The entered digit is in its own completed group: the group's halo must not replace its bleed
+        it("should bleed the entered digit in under the group's halo", () => {
+            const combined = animationOf(ARRIVING_GROUP_DIGIT);
+
+            expect(animationTimingOf(combined, "ink-bleed")).toEqual(animationTimingOf(animationOf(ARRIVING_DIGIT), "ink-bleed"));
+            expect(animationTimingOf(combined, "ink-group-halo")).toEqual(animationTimingOf(animationOf(GROUP_DIGIT), "ink-group-halo"));
+            expect(combined).toContain(animationOf(ARRIVING_DIGIT));
+            expect(reducedMotionDeclarationsOf(ARRIVING_GROUP_DIGIT).get("animation")).toBe("none");
+        });
+
+        it("should end each cell's halo within the group effect, and each stroke by the time the effect's timer ends", () => {
+            const effectMs = STYLE_MOMENTS.ink.groupEffectMs;
+
+            expect(spanOf(GROUP_DIGIT, "ink-group-halo").endMs).toBeLessThanOrEqual(effectMs);
+            expect(spanOf(ARRIVING_GROUP_DIGIT, "ink-group-halo").endMs).toBeLessThanOrEqual(effectMs);
+            // A line's farthest cell is at least four steps from the entered one, a box's two
+            for (const kind of ["row", "column"] as const) {
+                expect(spanOf(BRUSH_OF[kind], "ink-brush-life").endMs, kind).toBeLessThanOrEqual(effectMs);
+            }
+            expect(spanOf(BRUSH_OF.box, "ink-brush-life").endMs).toBeLessThanOrEqual(effectMs + 2 * GROUP_RIPPLE_STEP_MS);
+        });
+
+        it("should lay the brush over the cells' washes, under the digits, the brush lines and the 圓相", () => {
+            const brush = zIndexOf(BRUSH);
+
+            expect(brush).toBe(1);
+            expect(zIndexOf(`${BOARD} [data-variant] > div`)).toBe(2);
+            expect(zIndexOf(`${SCOPE} [data-skin~="board-grid"]::after`)).toBeGreaterThan(zIndexOf(`${BOARD} [data-variant] > div`));
+            expect(zIndexOf(`${BOARD}:not([data-hint-mode]) [data-selected]::after`)).toBeGreaterThan(zIndexOf(`${SCOPE} [data-skin~="board-grid"]::after`));
+            // Level with the entered digit's halo: the overlay follows the cells, so the brush lies over it
+            expect(zIndexOf(`${BOARD} [data-variant]:has(> .value-arrive)::before`)).toBe(brush);
+        });
+
+        it("should stop every brush and halo under reduced motion", () => {
+            for (const selector of [...Object.values(BRUSH_OF), ...Object.values(REVEAL_OF), GROUP_DIGIT, ARRIVING_GROUP_DIGIT]) {
+                expect(reducedMotionDeclarationsOf(selector).get("animation"), selector).toBe("none");
+            }
+        });
+    });
+
     describe("loader", () => {
         it("should run the strokes, their reveals, the digits and the seal on one 4.2s infinite loop", () => {
             for (const piece of PIECES) {

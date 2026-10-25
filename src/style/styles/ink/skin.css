@@ -231,6 +231,76 @@
     animation: ink-wash 800ms ease-out forwards;
 }
 
+/* Completing a group (only with motion allowed): a brush stroke sweeps a row or a column and a vermilion
+   圓相 rings a box, 80ms later, each drawn on along its centre line by its mask (InkGroupOverlay), held and
+   faded. The whole group plays at once. The brush lies over the cells' washes, under the digits (2), the
+   brush lines (3) and the selection's 圓相 (4); level with an entered digit's halo (1), it lies over it, as
+   the overlay follows the cells. While it is there the group's digits take a halo of paper, so they stay
+   readable on the ink. Unseen without its animation, so a stopped effect leaves no still cue. */
+[data-style="ink"] [data-skin~="board"] [data-group] {
+    --group-ripple-step: 0ms;
+}
+
+@keyframes ink-group-halo {
+    0%, 100% { text-shadow: none; }
+    8%, 82% { text-shadow: 0 0 2px var(--color-card), 0 0 3px var(--color-card), 0 0 6px var(--color-card); }
+}
+
+[data-style="ink"] [data-skin~="board"] [data-group] > div {
+    animation: ink-group-halo 1000ms linear 80ms;
+}
+
+/* The entered digit is in its own completed group: it bleeds in as usual, under the group's halo */
+[data-style="ink"] [data-skin~="board"] [data-group] > div.value-arrive {
+    animation:
+        ink-bleed 900ms cubic-bezier(0.2, 0.7, 0.2, 1) both,
+        ink-group-halo 1000ms linear 80ms;
+}
+
+@keyframes ink-brush-life {
+    0% { opacity: 0; }
+    6%, 80% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+@keyframes ink-brush-reveal {
+    to { stroke-dashoffset: 0; }
+}
+
+[data-style="ink"] .ink-group-brush {
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0;
+}
+
+[data-style="ink"] .ink-group-reveal {
+    stroke-dasharray: 400;
+    stroke-dashoffset: 400;
+}
+
+[data-style="ink"] .ink-group-brush[data-kind="box"] .ink-group-reveal {
+    stroke-dasharray: 330;
+    stroke-dashoffset: 330;
+}
+
+[data-style="ink"] .ink-group-brush[data-kind="row"],
+[data-style="ink"] .ink-group-brush[data-kind="column"] {
+    animation: ink-brush-life 1000ms linear 80ms;
+}
+
+[data-style="ink"] .ink-group-brush[data-kind="row"] .ink-group-reveal,
+[data-style="ink"] .ink-group-brush[data-kind="column"] .ink-group-reveal {
+    animation: ink-brush-reveal 440ms cubic-bezier(0.45, 0, 0.35, 1) 80ms both;
+}
+
+[data-style="ink"] .ink-group-brush[data-kind="box"] {
+    animation: ink-brush-life 1060ms linear 160ms;
+}
+
+[data-style="ink"] .ink-group-brush[data-kind="box"] .ink-group-reveal {
+    animation: ink-brush-reveal 540ms cubic-bezier(0.45, 0, 0.35, 1) 160ms both;
+}
+
 /* Notes: pale ink Garamond. The selected digit's note is vermilion, without the shared disc; a hint's
    candidates are blue-black italic, its eliminated ones vermilion, and its emphasised ones (only ever in
    its answer or pattern cells) a thin vermilion ring. */
@@ -797,6 +867,18 @@
 
     /* Its own rule, so a WebView without :has() still reads the list above */
     [data-style="ink"] [data-skin~="board"] [data-variant]:has(> .value-arrive)::before {
+        animation: none;
+    }
+
+    /* A completed group shows nothing: the brush stays unseen and the digits unhaloed */
+    [data-style="ink"] [data-skin~="board"] [data-group] > div,
+    [data-style="ink"] [data-skin~="board"] [data-group] > div.value-arrive,
+    [data-style="ink"] .ink-group-brush[data-kind="row"],
+    [data-style="ink"] .ink-group-brush[data-kind="column"],
+    [data-style="ink"] .ink-group-brush[data-kind="box"],
+    [data-style="ink"] .ink-group-brush[data-kind="row"] .ink-group-reveal,
+    [data-style="ink"] .ink-group-brush[data-kind="column"] .ink-group-reveal,
+    [data-style="ink"] .ink-group-brush[data-kind="box"] .ink-group-reveal {
         animation: none;
     }
 

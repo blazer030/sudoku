@@ -82,6 +82,8 @@ const REQUIRED_SELECTORS: Record<StyleId, readonly string[]> = {
         ...PRESS,
         ".ink-loader-stroke",
         ".ink-loader-seal",
+        "[data-group]",
+        ".ink-group-brush",
     ],
 };
 
