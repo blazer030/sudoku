@@ -1,7 +1,23 @@
-/* Ink and washi: ink on warm washi paper with a vermilion seal, light only. So far it gives the press
-   states and the segmented indicator their feedback and draws the board in brush lines with a vermilion
-   圓相; the washi and the screens come with the skin proper. Every rule is scoped by [data-style="ink"];
-   keyframes start with ink-. */
+/* Ink and washi: ink on warm washi paper with a vermilion seal, light only. Pages are washi with faint
+   fibres; cards, tiles and keys are translucent paper with a 1px edge line; chosen pieces are a vermilion
+   seal or a vermilion outline, never a filled block of colour; titles are brushed. The board is drawn in
+   brush lines with a vermilion 圓相. Every rule is scoped by [data-style="ink"]; keyframes start with ink-.
+   No pressable piece sets a background-image of its own, so the press wash below is never painted over. */
+
+/* Corners: small and a little uneven, as the canvas's 5px; pills and discs stay round */
+[data-style="ink"] {
+    --radius-lg: 4px;
+    --radius-xl: 5px;
+    --radius-2xl: 5px;
+    --radius-3xl: 6px;
+    --radius-button: 5px;
+    --radius-icon: 4px;
+    --radius-popup: 6px;
+    /* The firmer edge line (the canvas's line2): outlines of secondary buttons, unchecked marks, dotted rows */
+    --ink-line-strong: color-mix(in srgb, var(--color-foreground) 40%, transparent);
+    /* The washi's grain and fibres, in the pale ink */
+    --ink-grain: var(--color-foreground-secondary);
+}
 
 /* Press feedback: a faint ink wash. It is a colour change, so it stays on under reduced motion. */
 [data-style="ink"] [data-pressed] {
@@ -37,6 +53,8 @@
    once the faces have loaded (fonts.ts beside this sheet marks it), so nothing paints in a half-loaded
    stack. Garamond's figures are lining by default; the board asks for them anyway. */
 [data-style="ink"][data-ink-fonts="ready"] {
+    --font-sans: var(--font-ink-serif);
+    --font-mono: var(--font-ink-digits);
     --font-clue: var(--font-ink-digits);
     --font-entry: var(--font-ink-digits);
     --font-key: var(--font-ink-digits);
@@ -171,6 +189,367 @@
 
 [data-style="ink"] [data-skin~="board"] :is([data-variant="answer"], [data-variant="pattern"]) [data-note-highlight] {
     box-shadow: inset 0 0 0 1px var(--color-primary-ink);
+}
+
+/* Brushed titles: Yuji Boku (cut to these strings) on the Home title, the completion title and the dialog
+   titles, nowhere else; a character it lacks falls to WenKai. Upright, as a brush writes them. */
+[data-style="ink"][data-ink-fonts="ready"] [data-skin~="title"],
+[data-style="ink"][data-ink-fonts="ready"] [data-skin~="complete-title"],
+[data-style="ink"][data-ink-fonts="ready"] [data-skin~="dialog-title"] {
+    font-family: var(--font-ink-brush);
+    font-weight: 400;
+}
+
+[data-style="ink"][data-ink-fonts="ready"] [data-skin~="logo"]::after {
+    font-family: var(--font-ink-serif);
+}
+
+[data-style="ink"][data-ink-fonts="ready"] [data-skin~="badge"] {
+    font-family: var(--font-ink-digits);
+}
+
+/* Washi. The app's page scroller is the one sheet behind every screen: the page colour under a soft light
+   from the top left, a warm shade at the bottom right, two crossing grains and a fine dot, all in the pale
+   ink. It is its own stacking context, so the fibres on its ::before (fixed to the screen, a static mask
+   image stretched to it) lie above the washi and below every content layer, never taking taps. The
+   scroller's background stays put while its content scrolls. */
+[data-style="ink"] [data-skin~="page-ruled"] {
+    isolation: isolate;
+    background-color: var(--color-background);
+    background-image:
+        radial-gradient(ellipse 80% 45% at 10% 0%, var(--color-card), transparent 60%),
+        radial-gradient(ellipse 70% 50% at 100% 100%, color-mix(in srgb, var(--ink-grain) 9%, transparent), transparent 60%),
+        repeating-linear-gradient(17deg, color-mix(in srgb, var(--ink-grain) 3.5%, transparent) 0 1px, transparent 1px 7px),
+        repeating-linear-gradient(-63deg, color-mix(in srgb, var(--ink-grain) 3%, transparent) 0 1px, transparent 1px 11px),
+        radial-gradient(color-mix(in srgb, var(--ink-grain) 9%, transparent) 0.7px, transparent 1.1px);
+    background-size: auto, auto, auto, auto, 6px 6px;
+}
+
+[data-style="ink"] [data-skin~="page-ruled"]::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-color: color-mix(in srgb, var(--ink-grain) 15%, transparent);
+    -webkit-mask-image: url("@/style/styles/ink/washi-fibres.svg");
+    mask-image: url("@/style/styles/ink/washi-fibres.svg");
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+}
+
+/* Pages inside the scroller (Home, Settings) and pages that scroll on their own are clear, so the one
+   sheet shows through them, with no second copy of the fibres */
+[data-style="ink"] [data-skin~="page-ruled"] [data-skin~="page-ruled"] {
+    isolation: auto;
+    background: transparent;
+}
+
+[data-style="ink"] [data-skin~="page-ruled"] [data-skin~="page-ruled"]::before {
+    content: none;
+}
+
+[data-style="ink"] [data-skin~="page"] {
+    background-color: transparent;
+}
+
+/* A sticky header is clear at rest, so the washi runs through it. Once its page has scrolled it frosts,
+   fading in over the first 64px of scroll (--header-scroll, 0 to 1): a translucent page colour over a
+   blur, tapering out over the header's empty bottom padding, with no rule underneath. */
+[data-style="ink"] [data-skin~="page-header"] {
+    background-color: transparent;
+}
+
+[data-style="ink"] [data-skin~="page-header"][data-scrolled] {
+    background-color: color-mix(in srgb, var(--color-background) calc(65% * var(--header-scroll, 0)), transparent);
+    -webkit-backdrop-filter: blur(calc(10px * var(--header-scroll, 0)));
+    backdrop-filter: blur(calc(10px * var(--header-scroll, 0)));
+    -webkit-mask-image: linear-gradient(to bottom, var(--color-foreground) calc(100% - 12px), transparent);
+    mask-image: linear-gradient(to bottom, var(--color-foreground) calc(100% - 12px), transparent);
+}
+
+/* Home. The logo becomes a vermilion seal reading 「數獨」 (an emblem, the same in both languages), in
+   Noto Serif TC Black set vertically, with an inner paper ring, turned −4°. The seal is the logo's
+   ::after; the logo's own box stays unturned, because a turned box would hold its ::before, the misty
+   mountains, instead of the screen. The mountains (a static mask image with its blur drawn in) lie along
+   the bottom of the screen in faint ink, below every content layer and never taking taps. */
+[data-style="ink"] [data-skin~="logo"] {
+    position: relative;
+    background-color: transparent;
+    box-shadow: none;
+}
+
+[data-style="ink"] [data-skin~="logo"] > * {
+    opacity: 0;
+}
+
+[data-style="ink"] [data-skin~="logo"]::after {
+    content: "數獨";
+    content: "數獨" / "";
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    writing-mode: vertical-rl;
+    font-size: 27px;
+    font-weight: 900;
+    line-height: 1.05;
+    color: var(--color-on-primary);
+    background-color: var(--color-primary);
+    border-radius: 10px 6px 12px 7px;
+    box-shadow: inset 0 0 0 4px var(--color-primary), inset 0 0 0 6.5px var(--color-on-primary);
+    rotate: -4deg;
+}
+
+[data-style="ink"] [data-skin~="logo"]::before {
+    content: "";
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 260px;
+    z-index: -1;
+    pointer-events: none;
+    background-color: var(--color-foreground);
+    -webkit-mask-image: url("@/style/styles/ink/home-mountains.svg");
+    mask-image: url("@/style/styles/ink/home-mountains.svg");
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+}
+
+/* Paper on the washi: cards, tiles, keys and the continue card are translucent paper with a 1px edge
+   line, so the washi's grain shows faintly through them */
+[data-style="ink"] [data-skin~="card"],
+[data-style="ink"] [data-skin~="tile"],
+[data-style="ink"] [data-skin~="key"],
+[data-style="ink"] [data-skin~="continue"] {
+    background-color: color-mix(in srgb, var(--color-card) 62%, transparent);
+    box-shadow: inset 0 0 0 1px var(--color-border);
+}
+
+/* Dialogs and the panels that float over a screen (the hint menu, the hint and playback panels, the
+   walkthrough's intro) are solid paper with a soft warm shadow below, so nothing shows through them */
+[data-style="ink"] [data-skin~="card"]:is(.shadow-modal, .shadow-popup, .shadow-card-lg) {
+    background-color: var(--color-card);
+    box-shadow: inset 0 0 0 1px var(--color-border), 0 18px 40px -20px color-mix(in srgb, var(--color-shadow) 35%, transparent);
+}
+
+/* The continue card: ink on paper, its play mark vermilion; its chips are plain pale text joined by a
+   vermilion 「・」 set in the gap between them (the markup's 6px gap, centred) */
+[data-style="ink"] [data-skin~="continue"] {
+    color: var(--color-foreground);
+}
+
+[data-style="ink"] [data-skin~="caret"] {
+    color: var(--color-primary-ink);
+}
+
+[data-style="ink"] [data-skin~="chip"] {
+    position: relative;
+    background-color: transparent;
+    color: var(--color-foreground-secondary);
+}
+
+[data-style="ink"] [data-skin~="chip"] + [data-skin~="chip"]::before {
+    content: "・";
+    content: "・" / "";
+    position: absolute;
+    left: -3px;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--color-primary-ink);
+}
+
+/* Buttons have uneven brush corners. The main ones (and New Game, the main action on Home whether or not
+   a game is saved) are the seal: vermilion with an inner paper ring. Secondary ones are an edge-line
+   outline; the danger button is solid error; the playback button is a round vermilion blot. */
+[data-style="ink"] [data-skin~="button"] {
+    border-radius: 6px 3px 7px 4px;
+}
+
+[data-style="ink"] [data-skin~="button"]:is(.bg-card, .bg-primary-light, .hint-secondary) {
+    border-color: transparent;
+    background-color: transparent;
+    box-shadow: inset 0 0 0 1px var(--ink-line-strong);
+    color: var(--color-foreground);
+}
+
+[data-style="ink"] [data-skin~="button"]:is(.bg-primary, .hint-primary),
+[data-style="ink"] [data-skin~="button"][data-skin~="new-game"] {
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+    box-shadow: inset 0 0 0 2px var(--color-primary), inset 0 0 0 3.5px color-mix(in srgb, var(--color-on-primary) 55%, transparent);
+}
+
+[data-style="ink"] [data-skin~="button"].bg-danger {
+    box-shadow: none;
+}
+
+[data-style="ink"] [data-skin~="button"].rounded-full {
+    border-radius: 48% 52% 50% 50% / 52% 48% 52% 48%;
+    box-shadow: none;
+}
+
+/* Tiles: an option or toggle card that is chosen is outlined in vermilion instead of filled; its icon
+   turns vermilion and its text stays ink */
+[data-style="ink"] [data-skin~="tile"] {
+    border-color: transparent;
+}
+
+[data-style="ink"] [data-skin~="tile"][aria-pressed="true"] {
+    background-color: color-mix(in srgb, var(--color-card) 62%, transparent);
+    box-shadow: inset 0 0 0 1.5px var(--color-primary-ink);
+    color: var(--color-foreground);
+}
+
+[data-style="ink"] [data-skin~="tile"][aria-pressed="true"] > .text-on-primary {
+    color: var(--color-primary-ink);
+}
+
+[data-style="ink"] [data-skin~="tile"][aria-pressed="true"] span .text-on-primary {
+    color: var(--color-foreground-secondary);
+}
+
+/* A toggle's mark is a small square in the firmer edge line; when on it is a seal turned −8° */
+[data-style="ink"] [data-skin~="check"] {
+    border-radius: 3px;
+    border-color: var(--ink-line-strong);
+}
+
+[data-style="ink"] [data-skin~="tile"][aria-pressed="true"] [data-skin~="check"] {
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+    rotate: -8deg;
+}
+
+/* Segmented controls: a faint ink well. The chosen option has no fill (in the difficulty menu) or a
+   paper one (elsewhere), and a short vermilion brush stroke under its label. */
+[data-style="ink"] [data-skin~="segmented"] {
+    background-color: color-mix(in srgb, var(--color-foreground) 6%, transparent);
+    box-shadow: none;
+}
+
+[data-style="ink"] [data-skin~="segmented-indicator"] {
+    background-color: color-mix(in srgb, var(--color-card) 62%, transparent);
+    box-shadow: none;
+}
+
+[data-style="ink"] [data-skin~="segmented"][data-skin~="menu"] [data-skin~="segmented-indicator"] {
+    background-color: transparent;
+}
+
+[data-style="ink"] [data-skin~="segment"][aria-pressed="true"] {
+    color: var(--color-foreground);
+}
+
+[data-style="ink"] [data-skin~="segment"][aria-pressed="true"]::after {
+    content: "";
+    position: absolute;
+    left: 30%;
+    right: 30%;
+    bottom: 8px;
+    height: 3px;
+    pointer-events: none;
+    background-color: var(--color-primary);
+    border-radius: 2px 1px 3px 1px;
+    transform: rotate(-2deg);
+}
+
+/* The game header: the difficulty pill (and the completion card's difficulty tag) is a vermilion outline
+   with brush corners; the hint-mode pill is solid vermilion. */
+[data-style="ink"] [data-skin~="pill"],
+[data-style="ink"] [data-skin~="tag"] {
+    border-radius: 4px 2px 5px 3px;
+    background-color: transparent;
+    box-shadow: inset 0 0 0 1.5px var(--color-primary-ink);
+    color: var(--color-primary-ink);
+}
+
+[data-style="ink"] [data-skin~="pill"] > span {
+    color: inherit;
+}
+
+[data-style="ink"] [data-skin~="pill"][data-skin~="hint"] {
+    background-color: var(--color-primary);
+    box-shadow: none;
+    color: var(--color-on-primary);
+}
+
+/* A new record is a vermilion outline stamp turned −3°; a hint or walkthrough step's final, strong tag is
+   a solid seal turned −2° */
+[data-style="ink"] [data-skin~="tag"][data-skin~="new-record"] {
+    border-radius: 3px;
+    rotate: -3deg;
+}
+
+[data-style="ink"] [data-skin~="tag"][data-skin~="step"][data-skin~="strong"] {
+    background-color: var(--color-primary);
+    box-shadow: none;
+    color: var(--color-on-primary);
+    rotate: -2deg;
+}
+
+/* Controls are pale ink with no tile; an active one is vermilion on the seal's pale surface */
+[data-style="ink"] [data-skin~="control"] {
+    background-color: transparent;
+    box-shadow: none;
+    color: var(--color-foreground-secondary);
+}
+
+[data-style="ink"] [aria-pressed="true"] > [data-skin~="control"] {
+    background-color: var(--color-primary-light);
+    color: var(--color-primary-ink);
+}
+
+/* The keypad: washi keys with an edge line (above). The chosen key is a solid seal turned −3° (by the
+   rotate property, so the press scale still applies on top); a finished key fades to 30%. The
+   remaining-count badge is a page-coloured disc with a vermilion ring and vermilion digits. */
+[data-style="ink"] [data-skin~="key"] {
+    border-radius: 4px 3px 5px 3px;
+}
+
+[data-style="ink"] [data-skin~="key"][aria-pressed="true"] {
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+    box-shadow: none;
+    border-radius: 6px 3px 7px 4px;
+    rotate: -3deg;
+}
+
+[data-style="ink"] [data-skin~="key"]:disabled {
+    opacity: 0.3;
+}
+
+[data-style="ink"] [data-skin~="badge"] {
+    background-color: var(--color-background);
+    color: var(--color-primary-ink);
+    box-shadow: inset 0 0 0 1px var(--color-primary-ink);
+}
+
+/* Settings: group headings and their icons in vermilion; rows inside a card are separated by dotted lines */
+[data-style="ink"] [data-skin~="group-heading"] {
+    color: var(--color-primary-ink);
+}
+
+[data-style="ink"] [data-skin~="card"].divide-y > *,
+[data-style="ink"] [data-skin~="card"] .divide-y > * {
+    border-style: dotted;
+    border-color: var(--ink-line-strong);
+}
+
+/* Statistics: the overview's big numbers in Garamond italic */
+[data-style="ink"] [data-skin~="card"] .font-mono.text-3xl {
+    font-style: italic;
+    font-weight: 600;
+}
+
+/* The loader lies on a beige fog of the page, not the ink scrim the dialogs keep */
+[data-style="ink"] [data-skin~="loader-scrim"] {
+    background-color: color-mix(in srgb, var(--color-background) 66%, transparent);
 }
 
 /* Reduced motion: no scaling or sliding; the press wash stays */
