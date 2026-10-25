@@ -485,17 +485,10 @@ describe("ink skin", () => {
             expect(declarationsOf(INK_CSS, `${BOARD} .font-note.strike-diagonal`).get("color")).toBe("var(--color-primary-ink)");
         });
 
-        it("should ring a hint's emphasised candidates thinly in vermilion, without a fill", () => {
-            const emphasised = declarationsOf(INK_CSS, `${BOARD} :is([data-variant="answer"], [data-variant="pattern"]) [data-note-highlight]`);
-
-            expect(emphasised.get("box-shadow")).toBe(RING);
-            expect(emphasised.get("background-color") ?? "transparent").toBe("transparent");
-        });
-
         describe("the selected digit's ink ring", () => {
             const HIGHLIGHTED = `${BOARD} [data-note-highlight]`;
-            // Only outside a hint's answer and pattern cells is a highlighted note the selected digit's
-            const SELECTED_NOTE = `${BOARD} [data-variant]:not([data-variant="answer"], [data-variant="pattern"]) [data-note-highlight]`;
+            // One look for every highlighted note: the selected digit's in the game, a hint's emphasised one in the Walkthrough
+            const SELECTED_NOTE = `${BOARD} [data-note-highlight]`;
             const RING_LAYER = `${SELECTED_NOTE}::before`;
             const svg = parseSvg(NOTE_RING_SVG);
 
@@ -534,8 +527,8 @@ describe("ink skin", () => {
                 expect(declarationsOf(INK_CSS, HIGHLIGHTED).get("color")).toBe("var(--color-primary-ink)");
             });
 
-            // Plain notes, a hint's candidates, its struck ones and its emphasised ones keep their own looks
-            it("should draw a pseudo-element on no note but the selected digit's", () => {
+            // Plain notes, a hint's candidates and its struck ones keep their own looks
+            it("should draw a pseudo-element on no note but a highlighted one", () => {
                 const noteLayers = allRules().flatMap(rule => rule.selectors)
                     .filter(selector => isPseudoElement(selector) && /note|strike-diagonal/.test(selector));
 

@@ -439,9 +439,9 @@
     color: var(--color-on-primary);
 }
 
-/* Notes: pale ink Garamond. The selected digit's note is vermilion, without the shared disc, in a ring; a hint's
-   candidates are blue-black italic, its eliminated ones vermilion, and its emphasised ones (only ever in
-   its answer or pattern cells) a thin vermilion ring. */
+/* Notes: pale ink Garamond. A highlighted note (the selected digit's, or a hint's emphasised one in its answer
+   and pattern cells) is vermilion, without the shared disc, in a brushed ring; a hint's candidates are
+   blue-black italic and its eliminated ones vermilion. */
 [data-style="ink"] [data-skin~="board"] [data-note-highlight] {
     background-color: transparent;
     color: var(--color-primary-ink);
@@ -456,21 +456,16 @@
     color: var(--color-primary-ink);
 }
 
-[data-style="ink"] [data-skin~="board"] :is([data-variant="answer"], [data-variant="pattern"]) [data-note-highlight] {
-    box-shadow: inset 0 0 0 1px var(--color-primary-ink);
-}
-
-/* The selected digit's note (a highlighted note outside a hint's answer and pattern cells) also sits in a
-   small 圓相 of its own: a vermilion ring brushed once around it (note-ring.svg), set down with a drop of
+/* Every highlighted note, in the game and in a hint or the Walkthrough alike, sits in a small 圓相 of its own: a vermilion ring brushed once around it (note-ring.svg), set down with a drop of
    ink at the upper left, thin down the left, heavy across the bottom, trailing off short of the start.
    It lies a little past the note's box and behind its digit. Where masks are unsupported, a plain thin
    vermilion ring stands in. */
-[data-style="ink"] [data-skin~="board"] [data-variant]:not([data-variant="answer"], [data-variant="pattern"]) [data-note-highlight] {
+[data-style="ink"] [data-skin~="board"] [data-note-highlight] {
     position: relative;
     isolation: isolate;
 }
 
-[data-style="ink"] [data-skin~="board"] [data-variant]:not([data-variant="answer"], [data-variant="pattern"]) [data-note-highlight]::before {
+[data-style="ink"] [data-skin~="board"] [data-note-highlight]::before {
     content: "";
     position: absolute;
     inset: -2px;
@@ -481,7 +476,7 @@
 }
 
 @supports ((mask-image: url("")) or (-webkit-mask-image: url(""))) {
-    [data-style="ink"] [data-skin~="board"] [data-variant]:not([data-variant="answer"], [data-variant="pattern"]) [data-note-highlight]::before {
+    [data-style="ink"] [data-skin~="board"] [data-note-highlight]::before {
         box-shadow: none;
         background-color: var(--color-primary);
         -webkit-mask-image: url("@/style/styles/ink/note-ring.svg");
