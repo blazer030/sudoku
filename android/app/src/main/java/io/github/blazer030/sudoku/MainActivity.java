@@ -8,6 +8,8 @@ import com.getcapacitor.BridgeActivity;
 
 public class MainActivity extends BridgeActivity {
 
+    private static final long SPLASH_FADE_MILLISECONDS = 200;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         registerPlugin(AppearanceBridgePlugin.class);
@@ -29,12 +31,19 @@ public class MainActivity extends BridgeActivity {
         }
 
         // From API 31 the system splash screen sets the bar icons back to the theme's light ones
-        // as it leaves, so remove it ourselves and paint the bars again
+        // as it leaves, so fade it out ourselves, as the system would, and paint the bars again
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && SystemBarPainter.paintsBars()) {
-            getSplashScreen().setOnExitAnimationListener(splashScreenView -> {
-                splashScreenView.remove();
-                SystemBarPainter.repaint(this);
-            });
+            getSplashScreen().setOnExitAnimationListener(splashScreenView ->
+                splashScreenView
+                    .animate()
+                    .alpha(0f)
+                    .setDuration(SPLASH_FADE_MILLISECONDS)
+                    .withEndAction(() -> {
+                        splashScreenView.remove();
+                        SystemBarPainter.repaint(this);
+                    })
+                    .start()
+            );
         }
     }
 }
