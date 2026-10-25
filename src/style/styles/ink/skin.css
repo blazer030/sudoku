@@ -129,9 +129,9 @@
     box-shadow: none;
 }
 
-/* Clues in ink, Garamond 600; the player's digits (and a hint's) in blue-black italic 500 */
+/* Clues in ink, Garamond 700; the player's digits (and a hint's) in blue-black italic 500 */
 [data-style="ink"] [data-skin~="board"] [data-value-kind="given"] > div {
-    font-weight: 600;
+    font-weight: 700;
 }
 
 [data-style="ink"] [data-skin~="board"] [data-value-kind="entered"] > div {
