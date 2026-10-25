@@ -13,6 +13,9 @@ import { i18n } from "@/presentation/i18n";
 import { knownAnswer, knownPuzzle } from "@/__tests__/fixtures/knownPuzzle";
 import { ANALYTICS_KEY, type AnalyticsService } from "@/application/analytics/AnalyticsService";
 import { handleBackButton } from "@/presentation/composables/backDismissal";
+import { useSettingsStore } from "@/stores/settingsStore";
+import { STYLE_IDS, type StyleId } from "@/theme/themeIds";
+import { STYLE_HOME_HEROES } from "@/presentation/pages/home/homeHeroes";
 
 vi.mock("@/application/puzzleGeneration/PuzzleGenerationService", () => ({
     generatePuzzleAsync: vi.fn(() => Promise.resolve({
@@ -44,10 +47,13 @@ const createTestRouter = () => {
     });
 };
 
-const mountHome = ({ savedGame, analytics }: { savedGame?: GameState; analytics?: AnalyticsService } = {}) => {
+const mountHome = ({ savedGame, analytics, style }: { savedGame?: GameState; analytics?: AnalyticsService; style?: StyleId } = {}) => {
     const router = createTestRouter();
     const pinia = createPinia();
     setActivePinia(pinia);
+    if (style !== undefined) {
+        useSettingsStore().setStyle(style);
+    }
     if (savedGame !== undefined) {
         useGameStore().persistGame(savedGame);
     }
@@ -104,6 +110,15 @@ describe("Home", () => {
         const { wrapper } = mountHome();
 
         expect(wrapper.get("[data-testid='home-logo']").attributes("data-skin")).toBe("logo");
+    });
+
+    it("should give every stacked style the same hero", () => {
+        const stackedHeroes = STYLE_IDS.filter(style => STYLE_HOME_HEROES[style] === "stacked")
+            .map(style => mountHome({ style }).wrapper.get("[data-testid='home-hero']").html());
+
+        expect(stackedHeroes.length).toBeGreaterThan(0);
+        expect(new Set(stackedHeroes).size).toBe(1);
+        expect(stackedHeroes[0]).toContain('data-skin="logo"');
     });
 
     it("should keep an English title whole", () => {
