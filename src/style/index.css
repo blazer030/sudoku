@@ -38,6 +38,11 @@
   --font-pixel-note: "Silkscreen", "Cubic 11", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", monospace;
   --font-cyber-digits: "Orbitron", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
   --font-cyber-mono: "Share Tech Mono", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", monospace;
+  /* Ink's stacks: Yuji Boku only for brushed titles, falling to WenKai for a character its subset lacks;
+     Noto Serif TC for all other text; EB Garamond for digits. Nothing points at them until the ink skin does. */
+  --font-ink-brush: "Yuji Boku", "LXGW WenKai TC", "Noto Serif TC", "Songti TC", "PMingLiU", serif;
+  --font-ink-serif: "Noto Serif TC", "Songti TC", "PMingLiU", serif;
+  --font-ink-digits: "EB Garamond", "Noto Serif TC", "Songti TC", "PMingLiU", serif;
   --font-print: "Times New Roman", "Noto Serif TC", "Songti TC", "PMingLiU", serif;
   /* Board, key and timer faces; a style may point them at its own stacks */
   --font-clue: var(--font-sans);

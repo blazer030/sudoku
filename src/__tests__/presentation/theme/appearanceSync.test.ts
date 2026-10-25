@@ -246,6 +246,7 @@ describe("startAppearanceSync", () => {
             delete document.documentElement.dataset.paperFonts;
             delete document.documentElement.dataset.pixelFonts;
             delete document.documentElement.dataset.cyberFonts;
+            delete document.documentElement.dataset.inkFonts;
         });
 
         it("should mark paper's fonts ready once Caveat's digits have loaded", async () => {
@@ -288,6 +289,21 @@ describe("startAppearanceSync", () => {
             expect(families).toContain("Orbitron");
             expect(families).toContain("Share Tech Mono");
             expect(document.documentElement.dataset.cyberFonts).toBe("ready");
+        });
+
+        it("should mark ink's fonts ready once Yuji Boku, Noto Serif TC and EB Garamond have loaded", async () => {
+            const load = stubFontLoading(1);
+            const sources = buildSources("vermilion", "light", "ink");
+            stop = startAppearanceSync(sources, systemBar, appearanceBridge);
+            expect(document.documentElement.dataset.inkFonts).toBeUndefined();
+
+            await finishLoadingFonts();
+
+            const families = load.mock.calls.map(([font]) => font).join(" ");
+            expect(families).toContain("Yuji Boku");
+            expect(families).toContain("Noto Serif TC");
+            expect(families).toContain("EB Garamond");
+            expect(document.documentElement.dataset.inkFonts).toBe("ready");
         });
 
         it("should drop pixel's ready mark when leaving pixel", async () => {

@@ -3,9 +3,11 @@ import { dirname, join, resolve } from "path";
 import postcss from "postcss";
 import { mappedCodePoints, nameStrings } from "./woff2Tables";
 import { en } from "@/presentation/i18n/messages/en";
+import { zhHant } from "@/presentation/i18n/messages/zh-Hant";
+import { inkBrushTitles } from "@/style/styles/ink/brushTitles";
 
 const FONTS_CSS = "src/style/fonts.css";
-const BUNDLED_FONTS = ["outfit.woff2", "roboto-mono.woff2", "caveat.woff2", "lxgw-wenkai-tc-regular.woff2", "lxgw-wenkai-tc-bold.woff2", "press-start-2p.woff2", "silkscreen.woff2", "orbitron.woff2", "share-tech-mono.woff2"];
+const BUNDLED_FONTS = ["outfit.woff2", "roboto-mono.woff2", "caveat.woff2", "lxgw-wenkai-tc-regular.woff2", "lxgw-wenkai-tc-bold.woff2", "press-start-2p.woff2", "silkscreen.woff2", "orbitron.woff2", "share-tech-mono.woff2", "yuji-boku.woff2", "noto-serif-tc.woff2", "eb-garamond.woff2", "eb-garamond-italic.woff2"];
 const CUBIC_11 = "cubic-11.woff2";
 
 interface FontFace {
@@ -67,6 +69,10 @@ describe("bundled fonts", () => {
         ["Cubic 11", "400"],
         ["Orbitron", "500 900"],
         ["Share Tech Mono", "400"],
+        ["Yuji Boku", "400"],
+        ["Noto Serif TC", "400 900"],
+        ["EB Garamond", "500 700"],
+        ["EB Garamond", "500 600"],
     ])("should declare %s %s from a bundled woff2 with swap", (family, weight) => {
         const face = fontFaces().find(candidate => candidate.family === family && candidate.weight === weight);
 
@@ -79,7 +85,7 @@ describe("bundled fonts", () => {
 
     it("should ship each family's licence in the build", () => {
         // public/ is copied as is into dist/, which the web build serves and the Android app packs
-        for (const licence of ["Outfit-OFL.txt", "RobotoMono-OFL.txt", "Caveat-OFL.txt", "LXGWWenKaiTC-OFL.txt", "PressStart2P-OFL.txt", "Silkscreen-OFL.txt", "Cubic11-OFL.txt", "Orbitron-OFL.txt", "ShareTechMono-OFL.txt"]) {
+        for (const licence of ["Outfit-OFL.txt", "RobotoMono-OFL.txt", "Caveat-OFL.txt", "LXGWWenKaiTC-OFL.txt", "PressStart2P-OFL.txt", "Silkscreen-OFL.txt", "Cubic11-OFL.txt", "Orbitron-OFL.txt", "ShareTechMono-OFL.txt", "YujiBoku-OFL.txt", "NotoSerifTC-OFL.txt", "EBGaramond-OFL.txt"]) {
             expect(readFileSync(`public/fonts/licenses/${licence}`, "utf8"), licence).toContain("SIL Open Font License");
         }
     });
@@ -164,6 +170,36 @@ describe("bundled fonts", () => {
 
         expect([...orbitron].sort()).toEqual(digits.sort());
         expect([...shareTechMono].sort((first, second) => first - second)).toEqual(ascii);
+    });
+
+    it.each(["eb-garamond.woff2", "eb-garamond-italic.woff2"])("%s maps every digit ink writes in Garamond (run npm run generate:fonts)", (file) => {
+        const digits = Array.from("0123456789", character => character.codePointAt(0) ?? 0);
+        const mapped = mappedCodePoints(readFileSync(`src/assets/fonts/${file}`), digits);
+
+        expect(digits.filter(codePoint => !mapped.has(codePoint))).toEqual([]);
+    });
+
+    it("noto-serif-tc.woff2 maps every Chinese character the app writes and ink's seals (run npm run generate:fonts)", () => {
+        const wenkaiCharacters = readFileSync("src/assets/fonts/lxgw-wenkai-tc-characters.txt", "utf8");
+        const wanted = [...new Set(Array.from(wenkaiCharacters + "數獨題過關"))].filter(character => /\p{Script=Han}/u.test(character));
+        const mapped = mappedCodePoints(readFileSync("src/assets/fonts/noto-serif-tc.woff2"), wanted.map(character => character.codePointAt(0) ?? 0));
+
+        expect(wanted.length).toBeGreaterThan(100);
+        expect(wanted.filter(character => !mapped.has(character.codePointAt(0) ?? 0)).join("")).toBe("");
+    });
+
+    // Ink brushes these titles in Yuji Boku, which is cut to them. A character Yuji Boku's own source has
+    // no glyph for falls to WenKai (the brush stack's next face), so it is named here and WenKai must map it.
+    const YUJI_BOKU_LACKS = "嗎"; // 「要清除所有紀錄嗎？」, the clear-records dialog
+    it.each([["en", en], ["zh-Hant", zhHant]] as const)("yuji-boku.woff2 maps every character of ink's brushed titles in %s (run npm run generate:fonts)", (_language, messages) => {
+        const wanted = [...new Set(Array.from(inkBrushTitles(messages).join("")))];
+        const codePoints = wanted.map(character => character.codePointAt(0) ?? 0);
+        const mapped = mappedCodePoints(readFileSync("src/assets/fonts/yuji-boku.woff2"), codePoints);
+        const wenkai = mappedCodePoints(readFileSync("src/assets/fonts/lxgw-wenkai-tc-regular.woff2"), codePoints);
+        const missing = wanted.filter(character => !mapped.has(character.codePointAt(0) ?? 0));
+
+        expect(missing.filter(character => !YUJI_BOKU_LACKS.includes(character)).join("")).toBe("");
+        expect(missing.filter(character => !wenkai.has(character.codePointAt(0) ?? 0)).join(""), "falls to WenKai").toBe("");
     });
 
     it("cubic-11.woff2 maps every character the app writes (run npm run generate:fonts)", () => {

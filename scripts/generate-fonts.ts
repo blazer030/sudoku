@@ -8,6 +8,9 @@ import subsetFont from "subset-font";
 import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "fs";
 import { dirname, join, resolve } from "path";
 import { fileURLToPath } from "url";
+import { en } from "../src/presentation/i18n/messages/en";
+import { zhHant } from "../src/presentation/i18n/messages/zh-Hant";
+import { inkBrushTitles } from "../src/style/styles/ink/brushTitles";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const OUTPUT_DIR = join(ROOT, "src/assets/fonts");
@@ -30,6 +33,12 @@ const rangeText = (first: number, last: number): string =>
 const ASCII = rangeText(0x20, 0x7e);
 // Latin-1 letters and signs, and general punctuation such as dashes, curly quotes and ellipses
 const LATIN = ASCII + rangeText(0xa0, 0xff) + rangeText(0x2010, 0x2027) + rangeText(0x2030, 0x205e);
+
+/** The non-ASCII characters of ink's brushed titles in both languages; their ASCII is cut in anyway. */
+const inkBrushCharacters = (): string => {
+    const characters = new Set(Array.from([...inkBrushTitles(en), ...inkBrushTitles(zhHant)].join("")));
+    return Array.from(characters).filter(character => (character.codePointAt(0) ?? 0) > 0x7e).sort().join("");
+};
 
 /** Every non-ASCII character in the app's own source, which is all the Chinese copy it can show. */
 const sourceCharacters = (): string => {
@@ -81,6 +90,7 @@ const downloadCubic = (path: string): Promise<Buffer> => downloadCached(cubicUrl
 
 const main = async (): Promise<void> => {
     const chineseText = ASCII + sourceCharacters();
+    const inkBrushText = ASCII + inkBrushCharacters();
     const families: Family[] = [
         {
             licence: "ofl/outfit/OFL.txt",
@@ -142,6 +152,27 @@ const main = async (): Promise<void> => {
             // Cyberpunk's notes, timer and labels: printable ASCII only
             jobs: [{ output: "share-tech-mono.woff2", source: "ofl/sharetechmono/ShareTechMono-Regular.ttf", text: ASCII }],
         },
+        {
+            licence: "ofl/yujiboku/OFL.txt",
+            licenceOutput: "YujiBoku-OFL.txt",
+            // Ink's brushed titles only, in both languages (INK_BRUSH_MESSAGE_KEYS)
+            jobs: [{ output: "yuji-boku.woff2", source: "ofl/yujiboku/YujiBoku-Regular.ttf", text: inkBrushText }],
+        },
+        {
+            licence: "ofl/notoseriftc/OFL.txt",
+            licenceOutput: "NotoSerifTC-OFL.txt",
+            // Ink's text and its seals (900), cut to the characters the app writes like WenKai
+            jobs: [{ output: "noto-serif-tc.woff2", source: "ofl/notoseriftc/NotoSerifTC[wght].ttf", text: chineseText, weights: { min: 400, max: 900 } }],
+        },
+        {
+            licence: "ofl/ebgaramond/OFL.txt",
+            licenceOutput: "EBGaramond-OFL.txt",
+            // Ink's digits: clues, keys and the timer upright, the player's digits in italic
+            jobs: [
+                { output: "eb-garamond.woff2", source: "ofl/ebgaramond/EBGaramond[wght].ttf", text: "0123456789:/%", weights: { min: 500, max: 700 } },
+                { output: "eb-garamond-italic.woff2", source: "ofl/ebgaramond/EBGaramond-Italic[wght].ttf", text: "0123456789", weights: { min: 500, max: 600 } },
+            ],
+        },
     ];
 
     mkdirSync(OUTPUT_DIR, { recursive: true });
@@ -164,6 +195,8 @@ const main = async (): Promise<void> => {
     // Cubic 11 is cut to the same characters
     writeFileSync(join(OUTPUT_DIR, "cubic-11-characters.txt"), chineseText);
     console.log(`WenKai and Cubic 11 cover ${Array.from(chineseText).length} characters`);
+    // The characters the Yuji Boku subset was cut to
+    writeFileSync(join(OUTPUT_DIR, "yuji-boku-characters.txt"), inkBrushText);
 };
 
 main().catch((error: unknown) => {
