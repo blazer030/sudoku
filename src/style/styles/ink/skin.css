@@ -129,7 +129,7 @@
     box-shadow: none;
 }
 
-/* Clues in ink, Garamond 700; the player's digits (and a hint's) in blue-black italic 500 */
+/* Clues in ink, Garamond 700 like the keys; the player's digits (and a hint's) in blue-black italic 500 */
 [data-style="ink"] [data-skin~="board"] [data-value-kind="given"] > div {
     font-weight: 700;
 }
@@ -813,6 +813,7 @@
    remaining-count badge is a page-coloured disc with a vermilion ring and vermilion digits. */
 [data-style="ink"] [data-skin~="key"] {
     border-radius: 4px 3px 5px 3px;
+    font-weight: 700;
 }
 
 [data-style="ink"] [data-skin~="key"][aria-pressed="true"] {
