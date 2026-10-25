@@ -16,40 +16,45 @@ export interface ChangelogEntry {
  * Player-facing changes merged since the last release, newest last. Develop builds show them on top of
  * the changelog; at release they move into the new version's entry (docs/release.md).
  */
-export const UNRELEASED_CHANGES: ChangelogChange[] = [
-    {
-        text: {
-            en: "New styles: 8-bit, Cyberpunk and Ink & Washi",
-            "zh-Hant": "全新風格「8-bit 電玩」、「賽博龐克」與「水墨和紙」",
-        },
-    },
-    {
-        text: {
-            en: "Appearance settings and interface improvements",
-            "zh-Hant": "外觀設定與介面優化",
-        },
-    },
-    {
-        text: {
-            en: "Each style has its own loading and celebration effects",
-            "zh-Hant": "每種風格都有專屬的載入與過關效果",
-        },
-    },
-    {
-        text: {
-            en: "Game progress is saved more reliably",
-            "zh-Hant": "遊戲進度保存更可靠",
-        },
-    },
-    {
-        text: {
-            en: "Hints and controls are easier to use",
-            "zh-Hant": "提示與操作優化",
-        },
-    },
-]
+export const UNRELEASED_CHANGES: ChangelogChange[] = []
 
 export const CHANGELOG: ChangelogEntry[] = [
+    {
+        version: "2.3.0",
+        date: "2026-10-26",
+        changes: [
+            {
+                text: {
+                    en: "New styles: 8-bit, Cyberpunk and Ink & Washi",
+                    "zh-Hant": "全新風格「8-bit 電玩」、「賽博龐克」與「水墨和紙」",
+                },
+            },
+            {
+                text: {
+                    en: "Appearance settings and interface improvements",
+                    "zh-Hant": "外觀設定與介面優化",
+                },
+            },
+            {
+                text: {
+                    en: "Each style has its own loading and celebration effects",
+                    "zh-Hant": "每種風格都有專屬的載入與過關效果",
+                },
+            },
+            {
+                text: {
+                    en: "Game progress is saved more reliably",
+                    "zh-Hant": "遊戲進度保存更可靠",
+                },
+            },
+            {
+                text: {
+                    en: "Hints and controls are easier to use",
+                    "zh-Hant": "提示與操作優化",
+                },
+            },
+        ],
+    },
     {
         version: "2.2.0",
         date: "2026-10-23",
