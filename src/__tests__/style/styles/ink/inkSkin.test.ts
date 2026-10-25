@@ -1,6 +1,7 @@
 import { readFileSync } from "fs";
 import postcss, { type AtRule } from "postcss";
-import { declarationsOf } from "../../styleSheetRules";
+import { animationTimingOf, declarationsOf, reducedMotionDeclarationsOf } from "../../styleSheetRules";
+import { ARRIVAL_SETTLE_MS } from "@/presentation/components/board-cell/useArrivalMotion";
 
 const INK_CSS = readFileSync("src/style/styles/ink/skin.css", "utf8");
 const BRUSH_GRID_SVG = readFileSync("src/style/styles/ink/brush-grid.svg", "utf8");
@@ -471,6 +472,105 @@ describe("ink skin", () => {
 
             expect(emphasised.get("box-shadow")).toBe(RING);
             expect(emphasised.get("background-color") ?? "transparent").toBe("transparent");
+        });
+    });
+
+    describe("fill and erase", () => {
+        const DIGIT = `${BOARD} .value-arrive`;
+        const HALO = `${BOARD} [data-variant]:has(> .value-arrive)::before`;
+        const GHOST = `${BOARD} [data-variant].value-leave::before`;
+        const CELL_ANIMATIONS: [string, string][] = [[DIGIT, "ink-bleed"], [HALO, "ink-halo"], [GHOST, "ink-wash"]];
+
+        // Each keyframe's selector and its declarations, in order
+        const keyframesOf = (name: string): Map<string, Map<string, string>> => {
+            const frames = new Map<string, Map<string, string>>();
+            postcss.parse(INK_CSS).walkAtRules("keyframes", (atRule) => {
+                if (atRule.params !== name) return;
+                atRule.walkRules((frame) => {
+                    const declarations = new Map<string, string>();
+                    frame.walkDecls((declaration) => {
+                        declarations.set(declaration.prop, collapse(declaration.value));
+                    });
+                    frames.set(collapse(frame.selector), declarations);
+                });
+            });
+            return frames;
+        };
+        const animatedPropertiesOf = (name: string): Set<string> =>
+            new Set([...keyframesOf(name).values()].flatMap(frame => [...frame.keys()]));
+        const opacityOf = (frame: Map<string, string> | undefined): number => Number(frame?.get("opacity"));
+
+        it("should bleed an entered digit in from a blur, a size up, over 900ms", () => {
+            const animation = declarationsOf(INK_CSS, DIGIT).get("animation") ?? "";
+            const frames = keyframesOf("ink-bleed");
+
+            expect(animationTimingOf(animation, "ink-bleed")?.durationMs).toBe(900);
+            expect(animation.replace(/\s+/g, "")).toContain("cubic-bezier(0.2,0.7,0.2,1)");
+            expect(opacityOf(frames.get("0%"))).toBe(0);
+            expect(frames.get("0%")?.get("filter")).toBe("blur(7px)");
+            expect(frames.get("0%")?.get("transform")).toBe("scale(1.45)");
+            expect(frames.get("100%")?.get("filter")).toBe("blur(0)");
+            expect(frames.get("100%")?.get("transform")).toBe("scale(1)");
+        });
+
+        it("should animate the bleeding digit only by opacity, filter and transform", () => {
+            expect([...animatedPropertiesOf("ink-bleed")].sort()).toEqual(["filter", "opacity", "transform"]);
+        });
+
+        it("should spread an ink halo from under the arriving digit, without taking taps", () => {
+            const halo = declarationsOf(INK_CSS, HALO);
+            const frames = keyframesOf("ink-halo");
+
+            expect(halo.get("content")).toBe('""');
+            expect(halo.get("pointer-events")).toBe("none");
+            expect(Number(halo.get("z-index"))).toBeLessThan(Number(declarationsOf(INK_CSS, `${BOARD} [data-variant] > div`).get("z-index")));
+            expect(halo.get("background-image")).toContain("radial-gradient(");
+            expect(halo.get("background-image")).toContain("color-mix(in srgb, var(--color-foreground) 16%, transparent)");
+            expect(animationTimingOf(halo.get("animation") ?? "", "ink-halo")?.durationMs).toBe(900);
+            expect(frames.get("0%")?.get("transform")).toBe("scale(.2)");
+            expect(opacityOf(frames.get("0%"))).toBe(0.95);
+            expect(frames.get("100%")?.get("transform")).toBe("scale(1.4)");
+            expect(opacityOf(frames.get("100%"))).toBe(0);
+            expect([...animatedPropertiesOf("ink-halo")].every(property => ["opacity", "transform"].includes(property))).toBe(true);
+        });
+
+        it("should leave the cell's ::after to the 圓相 while a digit arrives or leaves", () => {
+            expect(allRules().flatMap(rule => rule.selectors).filter(selector => /value-(?:arrive|leave)[^,]*::after/.test(selector))).toEqual([]);
+        });
+
+        it("should wash the erased digit off as a ghost in the entered digit's ink and face", () => {
+            const ghost = declarationsOf(INK_CSS, GHOST);
+            const entered = declarationsOf(INK_CSS, `${BOARD} [data-value-kind="entered"] > div`);
+            const frames = keyframesOf("ink-wash");
+
+            expect(ghost.get("content")).toBe("attr(data-leaving-value)");
+            expect(ghost.get("pointer-events")).toBe("none");
+            expect(ghost.get("font-family")).toBe("var(--font-entry)");
+            expect(ghost.get("font-size")).toContain("var(--entry-scale, 1)");
+            expect(ghost.get("color")).toBe(entered.get("color"));
+            expect(ghost.get("font-style")).toBe(entered.get("font-style"));
+            expect(ghost.get("font-weight")).toBe(entered.get("font-weight"));
+            expect(animationTimingOf(ghost.get("animation") ?? "", "ink-wash")?.durationMs).toBe(800);
+            expect(opacityOf(frames.get("100%"))).toBe(0);
+            expect(frames.get("100%")?.get("filter")).toBe("blur(6px)");
+            expect(frames.get("100%")?.get("transform")).toBe("translateY(5px) scale(1.25)");
+        });
+
+        it("should isolate the board, so WebKit still draws the blur under the washi fibres fixed to the screen", () => {
+            expect(declarationsOf(INK_CSS, BOARD).get("isolation")).toBe("isolate");
+        });
+
+        it.each([["halo", HALO], ["ghost", GHOST]])("should show no %s when its animation does not run", (_name, selector) => {
+            expect(declarationsOf(INK_CSS, selector).get("opacity")).toBe("0");
+        });
+
+        it("should end every cell animation before the cell settles, and stop each under reduced motion", () => {
+            for (const [selector, name] of CELL_ANIMATIONS) {
+                const timing = animationTimingOf(declarationsOf(INK_CSS, selector).get("animation") ?? "", name);
+                expect(timing, name).not.toBeNull();
+                expect((timing?.durationMs ?? 0) + (timing?.fixedDelayMs ?? 0), name).toBeLessThanOrEqual(ARRIVAL_SETTLE_MS);
+                expect(reducedMotionDeclarationsOf(INK_CSS, selector).get("animation"), name).toBe("none");
+            }
         });
     });
 });

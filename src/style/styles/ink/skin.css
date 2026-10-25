@@ -64,11 +64,13 @@
 
 /* The board: no frame and no card. The board and its plain cells lie bare on the washi, and every wash
    (peers, the same digit, a hint's pattern) is mixed over the page in the palette. Digits are a size up,
-   like the canvas's 25px. */
+   like the canvas's 25px. The board is its own stacking context: under the washi fibres fixed to the
+   screen, WebKit otherwise draws a digit's blur (its bleed, its wash) as a sharp digit. */
 [data-style="ink"] [data-skin~="board"] {
     --clue-scale: 1.14;
     --entry-scale: 1.14;
     --note-scale: 1.15;
+    isolation: isolate;
     background-color: transparent;
     box-shadow: none;
 }
@@ -168,6 +170,65 @@
     border-bottom-width: 3.2px;
     border-radius: 50%;
     transform: rotate(-28deg);
+}
+
+/* Filling a digit: it bleeds into the paper, from a blur a size up to the sharp digit, while a halo of
+   ink spreads from under it and fades. Erasing washes it off: a ghost of the digit that left (the cell's
+   data-leaving-value) blurs, sinks and swells away. The halo and the ghost are the cell's ::before (its
+   ::after is the 圓相, which stays), and their animationend settles arriving / leaving like the digit's own.
+   Only the one digit or its ghost animates a blur; the halo moves by opacity and transform. With the
+   animations stopped, the halo and the ghost stay unseen. */
+@keyframes ink-bleed {
+    0% { opacity: 0; filter: blur(7px); transform: scale(1.45); }
+    55% { opacity: 0.85; filter: blur(1.5px); transform: scale(1.05); }
+    100% { opacity: 1; filter: blur(0); transform: scale(1); }
+}
+
+@keyframes ink-halo {
+    0% { opacity: 0.95; transform: scale(.2); }
+    60% { opacity: 0.6; }
+    100% { opacity: 0; transform: scale(1.4); }
+}
+
+@keyframes ink-wash {
+    0% { opacity: 1; filter: blur(0); transform: none; }
+    100% { opacity: 0; filter: blur(6px); transform: translateY(5px) scale(1.25); }
+}
+
+[data-style="ink"] [data-skin~="board"] .value-arrive {
+    animation: ink-bleed 900ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+/* Its own rule, so a WebView without :has() still reads the leaving one */
+[data-style="ink"] [data-skin~="board"] [data-variant]:has(> .value-arrive)::before {
+    content: "";
+    position: absolute;
+    inset: -8px;
+    z-index: 1;
+    pointer-events: none;
+    border-radius: 50%;
+    background-image: radial-gradient(circle, color-mix(in srgb, var(--color-foreground) 16%, transparent) 0 32%, transparent 68%);
+    opacity: 0;
+    animation: ink-halo 900ms ease-out forwards;
+}
+
+[data-style="ink"] [data-skin~="board"] [data-variant].value-leave::before {
+    content: attr(data-leaving-value);
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    font-family: var(--font-entry);
+    font-size: calc(22px * var(--entry-scale, 1));
+    font-style: italic;
+    font-weight: 500;
+    line-height: 1;
+    color: var(--color-accent);
+    opacity: 0;
+    animation: ink-wash 800ms ease-out forwards;
 }
 
 /* Notes: pale ink Garamond. The selected digit's note is vermilion, without the shared disc; a hint's
@@ -563,6 +624,16 @@
     [data-style="ink"] [data-press-motion][data-pressed],
     [data-style="ink"] [data-press-bounce] {
         transform: none;
+        animation: none;
+    }
+
+    [data-style="ink"] [data-skin~="board"] .value-arrive,
+    [data-style="ink"] [data-skin~="board"] [data-variant].value-leave::before {
+        animation: none;
+    }
+
+    /* Its own rule, so a WebView without :has() still reads the list above */
+    [data-style="ink"] [data-skin~="board"] [data-variant]:has(> .value-arrive)::before {
         animation: none;
     }
 }
