@@ -1,5 +1,6 @@
 package io.github.blazer030.sudoku;
 
+import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatDelegate;
@@ -18,9 +19,12 @@ public class MainActivity extends BridgeActivity {
         }
         super.onCreate(savedInstanceState);
 
-        // Repaint the bars from last time until the page sets them again
+        // Repaint the bars from last time until the page sets them again, unless the system theme
+        // changed while the app was closed and they would be the wrong way round
         AppearanceStore.SystemBarColors systemBarColors = AppearanceStore.loadSystemBarColors(this);
-        if (systemBarColors != null && AppearanceStore.restoresOnStart(systemBarColors, AppearanceStore.isNight(this))) {
+        int nightFlag = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+        boolean isNight = nightFlag == Configuration.UI_MODE_NIGHT_YES;
+        if (systemBarColors != null && systemBarColors.darkIcons() != isNight) {
             SystemBarPainter.paint(this, systemBarColors);
         }
     }

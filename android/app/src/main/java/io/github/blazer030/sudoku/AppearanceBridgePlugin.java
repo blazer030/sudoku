@@ -48,7 +48,7 @@ public class AppearanceBridgePlugin extends Plugin {
 
         AppearanceStore.SystemBarColors colors;
         try {
-            colors = new AppearanceStore.SystemBarColors(Color.parseColor(background), darkIcons, AppearanceStore.isNight(getContext()));
+            colors = new AppearanceStore.SystemBarColors(Color.parseColor(background), darkIcons);
         } catch (IllegalArgumentException error) {
             call.reject("Unknown colour: " + background);
             return;
