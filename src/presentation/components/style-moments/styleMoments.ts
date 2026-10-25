@@ -13,6 +13,9 @@ import PixelGroupOverlay from "@/presentation/components/style-moments/pixel/Pix
 import CyberLoader from "@/presentation/components/style-moments/cyber/CyberLoader.vue";
 import CyberCelebration from "@/presentation/components/style-moments/cyber/CyberCelebration.vue";
 import CyberGroupOverlay from "@/presentation/components/style-moments/cyber/CyberGroupOverlay.vue";
+import InkLoader from "@/presentation/components/style-moments/ink/InkLoader.vue";
+import InkGroupOverlay from "@/presentation/components/style-moments/ink/InkGroupOverlay.vue";
+import InkCardDecoration from "@/presentation/components/style-moments/ink/InkCardDecoration.vue";
 import type { CompletedGroup } from "@/domain/game/Sudoku";
 
 /** A group effect on the board: a new one gets a new id, which starts its drawings afresh. */
@@ -107,6 +110,23 @@ const CYBER_MOMENTS: StyleMoments = {
     celebrationBoardMs: 860,
 };
 
+// From the boards: the whole group plays at once. A line's brush shows from 80ms for 1000ms, its stroke
+// drawn on in the first 440ms, and the digits' halo of paper runs with it; a box's 圓相 starts 80ms later
+// and runs 1060ms. The effect runs past them all, so a box completed alone from its centre (its farthest
+// cell two steps out, 1380ms) still outlasts the ring's 1220ms by the frames the overlay takes to start.
+// The solved board: two ink washes bloom over 1400ms, the second 200ms later, and the digits take the ink
+// from the centre outward (640ms each, 55ms a step, the corners last by 1080ms). The dialog opens as the
+// first wash settles, while the second is still spreading under the scrim; the card then unrolls, its
+// title is brushed in and the 過關 seal pressed (InkCardDecoration).
+const INK_MOMENTS: StyleMoments = {
+    loader: InkLoader,
+    celebration: null,
+    cardDecoration: InkCardDecoration,
+    groupEffectMs: 1260,
+    groupOverlay: InkGroupOverlay,
+    celebrationBoardMs: 1450,
+};
+
 // One entry per style, so a style added without its moments is a type error
 export const STYLE_MOMENTS: Record<StyleId, StyleMoments> = {
     minimal: MINIMAL_MOMENTS,
@@ -114,6 +134,7 @@ export const STYLE_MOMENTS: Record<StyleId, StyleMoments> = {
     paper: PAPER_MOMENTS,
     pixel: PIXEL_MOMENTS,
     cyber: CYBER_MOMENTS,
+    ink: INK_MOMENTS,
 };
 
 export const useStyleMoments = (): ComputedRef<StyleMoments> => {

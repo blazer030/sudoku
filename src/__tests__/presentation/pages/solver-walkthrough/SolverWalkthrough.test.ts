@@ -249,6 +249,14 @@ describe("SolverWalkthrough", () => {
             expect(cellAt(wrapper, 3, 4).text()).toBe("7");
         });
 
+        it("should hold the 81 cells in the board's grid hook", async () => {
+            const { wrapper } = await mountEntering();
+            const grid = wrapper.find("[data-testid='walkthrough-board'] [data-skin~='board-grid']");
+
+            expect(grid.exists()).toBe(true);
+            expect(grid.findAll("[data-testid^='solver-cell-']")).toHaveLength(81);
+        });
+
         it("should name the selected cell on the board, and none during playback", async () => {
             const { wrapper } = await mountEntering();
             expect(wrapper.find("[data-testid='walkthrough-board']").attributes("data-selected-cell")).toBeUndefined();

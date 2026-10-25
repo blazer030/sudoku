@@ -105,6 +105,17 @@ describe("settingsStore", () => {
         expect(store.colorTheme).toBe("blue");
     });
 
+    // Review Focus 4: ink never writes the appearance, so leaving it brings dark back
+    it("should keep a dark appearance through a visit to the light-only ink", () => {
+        const store = useSettingsStore();
+        store.setAppearance("dark");
+
+        store.setStyle("ink");
+        store.setStyle("minimal");
+
+        expect(store.appearance).toBe("dark");
+    });
+
     it("should persist the chosen style", () => {
         const store = useSettingsStore();
 

@@ -13,6 +13,9 @@ import { i18n } from "@/presentation/i18n";
 import { knownAnswer, knownPuzzle } from "@/__tests__/fixtures/knownPuzzle";
 import { ANALYTICS_KEY, type AnalyticsService } from "@/application/analytics/AnalyticsService";
 import { handleBackButton } from "@/presentation/composables/backDismissal";
+import { useSettingsStore } from "@/stores/settingsStore";
+import { STYLE_IDS, type StyleId } from "@/theme/themeIds";
+import { STYLE_HOME_HEROES } from "@/presentation/pages/home/homeHeroes";
 
 vi.mock("@/application/puzzleGeneration/PuzzleGenerationService", () => ({
     generatePuzzleAsync: vi.fn(() => Promise.resolve({
@@ -44,10 +47,13 @@ const createTestRouter = () => {
     });
 };
 
-const mountHome = ({ savedGame, analytics }: { savedGame?: GameState; analytics?: AnalyticsService } = {}) => {
+const mountHome = ({ savedGame, analytics, style }: { savedGame?: GameState; analytics?: AnalyticsService; style?: StyleId } = {}) => {
     const router = createTestRouter();
     const pinia = createPinia();
     setActivePinia(pinia);
+    if (style !== undefined) {
+        useSettingsStore().setStyle(style);
+    }
     if (savedGame !== undefined) {
         useGameStore().persistGame(savedGame);
     }
@@ -104,6 +110,57 @@ describe("Home", () => {
         const { wrapper } = mountHome();
 
         expect(wrapper.get("[data-testid='home-logo']").attributes("data-skin")).toBe("logo");
+    });
+
+    it("should give every stacked style the same hero", () => {
+        const stackedHeroes = STYLE_IDS.filter(style => STYLE_HOME_HEROES[style] === "stacked")
+            .map(style => mountHome({ style }).wrapper.get("[data-testid='home-hero']").html());
+
+        expect(stackedHeroes.length).toBeGreaterThan(0);
+        expect(new Set(stackedHeroes).size).toBe(1);
+        expect(stackedHeroes[0]).toContain('data-skin="logo"');
+    });
+
+    it("should set ink's title as a vertical emblem in Chinese, the same in both languages", async () => {
+        const { wrapper } = mountHome({ style: "ink" });
+        const emblemText = async (locale: "en" | "zh-Hant") => {
+            i18n.global.locale.value = locale;
+            await nextTick();
+            return wrapper.get("[data-testid='home-hero-emblem']").text();
+        };
+
+        const english = await emblemText("en");
+        const chinese = await emblemText("zh-Hant");
+
+        expect(wrapper.find("[data-testid='home-logo']").exists()).toBe(false);
+        expect(wrapper.get("[data-testid='home-hero-emblem']").attributes("aria-hidden")).toBe("true");
+        expect(english).toBe(chinese);
+        expect(chinese).toContain(i18n.global.t("home.title"));
+        expect(chinese).toContain(i18n.global.t("home.subtitle"));
+        for (const token of ["hero-title", "hero-subtitle", "hero-seal"]) {
+            expect(wrapper.find(`[data-skin~='${token}']`).exists()).toBe(true);
+        }
+        i18n.global.locale.value = "en";
+    });
+
+    it("should keep ink's hidden heading in the player's language", async () => {
+        const { wrapper } = mountHome({ style: "ink" });
+        const heading = async (locale: "en" | "zh-Hant") => {
+            i18n.global.locale.value = locale;
+            await nextTick();
+            return { title: wrapper.get("h1").text(), text: wrapper.get("[data-testid='home-hero']").text(), expected: [i18n.global.t("home.title"), i18n.global.t("home.subtitle")] };
+        };
+
+        const english = await heading("en");
+        const chinese = await heading("zh-Hant");
+
+        expect(english.title).not.toBe(chinese.title);
+        for (const { title, text, expected } of [english, chinese]) {
+            expect(title).toBe(expected[0]);
+            expect(text).toContain(expected[1]);
+        }
+        expect(wrapper.get("h1").classes()).toContain("sr-only");
+        i18n.global.locale.value = "en";
     });
 
     it("should keep an English title whole", () => {

@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 844" preserveAspectRatio="none">
+    <!-- Ink's washi fibres, from the canvas (Ink.dc .fibres): long faint strands across the page, shown as a
+         mask in the fibre tone. Only alpha: every strand is a currentColor stroke. -->
+    <g fill="none" stroke="currentColor">
+        <path d="M75 827 Q91 849 136 888" stroke-width="0.90"/>
+        <path d="M68 545 Q36 542 4 562" stroke-width="0.82"/>
+        <path d="M18 186 Q40 204 69 193" stroke-width="0.59"/>
+        <path d="M28 207 Q50 202 63 205" stroke-width="0.73"/>
+        <path d="M122 588 Q96 592 40 590" stroke-width="0.47"/>
+        <path d="M7 813 Q0 817 -38 816" stroke-width="0.76"/>
+        <path d="M350 231 Q306 280 288 310" stroke-width="0.45"/>
+        <path d="M270 598 Q316 572 362 567" stroke-width="0.48"/>
+        <path d="M202 429 Q248 458 294 473" stroke-width="0.51"/>
+        <path d="M82 -10 Q66 7 54 33" stroke-width="0.82"/>
+        <path d="M354 134 Q343 164 320 161" stroke-width="0.50"/>
+        <path d="M302 244 Q342 236 393 252" stroke-width="0.62"/>
+        <path d="M77 341 Q51 344 18 362" stroke-width="0.45"/>
+        <path d="M16 74 Q-2 70 -43 66" stroke-width="0.75"/>
+        <path d="M392 35 Q408 40 433 40" stroke-width="0.77"/>
+        <path d="M128 829 Q166 844 224 831" stroke-width="0.42"/>
+        <path d="M385 648 Q412 663 462 643" stroke-width="0.62"/>
+        <path d="M15 513 Q-31 500 -53 514" stroke-width="0.69"/>
+        <path d="M170 91 Q137 107 88 124" stroke-width="0.60"/>
+        <path d="M132 178 Q128 218 153 241" stroke-width="0.75"/>
+        <path d="M237 -0 Q201 41 194 49" stroke-width="0.78"/>
+        <path d="M191 601 Q199 632 206 647" stroke-width="0.72"/>
+        <path d="M-17 520 Q36 513 58 471" stroke-width="0.51"/>
+        <path d="M104 462 Q150 470 163 453" stroke-width="0.66"/>
+        <path d="M243 822 Q260 785 254 770" stroke-width="0.58"/>
+        <path d="M383 725 Q377 762 362 775" stroke-width="0.74"/>
+        <path d="M373 621 Q385 583 407 550" stroke-width="0.64"/>
+        <path d="M202 718 Q208 727 198 753" stroke-width="0.61"/>
+        <path d="M29 710 Q36 736 21 763" stroke-width="0.54"/>
+        <path d="M353 342 Q329 392 284 425" stroke-width="0.52"/>
+        <path d="M322 505 Q346 489 350 453" stroke-width="0.59"/>
+        <path d="M255 667 Q317 651 358 662" stroke-width="0.71"/>
+        <path d="M268 57 Q234 84 171 80" stroke-width="0.45"/>
+        <path d="M235 741 Q202 734 203 696" stroke-width="0.83"/>
+    </g>
+</svg>

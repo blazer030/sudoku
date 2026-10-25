@@ -5,6 +5,7 @@ import { launcherIconKey } from "@/theme/launcherIcon";
 import { syncPaperFonts } from "@/style/styles/paper/fonts";
 import { syncCyberFonts } from "@/style/styles/cyber/fonts";
 import { syncPixelFonts } from "@/style/styles/pixel/fonts";
+import { syncInkFonts } from "@/style/styles/ink/fonts";
 import { effectiveColorMode, type ColorMode, type ColorThemeId, type StyleId } from "@/theme/themeIds";
 import type { SystemBarService } from "@/application/systemBar/SystemBarService";
 import type { AppearanceBridgeService } from "@/application/appearanceBridge/AppearanceBridgeService";
@@ -33,6 +34,7 @@ export const startAppearanceSync = (
         syncPaperFonts(sources.style.value === "paper");
         syncPixelFonts(sources.style.value === "pixel");
         syncCyberFonts(sources.style.value === "cyber");
+        syncInkFonts(sources.style.value === "ink");
         updateMetaThemeColor(systemBarColor(sources.style.value, sources.colorTheme.value, mode));
         updateFavicon(launcherIconKey(sources.style.value, sources.colorTheme.value, mode));
         void systemBar.apply(mode);

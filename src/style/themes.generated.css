@@ -1051,3 +1051,42 @@
     --color-signal: #FCEE0A;
     --color-signal-surface: #3A3506;
 }
+
+:root[data-style="ink"][data-color-theme="vermilion"] {
+    --color-background: #F2ECDF;
+    --color-card: #FBF7EE;
+    --color-border: #C3BEB3;
+    --color-foreground: #1E1B16;
+    --color-foreground-secondary: #5C554A;
+    --color-foreground-muted: #686155;
+    --color-primary: #B3261E;
+    --color-primary-hover: #9C1F18;
+    --color-primary-light: #F2DED5;
+    --color-accent: #2C3E5C;
+    --color-highlight: #EBD6CA;
+    --color-cell-clue: #F2ECDF;
+    --color-danger: #A0281E;
+    --color-danger-hover: #8A2219;
+    --color-error: #A0281E;
+    --color-error-surface: #EAD8CC;
+    --color-shadow: #1E1B16;
+    --color-on-primary: #FFF8F0;
+    --color-on-danger: #FFF8F0;
+    --color-note: #5C554A;
+    --color-cell-focus: #F2ECDF;
+    --color-cell-scope: #E7E2D5;
+    --color-cell-pattern: #ECD8CC;
+    --color-scrim: #1E1B16;
+    --color-on-scrim: #F2ECDF;
+    --color-toast: #1E1B16;
+    --color-on-toast: #F2ECDF;
+    --color-cell-selected: #F2ECDF;
+    --color-cell-peer: #E7E2D5;
+    --color-featured: #FBF7EE;
+    --color-on-featured: #1E1B16;
+    --color-rule: #F2ECDF;
+    --color-margin-line: #F2ECDF;
+    --color-primary-ink: #B3261E;
+    --color-signal: #EBD6CA;
+    --color-signal-surface: #F2DED5;
+}

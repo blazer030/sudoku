@@ -17,10 +17,10 @@ progressive web app (PWA) and as a native Android app via Capacitor.
 - **Save & restore** with a running timer, persisted to IndexedDB
 - **Statistics** (best times, win rate, day streak) plus per-game **Review**
   with move replay
-- **Five visual styles** — Minimal Motion, Tactile Tiles, Paper Notebook, 8-bit and
-  Cyberpunk — each with its own colour themes, in light or dark (Paper Notebook is light
-  only; 8-bit has fixed colours, 掌機 handheld green or 紅白機 console; Cyberpunk is dark
-  only with one fixed neon palette)
+- **Six visual styles** — Minimal Motion, Tactile Tiles, Paper Notebook, 8-bit,
+  Cyberpunk and Ink & Washi (水墨和紙) — each with its own colour themes, in light or dark (Paper
+  Notebook is light only; 8-bit has fixed colours, 掌機 handheld green or 紅白機 console;
+  Cyberpunk is dark only with one fixed neon palette; Ink & Washi is light only with one fixed palette)
 - **English and Traditional Chinese**, following the system language or chosen in Settings
 - **Offline support** via service worker (web build)
 - **Native Android app** — Google Play Billing donations and a dynamic app

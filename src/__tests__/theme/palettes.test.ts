@@ -49,6 +49,16 @@ describe("palettes", () => {
         expect(getPalette("cyber", "neon", "dark").background).toBe("#07070D");
     });
 
+    it("should give ink one light-only vermilion theme on washi, with a seal primary and blue-black player ink", () => {
+        const palette = getPalette("ink", "vermilion", "light");
+
+        expect(STYLES.ink.themes.map(theme => theme.id)).toEqual(["vermilion"]);
+        expect(getPalette("ink", "vermilion", "dark")).toEqual(palette);
+        expect(palette.background).toBe("#F2ECDF");
+        expect(palette.primary).toBe("#B3261E");
+        expect(palette.accent).toBe("#2C3E5C");
+    });
+
     it("should let a style set a board tint directly instead of deriving it from the primary", () => {
         const build = darkOnlyThemeBuilder({ ...getPalette("minimal", "green", "dark") }, { "cell-peer": "#123456", signal: "#FFE600" });
         const theme = build("green", { primary: "#00F0FF", "primary-hover": "#40F4FF", accent: "#FF2BD6" });
@@ -148,7 +158,7 @@ describe("palettes", () => {
     });
 
     it("should keep paper's lines invisible in other styles", () => {
-        for (const style of [STYLES.minimal, STYLES.tactile, STYLES.pixel, STYLES.cyber]) {
+        for (const style of [STYLES.minimal, STYLES.tactile, STYLES.pixel, STYLES.cyber, STYLES.ink]) {
             for (const theme of style.themes) {
                 for (const mode of STYLE_COLOR_MODES[style.id]) {
                     const palette = getPalette(style.id, theme.id, mode);

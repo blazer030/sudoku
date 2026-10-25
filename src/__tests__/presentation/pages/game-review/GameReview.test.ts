@@ -153,6 +153,13 @@ describe("GameReview", () => {
         expect(wrapper.find("[data-testid='review-play']").attributes("aria-label")).toBe("Play");
     });
 
+    it("should hold the 81 cells in the board's grid hook", async () => {
+        const grid = (await mountReview({ nextClicks: 0 })).find("[data-testid='review-board'] [data-skin~='board-grid']");
+
+        expect(grid.exists()).toBe(true);
+        expect(grid.findAll("[data-testid^='review-cell-']").filter(cell => /^review-cell-\d-\d$/.test(cell.attributes("data-testid") ?? ""))).toHaveLength(81);
+    });
+
     it("should keep the seek bar and play button inside the panel", async () => {
         const wrapper = await mountReview({ nextClicks: 0 });
 

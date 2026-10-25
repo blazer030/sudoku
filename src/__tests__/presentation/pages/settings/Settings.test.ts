@@ -332,14 +332,17 @@ describe("Settings.vue appearance row", () => {
         expect(summaryOf(wrapper)).not.toContain(t("settings.colorThemes.classic"));
     });
 
-    it("should show only the style's name for a style with one mode and one theme", async () => {
+    it.each([
+        { style: "cyber", themeId: "neon" },
+        { style: "ink", themeId: "vermilion" },
+    ] as const)("should show only the style's name for $style, with one mode and one theme", async ({ style, themeId }) => {
         const wrapper = mountSettings();
         const settingsStore = useSettingsStore();
-        settingsStore.setStyle("cyber");
+        settingsStore.setStyle(style);
         await nextTick();
 
-        expect(summaryOf(wrapper)).toBe(t("settings.style.names.cyber"));
-        expect(summaryOf(wrapper)).not.toContain(t("settings.colorThemes.neon"));
+        expect(summaryOf(wrapper)).toBe(t(`settings.style.names.${style}`));
+        expect(summaryOf(wrapper)).not.toContain(t(`settings.colorThemes.${themeId}`));
     });
 
     it("should open the appearance page", async () => {

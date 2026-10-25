@@ -15,6 +15,7 @@ describe("launcher icons", () => {
         expect(pwaIconKey("minimal", "green")).toBe("green");
         expect(pwaIconKey("pixel", "classic")).toBe("pixelClassic");
         expect(pwaIconKey("cyber", "neon")).toBe("cyberNeonDark");
+        expect(pwaIconKey("ink", "vermilion")).toBe("inkVermilion");
     });
 
     it("should keep the bare theme id for minimal's light icons, whose aliases existing shortcuts point at", () => {
@@ -37,7 +38,7 @@ describe("launcher icons", () => {
         const iconCount = STYLE_IDS.reduce((sum, style) => sum + STYLES[style].themes.length * STYLE_COLOR_MODES[style].length, 0);
 
         expect(LAUNCHER_ICONS).toHaveLength(iconCount);
-        expect(LAUNCHER_ICONS).toHaveLength(26);
+        expect(LAUNCHER_ICONS).toHaveLength(27);
         expect(new Set(LAUNCHER_ICONS.map(icon => icon.key)).size).toBe(LAUNCHER_ICONS.length);
         for (const icon of LAUNCHER_ICONS) {
             expect(icon.key).toBe(launcherIconKey(icon.style, icon.themeId, icon.mode));
@@ -53,6 +54,13 @@ describe("launcher icons", () => {
 
         expect(keys).toContain("cyberNeonDark");
         expect(keys).not.toContain("cyberNeon");
+    });
+
+    it("should give ink its one light icon and no dark one", () => {
+        const keys = LAUNCHER_ICONS.map(icon => icon.key);
+
+        expect(keys).toContain("inkVermilion");
+        expect(keys).not.toContain("inkVermilionDark");
     });
 
     it("should give paper no dark icon now that paper is light only", () => {

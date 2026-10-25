@@ -78,6 +78,21 @@ const REQUIRED_SELECTORS: Record<StyleId, readonly string[]> = {
         ".cyber-group-frame",
         ".cyber-mission",
     ],
+    ink: [
+        ...PRESS,
+        ".ink-loader-stroke",
+        ".ink-loader-seal",
+        "[data-group]",
+        ".ink-group-brush",
+        '[data-celebration="playing"]',
+        '[data-skin~="trophy"]',
+        '[data-skin~="complete-title"]',
+        '[data-skin~="celebration"]:not([data-still])',
+        ".ink-seal-stamp",
+        '[data-skin~="hero-title"]',
+        '[data-skin~="hero-seal"]',
+        '[data-skin~="hero-vertical"]',
+    ],
 };
 
 const selectorsOf = (style: StyleId): string[] => {

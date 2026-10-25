@@ -248,6 +248,43 @@ describe("BoardCell", () => {
             expect(wrapper.classes()).toContain("value-leave");
         });
 
+        it("should name the digit that left while the cell leaves, and drop the name when it settles", async () => {
+            vi.useFakeTimers();
+            try {
+                stubReducedMotion(false);
+                const wrapper = mountCell({ value: 7 });
+                await wrapper.setProps({ value: 0 });
+                expect(wrapper.attributes("data-leaving-value")).toBe("7");
+                expect(wrapper.classes()).toContain("value-leave");
+
+                vi.advanceTimersByTime(ARRIVAL_SETTLE_MS);
+                await nextTick();
+
+                expect(wrapper.attributes("data-leaving-value")).toBeUndefined();
+                expect(wrapper.classes()).not.toContain("value-leave");
+            } finally {
+                vi.useRealTimers();
+            }
+        });
+
+        it("should name the last digit shown when the cell changed digits before it left", async () => {
+            stubReducedMotion(false);
+            const wrapper = mountCell({ value: 7 });
+            await wrapper.setProps({ value: 3 });
+            await wrapper.setProps({ value: 0 });
+
+            expect(wrapper.attributes("data-leaving-value")).toBe("3");
+        });
+
+        it("should not name a leaving digit under reduced motion", async () => {
+            stubReducedMotion(true);
+            const wrapper = mountCell({ value: 7 });
+
+            await wrapper.setProps({ value: 0 });
+
+            expect(wrapper.attributes("data-leaving-value")).toBeUndefined();
+        });
+
         it("should not mark a leaving digit under reduced motion", async () => {
             stubReducedMotion(true);
             const wrapper = mountCell({ value: 5 });

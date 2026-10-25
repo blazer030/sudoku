@@ -187,12 +187,26 @@ describe("useArrivalMotion", () => {
 
     it("should outlast every style's arrival and leaving animation", () => {
         const checked = new Set<string>();
+        const layersOf = (value: string): string[] => value.split(/,(?![^(]*\))/).map(layer => layer.replace(/\s+/g, " ").trim());
         for (const style of STYLE_IDS) {
-            postcss.parse(readFileSync(`src/style/styles/${style}/skin.css`, "utf8")).walkDecls("animation", (declaration) => {
+            const sheet = postcss.parse(readFileSync(`src/style/styles/${style}/skin.css`, "utf8"));
+            // The layers a style's plain group rule runs on a group's digits
+            const groupLayers = new Set<string>();
+            sheet.walkDecls("animation", (declaration) => {
+                const rule = declaration.parent;
+                if (rule?.type !== "rule") return;
+                const plainGroupDigit = (rule as postcss.Rule).selectors.some(selector =>
+                    /\[data-group\][^ ]* > div$/.test(selector.trim()) && !MOTION_CLASSES.some(motionClass => selector.includes(motionClass)));
+                if (plainGroupDigit) layersOf(declaration.value).forEach(layer => groupLayers.add(layer));
+            });
+            sheet.walkDecls("animation", (declaration) => {
                 const rule = declaration.parent;
                 if (rule?.type !== "rule" || !MOTION_CLASSES.some(motionClass => (rule as postcss.Rule).selector.includes(motionClass))) return;
                 if (declaration.value.trim() === "none") return;
-                const durations = [...declaration.value.matchAll(/(\d+(?:\.\d+)?)(ms|s)\b/g)]
+                // A combined rule (the entered digit is in its own completed group) also lists the group's
+                // layer; the plain group rule carries the same one, so it runs on once the arrival settles
+                const arrivalLayers = layersOf(declaration.value).filter(layer => !groupLayers.has(layer));
+                const durations = arrivalLayers.flatMap(layer => [...layer.matchAll(/(\d+(?:\.\d+)?)(ms|s)\b/g)])
                     .map(([, amount, unit]) => Number(amount) * (unit === "s" ? 1000 : 1));
                 for (const duration of durations) expect(duration, style).toBeLessThan(ARRIVAL_SETTLE_MS);
                 for (const motionClass of MOTION_CLASSES) {
@@ -202,10 +216,10 @@ describe("useArrivalMotion", () => {
         }
 
         // The styles that animate them, so the check above is not empty
-        expect([...checked]).toEqual(expect.arrayContaining(["tactile .value-arrive", "paper .value-leave", "pixel .value-arrive", "pixel .value-leave", "cyber .value-arrive", "cyber .value-leave"]));
+        expect([...checked]).toEqual(expect.arrayContaining(["tactile .value-arrive", "paper .value-leave", "pixel .value-arrive", "pixel .value-leave", "cyber .value-arrive", "cyber .value-leave", "ink .value-arrive", "ink .value-leave"]));
     });
 
-    it.each(STYLE_IDS.filter(style => !["paper", "pixel", "cyber"].includes(style)))("should leave %s's digits to go without a leaving look", (style) => {
+    it.each(STYLE_IDS.filter(style => !["paper", "pixel", "cyber", "ink"].includes(style)))("should leave %s's digits to go without a leaving look", (style) => {
         const selectors: string[] = [];
         postcss.parse(readFileSync(`src/style/styles/${style}/skin.css`, "utf8")).walkRules((rule) => {
             selectors.push(...rule.selectors);

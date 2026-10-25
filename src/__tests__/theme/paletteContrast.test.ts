@@ -85,12 +85,15 @@ const BOARD_PAIRS: readonly ContrastPair[] = BOARD_SURFACES.flatMap(surface => B
 // (dither, hatch, inversion), and its board model checks the ink on each pattern instead. Cyberpunk's
 // states are neon washes over one dark panel, 7 to 18 percent of a colour on the card, so its layers
 // differ in hue rather than in lightness; its edges and the cell's outlines tell them apart, and its
-// board model checks the ink drawn on each.
+// board model checks the ink drawn on each. Ink and washi's board and cells are transparent on the page:
+// clues sit on the bare page like every other cell, so there is no clue layer to set apart from the card,
+// and a same-digit cell is told apart by its vermilion digit, not by a wash darker than the clue or peer
+// cells'; its board model (INK_BOARD_CASES) checks the ink drawn on each wash.
 const SURFACE_PAIRS: readonly ContrastPair[] = [
-    { ...pair("cell-clue", "card", 1.25), exceptIn: ["pixel", "cyber"] },
-    { ...pair("highlight", "cell-clue", 1.25), exceptIn: ["pixel", "cyber"] },
+    { ...pair("cell-clue", "card", 1.25), exceptIn: ["pixel", "cyber", "ink"] },
+    { ...pair("highlight", "cell-clue", 1.25), exceptIn: ["pixel", "cyber", "ink"] },
     { ...pair("highlight", "card", 1.25), exceptIn: ["pixel", "cyber"] },
-    { ...pair("highlight", "cell-peer", 1.25), exceptIn: ["pixel", "cyber"] },
+    { ...pair("highlight", "cell-peer", 1.25), exceptIn: ["pixel", "cyber", "ink"] },
     { ...pair("cell-peer", "card", 1.08), exceptIn: ["pixel", "cyber"] },
     // The selection outline is a UI component, so 3:1 applies
     { ...pair("primary", "cell-selected", LARGE_OR_ICON), exceptIn: ["pixel"] },
@@ -347,6 +350,38 @@ const CYBER_BOARD_CASES: CyberBoardCase[] = STYLES.cyber.themes.flatMap(theme =>
     ];
 }));
 
+// Ink and washi's board: the ink actually drawn on the surface actually drawn. The board and its cells are
+// transparent, so every cell lies on the page or on a wash mixed over it (palette.ts).
+interface InkBoardCase { label: string; foreground: string; background: string; minimum: number }
+
+const INK_BOARD_CASES: InkBoardCase[] = STYLES.ink.themes.flatMap(theme => STYLE_COLOR_MODES.ink.flatMap((mode) => {
+    const palette = getPalette("ink", theme.id, mode);
+    const prefix = `ink/${theme.id}/${mode}`;
+    const drawn = (name: string, foreground: string, background: string, minimum = TEXT): InkBoardCase => ({
+        label: `${prefix}: ${name} ≥ ${minimum}`, foreground, background, minimum,
+    });
+    const surfaces: readonly (readonly [string, string])[] = [
+        ["the page", palette.background],
+        ["cell-peer", palette["cell-peer"]],
+        ["cell-scope", palette["cell-scope"]],
+        ["cell-pattern", palette["cell-pattern"]],
+        ["highlight", palette.highlight],
+    ];
+    // A clue, a player's digit, a note and the vermilion (the same digit, the selected digit's note, a hint's
+    // eliminated and emphasised candidates) can lie on any wash a hint or the selection puts under them
+    const onEverySurface = (name: string, ink: string) => surfaces.map(([surface, background]) => drawn(`${name} on ${surface}`, ink, background));
+    return [
+        ...onEverySurface("clue (foreground)", palette.foreground),
+        ...onEverySurface("entry and candidate note (accent)", palette.accent),
+        ...onEverySurface("note", palette.note),
+        ...onEverySurface("vermilion (primary-ink)", palette["primary-ink"]),
+        // The ink ring around the selected digit's note is a mark, not text, so 3:1 applies
+        ...surfaces.map(([surface, background]) => drawn(`note ring (primary) on ${surface}`, palette.primary, background, LARGE_OR_ICON)),
+        drawn("error digit (error) on the page", palette.error, palette.background),
+        drawn("error digit (error) on error-surface", palette.error, palette["error-surface"]),
+    ];
+}));
+
 describe("palette contrast", () => {
     it("should check every style, theme and the modes the style has", () => {
         const expected = STYLE_IDS.flatMap(style => THEME_IDS_BY_STYLE[style].flatMap(theme =>
@@ -395,6 +430,14 @@ describe("palette contrast", () => {
 
     it("should check cyber's board in its one mode", () => {
         expect(new Set(CYBER_BOARD_CASES.map(boardCase => boardCase.label.split(":")[0]))).toEqual(new Set(["cyber/neon/dark"]));
+    });
+
+    it("should check ink's board in its one mode", () => {
+        expect(new Set(INK_BOARD_CASES.map(boardCase => boardCase.label.split(":")[0]))).toEqual(new Set(["ink/vermilion/light"]));
+    });
+
+    it.each(INK_BOARD_CASES)("$label", ({ foreground, background, minimum }) => {
+        expect(contrastRatio(foreground, background)).toBeGreaterThanOrEqual(minimum);
     });
 
     it.each(CYBER_BOARD_CASES)("$label", ({ foreground, background, minimum }) => {

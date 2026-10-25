@@ -138,6 +138,20 @@ describe("index.html no-flash script", () => {
         expect(meta.content).toBe(systemBarColor("cyber", "neon", "dark"));
     });
 
+    // Review Focus 4: ink is light only, whatever appearance is stored
+    it("should paint ink light with its seal bar colour while dark is stored", () => {
+        stubSystemDark(false);
+        storeSettings({ style: "ink", appearance: "dark" });
+
+        runInlineScript();
+
+        expect(root.dataset.style).toBe("ink");
+        expect(root.dataset.colorTheme).toBe("vermilion");
+        expect(root.classList.contains("dark")).toBe(false);
+        expect(meta.content).toBe("#B3261E");
+        expect(meta.content).toBe(systemBarColor("ink", "vermilion", "light"));
+    });
+
     it("should paint paper light for a stored system appearance on a dark system", () => {
         stubSystemDark(true);
         storeSettings({ style: "paper", appearance: "system" });

@@ -7,6 +7,7 @@
             pops ? 'animate-hint-reveal-glow' : '',
             leaving ? 'value-leave' : '',
         ]"
+        :data-leaving-value="leaving ? lastDigit : undefined"
         :data-group="inGroupEffect ? groupKinds.join(' ') : undefined"
         :data-selected="selected ? '' : undefined"
         :data-value-kind="value !== 0 ? valueKind : undefined"
@@ -169,6 +170,12 @@ const placement = computed(() => ({
 }));
 const pops = computed(() => props.popping && motionAllowed());
 const { arriving, leaving, settle } = useArrivalMotion(toRef(props, "value"), toRef(props, "popping"));
+
+// The digit a leaving cell last showed, for a style to draw as it goes
+const lastDigit = ref(props.value);
+watch(() => props.value, (current) => {
+    if (current !== 0) lastDigit.value = current;
+});
 
 // A style may write an arriving digit in with its own pen; arriving is only ever set while motion is allowed.
 // The pen is a mask, so a browser that cannot mask by one shows the digit plainly.

@@ -30,7 +30,10 @@
                 class="bg-card rounded-2xl shadow-card-lg p-2 self-center w-[calc(100%+1.5rem)] max-w-board-fit"
                 data-testid="walkthrough-board"
             >
-                <div class="relative flex flex-col border-3 border-foreground/20 rounded-xl">
+                <div
+                    class="relative flex flex-col border-3 border-foreground/20 rounded-xl"
+                    data-skin="board-grid"
+                >
                     <div
                         v-for="(row, rowIndex) in puzzleCells"
                         :key="`row-${rowIndex}`"
