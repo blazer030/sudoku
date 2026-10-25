@@ -3,6 +3,7 @@ package io.github.blazer030.sudoku;
 import android.app.UiModeManager;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import androidx.appcompat.app.AppCompatDelegate;
 
 /**
@@ -19,11 +20,12 @@ final class AppearanceStore {
     private static final String KEY_MODE = "mode";
     private static final String KEY_BAR_BACKGROUND = "systemBarBackground";
     private static final String KEY_BAR_DARK_ICONS = "systemBarDarkIcons";
+    private static final String KEY_BAR_SAVED_AT_NIGHT = "systemBarSavedAtNight";
 
     private AppearanceStore() {}
 
-    /** The system bar colours last set by the page. */
-    record SystemBarColors(int background, boolean darkIcons) {}
+    /** The system bar colours last set by the page, and whether the app was in night mode then. */
+    record SystemBarColors(int background, boolean darkIcons, boolean savedAtNight) {}
 
     static boolean isMode(String mode) {
         return MODE_SYSTEM.equals(mode) || MODE_LIGHT.equals(mode) || MODE_DARK.equals(mode);
@@ -60,6 +62,7 @@ final class AppearanceStore {
             .edit()
             .putInt(KEY_BAR_BACKGROUND, colors.background())
             .putBoolean(KEY_BAR_DARK_ICONS, colors.darkIcons())
+            .putBoolean(KEY_BAR_SAVED_AT_NIGHT, colors.savedAtNight())
             .apply();
     }
 
@@ -67,7 +70,24 @@ final class AppearanceStore {
     static SystemBarColors loadSystemBarColors(Context context) {
         SharedPreferences preferences = preferences(context);
         if (!preferences.contains(KEY_BAR_BACKGROUND)) return null;
-        return new SystemBarColors(preferences.getInt(KEY_BAR_BACKGROUND, 0), preferences.getBoolean(KEY_BAR_DARK_ICONS, true));
+        boolean darkIcons = preferences.getBoolean(KEY_BAR_DARK_ICONS, true);
+        // Colours saved before the night flag was kept: assume light bars were saved by day
+        boolean savedAtNight = preferences.getBoolean(KEY_BAR_SAVED_AT_NIGHT, !darkIcons);
+        return new SystemBarColors(preferences.getInt(KEY_BAR_BACKGROUND, 0), darkIcons, savedAtNight);
+    }
+
+    /**
+     * Repaint the saved bars at start only in the night mode they were saved in: if the system theme
+     * changed while the app was closed, the page may pick other bars. A style with one colour mode
+     * keeps its bars in either, so the icons alone cannot tell.
+     */
+    static boolean restoresOnStart(SystemBarColors colors, boolean isNight) {
+        return colors.savedAtNight() == isNight;
+    }
+
+    static boolean isNight(Context context) {
+        int nightFlag = context.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+        return nightFlag == Configuration.UI_MODE_NIGHT_YES;
     }
 
     private static SharedPreferences preferences(Context context) {
