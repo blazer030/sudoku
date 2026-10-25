@@ -13,7 +13,7 @@
 </template>
 
 <script setup lang="ts">
-import { nextTick, useTemplateRef, watch } from "vue";
+import { nextTick, onBeforeUnmount, onMounted, useTemplateRef, watch } from "vue";
 import { RouterView, useRoute } from "vue-router";
 
 const route = useRoute();
@@ -27,4 +27,19 @@ watch(
         if (pageScroller.value) pageScroller.value.scrollTop = 0;
     },
 );
+
+// Android's WebView keeps the scroll offset when the window grows (split screen, a foldable), even
+// past what the page can scroll, leaving its top cut off with no way back
+const keepScrollInReach = () => {
+    const scroller = pageScroller.value;
+    if (!scroller) return;
+    const furthest = Math.max(0, scroller.scrollHeight - scroller.clientHeight);
+    if (scroller.scrollTop > furthest) scroller.scrollTop = furthest;
+};
+onMounted(() => {
+    window.addEventListener("resize", keepScrollInReach);
+});
+onBeforeUnmount(() => {
+    window.removeEventListener("resize", keepScrollInReach);
+});
 </script>
