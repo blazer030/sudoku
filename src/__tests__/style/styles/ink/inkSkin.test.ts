@@ -385,6 +385,14 @@ describe("ink skin", () => {
             expect(on.get("rotate")).toMatch(/^-[\d.]+deg$/);
         });
 
+        it("should round the settings toggle and option cards more than the small card corner, and leave the home tiles on it", () => {
+            const rounded = declarationsOf(INK_CSS, `${SCOPE} [data-skin~="tile"].border-2`).get("border-radius");
+            const cardRadius = Number.parseFloat(declarationsOf(INK_CSS, SCOPE).get("--radius-2xl") ?? "");
+
+            expect(Number.parseFloat(rounded ?? "")).toBeGreaterThan(cardRadius);
+            expect(declarationsOf(INK_CSS, `${SCOPE} [data-skin~="tile"]`).has("border-radius")).toBe(false);
+        });
+
         it("should outline a chosen tile in vermilion instead of filling it", () => {
             const chosen = declarationsOf(INK_CSS, `${SCOPE} [data-skin~="tile"][aria-pressed="true"]`);
 

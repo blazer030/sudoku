@@ -702,6 +702,12 @@
     border-color: transparent;
 }
 
+/* The settings toggle cards and the 外觀 option cards (the tiles with a border) keep the canvas's 12px;
+   the home tiles stay on the small card corner */
+[data-style="ink"] [data-skin~="tile"].border-2 {
+    border-radius: 12px;
+}
+
 [data-style="ink"] [data-skin~="tile"][aria-pressed="true"] {
     background-color: color-mix(in srgb, var(--color-card) 62%, transparent);
     box-shadow: inset 0 0 0 1.5px var(--color-primary-ink);
