@@ -42,10 +42,10 @@ describe("ink skin", () => {
             expect(lines.get("background-color")).toBe("var(--color-foreground)");
         });
 
-        it("should lay the brush lines over the grid's border box, above the digits, never taking taps", () => {
+        it("should lay the brush lines over the cells, so they land on the cell edges, above the digits, never taking taps", () => {
             const lines = maskSupportsDeclarationsOf(`${GRID}::after`);
 
-            expect(lines.get("inset")).toBe("-3px");
+            expect(lines.get("inset")).toBe("0");
             expect(lines.get("z-index")).toBe("3");
             expect(lines.get("pointer-events")).toBe("none");
         });

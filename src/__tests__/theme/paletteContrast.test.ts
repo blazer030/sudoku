@@ -373,7 +373,7 @@ const INK_BOARD_CASES: InkBoardCase[] = STYLES.ink.themes.flatMap(theme => STYLE
     return [
         ...onEverySurface("clue (foreground)", palette.foreground),
         ...onEverySurface("entry and candidate note (accent)", palette.accent),
-        ...onEverySurface("note (foreground-secondary)", palette["foreground-secondary"]),
+        ...onEverySurface("note", palette.note),
         ...onEverySurface("vermilion (primary-ink)", palette["primary-ink"]),
         drawn("error digit (error) on the page", palette.error, palette.background),
         drawn("error digit (error) on error-surface", palette.error, palette["error-surface"]),
