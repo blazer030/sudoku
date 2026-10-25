@@ -1,0 +1,26 @@
+{
+  "name": "Sudoku",
+  "short_name": "Sudoku",
+  "description": "Train your brain with Sudoku puzzles",
+  "background_color": "#F2ECDF",
+  "display": "standalone",
+  "theme_color": "#B3261E",
+  "icons": [
+    {
+      "src": "pwa-192x192-inkVermilion.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "pwa-512x512-inkVermilion.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "pwa-512x512-inkVermilion.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

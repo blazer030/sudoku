@@ -2,8 +2,17 @@ import { ICON_THEME_IDS, THEME_IDS_BY_STYLE } from "@/theme/themeIds";
 import { loadSettings, saveSettings } from "@/application/settings/SettingsStorage";
 
 describe("SettingsStorage", () => {
+    const stubSystemDark = (dark: boolean) => {
+        vi.stubGlobal("matchMedia", (query: string) => ({ matches: dark && query === "(prefers-color-scheme: dark)" }));
+    };
+
     beforeEach(() => {
         localStorage.clear();
+    });
+
+    afterEach(() => {
+        vi.restoreAllMocks();
+        vi.unstubAllGlobals();
     });
 
     it("should list the six icon themes as the minimal style's themes", () => {
@@ -17,16 +26,78 @@ describe("SettingsStorage", () => {
             expect(settings).toEqual({
                 colorTheme: "green",
                 highlightSameDigit: true,
-                completionFlash: true,
+                motionEffects: true,
                 autoRemoveNotes: true,
                 showRemainingCount: true,
                 matchLauncherIconToTheme: false,
                 language: "system",
-                appearance: "system",
+                appearance: "light",
                 style: "minimal",
                 highlightScope: true,
                 colorThemeByStyle: { minimal: "green" },
             });
+        });
+
+        it("should treat saved settings that are the JSON text null as no saved settings", () => {
+            localStorage.setItem("sudoku-settings", "null");
+
+            expect(loadSettings().style).toBe("minimal");
+        });
+
+        it("should treat saved settings that are not valid JSON as no saved settings", () => {
+            localStorage.setItem("sudoku-settings", "{not json");
+
+            expect(loadSettings().style).toBe("minimal");
+        });
+
+        it.each(["42", "[\"paper\"]", "\"paper\""])("should treat saved settings that are not an object (%s) as no saved settings", (stored) => {
+            localStorage.setItem("sudoku-settings", stored);
+
+            const settings = loadSettings();
+
+            expect(settings).toEqual(expect.objectContaining({ style: "minimal", colorTheme: "green" }));
+            expect(settings).not.toHaveProperty("0");
+        });
+
+        it("should replace unreadable saved settings with readable ones", () => {
+            localStorage.setItem("sudoku-settings", "{not json");
+
+            loadSettings();
+
+            expect(() => JSON.parse(localStorage.getItem("sudoku-settings") ?? "") as unknown).not.toThrow();
+        });
+
+        it("should still return the settings when saving the migrated appearance fails", () => {
+            stubSystemDark(true);
+            vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
+                throw new DOMException("quota", "QuotaExceededError");
+            });
+
+            expect(loadSettings().appearance).toBe("dark");
+        });
+
+        it("should start a fresh install in the mode the system shows", () => {
+            stubSystemDark(true);
+
+            expect(loadSettings().appearance).toBe("dark");
+        });
+
+        it.each(["system", "sepia"])("should turn a stored %s appearance into the system's mode and save it", (stored) => {
+            stubSystemDark(false);
+            localStorage.setItem("sudoku-settings", JSON.stringify({ appearance: stored }));
+
+            expect(loadSettings().appearance).toBe("light");
+            expect(JSON.parse(localStorage.getItem("sudoku-settings") ?? "{}")).toMatchObject({ appearance: "light" });
+
+            stubSystemDark(true);
+            expect(loadSettings().appearance).toBe("light");
+        });
+
+        it("should keep a stored dark appearance whatever the system shows", () => {
+            stubSystemDark(false);
+            localStorage.setItem("sudoku-settings", JSON.stringify({ appearance: "dark" }));
+
+            expect(loadSettings().appearance).toBe("dark");
         });
 
         it("should seed the remembered theme from colorTheme for settings saved before it existed", () => {
@@ -75,11 +146,26 @@ describe("SettingsStorage", () => {
             expect(loadSettings().colorThemeByStyle).toEqual({ minimal: "green" });
         });
 
+        it("should carry the retired completionFlash choice over to motionEffects", () => {
+            localStorage.setItem("sudoku-settings", JSON.stringify({ completionFlash: false }));
+
+            const settings = loadSettings();
+
+            expect(settings.motionEffects).toBe(false);
+            expect(settings).not.toHaveProperty("completionFlash");
+        });
+
+        it("should prefer motionEffects over a leftover completionFlash", () => {
+            localStorage.setItem("sudoku-settings", JSON.stringify({ completionFlash: false, motionEffects: true }));
+
+            expect(loadSettings().motionEffects).toBe(true);
+        });
+
         it("should restore saved settings", () => {
             saveSettings({
                 colorTheme: "blue",
                 highlightSameDigit: false,
-                completionFlash: false,
+                motionEffects: false,
                 autoRemoveNotes: false,
                 showRemainingCount: false,
                 matchLauncherIconToTheme: true,
@@ -94,7 +180,7 @@ describe("SettingsStorage", () => {
 
             expect(settings.colorTheme).toBe("blue");
             expect(settings.highlightSameDigit).toBe(false);
-            expect(settings.completionFlash).toBe(false);
+            expect(settings.motionEffects).toBe(false);
             expect(settings.autoRemoveNotes).toBe(false);
             expect(settings.showRemainingCount).toBe(false);
             expect(settings.matchLauncherIconToTheme).toBe(true);
@@ -113,7 +199,6 @@ describe("SettingsStorage", () => {
         });
 
         it.each([
-            ["appearance", "sepia", "system"],
             ["style", "neon", "minimal"],
             ["colorTheme", "red", "green"],
             ["language", "fr", "system"],
@@ -131,12 +216,12 @@ describe("SettingsStorage", () => {
             expect(settings.colorTheme).toBe("purple");
             expect(settings.highlightSameDigit).toBe(true);
             expect(settings.highlightScope).toBe(true);
-            expect(settings.completionFlash).toBe(true);
+            expect(settings.motionEffects).toBe(true);
             expect(settings.autoRemoveNotes).toBe(true);
             expect(settings.showRemainingCount).toBe(true);
             expect(settings.matchLauncherIconToTheme).toBe(false);
             expect(settings.language).toBe("system");
-            expect(settings.appearance).toBe("system");
+            expect(settings.appearance).toBe("light");
             expect(settings.style).toBe("minimal");
         });
     });

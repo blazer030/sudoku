@@ -19,7 +19,8 @@ export interface GameResult {
 
 export interface StatisticsRepository {
     load(): Promise<GameResult[]>;
-    save(history: GameResult[]): Promise<void>;
+    /** Adds one finished game after the games already stored; `load()` returns games oldest first. */
+    append(game: GameResult): Promise<void>;
     clear(): Promise<void>;
 }
 

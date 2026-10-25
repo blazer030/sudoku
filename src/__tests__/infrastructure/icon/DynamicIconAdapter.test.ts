@@ -9,7 +9,7 @@ vi.mock("@capacitor-community/app-icon", () => ({ AppIcon: { change } }));
 vi.mock("@capacitor/app", () => ({ App: { addListener } }));
 
 import { DynamicIconAdapter } from "@/infrastructure/icon/DynamicIconAdapter";
-import { LAUNCHER_ICONS } from "@/theme/launcherIcon";
+import { ALL_LAUNCHER_ALIASES } from "@/theme/launcherIcon";
 
 describe("DynamicIconAdapter", () => {
     let triggerPause: () => void;
@@ -39,21 +39,32 @@ describe("DynamicIconAdapter", () => {
         expect(change).toHaveBeenCalledTimes(1);
         expect(change).toHaveBeenCalledWith({
             name: "blue",
-            disable: LAUNCHER_ICONS.map(icon => icon.key).filter(key => key !== "blue"),
+            disable: ALL_LAUNCHER_ALIASES.filter(alias => alias !== "blue"),
             suppressNotification: false,
         });
     });
 
     it("disables every other alias, light and dark, when applying a dark icon", async () => {
         const adapter = new DynamicIconAdapter();
-        await adapter.setIcon("paperRedInkDark");
+        await adapter.setIcon("tactileRustDark");
         triggerPause();
         const { name, disable } = change.mock.calls[0][0] as { name: string; disable: string[] };
-        expect(name).toBe("paperRedInkDark");
-        expect(disable).toHaveLength(LAUNCHER_ICONS.length - 1);
+        expect(name).toBe("tactileRustDark");
+        expect(disable).toHaveLength(ALL_LAUNCHER_ALIASES.length - 1);
         expect(disable).toContain("green");
         expect(disable).toContain("minimalGreenDark");
-        expect(disable).not.toContain("paperRedInkDark");
+        expect(disable).not.toContain("tactileRustDark");
+    });
+
+    // A user on an old paper dark alias moves to the light twin; leaving the old alias on would
+    // show two launcher entries
+    it("disables the legacy paper dark aliases when moving to a paper icon", async () => {
+        const adapter = new DynamicIconAdapter();
+        await adapter.setIcon("paperBlueInk");
+        triggerPause();
+        const { disable } = change.mock.calls[0][0] as { disable: string[] };
+        expect(disable).toEqual(expect.arrayContaining(["paperBlueInkDark", "paperGreenInkDark", "paperRedInkDark"]));
+        expect(disable).not.toContain("paperBlueInk");
     });
 
     it("applies only the last requested icon", async () => {

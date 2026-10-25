@@ -8,6 +8,9 @@ import subsetFont from "subset-font";
 import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "fs";
 import { dirname, join, resolve } from "path";
 import { fileURLToPath } from "url";
+import { en } from "../src/presentation/i18n/messages/en";
+import { zhHant } from "../src/presentation/i18n/messages/zh-Hant";
+import { inkBrushTitles } from "../src/style/styles/ink/brushTitles";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const OUTPUT_DIR = join(ROOT, "src/assets/fonts");
@@ -20,12 +23,23 @@ const CACHE_DIR = join(ROOT, "node_modules/.cache/sudoku-fonts");
 const GOOGLE_FONTS_COMMIT = "45e3d5269e4a17d823f6d84470bc084dc5ae46f6";
 const sourceUrl = (path: string): string => `https://raw.githubusercontent.com/google/fonts/${GOOGLE_FONTS_COMMIT}/${path}`;
 
+// Cubic 11 (俐方體 11 號) is not on Google Fonts; pinned by commit like the rest
+const CUBIC_11_COMMIT = "4c566f7d6cc5c05ee360fe9cff56b5da1fcafd4d";
+const cubicUrl = (path: string): string => `https://raw.githubusercontent.com/ACh-K/Cubic-11/${CUBIC_11_COMMIT}/${path}`;
+
 const rangeText = (first: number, last: number): string =>
     Array.from({ length: last - first + 1 }, (_, offset) => String.fromCodePoint(first + offset)).join("");
 
 const ASCII = rangeText(0x20, 0x7e);
 // Latin-1 letters and signs, and general punctuation such as dashes, curly quotes and ellipses
 const LATIN = ASCII + rangeText(0xa0, 0xff) + rangeText(0x2010, 0x2027) + rangeText(0x2030, 0x205e);
+
+/**
+ * The characters of ink's brushed titles in both languages, and nothing else: Yuji Boku's Latin glyphs are
+ * heavy brush outlines (printable ASCII alone is about 78 KB), so it carries no ASCII block.
+ */
+const inkBrushCharacters = (): string =>
+    Array.from(new Set(Array.from([...inkBrushTitles(en), ...inkBrushTitles(zhHant)].join("")))).sort().join("");
 
 /** Every non-ASCII character in the app's own source, which is all the Chinese copy it can show. */
 const sourceCharacters = (): string => {
@@ -55,23 +69,29 @@ interface FontJob {
 
 interface Family {
     licence: string;
+    fetch?: (path: string) => Promise<Buffer>;
     licenceOutput: string;
     jobs: FontJob[];
 }
 
-const download = async (path: string): Promise<Buffer> => {
-    const cached = join(CACHE_DIR, GOOGLE_FONTS_COMMIT, path);
+// Fetches a pinned file once and keeps it under the cache, so a rerun works offline
+const downloadCached = async (url: string, cacheKey: string): Promise<Buffer> => {
+    const cached = join(CACHE_DIR, cacheKey);
     if (existsSync(cached)) return readFileSync(cached);
-    const response = await fetch(sourceUrl(path));
-    if (!response.ok) throw new Error(`Could not download ${path}: ${response.status}`);
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`Could not download ${url}: ${response.status}`);
     const buffer = Buffer.from(await response.arrayBuffer());
     mkdirSync(dirname(cached), { recursive: true });
     writeFileSync(cached, buffer);
     return buffer;
 };
 
+const download = (path: string): Promise<Buffer> => downloadCached(sourceUrl(path), join(GOOGLE_FONTS_COMMIT, path));
+const downloadCubic = (path: string): Promise<Buffer> => downloadCached(cubicUrl(path), join("cubic-11", CUBIC_11_COMMIT, path));
+
 const main = async (): Promise<void> => {
     const chineseText = ASCII + sourceCharacters();
+    const inkBrushText = inkBrushCharacters();
     const families: Family[] = [
         {
             licence: "ofl/outfit/OFL.txt",
@@ -86,8 +106,11 @@ const main = async (): Promise<void> => {
         {
             licence: "ofl/caveat/OFL.txt",
             licenceOutput: "Caveat-OFL.txt",
-            // Paper writes only digits by hand; any other text falls through to WenKai
-            jobs: [{ output: "caveat.woff2", source: "ofl/caveat/Caveat[wght].ttf", text: "0123456789", weights: { min: 500, max: 700 } }],
+            // Paper writes only digits by hand, and stamps SOLVED (game.complete.stamp in English) and the
+            // month/day on the completion card; any other text falls through to WenKai. Paper's stroke writing
+            // (style-moments/paper/paperDigitStrokes.ts) holds Caveat's digit advances and baseline: re-measure
+            // them if this face changes
+            jobs: [{ output: "caveat.woff2", source: "ofl/caveat/Caveat[wght].ttf", text: "0123456789/SOLVED", weights: { min: 500, max: 700 } }],
         },
         {
             licence: "ofl/lxgwwenkaitc/OFL.txt",
@@ -97,14 +120,69 @@ const main = async (): Promise<void> => {
                 { output: "lxgw-wenkai-tc-bold.woff2", source: "ofl/lxgwwenkaitc/LXGWWenKaiTC-Bold.ttf", text: chineseText },
             ],
         },
+        {
+            licence: "ofl/pressstart2p/OFL.txt",
+            licenceOutput: "PressStart2P-OFL.txt",
+            // 8-bit style's digits: board, keys, timer and counts; the timer's colon too, so it does not
+            // fall back to Cubic 11 between two pixel digits; and the loader's and the celebration's
+            // English decoration, NOW LOADING... and STAGE CLEAR
+            jobs: [{ output: "press-start-2p.woff2", source: "ofl/pressstart2p/PressStart2P-Regular.ttf", text: "0123456789:NOW LOADING... STAGE CLEAR" }],
+        },
+        {
+            licence: "ofl/silkscreen/OFL.txt",
+            licenceOutput: "Silkscreen-OFL.txt",
+            // 8-bit style's pencil marks are digits only
+            jobs: [{ output: "silkscreen.woff2", source: "ofl/silkscreen/Silkscreen-Regular.ttf", text: "0123456789" }],
+        },
+        {
+            licence: "OFL.txt",
+            licenceOutput: "Cubic11-OFL.txt",
+            fetch: downloadCubic,
+            // 8-bit style's text in both languages, cut to the characters the app writes like WenKai
+            jobs: [{ output: "cubic-11.woff2", source: "fonts/ttf/Cubic_11.ttf", text: chineseText }],
+        },
+        {
+            licence: "ofl/orbitron/OFL.txt",
+            licenceOutput: "Orbitron-OFL.txt",
+            // Cyberpunk's digits and buttons: the variable face cut to the weights the skin uses
+            jobs: [{ output: "orbitron.woff2", source: "ofl/orbitron/Orbitron[wght].ttf", text: LATIN, weights: { min: 500, max: 900 } }],
+        },
+        {
+            licence: "ofl/sharetechmono/OFL.txt",
+            licenceOutput: "ShareTechMono-OFL.txt",
+            // Cyberpunk's notes, timer and labels: printable ASCII only
+            jobs: [{ output: "share-tech-mono.woff2", source: "ofl/sharetechmono/ShareTechMono-Regular.ttf", text: ASCII }],
+        },
+        {
+            licence: "ofl/yujiboku/OFL.txt",
+            licenceOutput: "YujiBoku-OFL.txt",
+            // Ink's brushed titles only, in both languages (INK_BRUSH_MESSAGE_KEYS)
+            jobs: [{ output: "yuji-boku.woff2", source: "ofl/yujiboku/YujiBoku-Regular.ttf", text: inkBrushText }],
+        },
+        {
+            licence: "ofl/notoseriftc/OFL.txt",
+            licenceOutput: "NotoSerifTC-OFL.txt",
+            // Ink's text and its seals (900), cut to the characters the app writes like WenKai
+            jobs: [{ output: "noto-serif-tc.woff2", source: "ofl/notoseriftc/NotoSerifTC[wght].ttf", text: chineseText, weights: { min: 400, max: 900 } }],
+        },
+        {
+            licence: "ofl/ebgaramond/OFL.txt",
+            licenceOutput: "EBGaramond-OFL.txt",
+            // Ink's digits: clues, keys and the timer upright, the player's digits in italic
+            jobs: [
+                { output: "eb-garamond.woff2", source: "ofl/ebgaramond/EBGaramond[wght].ttf", text: "0123456789:/%", weights: { min: 500, max: 700 } },
+                { output: "eb-garamond-italic.woff2", source: "ofl/ebgaramond/EBGaramond-Italic[wght].ttf", text: "0123456789", weights: { min: 500, max: 600 } },
+            ],
+        },
     ];
 
     mkdirSync(OUTPUT_DIR, { recursive: true });
     mkdirSync(LICENCE_DIR, { recursive: true });
     for (const family of families) {
-        writeFileSync(join(LICENCE_DIR, family.licenceOutput), await download(family.licence));
+        const fetchSource = family.fetch ?? download;
+        writeFileSync(join(LICENCE_DIR, family.licenceOutput), await fetchSource(family.licence));
         for (const job of family.jobs) {
-            const subset = await subsetFont(await download(job.source), job.text, {
+            const subset = await subsetFont(await fetchSource(job.source), job.text, {
                 targetFormat: "woff2",
                 preserveNameIds: LICENCE_NAME_IDS,
                 ...(job.weights ? { variationAxes: { wght: job.weights } } : {}),
@@ -115,7 +193,11 @@ const main = async (): Promise<void> => {
     }
     // The characters the WenKai subset was cut to; bundledFonts.test.ts checks the copy against it
     writeFileSync(join(OUTPUT_DIR, "lxgw-wenkai-tc-characters.txt"), chineseText);
-    console.log(`WenKai covers ${Array.from(chineseText).length} characters`);
+    // Cubic 11 is cut to the same characters
+    writeFileSync(join(OUTPUT_DIR, "cubic-11-characters.txt"), chineseText);
+    console.log(`WenKai and Cubic 11 cover ${Array.from(chineseText).length} characters`);
+    // The characters the Yuji Boku subset was cut to
+    writeFileSync(join(OUTPUT_DIR, "yuji-boku-characters.txt"), inkBrushText);
 };
 
 main().catch((error: unknown) => {

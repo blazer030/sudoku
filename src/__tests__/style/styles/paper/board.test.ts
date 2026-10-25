@@ -4,7 +4,7 @@ import { declarationsOf } from "@/__tests__/style/styleSheetRules";
 
 // Paper's board is drawn on the notebook page: a sheet of the page's paper with its grain, the grid
 // in the theme's ink, printed clue squares shaded in graphite and every highlight a translucent wash,
-// so the grain (and at night the lamp) shows through. The colours are checked in paletteContrast.
+// so the grain shows through. The colours are checked in paletteContrast.
 
 const PAPER_CSS = readFileSync("src/style/styles/paper/skin.css", "utf8");
 const BOARD = '[data-style="paper"] [data-skin~="board"]';
@@ -27,8 +27,8 @@ describe("paper board", () => {
         // Its own page surface under the sheet, so the ruled lines behind the board never show through
         expect(board.get("background-color")).toBe("var(--color-background)");
         expect(board.get("background-image")).toBe(
-            "var(--paper-texture), linear-gradient(var(--paper-sheet), var(--paper-sheet)), var(--paper-lamp-fade), var(--paper-lamp), var(--paper-texture)");
-        expect(board.get("background-attachment")).toBe("scroll, scroll, scroll, fixed, fixed, fixed, fixed");
+            "var(--paper-texture), linear-gradient(var(--paper-sheet), var(--paper-sheet)), var(--paper-texture)");
+        expect(board.get("background-attachment")).toBe("scroll, scroll, scroll, fixed, fixed");
         expect(board.get("--tw-shadow")).toBe("0 0 transparent");
         expect(declarationsOf(PAPER_CSS, '[data-style="paper"]').get("--paper-sheet")).toMatch(/^color-mix\(in srgb, var\(--color-card\) \d+%, transparent\)$/);
     });
@@ -67,16 +67,6 @@ describe("paper board", () => {
 
         expect(pressed).toContain("var(--press-overlay)");
         expect(pressed).toContain("var(--paper-clue-hatch)");
-    });
-
-    it("should flash a completed group from and back to the cell's own wash", () => {
-        // The shared flash starts and ends on the card colour unless a style says what the cell rests on
-        const indexCss = readFileSync("src/style/index.css", "utf8");
-        const flash = /@keyframes completion-flash \{([^@]*?)\n\}/.exec(indexCss)?.[1] ?? "";
-
-        expect(flash).toContain("0% { background-color: var(--completion-flash-rest, var(--color-card)); }");
-        expect(flash).toContain("100% { background-color: var(--completion-flash-rest, var(--color-card)); }");
-        expect(declarationsOf(PAPER_CSS, `${BOARD} [data-variant]`).get("--completion-flash-rest")).toBe("var(--paper-cell-wash)");
     });
 
     it("should square the board's corners like a ruled sheet", () => {

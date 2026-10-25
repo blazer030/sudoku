@@ -17,13 +17,15 @@ progressive web app (PWA) and as a native Android app via Capacitor.
 - **Save & restore** with a running timer, persisted to IndexedDB
 - **Statistics** (best times, win rate, day streak) plus per-game **Review**
   with move replay
-- **Three visual styles** — Minimal Motion, Tactile Tiles and Paper Notebook — each
-  with its own colour themes, in light, dark or following the system
+- **Six visual styles** — Minimal Motion, Tactile Tiles, Paper Notebook, 8-bit,
+  Cyberpunk and Ink & Washi (水墨和紙) — each with its own colour themes, in light or dark (Paper
+  Notebook is light only; 8-bit has fixed colours, 掌機 handheld green or 紅白機 console;
+  Cyberpunk is dark only with one fixed neon palette; Ink & Washi is light only with one fixed palette)
 - **English and Traditional Chinese**, following the system language or chosen in Settings
 - **Offline support** via service worker (web build)
-- **Native Android app** — Firebase analytics, Google Play Billing donations,
-  and a dynamic app icon that can match the selected theme (native-only
-  features)
+- **Native Android app** — Google Play Billing donations and a dynamic app
+  icon that can match the selected theme (native-only features). Firebase
+  Analytics runs on Android and on the production web build
 
 ## Tech Stack
 
@@ -33,7 +35,7 @@ progressive web app (PWA) and as a native Android app via Capacitor.
 - **State**: Pinia
 - **Styling**: Tailwind CSS v4
 - **Persistence**: localforage (IndexedDB)
-- **Native**: Capacitor (Android) — Firebase Analytics, Play Billing
+- **Native**: Capacitor (Android) — Play Billing; Firebase Analytics on Android and the production web build
 - **Animation / icons**: vue3-lottie, Lucide Vue Next
 - **Testing**: Vitest + @vue/test-utils (jsdom)
 
@@ -70,7 +72,7 @@ src/
 ```
 
 `src/main.ts` is the **composition root**: it selects adapters by platform
-(native gets Firebase / Play Billing / dynamic-icon, web gets no-op adapters),
+(native gets Firebase / Play Billing / dynamic-icon, web gets no-op adapters except Firebase Analytics in production builds),
 provides them via Vue's `provide/inject`, wires repositories into the stores,
 and hydrates state from IndexedDB before mounting.
 

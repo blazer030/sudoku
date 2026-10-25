@@ -31,3 +31,4 @@ coverage
 android/app/google-services.json
 android/app/release-upload-key.jks
 android/key.properties
+*.tsbuildinfo

@@ -11,6 +11,7 @@ export const zhHant: MessageSchema = {
         title: "更新日誌",
         appBadge: "App",
         appNote: "標有 App 的項目只適用於 Android App。",
+        unreleased: "開發中",
     },
     settings: {
         title: "設定",
@@ -23,14 +24,17 @@ export const zhHant: MessageSchema = {
         appearance: "外觀",
         colorMode: {
             label: "深淺色",
-            system: "跟隨系統",
             light: "淺色",
             dark: "深色",
+            styled: {
+                pixel: { light: "掌機", dark: "紅白機" },
+            },
         },
+        appearanceSummary: "{mode}・{theme}",
         colorTheme: "色彩主題",
         style: {
             label: "風格",
-            names: { minimal: "極簡動態", tactile: "實體方塊", paper: "紙本筆記" },
+            names: { minimal: "極簡動態", tactile: "實體方塊", paper: "紙本筆記", pixel: "8-bit 電玩", cyber: "賽博龐克", ink: "水墨和紙" },
         },
         colorThemes: {
             green: "綠",
@@ -44,14 +48,17 @@ export const zhHant: MessageSchema = {
             blueInk: "藍墨",
             greenInk: "綠墨",
             redInk: "紅墨",
+            classic: "經典",
+            neon: "霓虹",
+            vermilion: "朱紅",
         },
-        matchLauncherIcon: "App 圖示配合主題",
+        matchLauncherIcon: "App 圖示配合風格",
         matchLauncherIconNote: "離開 App 後圖示才會更新",
         gameplay: "遊戲",
         toggles: {
             highlightSameDigit: { label: "標示相同數字", description: "同樣數字一起亮" },
             highlightScope: { label: "標示同列、欄、宮", description: "淡淡標出所在範圍" },
-            completionFlash: { label: "完成動畫", description: "完成一組時閃一下" },
+            motionEffects: { label: "動態效果", description: "動畫與特效" },
             autoRemoveNotes: { label: "自動移除筆記", description: "填入後清掉不可能的筆記" },
             showRemainingCount: { label: "剩餘數量", description: "數字鍵上顯示還差幾個" },
         },
@@ -162,6 +169,7 @@ export const zhHant: MessageSchema = {
             newRecord: "新紀錄！",
             playAgain: "再玩一局",
             review: "看這局回顧",
+            stamp: "完成",
         },
     },
     walkthrough: {

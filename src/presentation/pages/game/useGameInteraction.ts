@@ -1,6 +1,6 @@
 import { computed, ref } from "vue";
 import { BOARD_SIZE, BOX_SIZE } from "@/domain/board/constants";
-import type { Sudoku } from "@/domain/game/Sudoku";
+import type { CompletedCells, Sudoku } from "@/domain/game/Sudoku";
 import type { StepRecorder } from "@/domain/game/StepRecorder";
 import { InputMode } from "@/presentation/pages/game/InputMode";
 
@@ -8,8 +8,8 @@ interface GameInteractionOptions {
     sudoku: Sudoku;
     stepRecorder: StepRecorder;
     clearErrors: () => void;
-    checkAndComplete: (origin: { row: number; column: number }) => void;
-    onGroupCompleted?: (cells: { row: number; column: number }[], origin: { row: number; column: number }) => void;
+    checkAndComplete: () => void;
+    onGroupCompleted?: (completed: CompletedCells, origin: { row: number; column: number }) => void;
     autoRemoveNotes: () => boolean;
     /** True while the board ignores the player, e.g. during hint mode. */
     isLocked?: () => boolean;
@@ -98,9 +98,9 @@ export const useGameInteraction = ({
         stepRecorder.record(sudoku.puzzle, "fill", row, column, value);
         if (!sudoku.isCompleted()) {
             const completed = sudoku.findCompletedGroups(row, column);
-            if (completed.cells.length > 0) onGroupCompleted?.(completed.cells, { row, column });
+            if (completed.cells.length > 0) onGroupCompleted?.(completed, { row, column });
         }
-        checkAndComplete({ row, column });
+        checkAndComplete();
         if (isDigitCompleted(value)) selectedDigit.value = null;
     };
 
@@ -157,6 +157,13 @@ export const useGameInteraction = ({
         return digitCounts.value[digit] >= 9;
     };
 
+    // A selected cell with nothing on it (empty, or a clue) has nothing for Erase to clear
+    const eraseDisabled = computed((): boolean => {
+        if (selectedCell.value === null) return false;
+        const cell = sudoku.puzzle[selectedCell.value.row][selectedCell.value.column];
+        return cell.isClue || (!cell.hasEntry && cell.notes.length === 0);
+    });
+
     const eraseCell = (row: number, column: number) => {
         sudoku.erase(row, column);
         stepRecorder.record(sudoku.puzzle, "erase", row, column, 0);
@@ -167,8 +174,16 @@ export const useGameInteraction = ({
         inputMode.value = inputMode.value === InputMode.Note ? InputMode.Normal : InputMode.Note;
     };
 
+    // Cell first, Erase clears the selected cell at once, the same as a digit fills it; with no cell
+    // selected it switches Erase mode for tapping cells next
     const toggleEraseMode = () => {
         if (isLocked()) return;
+        if (selectedCell.value !== null) {
+            const { row, column } = selectedCell.value;
+            if (!eraseDisabled.value) eraseCell(row, column);
+            selectedCell.value = null;
+            return;
+        }
         inputMode.value = inputMode.value === InputMode.Erase ? InputMode.Normal : InputMode.Erase;
         if (inputMode.value === InputMode.Erase) {
             selectedCell.value = null;
@@ -211,6 +226,7 @@ export const useGameInteraction = ({
         selectDigit,
         toggleNoteMode,
         toggleEraseMode,
+        eraseDisabled,
         isSelected,
         isPeerOfSelected,
         digitCounts,

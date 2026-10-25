@@ -5,9 +5,27 @@
             class="fixed inset-0 bg-scrim/60 flex items-center justify-center z-50"
             data-testid="game-complete-modal"
         >
-            <FireworkCanvas />
-            <div class="bg-card rounded-3xl p-8 mx-6 w-full max-w-[354px] flex flex-col items-center gap-6 shadow-modal relative z-[52]">
-                <div class="w-20 h-20 rounded-full bg-primary-light flex items-center justify-center">
+            <component
+                :is="moments.celebration"
+                v-if="moments.celebration !== null"
+                :still="params?.still ?? false"
+            />
+            <div
+                class="bg-card rounded-3xl p-8 mx-6 w-full max-w-[354px] flex flex-col items-center gap-6 shadow-modal relative z-[52]"
+                :data-still="params?.still ? '' : undefined"
+                data-skin="card celebration"
+                data-testid="complete-card"
+            >
+                <component
+                    :is="moments.cardDecoration"
+                    v-if="moments.cardDecoration"
+                    :still="params?.still ?? false"
+                />
+                <div
+                    class="w-20 h-20 rounded-full bg-primary-light flex items-center justify-center"
+                    data-skin="trophy"
+                    data-testid="complete-trophy"
+                >
                     <Trophy
                         :size="40"
                         class="text-primary"
@@ -15,17 +33,22 @@
                 </div>
 
                 <div class="flex flex-col items-center gap-2">
-                    <h2 class="text-[28px] font-bold text-foreground tracking-tight">
+                    <h2
+                        class="text-[28px] font-bold text-foreground tracking-tight"
+                        data-skin="complete-title"
+                    >
                         {{ t("game.complete.title") }}
                     </h2>
                     <div class="flex flex-wrap items-center justify-center gap-2">
                         <span
                             class="bg-accent/10 text-accent text-[13px] font-semibold rounded-full px-2.5 py-1"
+                            data-skin="tag"
                             data-testid="complete-difficulty"
                         >{{ difficultyLabel }}</span>
                         <span
                             v-if="params?.isNewRecord"
                             class="bg-primary text-on-primary text-[13px] font-semibold rounded-full px-2.5 py-1"
+                            data-skin="tag new-record"
                             data-testid="new-record-badge"
                         >{{ t("game.complete.newRecord") }}</span>
                     </div>
@@ -101,10 +124,11 @@ import { useDifficultyLabel } from "@/presentation/i18n/difficultyLabels";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import { useGameCompleteModal } from "@/presentation/pages/game/components/useGameCompleteModal";
-import FireworkCanvas from "@/presentation/components/firework-canvas/FireworkCanvas.vue";
+import { useStyleMoments } from "@/presentation/components/style-moments/styleMoments";
 import { vPress } from "@/presentation/directives/press";
 
 const { t } = useI18n();
+const moments = useStyleMoments();
 const { visible, params, close } = useGameCompleteModal();
 
 const difficultyText = useDifficultyLabel();

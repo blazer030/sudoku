@@ -1,0 +1,37 @@
+import { afterEach, describe, expect, it } from "vitest";
+import { nextTick } from "vue";
+import { mount } from "@vue/test-utils";
+import { i18n } from "@/presentation/i18n";
+import PaperLoader from "@/presentation/components/style-moments/paper/PaperLoader.vue";
+
+describe("PaperLoader", () => {
+    afterEach(() => {
+        i18n.global.locale.value = "en";
+    });
+
+    it("should sketch a grid of four strokes and four digits on the note, as decoration", () => {
+        const wrapper = mount(PaperLoader);
+
+        expect(wrapper.findAll(".paper-loader-line")).toHaveLength(4);
+        expect(wrapper.findAll(".paper-loader-digit").map(digit => digit.text())).toEqual(["5", "9", "1", "7"]);
+        expect(wrapper.get(".paper-loader-sketch").attributes("aria-hidden")).toBe("true");
+    });
+
+    it("should caption the note in the current language", async () => {
+        const wrapper = mount(PaperLoader);
+        const caption = wrapper.get(".paper-loader p");
+        const english = caption.text();
+
+        i18n.global.locale.value = "zh-Hant";
+        await nextTick();
+
+        expect(caption.text()).not.toBe(english);
+        expect(caption.text()).not.toBe("");
+    });
+
+    it("should show a screen's own message instead", () => {
+        const wrapper = mount(PaperLoader, { props: { message: "Checking…" } });
+
+        expect(wrapper.get(".paper-loader p").text()).toBe("Checking…");
+    });
+});

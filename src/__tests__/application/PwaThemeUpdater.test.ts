@@ -36,8 +36,8 @@ describe("PwaThemeUpdater", () => {
             updateFavicon("purple");
             expect(link.href).toMatch(/\/sudoku-purple\.svg$/);
 
-            updateFavicon("paperRedInkDark");
-            expect(link.href).toMatch(/\/sudoku-paperRedInkDark\.svg$/);
+            updateFavicon("tactileRustDark");
+            expect(link.href).toMatch(/\/sudoku-tactileRustDark\.svg$/);
         });
 
         it("should not throw when icon link is missing", () => {

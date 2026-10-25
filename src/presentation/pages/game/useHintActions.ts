@@ -1,6 +1,6 @@
 import { ref } from "vue";
 import type { RevealOutcome } from "@/domain/game/RevealOutcome";
-import type { Sudoku } from "@/domain/game/Sudoku";
+import type { CompletedCells, Sudoku } from "@/domain/game/Sudoku";
 import type { StepRecorder } from "@/domain/game/StepRecorder";
 import type { CellReference } from "@/domain/solver/SolveStep";
 import { provideHintMenu, type HintAction } from "@/presentation/pages/game/components/useHintMenu";
@@ -11,8 +11,8 @@ interface HintActionsOptions {
     sudoku: Sudoku;
     stepRecorder: StepRecorder;
     autoRemoveNotes: () => boolean;
-    onRevealComplete: (origin: { row: number; column: number }) => void;
-    onGroupCompleted?: (cells: { row: number; column: number }[], origin: { row: number; column: number }) => void;
+    onRevealComplete: () => void;
+    onGroupCompleted?: (completed: CompletedCells, origin: { row: number; column: number }) => void;
     onHintReveal?: (outcome: RevealOutcome) => void;
     /** Check Conflicts found no repeated digits; the hint is still spent. */
     onNoConflicts?: () => void;
@@ -67,9 +67,9 @@ export const useHintActions = ({
     const finishReveal = (cell: CellReference) => {
         if (!sudoku.isCompleted()) {
             const completed = sudoku.findCompletedGroups(cell.row, cell.column);
-            if (completed.cells.length > 0) onGroupCompleted?.(completed.cells, cell);
+            if (completed.cells.length > 0) onGroupCompleted?.(completed, cell);
         }
-        onRevealComplete(cell);
+        onRevealComplete();
     };
 
     const hintMode = useHintMode(sudoku, {
@@ -86,7 +86,7 @@ export const useHintActions = ({
     const revealRandomCell = () => {
         const target = sudoku.revealRandomCell();
         if (target === null) {
-            onRevealComplete({ row: 4, column: 4 });
+            onRevealComplete();
             return;
         }
         const outcome: RevealOutcome = {
@@ -139,7 +139,7 @@ export const useHintActions = ({
             return true;
         }
         if (hintMode.active.value) {
-            hintMode.cancel();
+            hintMode.close();
             return true;
         }
         return false;

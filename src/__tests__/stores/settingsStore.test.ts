@@ -2,7 +2,7 @@ import { createPinia, setActivePinia } from "pinia";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { updateManifestLink, updateAppleTouchIcon } from "@/application/PwaThemeUpdater";
 import { STYLE_IDS, THEME_IDS_BY_STYLE } from "@/theme/themeIds";
-import { launcherIconKey } from "@/theme/launcherIcon";
+import { pwaIconKey } from "@/theme/launcherIcon";
 
 // Spies that still update the page links, so tests can read the hrefs too
 vi.mock("@/application/PwaThemeUpdater", async (importOriginal) => {
@@ -27,17 +27,35 @@ describe("settingsStore", () => {
         vi.restoreAllMocks();
     });
 
+    it("should initialise with defaults when the saved settings are the JSON text null", () => {
+        localStorage.setItem("sudoku-settings", "null");
+
+        const store = useSettingsStore();
+
+        expect(store.style).toBe("minimal");
+        expect(store.appearance).toBe("light");
+    });
+
+    it("should initialise with defaults when the saved settings are not valid JSON", () => {
+        localStorage.setItem("sudoku-settings", "{\"style\": \"paper\"");
+
+        const store = useSettingsStore();
+
+        expect(store.style).toBe("minimal");
+        expect(store.appearance).toBe("light");
+    });
+
     it("should have default values on first load", () => {
         const store = useSettingsStore();
 
         expect(store.colorTheme).toBe("green");
         expect(store.highlightSameDigit).toBe(true);
-        expect(store.completionFlash).toBe(true);
+        expect(store.motionEffects).toBe(true);
         expect(store.autoRemoveNotes).toBe(true);
         expect(store.showRemainingCount).toBe(true);
         expect(store.matchLauncherIconToTheme).toBe(false);
         expect(store.language).toBe("system");
-        expect(store.appearance).toBe("system");
+        expect(store.appearance).toBe("light");
         expect(store.style).toBe("minimal");
     });
 
@@ -75,6 +93,29 @@ describe("settingsStore", () => {
         expect(store.style).toBe("minimal");
     });
 
+    it("should keep a light appearance through a visit to the dark-only cyber", () => {
+        const store = useSettingsStore();
+        store.setAppearance("light");
+        store.setColorTheme("blue");
+
+        store.setStyle("cyber");
+        store.setStyle("minimal");
+
+        expect(store.appearance).toBe("light");
+        expect(store.colorTheme).toBe("blue");
+    });
+
+    // Review Focus 4: ink never writes the appearance, so leaving it brings dark back
+    it("should keep a dark appearance through a visit to the light-only ink", () => {
+        const store = useSettingsStore();
+        store.setAppearance("dark");
+
+        store.setStyle("ink");
+        store.setStyle("minimal");
+
+        expect(store.appearance).toBe("dark");
+    });
+
     it("should persist the chosen style", () => {
         const store = useSettingsStore();
 
@@ -98,18 +139,18 @@ describe("settingsStore", () => {
         const store = useSettingsStore();
 
         store.setHighlightSameDigit(false);
-        store.setCompletionFlash(false);
+        store.setMotionEffects(false);
         store.setAutoRemoveNotes(false);
         store.setShowRemainingCount(false);
 
         expect(store.highlightSameDigit).toBe(false);
-        expect(store.completionFlash).toBe(false);
+        expect(store.motionEffects).toBe(false);
         expect(store.autoRemoveNotes).toBe(false);
         expect(store.showRemainingCount).toBe(false);
 
         const stored = JSON.parse(localStorage.getItem("sudoku-settings") ?? "{}") as Record<string, unknown>;
         expect(stored.highlightSameDigit).toBe(false);
-        expect(stored.completionFlash).toBe(false);
+        expect(stored.motionEffects).toBe(false);
     });
 
     it("should call PwaThemeUpdater functions when setting color theme", () => {
@@ -155,7 +196,7 @@ describe("settingsStore", () => {
                 store.setStyle(style);
                 for (const theme of THEME_IDS_BY_STYLE[style]) {
                     store.setColorTheme(theme);
-                    const key = launcherIconKey(style, theme, "light");
+                    const key = pwaIconKey(style, theme);
                     expect(linkHref("manifest"), `${style}/${theme}`).toMatch(new RegExp(`/manifest-${key}\\.webmanifest$`));
                     expect(linkHref("apple-touch-icon"), `${style}/${theme}`).toMatch(new RegExp(`/apple-touch-icon-${key}\\.png$`));
                 }

@@ -11,10 +11,21 @@
             />
             <div
                 class="absolute bottom-safe-24 left-1/2 -translate-x-1/2 bg-card rounded-popup shadow-popup w-72 z-10 flex flex-col gap-1 py-4 px-3"
+                data-skin="card"
                 data-testid="hint-menu"
             >
                 <div class="flex flex-col px-3 pb-1">
-                    <span class="text-foreground text-sm font-bold">{{ t("game.hints.title") }}</span>
+                    <div class="flex flex-wrap items-baseline gap-x-2">
+                        <span
+                            class="text-foreground text-sm font-bold"
+                            data-testid="hint-title"
+                        >{{ t("game.hints.title") }}</span>
+                        <span
+                            v-if="params?.firstHintFree"
+                            class="flex-1 min-w-[9rem] text-foreground-muted text-[11px] text-left text-pretty"
+                            data-testid="hint-free-note"
+                        >{{ t("game.hints.freeNote") }}</span>
+                    </div>
                     <span
                         v-if="remaining > 0"
                         class="text-[13px] text-foreground-secondary text-balance"
@@ -26,14 +37,6 @@
                         data-testid="hint-used-up"
                     >{{ t("game.hints.usedUp", { max: MAX_HINTS }) }}</span>
                 </div>
-
-                <span
-                    v-if="params?.firstHintFree"
-                    class="text-foreground-muted text-[11px] mb-1 text-center"
-                    data-testid="hint-free-note"
-                >
-                    {{ t("game.hints.freeNote") }}
-                </span>
 
                 <button
                     v-press

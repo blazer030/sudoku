@@ -1,5 +1,5 @@
 import { readFileSync } from "fs";
-import { LAUNCHER_ICONS } from "@/theme/launcherIcon";
+import { ALL_LAUNCHER_ALIASES } from "@/theme/launcherIcon";
 
 // The layout is designed for portrait only: in landscape the board and the digit row
 // cannot both fit above the navigation bar.
@@ -18,9 +18,15 @@ describe("Android manifest", () => {
         // An activity-alias has no orientation of its own; it opens its target activity
         const aliases = readFileSync(MANIFEST_PATH, "utf8").match(/<activity-alias\b[^>]*>/g) ?? [];
 
-        expect(aliases).toHaveLength(LAUNCHER_ICONS.length);
+        expect(aliases).toHaveLength(ALL_LAUNCHER_ALIASES.length);
         for (const alias of aliases) {
             expect(alias).toContain('android:targetActivity=".MainActivity"');
         }
+    });
+
+    it("should turn off automatic screen reports so analytics shows only our screen names", () => {
+        expect(readFileSync(MANIFEST_PATH, "utf8")).toMatch(
+            /<meta-data\s+android:name="google_analytics_automatic_screen_reporting_enabled"\s+android:value="false"\s*\/>/,
+        );
     });
 });

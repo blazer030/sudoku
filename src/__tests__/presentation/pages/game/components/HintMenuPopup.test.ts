@@ -66,6 +66,16 @@ describe("HintMenuPopup", () => {
         expect(usedWrapper.find("[data-testid='hint-free-note']").exists()).toBe(false);
     });
 
+    it("should put the free note in the title row instead of after the options", () => {
+        const wrapper = mountPopup({ firstHintFree: true });
+
+        const note = wrapper.get("[data-testid='hint-free-note']").element;
+        const title = wrapper.get("[data-testid='hint-title']").element;
+        expect(note.parentElement).toBe(title.parentElement);
+        expect(title.compareDocumentPosition(note) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+        expect(note.compareDocumentPosition(wrapper.get("[data-testid='hint-auto-notes']").element) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    });
+
     it("should be wide enough and balance its wrapped lines so short words are not left alone", () => {
         const wrapper = mountPopup({ remaining: 0, firstHintFree: false });
 

@@ -14,6 +14,7 @@ export const en = {
         title: "Changelog",
         appBadge: "App",
         appNote: "Items marked App apply to the Android app only.",
+        unreleased: "In development",
     },
     settings: {
         title: "Settings",
@@ -26,14 +27,17 @@ export const en = {
         appearance: "Appearance",
         colorMode: {
             label: "Color mode",
-            system: "System",
             light: "Light",
             dark: "Dark",
+            styled: {
+                pixel: { light: "Handheld", dark: "Console" },
+            },
         },
+        appearanceSummary: "{mode} · {theme}",
         colorTheme: "Color theme",
         style: {
             label: "Style",
-            names: { minimal: "Minimal Motion", tactile: "Tactile Tiles", paper: "Paper Notebook" },
+            names: { minimal: "Minimal Motion", tactile: "Tactile Tiles", paper: "Paper Notebook", pixel: "8-bit", cyber: "Cyberpunk", ink: "Ink & Washi" },
         },
         colorThemes: {
             green: "Green",
@@ -47,14 +51,17 @@ export const en = {
             blueInk: "Blue Ink",
             greenInk: "Green Ink",
             redInk: "Red Ink",
+            classic: "Classic",
+            neon: "Neon",
+            vermilion: "Vermilion",
         },
-        matchLauncherIcon: "Match launcher icon to theme",
+        matchLauncherIcon: "Match launcher icon to style",
         matchLauncherIconNote: "The icon updates after you leave the app",
         gameplay: "Gameplay",
         toggles: {
             highlightSameDigit: { label: "Same Numbers", description: "Light up matching digits" },
             highlightScope: { label: "Row, Column & Box", description: "Shade its row, column and box" },
-            completionFlash: { label: "Completion Flash", description: "Flash a finished row, column or box" },
+            motionEffects: { label: "Motion effects", description: "Animations and effects" },
             autoRemoveNotes: { label: "Auto-Clear Notes", description: "Clear notes a digit rules out" },
             showRemainingCount: { label: "Remaining Count", description: "Show how many are left on each key" },
         },
@@ -165,6 +172,8 @@ export const en = {
             newRecord: "New record!",
             playAgain: "Play Again",
             review: "Review This Game",
+            // Paper's rubber stamp on the completion card, written in Caveat
+            stamp: "SOLVED",
         },
     },
     walkthrough: {

@@ -5,6 +5,7 @@ import Game from "@/presentation/pages/game/Game.vue";
 import Statistics from "@/presentation/pages/statistics/Statistics.vue";
 import Settings from "@/presentation/pages/settings/Settings.vue";
 import Changelog from "@/presentation/pages/settings/Changelog.vue";
+import Appearance from "@/presentation/pages/settings/Appearance.vue";
 import Donate from "@/presentation/pages/donate/Donate.vue";
 import GameReview from "@/presentation/pages/game-review/GameReview.vue";
 import SolverWalkthrough from "@/presentation/pages/solver-walkthrough/SolverWalkthrough.vue";
@@ -17,6 +18,7 @@ export const ROUTER_PATH = {
     statistics: "/statistics",
     settings: "/settings",
     changelog: "/settings/changelog",
+    appearance: "/settings/appearance",
     donate: "/donate",
     gameReview: "/game-review/:index",
     gameReviewFor: (index: number) => `/game-review/${index}`,
@@ -39,6 +41,7 @@ export const router = createRouter({
         { path: "/statistics", component: Statistics },
         { path: "/settings", component: Settings },
         { path: "/settings/changelog", component: Changelog },
+        { path: "/settings/appearance", component: Appearance },
         { path: "/donate", component: Donate },
         { path: "/game-review/:index", component: GameReview, props: true },
         { path: "/solver", component: SolverWalkthrough },

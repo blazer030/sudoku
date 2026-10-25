@@ -1,3 +1,4 @@
+import { createAnalyticsSpy } from "@/__tests__/fixtures/analyticsSpy";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { nextTick } from "vue";
 import { flushPromises, mount, type VueWrapper } from "@vue/test-utils";
@@ -12,6 +13,9 @@ import { i18n } from "@/presentation/i18n";
 import { knownAnswer, knownPuzzle } from "@/__tests__/fixtures/knownPuzzle";
 import { ANALYTICS_KEY, type AnalyticsService } from "@/application/analytics/AnalyticsService";
 import { handleBackButton } from "@/presentation/composables/backDismissal";
+import { useSettingsStore } from "@/stores/settingsStore";
+import { STYLE_IDS, type StyleId } from "@/theme/themeIds";
+import { STYLE_HOME_HEROES } from "@/presentation/pages/home/homeHeroes";
 
 vi.mock("@/application/puzzleGeneration/PuzzleGenerationService", () => ({
     generatePuzzleAsync: vi.fn(() => Promise.resolve({
@@ -43,10 +47,13 @@ const createTestRouter = () => {
     });
 };
 
-const mountHome = ({ savedGame, analytics }: { savedGame?: GameState; analytics?: AnalyticsService } = {}) => {
+const mountHome = ({ savedGame, analytics, style }: { savedGame?: GameState; analytics?: AnalyticsService; style?: StyleId } = {}) => {
     const router = createTestRouter();
     const pinia = createPinia();
     setActivePinia(pinia);
+    if (style !== undefined) {
+        useSettingsStore().setStyle(style);
+    }
     if (savedGame !== undefined) {
         useGameStore().persistGame(savedGame);
     }
@@ -97,6 +104,63 @@ describe("Home", () => {
         expect(glyphs.map(glyph => glyph.text())).toEqual(["數", "獨"]);
         expect(wrapper.get("h1").text()).toBe("數獨");
         for (const glyph of glyphs) expect(glyph.attributes("data-skin")).toBe("title-glyph");
+    });
+
+    it("should mark the logo box for styles to decorate", () => {
+        const { wrapper } = mountHome();
+
+        expect(wrapper.get("[data-testid='home-logo']").attributes("data-skin")).toBe("logo");
+    });
+
+    it("should give every stacked style the same hero", () => {
+        const stackedHeroes = STYLE_IDS.filter(style => STYLE_HOME_HEROES[style] === "stacked")
+            .map(style => mountHome({ style }).wrapper.get("[data-testid='home-hero']").html());
+
+        expect(stackedHeroes.length).toBeGreaterThan(0);
+        expect(new Set(stackedHeroes).size).toBe(1);
+        expect(stackedHeroes[0]).toContain('data-skin="logo"');
+    });
+
+    it("should set ink's title as a vertical emblem in Chinese, the same in both languages", async () => {
+        const { wrapper } = mountHome({ style: "ink" });
+        const emblemText = async (locale: "en" | "zh-Hant") => {
+            i18n.global.locale.value = locale;
+            await nextTick();
+            return wrapper.get("[data-testid='home-hero-emblem']").text();
+        };
+
+        const english = await emblemText("en");
+        const chinese = await emblemText("zh-Hant");
+
+        expect(wrapper.find("[data-testid='home-logo']").exists()).toBe(false);
+        expect(wrapper.get("[data-testid='home-hero-emblem']").attributes("aria-hidden")).toBe("true");
+        expect(english).toBe(chinese);
+        expect(chinese).toContain(i18n.global.t("home.title"));
+        expect(chinese).toContain(i18n.global.t("home.subtitle"));
+        for (const token of ["hero-title", "hero-subtitle", "hero-seal"]) {
+            expect(wrapper.find(`[data-skin~='${token}']`).exists()).toBe(true);
+        }
+        i18n.global.locale.value = "en";
+    });
+
+    it("should keep ink's hidden heading in the player's language", async () => {
+        const { wrapper } = mountHome({ style: "ink" });
+        const heading = async (locale: "en" | "zh-Hant") => {
+            i18n.global.locale.value = locale;
+            await nextTick();
+            return { title: wrapper.get("h1").text(), text: wrapper.get("[data-testid='home-hero']").text(), expected: [i18n.global.t("home.title"), i18n.global.t("home.subtitle")] };
+        };
+
+        const english = await heading("en");
+        const chinese = await heading("zh-Hant");
+
+        expect(english.title).not.toBe(chinese.title);
+        for (const { title, text, expected } of [english, chinese]) {
+            expect(title).toBe(expected[0]);
+            expect(text).toContain(expected[1]);
+        }
+        expect(wrapper.get("h1").classes()).toContain("sr-only");
+        i18n.global.locale.value = "en";
     });
 
     it("should keep an English title whole", () => {
@@ -361,7 +425,7 @@ describe("Home", () => {
 
         describe("staying on Home", () => {
             const openDialog = async () => {
-                const analytics = { logEvent: vi.fn(() => Promise.resolve()) };
+                const analytics = createAnalyticsSpy();
                 const { wrapper, router, pinia } = mountHome({ savedGame: dummySave, analytics });
                 await router.push("/");
                 await router.isReady();
@@ -473,6 +537,23 @@ describe("Home", () => {
             expect(history[0].replay).toEqual(replay);
         });
 
+        // The save counts every hint used; statistics count the ones past the free first, as leaving a game does
+        it("should record the hints a given-up game paid for", async () => {
+            const history = await giveUpAndStartNew({ ...dummySave, hintsUsed: 3 });
+
+            expect(history[0].hintsUsed).toBe(2);
+        });
+
+        it.each([
+            [1, 0],
+            [2, 1],
+            [4, 3],
+        ])("should record %i saved hints as %i paid ones when the game is given up", async (saved, recorded) => {
+            const history = await giveUpAndStartNew({ ...dummySave, hintsUsed: saved });
+
+            expect(history[0].hintsUsed).toBe(recorded);
+        });
+
         it("should record a given-up game without a replay when its save has none", async () => {
             const history = await giveUpAndStartNew(dummySave);
 
@@ -481,7 +562,7 @@ describe("Home", () => {
         });
 
         it("should continue the saved game from the dialog", async () => {
-            const analytics = { logEvent: vi.fn(() => Promise.resolve()) };
+            const analytics = createAnalyticsSpy();
             const { wrapper, router, pinia } = mountHome({ savedGame: dummySave, analytics });
             await router.push("/");
             await router.isReady();
@@ -500,7 +581,7 @@ describe("Home", () => {
     });
 
     describe("game_abandon analytics", () => {
-        const createAnalytics = () => ({ logEvent: vi.fn(() => Promise.resolve()) });
+        const createAnalytics = () => (createAnalyticsSpy());
 
         const savedGameWithEntries: GameState = {
             ...dummySave,

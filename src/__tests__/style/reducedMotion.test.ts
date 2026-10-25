@@ -1,4 +1,5 @@
 import { readFileSync } from "fs";
+import { declarationsOf } from "./styleSheetRules";
 
 const REDUCED_MOTION_QUERY = "@media (prefers-reduced-motion: reduce)";
 
@@ -48,5 +49,12 @@ describe("reduced motion", () => {
         expect(block).toContain(".animate-hint-reveal-pop");
         expect(minimalBlock).toContain("[data-press-bounce]");
         expect(minimalBlock).toContain(".segmented-indicator-motion");
+    });
+
+    // With motion not allowed the completion dialog is marked still: it fades in and out without scaling
+    it("should keep a still dialog from scaling in or out, in every style", () => {
+        for (const selector of [".modal-enter-from > [data-still]", ".modal-leave-to > [data-still]"]) {
+            expect(declarationsOf(css, selector).get("transform")).toBe("none");
+        }
     });
 });

@@ -3,28 +3,10 @@
         class="flex flex-col gap-5 h-full px-5 bg-background overflow-y-auto"
         data-skin="page"
     >
-        <div
-            class="flex items-center justify-between sticky top-0 bg-background pt-6 pb-3 z-10"
-            data-skin="page-header"
-        >
-            <button
-                class="flex items-center gap-2 cursor-pointer"
-                data-testid="back-button"
-                @click="goBack"
-            >
-                <ChevronLeft
-                    :size="24"
-                    class="text-foreground"
-                />
-                <span class="text-foreground text-base font-medium">
-                    {{ t("common.back") }}
-                </span>
-            </button>
-            <span class="text-foreground text-lg font-semibold">
-                {{ t("settings.support") }}
-            </span>
-            <div class="w-15" />
-        </div>
+        <PageHeader
+            :title="t('settings.support')"
+            @back="goBack"
+        />
 
         <p class="text-foreground-muted text-[15px] leading-relaxed">
             {{ t("donate.intro1") }}<br>
@@ -35,6 +17,7 @@
             v-if="store.loading"
             class="flex justify-center bg-card rounded-2xl shadow-card-sm px-4 py-6"
             data-testid="donate-loading"
+            data-skin="card"
         >
             <span class="text-foreground-muted text-[15px]">
                 {{ t("donate.loading") }}
@@ -44,6 +27,7 @@
         <div
             v-else-if="store.loadFailed"
             class="flex flex-col items-center gap-3 bg-card rounded-2xl shadow-card-sm px-4 py-6"
+            data-skin="card"
         >
             <span class="text-foreground-muted text-[15px]">
                 {{ t("donate.loadFailed") }}
@@ -60,6 +44,7 @@
         <div
             v-else
             class="bg-card rounded-2xl shadow-card-sm divide-y divide-border"
+            data-skin="card"
         >
             <button
                 v-for="product in store.products"
@@ -113,10 +98,11 @@
 import { inject, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
-import { ChevronLeft, ChevronRight } from "lucide-vue-next";
+import { ChevronRight } from "lucide-vue-next";
 import { useDonateStore } from "@/stores/donateStore";
 import { ANALYTICS_KEY, type DonateTier } from "@/application/analytics/AnalyticsService";
 import type { Product } from "@/application/billing/BillingService";
+import PageHeader from "@/presentation/components/page-header/PageHeader.vue";
 import DonateSuccess from "@/presentation/pages/donate/components/DonateSuccess.vue";
 
 const { t } = useI18n();

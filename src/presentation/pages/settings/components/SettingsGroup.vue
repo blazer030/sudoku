@@ -3,7 +3,10 @@
         :data-testid="`settings-group-${id}`"
         class="flex flex-col gap-2"
     >
-        <h2 class="flex items-center gap-1.5 px-1 text-foreground-secondary text-[13px] font-semibold">
+        <h2
+            class="flex items-center gap-1.5 px-1 text-foreground-secondary text-[13px] font-semibold"
+            data-skin="group-heading"
+        >
             <component
                 :is="icon"
                 :size="16"
@@ -11,7 +14,10 @@
             />
             {{ title }}
         </h2>
-        <div class="flex flex-col bg-card rounded-2xl shadow-card-sm p-3">
+        <div
+            class="flex flex-col bg-card rounded-2xl shadow-card-sm p-3"
+            data-skin="card"
+        >
             <slot />
         </div>
     </section>

@@ -1,0 +1,1100 @@
+/* 8-bit: a 1989 handheld or a red-and-white home console. Pixel type, square corners, notched pixel
+   frames, hard shadows and presses that jump rather than ease. Every rule is scoped by
+   [data-style="pixel"]; keyframes start with pixel-. Frames and shadows are box-shadow only, so no
+   box changes size and the layout stays shared. */
+
+[data-style="pixel"] {
+    /* Pixel faces have one weight; a faked bold smears the pixels */
+    font-synthesis: none;
+    /* Every corner the shared markup rounds through a theme radius is square */
+    --radius-sm: 0;
+    --radius-md: 0;
+    --radius-lg: 0;
+    --radius-xl: 0;
+    --radius-2xl: 0;
+    --radius-3xl: 0;
+    --radius-button: 0;
+    --radius-icon: 0;
+    --radius-popup: 0;
+    /* Frames are drawn in the text ink, and shadows fall hard in the palette's shadow shade */
+    --pixel-ink: var(--color-foreground);
+    --pixel-drop: var(--color-shadow);
+    /* The small pieces' notched 2px frame (four bars that leave the corners open), and the frame with
+       its hard 4px drop shadow */
+    --pixel-frame-bars:
+        0 -2px 0 0 var(--pixel-ink),
+        0 2px 0 0 var(--pixel-ink),
+        -2px 0 0 0 var(--pixel-ink),
+        2px 0 0 0 var(--pixel-ink);
+    --pixel-frame: var(--pixel-frame-bars), 4px 4px 0 0 var(--pixel-drop);
+    --pixel-title-shadow: var(--color-primary-light);
+    --pixel-hint: var(--color-foreground);
+    /* The grid: thin lines in the mid shade, box lines in the ink, both solid */
+    --board-line: var(--color-border);
+    --board-box-line: var(--color-foreground);
+    /* The board's patterns (dither, hatch) and hint fills: the light green over the page in 掌機 */
+    --pixel-pattern-shade: var(--color-highlight);
+    /* A digit's burst: the two dark greens as it arrives, the mid green alone as it leaves (the light
+       green barely shows on the page) */
+    --pixel-burst-1: var(--color-foreground);
+    --pixel-burst-2: var(--color-border);
+    --pixel-burst-3: var(--color-foreground);
+    --pixel-burst-4: var(--color-border);
+    --pixel-burst-leave: var(--color-border);
+    /* A completed group's blink and the solved board's line clear invert the cell, as on the boards: the
+       light green would be only 1.2:1 on the page */
+    --pixel-flash-fill: var(--color-foreground);
+    --pixel-flash-ink: var(--color-background);
+    /* A completed group's sparks, in the ink (掌機) or the gold (紅白機) */
+    --pixel-spark: var(--color-primary);
+    /* The celebration's bursts and stars, and the console loader's squares: the two light greens over the
+       dimmed scene in 掌機 */
+    --pixel-fx-1: var(--color-background);
+    --pixel-fx-2: var(--color-highlight);
+    --pixel-fx-3: var(--color-background);
+    --pixel-fx-4: var(--color-highlight);
+    /* STAGE CLEAR: the light green over a mid-green shadow, or gold over the console's red */
+    --pixel-stage-clear-ink: var(--color-background);
+    --pixel-stage-clear-shadow: var(--color-border);
+}
+
+/* No soft shadows or glows: the shared shadow utilities draw in --tw-shadow-color, which does not
+   inherit, so every element clears it. The pixel frames and hard shadows below set their colours
+   directly. */
+[data-style="pixel"] * {
+    --tw-shadow-color: transparent;
+}
+
+/* The console's title drops a red shadow, as on its box art, and hint mode frames the board in gold */
+:root.dark[data-style="pixel"] {
+    --pixel-title-shadow: var(--color-error);
+    --pixel-hint: var(--color-primary);
+    /* ...and the navy card over the dark page in 紅白機 */
+    --pixel-pattern-shade: var(--color-card);
+    /* The console's burst is its red, gold and two blues; leaving, the light grey */
+    --pixel-burst-1: var(--color-error);
+    --pixel-burst-2: var(--color-primary);
+    --pixel-burst-3: var(--color-accent);
+    --pixel-burst-4: var(--color-highlight);
+    --pixel-burst-leave: var(--color-foreground-secondary);
+    /* The console's red, gold and two blues */
+    --pixel-fx-1: var(--color-error);
+    --pixel-fx-2: var(--color-primary);
+    --pixel-fx-3: var(--color-accent);
+    --pixel-fx-4: var(--color-highlight);
+    --pixel-stage-clear-ink: var(--color-primary);
+    --pixel-stage-clear-shadow: var(--color-error);
+    /* A completed group's blink and the line clear light the cell in the console blue under the text
+       ink: the inverted cell, the brightest ink on the darkest page, swung too much of the screen too hard */
+    --pixel-flash-fill: var(--color-highlight);
+    --pixel-flash-ink: var(--color-foreground);
+}
+
+/* Type: Press Start 2P for digits (board, keys, timer, counts), Cubic 11 for every other text and
+   Silkscreen for notes. Repointed only once the faces have loaded (fonts.ts beside this sheet marks
+   it), so nothing paints in a half-loaded stack. */
+[data-style="pixel"][data-pixel-fonts="ready"] {
+    --font-sans: var(--font-pixel);
+    --font-mono: var(--font-pixel);
+    --font-clue: var(--font-pixel-digits);
+    --font-entry: var(--font-pixel-digits);
+    --font-key: var(--font-pixel-digits);
+    --font-timer: var(--font-pixel-digits);
+    --font-note: var(--font-pixel-note);
+}
+
+[data-style="pixel"][data-pixel-fonts="ready"] [data-skin~="badge"] {
+    font-family: var(--font-pixel-digits);
+}
+
+/* Pages: an LCD grid (掌機) or console dots (紅白機) over the whole screen on the app root's ::before, and
+   in 紅白機 a field of blinking stars across the top on its ::after, both fixed to the screen. The app
+   root is shared by every screen, so there is exactly one copy at any width; the page roots are clear so
+   it shows through, and the body's page colour lies under it. Below every content layer, never taking
+   taps; cards are opaque, so text and the board keep their contrast. */
+[data-style="pixel"] [data-skin~="page"] {
+    background-color: transparent;
+}
+
+/* A sticky header is clear at rest, so the texture shows straight through it. Once its page has scrolled
+   (data-scrolled) it frosts, fading in over the first 64px of scroll (--header-scroll, 0 to 1): a translucent page colour over a blur, so content under the title is
+   subdued while the grid still reads through, with no rule underneath. */
+[data-style="pixel"] [data-skin~="page-header"] {
+    background-color: transparent;
+}
+
+[data-style="pixel"] [data-skin~="page-header"][data-scrolled] {
+    background-color: color-mix(in srgb, var(--color-background) calc(62% * var(--header-scroll, 0)), transparent);
+    -webkit-backdrop-filter: blur(calc(6px * var(--header-scroll, 0)));
+    backdrop-filter: blur(calc(6px * var(--header-scroll, 0)));
+    /* The frost tapers out over the header\'s empty bottom padding, so the title and back button stay fully frosted. */
+    -webkit-mask-image: linear-gradient(to bottom, var(--color-foreground) calc(100% - 12px), transparent);
+    mask-image: linear-gradient(to bottom, var(--color-foreground) calc(100% - 12px), transparent);
+}
+
+[data-style="pixel"] .app-safe-area::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-image:
+        linear-gradient(color-mix(in srgb, var(--color-foreground) 5.5%, transparent) 1px, transparent 1px),
+        linear-gradient(90deg, color-mix(in srgb, var(--color-foreground) 5.5%, transparent) 1px, transparent 1px);
+    background-size: 3px 3px;
+}
+
+:root.dark[data-style="pixel"] .app-safe-area::before {
+    background-image: radial-gradient(color-mix(in srgb, var(--color-foreground) 7%, transparent) 1px, transparent 1.2px);
+    background-size: 4px 4px;
+}
+
+:root.dark[data-style="pixel"] .app-safe-area::after {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 280px;
+    z-index: -1;
+    pointer-events: none;
+    background-image:
+        radial-gradient(var(--color-foreground) 1px, transparent 1.2px),
+        radial-gradient(var(--color-primary) 1px, transparent 1.2px),
+        radial-gradient(var(--color-accent) 1px, transparent 1.2px);
+    background-size: 97px 61px, 151px 89px, 123px 113px;
+    background-position: 13px 7px, 61px 41px, 29px 71px;
+    animation: pixel-blink 1.6s steps(2, jump-none) infinite;
+}
+
+/* The Home title in wide pixel letters with a hard offset shadow */
+[data-style="pixel"] [data-skin~="title"] {
+    text-shadow: 4px 4px 0 var(--pixel-title-shadow);
+}
+
+[data-style="pixel"] [data-skin~="title-glyph"] {
+    display: inline-block;
+    margin-inline: 0.12em;
+}
+
+/* The board is a screen in a notched pixel frame: four 4px bars leave the corners open, and a hard
+   shadow falls to the lower right. The shared hint ring (the primary at half strength) is the frame's
+   own ink in 掌機, so it is hidden and the frame itself shows hint mode (below). */
+[data-style="pixel"] [data-skin~="board"] {
+    border-radius: 0;
+    /* The frame changes in one step, never eases */
+    transition-duration: 0ms;
+    --tw-ring-color: transparent;
+    --tw-shadow:
+        0 -4px 0 0 var(--pixel-ink),
+        0 4px 0 0 var(--pixel-ink),
+        -4px 0 0 0 var(--pixel-ink),
+        4px 0 0 0 var(--pixel-ink),
+        8px 8px 0 0 var(--pixel-drop);
+}
+
+/* Hint mode doubles the frame: the notched bars in the hint ink, a 2px gap of the page and a square
+   outer ring, which blinks in three steps on entry like a cartridge's title screen */
+[data-style="pixel"] [data-skin~="board"][data-hint-mode] {
+    --pixel-hint-bars:
+        0 -4px 0 0 var(--pixel-hint),
+        0 4px 0 0 var(--pixel-hint),
+        -4px 0 0 0 var(--pixel-hint),
+        4px 0 0 0 var(--pixel-hint);
+    --pixel-hint-ring:
+        0 0 0 6px var(--color-background),
+        0 0 0 8px var(--pixel-hint);
+    --tw-shadow:
+        0 -4px 0 0 var(--pixel-hint),
+        0 4px 0 0 var(--pixel-hint),
+        -4px 0 0 0 var(--pixel-hint),
+        4px 0 0 0 var(--pixel-hint),
+        0 0 0 6px var(--color-background),
+        0 0 0 8px var(--pixel-hint);
+    animation: pixel-hint-frame 480ms steps(1, end) 3;
+}
+
+@keyframes pixel-hint-frame {
+    0% { box-shadow: var(--pixel-hint-bars), var(--pixel-hint-ring); }
+    50% { box-shadow: var(--pixel-hint-bars); }
+    100% { box-shadow: var(--pixel-hint-bars), var(--pixel-hint-ring); }
+}
+
+/* The grid's outer edge in the box lines' ink. It is positioned, so the line overlay below covers
+   the cells on every board (game, review, walkthrough), and isolated, so the overlay's and the
+   cursor's stacking stays inside the grid. */
+[data-style="pixel"] [data-skin~="board"] > div {
+    position: relative;
+    isolation: isolate;
+    border-color: var(--board-box-line);
+    border-radius: 0;
+}
+
+/* The cells' own borders are 1px and 3px; this overlay redraws the inner lines 2px thin and 4px for
+   the boxes, over the same edges (the 9×9 cells fill the grid exactly). The outer edge is the grid's
+   border, so the overlay leaves it alone. It is raised over the cells, since the selected cell is
+   positioned for its cursor and would otherwise paint over it, and stays under the hint links. */
+[data-style="pixel"] [data-skin~="board"] > div::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background-image:
+        linear-gradient(to right,
+            transparent calc(100% / 3 - 3px), var(--board-box-line) 0 calc(100% / 3 + 1px),
+            transparent 0 calc(200% / 3 - 3px), var(--board-box-line) 0 calc(200% / 3 + 1px),
+            transparent 0),
+        linear-gradient(to bottom,
+            transparent calc(100% / 3 - 3px), var(--board-box-line) 0 calc(100% / 3 + 1px),
+            transparent 0 calc(200% / 3 - 3px), var(--board-box-line) 0 calc(200% / 3 + 1px),
+            transparent 0),
+        linear-gradient(to right,
+            transparent calc(100% / 9 - 1px), var(--board-line) 0 calc(100% / 9 + 1px),
+            transparent 0 calc(200% / 9 - 1px), var(--board-line) 0 calc(200% / 9 + 1px),
+            transparent 0 calc(400% / 9 - 1px), var(--board-line) 0 calc(400% / 9 + 1px),
+            transparent 0 calc(500% / 9 - 1px), var(--board-line) 0 calc(500% / 9 + 1px),
+            transparent 0 calc(700% / 9 - 1px), var(--board-line) 0 calc(700% / 9 + 1px),
+            transparent 0 calc(800% / 9 - 1px), var(--board-line) 0 calc(800% / 9 + 1px),
+            transparent 0),
+        linear-gradient(to bottom,
+            transparent calc(100% / 9 - 1px), var(--board-line) 0 calc(100% / 9 + 1px),
+            transparent 0 calc(200% / 9 - 1px), var(--board-line) 0 calc(200% / 9 + 1px),
+            transparent 0 calc(400% / 9 - 1px), var(--board-line) 0 calc(400% / 9 + 1px),
+            transparent 0 calc(500% / 9 - 1px), var(--board-line) 0 calc(500% / 9 + 1px),
+            transparent 0 calc(700% / 9 - 1px), var(--board-line) 0 calc(700% / 9 + 1px),
+            transparent 0 calc(800% / 9 - 1px), var(--board-line) 0 calc(800% / 9 + 1px),
+            transparent 0);
+}
+
+[data-style="pixel"] [data-skin~="board"] > div > svg {
+    z-index: 2;
+}
+
+/* Cells. 掌機 has one ink, so states differ by pattern, not colour alone: every cell lies on the page
+   colour; scope and peer cells are a 2px dither and error cells a diagonal hatch, both the pattern
+   shade at half coverage; same-digit cells a solid fill; the selected cell is inverted under a
+   blinking corner cursor; and a player's digit is underlined. paletteContrast's PIXEL_BOARD_CASES
+   checks every ink on every one of these. The press overlay is laid over the pattern, and hint mode's
+   cells change in one step. */
+[data-style="pixel"] [data-skin~="board"] [data-variant] {
+    --pixel-cell-fill: var(--color-background);
+    --pixel-cell-pattern: none;
+    --pixel-clue-ink: var(--color-foreground);
+    --pixel-entry-ink: var(--color-accent);
+    background-color: var(--pixel-cell-fill);
+    background-image: var(--pixel-cell-pattern);
+    background-size: 4px 4px;
+    transition-duration: 0ms;
+}
+
+[data-style="pixel"] [data-skin~="board"] [data-variant][data-pressed] {
+    background-image: linear-gradient(var(--press-overlay), var(--press-overlay)), var(--pixel-cell-pattern);
+    background-size: auto, 4px 4px;
+}
+
+[data-style="pixel"] [data-skin~="board"] [data-value-kind="given"] > div {
+    color: var(--pixel-clue-ink);
+}
+
+[data-style="pixel"] [data-skin~="board"] [data-value-kind="entered"] > div {
+    position: relative;
+    color: var(--pixel-entry-ink);
+}
+
+/* A player's digit (or a hint's) carries a 2px underline in its own colour; a clue has none */
+[data-style="pixel"] [data-skin~="board"] [data-value-kind="entered"] > div::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 2px;
+    bottom: -5px;
+    height: 2px;
+    background-color: currentColor;
+}
+
+[data-style="pixel"] [data-skin~="board"] [data-variant="scope"],
+[data-style="pixel"] [data-skin~="board"] [data-variant="peer"] {
+    --pixel-cell-pattern: repeating-conic-gradient(var(--pixel-pattern-shade) 0 25%, transparent 0 50%);
+}
+
+/* An error (檢查衝突) or a hint's wrong entry is hatched; the error's digit blinks twice as it shows.
+   An error cell that is also selected or the same digit is drawn as an error: the cell gives the
+   error precedence, so the red never sits on the inverted cell or the same-digit blue. A selected
+   error keeps the cursor (below). */
+[data-style="pixel"] [data-skin~="board"] [data-variant="error"],
+[data-style="pixel"] [data-skin~="board"] [data-variant="wrong"] {
+    --pixel-cell-pattern: linear-gradient(45deg, var(--pixel-pattern-shade) 25%, transparent 0 50%, var(--pixel-pattern-shade) 0 75%, transparent 0);
+    --pixel-entry-ink: var(--color-error);
+}
+
+[data-style="pixel"] [data-skin~="board"] [data-variant="error"] > div {
+    animation: pixel-blink 400ms steps(2, jump-none) 2;
+}
+
+/* The hatch alone is faint in 掌機 (two close greens), so an error or wrong cell is also framed 2px
+   in the foreground ink inside its edge, in both modes */
+[data-style="pixel"] [data-skin~="board"] [data-variant="error"],
+[data-style="pixel"] [data-skin~="board"] [data-variant="wrong"] {
+    box-shadow: inset 0 0 0 2px var(--color-foreground);
+}
+
+/* Same digit: a solid fill. Its digits take the foreground ink (the entry blue reads only 2.61 on the
+   console's same-digit blue). */
+[data-style="pixel"] [data-skin~="board"] [data-variant="same-digit"] {
+    --pixel-cell-fill: var(--color-highlight);
+    --pixel-clue-ink: var(--color-foreground);
+    --pixel-entry-ink: var(--color-foreground);
+}
+
+/* Hint mode's pattern cells are the pattern shade solid; its answer keeps the board and takes the cursor */
+[data-style="pixel"] [data-skin~="board"] [data-variant="focus"],
+[data-style="pixel"] [data-skin~="board"] [data-variant="pattern"] {
+    --pixel-cell-fill: var(--pixel-pattern-shade);
+}
+
+/* The shared answer ring gives way to the cursor, as on the selected cell */
+[data-style="pixel"] [data-skin~="board"] [data-variant="answer"] {
+    box-shadow: none;
+}
+
+/* The selected cell is inverted, its digit, notes and underline in the page colour, and the shared
+   selection ring gives way to the cursor */
+[data-style="pixel"] [data-skin~="board"] [data-variant="selected"] {
+    --pixel-cell-fill: var(--color-foreground);
+    --pixel-clue-ink: var(--color-background);
+    --pixel-entry-ink: var(--color-background);
+    box-shadow: none;
+}
+
+[data-style="pixel"] [data-skin~="board"] [data-variant="selected"] * {
+    color: var(--color-background);
+}
+
+/* The selected digit's note keeps its disc, turned to the page colour */
+[data-style="pixel"] [data-skin~="board"] [data-variant="selected"] [data-note-highlight] {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+}
+
+/* The cursor: four corner brackets just outside the cell, over the grid lines, blinking on and off.
+   It marks the selected cell whatever its variant, so a selected error (hatched, not inverted) still
+   shows where the player is; hint mode shows its own cells instead. A step's answer cell (hint mode,
+   game review, the walkthrough) is marked the same way. */
+[data-style="pixel"] [data-skin~="board"]:not([data-hint-mode]) [data-selected],
+[data-style="pixel"] [data-skin~="board"] [data-variant="answer"] {
+    position: relative;
+}
+
+[data-style="pixel"] [data-skin~="board"]:not([data-hint-mode]) [data-selected]::before,
+[data-style="pixel"] [data-skin~="board"] [data-variant="answer"]::before {
+    content: "";
+    position: absolute;
+    inset: -7px;
+    z-index: 2;
+    pointer-events: none;
+    background:
+        linear-gradient(var(--color-primary), var(--color-primary)) top left / 12px 4px no-repeat,
+        linear-gradient(var(--color-primary), var(--color-primary)) top left / 4px 12px no-repeat,
+        linear-gradient(var(--color-primary), var(--color-primary)) top right / 12px 4px no-repeat,
+        linear-gradient(var(--color-primary), var(--color-primary)) top right / 4px 12px no-repeat,
+        linear-gradient(var(--color-primary), var(--color-primary)) bottom left / 12px 4px no-repeat,
+        linear-gradient(var(--color-primary), var(--color-primary)) bottom left / 4px 12px no-repeat,
+        linear-gradient(var(--color-primary), var(--color-primary)) bottom right / 12px 4px no-repeat,
+        linear-gradient(var(--color-primary), var(--color-primary)) bottom right / 4px 12px no-repeat;
+    animation: pixel-blink 1000ms steps(2, jump-none) infinite;
+}
+
+/* On for the first half, off for the second */
+@keyframes pixel-blink {
+    to { opacity: 0; }
+}
+
+/* A placed digit pops in four held frames, as on the canvas: half size, past full size, under it, then
+   settled (steps() applies to each keyframe interval, so one step each holds a frame). Eight pixels
+   burst out of its cell meanwhile; a cleared digit bursts the same pixels in the leaving colour. The
+   burst hangs off the cell, not the digit, so the pop's scaling never shrinks it and it outlives the
+   digit; it is drawn over the grid lines and the cursor. The arrival is the digit's class, so the cell
+   finds it with :has(); a WebView without :has() pops the digit without the burst. An error's blink
+   replaces the pop, and whichever animation ends first settles the cell. */
+@keyframes pixel-pop {
+    0% { transform: scale(0.5); }
+    25% { transform: scale(1.5); }
+    50% { transform: scale(0.75); }
+    75%, 100% { transform: none; }
+}
+
+@keyframes pixel-burst-in {
+    from {
+        box-shadow:
+            0 0 0 0 var(--pixel-burst-1), 0 0 0 0 var(--pixel-burst-2),
+            0 0 0 0 var(--pixel-burst-3), 0 0 0 0 var(--pixel-burst-4),
+            0 0 0 0 var(--pixel-burst-1), 0 0 0 0 var(--pixel-burst-2),
+            0 0 0 0 var(--pixel-burst-3), 0 0 0 0 var(--pixel-burst-4);
+    }
+    to {
+        box-shadow:
+            0 -24px 0 0 var(--pixel-burst-1), 24px 0 0 0 var(--pixel-burst-2),
+            0 24px 0 0 var(--pixel-burst-3), -24px 0 0 0 var(--pixel-burst-4),
+            16px -16px 0 0 var(--pixel-burst-1), 16px 16px 0 0 var(--pixel-burst-2),
+            -16px 16px 0 0 var(--pixel-burst-3), -16px -16px 0 0 var(--pixel-burst-4);
+    }
+}
+
+/* The same burst in the leaving colour, under its own name: a digit that flips between arriving and
+   leaving before its burst ends changes the animation's name, which starts the burst over */
+@keyframes pixel-burst-out {
+    from {
+        box-shadow:
+            0 0 0 0 var(--pixel-burst-leave), 0 0 0 0 var(--pixel-burst-leave),
+            0 0 0 0 var(--pixel-burst-leave), 0 0 0 0 var(--pixel-burst-leave),
+            0 0 0 0 var(--pixel-burst-leave), 0 0 0 0 var(--pixel-burst-leave),
+            0 0 0 0 var(--pixel-burst-leave), 0 0 0 0 var(--pixel-burst-leave);
+    }
+    to {
+        box-shadow:
+            0 -24px 0 0 var(--pixel-burst-leave), 24px 0 0 0 var(--pixel-burst-leave),
+            0 24px 0 0 var(--pixel-burst-leave), -24px 0 0 0 var(--pixel-burst-leave),
+            16px -16px 0 0 var(--pixel-burst-leave), 16px 16px 0 0 var(--pixel-burst-leave),
+            -16px 16px 0 0 var(--pixel-burst-leave), -16px -16px 0 0 var(--pixel-burst-leave);
+    }
+}
+
+[data-style="pixel"] [data-skin~="board"] .value-arrive {
+    animation: pixel-pop 480ms steps(1, end);
+}
+
+[data-style="pixel"] [data-skin~="board"] [data-variant]:is(.value-leave, :has(> .value-arrive)) {
+    position: relative;
+}
+
+[data-style="pixel"] [data-skin~="board"] [data-variant]:is(.value-leave, :has(> .value-arrive))::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 4px;
+    height: 4px;
+    margin: -2px 0 0 -2px;
+    z-index: 3;
+    pointer-events: none;
+}
+
+/* Its own rule, so a WebView without :has() still reads the leaving one */
+[data-style="pixel"] [data-skin~="board"] [data-variant]:has(> .value-arrive)::after {
+    animation: pixel-burst-in 480ms steps(4, jump-start);
+}
+
+[data-style="pixel"] [data-skin~="board"] [data-variant].value-leave::after {
+    animation: pixel-burst-out 480ms steps(4, jump-start);
+}
+
+/* A hint's revealed answer pops like a placed digit. Its glow holds, then snaps off at once rather
+   than fading, and is solid, so a peer's dither is not laid over it. */
+[data-style="pixel"] [data-skin~="board"] .animate-hint-reveal-pop {
+    animation: pixel-pop 480ms steps(1, end);
+}
+
+@keyframes pixel-hint-glow {
+    0%, 45% {
+        background-color: var(--color-primary-light);
+        background-image: none;
+        box-shadow: inset 0 0 0 2px var(--color-primary);
+    }
+}
+
+/* Through a hint's glow a cell's digits take the foreground ink, which reads on the glow. The selected
+   cell is inverted, so the glow is not drawn behind its page-coloured digit: the cursor and the pop
+   mark it. */
+[data-style="pixel"] [data-skin~="board"] .animate-hint-reveal-glow:not([data-selected]) {
+    --pixel-clue-ink: var(--color-foreground);
+    --pixel-entry-ink: var(--color-foreground);
+    animation: pixel-hint-glow 1000ms steps(2, jump-none);
+}
+
+[data-style="pixel"] [data-skin~="board"] .animate-hint-reveal-glow[data-selected] {
+    animation: none;
+}
+
+/* Moments, from the MomentsPixel and GroupPixel boards: the loader, a completed group and the solved
+   puzzle. Everything moves in steps, never eases; a row flashes at most twice (once in 紅白機's line
+   clear), and nothing blinks more than three times a second. */
+
+/* A completed row, column or box clears like a line in a block game: after a short beat each cell blinks
+   inverted twice in hard steps, outward from the entered cell at the shared step. Each round is lit for its
+   first half and has no 100% frame, so its second half is the cell's own look: its pattern, its selection
+   and its own ink. The digit's own pop and burst carry on, since the blink is on the cell. A hint's answer
+   keeps its glow. */
+@keyframes pixel-group-blink {
+    0%, 50% {
+        background-color: var(--pixel-flash-fill);
+        background-image: none;
+        color: var(--pixel-flash-ink);
+        --pixel-clue-ink: var(--pixel-flash-ink);
+        --pixel-entry-ink: var(--pixel-flash-ink);
+    }
+}
+
+[data-style="pixel"] [data-skin~="board"] [data-group]:not(.animate-hint-reveal-glow) {
+    animation: pixel-group-blink 180ms steps(1, jump-start) calc(100ms + var(--group-delay, 0ms)) 2;
+}
+
+/* Pixel sparks pop at the ends of a line or the corners of a box as its farthest cell blinks
+   (PixelGroupOverlay places them and says how far that cell is), four pixels flying out in three steps */
+@keyframes pixel-group-spark {
+    0% {
+        opacity: 1;
+        background-color: var(--pixel-spark);
+        box-shadow: 0 -5px 0 var(--pixel-spark), 5px 0 0 var(--pixel-spark), 0 5px 0 var(--pixel-spark), -5px 0 0 var(--pixel-spark);
+    }
+    50% {
+        opacity: 1;
+        background-color: transparent;
+        box-shadow: 0 -10px 0 var(--pixel-spark), 10px 0 0 var(--pixel-spark), 0 10px 0 var(--pixel-spark), -10px 0 0 var(--pixel-spark);
+    }
+    100% {
+        opacity: 1;
+        background-color: transparent;
+        box-shadow: 0 -14px 0 var(--pixel-spark), 14px 0 0 var(--pixel-spark), 0 14px 0 var(--pixel-spark), -14px 0 0 var(--pixel-spark);
+    }
+}
+
+[data-style="pixel"] .pixel-group-spark {
+    opacity: 0;
+    animation: pixel-group-spark 360ms steps(3, end) calc(100ms + var(--pixel-spark-reach) * var(--group-ripple-step, 60ms));
+}
+
+/* The solved board clears row by row from the top, 80ms apart, like a line clear: in 掌機 each row lit,
+   dimmed to the pattern shade, lit again, then back to its own look; two flashes a row. It runs on under the dialog,
+   which opens as the last rows clear. */
+@keyframes pixel-row-clear {
+    0% {
+        background-color: var(--pixel-flash-fill);
+        background-image: none;
+        color: var(--pixel-flash-ink);
+        --pixel-clue-ink: var(--pixel-flash-ink);
+        --pixel-entry-ink: var(--pixel-flash-ink);
+    }
+    33.33% {
+        background-color: var(--pixel-pattern-shade);
+        background-image: none;
+        color: var(--color-foreground);
+        --pixel-clue-ink: var(--color-foreground);
+        --pixel-entry-ink: var(--color-foreground);
+    }
+    66.67%, 100% {
+        background-color: var(--pixel-flash-fill);
+        background-image: none;
+        color: var(--pixel-flash-ink);
+        --pixel-clue-ink: var(--pixel-flash-ink);
+        --pixel-entry-ink: var(--pixel-flash-ink);
+    }
+}
+
+[data-style="pixel"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"]) [data-variant] {
+    animation: pixel-row-clear 300ms steps(1, end) calc(var(--cell-row) * 80ms);
+}
+
+/* 紅白機 rows light once each, for the first half of their turn, then show their own look: at 80ms apart,
+   two flashes a row swung any band of rows several times a second */
+@keyframes pixel-row-clear-once {
+    0%, 50% {
+        background-color: var(--pixel-flash-fill);
+        background-image: none;
+        color: var(--pixel-flash-ink);
+        --pixel-clue-ink: var(--pixel-flash-ink);
+        --pixel-entry-ink: var(--pixel-flash-ink);
+    }
+}
+
+:root.dark[data-style="pixel"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"]) [data-variant] {
+    animation: pixel-row-clear-once 300ms steps(1, jump-start) calc(var(--cell-row) * 80ms);
+}
+
+/* The dialog: the window opens from its middle in four steps, framed with its hard shadow, and once open
+   the trophy (solid, like a sprite) and the new-record tag blink once a second. A still card (data-still)
+   only fades in, like every style's. Board timings minus the 800ms the dialog waits. */
+@keyframes pixel-card-open {
+    0% { transform: scaleY(0); }
+    100% { transform: scaleY(1); }
+}
+
+[data-style="pixel"] [data-skin~="card"][data-skin~="celebration"] {
+    box-shadow:
+        0 -4px 0 0 var(--pixel-ink),
+        0 4px 0 0 var(--pixel-ink),
+        -4px 0 0 0 var(--pixel-ink),
+        4px 0 0 0 var(--pixel-ink),
+        8px 8px 0 0 var(--pixel-drop);
+}
+
+[data-style="pixel"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) {
+    animation: pixel-card-open 280ms steps(4, end) 200ms backwards;
+}
+
+[data-style="pixel"] [data-skin~="card"][data-skin~="celebration"] [data-skin~="trophy"] {
+    background-color: var(--color-primary);
+}
+
+[data-style="pixel"] [data-skin~="card"][data-skin~="celebration"] [data-skin~="trophy"] > svg {
+    color: var(--color-on-primary);
+}
+
+/* The difficulty is a square tag framed in the ink, beside the solid new-record tag */
+[data-style="pixel"] [data-skin~="card"][data-skin~="celebration"] [data-skin~="tag"]:not([data-skin~="new-record"]) {
+    background-color: transparent;
+    color: var(--color-foreground);
+    box-shadow: inset 0 0 0 2px var(--color-foreground);
+}
+
+[data-style="pixel"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) [data-skin~="trophy"],
+[data-style="pixel"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) [data-skin~="new-record"] {
+    animation: pixel-blink 1000ms steps(2, jump-none) 600ms infinite;
+}
+
+/* Over the scene (PixelCelebration): STAGE CLEAR drops in a letter at a time, each falling in four steps;
+   the stars come out and twinkle twice a second; and pixel bursts pop round the dialog, each once every
+   1.6s. Still, STAGE CLEAR and the stars are simply there. */
+[data-style="pixel"][data-pixel-fonts="ready"] :is(.pixel-stage-clear, .pixel-loader-now) {
+    font-family: var(--font-pixel-digits);
+}
+
+[data-style="pixel"] .pixel-stage-clear {
+    color: var(--pixel-stage-clear-ink);
+    text-shadow: 3px 3px 0 var(--pixel-stage-clear-shadow);
+}
+
+@keyframes pixel-stage-drop {
+    0% { opacity: 0; transform: translateY(-40px); }
+    1% { opacity: 1; transform: translateY(-40px); animation-timing-function: steps(4, end); }
+    100% { opacity: 1; transform: none; }
+}
+
+[data-style="pixel"] .pixel-celebration:not([data-still]) .pixel-stage-letter {
+    animation: pixel-stage-drop 320ms steps(1, end) calc(100ms + var(--pixel-letter-step) * 70ms) both;
+}
+
+[data-style="pixel"] .pixel-celebration-stars {
+    background-image:
+        radial-gradient(var(--pixel-fx-2) 2px, transparent 2.4px),
+        radial-gradient(var(--pixel-fx-3) 2px, transparent 2.4px),
+        radial-gradient(var(--pixel-fx-1) 2px, transparent 2.4px),
+        radial-gradient(var(--pixel-fx-4) 2px, transparent 2.4px);
+    background-size: 83px 71px, 131px 97px, 107px 119px, 149px 89px;
+    background-position: 11px 19px, 47px 61px, 73px 7px, 23px 43px;
+}
+
+/* On for the first half, then the hidden base for the second, and hidden until they come out */
+@keyframes pixel-celebration-twinkle {
+    0% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+[data-style="pixel"] .pixel-celebration:not([data-still]) .pixel-celebration-stars {
+    opacity: 0;
+    animation: pixel-celebration-twinkle 500ms steps(1, end) 100ms infinite;
+}
+
+@keyframes pixel-celebration-burst {
+    0% {
+        opacity: 1;
+        box-shadow:
+            0 -6px 0 0 var(--pixel-fx-1), 6px 0 0 0 var(--pixel-fx-2), 0 6px 0 0 var(--pixel-fx-3), -6px 0 0 0 var(--pixel-fx-4),
+            4px -4px 0 0 var(--pixel-fx-1), 4px 4px 0 0 var(--pixel-fx-2), -4px 4px 0 0 var(--pixel-fx-3), -4px -4px 0 0 var(--pixel-fx-4);
+    }
+    12% {
+        opacity: 1;
+        box-shadow:
+            0 -16px 0 0 var(--pixel-fx-1), 16px 0 0 0 var(--pixel-fx-2), 0 16px 0 0 var(--pixel-fx-3), -16px 0 0 0 var(--pixel-fx-4),
+            11px -11px 0 0 var(--pixel-fx-1), 11px 11px 0 0 var(--pixel-fx-2), -11px 11px 0 0 var(--pixel-fx-3), -11px -11px 0 0 var(--pixel-fx-4);
+    }
+    24% {
+        opacity: 1;
+        box-shadow:
+            0 -26px 0 0 var(--pixel-fx-1), 26px 0 0 0 var(--pixel-fx-2), 0 26px 0 0 var(--pixel-fx-3), -26px 0 0 0 var(--pixel-fx-4),
+            18px -18px 0 0 var(--pixel-fx-1), 18px 18px 0 0 var(--pixel-fx-2), -18px 18px 0 0 var(--pixel-fx-3), -18px -18px 0 0 var(--pixel-fx-4);
+    }
+    36% {
+        opacity: 1;
+        box-shadow:
+            0 -34px 0 0 var(--pixel-fx-1), 34px 0 0 0 var(--pixel-fx-2), 0 34px 0 0 var(--pixel-fx-3), -34px 0 0 0 var(--pixel-fx-4),
+            24px -24px 0 0 var(--pixel-fx-1), 24px 24px 0 0 var(--pixel-fx-2), -24px 24px 0 0 var(--pixel-fx-3), -24px -24px 0 0 var(--pixel-fx-4);
+    }
+    48%, 100% { opacity: 0; }
+}
+
+[data-style="pixel"] .pixel-burst {
+    opacity: 0;
+}
+
+[data-style="pixel"] .pixel-celebration:not([data-still]) .pixel-burst {
+    animation: pixel-celebration-burst 1600ms steps(1, end) var(--pixel-burst-delay) infinite;
+}
+
+/* Loading: an RPG text window with its hard shadow. The mark's squares light one at a time like a snake
+   (PixelLoader gives each its step), NOW LOADING counts its dots, a cursor blinks before the caption and
+   the bar fills a block at a time. In 紅白機 the squares light in the console's four colours in turn. */
+[data-style="pixel"] .pixel-loader {
+    --pixel-loader-lit: var(--color-foreground);
+    --pixel-loader-unlit: var(--pixel-pattern-shade);
+    box-shadow:
+        0 -4px 0 0 var(--pixel-ink),
+        0 4px 0 0 var(--pixel-ink),
+        -4px 0 0 0 var(--pixel-ink),
+        4px 0 0 0 var(--pixel-ink),
+        8px 8px 0 0 var(--pixel-drop);
+}
+
+[data-style="pixel"] .pixel-loader-mark {
+    box-shadow:
+        0 -4px 0 0 var(--pixel-ink),
+        0 4px 0 0 var(--pixel-ink),
+        -4px 0 0 0 var(--pixel-ink),
+        4px 0 0 0 var(--pixel-ink);
+}
+
+:root.dark[data-style="pixel"] .pixel-loader-square:nth-child(4n + 1) { --pixel-loader-lit: var(--pixel-fx-1); }
+:root.dark[data-style="pixel"] .pixel-loader-square:nth-child(4n + 2) { --pixel-loader-lit: var(--pixel-fx-2); }
+:root.dark[data-style="pixel"] .pixel-loader-square:nth-child(4n + 3) { --pixel-loader-lit: var(--pixel-fx-3); }
+:root.dark[data-style="pixel"] .pixel-loader-square:nth-child(4n) { --pixel-loader-lit: var(--pixel-fx-4); }
+
+@keyframes pixel-loader-hop {
+    0% { background-color: var(--pixel-loader-lit); }
+    22.2%, 100% { background-color: var(--pixel-loader-unlit); }
+}
+
+[data-style="pixel"] .pixel-loader-square {
+    background-color: var(--pixel-loader-unlit);
+    animation: pixel-loader-hop 1800ms steps(1, end) calc(var(--pixel-loader-step) * 200ms) infinite;
+}
+
+[data-style="pixel"] .pixel-loader-now {
+    color: var(--color-primary);
+}
+
+/* No dot, one, two, then all three: the clip runs a third past the dots so the last step shows them all */
+@keyframes pixel-loader-dots {
+    0% { clip-path: inset(0 100% 0 0); }
+    100% { clip-path: inset(0 -34% 0 0); }
+}
+
+[data-style="pixel"] .pixel-loader-dots {
+    clip-path: inset(0 100% 0 0);
+    animation: pixel-loader-dots 1600ms steps(4, end) infinite;
+}
+
+[data-style="pixel"] .pixel-loader-cursor {
+    background-color: currentColor;
+    clip-path: polygon(0 0, 100% 50%, 0 100%);
+    animation: pixel-blink 1000ms steps(2, jump-none) infinite;
+}
+
+[data-style="pixel"] .pixel-loader-bar {
+    box-shadow: inset 0 0 0 2px var(--pixel-ink);
+}
+
+/* Eleven steps of a block, the last a tenth past the end so the tenth step fills it; it holds full a beat */
+@keyframes pixel-loader-fill {
+    0% { clip-path: inset(0 100% 0 0); }
+    86%, 100% { clip-path: inset(0 -10% 0 0); }
+}
+
+[data-style="pixel"] .pixel-loader-bar-fill {
+    background-image: repeating-linear-gradient(90deg, var(--color-primary) 0 8px, transparent 8px 10px);
+    clip-path: inset(0 100% 0 0);
+    animation: pixel-loader-fill 2200ms steps(11, end) infinite;
+}
+
+/* Keys, buttons and tiles: square, a notched 2px frame and a hard 4px shadow. Colour changes snap;
+   there is no fading in 8-bit. */
+[data-style="pixel"] [data-skin~="key"],
+[data-style="pixel"] [data-skin~="button"],
+[data-style="pixel"] [data-skin~="tile"] {
+    border-radius: 0;
+    box-shadow: var(--pixel-frame);
+    transition-duration: 0ms;
+}
+
+/* A component's scoped styles weigh as much as the rule above and load after it, so they win: the
+   hint panel's buttons kept their soft shadow and a 200ms ease. A plain button (not one of the big
+   ones below) takes the frame again at one attribute more. */
+[data-style="pixel"] [data-skin~="button"]:not([data-skin~="continue"], [data-skin~="new-game"]) {
+    border-radius: 0;
+    box-shadow: var(--pixel-frame);
+    transition-duration: 0ms;
+}
+
+/* A game control's label sits 4px under it, so a control has the frame without the shadow and does
+   not drop when pressed; the press overlay marks it */
+[data-style="pixel"] [data-skin~="control"] {
+    border-radius: 0;
+    box-shadow: var(--pixel-frame-bars);
+    transition-duration: 0ms;
+}
+
+/* An option tile's own border would double the frame; it takes the tile's fill instead. A tile that
+   is on draws it in ink, so its frame doubles to 4px (the 外觀 page's style cards show their choice
+   only by the border). */
+[data-style="pixel"] [data-skin~="tile"] {
+    border-color: transparent;
+}
+
+[data-style="pixel"] [data-skin~="tile"][aria-pressed="true"] {
+    border-color: var(--pixel-ink);
+}
+
+/* In note mode a key's digit hops to its place in three steps */
+[data-style="pixel"] [data-skin~="key"] > span {
+    transition-timing-function: steps(3, end);
+}
+
+/* Continue and New Game are the big buttons: a 4px notched frame and an 8px shadow. Continue has a
+   second, inner frame like a cartridge label. */
+[data-style="pixel"] [data-skin~="continue"] {
+    box-shadow:
+        0 -4px 0 0 var(--pixel-ink),
+        0 4px 0 0 var(--pixel-ink),
+        -4px 0 0 0 var(--pixel-ink),
+        4px 0 0 0 var(--pixel-ink),
+        inset 0 0 0 4px var(--color-featured),
+        inset 0 0 0 6px var(--pixel-ink),
+        8px 8px 0 0 var(--pixel-drop);
+}
+
+/* Home, as on the canvas: New Game stays the dark main button even while a save makes it the second
+   choice, and a blinking arrow marks the continue card and the chosen difficulty, like a game menu */
+[data-style="pixel"] [data-skin~="new-game"] {
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+}
+
+[data-style="pixel"] [data-skin~="caret"] {
+    color: var(--color-primary);
+    fill: currentColor;
+    stroke: none;
+    animation: pixel-blink 1000ms steps(2, jump-none) infinite;
+}
+
+[data-style="pixel"] [data-skin~="menu"] [aria-pressed="true"]::before {
+    content: "";
+    width: 6px;
+    height: 10px;
+    margin-right: 6px;
+    background-color: currentColor;
+    clip-path: polygon(0 0, 100% 50%, 0 100%);
+    animation: pixel-blink 1000ms steps(2, jump-none) infinite;
+}
+
+[data-style="pixel"] [data-skin~="new-game"] {
+    box-shadow:
+        0 -4px 0 0 var(--pixel-ink),
+        0 4px 0 0 var(--pixel-ink),
+        -4px 0 0 0 var(--pixel-ink),
+        4px 0 0 0 var(--pixel-ink),
+        8px 8px 0 0 var(--pixel-drop);
+}
+
+/* The continue card's chips are square frames on the card, without the shared tint */
+[data-style="pixel"] [data-skin~="chip"] {
+    border-radius: 0;
+    background-color: transparent;
+    box-shadow: inset 0 0 0 2px var(--color-on-featured);
+}
+
+/* The remaining-count badge is a square pixel tag, cut out from the key by a ring of the page */
+[data-style="pixel"] [data-skin~="badge"] {
+    border-radius: 0;
+    box-shadow: 0 0 0 2px var(--color-background);
+}
+
+/* An option tile's mark is a square box */
+[data-style="pixel"] [data-skin~="check"] {
+    border-radius: 0;
+    border-color: var(--pixel-ink);
+}
+
+/* A segmented control is separate blocks ten pixels apart, as on the canvas: the strip has no frame or
+   fill, and the chosen option is itself a solid block, so the sliding indicator is not drawn. Only the
+   chosen option has the control's notched frame, without a shadow since the gap leaves no room for one;
+   the others are bare text on the card. */
+[data-style="pixel"] [data-skin~="segmented"] {
+    --segmented-gap: 10px;
+    --segmented-padding: 0px;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+}
+
+[data-style="pixel"] [data-skin~="segmented-indicator"] {
+    visibility: hidden;
+}
+
+[data-style="pixel"] [data-skin~="segment"] {
+    border-radius: 0;
+    box-shadow: none;
+    background-color: transparent;
+    color: var(--pixel-ink);
+    transition-duration: 0ms;
+}
+
+[data-style="pixel"] [data-skin~="segment"][aria-pressed="true"] {
+    box-shadow: var(--pixel-frame-bars);
+    background-color: var(--pixel-ink);
+    color: var(--color-card);
+}
+
+/* Cards (settings groups, dialog panels, the hint menu, Home's new-game card) are framed panels: a
+   4px notched ink frame and no drop shadow, so a card on the page colour (掌機) still reads as one */
+[data-style="pixel"] [data-skin~="card"] {
+    border-radius: 0;
+    box-shadow:
+        0 -4px 0 0 var(--pixel-ink),
+        0 4px 0 0 var(--pixel-ink),
+        -4px 0 0 0 var(--pixel-ink),
+        4px 0 0 0 var(--pixel-ink);
+}
+
+/* The game header's pills are square tags in a 2px notched frame */
+[data-style="pixel"] [data-skin~="pill"] {
+    border-radius: 0;
+    box-shadow: var(--pixel-frame-bars);
+}
+
+/* Nothing in 8-bit is round: chips, dots, tags, icon wells and the play button go square too */
+[data-style="pixel"] .rounded-full {
+    border-radius: 0;
+}
+
+/* Press feedback. vPress sets the data attributes; input never waits for them.
+   The overlay is a colour change, so it stays on under reduced motion. */
+[data-style="pixel"] [data-pressed] {
+    --press-overlay: color-mix(in srgb, var(--color-foreground) 12%, transparent);
+    background-image: linear-gradient(var(--press-overlay), var(--press-overlay));
+}
+
+[data-style="pixel"] [data-press-motion] {
+    transition-property: transform, background-color, color, box-shadow, opacity;
+    transition-duration: 0ms;
+}
+
+/* A framed piece drops 4px into its shadow in one step, and the shadow is gone */
+[data-style="pixel"] [data-skin~="key"][data-press-motion][data-pressed],
+[data-style="pixel"] [data-skin~="button"][data-press-motion][data-pressed],
+[data-style="pixel"] [data-skin~="tile"][data-press-motion][data-pressed] {
+    transform: translate(4px, 4px);
+    box-shadow: var(--pixel-frame-bars);
+}
+
+/* The big buttons keep half their shadow while held */
+[data-style="pixel"] [data-skin~="continue"][data-press-motion][data-pressed] {
+    box-shadow:
+        0 -4px 0 0 var(--pixel-ink),
+        0 4px 0 0 var(--pixel-ink),
+        -4px 0 0 0 var(--pixel-ink),
+        4px 0 0 0 var(--pixel-ink),
+        inset 0 0 0 4px var(--color-featured),
+        inset 0 0 0 6px var(--pixel-ink),
+        4px 4px 0 0 var(--pixel-drop);
+}
+
+[data-style="pixel"] [data-skin~="new-game"][data-press-motion][data-pressed] {
+    box-shadow:
+        0 -4px 0 0 var(--pixel-ink),
+        0 4px 0 0 var(--pixel-ink),
+        -4px 0 0 0 var(--pixel-ink),
+        4px 0 0 0 var(--pixel-ink),
+        4px 4px 0 0 var(--pixel-drop);
+}
+
+/* A released key jumps back up in two steps */
+@keyframes pixel-press-release {
+    0% { transform: translate(4px, 4px); }
+    100% { transform: none; }
+}
+
+[data-style="pixel"] [data-press-bounce] {
+    animation: pixel-press-release 120ms steps(2, end);
+}
+
+/* The segmented control's selection jumps across in steps */
+[data-style="pixel"] .segmented-indicator-motion {
+    transition: transform 200ms steps(4, end);
+}
+
+/* Reduced motion: no dropping, jumping, blinking, sliding, popping or bursting. A pressed piece stays
+   where it is but still loses its drop shadow, a change of look rather than a movement, and the press
+   overlay stays; hint mode keeps its doubled frame and the selection its cursor, held still, an
+   error's digit stays lit over its hatch, and a hint's answer shows its colour still instead of
+   flashing. The loader holds a still mark, its dots and a part-filled bar; the group effect and the
+   celebration never start without motion, so they are only stopped, and a completed group shows
+   nothing. */
+@media (prefers-reduced-motion: reduce) {
+    [data-style="pixel"] .segmented-indicator-motion {
+        transition: none;
+    }
+
+    /* The stars stay, not blinking */
+    :root.dark[data-style="pixel"] .app-safe-area::after {
+        animation: none;
+    }
+
+    [data-style="pixel"] [data-skin~="board"][data-hint-mode],
+    [data-style="pixel"] [data-skin~="board"]:not([data-hint-mode]) [data-selected]::before,
+    [data-style="pixel"] [data-skin~="board"] [data-variant="answer"]::before,
+    [data-style="pixel"] [data-skin~="caret"],
+    [data-style="pixel"] [data-skin~="menu"] [aria-pressed="true"]::before,
+    [data-style="pixel"] [data-skin~="board"] [data-variant="error"] > div,
+    [data-style="pixel"] [data-skin~="board"] .value-arrive,
+    [data-style="pixel"] [data-skin~="board"] [data-variant].value-leave::after,
+    [data-style="pixel"] [data-skin~="board"] .animate-hint-reveal-pop,
+    [data-style="pixel"] [data-press-motion],
+    [data-style="pixel"] [data-skin~="key"][data-press-motion][data-pressed],
+    [data-style="pixel"] [data-skin~="button"][data-press-motion][data-pressed],
+    [data-style="pixel"] [data-skin~="tile"][data-press-motion][data-pressed],
+    [data-style="pixel"] [data-press-bounce] {
+        transform: none;
+        animation: none;
+    }
+
+    [data-style="pixel"] [data-skin~="board"] [data-group]:not(.animate-hint-reveal-glow),
+    [data-style="pixel"] .pixel-group-spark,
+    [data-style="pixel"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"]) [data-variant],
+    :root.dark[data-style="pixel"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"]) [data-variant],
+    [data-style="pixel"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]),
+    [data-style="pixel"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) [data-skin~="trophy"],
+    [data-style="pixel"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) [data-skin~="new-record"],
+    [data-style="pixel"] .pixel-celebration:not([data-still]) .pixel-stage-letter,
+    [data-style="pixel"] .pixel-celebration:not([data-still]) .pixel-celebration-stars,
+    [data-style="pixel"] .pixel-celebration:not([data-still]) .pixel-burst,
+    [data-style="pixel"] .pixel-loader-square,
+    [data-style="pixel"] .pixel-loader-cursor {
+        animation: none;
+    }
+
+    [data-style="pixel"] .pixel-loader-square:nth-child(odd) {
+        background-color: var(--pixel-loader-lit);
+    }
+
+    [data-style="pixel"] .pixel-loader-dots {
+        animation: none;
+        clip-path: none;
+    }
+
+    [data-style="pixel"] .pixel-loader-bar-fill {
+        animation: none;
+        clip-path: inset(0 40% 0 0);
+    }
+
+    /* A hint's answer shows the glow's colours, still, for as long as it is marked revealed */
+    [data-style="pixel"] [data-skin~="board"] .animate-hint-reveal-glow:not([data-selected]) {
+        animation: none;
+        background-color: var(--color-primary-light);
+        background-image: none;
+        box-shadow: inset 0 0 0 2px var(--color-primary);
+    }
+
+    /* Its own rule, so a WebView without :has() still reads the list above */
+    [data-style="pixel"] [data-skin~="board"] [data-variant]:has(> .value-arrive)::after {
+        animation: none;
+    }
+}

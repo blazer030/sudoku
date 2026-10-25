@@ -26,7 +26,7 @@ vi.mock("@/presentation/components/puzzle-loader/usePuzzleLoader", async () => {
 });
 
 const mountGameRoute = async (difficulty: Difficulty = "easy") => {
-    localStorage.setItem("sudoku-settings", JSON.stringify({ completionFlash: false }));
+    localStorage.setItem("sudoku-settings", JSON.stringify({ motionEffects: false }));
     const pinia = createPinia();
     const router = createRouter({
         history: createMemoryHistory(),

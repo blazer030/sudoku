@@ -25,23 +25,7 @@ describe("startLauncherIconSync", () => {
     afterEach(() => {
         stop?.();
         stop = undefined;
-        vi.unstubAllGlobals();
     });
-
-    const stubSystemDark = (initial: boolean) => {
-        let matches = initial;
-        const listeners = new Set<(event: MediaQueryListEvent) => void>();
-        vi.stubGlobal("matchMedia", (query: string) => ({
-            get matches() { return query === "(prefers-color-scheme: dark)" && matches; },
-            media: query,
-            addEventListener: (_type: string, listener: (event: MediaQueryListEvent) => void) => { listeners.add(listener); },
-            removeEventListener: (_type: string, listener: (event: MediaQueryListEvent) => void) => { listeners.delete(listener); },
-        }));
-        return (value: boolean) => {
-            matches = value;
-            listeners.forEach((listener) => { listener({ matches: value } as MediaQueryListEvent); });
-        };
-    };
 
     const startMatching = async () => {
         const store = start();
@@ -52,15 +36,15 @@ describe("startLauncherIconSync", () => {
     };
 
     it.each([
-        ["light", false, "green"],
-        ["light", true, "green"],
-        ["dark", false, "minimalGreenDark"],
-        ["dark", true, "minimalGreenDark"],
-        ["system", false, "green"],
-        ["system", true, "minimalGreenDark"],
-    ] as const)("should pick the %s appearance's icon when the system is dark: %s", async (appearance, systemDark, expected) => {
-        stubSystemDark(systemDark);
+        ["minimal", "green", "light", "green"],
+        ["minimal", "green", "dark", "minimalGreenDark"],
+        ["tactile", "rust", "dark", "tactileRustDark"],
+        ["paper", "blueInk", "light", "paperBlueInk"],
+        ["paper", "blueInk", "dark", "paperBlueInk"],
+    ] as const)("should pick the %s style's %s icon for the stored %s appearance: %s", async (style, colorTheme, appearance, expected) => {
         const store = start();
+        store.setStyle(style);
+        store.setColorTheme(colorTheme);
         store.setAppearance(appearance);
 
         store.setMatchLauncherIconToTheme(true);
@@ -70,7 +54,6 @@ describe("startLauncherIconSync", () => {
     });
 
     it("should re-target the icon when only the appearance changes", async () => {
-        stubSystemDark(false);
         const store = await startMatching();
 
         store.setAppearance("dark");
@@ -83,25 +66,37 @@ describe("startLauncherIconSync", () => {
         expect(setIcon).toHaveBeenCalledTimes(2);
     });
 
-    it("should follow the system's light or dark while the appearance is system", async () => {
-        const setSystemDark = stubSystemDark(false);
-        await startMatching();
-
-        setSystemDark(true);
+    it("should not re-send paper's icon when the appearance changes", async () => {
+        const store = start();
+        store.setStyle("paper");
+        store.setMatchLauncherIconToTheme(true);
         await nextTick();
+        setIcon.mockClear();
+
+        store.setAppearance("dark");
+        await nextTick();
+
+        expect(setIcon).not.toHaveBeenCalled();
+    });
+
+    it("should send the dark icon when the style changes from paper to minimal while dark is stored", async () => {
+        const store = start();
+        store.setAppearance("dark");
+        store.setStyle("paper");
+        store.setMatchLauncherIconToTheme(true);
+        await nextTick();
+        setIcon.mockClear();
+
+        store.setStyle("minimal");
+        await nextTick();
+
         expect(setIcon).toHaveBeenLastCalledWith("minimalGreenDark");
-
-        setSystemDark(false);
-        await nextTick();
-        expect(setIcon).toHaveBeenLastCalledWith("green");
     });
 
     it("should leave the icon alone on appearance changes while matching is off", async () => {
-        const setSystemDark = stubSystemDark(false);
         const store = start();
 
         store.setAppearance("dark");
-        setSystemDark(true);
         await nextTick();
 
         expect(setIcon).not.toHaveBeenCalled();
@@ -109,12 +104,11 @@ describe("startLauncherIconSync", () => {
 
     // The mode may have changed while the app was closed
     it("should send the current icon on start when matching is on", () => {
-        stubSystemDark(true);
-        localStorage.setItem("sudoku-settings", JSON.stringify({ matchLauncherIconToTheme: true, style: "paper", colorTheme: "redInk" }));
+        localStorage.setItem("sudoku-settings", JSON.stringify({ matchLauncherIconToTheme: true, style: "paper", colorTheme: "redInk", appearance: "dark" }));
 
         start();
 
-        expect(setIcon).toHaveBeenCalledExactlyOnceWith("paperRedInkDark");
+        expect(setIcon).toHaveBeenCalledExactlyOnceWith("paperRedInk");
     });
 
     it("should send the theme's icon when the theme changes while matching is on", async () => {

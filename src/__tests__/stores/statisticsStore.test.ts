@@ -13,7 +13,7 @@ const sampleGame: GameResult = {
 
 const buildRepo = (overrides: Partial<StatisticsRepository> = {}): StatisticsRepository => ({
     load: vi.fn().mockResolvedValue([]),
-    save: vi.fn().mockResolvedValue(undefined),
+    append: vi.fn().mockResolvedValue(undefined),
     clear: vi.fn().mockResolvedValue(undefined),
     ...overrides,
 });
@@ -63,22 +63,40 @@ describe("useStatisticsStore", () => {
         expect(store.history[0].hintsUsed).toBe(0);
     });
 
-    it("recordGame schedules a save to the repository with the new history", async () => {
-        const save = vi.fn().mockResolvedValue(undefined);
-        const repo = buildRepo({ save });
+    it("recordGame hands the repository only the new game, never the whole history", async () => {
+        const append = vi.fn().mockResolvedValue(undefined);
+        const repo = buildRepo({ append });
         const store = useStatisticsStore();
         store.setRepository(repo);
 
         store.recordGame({ difficulty: "hard", elapsedSeconds: 200, completed: true, hintsUsed: 2 });
         await Promise.resolve();
 
-        expect(save).toHaveBeenCalledTimes(1);
-        expect(save).toHaveBeenCalledWith(store.history);
+        expect(append).toHaveBeenCalledTimes(1);
+        expect(append).toHaveBeenCalledWith(expect.objectContaining({ difficulty: "hard", elapsedSeconds: 200 }));
+    });
+
+    it("recordGame appends exactly the new game, whatever the history holds", () => {
+        const store = useStatisticsStore();
+        for (let index = 0; index < 5; index++) store.history.push({ ...sampleGame });
+        const append = vi.fn().mockResolvedValue(undefined);
+        store.setRepository(buildRepo({ append }));
+
+        store.recordGame({ difficulty: "easy", elapsedSeconds: 10, completed: true });
+
+        expect(append).toHaveBeenCalledTimes(1);
+        expect(append).toHaveBeenCalledWith({
+            difficulty: "easy",
+            elapsedSeconds: 10,
+            completed: true,
+            hintsUsed: 0,
+            date: expect.any(String) as string,
+        });
     });
 
     it("recordGame stays resilient when the repository rejects (the bug that motivated this refactor)", async () => {
-        const save = vi.fn().mockRejectedValue(new DOMException("QuotaExceededError", "QuotaExceededError"));
-        const repo = buildRepo({ save });
+        const append = vi.fn().mockRejectedValue(new DOMException("QuotaExceededError", "QuotaExceededError"));
+        const repo = buildRepo({ append });
         const store = useStatisticsStore();
         store.setRepository(repo);
 

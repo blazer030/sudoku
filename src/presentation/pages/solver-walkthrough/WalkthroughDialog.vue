@@ -9,6 +9,7 @@
                 :aria-labelledby="titleId"
                 aria-modal="true"
                 class="bg-card rounded-3xl p-8 mx-6 w-full max-w-[354px] flex flex-col items-center gap-6 shadow-modal"
+                data-skin="card"
                 role="dialog"
             >
                 <div
@@ -26,6 +27,7 @@
                     <h2
                         :id="titleId"
                         class="text-2xl font-bold text-foreground tracking-tight text-center"
+                        data-skin="dialog-title"
                         data-testid="walkthrough-dialog-title"
                     >
                         {{ t(content.titleKey) }}

@@ -8,6 +8,10 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
+        <meta-data
+            android:name="google_analytics_automatic_screen_reporting_enabled"
+            android:value="false" />
+
         <activity
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode|navigation|density"
             android:name=".MainActivity"
@@ -299,35 +303,9 @@
         </activity-alias>
 
         <activity-alias
-            android:name=".paperBlueInkDark"
-            android:enabled="false"
-            android:icon="@mipmap/ic_launcher_paper_blue_ink_dark"
-            android:label="@string/title_activity_main"
-            android:targetActivity=".MainActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity-alias>
-
-        <activity-alias
             android:name=".paperGreenInk"
             android:enabled="false"
             android:icon="@mipmap/ic_launcher_paper_green_ink"
-            android:label="@string/title_activity_main"
-            android:targetActivity=".MainActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity-alias>
-
-        <activity-alias
-            android:name=".paperGreenInkDark"
-            android:enabled="false"
-            android:icon="@mipmap/ic_launcher_paper_green_ink_dark"
             android:label="@string/title_activity_main"
             android:targetActivity=".MainActivity"
             android:exported="true">
@@ -351,9 +329,87 @@
         </activity-alias>
 
         <activity-alias
+            android:name=".pixelClassic"
+            android:enabled="false"
+            android:icon="@mipmap/ic_launcher_pixel_classic"
+            android:label="@string/title_activity_main"
+            android:targetActivity=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <activity-alias
+            android:name=".pixelClassicDark"
+            android:enabled="false"
+            android:icon="@mipmap/ic_launcher_pixel_classic_dark"
+            android:label="@string/title_activity_main"
+            android:targetActivity=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <activity-alias
+            android:name=".cyberNeonDark"
+            android:enabled="false"
+            android:icon="@mipmap/ic_launcher_cyber_neon_dark"
+            android:label="@string/title_activity_main"
+            android:targetActivity=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <activity-alias
+            android:name=".inkVermilion"
+            android:enabled="false"
+            android:icon="@mipmap/ic_launcher_ink_vermilion"
+            android:label="@string/title_activity_main"
+            android:targetActivity=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <activity-alias
+            android:name=".paperBlueInkDark"
+            android:enabled="false"
+            android:icon="@mipmap/ic_launcher_paper_blue_ink"
+            android:label="@string/title_activity_main"
+            android:targetActivity=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <activity-alias
+            android:name=".paperGreenInkDark"
+            android:enabled="false"
+            android:icon="@mipmap/ic_launcher_paper_green_ink"
+            android:label="@string/title_activity_main"
+            android:targetActivity=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <activity-alias
             android:name=".paperRedInkDark"
             android:enabled="false"
-            android:icon="@mipmap/ic_launcher_paper_red_ink_dark"
+            android:icon="@mipmap/ic_launcher_paper_red_ink"
             android:label="@string/title_activity_main"
             android:targetActivity=".MainActivity"
             android:exported="true">

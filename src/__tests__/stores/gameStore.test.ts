@@ -1,10 +1,10 @@
+import { createAnalyticsSpy } from "@/__tests__/fixtures/analyticsSpy";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createPinia, setActivePinia } from "pinia";
 import { useGameStore } from "@/stores/gameStore";
 import type { GameState } from "@/application/game/GameState";
 import type { GameRepository } from "@/application/game/GameRepository";
 import { knownPuzzle, knownAnswer } from "@/__tests__/fixtures/knownPuzzle";
-import type { AnalyticsService } from "@/application/analytics/AnalyticsService";
 
 const sampleState: GameState = {
     difficulty: "easy",
@@ -89,14 +89,13 @@ describe("gameStore", () => {
     });
 
     it("emits game_start analytics event on startNewGame", async () => {
-        const logEvent = vi.fn().mockResolvedValue(undefined);
-        const analytics: AnalyticsService = { logEvent };
+        const analytics = createAnalyticsSpy();
         const store = useGameStore();
         store.setAnalytics(analytics);
 
         await store.startNewGame("medium");
 
-        expect(logEvent).toHaveBeenCalledWith({
+        expect(analytics.logEvent).toHaveBeenCalledWith({
             name: "game_start",
             difficulty: "medium",
         });

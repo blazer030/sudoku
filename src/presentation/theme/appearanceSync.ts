@@ -3,35 +3,18 @@ import { getPalette, systemBarColor } from "@/theme/palettes";
 import { updateFavicon, updateMetaThemeColor } from "@/application/PwaThemeUpdater";
 import { launcherIconKey } from "@/theme/launcherIcon";
 import { syncPaperFonts } from "@/style/styles/paper/fonts";
-import type { Appearance, ColorMode, ColorThemeId, StyleId } from "@/theme/themeIds";
+import { syncCyberFonts } from "@/style/styles/cyber/fonts";
+import { syncPixelFonts } from "@/style/styles/pixel/fonts";
+import { syncInkFonts } from "@/style/styles/ink/fonts";
+import { effectiveColorMode, type ColorMode, type ColorThemeId, type StyleId } from "@/theme/themeIds";
 import type { SystemBarService } from "@/application/systemBar/SystemBarService";
 import type { AppearanceBridgeService } from "@/application/appearanceBridge/AppearanceBridgeService";
 
 export interface AppearanceSources {
-    appearance: Ref<Appearance>;
+    appearance: Ref<ColorMode>;
     style: Ref<StyleId>;
     colorTheme: Ref<ColorThemeId>;
 }
-
-export const DARK_SCHEME_QUERY = "(prefers-color-scheme: dark)";
-
-// index.html's inline script resolves the mode the same way before first paint
-export const resolveColorMode = (appearance: Appearance, systemPrefersDark: boolean): ColorMode => {
-    if (appearance === "system") return systemPrefersDark ? "dark" : "light";
-    return appearance;
-};
-
-// Older WebViews only offer the deprecated addListener / removeListener pair
-export const listenForChanges = (query: MediaQueryList, listener: () => void): (() => void) => {
-    if (typeof query.addEventListener === "function") {
-        query.addEventListener("change", listener);
-        return () => { query.removeEventListener("change", listener); };
-    }
-    // eslint-disable-next-line @typescript-eslint/no-deprecated -- the only API those WebViews have
-    query.addListener(listener);
-    // eslint-disable-next-line @typescript-eslint/no-deprecated -- pairs with addListener above
-    return () => { query.removeListener(listener); };
-};
 
 /**
  * Owns the <html> theme attributes, the dark class, the theme-color meta, the favicon, the system bars and
@@ -42,16 +25,16 @@ export const startAppearanceSync = (
     systemBar: SystemBarService,
     appearanceBridge: AppearanceBridgeService,
 ): (() => void) => {
-    // Old WebViews and jsdom may lack matchMedia; treat them as a light system
-    const darkScheme = typeof window.matchMedia === "function" ? window.matchMedia(DARK_SCHEME_QUERY) : null;
-
     const apply = () => {
-        const mode = resolveColorMode(sources.appearance.value, darkScheme?.matches ?? false);
+        const mode = effectiveColorMode(sources.style.value, sources.appearance.value);
         const root = document.documentElement;
         root.classList.toggle("dark", mode === "dark");
         root.dataset.style = sources.style.value;
         root.dataset.colorTheme = sources.colorTheme.value;
         syncPaperFonts(sources.style.value === "paper");
+        syncPixelFonts(sources.style.value === "pixel");
+        syncCyberFonts(sources.style.value === "cyber");
+        syncInkFonts(sources.style.value === "ink");
         updateMetaThemeColor(systemBarColor(sources.style.value, sources.colorTheme.value, mode));
         updateFavicon(launcherIconKey(sources.style.value, sources.colorTheme.value, mode));
         void systemBar.apply(mode);
@@ -62,14 +45,14 @@ export const startAppearanceSync = (
     };
 
     const stopWatching = watch([sources.appearance, sources.style, sources.colorTheme], apply, { immediate: true });
-    const stopWatchingAppearance = watch(sources.appearance, (appearance) => {
-        void appearanceBridge.setAppearance(appearance);
-    }, { immediate: true });
-    const stopListening = darkScheme === null ? () => undefined : listenForChanges(darkScheme, apply);
+    const stopWatchingAppearance = watch(
+        () => effectiveColorMode(sources.style.value, sources.appearance.value),
+        (mode) => { void appearanceBridge.setAppearance(mode); },
+        { immediate: true },
+    );
 
     return () => {
         stopWatching();
         stopWatchingAppearance();
-        stopListening();
     };
 };

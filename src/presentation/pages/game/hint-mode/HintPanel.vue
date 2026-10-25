@@ -4,6 +4,7 @@
         :aria-label="t('hintMode.badge')"
         :style="maxHeight === null ? undefined : { maxHeight: `${maxHeight}px` }"
         class="bg-card rounded-2xl shadow-card-lg w-full p-4 pb-3 flex flex-col gap-3 outline-none [&>*]:shrink-0"
+        data-skin="card"
         data-testid="hint-panel"
         role="group"
         tabindex="-1"

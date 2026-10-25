@@ -75,6 +75,38 @@ describe("useHintMode", () => {
         });
     });
 
+    describe("closing", () => {
+        // Closing a step-by-step hint early counts as skipping the walkthrough: the hint was already spent,
+        // so its answer goes in, as if the player had pressed 填入答案
+        it("fills the hint's cell when a step-by-step hint is closed", () => {
+            const sudoku = createMultiStepSudoku();
+            const plan = planSteps(sudoku);
+            const { hintMode, record, onApplied } = setup(sudoku);
+            hintMode.start(plan);
+
+            hintMode.close();
+
+            expect(hintMode.active.value).toBe(false);
+            expect(sudoku.puzzle[plan.target.row][plan.target.column].entry).toBe(plan.digit);
+            expect(record).toHaveBeenCalledWith("hint", plan.target, plan.digit);
+            expect(onApplied).toHaveBeenCalledWith(plan.target);
+        });
+
+        it("only ends a wrong-entry hint when it is closed, leaving the entry for the player", () => {
+            const sudoku = createKnownSudoku();
+            sudoku.fill(1, 1, 1);
+            const { hintMode, record } = setup(sudoku);
+            const before = snapshotBoard(sudoku);
+            hintMode.start(sudoku.planRevealHint());
+
+            hintMode.close();
+
+            expect(hintMode.active.value).toBe(false);
+            expect(snapshotBoard(sudoku)).toEqual(before);
+            expect(record).not.toHaveBeenCalled();
+        });
+    });
+
     describe("steps", () => {
         it("ignores plans that cannot be shown step by step", () => {
             const { hintMode } = setup(createKnownSudoku());

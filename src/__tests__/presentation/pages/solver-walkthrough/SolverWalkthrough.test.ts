@@ -14,6 +14,8 @@ import { SAMPLE_PUZZLES } from "@/presentation/pages/solver-walkthrough/samplePu
 import { expectKeyRowsToShrinkToFit } from "@/__tests__/fixtures/digitKeyRows";
 import { PUZZLE_LOADER_MINIMUM_MS } from "@/presentation/components/puzzle-loader/usePuzzleLoader";
 import { handleBackButton } from "@/presentation/composables/backDismissal";
+import { ANALYTICS_KEY, type AnalyticsEvent } from "@/application/analytics/AnalyticsService";
+import { createAnalyticsSpy } from "@/__tests__/fixtures/analyticsSpy";
 
 const samplePuzzle = (id: string): number[][] => {
     const sample = SAMPLE_PUZZLES.find((candidate) => candidate.id === id);
@@ -37,8 +39,12 @@ const createTestRouter = () => createRouter({
 
 const mountWalkthrough = (props: { initialPuzzle?: number[][] } = {}) => {
     const router = createTestRouter();
-    const wrapper = mount(SolverWalkthrough, { props, global: { plugins: [router] } });
-    return { wrapper, router };
+    const analytics = createAnalyticsSpy();
+    const wrapper = mount(SolverWalkthrough, {
+        props,
+        global: { plugins: [router], provide: { [ANALYTICS_KEY as symbol]: analytics } },
+    });
+    return { wrapper, router, analytics };
 };
 
 // Closes the guide to enter a puzzle by hand
@@ -243,6 +249,22 @@ describe("SolverWalkthrough", () => {
             expect(cellAt(wrapper, 3, 4).text()).toBe("7");
         });
 
+        it("should hold the 81 cells in the board's grid hook", async () => {
+            const { wrapper } = await mountEntering();
+            const grid = wrapper.find("[data-testid='walkthrough-board'] [data-skin~='board-grid']");
+
+            expect(grid.exists()).toBe(true);
+            expect(grid.findAll("[data-testid^='solver-cell-']")).toHaveLength(81);
+        });
+
+        it("should name the selected cell on the board, and none during playback", async () => {
+            const { wrapper } = await mountEntering();
+            expect(wrapper.find("[data-testid='walkthrough-board']").attributes("data-selected-cell")).toBeUndefined();
+
+            await cellAt(wrapper, 3, 6).trigger("click");
+            expect(wrapper.find("[data-testid='walkthrough-board']").attributes("data-selected-cell")).toBe("R4C7");
+        });
+
         it("should navigate back to Home when clicking Back button", async () => {
             const { wrapper, router } = mountWalkthrough();
             await router.push("/solver");
@@ -364,6 +386,7 @@ describe("SolverWalkthrough", () => {
             await cellAt(wrapper, 0, 0).trigger("click");
 
             expect(cellAt(wrapper, 0, 0).classes()).not.toContain("bg-cell-selected");
+            expect(wrapper.find("[data-testid='walkthrough-board']").attributes("data-selected-cell")).toBeUndefined();
         });
 
         it("should not present the cells as buttons during playback", async () => {
@@ -834,6 +857,128 @@ describe("SolverWalkthrough", () => {
             expect(wrapper.find("[data-testid='walkthrough-dialog']").exists()).toBe(false);
             expect(wrapper.find("[data-testid='walkthrough-panel']").exists()).toBe(true);
         });
+
+        describe("analytics", () => {
+            const loggedNames = (analytics: ReturnType<typeof createAnalyticsSpy>) =>
+                analytics.logEvent.mock.calls.map((call) => (call[0] as AnalyticsEvent).name);
+
+            it("should log a solved sample", async () => {
+                const { wrapper, analytics } = mountWalkthrough();
+                await wrapper.find("[data-testid='load-sample-easy']").trigger("click");
+
+                await solve(wrapper);
+
+                expect(analytics.logEvent).toHaveBeenCalledTimes(1);
+                expect(analytics.logEvent).toHaveBeenCalledWith({ name: "walkthrough_solve", result: "solved", source: "sample" });
+            });
+
+            it("should log a puzzle with no solution after the dialog closes", async () => {
+                const { wrapper, analytics } = mountWalkthrough({ initialPuzzle: noSolutionPuzzle() });
+
+                await solve(wrapper);
+                expect(analytics.logEvent).not.toHaveBeenCalled();
+
+                await wrapper.find("[data-testid='walkthrough-dialog-confirm']").trigger("click");
+                await flushPromises();
+
+                expect(analytics.logEvent).toHaveBeenCalledTimes(1);
+                expect(analytics.logEvent).toHaveBeenCalledWith({ name: "walkthrough_solve", result: "no_solution", source: "own" });
+            });
+
+            it("should log multiple solutions as confirmed", async () => {
+                const { wrapper, analytics } = mountWalkthrough({ initialPuzzle: twoSolutionPuzzle() });
+
+                await solve(wrapper);
+                await wrapper.find("[data-testid='walkthrough-dialog-confirm']").trigger("click");
+                await flushPromises();
+
+                expect(analytics.logEvent).toHaveBeenCalledWith({ name: "walkthrough_solve", result: "multiple_solutions", confirmed: 1, source: "own" });
+            });
+
+            it("should log multiple solutions as not confirmed when cancelled", async () => {
+                const { wrapper, analytics } = mountWalkthrough({ initialPuzzle: twoSolutionPuzzle() });
+
+                await solve(wrapper);
+                await wrapper.find("[data-testid='walkthrough-dialog-cancel']").trigger("click");
+                await flushPromises();
+
+                expect(analytics.logEvent).toHaveBeenCalledTimes(1);
+                expect(analytics.logEvent).toHaveBeenCalledWith({ name: "walkthrough_solve", result: "multiple_solutions", confirmed: 0, source: "own" });
+            });
+
+            it("should log multiple solutions as not confirmed when the dialog is dismissed", async () => {
+                const { wrapper, analytics } = mountWalkthrough({ initialPuzzle: twoSolutionPuzzle() });
+
+                await solve(wrapper);
+                handleBackButton(false);
+                await flushPromises();
+
+                expect(analytics.logEvent).toHaveBeenCalledTimes(1);
+                expect(analytics.logEvent).toHaveBeenCalledWith({ name: "walkthrough_solve", result: "multiple_solutions", confirmed: 0, source: "own" });
+            });
+
+            it("should log an unknown count as confirmed", async () => {
+                const { wrapper, analytics } = mountWalkthrough({ initialPuzzle: openNoSolutionPuzzle });
+
+                await solve(wrapper);
+                await wrapper.find("[data-testid='walkthrough-dialog-confirm']").trigger("click");
+                await flushPromises();
+
+                expect(analytics.logEvent).toHaveBeenCalledWith({ name: "walkthrough_solve", result: "unknown_count", confirmed: 1, source: "own" });
+            });
+
+            it("should log nothing when Back cancels the check", async () => {
+                const { wrapper, router, analytics } = mountWalkthrough({ initialPuzzle: singlesPuzzle });
+                await router.push("/solver");
+                vi.useFakeTimers();
+
+                await wrapper.find("[data-testid='solve-button']").trigger("click");
+                await nextTick();
+                await wrapper.find("[data-testid='back-button']").trigger("click");
+                await vi.advanceTimersByTimeAsync(PUZZLE_LOADER_MINIMUM_MS * 2);
+                await flushPromises();
+
+                expect(analytics.logEvent).not.toHaveBeenCalled();
+            });
+
+            it("should log the finish once on reaching the last position", async () => {
+                const { wrapper, analytics } = mountWalkthrough({ initialPuzzle: singlesPuzzle });
+                await solve(wrapper);
+
+                await clickNext(wrapper, singlesPositionCount - 2);
+                expect(loggedNames(analytics)).not.toContain("walkthrough_finish");
+
+                await clickNext(wrapper, 1);
+                expect(analytics.logEvent).toHaveBeenLastCalledWith({ name: "walkthrough_finish" });
+
+                await wrapper.find("[data-testid='walkthrough-previous']").trigger("click");
+                await clickNext(wrapper, 1);
+
+                expect(loggedNames(analytics).filter((name) => name === "walkthrough_finish")).toHaveLength(1);
+            });
+
+            it("should log the finish again after solving again", async () => {
+                const { wrapper, analytics } = mountWalkthrough({ initialPuzzle: singlesPuzzle });
+                await solve(wrapper);
+                await clickNext(wrapper, singlesPositionCount - 1);
+
+                await wrapper.find("[data-testid='back-button']").trigger("click");
+                await solve(wrapper);
+                await clickNext(wrapper, singlesPositionCount - 1);
+
+                expect(loggedNames(analytics).filter((name) => name === "walkthrough_finish")).toHaveLength(2);
+            });
+
+            it("should log no finish when the path stops short of the end", async () => {
+                const { wrapper, analytics } = mountWalkthrough({ initialPuzzle: singlesPuzzle });
+                await solve(wrapper);
+                await clickNext(wrapper, 1);
+
+                await wrapper.find("[data-testid='back-button']").trigger("click");
+
+                expect(loggedNames(analytics)).not.toContain("walkthrough_finish");
+            });
+        });
     });
 
     describe("while checking the puzzle", () => {
@@ -925,7 +1070,9 @@ describe("SolverWalkthrough", () => {
             await router.push("/");
             await router.push("/solver");
             await router.isReady();
-            const app = mount({ template: "<RouterView />" }, { global: { plugins: [router] } });
+            const app = mount({ template: "<RouterView />" }, {
+                global: { plugins: [router], provide: { [ANALYTICS_KEY as symbol]: createAnalyticsSpy() } },
+            });
             await app.find("[data-testid='walkthrough-enter-own']").trigger("click");
 
             await pressSolve(app);

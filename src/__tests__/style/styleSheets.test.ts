@@ -1,6 +1,6 @@
 import { existsSync, readdirSync, readFileSync } from "fs";
 import { STYLE_IDS, type StyleId } from "@/theme/themeIds";
-import { findLayoutDeclarations, findScalesOutOfRange, findUnguardedMotion, findUnscopedSelectors } from "./styleSheetRules";
+import { animationTimingOf, findLayoutDeclarations, findScalesOutOfRange, findUnguardedMotion, findUnscopedSelectors, reducedMotionDeclarationsOf } from "./styleSheetRules";
 
 const sheetOf = (style: StyleId): string => readFileSync(`src/style/styles/${style}/skin.css`, "utf8");
 
@@ -36,6 +36,19 @@ describe("style sheet rules", () => {
         expect(findScalesOutOfRange('[data-style="paper"] { --entry-scale: 0.9 }')).toHaveLength(1);
         expect(findScalesOutOfRange('[data-style="paper"] { --entry-scale: 1.6 }')).toHaveLength(1);
         expect(findScalesOutOfRange('[data-style="paper"] { --entry-scale: 1.3; --note-scale: 1 }')).toHaveLength(0);
+    });
+
+    it("should read an animation's duration and fixed delay by its name", () => {
+        expect(animationTimingOf("paper-a 520ms ease-out calc(100ms + var(--group-delay, 0ms))", "paper-a")).toEqual({ durationMs: 520, fixedDelayMs: 100 });
+        expect(animationTimingOf("paper-a 1s, paper-b 0.3s linear 2s both", "paper-b")).toEqual({ durationMs: 300, fixedDelayMs: 2000 });
+        expect(animationTimingOf("paper-a 1s", "paper-b")).toBeNull();
+    });
+
+    it("should read declarations from inside the reduced-motion block only", () => {
+        const css = `[data-style="paper"] .x { animation: paper-a 1s }
+            @media (prefers-reduced-motion: reduce) { [data-style="paper"] .x { animation: none } }`;
+
+        expect(reducedMotionDeclarationsOf(css, '[data-style="paper"] .x').get("animation")).toBe("none");
     });
 
     it.each(STYLE_IDS)("%s.css has no layout declarations", (style) => {

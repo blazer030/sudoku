@@ -5,6 +5,9 @@
 @import "./styles/minimal/skin.css";
 @import "./styles/tactile/skin.css";
 @import "./styles/paper/skin.css";
+@import "./styles/pixel/skin.css";
+@import "./styles/cyber/skin.css";
+@import "./styles/ink/skin.css";
 
 @variant dark (&:where(.dark, .dark *));
 
@@ -18,9 +21,8 @@
 
 @theme {
   --container-2xl: 1400px;
-  /* The interface face; a style may repoint --font-sans, and the style picker's thumbnails pin it back */
-  --font-default: "Outfit", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
-  --font-sans: var(--font-default);
+  /* The interface face; a style may repoint it */
+  --font-sans: "Outfit", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
   --font-mono: "Roboto Mono", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", monospace;
   /* Paper's stacks. Each ends in a system CJK face and a generic family, never cursive, so a
      character outside the bundled subsets still reads clearly. Times, not Georgia: Georgia's old-style
@@ -29,6 +31,19 @@
   --font-wenkai: "LXGW WenKai TC", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
   /* Paper's mono stack: Chinese inside mono text (「已放棄」) is written in WenKai too */
   --font-mono-paper: "Roboto Mono", "LXGW WenKai TC", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", monospace;
+  /* 8-bit style's stacks: Press Start 2P for digits only, Cubic 11 for all other text, Silkscreen for
+     notes. Nothing points at them until the pixel skin does. */
+  --font-pixel-digits: "Press Start 2P", "Cubic 11", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", monospace;
+  --font-pixel: "Cubic 11", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+  --font-pixel-note: "Silkscreen", "Cubic 11", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", monospace;
+  --font-cyber-digits: "Orbitron", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+  --font-cyber-mono: "Share Tech Mono", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", monospace;
+  /* Ink's stacks, on its bundled faces (fonts.css): Ink Brush (Yuji Boku) only for brushed titles, falling
+     to WenKai for a character its subset lacks; Ink Serif TC (Noto Serif TC) for all other text; Ink Garamond
+     (EB Garamond) for digits. Nothing points at them until the ink skin does. */
+  --font-ink-brush: "Ink Brush", "LXGW WenKai TC", "Ink Serif TC", "Songti TC", "PMingLiU", serif;
+  --font-ink-serif: "Ink Serif TC", "Songti TC", "PMingLiU", serif;
+  --font-ink-digits: "Ink Garamond", "Ink Serif TC", "Songti TC", "PMingLiU", serif;
   --font-print: "Times New Roman", "Noto Serif TC", "Songti TC", "PMingLiU", serif;
   /* Board, key and timer faces; a style may point them at its own stacks */
   --font-clue: var(--font-sans);
@@ -116,6 +131,11 @@
 .modal-leave-to > *:last-child {
   transform: scale(0.95);
 }
+/* A still dialog (motion not allowed) only fades: the card neither scales in nor out, in every style */
+.modal-enter-from > [data-still],
+.modal-leave-to > [data-still] {
+  transform: none;
+}
 
 /* Hint popup transition: overlay fades, card slides up */
 .hint-popup-enter-active,
@@ -170,16 +190,11 @@
     pointer-events: none;
 }
 
-/* Completion flash animation. It starts and ends on the card colour unless a style says what
-   the cell rests on (--completion-flash-rest). */
-@keyframes completion-flash {
-  0% { background-color: var(--completion-flash-rest, var(--color-card)); }
-  50% { background-color: var(--color-highlight); }
-  100% { background-color: var(--completion-flash-rest, var(--color-card)); }
-}
-
-.animate-completion-flash {
-  animation: completion-flash 500ms ease-in-out;
+/* A group effect ripples out from the cell that completed it: a cell starts one ripple step later for
+   each row and column between it and the origin (max(a, -a) is |a|). The board sets the origin, the
+   step and one cell's duration while the effect runs. */
+[data-group-effect] [data-group] {
+  --group-delay: calc((max(var(--cell-row) - var(--origin-row), var(--origin-row) - var(--cell-row)) + max(var(--cell-column) - var(--origin-column), var(--origin-column) - var(--cell-column))) * var(--group-ripple-step));
 }
 
 /* The answer a Reveal Cell hint fills in grows past its size and settles back. */
@@ -193,11 +208,9 @@
   animation: hint-reveal-pop 450ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-
 /* The answer cell keeps the hint's highlight for a beat, then fades back, so the fill
-   reads clearly while the panel slides away. Defined after the completion flash so it
-   wins on the answer cell when the fill also completes a row, column or box.
-   It is only a colour change, so it stays on under reduced motion. */
+   reads clearly while the panel slides away. It is only a colour change, so it stays on
+   under reduced motion. */
 @keyframes hint-reveal-glow {
   0%, 45% {
     background-color: var(--color-primary-light);

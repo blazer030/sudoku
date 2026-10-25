@@ -3,6 +3,7 @@
         :model-value="modelValue"
         :options="options"
         inset
+        skin="menu"
         data-testid="difficulty-switcher"
         test-id-prefix="difficulty"
         @update:model-value="emit('update:modelValue', $event)"

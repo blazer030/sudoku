@@ -1,3 +1,5 @@
+import { createAnalyticsSpy } from "@/__tests__/fixtures/analyticsSpy";
+import { setPageVisibility } from "@/__tests__/fixtures/pageVisibility";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { ref, defineComponent } from "vue";
 import { mount } from "@vue/test-utils";
@@ -60,20 +62,21 @@ interface MountConfig {
     sudoku: Sudoku;
     analytics: AnalyticsService;
     dismissOverlay?: () => boolean;
+    completed?: boolean;
 }
 
 const mountLeaveHarness = async (config: MountConfig): Promise<LeaveApi> => {
     return (await mountLeaveHarnessWithRouter(config)).api;
 };
 
-const mountLeaveHarnessWithRouter = async ({ sudoku, analytics, dismissOverlay }: MountConfig) => {
+const mountLeaveHarnessWithRouter = async ({ sudoku, analytics, dismissOverlay, completed = false }: MountConfig) => {
     const captured: { api: LeaveApi | undefined } = { api: undefined };
     const Harness = defineComponent({
         setup() {
             captured.api = useLeaveGame({
                 sudoku,
                 difficulty: ref("easy"),
-                completed: ref(false),
+                completed: ref(completed),
                 getElapsedSeconds: () => 60,
                 getReplayData: emptyReplay,
                 analytics,
@@ -99,17 +102,17 @@ const mountLeaveHarnessWithRouter = async ({ sudoku, analytics, dismissOverlay }
 
 describe("useLeaveGame — analytics", () => {
     it("emits game_abandon with progress computed without clue cells", async () => {
-        const logEvent = vi.fn().mockResolvedValue(undefined);
+        const analytics = createAnalyticsSpy();
         // 40 clue cells, 41 empty cells with no entries yet.
         const api = await mountLeaveHarness({
             sudoku: buildSudokuWithFilledCount(40),
-            analytics: { logEvent },
+            analytics,
         });
         vi.spyOn(api.leaveDialog, "open").mockResolvedValue("giveUp");
 
         await api.showLeaveDialog();
 
-        expect(logEvent).toHaveBeenCalledWith({
+        expect(analytics.logEvent).toHaveBeenCalledWith({
             name: "game_abandon",
             difficulty: "easy",
             progress_pct: 0,
@@ -119,17 +122,17 @@ describe("useLeaveGame — analytics", () => {
     });
 
     it("emits progress, correct and incorrect percentages of the player's cells", async () => {
-        const logEvent = vi.fn().mockResolvedValue(undefined);
+        const analytics = createAnalyticsSpy();
         // 81 empty cells: 40 entries, 20 of them wrong.
         const api = await mountLeaveHarness({
             sudoku: buildSudokuWithEntries(40, 20),
-            analytics: { logEvent },
+            analytics,
         });
         vi.spyOn(api.leaveDialog, "open").mockResolvedValue("giveUp");
 
         await api.showLeaveDialog();
 
-        expect(logEvent).toHaveBeenCalledWith({
+        expect(analytics.logEvent).toHaveBeenCalledWith({
             name: "game_abandon",
             difficulty: "easy",
             progress_pct: Math.round((40 / 81) * 100),
@@ -139,29 +142,29 @@ describe("useLeaveGame — analytics", () => {
     });
 
     it("does not emit game_abandon when user chooses save", async () => {
-        const logEvent = vi.fn().mockResolvedValue(undefined);
+        const analytics = createAnalyticsSpy();
         const api = await mountLeaveHarness({
             sudoku: buildSudokuWithFilledCount(10),
-            analytics: { logEvent },
+            analytics,
         });
         vi.spyOn(api.leaveDialog, "open").mockResolvedValue("save");
 
         await api.showLeaveDialog();
 
-        expect(logEvent).not.toHaveBeenCalled();
+        expect(analytics.logEvent).not.toHaveBeenCalled();
     });
 
     it("does not emit game_abandon when user cancels", async () => {
-        const logEvent = vi.fn().mockResolvedValue(undefined);
+        const analytics = createAnalyticsSpy();
         const api = await mountLeaveHarness({
             sudoku: buildSudokuWithFilledCount(10),
-            analytics: { logEvent },
+            analytics,
         });
         vi.spyOn(api.leaveDialog, "open").mockResolvedValue("cancel");
 
         await api.showLeaveDialog();
 
-        expect(logEvent).not.toHaveBeenCalled();
+        expect(analytics.logEvent).not.toHaveBeenCalled();
     });
 });
 
@@ -169,7 +172,7 @@ describe("useLeaveGame — save", () => {
     it("saves the session's replay with the game", async () => {
         const api = await mountLeaveHarness({
             sudoku: buildSudokuWithFilledCount(10),
-            analytics: { logEvent: vi.fn().mockResolvedValue(undefined) },
+            analytics: createAnalyticsSpy(),
         });
         vi.spyOn(api.leaveDialog, "open").mockResolvedValue("save");
 
@@ -182,7 +185,7 @@ describe("useLeaveGame — save", () => {
 describe("useLeaveGame — Back key", () => {
     const harness = (dismissOverlay?: () => boolean) => mountLeaveHarnessWithRouter({
         sudoku: buildSudokuWithFilledCount(10),
-        analytics: { logEvent: vi.fn().mockResolvedValue(undefined) },
+        analytics: createAnalyticsSpy(),
         dismissOverlay,
     });
 
@@ -215,5 +218,49 @@ describe("useLeaveGame — Back key", () => {
 
         expect(api.leaveDialog.visible.value).toBe(false);
         expect(router.currentRoute.value.path).toBe("/");
+    });
+});
+
+describe("useLeaveGame — saving when the page is hidden", () => {
+    afterEach(() => {
+        setPageVisibility("visible");
+    });
+
+    it("saves the game as it stands when the page is hidden", async () => {
+        await mountLeaveHarness({ sudoku: buildSudokuWithEntries(3), analytics: createAnalyticsSpy() });
+
+        setPageVisibility("hidden");
+
+        const saved = useGameStore().savedGame;
+        expect(saved?.cells[0][2].entry).toBe(SOLVED_BOARD[0][2]);
+        expect(saved?.elapsedSeconds).toBe(60);
+    });
+
+    it("leaves a finished game unsaved when the page is hidden", async () => {
+        await mountLeaveHarness({ sudoku: buildSudokuWithEntries(3), analytics: createAnalyticsSpy(), completed: true });
+
+        setPageVisibility("hidden");
+
+        expect(useGameStore().savedGame).toBeNull();
+    });
+
+    // Giving up clears the save; the screen is still mounted for a moment, and a hidden page then must not
+    // bring the abandoned game back
+    it("keeps a given-up game unsaved when the page is hidden before the screen goes", async () => {
+        const api = await mountLeaveHarness({ sudoku: buildSudokuWithEntries(3), analytics: createAnalyticsSpy() });
+        vi.spyOn(api.leaveDialog, "open").mockResolvedValue("giveUp");
+        await api.showLeaveDialog();
+
+        setPageVisibility("hidden");
+
+        expect(useGameStore().savedGame).toBeNull();
+    });
+
+    it("saves nothing when the page becomes visible again", async () => {
+        await mountLeaveHarness({ sudoku: buildSudokuWithEntries(3), analytics: createAnalyticsSpy() });
+
+        setPageVisibility("visible");
+
+        expect(useGameStore().savedGame).toBeNull();
     });
 });

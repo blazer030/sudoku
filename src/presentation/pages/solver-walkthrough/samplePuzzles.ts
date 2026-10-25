@@ -50,3 +50,11 @@ export const SAMPLE_PUZZLES: SamplePuzzle[] = [
         ],
     },
 ];
+
+/** Whether the values are one of the samples, cell for cell. */
+export const isSamplePuzzle = (values: readonly (readonly number[])[]): boolean =>
+    SAMPLE_PUZZLES.some((sample) =>
+        sample.puzzle.length === values.length
+        && sample.puzzle.every((rowValues, row) =>
+            rowValues.length === values[row].length
+            && rowValues.every((value, column) => value === values[row][column])));

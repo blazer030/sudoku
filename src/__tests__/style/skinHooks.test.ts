@@ -30,9 +30,10 @@ const findUnmarkedFilledButtons = (path: string, source: string): string[] =>
 const styledSkinTokens = (css: string): string[] =>
     [...css.matchAll(/\[data-skin~?="([^"]+)"\]/g)].map(match => match[1]);
 
-// Tokens of every data-skin attribute: static values and string literals inside bound values
+// Tokens of every data-skin attribute: static values and string literals inside bound values. A static
+// `skin` prop counts too: SegmentedControl adds it to its own data-skin.
 const markupSkinTokens = (source: string): string[] =>
-    [...source.matchAll(/(?<![\w-])(:?)data-skin="([^"]*)"/g)].flatMap(([, bound, value]) => {
+    [...source.matchAll(/(?<![\w-])(:?)(?:data-)?skin="([^"]*)"/g)].flatMap(([, bound, value]) => {
         const text = bound === ":" ? [...value.matchAll(/'([^']*)'|`([^`]*)`/g)].map(literal => literal.slice(1).join("")).join(" ") : value;
         return text.split(/\s+/).filter(token => token !== "");
     });
@@ -69,6 +70,46 @@ describe("skin hooks", () => {
             .map(tag => `${path}: ${tag.replace(/\s+/g, " ").slice(0, 90)}`));
 
         expect(offenders).toEqual([]);
+    });
+
+    // A raised card surface (a card fill, rounded, with a card shadow) is a panel a style may frame; it carries
+    // a skin hook so a style can draw it, instead of leaving it as an unframed slab
+    it("should mark every raised card panel with a skin hook", () => {
+        const offenders = VUE_FILES.flatMap(path => openingTags(readFileSync(path, "utf8"), "div|section")
+            .filter(tag => /\bbg-card\b/.test(tag) && /\brounded-(?:xl|2xl)\b/.test(tag) && /\bshadow-card/.test(tag))
+            .filter(tag => !/\bdata-skin=/.test(tag))
+            .map(tag => `${path}: ${tag.replace(/\s+/g, " ").slice(0, 90)}`));
+
+        expect(offenders).toEqual([]);
+    });
+
+    it("should mark the continue card's arrow, so a style can draw it", () => {
+        const source = readFileSync("src/presentation/components/continue-button/ContinueButton.vue", "utf8");
+
+        expect(openingTags(source, "Play").some(tag => hasSkinToken(tag, "caret"))).toBe(true);
+    });
+
+    it("should mark the hint menu as a card, so a style frames it like the dialogs", () => {
+        const source = readFileSync("src/presentation/pages/game/components/HintMenuPopup.vue", "utf8");
+        const menuTag = openingTags(source, "div").find(tag => tag.includes('data-testid="hint-menu"'));
+
+        expect(menuTag).toBeDefined();
+        expect(hasSkinToken(menuTag ?? "", "card")).toBe(true);
+    });
+
+    it("should mark every dialog heading as a dialog title", () => {
+        const dialogs = [
+            "src/presentation/components/new-game-dialog/NewGameDialog.vue",
+            "src/presentation/pages/game/components/LeaveGameDialog.vue",
+            "src/presentation/pages/settings/components/ClearRecordsDialog.vue",
+            "src/presentation/pages/solver-walkthrough/WalkthroughDialog.vue",
+        ];
+
+        for (const path of dialogs) {
+            const headings = openingTags(readFileSync(path, "utf8"), "h2");
+            expect(headings.length, path).toBeGreaterThan(0);
+            expect(headings.every(tag => hasSkinToken(tag, "dialog-title")), path).toBe(true);
+        }
     });
 
     it("should keep the skin hooks GameScreen measures", () => {

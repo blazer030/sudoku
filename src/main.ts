@@ -14,9 +14,9 @@ import { startLauncherIconSync } from "@/presentation/theme/launcherIconSync";
 import { useGameStore } from "@/stores/gameStore";
 import { useDonateStore } from "@/stores/donateStore";
 import { useStatisticsStore } from "@/stores/statisticsStore";
-import { ANALYTICS_KEY, type AnalyticsService } from "@/application/analytics/AnalyticsService";
-import { FirebaseAnalyticsAdapter } from "@/infrastructure/analytics/FirebaseAnalyticsAdapter";
-import { NoopAnalyticsAdapter } from "@/infrastructure/analytics/NoopAnalyticsAdapter";
+import { ANALYTICS_KEY } from "@/application/analytics/AnalyticsService";
+import { chooseAnalytics } from "@/infrastructure/analytics/chooseAnalytics";
+import { readWebFirebaseConfig } from "@/infrastructure/analytics/webFirebaseConfig";
 import { BILLING_KEY, type BillingService } from "@/application/billing/BillingService";
 import { NoopBillingAdapter } from "@/infrastructure/billing/NoopBillingAdapter";
 import { PlayBillingAdapter } from "@/infrastructure/billing/PlayBillingAdapter";
@@ -36,6 +36,7 @@ import { IndexedDBGameRepository } from "@/infrastructure/game/IndexedDBGameRepo
 import type { BackButtonService } from "@/application/backButton/BackButtonService";
 import { CapacitorBackButtonAdapter } from "@/infrastructure/backButton/CapacitorBackButtonAdapter";
 import { NoopBackButtonAdapter } from "@/infrastructure/backButton/NoopBackButtonAdapter";
+import { startAnalyticsReporting } from "@/presentation/analytics/analyticsReporting";
 import { handleBackButton } from "@/presentation/composables/backDismissal";
 
 if (Capacitor.isNativePlatform() && "serviceWorker" in navigator) {
@@ -46,9 +47,20 @@ if (Capacitor.isNativePlatform() && "serviceWorker" in navigator) {
     });
 }
 
-const analytics: AnalyticsService = Capacitor.isNativePlatform()
-    ? new FirebaseAnalyticsAdapter()
-    : new NoopAnalyticsAdapter();
+const analytics = await chooseAnalytics({
+    isNative: Capacitor.isNativePlatform(),
+    webConfig: readWebFirebaseConfig(import.meta.env),
+    initializeWebFirebase: async (config) => {
+        const [{ initializeApp }, { initializeAnalytics }] = await Promise.all([
+            import("firebase/app"),
+            import("firebase/analytics"),
+        ]);
+        const app = initializeApp(config);
+        // Screen tracking sends every page_view itself; this stops gtag adding one on load.
+        // The plugin's later getAnalytics() returns this same instance.
+        initializeAnalytics(app, { config: { send_page_view: false } });
+    },
+});
 
 const billing: BillingService = Capacitor.isNativePlatform()
     ? new PlayBillingAdapter()
@@ -75,6 +87,15 @@ const gameRepository: GameRepository = new IndexedDBGameRepository();
 
 const app = createApp(App);
 app.use(createPinia());
+// Before the router is installed: that starts the first navigation, whose screen view must already
+// carry the resolved language and the rest of the player's setup
+startLocaleSync(storeToRefs(useSettingsStore()).language);
+startAnalyticsReporting({
+    router,
+    analytics,
+    userProperties: { ...storeToRefs(useSettingsStore()), locale: i18n.global.locale },
+    reportsIconSetting: Capacitor.isNativePlatform(),
+});
 app.use(router);
 app.use(i18n);
 app.provide(ANALYTICS_KEY, analytics);
@@ -96,6 +117,4 @@ await Promise.all([
     statisticsStore.loadFromRepository(),
     gameStore.loadFromRepository(),
 ]);
-startLocaleSync(storeToRefs(useSettingsStore()).language);
-
 app.mount("#root");

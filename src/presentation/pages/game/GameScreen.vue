@@ -11,11 +11,19 @@
         <div class="flex flex-col items-center gap-6">
             <div
                 :class="hintMode.active.value ? 'ring-2 ring-primary/50' : 'ring-0 ring-transparent'"
+                :data-celebration="celebration ?? undefined"
+                :data-group-effect="groupEffect?.id"
+                :data-hint-mode="hintMode.active.value || undefined"
+                :data-selected-cell="selectedCellName"
                 class="bg-card rounded-2xl shadow-card-lg p-2 self-center w-[calc(100%+1.5rem)] max-w-board-fit transition-shadow duration-300"
+                :style="groupEffectPlacement"
                 data-skin="board"
                 data-testid="game-board"
             >
-                <div class="relative flex flex-col border-3 border-foreground/20 rounded-xl">
+                <div
+                    class="relative flex flex-col border-3 border-foreground/20 rounded-xl"
+                    data-skin="board-grid"
+                >
                     <div
                         v-for="(row, rowIndex) in sudoku.puzzle"
                         :key="rowIndex"
@@ -27,7 +35,8 @@
                             :column="columnIndex"
                             :data-testid="`cell-${rowIndex}-${columnIndex}`"
                             :error="isError(rowIndex, columnIndex)"
-                            :flashing="isFlashing(rowIndex, columnIndex)"
+                            :group-effect-id="groupEffect?.id ?? null"
+                            :group-kinds="isInGroupEffect(rowIndex, columnIndex)"
                             :highlight-same-digit="settingsStore.highlightSameDigit"
                             :hint="hintMode.cellViews.value?.[rowIndex][columnIndex] ?? null"
                             :peer="settingsStore.highlightScope && isPeerOfSelected(rowIndex, columnIndex)"
@@ -40,6 +49,7 @@
                             @long-press="longPressCell(rowIndex, columnIndex)"
                         />
                     </div>
+                    <GroupOverlay :effect="groupEffect" />
                     <StepLinkOverlay
                         v-if="hintMode.active.value"
                         :links="hintMode.links.value"
@@ -68,6 +78,7 @@
                     <DigitPad
                         :digit-counts="digitCounts"
                         :erase-active="inputMode === InputMode.Erase"
+                        :erase-disabled="eraseDisabled"
                         :note-mode="inputMode === InputMode.Note"
                         :selected-digit="selectedDigit"
                         :show-remaining-count="settingsStore.showRemainingCount"
@@ -95,7 +106,7 @@
                             :total-steps="hintMode.steps.value.length"
                             :wrong-cell="hintMode.wrongCell.value"
                             @clear="hintMode.clearWrongEntry"
-                            @close="hintMode.cancel"
+                            @close="hintMode.close"
                             @fill="hintMode.fill"
                             @go-to="hintMode.goTo"
                             @next="hintMode.next"
@@ -128,6 +139,9 @@ import HintMenuPopup from "@/presentation/pages/game/components/HintMenuPopup.vu
 import GameToast from "@/presentation/pages/game/components/GameToast.vue";
 import DigitPad from "@/presentation/components/digit-pad/DigitPad.vue";
 import Cell from "@/presentation/components/board-cell/Cell.vue";
+import { cellName } from "@/presentation/components/board-cell/cellName";
+import GroupOverlay from "@/presentation/components/style-moments/GroupOverlay.vue";
+import { GROUP_RIPPLE_STEP_MS } from "@/presentation/pages/game/useGroupEffect";
 import StepLinkOverlay from "@/presentation/components/step-presentation/StepLinkOverlay.vue";
 import HintPanel from "@/presentation/pages/game/hint-mode/HintPanel.vue";
 import { useRoomBelow } from "@/presentation/composables/useRoomBelow";
@@ -151,8 +165,10 @@ const {
     toastContent,
     showLeaveDialog,
     checkAndComplete,
-    triggerFlash,
-    isFlashing,
+    playGroupEffect,
+    celebration,
+    groupEffect,
+    isInGroupEffect,
 } = useGameSession({ onPlayAgain: () => { emit("playAgain"); } });
 
 const settingsStore = useSettingsStore();
@@ -187,6 +203,7 @@ watch(
 );
 
 const {
+    selectedCell,
     selectedDigit,
     highlightedDigit,
     inputMode,
@@ -195,6 +212,7 @@ const {
     selectDigit,
     toggleNoteMode,
     toggleEraseMode,
+    eraseDisabled,
     isSelected,
     isPeerOfSelected,
     digitCounts,
@@ -204,10 +222,22 @@ const {
     stepRecorder,
     clearErrors,
     checkAndComplete,
-    onGroupCompleted: triggerFlash,
+    onGroupCompleted: playGroupEffect,
     autoRemoveNotes: () => settingsStore.autoRemoveNotes,
     isLocked: () => hintMode.active.value,
 });
+
+// A running group effect's origin and timing, for the cells' CSS to ripple from
+const groupEffectPlacement = computed(() => {
+    if (groupEffect.value === null) return undefined;
+    return {
+        "--origin-row": groupEffect.value.origin.row,
+        "--origin-column": groupEffect.value.origin.column,
+        "--group-ripple-step": `${GROUP_RIPPLE_STEP_MS}ms`,
+    };
+});
+
+const selectedCellName = computed(() => selectedCell.value === null ? undefined : cellName(selectedCell.value.row, selectedCell.value.column));
 </script>
 
 <style scoped>

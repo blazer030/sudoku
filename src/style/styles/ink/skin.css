@@ -1,0 +1,1085 @@
+/* Ink and washi: ink on warm washi paper with a vermilion seal, light only. Pages are washi with faint
+   fibres; cards, tiles and keys are translucent paper with a 1px edge line; chosen pieces are a vermilion
+   seal or a vermilion outline, never a filled block of colour; titles are brushed. The board is drawn in
+   brush lines with a vermilion 圓相. Every rule is scoped by [data-style="ink"]; keyframes start with ink-.
+   No pressable piece sets a background-image of its own, so the press wash below is never painted over. */
+
+/* Corners: small and a little uneven, as the canvas's 5px; pills and discs stay round */
+[data-style="ink"] {
+    --radius-lg: 4px;
+    --radius-xl: 5px;
+    --radius-2xl: 5px;
+    --radius-3xl: 6px;
+    --radius-button: 5px;
+    --radius-icon: 4px;
+    --radius-popup: 6px;
+    /* The firmer edge line (the canvas's line2): outlines of secondary buttons, unchecked marks, dotted rows */
+    --ink-line-strong: color-mix(in srgb, var(--color-foreground) 40%, transparent);
+    /* The washi's grain and fibres, in the pale ink */
+    --ink-grain: var(--color-foreground-secondary);
+}
+
+/* Press feedback: a faint ink wash. It is a colour change, so it stays on under reduced motion. */
+[data-style="ink"] [data-pressed] {
+    --press-overlay: color-mix(in srgb, var(--color-foreground) 8%, transparent);
+    background-image: linear-gradient(var(--press-overlay), var(--press-overlay));
+}
+
+[data-style="ink"] [data-press-motion] {
+    transition-property: transform, background-color, color, box-shadow, opacity;
+    transition-duration: 160ms;
+    transition-timing-function: ease-out;
+}
+
+[data-style="ink"] [data-press-motion][data-pressed] {
+    transform: scale(0.97);
+    transition-duration: 60ms;
+}
+
+@keyframes ink-press-bounce {
+    0% { transform: scale(0.97); }
+    100% { transform: scale(1); }
+}
+
+[data-style="ink"] [data-press-bounce] {
+    animation: ink-press-bounce 180ms ease-out;
+}
+
+[data-style="ink"] .segmented-indicator-motion {
+    transition: transform 180ms ease-out;
+}
+
+/* Type: EB Garamond for every digit (clues, the player's digits, keys, the timer, notes), repointed only
+   once the faces have loaded (fonts.ts beside this sheet marks it), so nothing paints in a half-loaded
+   stack. Garamond's figures are lining by default; the board asks for them anyway. */
+[data-style="ink"][data-ink-fonts="ready"] {
+    --font-sans: var(--font-ink-serif);
+    --font-mono: var(--font-ink-digits);
+    --font-clue: var(--font-ink-digits);
+    --font-entry: var(--font-ink-digits);
+    --font-key: var(--font-ink-digits);
+    --font-timer: var(--font-ink-digits);
+    --font-note: var(--font-ink-digits);
+}
+
+/* The board: no frame and no card. The board and its plain cells lie bare on the washi, and every wash
+   (peers, the same digit, a hint's pattern) is mixed over the page in the palette. Digits are a size up,
+   like the canvas's 25px. The board is its own stacking context: under the washi fibres fixed to the
+   screen, WebKit otherwise draws a digit's blur (its bleed, its wash) as a sharp digit. */
+[data-style="ink"] [data-skin~="board"] {
+    --clue-scale: 1.14;
+    --entry-scale: 1.14;
+    --note-scale: 1.15;
+    position: relative;
+    isolation: isolate;
+    background-color: transparent;
+    box-shadow: none;
+}
+
+[data-style="ink"] [data-skin~="board-grid"] {
+    position: relative;
+    border-radius: 0;
+}
+
+/* Brush lines: one static drawing (brush-grid.svg: twelve pale cell lines, four box lines, the frame, its
+   edges roughened once when the image is rasterised) shown as a mask in ink, over the cells
+   (inside the grid's border, as the canvas lays it), so its lines land on the cell edges.
+   Only where masks are supported do the plain cell lines and the grid's border give way to it, so an
+   engine without masks keeps them and draws no block of ink. Above the digits (2), below the 圓相 (4).
+   The file is named through the @/ alias: a path relative to this sheet is lost once it is inlined into
+   index.css and minified, and a production build would look for it beside index.css. */
+@supports ((mask-image: url("")) or (-webkit-mask-image: url(""))) {
+    [data-style="ink"] [data-skin~="board-grid"] {
+        --board-line: transparent;
+        --board-box-line: transparent;
+        border-color: transparent;
+    }
+
+    [data-style="ink"] [data-skin~="board-grid"]::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: 3;
+        pointer-events: none;
+        background-color: var(--color-foreground);
+        -webkit-mask-image: url("@/style/styles/ink/brush-grid.svg");
+        mask-image: url("@/style/styles/ink/brush-grid.svg");
+        -webkit-mask-size: 100% 100%;
+        mask-size: 100% 100%;
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+    }
+}
+
+/* Cells: square, with lining figures; digits and notes sit above the group brush (1) */
+[data-style="ink"] [data-skin~="board"] [data-variant] {
+    position: relative;
+    border-radius: 0;
+    font-variant-numeric: lining-nums;
+}
+
+[data-style="ink"] [data-skin~="board"] [data-variant] > div {
+    position: relative;
+    z-index: 2;
+}
+
+[data-style="ink"] [data-skin~="board"] [data-variant="default"],
+[data-style="ink"] [data-skin~="board"] [data-variant="clue"] {
+    background-color: transparent;
+    box-shadow: none;
+}
+
+/* Clues in ink, Garamond 700 like the keys; the player's digits (and a hint's) in blue-black italic 500 */
+[data-style="ink"] [data-skin~="board"] [data-value-kind="given"] > div {
+    font-weight: 700;
+}
+
+[data-style="ink"] [data-skin~="board"] [data-value-kind="entered"] > div {
+    color: var(--color-accent);
+    font-style: italic;
+    font-weight: 500;
+}
+
+[data-style="ink"] [data-skin~="board"] [data-variant="error"][data-value-kind="entered"] > div,
+[data-style="ink"] [data-skin~="board"] [data-variant="wrong"][data-value-kind="entered"] > div {
+    color: var(--color-error);
+}
+
+[data-style="ink"] [data-skin~="board"] [data-variant="same-digit"][data-value-kind] > div {
+    color: var(--color-primary-ink);
+}
+
+/* The selected cell and a hint's answer have no fill and no shared ring: a vermilion 圓相 instead, open at
+   the top left, thin on the left and heavy at the bottom, turned −28°. It marks the selected cell whatever
+   its variant (a selected error still shows where the player is); hint mode marks its answer instead. */
+[data-style="ink"] [data-skin~="board"] [data-variant="selected"],
+[data-style="ink"] [data-skin~="board"] [data-variant="answer"] {
+    background-color: transparent;
+    box-shadow: none;
+}
+
+[data-style="ink"] [data-skin~="board"]:not([data-hint-mode]) [data-selected]::after,
+[data-style="ink"] [data-skin~="board"] [data-variant="answer"]::after {
+    content: "";
+    position: absolute;
+    inset: 3px;
+    z-index: 4;
+    pointer-events: none;
+    border: 2.6px solid var(--color-primary);
+    border-top-color: transparent;
+    border-left-width: 1.2px;
+    border-bottom-width: 3.2px;
+    border-radius: 50%;
+    transform: rotate(-28deg);
+}
+
+/* Filling a digit: it bleeds into the paper, from a blur a size up to the sharp digit, while a halo of
+   ink spreads from under it and fades. Erasing washes it off: a ghost of the digit that left (the cell's
+   data-leaving-value) blurs, sinks and swells away. The halo and the ghost are the cell's ::before (its
+   ::after is the 圓相, which stays), and their animationend settles arriving / leaving like the digit's own.
+   Only the one digit or its ghost animates a blur; the halo moves by opacity and transform. With the
+   animations stopped, the halo and the ghost stay unseen. */
+@keyframes ink-bleed {
+    0% { opacity: 0; filter: blur(7px); transform: scale(1.45); }
+    55% { opacity: 0.85; filter: blur(1.5px); transform: scale(1.05); }
+    100% { opacity: 1; filter: blur(0); transform: scale(1); }
+}
+
+@keyframes ink-halo {
+    0% { opacity: 0.95; transform: scale(.2); }
+    60% { opacity: 0.6; }
+    100% { opacity: 0; transform: scale(1.4); }
+}
+
+@keyframes ink-wash {
+    0% { opacity: 1; filter: blur(0); transform: none; }
+    100% { opacity: 0; filter: blur(6px); transform: translateY(5px) scale(1.25); }
+}
+
+[data-style="ink"] [data-skin~="board"] .value-arrive {
+    animation: ink-bleed 900ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+/* Its own rule, so a WebView without :has() still reads the leaving one */
+[data-style="ink"] [data-skin~="board"] [data-variant]:has(> .value-arrive)::before {
+    content: "";
+    position: absolute;
+    inset: -8px;
+    z-index: 1;
+    pointer-events: none;
+    border-radius: 50%;
+    background-image: radial-gradient(circle, color-mix(in srgb, var(--color-foreground) 16%, transparent) 0 32%, transparent 68%);
+    opacity: 0;
+    animation: ink-halo 900ms ease-out forwards;
+}
+
+[data-style="ink"] [data-skin~="board"] [data-variant].value-leave::before {
+    content: attr(data-leaving-value);
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    font-family: var(--font-entry);
+    font-size: calc(22px * var(--entry-scale, 1));
+    font-style: italic;
+    font-weight: 500;
+    line-height: 1;
+    color: var(--color-accent);
+    opacity: 0;
+    animation: ink-wash 800ms ease-out forwards;
+}
+
+/* Completing a group (only with motion allowed): a brush stroke sweeps a row or a column and a vermilion
+   圓相 rings a box, 80ms later, each drawn on along its centre line by its mask (InkGroupOverlay), held and
+   faded. The whole group plays at once. The brush lies over the cells' washes, under the digits (2), the
+   brush lines (3) and the selection's 圓相 (4); level with an entered digit's halo (1), it lies over it, as
+   the overlay follows the cells. While it is there the group's digits take a halo of paper, so they stay
+   readable on the ink. Unseen without its animation, so a stopped effect leaves no still cue. A cell that
+   Reveal Cell fills keeps its hint pop instead of the halo. */
+[data-style="ink"] [data-skin~="board"] [data-group] {
+    --group-ripple-step: 0ms;
+}
+
+@keyframes ink-group-halo {
+    0%, 100% { text-shadow: none; }
+    8%, 82% { text-shadow: 0 0 2px var(--color-card), 0 0 3px var(--color-card), 0 0 6px var(--color-card); }
+}
+
+[data-style="ink"] [data-skin~="board"] [data-group]:not(.animate-hint-reveal-glow) > div {
+    animation: ink-group-halo 1000ms linear 80ms;
+}
+
+/* The entered digit is in its own completed group: it bleeds in as usual, under the group's halo */
+[data-style="ink"] [data-skin~="board"] [data-group]:not(.animate-hint-reveal-glow) > div.value-arrive {
+    animation:
+        ink-bleed 900ms cubic-bezier(0.2, 0.7, 0.2, 1) both,
+        ink-group-halo 1000ms linear 80ms;
+}
+
+@keyframes ink-brush-life {
+    0% { opacity: 0; }
+    6%, 80% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+@keyframes ink-brush-reveal {
+    to { stroke-dashoffset: 0; }
+}
+
+[data-style="ink"] .ink-group-brush {
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0;
+}
+
+[data-style="ink"] .ink-group-reveal {
+    stroke-dasharray: 400;
+    stroke-dashoffset: 400;
+}
+
+[data-style="ink"] .ink-group-brush[data-kind="box"] .ink-group-reveal {
+    stroke-dasharray: 330;
+    stroke-dashoffset: 330;
+}
+
+[data-style="ink"] .ink-group-brush[data-kind="row"],
+[data-style="ink"] .ink-group-brush[data-kind="column"] {
+    animation: ink-brush-life 1000ms linear 80ms;
+}
+
+[data-style="ink"] .ink-group-brush[data-kind="row"] .ink-group-reveal,
+[data-style="ink"] .ink-group-brush[data-kind="column"] .ink-group-reveal {
+    animation: ink-brush-reveal 440ms cubic-bezier(0.45, 0, 0.35, 1) 80ms both;
+}
+
+[data-style="ink"] .ink-group-brush[data-kind="box"] {
+    animation: ink-brush-life 1060ms linear 160ms;
+}
+
+[data-style="ink"] .ink-group-brush[data-kind="box"] .ink-group-reveal {
+    animation: ink-brush-reveal 540ms cubic-bezier(0.45, 0, 0.35, 1) 160ms both;
+}
+
+/* The solved board (only with motion allowed): two deep ink washes bloom across it, the second a beat
+   later and off centre, on the board's own ::before and ::after (inside its stacking context, under the
+   digits). They are soft by their gradients alone, with no filter, and move only by opacity and
+   transform. The digits take the ink from the centre outward, dipping and swelling, and keep a halo of
+   paper so they read on it. Both stay under the dialog. An entered digit still bleeding in, or a revealed
+   one popping, takes the ink once it has settled. Without motion one faint wash is simply there. */
+@keyframes ink-board-wash {
+    0% { opacity: 0; transform: scale(0.25); }
+    40% { opacity: 1; transform: scale(1.2); }
+    70% { opacity: 1; transform: scale(1.3); }
+    100% { opacity: 0.55; transform: scale(1.35); }
+}
+
+@keyframes ink-take {
+    0% { opacity: 1; transform: none; text-shadow: none; }
+    35% { opacity: 0.55; transform: scale(1.12); text-shadow: 0 0 2px var(--color-card), 0 0 3px var(--color-card), 0 0 6px var(--color-card); }
+    100% { opacity: 1; transform: none; text-shadow: 0 0 2px var(--color-card), 0 0 3px var(--color-card), 0 0 6px var(--color-card); }
+}
+
+/* The washes swell past the board as they bloom; the board keeps them inside its box, so the page never
+   grows sideways. Everything else on the board (the 圓相, the grid, a digit's swell) lies within it. */
+[data-style="ink"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"]) {
+    overflow: hidden;
+    overflow: clip;
+}
+
+[data-style="ink"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"])::before,
+[data-style="ink"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"])::after,
+[data-style="ink"] [data-skin~="board"][data-celebration="still"]::before {
+    content: "";
+    position: absolute;
+    z-index: 1;
+    pointer-events: none;
+    border-radius: 50%;
+    background-image: radial-gradient(circle, color-mix(in srgb, var(--color-foreground) 44%, transparent) 0, color-mix(in srgb, var(--color-foreground) 32%, transparent) 42%, transparent 70%);
+}
+
+[data-style="ink"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"])::before,
+[data-style="ink"] [data-skin~="board"][data-celebration="still"]::before {
+    inset: 11%;
+}
+
+[data-style="ink"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"])::after {
+    inset: 34% 0 9% 43%;
+}
+
+[data-style="ink"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"])::before {
+    opacity: 0;
+    animation: ink-board-wash 1400ms ease-out both;
+}
+
+[data-style="ink"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"])::after {
+    opacity: 0;
+    animation: ink-board-wash 1400ms ease-out 200ms both;
+}
+
+[data-style="ink"] [data-skin~="board"][data-celebration="still"]::before {
+    opacity: 0.5;
+}
+
+[data-style="ink"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"]) [data-variant] > div:not(.value-arrive):not(.animate-hint-reveal-pop) {
+    animation: ink-take 640ms ease-out calc((max(var(--cell-row) - 4, 4 - var(--cell-row)) + max(var(--cell-column) - 4, 4 - var(--cell-column))) * 55ms) both;
+}
+
+/* The completion card is a hanging scroll. It waits for the scrim, then unrolls down from its top rod
+   (InkCardDecoration), the bottom rod travelling with the edge on a track the card's height; then the
+   title is brushed in from the left and a 過關 seal is pressed into the corner. The trophy is a seal too,
+   turned the other way. A still card (data-still) only fades in, like every style's, hanging open,
+   titled and sealed. */
+@keyframes ink-unroll {
+    0% { opacity: 0; clip-path: inset(-14px -16px calc(100% - 4px) -16px); }
+    4% { opacity: 1; }
+    100% { opacity: 1; clip-path: inset(-14px -16px -14px -16px); }
+}
+
+@keyframes ink-rod {
+    0% { transform: translateY(-100%); }
+    100% { transform: none; }
+}
+
+@keyframes ink-brush {
+    0% { clip-path: inset(0 100% 0 0); opacity: 0.6; }
+    100% { clip-path: inset(0 0 0 0); opacity: 1; }
+}
+
+@keyframes ink-press {
+    0% { opacity: 0; transform: rotate(-2deg) scale(1.7); }
+    60% { opacity: 1; transform: rotate(-8deg) scale(0.94); }
+    100% { opacity: 1; transform: rotate(-8deg); }
+}
+
+[data-style="ink"] [data-skin~="card"][data-skin~="celebration"] {
+    border-radius: 3px;
+}
+
+[data-style="ink"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) {
+    animation: ink-unroll 800ms cubic-bezier(0.3, 0.7, 0.2, 1) 200ms both;
+}
+
+[data-style="ink"] .ink-rod {
+    background-image: linear-gradient(color-mix(in srgb, var(--color-foreground) 62%, color-mix(in srgb, var(--color-primary) 50%, var(--color-background))), color-mix(in srgb, var(--color-foreground) 85%, var(--color-primary)));
+    box-shadow: 0 2px 3px color-mix(in srgb, var(--color-shadow) 35%, transparent);
+}
+
+[data-style="ink"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) .ink-rod-track {
+    animation: ink-rod 800ms cubic-bezier(0.3, 0.7, 0.2, 1) 200ms both;
+}
+
+[data-style="ink"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) [data-skin~="complete-title"] {
+    animation: ink-brush 620ms ease-out 800ms both;
+}
+
+[data-style="ink"] .ink-seal-stamp {
+    border-radius: 6px 3px 7px 4px;
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+    box-shadow: inset 0 0 0 2.5px var(--color-primary), inset 0 0 0 4px var(--color-on-primary);
+    transform: rotate(-8deg);
+    -webkit-mask-image: repeating-radial-gradient(circle at 40% 60%, var(--color-foreground) 0 2px, color-mix(in srgb, var(--color-foreground) 80%, transparent) 2px 3px);
+    mask-image: repeating-radial-gradient(circle at 40% 60%, var(--color-foreground) 0 2px, color-mix(in srgb, var(--color-foreground) 80%, transparent) 2px 3px);
+}
+
+[data-style="ink"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) .ink-seal-stamp {
+    animation: ink-press 380ms cubic-bezier(0.5, 0, 0.6, 1.3) 1400ms both;
+}
+
+[data-style="ink"] [data-skin~="card"][data-skin~="celebration"] [data-skin~="trophy"] {
+    border-radius: 6px 3px 7px 4px;
+    background-color: var(--color-primary);
+    transform: rotate(-4deg);
+}
+
+[data-style="ink"] [data-skin~="card"][data-skin~="celebration"] [data-skin~="trophy"] > svg {
+    color: var(--color-on-primary);
+}
+
+/* Notes: pale ink Garamond. A highlighted note (the selected digit's, or a hint's emphasised one in its answer
+   and pattern cells) is vermilion, without the shared disc, in a brushed ring; a hint's candidates are
+   blue-black italic and its eliminated ones vermilion. */
+[data-style="ink"] [data-skin~="board"] [data-note-highlight] {
+    background-color: transparent;
+    color: var(--color-primary-ink);
+}
+
+[data-style="ink"] [data-skin~="board"] .font-note.text-primary {
+    color: var(--color-accent);
+    font-style: italic;
+}
+
+[data-style="ink"] [data-skin~="board"] .font-note.strike-diagonal {
+    color: var(--color-primary-ink);
+}
+
+/* Every highlighted note, in the game and in a hint or the Walkthrough alike, sits in a small 圓相 of its own: a vermilion ring brushed once around it (note-ring.svg), set down with a drop of
+   ink at the upper left, thin down the left, heavy across the bottom, trailing off short of the start.
+   It lies a little past the note's box and behind its digit. Where masks are unsupported, a plain thin
+   vermilion ring stands in. */
+[data-style="ink"] [data-skin~="board"] [data-note-highlight] {
+    position: relative;
+    isolation: isolate;
+}
+
+[data-style="ink"] [data-skin~="board"] [data-note-highlight]::before {
+    content: "";
+    position: absolute;
+    inset: -2px;
+    z-index: -1;
+    pointer-events: none;
+    border-radius: 50%;
+    box-shadow: inset 0 0 0 1px var(--color-primary);
+}
+
+@supports ((mask-image: url("")) or (-webkit-mask-image: url(""))) {
+    [data-style="ink"] [data-skin~="board"] [data-note-highlight]::before {
+        box-shadow: none;
+        background-color: var(--color-primary);
+        -webkit-mask-image: url("@/style/styles/ink/note-ring.svg");
+        mask-image: url("@/style/styles/ink/note-ring.svg");
+        -webkit-mask-size: 100% 100%;
+        mask-size: 100% 100%;
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+    }
+}
+
+/* Brushed titles: Yuji Boku (cut to these strings) on the Home title, the completion title and the dialog
+   titles, nowhere else; a character it lacks falls to WenKai. Upright, as a brush writes them. */
+[data-style="ink"][data-ink-fonts="ready"] [data-skin~="hero-title"],
+[data-style="ink"][data-ink-fonts="ready"] [data-skin~="complete-title"],
+[data-style="ink"][data-ink-fonts="ready"] [data-skin~="dialog-title"] {
+    font-family: var(--font-ink-brush);
+    font-weight: 400;
+}
+
+[data-style="ink"][data-ink-fonts="ready"] [data-skin~="hero-seal"] {
+    font-family: var(--font-ink-serif);
+}
+
+[data-style="ink"][data-ink-fonts="ready"] [data-skin~="badge"] {
+    font-family: var(--font-ink-digits);
+}
+
+/* Washi. The app's page scroller is the one sheet behind every screen: the page colour under a soft light
+   from the top left, a warm shade at the bottom right, two crossing grains and a fine dot, all in the pale
+   ink. It is its own stacking context, so the fibres on its ::before (fixed to the screen, a static mask
+   image stretched to it) lie above the washi and below every content layer, never taking taps. The
+   scroller's background stays put while its content scrolls. */
+[data-style="ink"] [data-skin~="page-ruled"] {
+    isolation: isolate;
+    background-color: var(--color-background);
+    background-image:
+        radial-gradient(ellipse 80% 45% at 10% 0%, var(--color-card), transparent 60%),
+        radial-gradient(ellipse 70% 50% at 100% 100%, color-mix(in srgb, var(--ink-grain) 9%, transparent), transparent 60%),
+        repeating-linear-gradient(17deg, color-mix(in srgb, var(--ink-grain) 3.5%, transparent) 0 1px, transparent 1px 7px),
+        repeating-linear-gradient(-63deg, color-mix(in srgb, var(--ink-grain) 3%, transparent) 0 1px, transparent 1px 11px),
+        radial-gradient(color-mix(in srgb, var(--ink-grain) 9%, transparent) 0.7px, transparent 1.1px);
+    background-size: auto, auto, auto, auto, 6px 6px;
+}
+
+[data-style="ink"] [data-skin~="page-ruled"]::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-color: color-mix(in srgb, var(--ink-grain) 15%, transparent);
+    -webkit-mask-image: url("@/style/styles/ink/washi-fibres.svg");
+    mask-image: url("@/style/styles/ink/washi-fibres.svg");
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+}
+
+/* Pages inside the scroller (Home, Settings) and pages that scroll on their own are clear, so the one
+   sheet shows through them, with no second copy of the fibres */
+[data-style="ink"] [data-skin~="page-ruled"] [data-skin~="page-ruled"] {
+    isolation: auto;
+    background: transparent;
+}
+
+[data-style="ink"] [data-skin~="page-ruled"] [data-skin~="page-ruled"]::before {
+    content: none;
+}
+
+[data-style="ink"] [data-skin~="page"] {
+    background-color: transparent;
+}
+
+/* A sticky header is clear at rest, so the washi runs through it. Once its page has scrolled it frosts,
+   fading in over the first 64px of scroll (--header-scroll, 0 to 1): a translucent page colour over a
+   blur, tapering out over the header's empty bottom padding, with no rule underneath. */
+[data-style="ink"] [data-skin~="page-header"] {
+    background-color: transparent;
+}
+
+[data-style="ink"] [data-skin~="page-header"][data-scrolled] {
+    background-color: color-mix(in srgb, var(--color-background) calc(65% * var(--header-scroll, 0)), transparent);
+    -webkit-backdrop-filter: blur(calc(10px * var(--header-scroll, 0)));
+    backdrop-filter: blur(calc(10px * var(--header-scroll, 0)));
+    -webkit-mask-image: linear-gradient(to bottom, var(--color-foreground) calc(100% - 12px), transparent);
+    mask-image: linear-gradient(to bottom, var(--color-foreground) calc(100% - 12px), transparent);
+}
+
+/* Home. Ink sets its title as a vertical emblem (STYLE_HOME_HEROES): the title brushed large, the subtitle
+   in the pale serif down its left, and under the title a vermilion seal reading 「數獨」 with an inner
+   paper ring and uneven corners. The emblem's ::before is the misty mountains (a static mask image with
+   its blur drawn in), fixed along the bottom of the screen in faint ink, below every content layer and
+   never taking taps; the emblem's box is never turned, so the mountains stay fixed to the screen. */
+[data-style="ink"] [data-skin~="hero-seal"] {
+    color: var(--color-on-primary);
+    background-color: var(--color-primary);
+    border-radius: 5px 3px 6px 4px;
+    box-shadow: inset 0 0 0 2px var(--color-primary), inset 0 0 0 3.5px var(--color-on-primary);
+}
+
+[data-style="ink"] [data-skin~="hero-vertical"]::before {
+    content: "";
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 260px;
+    z-index: -1;
+    pointer-events: none;
+    background-color: var(--color-foreground);
+    -webkit-mask-image: url("@/style/styles/ink/home-mountains.svg");
+    mask-image: url("@/style/styles/ink/home-mountains.svg");
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+}
+
+/* Paper on the washi: cards, tiles, keys and the continue card are translucent paper with a 1px edge
+   line, so the washi's grain shows faintly through them */
+[data-style="ink"] [data-skin~="card"],
+[data-style="ink"] [data-skin~="tile"],
+[data-style="ink"] [data-skin~="key"],
+[data-style="ink"] [data-skin~="continue"] {
+    background-color: color-mix(in srgb, var(--color-card) 62%, transparent);
+    box-shadow: inset 0 0 0 1px var(--color-border);
+}
+
+/* Dialogs and the panels that float over a screen (the hint menu, the hint and playback panels, the
+   walkthrough's intro) are solid paper with a soft warm shadow below, so nothing shows through them */
+[data-style="ink"] [data-skin~="card"]:is(.shadow-modal, .shadow-popup, .shadow-card-lg) {
+    background-color: var(--color-card);
+    box-shadow: inset 0 0 0 1px var(--color-border), 0 18px 40px -20px color-mix(in srgb, var(--color-shadow) 35%, transparent);
+}
+
+/* The continue card: ink on paper, its play mark vermilion; its chips are plain pale text joined by a
+   vermilion 「・」 set in the gap between them (the markup's 6px gap, centred) */
+[data-style="ink"] [data-skin~="continue"] {
+    color: var(--color-foreground);
+}
+
+[data-style="ink"] [data-skin~="caret"] {
+    color: var(--color-primary-ink);
+}
+
+[data-style="ink"] [data-skin~="chip"] {
+    position: relative;
+    background-color: transparent;
+    color: var(--color-foreground-secondary);
+}
+
+[data-style="ink"] [data-skin~="chip"] + [data-skin~="chip"]::before {
+    content: "・";
+    content: "・" / "";
+    position: absolute;
+    left: -3px;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--color-primary-ink);
+}
+
+/* Buttons have uneven brush corners. The main ones (and New Game, the main action on Home whether or not
+   a game is saved) are the seal: vermilion with an inner paper ring. Secondary ones are an edge-line
+   outline; the danger button is solid error; the playback button is a round vermilion blot. */
+[data-style="ink"] [data-skin~="button"] {
+    border-radius: 6px 3px 7px 4px;
+}
+
+[data-style="ink"] [data-skin~="button"]:is(.bg-card, .bg-primary-light, .hint-secondary) {
+    border-color: transparent;
+    background-color: transparent;
+    box-shadow: inset 0 0 0 1px var(--ink-line-strong);
+    color: var(--color-foreground);
+}
+
+[data-style="ink"] [data-skin~="button"]:is(.bg-primary, .hint-primary),
+[data-style="ink"] [data-skin~="button"][data-skin~="new-game"] {
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+    box-shadow: inset 0 0 0 2px var(--color-primary), inset 0 0 0 3.5px color-mix(in srgb, var(--color-on-primary) 55%, transparent);
+}
+
+[data-style="ink"] [data-skin~="button"].bg-danger {
+    box-shadow: none;
+}
+
+[data-style="ink"] [data-skin~="button"].rounded-full {
+    border-radius: 48% 52% 50% 50% / 52% 48% 52% 48%;
+    box-shadow: none;
+}
+
+/* Tiles: an option or toggle card that is chosen is outlined in vermilion instead of filled; its icon
+   turns vermilion and its text stays ink */
+[data-style="ink"] [data-skin~="tile"] {
+    border-color: transparent;
+}
+
+/* The settings toggle cards and the 外觀 option cards (the tiles with a border) keep the canvas's 12px;
+   the home tiles stay on the small card corner */
+[data-style="ink"] [data-skin~="tile"].border-2 {
+    border-radius: 12px;
+}
+
+[data-style="ink"] [data-skin~="tile"][aria-pressed="true"] {
+    background-color: color-mix(in srgb, var(--color-card) 62%, transparent);
+    box-shadow: inset 0 0 0 1.5px var(--color-primary-ink);
+    color: var(--color-foreground);
+}
+
+[data-style="ink"] [data-skin~="tile"][aria-pressed="true"] > .text-on-primary {
+    color: var(--color-primary-ink);
+}
+
+[data-style="ink"] [data-skin~="tile"][aria-pressed="true"] span .text-on-primary {
+    color: var(--color-foreground-secondary);
+}
+
+/* A toggle's mark is a small square in the firmer edge line; when on it is a seal turned −8° */
+[data-style="ink"] [data-skin~="check"] {
+    border-radius: 3px;
+    border-color: var(--ink-line-strong);
+}
+
+[data-style="ink"] [data-skin~="tile"][aria-pressed="true"] [data-skin~="check"] {
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+    rotate: -8deg;
+}
+
+/* Segmented controls: a faint ink well. The chosen option has no fill (in the difficulty menu) or a
+   paper one (elsewhere), and a short vermilion brush stroke under its label. */
+[data-style="ink"] [data-skin~="segmented"] {
+    background-color: color-mix(in srgb, var(--color-foreground) 6%, transparent);
+    box-shadow: none;
+}
+
+[data-style="ink"] [data-skin~="segmented-indicator"] {
+    background-color: color-mix(in srgb, var(--color-card) 62%, transparent);
+    box-shadow: none;
+}
+
+[data-style="ink"] [data-skin~="segmented"][data-skin~="menu"] [data-skin~="segmented-indicator"] {
+    background-color: transparent;
+}
+
+[data-style="ink"] [data-skin~="segment"][aria-pressed="true"] {
+    color: var(--color-foreground);
+}
+
+[data-style="ink"] [data-skin~="segment"][aria-pressed="true"]::after {
+    content: "";
+    position: absolute;
+    left: 30%;
+    right: 30%;
+    bottom: 8px;
+    height: 3px;
+    pointer-events: none;
+    background-color: var(--color-primary);
+    border-radius: 2px 1px 3px 1px;
+    transform: rotate(-2deg);
+}
+
+/* The game header: the difficulty pill (and the completion card's difficulty tag) is a vermilion outline
+   with brush corners; the hint-mode pill is solid vermilion. */
+[data-style="ink"] [data-skin~="pill"],
+[data-style="ink"] [data-skin~="tag"] {
+    border-radius: 4px 2px 5px 3px;
+    background-color: transparent;
+    box-shadow: inset 0 0 0 1.5px var(--color-primary-ink);
+    color: var(--color-primary-ink);
+}
+
+[data-style="ink"] [data-skin~="pill"] > span {
+    color: inherit;
+}
+
+[data-style="ink"] [data-skin~="pill"][data-skin~="hint"] {
+    background-color: var(--color-primary);
+    box-shadow: none;
+    color: var(--color-on-primary);
+}
+
+/* A new record is a vermilion outline stamp turned −3°; a hint or walkthrough step's final, strong tag is
+   a solid seal turned −2° */
+[data-style="ink"] [data-skin~="tag"][data-skin~="new-record"] {
+    border-radius: 3px;
+    rotate: -3deg;
+}
+
+[data-style="ink"] [data-skin~="tag"][data-skin~="step"][data-skin~="strong"] {
+    background-color: var(--color-primary);
+    box-shadow: none;
+    color: var(--color-on-primary);
+    rotate: -2deg;
+}
+
+/* Controls are pale ink with no tile; an active one is vermilion on the seal's pale surface */
+[data-style="ink"] [data-skin~="control"] {
+    background-color: transparent;
+    box-shadow: none;
+    color: var(--color-foreground-secondary);
+}
+
+[data-style="ink"] [aria-pressed="true"] > [data-skin~="control"] {
+    background-color: var(--color-primary-light);
+    color: var(--color-primary-ink);
+}
+
+/* The keypad: washi keys with an edge line (above). The chosen key is a solid seal turned −3° (by the
+   rotate property, so the press scale still applies on top); a finished key fades to 30%. The
+   remaining-count badge is a page-coloured disc with a vermilion ring and vermilion digits. */
+[data-style="ink"] [data-skin~="key"] {
+    border-radius: 4px 3px 5px 3px;
+    font-weight: 700;
+}
+
+[data-style="ink"] [data-skin~="key"][aria-pressed="true"] {
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+    box-shadow: none;
+    border-radius: 6px 3px 7px 4px;
+    rotate: -3deg;
+}
+
+[data-style="ink"] [data-skin~="key"]:disabled {
+    opacity: 0.3;
+}
+
+[data-style="ink"] [data-skin~="badge"] {
+    background-color: var(--color-background);
+    color: var(--color-primary-ink);
+    box-shadow: inset 0 0 0 1px var(--color-primary-ink);
+}
+
+/* Settings: group headings and their icons in vermilion; rows inside a card are separated by dotted lines */
+[data-style="ink"] [data-skin~="group-heading"] {
+    color: var(--color-primary-ink);
+}
+
+[data-style="ink"] [data-skin~="card"].divide-y > *,
+[data-style="ink"] [data-skin~="card"] .divide-y > * {
+    border-style: dotted;
+    border-color: var(--ink-line-strong);
+}
+
+/* Statistics: the overview's big numbers in Garamond italic */
+[data-style="ink"] [data-skin~="card"] .font-mono.text-3xl {
+    font-style: italic;
+    font-weight: 600;
+}
+
+/* The loader lies on a beige fog of the page, not the ink scrim the dialogs keep */
+[data-style="ink"] [data-skin~="loader-scrim"] {
+    background-color: color-mix(in srgb, var(--color-background) 66%, transparent);
+}
+
+/* The loader, from MomentsInk: on a slip of washi the brush paints a sudoku box, the frame first and
+   then the inner lines, each stroke drawn on along its mask; then the digits are inked in a solving order,
+   a small 「題」 seal is pressed, and the slip fades for the next round. Every piece starts each round
+   hidden, so the loop has no seam. Loaders follow only the system's reduced motion. */
+[data-style="ink"] .ink-loader-stroke {
+    opacity: 0;
+}
+
+[data-style="ink"] .ink-loader-reveal {
+    stroke-dasharray: 120;
+    stroke-dashoffset: 120;
+}
+
+[data-style="ink"] .ink-loader-digit {
+    opacity: 0;
+}
+
+[data-style="ink"] .ink-loader-seal {
+    opacity: 0;
+    transform: rotate(-6deg) scale(1);
+}
+
+@keyframes ink-st0 {
+    0%, 3% { opacity: 0; }
+    3.3%, 84% { opacity: 0.85; }
+    94%, 100% { opacity: 0; }
+}
+
+@keyframes ink-rv0 {
+    0%, 3% { stroke-dashoffset: 120; }
+    9.5%, 100% { stroke-dashoffset: 0; }
+}
+
+@keyframes ink-st1 {
+    0%, 8.5% { opacity: 0; }
+    8.8%, 84% { opacity: 0.85; }
+    94%, 100% { opacity: 0; }
+}
+
+@keyframes ink-rv1 {
+    0%, 8.5% { stroke-dashoffset: 120; }
+    15%, 100% { stroke-dashoffset: 0; }
+}
+
+@keyframes ink-st2 {
+    0%, 14% { opacity: 0; }
+    14.3%, 84% { opacity: 0.85; }
+    94%, 100% { opacity: 0; }
+}
+
+@keyframes ink-rv2 {
+    0%, 14% { stroke-dashoffset: 120; }
+    20.5%, 100% { stroke-dashoffset: 0; }
+}
+
+@keyframes ink-st3 {
+    0%, 19.5% { opacity: 0; }
+    19.8%, 84% { opacity: 0.85; }
+    94%, 100% { opacity: 0; }
+}
+
+@keyframes ink-rv3 {
+    0%, 19.5% { stroke-dashoffset: 120; }
+    26%, 100% { stroke-dashoffset: 0; }
+}
+
+@keyframes ink-st4 {
+    0%, 25% { opacity: 0; }
+    25.3%, 84% { opacity: 0.85; }
+    94%, 100% { opacity: 0; }
+}
+
+@keyframes ink-rv4 {
+    0%, 25% { stroke-dashoffset: 120; }
+    31.5%, 100% { stroke-dashoffset: 0; }
+}
+
+@keyframes ink-st5 {
+    0%, 30.5% { opacity: 0; }
+    30.8%, 84% { opacity: 0.85; }
+    94%, 100% { opacity: 0; }
+}
+
+@keyframes ink-rv5 {
+    0%, 30.5% { stroke-dashoffset: 120; }
+    37%, 100% { stroke-dashoffset: 0; }
+}
+
+@keyframes ink-st6 {
+    0%, 36% { opacity: 0; }
+    36.3%, 84% { opacity: 0.85; }
+    94%, 100% { opacity: 0; }
+}
+
+@keyframes ink-rv6 {
+    0%, 36% { stroke-dashoffset: 120; }
+    42.5%, 100% { stroke-dashoffset: 0; }
+}
+
+@keyframes ink-st7 {
+    0%, 41.5% { opacity: 0; }
+    41.8%, 84% { opacity: 0.85; }
+    94%, 100% { opacity: 0; }
+}
+
+@keyframes ink-rv7 {
+    0%, 41.5% { stroke-dashoffset: 120; }
+    48%, 100% { stroke-dashoffset: 0; }
+}
+
+@keyframes ink-dg0 {
+    0%, 50% { opacity: 0; transform: scale(1.35); }
+    54%, 84% { opacity: 1; transform: none; }
+    94%, 100% { opacity: 0; transform: none; }
+}
+
+@keyframes ink-dg1 {
+    0%, 56% { opacity: 0; transform: scale(1.35); }
+    60%, 84% { opacity: 1; transform: none; }
+    94%, 100% { opacity: 0; transform: none; }
+}
+
+@keyframes ink-dg2 {
+    0%, 62% { opacity: 0; transform: scale(1.35); }
+    66%, 84% { opacity: 1; transform: none; }
+    94%, 100% { opacity: 0; transform: none; }
+}
+
+@keyframes ink-dg3 {
+    0%, 68% { opacity: 0; transform: scale(1.35); }
+    72%, 84% { opacity: 1; transform: none; }
+    94%, 100% { opacity: 0; transform: none; }
+}
+
+@keyframes ink-seal {
+    0%, 75% { opacity: 0; transform: rotate(-6deg) scale(1.5); }
+    78% { opacity: 1; transform: rotate(-6deg) scale(0.95); }
+    80%, 84% { opacity: 1; transform: rotate(-6deg) scale(1); }
+    94%, 100% { opacity: 0; transform: rotate(-6deg) scale(1); }
+}
+
+[data-style="ink"] .ink-loader-stroke[data-step="0"] { animation: ink-st0 4.2s linear infinite both; }
+[data-style="ink"] .ink-loader-stroke[data-step="1"] { animation: ink-st1 4.2s linear infinite both; }
+[data-style="ink"] .ink-loader-stroke[data-step="2"] { animation: ink-st2 4.2s linear infinite both; }
+[data-style="ink"] .ink-loader-stroke[data-step="3"] { animation: ink-st3 4.2s linear infinite both; }
+[data-style="ink"] .ink-loader-stroke[data-step="4"] { animation: ink-st4 4.2s linear infinite both; }
+[data-style="ink"] .ink-loader-stroke[data-step="5"] { animation: ink-st5 4.2s linear infinite both; }
+[data-style="ink"] .ink-loader-stroke[data-step="6"] { animation: ink-st6 4.2s linear infinite both; }
+[data-style="ink"] .ink-loader-stroke[data-step="7"] { animation: ink-st7 4.2s linear infinite both; }
+[data-style="ink"] .ink-loader-reveal[data-step="0"] { animation: ink-rv0 4.2s linear infinite both; }
+[data-style="ink"] .ink-loader-reveal[data-step="1"] { animation: ink-rv1 4.2s linear infinite both; }
+[data-style="ink"] .ink-loader-reveal[data-step="2"] { animation: ink-rv2 4.2s linear infinite both; }
+[data-style="ink"] .ink-loader-reveal[data-step="3"] { animation: ink-rv3 4.2s linear infinite both; }
+[data-style="ink"] .ink-loader-reveal[data-step="4"] { animation: ink-rv4 4.2s linear infinite both; }
+[data-style="ink"] .ink-loader-reveal[data-step="5"] { animation: ink-rv5 4.2s linear infinite both; }
+[data-style="ink"] .ink-loader-reveal[data-step="6"] { animation: ink-rv6 4.2s linear infinite both; }
+[data-style="ink"] .ink-loader-reveal[data-step="7"] { animation: ink-rv7 4.2s linear infinite both; }
+[data-style="ink"] .ink-loader-digit[data-step="0"] { animation: ink-dg0 4.2s ease-out infinite both; }
+[data-style="ink"] .ink-loader-digit[data-step="1"] { animation: ink-dg1 4.2s ease-out infinite both; }
+[data-style="ink"] .ink-loader-digit[data-step="2"] { animation: ink-dg2 4.2s ease-out infinite both; }
+[data-style="ink"] .ink-loader-digit[data-step="3"] { animation: ink-dg3 4.2s ease-out infinite both; }
+[data-style="ink"] .ink-loader-seal { animation: ink-seal 4.2s ease-out infinite both; }
+
+/* Reduced motion: no scaling or sliding; the press wash stays */
+@media (prefers-reduced-motion: reduce) {
+    [data-style="ink"] .segmented-indicator-motion {
+        transition: none;
+    }
+
+    [data-style="ink"] [data-pressed],
+    [data-style="ink"] [data-press-motion],
+    [data-style="ink"] [data-press-motion][data-pressed],
+    [data-style="ink"] [data-press-bounce] {
+        transform: none;
+        animation: none;
+    }
+
+    [data-style="ink"] [data-skin~="board"] .value-arrive,
+    [data-style="ink"] [data-skin~="board"] [data-variant].value-leave::before {
+        animation: none;
+    }
+
+    /* Its own rule, so a WebView without :has() still reads the list above */
+    [data-style="ink"] [data-skin~="board"] [data-variant]:has(> .value-arrive)::before {
+        animation: none;
+    }
+
+    /* A completed group shows nothing: the brush stays unseen and the digits unhaloed */
+    [data-style="ink"] [data-skin~="board"] [data-group]:not(.animate-hint-reveal-glow) > div,
+    [data-style="ink"] [data-skin~="board"] [data-group]:not(.animate-hint-reveal-glow) > div.value-arrive,
+    [data-style="ink"] .ink-group-brush[data-kind="row"],
+    [data-style="ink"] .ink-group-brush[data-kind="column"],
+    [data-style="ink"] .ink-group-brush[data-kind="box"],
+    [data-style="ink"] .ink-group-brush[data-kind="row"] .ink-group-reveal,
+    [data-style="ink"] .ink-group-brush[data-kind="column"] .ink-group-reveal,
+    [data-style="ink"] .ink-group-brush[data-kind="box"] .ink-group-reveal {
+        animation: none;
+    }
+
+    /* The celebration never starts without motion, so it is only stopped */
+    [data-style="ink"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"])::before,
+    [data-style="ink"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"])::after,
+    [data-style="ink"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"]) [data-variant] > div:not(.value-arrive):not(.animate-hint-reveal-pop),
+    [data-style="ink"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]),
+    [data-style="ink"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) .ink-rod-track,
+    [data-style="ink"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) [data-skin~="complete-title"],
+    [data-style="ink"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) .ink-seal-stamp {
+        animation: none;
+    }
+
+    /* The loader holds its slip written: the box brushed, the digits inked and the seal pressed */
+    [data-style="ink"] .ink-loader-stroke[data-step="0"],
+    [data-style="ink"] .ink-loader-stroke[data-step="1"],
+    [data-style="ink"] .ink-loader-stroke[data-step="2"],
+    [data-style="ink"] .ink-loader-stroke[data-step="3"],
+    [data-style="ink"] .ink-loader-stroke[data-step="4"],
+    [data-style="ink"] .ink-loader-stroke[data-step="5"],
+    [data-style="ink"] .ink-loader-stroke[data-step="6"],
+    [data-style="ink"] .ink-loader-stroke[data-step="7"],
+    [data-style="ink"] .ink-loader-reveal[data-step="0"],
+    [data-style="ink"] .ink-loader-reveal[data-step="1"],
+    [data-style="ink"] .ink-loader-reveal[data-step="2"],
+    [data-style="ink"] .ink-loader-reveal[data-step="3"],
+    [data-style="ink"] .ink-loader-reveal[data-step="4"],
+    [data-style="ink"] .ink-loader-reveal[data-step="5"],
+    [data-style="ink"] .ink-loader-reveal[data-step="6"],
+    [data-style="ink"] .ink-loader-reveal[data-step="7"],
+    [data-style="ink"] .ink-loader-digit[data-step="0"],
+    [data-style="ink"] .ink-loader-digit[data-step="1"],
+    [data-style="ink"] .ink-loader-digit[data-step="2"],
+    [data-style="ink"] .ink-loader-digit[data-step="3"],
+    [data-style="ink"] .ink-loader-seal {
+        animation: none;
+    }
+
+    [data-style="ink"] .ink-loader-stroke {
+        opacity: 0.85;
+    }
+
+    [data-style="ink"] .ink-loader-reveal {
+        stroke-dashoffset: 0;
+    }
+
+    [data-style="ink"] .ink-loader-digit,
+    [data-style="ink"] .ink-loader-seal {
+        opacity: 1;
+    }
+}

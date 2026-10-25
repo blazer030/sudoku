@@ -44,4 +44,24 @@ describe("paper ruled pages", () => {
 
         expect(offenders).toEqual([]);
     });
+
+    it("should leave a sticky header clear at rest, so the lines and margin line run through it", () => {
+        const header = declarationsOf(PAPER_CSS, '[data-style="paper"] [data-skin~="page-header"]');
+
+        expect(header.get("background-color")).toBe("transparent");
+        expect(header.has("background-image")).toBe(false);
+        expect(header.has("backdrop-filter")).toBe(false);
+    });
+
+    it("should frost a scrolled sticky header, with no rule underneath", () => {
+        const scrolled = declarationsOf(PAPER_CSS, '[data-style="paper"] [data-skin~="page-header"][data-scrolled]');
+
+        expect(scrolled.get("background-color")).toMatch(/^color-mix\(in srgb, var\(--color-background\) calc\(\d+% \* var\(--header-scroll, 0\)\), transparent\)$/);
+        expect(scrolled.get("backdrop-filter")).toMatch(/^blur\(calc\(\d+px \* var\(--header-scroll, 0\)\)\)$/);
+        expect(scrolled.get("-webkit-backdrop-filter")).toBe(scrolled.get("backdrop-filter"));
+        expect(scrolled.get("mask-image")).toBe("linear-gradient(to bottom, var(--color-foreground) calc(100% - 12px), transparent)");
+        expect(scrolled.get("-webkit-mask-image")).toBe(scrolled.get("mask-image"));
+        expect(scrolled.has("background-image")).toBe(false);
+        expect(scrolled.has("box-shadow")).toBe(false);
+    });
 });

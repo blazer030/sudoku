@@ -6,7 +6,10 @@
             data-testid="new-game-confirm-dialog"
             @click.self="close('stay')"
         >
-            <div class="bg-card rounded-3xl p-8 mx-6 w-full max-w-[354px] flex flex-col items-center gap-6 shadow-modal">
+            <div
+                class="bg-card rounded-3xl p-8 mx-6 w-full max-w-[354px] flex flex-col items-center gap-6 shadow-modal"
+                data-skin="card"
+            >
                 <div class="w-16 h-16 rounded-2xl bg-danger/10 flex items-center justify-center">
                     <TriangleAlert
                         :size="32"
@@ -15,7 +18,10 @@
                 </div>
 
                 <div class="flex flex-col items-center gap-2">
-                    <h2 class="text-2xl font-bold text-foreground tracking-tight">
+                    <h2
+                        class="text-2xl font-bold text-foreground tracking-tight"
+                        data-skin="dialog-title"
+                    >
                         {{ t("home.giveUp.title") }}
                     </h2>
                     <p

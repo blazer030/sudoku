@@ -4,7 +4,7 @@ import OptionTile from "@/presentation/components/option-tile/OptionTile.vue";
 
 const mountTile = (pressed: boolean) => mount(OptionTile, {
     props: { pressed, label: "Completion Flash", description: "Flash a finished row or box", icon: Sparkles },
-    attrs: { "data-testid": "toggle-completionFlash" },
+    attrs: { "data-testid": "toggle-motionEffects" },
     attachTo: document.body,
 });
 
@@ -52,7 +52,7 @@ describe("OptionTile", () => {
 
         expect(wrapper.text()).toContain("Completion Flash");
         expect(wrapper.text()).toContain("Flash a finished row or box");
-        expect(wrapper.attributes("data-testid")).toBe("toggle-completionFlash");
+        expect(wrapper.attributes("data-testid")).toBe("toggle-motionEffects");
         expect(wrapper.find("button").element).toBe(wrapper.element);
         expect(wrapper.attributes("type")).toBe("button");
     });
