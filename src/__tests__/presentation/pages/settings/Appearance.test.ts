@@ -70,11 +70,11 @@ describe("Appearance.vue style cards", () => {
         vi.mocked(Capacitor.isNativePlatform).mockReturnValue(false);
     });
 
-    it("should list the five styles, each with its app icon and name", () => {
+    it("should list the six styles, each with its app icon and name", () => {
         const wrapper = mountAppearance();
         const cards = wrapper.findAll("button[data-testid^='style-option-']");
 
-        expect(cards.map(card => card.attributes("data-testid"))).toEqual(["style-option-minimal", "style-option-tactile", "style-option-paper", "style-option-pixel", "style-option-cyber"]);
+        expect(cards.map(card => card.attributes("data-testid"))).toEqual(["style-option-minimal", "style-option-tactile", "style-option-paper", "style-option-pixel", "style-option-cyber", "style-option-ink"]);
         for (const style of STYLE_IDS) {
             const card = wrapper.get(`[data-testid='style-option-${style}']`);
             const rendered = card.get(`[data-testid='style-icon-${style}'] svg`).element.outerHTML;
@@ -470,6 +470,17 @@ describe("Appearance.vue one-theme style", () => {
         await nextTick();
 
         expect(wrapper.find("[data-testid='appearance-colours-card']").exists()).toBe(false);
+        expect(wrapper.find("[data-testid='appearance-mode-label']").exists()).toBe(false);
+        expect(wrapper.find("[data-testid='appearance-light']").exists()).toBe(false);
+        expect(wrapper.find("[data-testid='appearance-dark']").exists()).toBe(false);
+        expect(wrapper.find("[data-testid='appearance-theme-label']").exists()).toBe(false);
+    });
+
+    it("should hide the colour-mode control and the theme heading for the light-only, one-theme ink", async () => {
+        const wrapper = mountAppearance();
+        useSettingsStore().setStyle("ink");
+        await nextTick();
+
         expect(wrapper.find("[data-testid='appearance-mode-label']").exists()).toBe(false);
         expect(wrapper.find("[data-testid='appearance-light']").exists()).toBe(false);
         expect(wrapper.find("[data-testid='appearance-dark']").exists()).toBe(false);

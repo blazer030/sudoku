@@ -19,8 +19,8 @@ export interface ChangelogEntry {
 export const UNRELEASED_CHANGES: ChangelogChange[] = [
     {
         text: {
-            en: "New styles: 8-bit and Cyberpunk",
-            "zh-Hant": "全新風格「8-bit 電玩」與「賽博龐克」",
+            en: "New styles: 8-bit, Cyberpunk and Ink & Washi",
+            "zh-Hant": "全新風格「8-bit 電玩」、「賽博龐克」與「水墨和紙」",
         },
     },
     {

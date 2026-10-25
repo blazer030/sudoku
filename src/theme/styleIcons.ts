@@ -366,6 +366,8 @@ const artworkOf = (style: StyleId, palette: Palette, bleed = 0, idSuffix = ""): 
         }
         case "pixel": return pixelArtwork(pixelColors(palette));
         case "cyber": return cyberArtwork(palette, idSuffix);
+        // Plain washi for now
+        case "ink": return [];
     }
 };
 
@@ -410,6 +412,8 @@ const monochromeArtwork = (style: StyleId): string[] => {
             `<rect x="44" y="47" width="20" height="8" fill="${color}"/>`,
             ...CYBER_SQUARES.map(([x, y]) => `<rect x="${x}" y="${y}" width="6" height="6" fill="${color}"/>`),
         ];
+        // A plain square until the artwork comes, so the themed icon is never empty
+        case "ink": return [`<rect x="34" y="34" width="40" height="40" fill="${color}"/>`];
     }
 };
 

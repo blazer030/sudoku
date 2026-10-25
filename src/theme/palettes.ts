@@ -2,6 +2,7 @@
 // is rendered from them by `npm run generate:theme-css`. Relative imports only: scripts/ import this file.
 import { effectiveColorMode, type ColorMode, type ColorThemeId, type RememberedThemes, type StyleId } from "./themeIds";
 import { CYBER_STYLE } from "../style/styles/cyber/palette";
+import { INK_STYLE } from "../style/styles/ink/palette";
 import { MINIMAL_STYLE } from "../style/styles/minimal/palette";
 import { PAPER_STYLE } from "../style/styles/paper/palette";
 import { PIXEL_STYLE } from "../style/styles/pixel/palette";
@@ -16,6 +17,7 @@ export const STYLES: Record<StyleId, StyleDefinition> = {
     paper: PAPER_STYLE,
     pixel: PIXEL_STYLE,
     cyber: CYBER_STYLE,
+    ink: INK_STYLE,
 };
 
 export const DEFAULT_STYLE_ID: StyleId = "minimal";
