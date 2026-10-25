@@ -121,6 +121,48 @@ describe("Home", () => {
         expect(stackedHeroes[0]).toContain('data-skin="logo"');
     });
 
+    it("should set ink's title as a vertical emblem in Chinese, the same in both languages", async () => {
+        const { wrapper } = mountHome({ style: "ink" });
+        const emblemText = async (locale: "en" | "zh-Hant") => {
+            i18n.global.locale.value = locale;
+            await nextTick();
+            return wrapper.get("[data-testid='home-hero-emblem']").text();
+        };
+
+        const english = await emblemText("en");
+        const chinese = await emblemText("zh-Hant");
+
+        expect(wrapper.find("[data-testid='home-logo']").exists()).toBe(false);
+        expect(wrapper.get("[data-testid='home-hero-emblem']").attributes("aria-hidden")).toBe("true");
+        expect(english).toBe(chinese);
+        expect(chinese).toContain(i18n.global.t("home.title"));
+        expect(chinese).toContain(i18n.global.t("home.subtitle"));
+        for (const token of ["hero-title", "hero-subtitle", "hero-seal"]) {
+            expect(wrapper.find(`[data-skin~='${token}']`).exists()).toBe(true);
+        }
+        i18n.global.locale.value = "en";
+    });
+
+    it("should keep ink's hidden heading in the player's language", async () => {
+        const { wrapper } = mountHome({ style: "ink" });
+        const heading = async (locale: "en" | "zh-Hant") => {
+            i18n.global.locale.value = locale;
+            await nextTick();
+            return { title: wrapper.get("h1").text(), text: wrapper.get("[data-testid='home-hero']").text(), expected: [i18n.global.t("home.title"), i18n.global.t("home.subtitle")] };
+        };
+
+        const english = await heading("en");
+        const chinese = await heading("zh-Hant");
+
+        expect(english.title).not.toBe(chinese.title);
+        for (const { title, text, expected } of [english, chinese]) {
+            expect(title).toBe(expected[0]);
+            expect(text).toContain(expected[1]);
+        }
+        expect(wrapper.get("h1").classes()).toContain("sr-only");
+        i18n.global.locale.value = "en";
+    });
+
     it("should keep an English title whole", () => {
         const { wrapper } = mountHome();
 

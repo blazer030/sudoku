@@ -25,7 +25,8 @@ const WASHI_SURFACE = "color-mix(in srgb, var(--color-card) 62%, transparent)";
 const EDGE_LINE = "inset 0 0 0 1px var(--color-border)";
 const ROOT_PAGE = `${SCOPE} [data-skin~="page-ruled"]`;
 const NESTED_PAGE = `${SCOPE} [data-skin~="page-ruled"] [data-skin~="page-ruled"]`;
-const LOGO = `${SCOPE} [data-skin~="logo"]`;
+const HERO = `${SCOPE} [data-skin~="hero-vertical"]`;
+const HERO_SEAL = `${SCOPE} [data-skin~="hero-seal"]`;
 // The pieces v-press washes by a background-image; none of them may set one of its own
 const PRESSABLE_TOKENS = ["card", "tile", "key", "button", "control", "segment", "chip", "continue", "new-game"];
 
@@ -198,29 +199,24 @@ describe("ink skin", () => {
     });
 
     describe("Home", () => {
-        it("should turn the logo into a vermilion seal reading 數獨, turned a little, with an inner paper ring", () => {
-            const seal = declarationsOf(INK_CSS, `${LOGO}::after`);
+        it("should press the hero's seal in vermilion with an inner paper ring, set in the serif", () => {
+            const seal = declarationsOf(INK_CSS, HERO_SEAL);
 
-            expect(seal.get("content")).toContain('"數獨"');
             expect(seal.get("background-color")).toBe("var(--color-primary)");
             expect(seal.get("color")).toBe("var(--color-on-primary)");
-            expect(seal.get("writing-mode")).toBe("vertical-rl");
-            expect(seal.get("rotate")).toMatch(/^-[\d.]+deg$/);
             expect(seal.get("box-shadow")).toContain("var(--color-on-primary)");
-            expect(declarationsOf(INK_CSS, `${FONTS_READY} [data-skin~="logo"]::after`).get("font-family")).toBe("var(--font-ink-serif)");
+            expect(declarationsOf(INK_CSS, `${FONTS_READY} [data-skin~="hero-seal"]`).get("font-family")).toBe("var(--font-ink-serif)");
         });
 
-        it("should hide the logo's own grid and leave its box unturned, so the mountains can be fixed to the screen", () => {
-            const logo = declarationsOf(INK_CSS, LOGO);
+        it("should leave the hero's box unturned, so the mountains can be fixed to the screen", () => {
+            const hero = declarationsOf(INK_CSS, HERO);
 
-            expect(declarationsOf(INK_CSS, `${LOGO} > *`).get("opacity")).toBe("0");
-            expect(logo.get("background-color")).toBe("transparent");
-            expect(logo.get("transform") ?? "none").toBe("none");
-            expect(logo.get("rotate")).toBeUndefined();
+            expect(hero.get("transform") ?? "none").toBe("none");
+            expect(hero.get("rotate")).toBeUndefined();
         });
 
         it("should lay the misty mountains along the bottom of the screen, below every content layer and never taking taps", () => {
-            const mountains = declarationsOf(INK_CSS, `${LOGO}::before`);
+            const mountains = declarationsOf(INK_CSS, `${HERO}::before`);
 
             expect(mountains.get("position")).toBe("fixed");
             expect(mountains.get("bottom")).toBe("0");
@@ -261,7 +257,7 @@ describe("ink skin", () => {
             });
 
             it("should stretch along the bottom of the screen: the drawing keeps no aspect ratio and the mask fills the layer", () => {
-                const mountains = declarationsOf(INK_CSS, `${LOGO}::before`);
+                const mountains = declarationsOf(INK_CSS, `${HERO}::before`);
 
                 expect(svg.documentElement.getAttribute("preserveAspectRatio")).toBe("none");
                 expect(mountains.get("mask-size")).toBe("100% 100%");
@@ -289,7 +285,7 @@ describe("ink skin", () => {
             expect(brushed.sort()).toEqual([
                 `${FONTS_READY} [data-skin~="complete-title"]`,
                 `${FONTS_READY} [data-skin~="dialog-title"]`,
-                `${FONTS_READY} [data-skin~="title"]`,
+                `${FONTS_READY} [data-skin~="hero-title"]`,
             ]);
         });
 
@@ -301,7 +297,7 @@ describe("ink skin", () => {
 
         it("should set every other text in the seal's serif, not the brush, once the faces have loaded", () => {
             const fonts = declarationsOf(INK_CSS, FONTS_READY);
-            const seal = declarationsOf(INK_CSS, `${FONTS_READY} [data-skin~="logo"]::after`);
+            const seal = declarationsOf(INK_CSS, `${FONTS_READY} [data-skin~="hero-seal"]`);
 
             expect(fonts.get("--font-sans")).toBe(seal.get("font-family"));
             expect(fonts.get("--font-sans")).not.toContain("--font-ink-brush");

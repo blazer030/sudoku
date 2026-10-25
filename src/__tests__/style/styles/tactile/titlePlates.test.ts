@@ -67,7 +67,7 @@ describe("tactile title plates", () => {
     it("should still sit on Home's heading at the size and gap the check assumes", () => {
         const home = readFileSync("src/presentation/pages/home/HomeHero.vue", "utf8");
 
-        expect(home).toMatch(/<div\s+class="flex flex-col items-center gap-2"[^>]*>\s*<div/);
+        expect(home).toMatch(/<div\s[^>]*\bclass="flex flex-col items-center gap-2"[^>]*>\s*<div/);
         expect(home).toMatch(/<h1\s+class="[^"]*\btext-4xl\b[^"]*"\s+data-skin="title"/);
     });
 

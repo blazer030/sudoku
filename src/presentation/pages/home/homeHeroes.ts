@@ -14,5 +14,5 @@ export const STYLE_HOME_HEROES: Record<StyleId, HomeHeroLayout> = {
     paper: "stacked",
     pixel: "stacked",
     cyber: "stacked",
-    ink: "stacked",
+    ink: "vertical",
 };

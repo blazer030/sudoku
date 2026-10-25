@@ -1,5 +1,5 @@
 /**
- * The ink style's brushed titles (data-skin title, complete-title and dialog-title): the home title, the
+ * The ink style's brushed titles (data-skin hero-title, complete-title and dialog-title): the home title, the
  * completion title and the titles of the new-game, leave-game, clear-records and walkthrough dialogs.
  * scripts/generate-fonts.ts cuts Yuji Boku to these strings in both languages, so a new brushed title
  * adds its key here; any other character falls to LXGW WenKai TC. Relative imports only: the script

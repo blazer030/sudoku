@@ -490,14 +490,14 @@
 
 /* Brushed titles: Yuji Boku (cut to these strings) on the Home title, the completion title and the dialog
    titles, nowhere else; a character it lacks falls to WenKai. Upright, as a brush writes them. */
-[data-style="ink"][data-ink-fonts="ready"] [data-skin~="title"],
+[data-style="ink"][data-ink-fonts="ready"] [data-skin~="hero-title"],
 [data-style="ink"][data-ink-fonts="ready"] [data-skin~="complete-title"],
 [data-style="ink"][data-ink-fonts="ready"] [data-skin~="dialog-title"] {
     font-family: var(--font-ink-brush);
     font-weight: 400;
 }
 
-[data-style="ink"][data-ink-fonts="ready"] [data-skin~="logo"]::after {
+[data-style="ink"][data-ink-fonts="ready"] [data-skin~="hero-seal"] {
     font-family: var(--font-ink-serif);
 }
 
@@ -567,40 +567,19 @@
     mask-image: linear-gradient(to bottom, var(--color-foreground) calc(100% - 12px), transparent);
 }
 
-/* Home. The logo becomes a vermilion seal reading 「數獨」 (an emblem, the same in both languages), in
-   Noto Serif TC Black set vertically, with an inner paper ring, turned −4°. The seal is the logo's
-   ::after; the logo's own box stays unturned, because a turned box would hold its ::before, the misty
-   mountains, instead of the screen. The mountains (a static mask image with its blur drawn in) lie along
-   the bottom of the screen in faint ink, below every content layer and never taking taps. */
-[data-style="ink"] [data-skin~="logo"] {
-    position: relative;
-    background-color: transparent;
-    box-shadow: none;
-}
-
-[data-style="ink"] [data-skin~="logo"] > * {
-    opacity: 0;
-}
-
-[data-style="ink"] [data-skin~="logo"]::after {
-    content: "數獨";
-    content: "數獨" / "";
-    position: absolute;
-    inset: 0;
-    display: grid;
-    place-items: center;
-    writing-mode: vertical-rl;
-    font-size: 27px;
-    font-weight: 900;
-    line-height: 1.05;
+/* Home. Ink sets its title as a vertical emblem (STYLE_HOME_HEROES): the title brushed large, the subtitle
+   in the pale serif down its left, and under the title a vermilion seal reading 「數獨」 with an inner
+   paper ring and uneven corners. The emblem's ::before is the misty mountains (a static mask image with
+   its blur drawn in), fixed along the bottom of the screen in faint ink, below every content layer and
+   never taking taps; the emblem's box is never turned, so the mountains stay fixed to the screen. */
+[data-style="ink"] [data-skin~="hero-seal"] {
     color: var(--color-on-primary);
     background-color: var(--color-primary);
-    border-radius: 10px 6px 12px 7px;
-    box-shadow: inset 0 0 0 4px var(--color-primary), inset 0 0 0 6.5px var(--color-on-primary);
-    rotate: -4deg;
+    border-radius: 5px 3px 6px 4px;
+    box-shadow: inset 0 0 0 2px var(--color-primary), inset 0 0 0 3.5px var(--color-on-primary);
 }
 
-[data-style="ink"] [data-skin~="logo"]::before {
+[data-style="ink"] [data-skin~="hero-vertical"]::before {
     content: "";
     position: fixed;
     left: 0;

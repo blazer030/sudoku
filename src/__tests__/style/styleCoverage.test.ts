@@ -89,6 +89,9 @@ const REQUIRED_SELECTORS: Record<StyleId, readonly string[]> = {
         '[data-skin~="complete-title"]',
         '[data-skin~="celebration"]:not([data-still])',
         ".ink-seal-stamp",
+        '[data-skin~="hero-title"]',
+        '[data-skin~="hero-seal"]',
+        '[data-skin~="hero-vertical"]',
     ],
 };
 
