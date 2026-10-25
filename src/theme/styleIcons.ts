@@ -4,6 +4,7 @@
 // The artwork is a 108-unit square with no rounding; callers mask it. Digits are paths, not text:
 // the fonts the app uses are not there when the generators rasterise the icon.
 import { contrastRatio, mixColors } from "./contrast";
+import { INK_SEAL_GLYPH_PATH } from "./inkSealGlyph";
 import type { Palette } from "./paletteBuilder";
 import type { StyleId } from "./themeIds";
 
@@ -356,6 +357,67 @@ const cyberArtwork = (palette: Palette, idSuffix: string): string[] => {
     ];
 };
 
+// Ink and washi: one brushed 圓相 (an enso) round a faint nine-cell grid on washi, a pale ink wash at the foot, and a
+// vermilion seal stamped with 獨 at the bottom right. Ported from the style-research canvas (Ink.dc.html). The
+// brush roughening is a filter referenced by id, so an icon given a suffix keeps it apart from other copies.
+const INK_WASH_CURVE = "Q20 72 36 80 T70 76 T108 82";
+const INK_ENSO = "M63 22 C40 18 22 34 22 54 C22 74 38 88 57 87 C75 86 88 72 87 53 C86 41 79 31 70 27";
+const INK_GRID = "M44 38 V70 M64 38 V70 M38 46 H72 M38 62 H72";
+// The seal: a 22-unit square turned 5 degrees anticlockwise about its centre
+const INK_SEAL = { x: 69, y: 68, size: 22, radius: 3 };
+const INK_SEAL_TURN = "rotate(-5 80 79)";
+// 獨 at 15 units, centred on the seal, its baseline at 84 as the canvas sets the character: the em box's top
+// sits 0.88 em above the baseline
+const INK_GLYPH_SCALE = 15 / 1000;
+const INK_GLYPH_ORIGIN = { x: 80 - 7.5, y: 84 - 0.88 * 15 };
+const INK_GLYPH_PLACEMENT = `${INK_SEAL_TURN} translate(${INK_GLYPH_ORIGIN.x} ${INK_GLYPH_ORIGIN.y}) scale(${INK_GLYPH_SCALE})`;
+
+const inkFilterId = (idSuffix: string): string => idSuffix === "" ? "ink-rough" : `ink-rough-${idSuffix}`;
+
+const inkRoughFilter = (id: string): string =>
+    `<defs><filter id="${id}" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="11"/><feDisplacementMap in="SourceGraphic" scale="3"/></filter></defs>`;
+
+// The wash runs `bleed` units past the left, right and bottom edges, so a foreground layer has no seam
+const inkWash = (color: string, bleed: number): string =>
+    `<path d="M${-bleed} 84 H0 ${INK_WASH_CURVE} H${ICON_SIZE + bleed} V${ICON_SIZE + bleed} H${-bleed} Z" fill="${color}" opacity=".07"/>`;
+
+const inkBrush = (color: string, filterId: string): string[] => [
+    `<g filter="url(#${filterId})" fill="none" stroke="${color}" stroke-linecap="round">`,
+    `<path d="${INK_ENSO}" stroke-width="7"/>`,
+    `<path d="${INK_GRID}" stroke-width="1.6" opacity=".55"/>`,
+    "</g>",
+];
+
+const inkArtwork = (palette: Palette, bleed: number, idSuffix: string): string[] => {
+    const filterId = inkFilterId(idSuffix);
+    const { x, y, size, radius } = INK_SEAL;
+    return [
+        inkRoughFilter(filterId),
+        inkWash(palette.foreground, bleed),
+        ...inkBrush(palette.foreground, filterId),
+        `<rect x="${x}" y="${y}" width="${size}" height="${size}" rx="${radius}" transform="${INK_SEAL_TURN}" fill="${palette.primary}"/>`,
+        `<path d="${INK_SEAL_GLYPH_PATH}" transform="${INK_GLYPH_PLACEMENT}" fill="${palette["on-primary"]}"/>`,
+    ];
+};
+
+// The seal's rounded square in the glyph's em units, so one even-odd path holds both and 獨 cuts through
+const inkSealOutlineInGlyphUnits = (): string => {
+    const toGlyph = (length: number): number => Math.round(length / INK_GLYPH_SCALE * 100) / 100;
+    const radius = toGlyph(INK_SEAL.radius);
+    const start = toGlyph(INK_SEAL.x + INK_SEAL.radius - INK_GLYPH_ORIGIN.x);
+    const top = toGlyph(INK_SEAL.y - INK_GLYPH_ORIGIN.y);
+    const straight = toGlyph(INK_SEAL.size - 2 * INK_SEAL.radius);
+    const corner = `a${radius} ${radius} 0 0 1`;
+    return `M${start} ${top}h${straight}${corner} ${radius} ${radius}v${straight}${corner} ${-radius} ${radius}`
+        + `h${-straight}${corner} ${-radius} ${-radius}v${-straight}${corner} ${radius} ${-radius}Z`;
+};
+
+const inkMonochrome = (color: string): string[] => [
+    inkRoughFilter(inkFilterId("")),
+    ...inkBrush(color, inkFilterId("")),
+    `<path d="${inkSealOutlineInGlyphUnits()}${INK_SEAL_GLYPH_PATH}" transform="${INK_GLYPH_PLACEMENT}" fill="${color}" fill-rule="evenodd"/>`,
+];
+
 const artworkOf = (style: StyleId, palette: Palette, bleed = 0, idSuffix = ""): string[] => {
     switch (style) {
         case "minimal": return minimalTiles(palette["on-primary"]);
@@ -366,8 +428,7 @@ const artworkOf = (style: StyleId, palette: Palette, bleed = 0, idSuffix = ""): 
         }
         case "pixel": return pixelArtwork(pixelColors(palette));
         case "cyber": return cyberArtwork(palette, idSuffix);
-        // Plain washi for now
-        case "ink": return [];
+        case "ink": return inkArtwork(palette, bleed, idSuffix);
     }
 };
 
@@ -377,7 +438,7 @@ export const styleIconBackground = (style: StyleId, palette: Palette): string =>
 
 /**
  * A style's icon as a full 108-unit square SVG in the palette's colours, unrounded. An icon that uses
- * ids (cyberpunk's gradient and glow) takes `idSuffix` into them, so copies on one page do not share.
+ * ids (cyberpunk's gradient and glow, ink's brush filter) takes `idSuffix` into them, so copies on one page do not share.
  */
 export const styleIconSvg = (style: StyleId, palette: Palette, idSuffix = ""): string =>
     svgOf(fillSquare(styleIconBackground(style, palette)), ...artworkOf(style, palette, 0, idSuffix));
@@ -412,8 +473,8 @@ const monochromeArtwork = (style: StyleId): string[] => {
             `<rect x="44" y="47" width="20" height="8" fill="${color}"/>`,
             ...CYBER_SQUARES.map(([x, y]) => `<rect x="${x}" y="${y}" width="6" height="6" fill="${color}"/>`),
         ];
-        // A plain square until the artwork comes, so the themed icon is never empty
-        case "ink": return [`<rect x="34" y="34" width="40" height="40" fill="${color}"/>`];
+        // The 圓相, the grid and the seal with 獨 cut out of it
+        case "ink": return inkMonochrome(color);
     }
 };
 

@@ -1,6 +1,7 @@
 import { contrastRatio } from "@/theme/contrast";
 import { getPalette } from "@/theme/palettes";
 import { COLOR_MODES, STYLE_IDS, THEME_IDS_BY_STYLE, type StyleId } from "@/theme/themeIds";
+import { INK_SEAL_GLYPH_PATH } from "@/theme/inkSealGlyph";
 import { styleIconBackground, styleIconForeground, styleIconMonochrome, styleIconSvg } from "@/theme/styleIcons";
 
 const minimalGreen = getPalette("minimal", "green", "light");
@@ -9,6 +10,7 @@ const paperRedInk = getPalette("paper", "redInk", "light");
 const pixelHandheld = getPalette("pixel", "classic", "light");
 const pixelConsole = getPalette("pixel", "classic", "dark");
 const cyberNeon = getPalette("cyber", "neon", "dark");
+const inkVermilion = getPalette("ink", "vermilion", "light");
 const firstPalette = (style: StyleId) => getPalette(style, THEME_IDS_BY_STYLE[style][0], "light");
 
 // Every colour the markup paints with, fills and strokes alike
@@ -137,6 +139,33 @@ describe("styleIcons", () => {
 
         expect(used.length).toBeGreaterThan(0);
         for (const id of used) expect(defined).toContain(id);
+    });
+
+    it("should draw ink's icon in the washi, the ink and the vermilion seal of its palette", () => {
+        const svg = styleIconSvg("ink", inkVermilion);
+
+        for (const color of ["#F2ECDF", "#1E1B16", "#B3261E"]) expect(paintsOf(svg), color).toContain(color);
+        expect(svg).not.toContain("<text");
+    });
+
+    it("should give each ink icon copy its own brush filter id when given a suffix", () => {
+        const filterIdOf = (svg: string) => /<filter id="([^"]+)"/.exec(svg)?.[1];
+        const first = filterIdOf(styleIconSvg("ink", inkVermilion, "a"));
+        const second = filterIdOf(styleIconSvg("ink", inkVermilion, "b"));
+
+        expect(first).toBeDefined();
+        expect(first).not.toBe(second);
+    });
+
+    it("should keep ink's background-sample point clear of drawing", () => {
+        // The icon assets sample the background 5% across, halfway down
+        expect(paintsAt(styleIconSvg("ink", inkVermilion), 5.4, 54)).toEqual([inkVermilion.background]);
+    });
+
+    it("should cut 獨 out of ink's monochrome seal", () => {
+        const monochrome = styleIconMonochrome("ink");
+
+        expect(monochrome).toMatch(new RegExp(`<path d="[^"]*${INK_SEAL_GLYPH_PATH.slice(0, 20)}[^"]*"[^>]*fill-rule="evenodd"`));
     });
 
     it.each(STYLE_IDS)("should draw the %s icon as a plain 108 square with no text", (style) => {
