@@ -367,13 +367,16 @@ const INK_BOARD_CASES: InkBoardCase[] = STYLES.ink.themes.flatMap(theme => STYLE
         ["cell-pattern", palette["cell-pattern"]],
         ["highlight", palette.highlight],
     ];
-    // A clue, a player's digit and a note can lie on any wash a hint or the selection puts under them
+    // A clue, a player's digit, a note and the vermilion (the same digit, the selected digit's note, a hint's
+    // eliminated and emphasised candidates) can lie on any wash a hint or the selection puts under them
     const onEverySurface = (name: string, ink: string) => surfaces.map(([surface, background]) => drawn(`${name} on ${surface}`, ink, background));
     return [
         ...onEverySurface("clue (foreground)", palette.foreground),
-        ...onEverySurface("entry (accent)", palette.accent),
-        ...onEverySurface("note", palette.note),
-        drawn("same digit (primary-ink) on highlight", palette["primary-ink"], palette.highlight),
+        ...onEverySurface("entry and candidate note (accent)", palette.accent),
+        ...onEverySurface("note (foreground-secondary)", palette["foreground-secondary"]),
+        ...onEverySurface("vermilion (primary-ink)", palette["primary-ink"]),
+        drawn("error digit (error) on the page", palette.error, palette.background),
+        drawn("error digit (error) on error-surface", palette.error, palette["error-surface"]),
     ];
 }));
 

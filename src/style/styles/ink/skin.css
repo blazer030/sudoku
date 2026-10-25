@@ -1,6 +1,7 @@
-/* Ink and washi: ink on warm washi paper with a vermilion seal, light only. This is a stub that gives the
-   press states and the segmented indicator their feedback; the washi, brush board and type come with the
-   skin proper. Every rule is scoped by [data-style="ink"]; keyframes start with ink-. */
+/* Ink and washi: ink on warm washi paper with a vermilion seal, light only. So far it gives the press
+   states and the segmented indicator their feedback and draws the board in brush lines with a vermilion
+   圓相; the washi and the screens come with the skin proper. Every rule is scoped by [data-style="ink"];
+   keyframes start with ink-. */
 
 /* Press feedback: a faint ink wash. It is a colour change, so it stays on under reduced motion. */
 [data-style="ink"] [data-pressed] {
@@ -30,6 +31,146 @@
 
 [data-style="ink"] .segmented-indicator-motion {
     transition: transform 180ms ease-out;
+}
+
+/* Type: EB Garamond for every digit (clues, the player's digits, keys, the timer, notes), repointed only
+   once the faces have loaded (fonts.ts beside this sheet marks it), so nothing paints in a half-loaded
+   stack. Garamond's figures are lining by default; the board asks for them anyway. */
+[data-style="ink"][data-ink-fonts="ready"] {
+    --font-clue: var(--font-ink-digits);
+    --font-entry: var(--font-ink-digits);
+    --font-key: var(--font-ink-digits);
+    --font-timer: var(--font-ink-digits);
+    --font-note: var(--font-ink-digits);
+}
+
+/* The board: no frame and no card. The board and its plain cells lie bare on the washi, and every wash
+   (peers, the same digit, a hint's pattern) is mixed over the page in the palette. Digits are a size up,
+   like the canvas's 25px. */
+[data-style="ink"] [data-skin~="board"] {
+    --clue-scale: 1.14;
+    --entry-scale: 1.14;
+    --note-scale: 1.15;
+    background-color: transparent;
+    box-shadow: none;
+}
+
+[data-style="ink"] [data-skin~="board-grid"] {
+    position: relative;
+    border-radius: 0;
+}
+
+/* Brush lines: one static drawing (brush-grid.svg: twelve pale cell lines, four box lines, the frame, its
+   edges roughened once when the image is rasterised) shown as a mask in ink, over the grid's border box.
+   Only where masks are supported do the plain cell lines and the grid's border give way to it, so an
+   engine without masks keeps them and draws no block of ink. Above the digits (2), below the 圓相 (4).
+   The file is named through the @/ alias: a path relative to this sheet is lost once it is inlined into
+   index.css and minified, and a production build would look for it beside index.css. */
+@supports ((mask-image: url("")) or (-webkit-mask-image: url(""))) {
+    [data-style="ink"] [data-skin~="board-grid"] {
+        --board-line: transparent;
+        --board-box-line: transparent;
+        border-color: transparent;
+    }
+
+    [data-style="ink"] [data-skin~="board-grid"]::after {
+        content: "";
+        position: absolute;
+        inset: -3px;
+        z-index: 3;
+        pointer-events: none;
+        background-color: var(--color-foreground);
+        -webkit-mask-image: url("@/style/styles/ink/brush-grid.svg");
+        mask-image: url("@/style/styles/ink/brush-grid.svg");
+        -webkit-mask-size: 100% 100%;
+        mask-size: 100% 100%;
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+    }
+}
+
+/* Cells: square, with lining figures; digits and notes sit above the group brush (1) */
+[data-style="ink"] [data-skin~="board"] [data-variant] {
+    position: relative;
+    border-radius: 0;
+    font-variant-numeric: lining-nums;
+}
+
+[data-style="ink"] [data-skin~="board"] [data-variant] > div {
+    position: relative;
+    z-index: 2;
+}
+
+[data-style="ink"] [data-skin~="board"] [data-variant="default"],
+[data-style="ink"] [data-skin~="board"] [data-variant="clue"],
+[data-style="ink"] [data-skin~="board"] [data-variant="focus"] {
+    background-color: transparent;
+    box-shadow: none;
+}
+
+/* Clues in ink, Garamond 600; the player's digits (and a hint's) in blue-black italic 500 */
+[data-style="ink"] [data-skin~="board"] [data-value-kind="given"] > div {
+    font-weight: 600;
+}
+
+[data-style="ink"] [data-skin~="board"] [data-value-kind="entered"] > div {
+    color: var(--color-accent);
+    font-style: italic;
+    font-weight: 500;
+}
+
+[data-style="ink"] [data-skin~="board"] [data-variant="error"][data-value-kind="entered"] > div,
+[data-style="ink"] [data-skin~="board"] [data-variant="wrong"][data-value-kind="entered"] > div {
+    color: var(--color-error);
+}
+
+[data-style="ink"] [data-skin~="board"] [data-variant="same-digit"][data-value-kind] > div {
+    color: var(--color-primary-ink);
+}
+
+/* The selected cell and a hint's answer have no fill and no shared ring: a vermilion 圓相 instead, open at
+   the top left, thin on the left and heavy at the bottom, turned −28°. It marks the selected cell whatever
+   its variant (a selected error still shows where the player is); hint mode marks its answer instead. */
+[data-style="ink"] [data-skin~="board"] [data-variant="selected"],
+[data-style="ink"] [data-skin~="board"] [data-variant="answer"] {
+    background-color: transparent;
+    box-shadow: none;
+}
+
+[data-style="ink"] [data-skin~="board"]:not([data-hint-mode]) [data-selected]::after,
+[data-style="ink"] [data-skin~="board"] [data-variant="answer"]::after {
+    content: "";
+    position: absolute;
+    inset: 3px;
+    z-index: 4;
+    pointer-events: none;
+    border: 2.6px solid var(--color-primary);
+    border-top-color: transparent;
+    border-left-width: 1.2px;
+    border-bottom-width: 3.2px;
+    border-radius: 50%;
+    transform: rotate(-28deg);
+}
+
+/* Notes: pale ink Garamond. The selected digit's note is vermilion, without the shared disc; a hint's
+   candidates are blue-black italic, its eliminated ones vermilion, and its emphasised ones (only ever in
+   its answer or pattern cells) a thin vermilion ring. */
+[data-style="ink"] [data-skin~="board"] [data-note-highlight] {
+    background-color: transparent;
+    color: var(--color-primary-ink);
+}
+
+[data-style="ink"] [data-skin~="board"] .font-note.text-primary {
+    color: var(--color-accent);
+    font-style: italic;
+}
+
+[data-style="ink"] [data-skin~="board"] .font-note.strike-diagonal {
+    color: var(--color-primary-ink);
+}
+
+[data-style="ink"] [data-skin~="board"] :is([data-variant="answer"], [data-variant="pattern"]) [data-note-highlight] {
+    box-shadow: inset 0 0 0 1px var(--color-primary-ink);
 }
 
 /* Reduced motion: no scaling or sliding; the press wash stays */
