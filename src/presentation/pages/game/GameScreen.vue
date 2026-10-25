@@ -138,7 +138,6 @@ import DigitPad from "@/presentation/components/digit-pad/DigitPad.vue";
 import Cell from "@/presentation/components/board-cell/Cell.vue";
 import { cellName } from "@/presentation/components/board-cell/cellName";
 import GroupOverlay from "@/presentation/components/style-moments/GroupOverlay.vue";
-import { useStyleMoments } from "@/presentation/components/style-moments/styleMoments";
 import { GROUP_RIPPLE_STEP_MS } from "@/presentation/pages/game/useGroupEffect";
 import StepLinkOverlay from "@/presentation/components/step-presentation/StepLinkOverlay.vue";
 import HintPanel from "@/presentation/pages/game/hint-mode/HintPanel.vue";
@@ -226,14 +225,12 @@ const {
 });
 
 // A running group effect's origin and timing, for the cells' CSS to ripple from
-const styleMoments = useStyleMoments();
 const groupEffectPlacement = computed(() => {
     if (groupEffect.value === null) return undefined;
     return {
         "--origin-row": groupEffect.value.origin.row,
         "--origin-column": groupEffect.value.origin.column,
         "--group-ripple-step": `${GROUP_RIPPLE_STEP_MS}ms`,
-        "--group-effect-duration": `${styleMoments.value.groupEffectMs}ms`,
     };
 });
 
