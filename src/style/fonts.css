@@ -91,27 +91,30 @@
     src: url("../assets/fonts/share-tech-mono.woff2") format("woff2");
 }
 
-/* Ink's brushed titles, cut to those strings in both languages; other characters fall to WenKai */
+/* Ink's faces carry their own family names, so a stack naming the system's Noto Serif TC (such as
+   --font-print) never reaches the bundled subset. */
+
+/* Ink's brushed titles in Yuji Boku, cut to those strings in both languages; other characters fall to WenKai */
 @font-face {
-    font-family: "Yuji Boku";
+    font-family: "Ink Brush";
     font-style: normal;
     font-weight: 400;
     font-display: swap;
     src: url("../assets/fonts/yuji-boku.woff2") format("woff2");
 }
 
-/* Ink's text and seals, cut to the characters the app writes */
+/* Ink's text and seals in Noto Serif TC, cut to the characters the app writes */
 @font-face {
-    font-family: "Noto Serif TC";
+    font-family: "Ink Serif TC";
     font-style: normal;
     font-weight: 400 900;
     font-display: swap;
     src: url("../assets/fonts/noto-serif-tc.woff2") format("woff2");
 }
 
-/* Ink's digits: clues, keys and the timer upright, the player's digits in italic */
+/* Ink's digits in EB Garamond: clues, keys and the timer upright, the player's digits in italic */
 @font-face {
-    font-family: "EB Garamond";
+    font-family: "Ink Garamond";
     font-style: normal;
     font-weight: 500 700;
     font-display: swap;
@@ -119,7 +122,7 @@
 }
 
 @font-face {
-    font-family: "EB Garamond";
+    font-family: "Ink Garamond";
     font-style: italic;
     font-weight: 500 600;
     font-display: swap;

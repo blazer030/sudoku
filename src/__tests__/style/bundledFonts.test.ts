@@ -69,10 +69,10 @@ describe("bundled fonts", () => {
         ["Cubic 11", "400"],
         ["Orbitron", "500 900"],
         ["Share Tech Mono", "400"],
-        ["Yuji Boku", "400"],
-        ["Noto Serif TC", "400 900"],
-        ["EB Garamond", "500 700"],
-        ["EB Garamond", "500 600"],
+        ["Ink Brush", "400"],
+        ["Ink Serif TC", "400 900"],
+        ["Ink Garamond", "500 700"],
+        ["Ink Garamond", "500 600"],
     ])("should declare %s %s from a bundled woff2 with swap", (family, weight) => {
         const face = fontFaces().find(candidate => candidate.family === family && candidate.weight === weight);
 

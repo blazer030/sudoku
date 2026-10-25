@@ -34,11 +34,12 @@ const ASCII = rangeText(0x20, 0x7e);
 // Latin-1 letters and signs, and general punctuation such as dashes, curly quotes and ellipses
 const LATIN = ASCII + rangeText(0xa0, 0xff) + rangeText(0x2010, 0x2027) + rangeText(0x2030, 0x205e);
 
-/** The non-ASCII characters of ink's brushed titles in both languages; their ASCII is cut in anyway. */
-const inkBrushCharacters = (): string => {
-    const characters = new Set(Array.from([...inkBrushTitles(en), ...inkBrushTitles(zhHant)].join("")));
-    return Array.from(characters).filter(character => (character.codePointAt(0) ?? 0) > 0x7e).sort().join("");
-};
+/**
+ * The characters of ink's brushed titles in both languages, and nothing else: Yuji Boku's Latin glyphs are
+ * heavy brush outlines (printable ASCII alone is about 78 KB), so it carries no ASCII block.
+ */
+const inkBrushCharacters = (): string =>
+    Array.from(new Set(Array.from([...inkBrushTitles(en), ...inkBrushTitles(zhHant)].join("")))).sort().join("");
 
 /** Every non-ASCII character in the app's own source, which is all the Chinese copy it can show. */
 const sourceCharacters = (): string => {
@@ -90,7 +91,7 @@ const downloadCubic = (path: string): Promise<Buffer> => downloadCached(cubicUrl
 
 const main = async (): Promise<void> => {
     const chineseText = ASCII + sourceCharacters();
-    const inkBrushText = ASCII + inkBrushCharacters();
+    const inkBrushText = inkBrushCharacters();
     const families: Family[] = [
         {
             licence: "ofl/outfit/OFL.txt",

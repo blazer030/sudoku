@@ -291,7 +291,7 @@ describe("startAppearanceSync", () => {
             expect(document.documentElement.dataset.cyberFonts).toBe("ready");
         });
 
-        it("should mark ink's fonts ready once Yuji Boku, Noto Serif TC and EB Garamond have loaded", async () => {
+        it("should mark ink's fonts ready once its brush, serif and digit faces have loaded", async () => {
             const load = stubFontLoading(1);
             const sources = buildSources("vermilion", "light", "ink");
             stop = startAppearanceSync(sources, systemBar, appearanceBridge);
@@ -300,9 +300,9 @@ describe("startAppearanceSync", () => {
             await finishLoadingFonts();
 
             const families = load.mock.calls.map(([font]) => font).join(" ");
-            expect(families).toContain("Yuji Boku");
-            expect(families).toContain("Noto Serif TC");
-            expect(families).toContain("EB Garamond");
+            expect(families).toContain("Ink Brush");
+            expect(families).toContain("Ink Serif TC");
+            expect(families).toContain("Ink Garamond");
             expect(document.documentElement.dataset.inkFonts).toBe("ready");
         });
 

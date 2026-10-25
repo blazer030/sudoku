@@ -16,18 +16,29 @@ const themeFonts = (): Map<string, string> => {
 const families = (stack: string): string[] => stack.split(",").map(family => family.trim().replace(/"/g, ""));
 
 describe("ink font stacks", () => {
-    // Yuji Boku is cut to the brush strings: any other character, such as 「產」 in a new title, falls to a 楷 face
+    // Ink Brush (Yuji Boku) is cut to the brush strings: any other character, such as 「產」 in a new title, falls to a 楷 face
     it("should fall from Yuji Boku to LXGW WenKai TC, which covers every character the app writes", () => {
         const brush = families(themeFonts().get("--font-ink-brush") ?? "");
 
-        expect(brush.slice(0, 2)).toEqual(["Yuji Boku", "LXGW WenKai TC"]);
+        expect(brush.slice(0, 2)).toEqual(["Ink Brush", "LXGW WenKai TC"]);
     });
 
-    it("should set ink's text in Noto Serif TC and its digits in EB Garamond", () => {
+    it("should set ink's text in its Noto Serif TC and its digits in its EB Garamond", () => {
         const fonts = themeFonts();
 
-        expect(families(fonts.get("--font-ink-serif") ?? "")[0]).toBe("Noto Serif TC");
-        expect(families(fonts.get("--font-ink-digits") ?? "")[0]).toBe("EB Garamond");
+        expect(families(fonts.get("--font-ink-serif") ?? "")[0]).toBe("Ink Serif TC");
+        expect(families(fonts.get("--font-ink-digits") ?? "")[0]).toBe("Ink Garamond");
+    });
+
+    // The print stack names the system's Noto Serif TC; a bundled face of that name would fetch the 250 KB subset
+    it("should keep ink's bundled faces out of every other style's stacks", () => {
+        const others = [...themeFonts()].filter(([token]) => !token.startsWith("--font-ink-"));
+
+        for (const [token, stack] of others) {
+            expect(families(stack), token).not.toEqual(expect.arrayContaining(["Ink Brush"]));
+            expect(families(stack), token).not.toEqual(expect.arrayContaining(["Ink Serif TC"]));
+            expect(families(stack), token).not.toEqual(expect.arrayContaining(["Ink Garamond"]));
+        }
     });
 });
 
@@ -61,7 +72,7 @@ describe("syncInkFonts", () => {
         finishLoading = [];
     });
 
-    it("should mark <html> once Yuji Boku, Noto Serif TC and EB Garamond have loaded", async () => {
+    it("should mark <html> once ink's brush, serif and digit faces have loaded", async () => {
         const load = stubFontLoading({});
 
         syncInkFonts(true);
@@ -69,14 +80,14 @@ describe("syncInkFonts", () => {
         await finishLoadingFonts();
 
         const loaded = load.mock.calls.map(([font]) => font).join(" ");
-        expect(loaded).toContain("Yuji Boku");
-        expect(loaded).toContain("Noto Serif TC");
-        expect(loaded).toContain("EB Garamond");
+        expect(loaded).toContain("Ink Brush");
+        expect(loaded).toContain("Ink Serif TC");
+        expect(loaded).toContain("Ink Garamond");
         expect(root.dataset.inkFonts).toBe("ready");
     });
 
     it("should not mark while the italic digits failed to load", async () => {
-        stubFontLoading({ 'italic 500 16px "EB Garamond"': "error" });
+        stubFontLoading({ 'italic 500 16px "Ink Garamond"': "error" });
 
         syncInkFonts(true);
         await finishLoadingFonts();
