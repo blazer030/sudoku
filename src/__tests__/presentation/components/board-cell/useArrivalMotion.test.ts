@@ -187,14 +187,25 @@ describe("useArrivalMotion", () => {
 
     it("should outlast every style's arrival and leaving animation", () => {
         const checked = new Set<string>();
+        const layersOf = (value: string): string[] => value.split(/,(?![^(]*\))/).map(layer => layer.replace(/\s+/g, " ").trim());
         for (const style of STYLE_IDS) {
-            postcss.parse(readFileSync(`src/style/styles/${style}/skin.css`, "utf8")).walkDecls("animation", (declaration) => {
+            const sheet = postcss.parse(readFileSync(`src/style/styles/${style}/skin.css`, "utf8"));
+            // The layers a style's plain group rule runs on a group's digits
+            const groupLayers = new Set<string>();
+            sheet.walkDecls("animation", (declaration) => {
+                const rule = declaration.parent;
+                if (rule?.type !== "rule") return;
+                const plainGroupDigit = (rule as postcss.Rule).selectors.some(selector =>
+                    /\[data-group\][^ ]* > div$/.test(selector.trim()) && !MOTION_CLASSES.some(motionClass => selector.includes(motionClass)));
+                if (plainGroupDigit) layersOf(declaration.value).forEach(layer => groupLayers.add(layer));
+            });
+            sheet.walkDecls("animation", (declaration) => {
                 const rule = declaration.parent;
                 if (rule?.type !== "rule" || !MOTION_CLASSES.some(motionClass => (rule as postcss.Rule).selector.includes(motionClass))) return;
                 if (declaration.value.trim() === "none") return;
-                // A completed group's own animation rides along in a combined rule (the entered digit is in
-                // its group); it is timed by the group effect, not by the arrival
-                const arrivalLayers = declaration.value.split(/,(?![^(]*\))/).filter(layer => !/\b[\w-]+-group-[\w-]+\b/.test(layer));
+                // A combined rule (the entered digit is in its own completed group) also lists the group's
+                // layer; the plain group rule carries the same one, so it runs on once the arrival settles
+                const arrivalLayers = layersOf(declaration.value).filter(layer => !groupLayers.has(layer));
                 const durations = arrivalLayers.flatMap(layer => [...layer.matchAll(/(\d+(?:\.\d+)?)(ms|s)\b/g)])
                     .map(([, amount, unit]) => Number(amount) * (unit === "s" ? 1000 : 1));
                 for (const duration of durations) expect(duration, style).toBeLessThan(ARRIVAL_SETTLE_MS);

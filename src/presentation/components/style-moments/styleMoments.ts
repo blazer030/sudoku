@@ -111,12 +111,13 @@ const CYBER_MOMENTS: StyleMoments = {
 
 // From the boards: the whole group plays at once. A line's brush shows from 80ms for 1000ms, its stroke
 // drawn on in the first 440ms, and the digits' halo of paper runs with it; a box's 圓相 starts 80ms later
-// and runs 1060ms, which a box's farthest cell (two steps out) just covers. The celebration still borrows
-// minimal's board phase until its own moment comes.
+// and runs 1060ms. The effect runs past them all, so a box completed alone from its centre (its farthest
+// cell two steps out, 1380ms) still outlasts the ring's 1220ms by the frames the overlay takes to start.
+// The celebration still borrows minimal's board phase until its own moment comes.
 const INK_MOMENTS: StyleMoments = {
     loader: InkLoader,
     celebration: null,
-    groupEffectMs: 1100,
+    groupEffectMs: 1260,
     groupOverlay: InkGroupOverlay,
     celebrationBoardMs: 640,
 };

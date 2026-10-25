@@ -14,7 +14,7 @@ const SEAL = `${SCOPE} .ink-loader-seal`;
 const PIECES = [STROKE, REVEAL, DIGIT, SEAL];
 const BOARD = `${SCOPE} [data-skin~="board"]`;
 const GROUP_CELL = `${BOARD} [data-group]`;
-const GROUP_DIGIT = `${GROUP_CELL} > div`;
+const GROUP_DIGIT = `${GROUP_CELL}:not(.animate-hint-reveal-glow) > div`;
 const ARRIVING_GROUP_DIGIT = `${GROUP_DIGIT}.value-arrive`;
 const ARRIVING_DIGIT = `${BOARD} .value-arrive`;
 const BRUSH = `${SCOPE} .ink-group-brush`;
@@ -171,7 +171,10 @@ describe("ink moments", () => {
             for (const kind of ["row", "column"] as const) {
                 expect(spanOf(BRUSH_OF[kind], "ink-brush-life").endMs, kind).toBeLessThanOrEqual(effectMs);
             }
-            expect(spanOf(BRUSH_OF.box, "ink-brush-life").endMs).toBeLessThanOrEqual(effectMs + 2 * GROUP_RIPPLE_STEP_MS);
+            // A box alone, completed from its centre, has its farthest cell two steps out: the ring must end
+            // before that timer does, by at least a couple of frames for the overlay to mount and style
+            const frameMarginMs = 2 * 16;
+            expect(spanOf(BRUSH_OF.box, "ink-brush-life").endMs + frameMarginMs).toBeLessThanOrEqual(effectMs + 2 * GROUP_RIPPLE_STEP_MS);
         });
 
         it("should lay the brush over the cells' washes, under the digits, the brush lines and the 圓相", () => {
@@ -183,6 +186,19 @@ describe("ink moments", () => {
             expect(zIndexOf(`${BOARD}:not([data-hint-mode]) [data-selected]::after`)).toBeGreaterThan(zIndexOf(`${SCOPE} [data-skin~="board-grid"]::after`));
             // Level with the entered digit's halo: the overlay follows the cells, so the brush lies over it
             expect(zIndexOf(`${BOARD} [data-variant]:has(> .value-arrive)::before`)).toBe(brush);
+        });
+
+        // Reveal Cell can complete a group: its digit keeps the hint pop, which a group rule would replace
+        it("should leave a revealed hint's digit to its pop", () => {
+            const groupDigitSelectors: string[] = [];
+            postcss.parse(INK_CSS).walkRules((rule) => {
+                groupDigitSelectors.push(...rule.selectors.map(collapse).filter(selector => /\[data-group\][^ ]* > div/.test(selector)));
+            });
+
+            expect(groupDigitSelectors.length).toBeGreaterThanOrEqual(4);
+            for (const selector of groupDigitSelectors) {
+                expect(selector).toContain("[data-group]:not(.animate-hint-reveal-glow) > div");
+            }
         });
 
         it("should stop every brush and halo under reduced motion", () => {
