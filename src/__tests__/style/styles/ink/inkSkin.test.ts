@@ -7,6 +7,7 @@ const INK_CSS = readFileSync("src/style/styles/ink/skin.css", "utf8");
 const BRUSH_GRID_SVG = readFileSync("src/style/styles/ink/brush-grid.svg", "utf8");
 const WASHI_FIBRES_SVG = readFileSync("src/style/styles/ink/washi-fibres.svg", "utf8");
 const HOME_MOUNTAINS_SVG = readFileSync("src/style/styles/ink/home-mountains.svg", "utf8");
+const NOTE_RING_SVG = readFileSync("src/style/styles/ink/note-ring.svg", "utf8");
 
 const SCOPE = '[data-style="ink"]';
 const FONTS_READY = '[data-style="ink"][data-ink-fonts="ready"]';
@@ -18,6 +19,7 @@ const RING = "inset 0 0 0 1px var(--color-primary-ink)";
 const BRUSH_GRID_URL = 'url("@/style/styles/ink/brush-grid.svg")';
 const WASHI_FIBRES_URL = 'url("@/style/styles/ink/washi-fibres.svg")';
 const HOME_MOUNTAINS_URL = 'url("@/style/styles/ink/home-mountains.svg")';
+const NOTE_RING_URL = 'url("@/style/styles/ink/note-ring.svg")';
 const RAW_COLOUR = /#[0-9a-fA-F]{3,8}\b|rgba?\(|hsla?\(|\bwhite\b|\bblack\b/;
 const WASHI_SURFACE = "color-mix(in srgb, var(--color-card) 62%, transparent)";
 const EDGE_LINE = "inset 0 0 0 1px var(--color-border)";
@@ -480,6 +482,78 @@ describe("ink skin", () => {
 
             expect(emphasised.get("box-shadow")).toBe(RING);
             expect(emphasised.get("background-color") ?? "transparent").toBe("transparent");
+        });
+
+        describe("the selected digit's ink ring", () => {
+            const HIGHLIGHTED = `${BOARD} [data-note-highlight]`;
+            // Only outside a hint's answer and pattern cells is a highlighted note the selected digit's
+            const SELECTED_NOTE = `${BOARD} [data-variant]:not([data-variant="answer"], [data-variant="pattern"]) [data-note-highlight]`;
+            const RING_LAYER = `${SELECTED_NOTE}::before`;
+            const svg = parseSvg(NOTE_RING_SVG);
+
+            it("should brush a vermilion ring through the mask, for WebKit as well as the rest", () => {
+                const ring = maskSupportsDeclarationsOf(RING_LAYER);
+
+                expect(ring.get("-webkit-mask-image")).toBe(NOTE_RING_URL);
+                expect(ring.get("mask-image")).toBe(NOTE_RING_URL);
+                expect(ring.get("background-color")).toBe("var(--color-primary)");
+                expect(ring.get("mask-size")).toBe("100% 100%");
+                expect(ring.get("-webkit-mask-size")).toBe("100% 100%");
+            });
+
+            it("should fall back to a plain thin vermilion ring where masks are unsupported, and drop it under the mask", () => {
+                const plain = declarationsOf(INK_CSS, RING_LAYER);
+
+                expect(plain.get("content")).toBe('""');
+                expect(plain.get("box-shadow")).toContain("var(--color-primary)");
+                expect(plain.get("border-radius")).toBe("50%");
+                expect(maskSupportsDeclarationsOf(RING_LAYER).get("box-shadow")).toBe("none");
+            });
+
+            it("should lie around the digit and behind it, never taking taps", () => {
+                const plain = declarationsOf(INK_CSS, RING_LAYER);
+                const note = declarationsOf(INK_CSS, SELECTED_NOTE);
+
+                expect(plain.get("position")).toBe("absolute");
+                expect(Number.parseFloat(plain.get("inset") ?? "")).toBeLessThanOrEqual(0);
+                expect(plain.get("pointer-events")).toBe("none");
+                expect(Number(plain.get("z-index"))).toBeLessThan(0);
+                expect(note.get("position")).toBe("relative");
+                expect(note.get("isolation")).toBe("isolate");
+            });
+
+            it("should keep the note's digit vermilion inside the ring", () => {
+                expect(declarationsOf(INK_CSS, HIGHLIGHTED).get("color")).toBe("var(--color-primary-ink)");
+            });
+
+            // Plain notes, a hint's candidates, its struck ones and its emphasised ones keep their own looks
+            it("should draw a pseudo-element on no note but the selected digit's", () => {
+                const noteLayers = allRules().flatMap(rule => rule.selectors)
+                    .filter(selector => isPseudoElement(selector) && /note|strike-diagonal/.test(selector));
+
+                expect(new Set(noteLayers)).toEqual(new Set([RING_LAYER]));
+            });
+
+            describe("note-ring.svg", () => {
+                it("should parse as a square drawing, so the ring stays round on the square note", () => {
+                    const [, , width, height] = (svg.documentElement.getAttribute("viewBox") ?? "").split(/\s+/).map(Number);
+
+                    expect(svg.getElementsByTagName("parsererror")).toHaveLength(0);
+                    expect(width).toBeGreaterThan(0);
+                    expect(width).toBe(height);
+                });
+
+                it("should brush one stroke with a drop of ink where it sets down, and no live filter", () => {
+                    expect(svg.getElementsByTagName("path")).toHaveLength(1);
+                    expect(svg.getElementsByTagName("ellipse").length + svg.getElementsByTagName("circle").length).toBe(1);
+                    expect(svg.getElementsByTagName("filter")).toHaveLength(0);
+                });
+
+                it("should carry only alpha: every shape in currentColor", () => {
+                    expect(NOTE_RING_SVG).not.toMatch(RAW_COLOUR);
+                    expect(svg.getElementsByTagName("g")[0].getAttribute("fill")).toBe("currentColor");
+                });
+            });
         });
     });
 

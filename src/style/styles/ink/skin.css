@@ -439,7 +439,7 @@
     color: var(--color-on-primary);
 }
 
-/* Notes: pale ink Garamond. The selected digit's note is vermilion, without the shared disc; a hint's
+/* Notes: pale ink Garamond. The selected digit's note is vermilion, without the shared disc, in a ring; a hint's
    candidates are blue-black italic, its eliminated ones vermilion, and its emphasised ones (only ever in
    its answer or pattern cells) a thin vermilion ring. */
 [data-style="ink"] [data-skin~="board"] [data-note-highlight] {
@@ -458,6 +458,39 @@
 
 [data-style="ink"] [data-skin~="board"] :is([data-variant="answer"], [data-variant="pattern"]) [data-note-highlight] {
     box-shadow: inset 0 0 0 1px var(--color-primary-ink);
+}
+
+/* The selected digit's note (a highlighted note outside a hint's answer and pattern cells) also sits in a
+   small 圓相 of its own: a vermilion ring brushed once around it (note-ring.svg), set down with a drop of
+   ink at the upper left, thin down the left, heavy across the bottom, trailing off short of the start.
+   It lies a little past the note's box and behind its digit. Where masks are unsupported, a plain thin
+   vermilion ring stands in. */
+[data-style="ink"] [data-skin~="board"] [data-variant]:not([data-variant="answer"], [data-variant="pattern"]) [data-note-highlight] {
+    position: relative;
+    isolation: isolate;
+}
+
+[data-style="ink"] [data-skin~="board"] [data-variant]:not([data-variant="answer"], [data-variant="pattern"]) [data-note-highlight]::before {
+    content: "";
+    position: absolute;
+    inset: -2px;
+    z-index: -1;
+    pointer-events: none;
+    border-radius: 50%;
+    box-shadow: inset 0 0 0 1px var(--color-primary);
+}
+
+@supports ((mask-image: url("")) or (-webkit-mask-image: url(""))) {
+    [data-style="ink"] [data-skin~="board"] [data-variant]:not([data-variant="answer"], [data-variant="pattern"]) [data-note-highlight]::before {
+        box-shadow: none;
+        background-color: var(--color-primary);
+        -webkit-mask-image: url("@/style/styles/ink/note-ring.svg");
+        mask-image: url("@/style/styles/ink/note-ring.svg");
+        -webkit-mask-size: 100% 100%;
+        mask-size: 100% 100%;
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+    }
 }
 
 /* Brushed titles: Yuji Boku (cut to these strings) on the Home title, the completion title and the dialog

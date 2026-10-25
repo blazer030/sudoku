@@ -375,6 +375,8 @@ const INK_BOARD_CASES: InkBoardCase[] = STYLES.ink.themes.flatMap(theme => STYLE
         ...onEverySurface("entry and candidate note (accent)", palette.accent),
         ...onEverySurface("note", palette.note),
         ...onEverySurface("vermilion (primary-ink)", palette["primary-ink"]),
+        // The ink ring around the selected digit's note is a mark, not text, so 3:1 applies
+        ...surfaces.map(([surface, background]) => drawn(`note ring (primary) on ${surface}`, palette.primary, background, LARGE_OR_ICON)),
         drawn("error digit (error) on the page", palette.error, palette.background),
         drawn("error digit (error) on error-surface", palette.error, palette["error-surface"]),
     ];
