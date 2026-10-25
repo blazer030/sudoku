@@ -78,7 +78,11 @@ const REQUIRED_SELECTORS: Record<StyleId, readonly string[]> = {
         ".cyber-group-frame",
         ".cyber-mission",
     ],
-    ink: PRESS,
+    ink: [
+        ...PRESS,
+        ".ink-loader-stroke",
+        ".ink-loader-seal",
+    ],
 };
 
 const selectorsOf = (style: StyleId): string[] => {

@@ -13,6 +13,7 @@ import PixelGroupOverlay from "@/presentation/components/style-moments/pixel/Pix
 import CyberLoader from "@/presentation/components/style-moments/cyber/CyberLoader.vue";
 import CyberCelebration from "@/presentation/components/style-moments/cyber/CyberCelebration.vue";
 import CyberGroupOverlay from "@/presentation/components/style-moments/cyber/CyberGroupOverlay.vue";
+import InkLoader from "@/presentation/components/style-moments/ink/InkLoader.vue";
 import type { CompletedGroup } from "@/domain/game/Sudoku";
 
 /** A group effect on the board: a new one gets a new id, which starts its drawings afresh. */
@@ -107,9 +108,9 @@ const CYBER_MOMENTS: StyleMoments = {
     celebrationBoardMs: 860,
 };
 
-// Ink borrows minimal's loading and timings until its own moments come
+// Ink borrows minimal's timings until its own group and celebration moments come
 const INK_MOMENTS: StyleMoments = {
-    loader: MinimalLoader,
+    loader: InkLoader,
     celebration: null,
     groupEffectMs: 620,
     celebrationBoardMs: 640,

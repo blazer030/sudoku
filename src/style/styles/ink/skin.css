@@ -613,6 +613,169 @@
     background-color: color-mix(in srgb, var(--color-background) 66%, transparent);
 }
 
+/* The loader, from MomentsInk: on a slip of washi the brush paints a sudoku box, the frame first and
+   then the inner lines, each stroke drawn on along its mask; then the digits are inked in a solving order,
+   a small 「題」 seal is pressed, and the slip fades for the next round. Every piece starts each round
+   hidden, so the loop has no seam. Loaders follow only the system's reduced motion. */
+[data-style="ink"] .ink-loader-stroke {
+    opacity: 0;
+}
+
+[data-style="ink"] .ink-loader-reveal {
+    stroke-dasharray: 120;
+    stroke-dashoffset: 120;
+}
+
+[data-style="ink"] .ink-loader-digit {
+    opacity: 0;
+}
+
+[data-style="ink"] .ink-loader-seal {
+    opacity: 0;
+    transform: rotate(-6deg) scale(1);
+}
+
+@keyframes ink-st0 {
+    0%, 3% { opacity: 0; }
+    3.3%, 84% { opacity: 0.85; }
+    94%, 100% { opacity: 0; }
+}
+
+@keyframes ink-rv0 {
+    0%, 3% { stroke-dashoffset: 120; }
+    9.5%, 100% { stroke-dashoffset: 0; }
+}
+
+@keyframes ink-st1 {
+    0%, 8.5% { opacity: 0; }
+    8.8%, 84% { opacity: 0.85; }
+    94%, 100% { opacity: 0; }
+}
+
+@keyframes ink-rv1 {
+    0%, 8.5% { stroke-dashoffset: 120; }
+    15%, 100% { stroke-dashoffset: 0; }
+}
+
+@keyframes ink-st2 {
+    0%, 14% { opacity: 0; }
+    14.3%, 84% { opacity: 0.85; }
+    94%, 100% { opacity: 0; }
+}
+
+@keyframes ink-rv2 {
+    0%, 14% { stroke-dashoffset: 120; }
+    20.5%, 100% { stroke-dashoffset: 0; }
+}
+
+@keyframes ink-st3 {
+    0%, 19.5% { opacity: 0; }
+    19.8%, 84% { opacity: 0.85; }
+    94%, 100% { opacity: 0; }
+}
+
+@keyframes ink-rv3 {
+    0%, 19.5% { stroke-dashoffset: 120; }
+    26%, 100% { stroke-dashoffset: 0; }
+}
+
+@keyframes ink-st4 {
+    0%, 25% { opacity: 0; }
+    25.3%, 84% { opacity: 0.85; }
+    94%, 100% { opacity: 0; }
+}
+
+@keyframes ink-rv4 {
+    0%, 25% { stroke-dashoffset: 120; }
+    31.5%, 100% { stroke-dashoffset: 0; }
+}
+
+@keyframes ink-st5 {
+    0%, 30.5% { opacity: 0; }
+    30.8%, 84% { opacity: 0.85; }
+    94%, 100% { opacity: 0; }
+}
+
+@keyframes ink-rv5 {
+    0%, 30.5% { stroke-dashoffset: 120; }
+    37%, 100% { stroke-dashoffset: 0; }
+}
+
+@keyframes ink-st6 {
+    0%, 36% { opacity: 0; }
+    36.3%, 84% { opacity: 0.85; }
+    94%, 100% { opacity: 0; }
+}
+
+@keyframes ink-rv6 {
+    0%, 36% { stroke-dashoffset: 120; }
+    42.5%, 100% { stroke-dashoffset: 0; }
+}
+
+@keyframes ink-st7 {
+    0%, 41.5% { opacity: 0; }
+    41.8%, 84% { opacity: 0.85; }
+    94%, 100% { opacity: 0; }
+}
+
+@keyframes ink-rv7 {
+    0%, 41.5% { stroke-dashoffset: 120; }
+    48%, 100% { stroke-dashoffset: 0; }
+}
+
+@keyframes ink-dg0 {
+    0%, 50% { opacity: 0; transform: scale(1.35); }
+    54%, 84% { opacity: 1; transform: none; }
+    94%, 100% { opacity: 0; transform: none; }
+}
+
+@keyframes ink-dg1 {
+    0%, 56% { opacity: 0; transform: scale(1.35); }
+    60%, 84% { opacity: 1; transform: none; }
+    94%, 100% { opacity: 0; transform: none; }
+}
+
+@keyframes ink-dg2 {
+    0%, 62% { opacity: 0; transform: scale(1.35); }
+    66%, 84% { opacity: 1; transform: none; }
+    94%, 100% { opacity: 0; transform: none; }
+}
+
+@keyframes ink-dg3 {
+    0%, 68% { opacity: 0; transform: scale(1.35); }
+    72%, 84% { opacity: 1; transform: none; }
+    94%, 100% { opacity: 0; transform: none; }
+}
+
+@keyframes ink-seal {
+    0%, 75% { opacity: 0; transform: rotate(-6deg) scale(1.5); }
+    78% { opacity: 1; transform: rotate(-6deg) scale(0.95); }
+    80%, 84% { opacity: 1; transform: rotate(-6deg) scale(1); }
+    94%, 100% { opacity: 0; transform: rotate(-6deg) scale(1); }
+}
+
+[data-style="ink"] .ink-loader-stroke[data-step="0"] { animation: ink-st0 4.2s linear infinite both; }
+[data-style="ink"] .ink-loader-stroke[data-step="1"] { animation: ink-st1 4.2s linear infinite both; }
+[data-style="ink"] .ink-loader-stroke[data-step="2"] { animation: ink-st2 4.2s linear infinite both; }
+[data-style="ink"] .ink-loader-stroke[data-step="3"] { animation: ink-st3 4.2s linear infinite both; }
+[data-style="ink"] .ink-loader-stroke[data-step="4"] { animation: ink-st4 4.2s linear infinite both; }
+[data-style="ink"] .ink-loader-stroke[data-step="5"] { animation: ink-st5 4.2s linear infinite both; }
+[data-style="ink"] .ink-loader-stroke[data-step="6"] { animation: ink-st6 4.2s linear infinite both; }
+[data-style="ink"] .ink-loader-stroke[data-step="7"] { animation: ink-st7 4.2s linear infinite both; }
+[data-style="ink"] .ink-loader-reveal[data-step="0"] { animation: ink-rv0 4.2s linear infinite both; }
+[data-style="ink"] .ink-loader-reveal[data-step="1"] { animation: ink-rv1 4.2s linear infinite both; }
+[data-style="ink"] .ink-loader-reveal[data-step="2"] { animation: ink-rv2 4.2s linear infinite both; }
+[data-style="ink"] .ink-loader-reveal[data-step="3"] { animation: ink-rv3 4.2s linear infinite both; }
+[data-style="ink"] .ink-loader-reveal[data-step="4"] { animation: ink-rv4 4.2s linear infinite both; }
+[data-style="ink"] .ink-loader-reveal[data-step="5"] { animation: ink-rv5 4.2s linear infinite both; }
+[data-style="ink"] .ink-loader-reveal[data-step="6"] { animation: ink-rv6 4.2s linear infinite both; }
+[data-style="ink"] .ink-loader-reveal[data-step="7"] { animation: ink-rv7 4.2s linear infinite both; }
+[data-style="ink"] .ink-loader-digit[data-step="0"] { animation: ink-dg0 4.2s ease-out infinite both; }
+[data-style="ink"] .ink-loader-digit[data-step="1"] { animation: ink-dg1 4.2s ease-out infinite both; }
+[data-style="ink"] .ink-loader-digit[data-step="2"] { animation: ink-dg2 4.2s ease-out infinite both; }
+[data-style="ink"] .ink-loader-digit[data-step="3"] { animation: ink-dg3 4.2s ease-out infinite both; }
+[data-style="ink"] .ink-loader-seal { animation: ink-seal 4.2s ease-out infinite both; }
+
 /* Reduced motion: no scaling or sliding; the press wash stays */
 @media (prefers-reduced-motion: reduce) {
     [data-style="ink"] .segmented-indicator-motion {
@@ -635,5 +798,43 @@
     /* Its own rule, so a WebView without :has() still reads the list above */
     [data-style="ink"] [data-skin~="board"] [data-variant]:has(> .value-arrive)::before {
         animation: none;
+    }
+
+    /* The loader holds its slip written: the box brushed, the digits inked and the seal pressed */
+    [data-style="ink"] .ink-loader-stroke[data-step="0"],
+    [data-style="ink"] .ink-loader-stroke[data-step="1"],
+    [data-style="ink"] .ink-loader-stroke[data-step="2"],
+    [data-style="ink"] .ink-loader-stroke[data-step="3"],
+    [data-style="ink"] .ink-loader-stroke[data-step="4"],
+    [data-style="ink"] .ink-loader-stroke[data-step="5"],
+    [data-style="ink"] .ink-loader-stroke[data-step="6"],
+    [data-style="ink"] .ink-loader-stroke[data-step="7"],
+    [data-style="ink"] .ink-loader-reveal[data-step="0"],
+    [data-style="ink"] .ink-loader-reveal[data-step="1"],
+    [data-style="ink"] .ink-loader-reveal[data-step="2"],
+    [data-style="ink"] .ink-loader-reveal[data-step="3"],
+    [data-style="ink"] .ink-loader-reveal[data-step="4"],
+    [data-style="ink"] .ink-loader-reveal[data-step="5"],
+    [data-style="ink"] .ink-loader-reveal[data-step="6"],
+    [data-style="ink"] .ink-loader-reveal[data-step="7"],
+    [data-style="ink"] .ink-loader-digit[data-step="0"],
+    [data-style="ink"] .ink-loader-digit[data-step="1"],
+    [data-style="ink"] .ink-loader-digit[data-step="2"],
+    [data-style="ink"] .ink-loader-digit[data-step="3"],
+    [data-style="ink"] .ink-loader-seal {
+        animation: none;
+    }
+
+    [data-style="ink"] .ink-loader-stroke {
+        opacity: 0.85;
+    }
+
+    [data-style="ink"] .ink-loader-reveal {
+        stroke-dashoffset: 0;
+    }
+
+    [data-style="ink"] .ink-loader-digit,
+    [data-style="ink"] .ink-loader-seal {
+        opacity: 1;
     }
 }
