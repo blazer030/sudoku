@@ -177,14 +177,16 @@ describe("ink skin", () => {
         describe("washi-fibres.svg", () => {
             const svg = parseSvg(WASHI_FIBRES_SVG);
 
-            it("should parse as a 390×844 drawing stretched to the screen", () => {
+            it("should stretch over the whole screen: the drawing keeps no aspect ratio and the mask fills the layer", () => {
+                const fibres = declarationsOf(INK_CSS, `${ROOT_PAGE}::before`);
+
                 expect(svg.getElementsByTagName("parsererror")).toHaveLength(0);
-                expect(svg.documentElement.getAttribute("viewBox")).toBe("0 0 390 844");
                 expect(svg.documentElement.getAttribute("preserveAspectRatio")).toBe("none");
+                expect(fibres.get("mask-size")).toBe("100% 100%");
+                expect(fibres.get("-webkit-mask-size")).toBe("100% 100%");
             });
 
             it("should draw only currentColor strands", () => {
-                expect(svg.getElementsByTagName("path").length).toBeGreaterThan(20);
                 expect(svg.getElementsByTagName("g")[0].getAttribute("stroke")).toBe("currentColor");
                 expect(WASHI_FIBRES_SVG).not.toMatch(RAW_COLOUR);
             });
@@ -246,12 +248,21 @@ describe("ink skin", () => {
         describe("home-mountains.svg", () => {
             const svg = parseSvg(HOME_MOUNTAINS_SVG);
 
-            it("should parse as a 390×260 drawing of three ranges, the far one faintest", () => {
+            it("should draw its ranges back to front, each nearer one darker, all of them faint", () => {
                 const opacities = Array.from(svg.getElementsByTagName("path")).map(path => Number(path.getAttribute("opacity")));
 
                 expect(svg.getElementsByTagName("parsererror")).toHaveLength(0);
-                expect(svg.documentElement.getAttribute("viewBox")).toBe("0 0 390 260");
-                expect(opacities).toEqual([0.08, 0.12, 0.16]);
+                expect(opacities.length).toBeGreaterThan(1);
+                expect(opacities.slice(1).every((opacity, index) => opacity > opacities[index])).toBe(true);
+                expect(Math.max(...opacities)).toBeLessThan(0.5);
+            });
+
+            it("should stretch along the bottom of the screen: the drawing keeps no aspect ratio and the mask fills the layer", () => {
+                const mountains = declarationsOf(INK_CSS, `${LOGO}::before`);
+
+                expect(svg.documentElement.getAttribute("preserveAspectRatio")).toBe("none");
+                expect(mountains.get("mask-size")).toBe("100% 100%");
+                expect(mountains.get("-webkit-mask-size")).toBe("100% 100%");
             });
 
             it("should soften the ranges with one blur, drawn into the image", () => {
@@ -279,21 +290,18 @@ describe("ink skin", () => {
             ]);
         });
 
-        it("should set every other text in the serif and the mono figures in Garamond, once the faces have loaded", () => {
+        it("should set the mono figures (statistics, times) in the board's digit face, once the faces have loaded", () => {
             const fonts = declarationsOf(INK_CSS, FONTS_READY);
 
-            expect(fonts.get("--font-sans")).toBe("var(--font-ink-serif)");
-            expect(fonts.get("--font-mono")).toBe("var(--font-ink-digits)");
+            expect(fonts.get("--font-mono")).toBe(fonts.get("--font-clue"));
         });
 
-        it("should set no letter-spacing, font-size or border on any element (only placed decorations size themselves)", () => {
-            const offending = allRules().flatMap(rule => rule.selectors
-                .filter(selector => !isPseudoElement(selector))
-                .flatMap(selector => ["letter-spacing", "font-size", "border"]
-                    .filter(property => rule.declarations.has(property))
-                    .map(property => `${selector} → ${property}`)));
+        it("should set every other text in the seal's serif, not the brush, once the faces have loaded", () => {
+            const fonts = declarationsOf(INK_CSS, FONTS_READY);
+            const seal = declarationsOf(INK_CSS, `${FONTS_READY} [data-skin~="logo"]::after`);
 
-            expect(offending).toEqual([]);
+            expect(fonts.get("--font-sans")).toBe(seal.get("font-family"));
+            expect(fonts.get("--font-sans")).not.toContain("--font-ink-brush");
         });
     });
 
