@@ -84,6 +84,11 @@ const REQUIRED_SELECTORS: Record<StyleId, readonly string[]> = {
         ".ink-loader-seal",
         "[data-group]",
         ".ink-group-brush",
+        '[data-celebration="playing"]',
+        '[data-skin~="trophy"]',
+        '[data-skin~="complete-title"]',
+        '[data-skin~="celebration"]:not([data-still])',
+        ".ink-seal-stamp",
     ],
 };
 

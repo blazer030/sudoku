@@ -21,6 +21,23 @@ const BRUSH = `${SCOPE} .ink-group-brush`;
 const BRUSH_OF = { row: `${BRUSH}[data-kind="row"]`, column: `${BRUSH}[data-kind="column"]`, box: `${BRUSH}[data-kind="box"]` };
 const REVEAL_OF = { row: `${BRUSH_OF.row} .ink-group-reveal`, column: `${BRUSH_OF.column} .ink-group-reveal`, box: `${BRUSH_OF.box} .ink-group-reveal` };
 const KINDS = ["row", "column", "box"] as const;
+const CELEBRATING = `${BOARD}:is([data-celebration="playing"], [data-celebration="done"])`;
+const STILL_BOARD = `${BOARD}[data-celebration="still"]`;
+const FIRST_WASH = `${CELEBRATING}::before`;
+const SECOND_WASH = `${CELEBRATING}::after`;
+const STILL_WASH = `${STILL_BOARD}::before`;
+const TAKING_DIGIT = `${CELEBRATING} [data-variant] > div:not(.value-arrive):not(.animate-hint-reveal-pop)`;
+const CARD = `${SCOPE} [data-skin~="card"][data-skin~="celebration"]`;
+const UNROLLING_CARD = `${CARD}:not([data-still])`;
+const TITLE = `${CARD} [data-skin~="complete-title"]`;
+const BRUSHING_TITLE = `${UNROLLING_CARD} [data-skin~="complete-title"]`;
+const ROD = `${SCOPE} .ink-rod`;
+const ROD_TRACK = `${SCOPE} .ink-rod-track`;
+const TRAVELLING_ROD = `${UNROLLING_CARD} .ink-rod-track`;
+const SEAL_STAMP = `${SCOPE} .ink-seal-stamp`;
+const PRESSING_SEAL = `${UNROLLING_CARD} .ink-seal-stamp`;
+const TROPHY = `${CARD} [data-skin~="trophy"]`;
+const CELEBRATION_ANIMATED = [FIRST_WASH, SECOND_WASH, TAKING_DIGIT, UNROLLING_CARD, BRUSHING_TITLE, TRAVELLING_ROD, PRESSING_SEAL];
 
 const collapse = (text: string): string => text.replace(/\s+/g, " ").trim();
 
@@ -92,6 +109,53 @@ const zIndexOf = (selector: string): number => {
         rule.walkDecls("z-index", (declaration) => { zIndex = Number(declaration.value); });
     });
     return zIndex;
+};
+
+// Evaluates a calc() body of numbers, + - *, parentheses and max(), as the take's delay is written
+const evaluate = (expression: string): number => {
+    const tokens = expression.match(/max|\d*\.?\d+|[-+*(),]/g) ?? [];
+    let position = 0;
+    const next = (): string => tokens[position++] ?? "";
+    const peek = (): string => tokens[position] ?? "";
+    const parseSum = (): number => {
+        let total = parseProduct();
+        while (peek() === "+" || peek() === "-") total = next() === "+" ? total + parseProduct() : total - parseProduct();
+        return total;
+    };
+    const parseProduct = (): number => {
+        let product = parseTerm();
+        while (peek() === "*") {
+            next();
+            product *= parseTerm();
+        }
+        return product;
+    };
+    const parseTerm = (): number => {
+        const token = next();
+        if (token === "(") {
+            const value = parseSum();
+            next();
+            return value;
+        }
+        if (token === "max") {
+            next();
+            const values = [parseSum()];
+            while (next() === ",") values.push(parseSum());
+            return Math.max(...values);
+        }
+        return Number(token);
+    };
+    return parseSum();
+};
+
+// A digit's ink-take delay in a given cell, from its calc() over the cell's row and column
+const takeDelayAt = (row: number, column: number): number => {
+    const delay = /ink-take \S+ \S+ calc\((.*)\) \S+$/.exec(animationOf(TAKING_DIGIT))?.[1] ?? "";
+    if (delay === "") throw new Error("the take has no calc() delay");
+    return evaluate(delay
+        .replace(/var\(--cell-row\)/g, String(row))
+        .replace(/var\(--cell-column\)/g, String(column))
+        .replace(/ms/g, ""));
 };
 
 describe("ink moments", () => {
@@ -203,6 +267,156 @@ describe("ink moments", () => {
 
         it("should stop every brush and halo under reduced motion", () => {
             for (const selector of [...Object.values(BRUSH_OF), ...Object.values(REVEAL_OF), GROUP_DIGIT, ARRIVING_GROUP_DIGIT]) {
+                expect(reducedMotionDeclarationsOf(selector).get("animation"), selector).toBe("none");
+            }
+        });
+    });
+
+    describe("celebration", () => {
+        it("should bloom two ink washes on the board's own layers, the second a beat later, and keep them under the dialog", () => {
+            const first = spanOf(FIRST_WASH, "ink-board-wash");
+            const second = spanOf(SECOND_WASH, "ink-board-wash");
+            const frames = framesOf("ink-board-wash");
+
+            expect(second.endMs - second.startMs).toBe(first.endMs - first.startMs);
+            expect(second.startMs).toBeGreaterThan(first.startMs);
+            // Hidden until it blooms, and still there once it has
+            expect(frames[0]?.declarations.get("opacity")).toBe("0");
+            expect(Number(frames[frames.length - 1]?.declarations.get("opacity"))).toBeGreaterThan(0);
+            expect(animationOf(FIRST_WASH)).toMatch(/ both$/);
+            for (const wash of [FIRST_WASH, SECOND_WASH]) {
+                expect(declarationsOf(INK_CSS, wash).get("opacity"), wash).toBe("0");
+            }
+        });
+
+        it("should wash the board in ink by gradients, moving only by opacity and transform, with no filter", () => {
+            const washes = declarationsOf(INK_CSS, `${CELEBRATING}::before`);
+
+            expect(washes.get("background-image")).toMatch(/^radial-gradient\(/);
+            expect(washes.get("background-image")).toContain("var(--color-foreground)");
+            expect([...animatedPropertiesOf("ink-board-wash")].sort()).toEqual(["opacity", "transform"]);
+            for (const selector of [FIRST_WASH, SECOND_WASH, STILL_WASH]) {
+                expect(declarationsOf(INK_CSS, selector).has("filter"), selector).toBe(false);
+            }
+            // Under the digits, inside the board's own stacking context
+            expect(zIndexOf(`${CELEBRATING}::before`)).toBeLessThan(zIndexOf(`${BOARD} [data-variant] > div`));
+            expect(declarationsOf(INK_CSS, BOARD).get("isolation")).toBe("isolate");
+            expect(declarationsOf(INK_CSS, BOARD).get("position")).toBe("relative");
+        });
+
+        it("should let the digits take the ink from the centre outward, all before the dialog opens", () => {
+            const take = animationTimingOf(animationOf(TAKING_DIGIT), "ink-take");
+            const farthest = takeDelayAt(0, 0);
+
+            expect(takeDelayAt(4, 4)).toBe(0);
+            expect(takeDelayAt(4, 5)).toBeGreaterThan(0);
+            expect(takeDelayAt(3, 5)).toBeGreaterThan(takeDelayAt(4, 5));
+            expect(takeDelayAt(8, 8)).toBe(farthest);
+            expect(takeDelayAt(0, 8)).toBe(farthest);
+            expect(farthest + (take?.durationMs ?? Infinity)).toBeLessThanOrEqual(STYLE_MOMENTS.ink.celebrationBoardMs);
+        });
+
+        it("should leave each digit sharp, in a halo of paper, once it has taken the ink", () => {
+            const frames = framesOf("ink-take");
+            const last = frames[frames.length - 1]?.declarations ?? new Map<string, string>();
+
+            expect(frames[0]?.declarations.get("text-shadow")).toBe("none");
+            expect(last.get("opacity")).toBe("1");
+            expect(last.get("transform")).toBe("none");
+            expect(last.get("text-shadow")).toContain("var(--color-card)");
+            expect(animationOf(TAKING_DIGIT)).toMatch(/ both$/);
+        });
+
+        it("should hold one faint wash still, and nothing moving, when still", () => {
+            const wash = declarationsOf(INK_CSS, STILL_WASH);
+            const opacity = Number(wash.get("opacity"));
+
+            expect(opacity).toBeGreaterThan(0);
+            expect(opacity).toBeLessThan(1);
+            expect(wash.get("background-image")).toBe(declarationsOf(INK_CSS, `${CELEBRATING}::before`).get("background-image"));
+            expect(wash.has("animation")).toBe(false);
+            expect(declarationsOf(INK_CSS, `${STILL_BOARD}::after`).size).toBe(0);
+            const stillRules: string[] = [];
+            postcss.parse(INK_CSS).walkRules((rule) => {
+                if (!rule.selectors.some(selector => selector.includes('[data-celebration="still"]'))) return;
+                rule.walkDecls("animation", (declaration) => { stillRules.push(`${rule.selector} → ${declaration.value}`); });
+            });
+            expect(stillRules).toEqual([]);
+        });
+
+        it("should unroll the card from its top by its clip, the bottom rod travelling with the edge", () => {
+            const unroll = spanOf(UNROLLING_CARD, "ink-unroll");
+            const rod = spanOf(TRAVELLING_ROD, "ink-rod");
+            const frames = framesOf("ink-unroll");
+
+            expect(unroll.startMs).toBeGreaterThan(0);
+            expect(rod).toEqual(unroll);
+            expect(animationOf(TRAVELLING_ROD).replace("ink-rod", "")).toBe(animationOf(UNROLLING_CARD).replace("ink-unroll", ""));
+            expect(frames[0]?.declarations.get("clip-path")).toMatch(/^inset\(\S+ \S+ calc\(100% - [\d.]+px\) \S+\)$/);
+            expect(frames[frames.length - 1]?.declarations.get("clip-path")).toMatch(/^inset\((-[\d.]+px ?){4}\)$/);
+            // Held rolled up until it starts; the rod starts at the top and ends where the card's foot is
+            expect(animationOf(UNROLLING_CARD)).toMatch(/ both$/);
+            expect(framesOf("ink-rod")[0]?.declarations.get("transform")).toBe("translateY(-100%)");
+            expect(framesOf("ink-rod").slice(-1)[0]?.declarations.get("transform")).toBe("none");
+            expect([...animatedPropertiesOf("ink-rod")]).toEqual(["transform"]);
+        });
+
+        it("should brush the title in from the left as the scroll opens, then press the seal", () => {
+            const unroll = spanOf(UNROLLING_CARD, "ink-unroll");
+            const title = spanOf(BRUSHING_TITLE, "ink-brush");
+            const press = spanOf(PRESSING_SEAL, "ink-press");
+            const brush = framesOf("ink-brush");
+
+            expect(title.startMs).toBeGreaterThan(unroll.startMs);
+            expect(title.startMs).toBeLessThan(unroll.endMs);
+            expect(press.startMs).toBeGreaterThan(title.startMs);
+            expect(press.startMs).toBeGreaterThanOrEqual(unroll.endMs);
+            expect(brush[0]?.declarations.get("clip-path")).toBe("inset(0 100% 0 0)");
+            expect(brush[brush.length - 1]?.declarations.get("clip-path")).toBe("inset(0 0 0 0)");
+            expect(framesOf("ink-press")[0]?.declarations.get("opacity")).toBe("0");
+            for (const selector of [BRUSHING_TITLE, PRESSING_SEAL]) {
+                expect(animationOf(selector), selector).toMatch(/ both$/);
+            }
+        });
+
+        it("should show the still card's end state: open, titled and sealed", () => {
+            const pressed = framesOf("ink-press").slice(-1)[0]?.declarations ?? new Map<string, string>();
+
+            for (const selector of [CARD, TITLE, SEAL_STAMP, ROD, ROD_TRACK]) {
+                const declarations = declarationsOf(INK_CSS, selector);
+                expect(declarations.has("animation"), selector).toBe(false);
+                expect(declarations.has("clip-path"), selector).toBe(false);
+                expect(declarations.has("opacity"), selector).toBe(false);
+            }
+            expect(declarationsOf(INK_CSS, SEAL_STAMP).get("transform")).toBe(pressed.get("transform"));
+            expect(pressed.get("opacity")).toBe("1");
+        });
+
+        it("should cut the seal in vermilion with a paper ring, worn by a grainy mask, and make the trophy that seal turned", () => {
+            const seal = declarationsOf(INK_CSS, SEAL_STAMP);
+            const trophy = declarationsOf(INK_CSS, TROPHY);
+
+            expect(seal.get("background-color")).toBe("var(--color-primary)");
+            expect(seal.get("color")).toBe("var(--color-on-primary)");
+            expect(seal.get("box-shadow")).toContain("var(--color-on-primary)");
+            expect(seal.get("mask-image")).toMatch(/^repeating-radial-gradient\(/);
+            expect(seal.get("-webkit-mask-image")).toBe(seal.get("mask-image"));
+            expect(trophy.get("background-color")).toBe(seal.get("background-color"));
+            expect(trophy.get("border-radius")).toBe(seal.get("border-radius"));
+            expect(trophy.get("transform")).toMatch(/^rotate\(-[\d.]+deg\)$/);
+            expect(declarationsOf(INK_CSS, `${TROPHY} > svg`).get("color")).toBe(seal.get("color"));
+        });
+
+        it("should hang the rods in a warm ink", () => {
+            const rod = declarationsOf(INK_CSS, ROD);
+
+            expect(rod.get("background-image")).toMatch(/^linear-gradient\(/);
+            expect(rod.get("background-image")).toContain("var(--color-foreground)");
+            expect(rod.get("background-image")).toContain("color-mix(");
+        });
+
+        it("should stop every part of it under reduced motion", () => {
+            for (const selector of CELEBRATION_ANIMATED) {
                 expect(reducedMotionDeclarationsOf(selector).get("animation"), selector).toBe("none");
             }
         });
