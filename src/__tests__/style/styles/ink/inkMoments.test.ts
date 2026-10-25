@@ -304,6 +304,17 @@ describe("ink moments", () => {
             expect(declarationsOf(INK_CSS, BOARD).get("position")).toBe("relative");
         });
 
+        // The washes swell past the board's box; unclipped, they widened the page scroller while celebrating
+        it("should keep the blooming washes inside the board's box", () => {
+            const scaledBeyond = framesOf("ink-board-wash").some((frame) => {
+                const scale = /scale\(([\d.]+)\)/.exec(frame.declarations.get("transform") ?? "")?.[1];
+                return scale !== undefined && Number(scale) > 1;
+            });
+
+            expect(scaledBeyond).toBe(true);
+            expect(declarationsOf(INK_CSS, CELEBRATING).get("overflow")).toBe("clip");
+        });
+
         it("should let the digits take the ink from the centre outward, all before the dialog opens", () => {
             const take = animationTimingOf(animationOf(TAKING_DIGIT), "ink-take");
             const farthest = takeDelayAt(0, 0);
