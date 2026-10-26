@@ -175,7 +175,6 @@ describe("styleIcons", () => {
 
         for (const color of ["#2E4B3C", "#F4F1E8", "#F7C873"]) expect(paintsOf(svg), color).toContain(color);
         expect(svg).not.toContain("<text");
-        expect(svg).not.toContain("filter");
     });
 
     it("should draw chalkboard's 白板 icon in black, orange and blue markers on the whiteboard", () => {
@@ -205,6 +204,49 @@ describe("styleIcons", () => {
         expect(monochrome).toContain(`<path d="M45 38 Q34 36 33 46`);
         expect(monochrome).toMatch(/<path d="M71\.1 80Q/);
         expect(monochrome).not.toContain(`<rect x="34" y="34" width="40" height="40"`);
+    });
+
+    describe("chalkboard's chalk grain", () => {
+        const filterIdOf = (svg: string) => /<filter id="([^"]+)"/.exec(svg)?.[1];
+        const elementStarting = (svg: string, start: string): string =>
+            (svg.match(/<(?:path|rect) [^>]*\/>/g) ?? []).find(element => element.includes(start)) ?? "";
+
+        it("should roughen the 黑板's grid, ring and 7 with the canvas's chalk filter but not its stubs", () => {
+            const svg = styleIconSvg("chalkboard", chalkboard);
+            const id = filterIdOf(svg);
+
+            expect(id).toBeDefined();
+            expect(svg).toContain(`baseFrequency="1.25" numOctaves="2" seed="7"`);
+            expect(svg).toContain(`values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -4 2.9"`);
+            expect(svg).toContain(`<feDisplacementMap in="grain" in2="noise" scale="1.4"/>`);
+            expect(elementStarting(svg, `d="M44 24 Q43 54`)).toContain(`filter="url(#${id})"`);
+            expect(elementStarting(svg, `d="M45 38 Q34 36`)).toContain(`filter="url(#${id})"`);
+            expect(elementStarting(svg, `d="M71.1 80Q`)).toContain(`filter="url(#${id})"`);
+            expect(elementStarting(svg, `y="92"`)).not.toContain("filter");
+            expect(elementStarting(svg, `x="8" y="8"`)).not.toContain("filter");
+            expect(svg.match(/filter="/g)).toHaveLength(3);
+        });
+
+        it("should roughen the adaptive foreground of the 黑板 too", () => {
+            expect(styleIconForeground("chalkboard", chalkboard)).toContain(`filter="url(#`);
+        });
+
+        it("should leave the 白板 plain", () => {
+            expect(styleIconSvg("chalkboard", whiteboard)).not.toMatch(/filter/i);
+            expect(styleIconForeground("chalkboard", whiteboard)).not.toMatch(/filter/i);
+        });
+
+        it("should give each 黑板 icon copy its own filter id when given a suffix", () => {
+            const first = filterIdOf(styleIconSvg("chalkboard", chalkboard, "a"));
+            const second = filterIdOf(styleIconSvg("chalkboard", chalkboard, "b"));
+
+            expect(first).toBeDefined();
+            expect(first).not.toBe(second);
+        });
+
+        it("should keep the monochrome silhouette free of grain", () => {
+            expect(styleIconMonochrome("chalkboard")).not.toMatch(/filter/i);
+        });
     });
 
     it.each(STYLE_IDS)("should draw the %s icon as a plain 108 square with no text", (style) => {
