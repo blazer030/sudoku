@@ -35,7 +35,6 @@ const DARK_NESTED_PAGE = `${DARK} [data-skin~="page-ruled"] [data-skin~="page-ru
 const LOGO = `${SCOPE} [data-skin~="logo"]`;
 const TITLE = `${SCOPE} [data-skin~="title"]`;
 const CHOSEN_KEY = `${SCOPE} [data-skin~="key"][aria-pressed="true"]`;
-const DARK_CHOSEN_KEY = `${DARK} [data-skin~="key"][aria-pressed="true"]`;
 // The canvas's uneven chalk corners (--wob)
 const WOBBLY_CORNERS = "var(--chalkboard-wob)";
 const CHALK_OUTLINE = /^inset 0 0 0 [\d.]+px var\(--color-border\)$/;
@@ -572,18 +571,14 @@ describe("chalkboard skin", () => {
             expect(chosen.get("color")).toBe("var(--color-on-primary)");
         });
 
-        it("should grain the chosen key's chalk in 黑板, behind its digit", () => {
-            const key = declarationsOf(CHALKBOARD_CSS, DARK_CHOSEN_KEY);
-            const fill = declarationsOf(CHALKBOARD_CSS, `${DARK_CHOSEN_KEY}::before`);
+        // A mask clips to its element's box, and Caveat Brush's strokes overhang a digit's own box
+        it("should grain the whole key in 黑板, its outline, fill and digit, not the digit alone", () => {
+            const key = declarationsOf(CHALKBOARD_CSS, `${DARK} [data-skin~="key"]`);
+            const masked = allRules().filter(rule => rule.declarations.has("mask-image")).flatMap(rule => rule.selectors);
 
-            expect(key.get("background-color")).toBe("transparent");
-            expect(key.get("isolation")).toBe("isolate");
-            expect(fill.get("content")).toBe('""');
-            expect(fill.get("z-index")).toBe("-1");
-            expect(fill.get("pointer-events")).toBe("none");
-            expect(fill.get("background-color")).toBe("var(--color-primary)");
-            expect(fill.get("-webkit-mask-image")).toBe(GRAIN);
-            expect(fill.get("mask-image")).toBe(GRAIN);
+            expect(key.get("-webkit-mask-image")).toBe(GRAIN);
+            expect(key.get("mask-image")).toBe(GRAIN);
+            expect(masked.filter(selector => selector.includes('[data-skin~="key"] '))).toEqual([]);
         });
 
         it("should fade a finished key", () => {
