@@ -782,6 +782,82 @@
     animation-fill-mode: both;
 }
 
+/* Completing a group (only with motion allowed), from GroupChalk: a stick of yellow chalk (an orange marker on
+   白板) is dragged under the completed row or down the right of the completed column, and a wobbly ring goes
+   round a completed box, 80ms later (ChalkboardGroupOverlay); each is held and fades by about 0.9s. As a stroke
+   ends a few specks of dust drop off it (黑板 only; 白板's marker drops none). The group's digits flash yellow,
+   rippling out from the entered cell 45ms a step. The lines lie under the digits (2), the chalk lines (3) and
+   the selection ring (4). Every piece is unseen without its animation, so a stopped effect leaves no still cue.
+   The entered digit is written through its writer's mask, not an animation, so the flash on it replaces
+   nothing; the flash's name marks it as the group's, so its end never settles the arrival. */
+[data-style="chalkboard"] [data-skin~="board"] [data-group]:not(.animate-hint-reveal-glow) {
+    --group-ripple-step: 45ms;
+}
+
+@keyframes chalkboard-group-flash {
+    35% { color: var(--color-primary); }
+}
+
+[data-style="chalkboard"] [data-skin~="board"] [data-group]:not(.animate-hint-reveal-glow) > div {
+    animation: chalkboard-group-flash 520ms ease-out calc(100ms + var(--group-delay, 0ms));
+}
+
+@keyframes chalkboard-group-line {
+    0% { stroke-dashoffset: 420; opacity: 1; }
+    45% { stroke-dashoffset: 0; opacity: 1; }
+    70% { stroke-dashoffset: 0; opacity: 1; }
+    100% { stroke-dashoffset: 0; opacity: 0; }
+}
+
+[data-style="chalkboard"] .chalkboard-group-line {
+    z-index: 1;
+    pointer-events: none;
+}
+
+:root.dark[data-style="chalkboard"] .chalkboard-group-line > svg {
+    -webkit-mask-image: var(--chalkboard-grain);
+    mask-image: var(--chalkboard-grain);
+    -webkit-mask-size: 48px 48px;
+    mask-size: 48px 48px;
+    -webkit-mask-repeat: repeat;
+    mask-repeat: repeat;
+}
+
+[data-style="chalkboard"] .chalkboard-group-stroke {
+    opacity: 0;
+    stroke-dasharray: 420;
+    stroke-dashoffset: 420;
+}
+
+[data-style="chalkboard"] .chalkboard-group-line[data-kind="row"] .chalkboard-group-stroke,
+[data-style="chalkboard"] .chalkboard-group-line[data-kind="column"] .chalkboard-group-stroke {
+    animation: chalkboard-group-line 860ms ease-out 100ms;
+}
+
+[data-style="chalkboard"] .chalkboard-group-line[data-kind="box"] .chalkboard-group-stroke {
+    animation: chalkboard-group-line 900ms ease-out 180ms;
+}
+
+@keyframes chalkboard-group-dust {
+    0% { opacity: 1; transform: none; }
+    100% { opacity: 0; transform: translateY(14px); }
+}
+
+[data-style="chalkboard"] .chalkboard-group-dust {
+    opacity: 0;
+}
+
+:root.dark[data-style="chalkboard"] .chalkboard-group-dust {
+    background-color: color-mix(in srgb, var(--color-foreground) 80%, transparent);
+    box-shadow:
+        5px 2px 0 -0.5px color-mix(in srgb, var(--color-foreground) 80%, transparent),
+        -4px 5px 0 -0.5px color-mix(in srgb, var(--color-foreground) 80%, transparent);
+}
+
+:root.dark[data-style="chalkboard"] .chalkboard-group-dust[data-step="0"] { animation: chalkboard-group-dust 600ms ease-in 200ms; }
+:root.dark[data-style="chalkboard"] .chalkboard-group-dust[data-step="1"] { animation: chalkboard-group-dust 600ms ease-in 300ms; }
+:root.dark[data-style="chalkboard"] .chalkboard-group-dust[data-step="2"] { animation: chalkboard-group-dust 600ms ease-in 400ms; }
+
 /* The loader, from MomentsChalk: on a small board chalk draws a closed 九宮 (the outline in one stroke, then the
    inner lines), rings the cell being solved in yellow chalk and writes its digit through a mask wiped on left to
    right, a puff of dust falling (黑板 only), four cells in turn; then the duster drags its smear across, the sketch fades to
@@ -1062,6 +1138,17 @@
         mask-size: 48px 48px;
         -webkit-mask-repeat: repeat;
         mask-repeat: repeat;
+    }
+
+    /* A completed group shows nothing: no line, no ring, no dust and no flash */
+    [data-style="chalkboard"] [data-skin~="board"] [data-group]:not(.animate-hint-reveal-glow) > div,
+    [data-style="chalkboard"] .chalkboard-group-line[data-kind="row"] .chalkboard-group-stroke,
+    [data-style="chalkboard"] .chalkboard-group-line[data-kind="column"] .chalkboard-group-stroke,
+    [data-style="chalkboard"] .chalkboard-group-line[data-kind="box"] .chalkboard-group-stroke,
+    :root.dark[data-style="chalkboard"] .chalkboard-group-dust[data-step="0"],
+    :root.dark[data-style="chalkboard"] .chalkboard-group-dust[data-step="1"],
+    :root.dark[data-style="chalkboard"] .chalkboard-group-dust[data-step="2"] {
+        animation: none;
     }
 
     /* The loader holds the finished sketch: the 九宮 and the digits, the last cell ringed, and the smear the

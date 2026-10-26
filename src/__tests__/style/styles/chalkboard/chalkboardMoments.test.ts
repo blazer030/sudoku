@@ -3,6 +3,7 @@ import postcss from "postcss";
 import { ARRIVAL_SETTLE_MS } from "@/presentation/components/board-cell/useArrivalMotion";
 import { CHALKBOARD_DIGIT_DUST } from "@/presentation/components/style-moments/chalkboard/chalkboardDigitStrokes";
 import { STYLE_MOMENTS } from "@/presentation/components/style-moments/styleMoments";
+import { GROUP_RIPPLE_STEP_MS } from "@/presentation/pages/game/useGroupEffect";
 import ChalkboardDigitWriter from "@/presentation/components/style-moments/chalkboard/ChalkboardDigitWriter.vue";
 import { animationTimingOf, declarationsOf, reducedMotionDeclarationsOf as reducedMotionDeclarationsIn } from "../../styleSheetRules";
 
@@ -57,6 +58,19 @@ const LOADER_DUSTER = `${SCOPE} .chalkboard-loader-duster`;
 const LOADER_SMEAR = `${SCOPE} .chalkboard-loader-smear`;
 const LOADER_PIECES = [LOADER_STROKE, LOADER_RING, LOADER_DIGIT, LOADER_REVEAL, DARK_LOADER_DUST, LOADER_DUSTER, LOADER_SMEAR];
 
+
+const BOARD = `${SCOPE} [data-skin~="board"]`;
+const GROUP_CELL = `${BOARD} [data-group]:not(.animate-hint-reveal-glow)`;
+const GROUP_DIGIT = `${GROUP_CELL} > div`;
+const GROUP_LINE = `${SCOPE} .chalkboard-group-line`;
+const GROUP_STROKE_OF = {
+    row: `${GROUP_LINE}[data-kind="row"] .chalkboard-group-stroke`,
+    column: `${GROUP_LINE}[data-kind="column"] .chalkboard-group-stroke`,
+    box: `${GROUP_LINE}[data-kind="box"] .chalkboard-group-stroke`,
+};
+const GROUP_DUST = `${SCOPE} .chalkboard-group-dust`;
+const DARK_GROUP_DUST_STEPS = [0, 1, 2].map(step => `${DARK} .chalkboard-group-dust[data-step="${step}"]`);
+
 const collapse = (text: string): string => text.replace(/\s+/g, " ").trim();
 
 interface Frame { offsets: number[]; declarations: Map<string, string> }
@@ -103,6 +117,41 @@ const animationsOf = (piece: string): LoaderAnimation[] =>
 const hiddenUntil = (name: string): number => framesOf(name)[0]?.offsets.reduce((latest, offset) => Math.max(latest, offset), 0) ?? 0;
 const wholeFrom = (name: string, property: string, whole: string): number =>
     framesOf(name).find(frame => frame.declarations.get(property) === whole)?.offsets[0] ?? Infinity;
+
+
+interface Span { startMs: number; endMs: number }
+
+// When an animation runs on a selector, from its fixed delay to its end
+const spanOf = (selector: string, name: string): Span => {
+    const timing = animationTimingOf(declarationsOf(CHALKBOARD_CSS, selector).get("animation") ?? "", name);
+    if (timing === null) throw new Error(`${selector} does not run ${name}`);
+    return { startMs: timing.fixedDelayMs, endMs: timing.fixedDelayMs + timing.durationMs };
+};
+
+const animatedPropertiesOf = (name: string): Set<string> => new Set(framesOf(name).flatMap(frame => [...frame.declarations.keys()]));
+
+// The z-index a selector sets anywhere outside keyframes and reduced motion
+const zIndexOf = (selector: string): number => {
+    let zIndex = Number.NaN;
+    postcss.parse(CHALKBOARD_CSS).walkRules((rule) => {
+        if (!rule.selectors.map(collapse).includes(selector)) return;
+        rule.walkDecls("z-index", (declaration) => { zIndex = Number(declaration.value); });
+    });
+    return zIndex;
+};
+
+// Every selector of a rule outside @keyframes and reduced motion that matches `pattern`, with what it declares
+const rulesMatching = (pattern: RegExp): { selector: string; declarations: Map<string, string> }[] => {
+    const found: { selector: string; declarations: Map<string, string> }[] = [];
+    postcss.parse(CHALKBOARD_CSS).walkRules((rule) => {
+        const parent = rule.parent;
+        if (parent?.type === "atrule" && ["keyframes", "media"].includes((parent as postcss.AtRule).name)) return;
+        const declarations = new Map<string, string>();
+        rule.walkDecls((declaration) => { declarations.set(declaration.prop, collapse(declaration.value)); });
+        for (const selector of rule.selectors.map(collapse).filter(item => pattern.test(item))) found.push({ selector, declarations });
+    });
+    return found;
+};
 
 describe("chalkboard moments", () => {
     it("should write entered digits with chalk's pen", () => {
@@ -161,6 +210,124 @@ describe("chalkboard moments", () => {
             expect(reducedMotionDeclarationsOf(DARK_WRITTEN_DIGIT).get("-webkit-mask-image")).toBe(GRAIN);
             expect(reducedMotionDeclarationsOf(DARK_WRITTEN_DIGIT).get("mask-size")).toBe("48px 48px");
             expect(reducedMotionDeclarationsOf(DARK_WRITTEN_DIGIT).get("-webkit-mask-size")).toBe("48px 48px");
+        });
+    });
+
+    describe("group completion", () => {
+        it("should show its completed groups with chalk's group overlay", () => {
+            expect(STYLE_MOMENTS.chalkboard.groupOverlay).toBeDefined();
+        });
+
+        it("should drag a line's chalk along it, hold it and fade it, as GroupChalk does", () => {
+            const frames = framesOf("chalkboard-group-line");
+            const dash = declarationsOf(CHALKBOARD_CSS, `${SCOPE} .chalkboard-group-stroke`);
+
+            expect([...animatedPropertiesOf("chalkboard-group-line")].sort()).toEqual(["opacity", "stroke-dashoffset"]);
+            // Unseen without its animation, so a stopped effect leaves no still cue
+            expect(dash.get("opacity")).toBe("0");
+            expect(dash.get("stroke-dashoffset")).toBe(dash.get("stroke-dasharray"));
+            expect(frames[0]?.declarations.get("stroke-dashoffset")).toBe(dash.get("stroke-dasharray"));
+            const drawnAt = frames.find(frame => frame.declarations.get("stroke-dashoffset") === "0")?.offsets[0] ?? 100;
+            expect(drawnAt).toBeLessThan(50);
+            expect(frames[frames.length - 1]?.declarations.get("opacity")).toBe("0");
+            expect(frames[frames.length - 1]?.declarations.get("stroke-dashoffset")).toBe("0");
+        });
+
+        it("should draw a column's line as a row's, ring a box a beat later, and fade them all by about 0.9s", () => {
+            const row = spanOf(GROUP_STROKE_OF.row, "chalkboard-group-line");
+            const box = spanOf(GROUP_STROKE_OF.box, "chalkboard-group-line");
+
+            expect(spanOf(GROUP_STROKE_OF.column, "chalkboard-group-line")).toEqual(row);
+            expect(box.startMs).toBeGreaterThan(row.startMs);
+            for (const span of [row, box]) {
+                expect(span.endMs - span.startMs).toBeGreaterThanOrEqual(850);
+                expect(span.endMs - span.startMs).toBeLessThanOrEqual(950);
+            }
+        });
+
+        it("should drop three specks of dust off each line after it is drawn, in 黑板 only", () => {
+            const drawn = spanOf(GROUP_STROKE_OF.row, "chalkboard-group-line");
+            const dustStarts = DARK_GROUP_DUST_STEPS.map(selector => spanOf(selector, "chalkboard-group-dust").startMs);
+
+            expect(dustStarts).toEqual([...dustStarts].sort((first, second) => first - second));
+            expect(new Set(dustStarts).size).toBe(3);
+            expect(dustStarts[0]).toBeGreaterThan(drawn.startMs);
+            expect(declarationsOf(CHALKBOARD_CSS, GROUP_DUST).get("opacity")).toBe("0");
+            expect([...animatedPropertiesOf("chalkboard-group-dust")].sort()).toEqual(["opacity", "transform"]);
+            // 白板's marker drops none: only 黑板's rules animate the dust or give it a colour
+            for (const { selector, declarations } of rulesMatching(/chalkboard-group-dust/)) {
+                if (!declarations.has("animation") && !declarations.has("background-color")) continue;
+                expect(selector.startsWith(DARK), selector).toBe(true);
+            }
+        });
+
+        it("should grain the lines in 黑板 only, without a filter", () => {
+            for (const { selector, declarations } of rulesMatching(/chalkboard-group/)) {
+                expect(declarations.has("filter"), selector).toBe(false);
+                if ([...declarations.values()].some(value => value.includes(GRAIN))) expect(selector.startsWith(DARK), selector).toBe(true);
+            }
+            const grained = rulesMatching(/chalkboard-group-line/).filter(({ declarations }) => declarations.get("mask-image") === GRAIN);
+            expect(grained.map(({ selector }) => selector)).toEqual([`${DARK} .chalkboard-group-line > svg`]);
+            expect(grained[0]?.declarations.get("-webkit-mask-image")).toBe(GRAIN);
+        });
+
+        it("should flash the group's digits in the primary chalk, rippling out 45ms a step", () => {
+            const step = declarationsOf(CHALKBOARD_CSS, GROUP_CELL).get("--group-ripple-step") ?? "";
+            const flash = declarationsOf(CHALKBOARD_CSS, GROUP_DIGIT).get("animation") ?? "";
+
+            expect(Number.parseFloat(step)).toBe(45);
+            expect(Number.parseFloat(step)).toBeLessThanOrEqual(GROUP_RIPPLE_STEP_MS);
+            expect(flash).toContain("var(--group-delay");
+            expect([...animatedPropertiesOf("chalkboard-group-flash")]).toEqual(["color"]);
+            expect(framesOf("chalkboard-group-flash").some(frame => frame.declarations.get("color") === "var(--color-primary)")).toBe(true);
+        });
+
+        // The entered digit is in its own completed group (CLAUDE.md's trap). Chalk writes it through a mask, not
+        // an animation, so the group's flash on it replaces nothing and the writing stays; and the flash is
+        // named as a group's, so its end never settles the arrival while the pen is still drawing.
+        it("should flash the entered digit too, without cutting its writing", () => {
+            for (const { selector, declarations } of rulesMatching(/\.value-arrive/)) {
+                expect(declarations.has("animation"), selector).toBe(false);
+            }
+            const group = declarationsOf(CHALKBOARD_CSS, GROUP_DIGIT);
+            expect([...group.keys()].some(property => property.includes("mask"))).toBe(false);
+            expect(group.get("animation")).toMatch(/^chalkboard-group-/);
+        });
+
+        it("should end each piece within the group effect", () => {
+            const effectMs = STYLE_MOMENTS.chalkboard.groupEffectMs;
+
+            // The entered cell's flash is the one that ends latest past its own ripple delay
+            expect(spanOf(GROUP_DIGIT, "chalkboard-group-flash").endMs).toBeLessThanOrEqual(effectMs);
+            const dustEnd = Math.max(...DARK_GROUP_DUST_STEPS.map(selector => spanOf(selector, "chalkboard-group-dust").endMs));
+            // A line's farthest cell is at least four steps from the entered one, a box's two
+            for (const kind of ["row", "column"] as const) {
+                expect(Math.max(spanOf(GROUP_STROKE_OF[kind], "chalkboard-group-line").endMs, dustEnd), kind).toBeLessThanOrEqual(effectMs + 4 * GROUP_RIPPLE_STEP_MS);
+            }
+            expect(Math.max(spanOf(GROUP_STROKE_OF.box, "chalkboard-group-line").endMs, dustEnd)).toBeLessThanOrEqual(effectMs + 2 * GROUP_RIPPLE_STEP_MS);
+        });
+
+        it("should lay the lines under the digits, the chalk lines and the selection ring", () => {
+            const line = zIndexOf(GROUP_LINE);
+
+            expect(line).toBe(1);
+            expect(zIndexOf(`${BOARD} [data-variant] > div`)).toBe(2);
+            expect(zIndexOf(`${SCOPE} [data-skin~="board-grid"]::after`)).toBeGreaterThan(zIndexOf(`${BOARD} [data-variant] > div`));
+            // Nothing lifts the group's cells into a layer of their own while the effect runs
+            for (const { selector, declarations } of rulesMatching(/\[data-group\]/)) {
+                expect(declarations.has("transform") || declarations.has("z-index") || declarations.has("isolation"), selector).toBe(false);
+            }
+        });
+
+        it("should stop every piece under reduced motion and leave no still cue", () => {
+            const animated = rulesMatching(/chalkboard-group|\[data-group\]/).filter(({ declarations }) => declarations.has("animation"));
+
+            expect(animated.length).toBeGreaterThan(0);
+            for (const { selector } of animated) {
+                const stopped = reducedMotionDeclarationsOf(selector);
+                expect(stopped.get("animation"), selector).toBe("none");
+                expect([...stopped.keys()], selector).toEqual(["animation"]);
+            }
         });
     });
 

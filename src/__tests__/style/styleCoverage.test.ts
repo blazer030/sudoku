@@ -115,6 +115,8 @@ const REQUIRED_SELECTORS: Record<StyleId, readonly string[]> = {
         ".chalkboard-digit-dust",
         ".chalkboard-loader-stroke",
         ".chalkboard-loader-duster",
+        "[data-group]",
+        ".chalkboard-group-line",
     ],
 };
 
