@@ -157,7 +157,7 @@ describe("Appearance.vue style cards", () => {
         const wrapper = mountAppearance();
         const settingsStore = useSettingsStore();
         const setIcon = vi.fn().mockResolvedValue(undefined);
-        const stopLauncherIconSync = startLauncherIconSync(storeToRefs(settingsStore), { setIcon });
+        const stopLauncherIconSync = startLauncherIconSync(storeToRefs(settingsStore), { setIcon, resetIcon: vi.fn().mockResolvedValue(undefined) });
         settingsStore.setMatchLauncherIconToTheme(true);
         await nextTick();
         setIcon.mockClear();
@@ -340,7 +340,7 @@ describe("Appearance.vue match-launcher-icon toggle", () => {
         const wrapper = mountAppearance();
         const setIcon = vi.fn().mockResolvedValue(undefined);
         const settingsStore = useSettingsStore();
-        const stopLauncherIconSync = startLauncherIconSync(storeToRefs(settingsStore), { setIcon });
+        const stopLauncherIconSync = startLauncherIconSync(storeToRefs(settingsStore), { setIcon, resetIcon: vi.fn().mockResolvedValue(undefined) });
         try {
             await wrapper.find("[data-testid='toggle-matchLauncherIconToTheme']").trigger("click");
 

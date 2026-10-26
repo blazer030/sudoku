@@ -3,6 +3,7 @@ import sharp from "sharp";
 import { getPalette } from "@/theme/palettes";
 import { ALL_LAUNCHER_ALIASES, LAUNCHER_ICONS, LEGACY_LAUNCHER_ALIASES, launcherResourceName } from "@/theme/launcherIcon";
 import { styleIconBackground } from "@/theme/styleIcons";
+import { BRAND_ICON_BACKGROUND, BRAND_ICON_RESOURCE, brandTileColors } from "@/theme/brandIcon";
 import { ICON_THEME_IDS, type ColorMode, type StyleId } from "@/theme/themeIds";
 import type { Palette, PaletteToken } from "@/theme/palettes";
 
@@ -94,6 +95,45 @@ const inForeground = (point: number): number => (18 + point * 72 / 108) / 108;
 const manifestAliases = (): { alias: string; icon: string }[] =>
     [...readFileSync(MANIFEST, "utf8").matchAll(/<activity-alias\s[^>]*?android:name="\.(\w+)"[^>]*?android:icon="@mipmap\/(\w+)"/g)]
         .map(([, alias, icon]) => ({ alias, icon }));
+
+// The app's own icon: its dark ground near the left edge, clear of the rounding, and the face of the first box's empty centre tile
+const BRAND_GROUND = { x: 5.4, y: 20 };
+const BRAND_CENTRE_TILE = { x: 51.7, y: 51.9 };
+
+describe("the app's own launcher icon", () => {
+    it("should be the icon the application and its main activity show", () => {
+        expect(readFileSync(MANIFEST, "utf8")).toMatch(/<application\b[^>]*android:icon="@mipmap\/ic_launcher_brand"/);
+    });
+
+    it("should layer its foreground and monochrome on its dark ground", () => {
+        const xml = readFileSync(`${RES_ROOT}/mipmap-anydpi-v26/${BRAND_ICON_RESOURCE}.xml`, "utf8");
+        const colors = readFileSync(`${RES_ROOT}/values/ic_launcher_theme_colors.xml`, "utf8");
+
+        expect(xml).toContain(`<background android:drawable="@color/${BRAND_ICON_RESOURCE}_background"/>`);
+        expect(xml).toContain(`<foreground android:drawable="@mipmap/${BRAND_ICON_RESOURCE}_foreground"/>`);
+        expect(xml).toContain(`<monochrome android:drawable="@mipmap/${BRAND_ICON_RESOURCE}_monochrome"/>`);
+        expect(colors).toContain(`<color name="${BRAND_ICON_RESOURCE}_background">${BRAND_ICON_BACKGROUND}</color>`);
+    });
+
+    it("should draw the legacy icon's ground and first box at every density", async () => {
+        for (const density of DENSITIES) {
+            const path = `${RES_ROOT}/mipmap-${density}/${BRAND_ICON_RESOURCE}.png`;
+
+            expect(await pixelAt(path, BRAND_GROUND.x / 108, BRAND_GROUND.y / 108), path).toEqual({ color: BRAND_ICON_BACKGROUND, alpha: 255 });
+            expect(await pixelAt(path, BRAND_CENTRE_TILE.x / 108, BRAND_CENTRE_TILE.y / 108), path).toEqual({ color: brandTileColors(1, 1).top, alpha: 255 });
+        }
+    });
+
+    it("should draw the first box in the foreground's viewport and leave its ground to the background layer", async () => {
+        for (const density of DENSITIES) {
+            const path = `${RES_ROOT}/mipmap-${density}/${BRAND_ICON_RESOURCE}_foreground.png`;
+
+            expect((await pixelAt(path, inForeground(BRAND_GROUND.x), inForeground(BRAND_GROUND.y))).alpha, path).toBe(0);
+            expect(await pixelAt(path, inForeground(BRAND_CENTRE_TILE.x), inForeground(BRAND_CENTRE_TILE.y)), path).toEqual({ color: brandTileColors(1, 1).top, alpha: 255 });
+            expect(readdirSync(`${RES_ROOT}/mipmap-${density}`), density).toContain(`${BRAND_ICON_RESOURCE}_monochrome.png`);
+        }
+    });
+});
 
 describe("launcher icon assets", () => {
     it("should back each adaptive icon with the colour behind its style's artwork", () => {

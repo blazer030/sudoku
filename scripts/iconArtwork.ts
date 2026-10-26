@@ -18,13 +18,16 @@ export const ICON_VARIANTS: IconVariant[] = LAUNCHER_ICONS.map(({ key, style, th
     palette: getPalette(style, themeId, mode),
 }));
 
-/** The artwork masked to a rounded square, a quarter of its side in radius: favicons and legacy launcher icons. */
-export const roundedIconSvg = ({ style, palette }: IconVariant): string => [
+/** An artwork masked to a rounded square, a quarter of its side in radius: favicons and legacy launcher icons. */
+export const roundedSvg = (artwork: string): string => [
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 108">`,
     `<clipPath id="icon-shape"><rect width="108" height="108" rx="27"/></clipPath>`,
     `<g clip-path="url(#icon-shape)">`,
-    styleIconSvg(style, palette).trimEnd(),
+    artwork.trimEnd(),
     "</g>",
     "</svg>",
     "",
 ].join("\n");
+
+/** A style's icon masked to a rounded square. */
+export const roundedIconSvg = ({ style, palette }: IconVariant): string => roundedSvg(styleIconSvg(style, palette));

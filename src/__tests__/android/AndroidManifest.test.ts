@@ -24,6 +24,23 @@ describe("Android manifest", () => {
         }
     });
 
+    // The app shows no ads, so analytics counts players by Firebase's own random id, never the advertising id
+    it("should keep analytics from collecting the advertising id", () => {
+        expect(readFileSync(MANIFEST_PATH, "utf8")).toMatch(
+            /<meta-data\s+android:name="google_analytics_adid_collection_enabled"\s+android:value="false"\s*\/>/,
+        );
+    });
+
+    it.each([
+        "com.google.android.gms.permission.AD_ID",
+        "android.permission.ACCESS_ADSERVICES_AD_ID",
+        "android.permission.ACCESS_ADSERVICES_ATTRIBUTION",
+    ])("should strip the %s permission the analytics library would merge in", (permission) => {
+        const declaration = new RegExp(`<uses-permission\\s+android:name="${permission.replace(/\./g, "\\.")}"\\s+tools:node="remove"\\s*/>`);
+
+        expect(readFileSync(MANIFEST_PATH, "utf8")).toMatch(declaration);
+    });
+
     it("should turn off automatic screen reports so analytics shows only our screen names", () => {
         expect(readFileSync(MANIFEST_PATH, "utf8")).toMatch(
             /<meta-data\s+android:name="google_analytics_automatic_screen_reporting_enabled"\s+android:value="false"\s*\/>/,
