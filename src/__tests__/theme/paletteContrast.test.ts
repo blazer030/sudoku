@@ -419,6 +419,10 @@ const CHALKBOARD_BOARD_CASES: ChalkboardBoardCase[] = STYLES.chalkboard.themes.f
         ...onEverySurface("entry (accent)", palette.accent),
         ...onEverySurface("note", palette.note),
         ...onEverySurface("same digit and highlighted note (primary)", palette.primary),
+        // The selection's and the answer's chalk ring and a hint's emphasised note ring are marks, not text, so 3:1 applies
+        ...surfaces.map(([surface, background]) => drawn(`ring (primary) on ${surface}`, palette.primary, background, LARGE_OR_ICON)),
+        drawn("clue in an error cell (foreground) on error-surface", palette.foreground, palette["error-surface"]),
+        drawn("note in an error cell on error-surface", palette.note, palette["error-surface"]),
         ...([["the page", palette.background], ["error-surface", palette["error-surface"]], ["cell-scope", palette["cell-scope"]], ["cell-pattern", palette["cell-pattern"]]] as const)
             .map(([surface, background]) => drawn(`error on ${surface}`, palette.error, background)),
     ];

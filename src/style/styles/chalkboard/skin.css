@@ -33,6 +33,208 @@
     transition: transform 180ms ease-out;
 }
 
+/* Chalk grain: 黑板's chalk is broken by fine specks, one static tile (chalkboard-grain.svg, the canvas's #chalk
+   filter baked once) masked over the chalk lines, the rings and the digits, never a live filter. 白板 is markers:
+   smooth strokes and no grain, so only rules scoped to 黑板 (:root.dark) lay it. Later pieces of chalk read it
+   from --chalkboard-grain. The file is named through the @/ alias: a path relative to this sheet is lost once it
+   is inlined into index.css and minified, and a production build would look for it beside index.css. */
+[data-style="chalkboard"] {
+    --chalkboard-grain: none;
+}
+
+:root.dark[data-style="chalkboard"] {
+    --chalkboard-grain: url("@/style/styles/chalkboard/chalkboard-grain.svg");
+}
+
+/* Type: Caveat Brush (Chalk Digits) for every digit (clues, the player's digits, keys, the timer, notes),
+   repointed only once the face has loaded (fonts.ts beside this sheet marks it), so nothing paints in a
+   half-loaded stack. */
+[data-style="chalkboard"][data-chalkboard-fonts="ready"] {
+    --font-clue: var(--font-chalkboard-digits);
+    --font-entry: var(--font-chalkboard-digits);
+    --font-key: var(--font-chalkboard-digits);
+    --font-timer: var(--font-chalkboard-digits);
+    --font-note: var(--font-chalkboard-digits);
+}
+
+/* The board: no frame and no card. The board and its plain cells lie bare on the page, and every wash (peers,
+   the same digit, a hint's cells) is mixed over the page in the palette. Digits a size up, like the canvas's
+   29px (and its 13px notes). */
+[data-style="chalkboard"] [data-skin~="board"] {
+    --clue-scale: 1.32;
+    --entry-scale: 1.32;
+    --note-scale: 1.3;
+    position: relative;
+    background-color: transparent;
+    box-shadow: none;
+}
+
+[data-style="chalkboard"] [data-skin~="board-grid"] {
+    position: relative;
+    border-radius: 0;
+}
+
+/* Chalk lines: one static drawing (chalkboard-grid.svg, the canvas's hand-drawn grid: twelve pale cell lines,
+   four box lines, the frame) shown as a mask in the board's chalk or marker, over the cells (inside the grid's
+   border), so its lines land on the cell edges. 黑板 grains it, both masks at once. Only where masks are
+   supported do the plain cell lines and the grid's border give way to it, so an engine without masks keeps them
+   and draws no block of chalk. Above the digits (2), below the ring (4); a completed group's chalk line lies
+   under the digits (1). */
+@supports ((mask-image: url("")) or (-webkit-mask-image: url(""))) {
+    [data-style="chalkboard"] [data-skin~="board-grid"] {
+        --board-line: transparent;
+        --board-box-line: transparent;
+        border-color: transparent;
+    }
+
+    [data-style="chalkboard"] [data-skin~="board-grid"]::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: 3;
+        pointer-events: none;
+        background-color: var(--color-foreground);
+        -webkit-mask-image: url("@/style/styles/chalkboard/chalkboard-grid.svg");
+        mask-image: url("@/style/styles/chalkboard/chalkboard-grid.svg");
+        -webkit-mask-size: 100% 100%;
+        mask-size: 100% 100%;
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+    }
+
+    :root.dark[data-style="chalkboard"] [data-skin~="board-grid"]::after {
+        -webkit-mask-image: url("@/style/styles/chalkboard/chalkboard-grid.svg"), var(--chalkboard-grain);
+        mask-image: url("@/style/styles/chalkboard/chalkboard-grid.svg"), var(--chalkboard-grain);
+        -webkit-mask-size: 100% 100%, 48px 48px;
+        mask-size: 100% 100%, 48px 48px;
+        -webkit-mask-repeat: no-repeat, repeat;
+        mask-repeat: no-repeat, repeat;
+        -webkit-mask-composite: source-in;
+        mask-composite: intersect;
+    }
+}
+
+/* Cells: square; digits and notes sit above a group's chalk line (1) */
+[data-style="chalkboard"] [data-skin~="board"] [data-variant] {
+    position: relative;
+    border-radius: 0;
+}
+
+[data-style="chalkboard"] [data-skin~="board"] [data-variant] > div {
+    position: relative;
+    z-index: 2;
+}
+
+[data-style="chalkboard"] [data-skin~="board"] [data-variant="default"],
+[data-style="chalkboard"] [data-skin~="board"] [data-variant="clue"] {
+    background-color: transparent;
+    box-shadow: none;
+}
+
+/* 黑板's digits and notes are chalk: grained like the lines */
+:root.dark[data-style="chalkboard"] [data-skin~="board"] [data-variant] > div {
+    -webkit-mask-image: var(--chalkboard-grain);
+    mask-image: var(--chalkboard-grain);
+    -webkit-mask-size: 48px 48px;
+    mask-size: 48px 48px;
+    -webkit-mask-repeat: repeat;
+    mask-repeat: repeat;
+}
+
+/* Clues in the board's chalk or marker; the player's digits (and a hint's) in blue; the same digit in the
+   primary, and in 黑板 the selected cell's digit too, in yellow chalk */
+[data-style="chalkboard"] [data-skin~="board"] [data-value-kind="entered"] > div {
+    color: var(--color-accent);
+}
+
+[data-style="chalkboard"] [data-skin~="board"] [data-variant="error"][data-value-kind="entered"] > div,
+[data-style="chalkboard"] [data-skin~="board"] [data-variant="wrong"][data-value-kind="entered"] > div {
+    color: var(--color-error);
+}
+
+[data-style="chalkboard"] [data-skin~="board"] [data-variant="same-digit"][data-value-kind] > div {
+    color: var(--color-primary);
+}
+
+:root.dark[data-style="chalkboard"] [data-skin~="board"] [data-variant="selected"][data-value-kind] > div {
+    color: var(--color-primary);
+}
+
+/* The selected cell and a hint's answer have no fill and no shared ring: a hand-drawn ring of yellow chalk (an
+   orange marker on 白板) instead (chalkboard-ring.svg), grained in 黑板. It marks the selected cell whatever its
+   variant (a selected error still shows where the player is); hint mode marks its answer instead. Where masks
+   are unsupported, a plain wobbly ring stands in. */
+[data-style="chalkboard"] [data-skin~="board"] [data-variant="selected"],
+[data-style="chalkboard"] [data-skin~="board"] [data-variant="answer"] {
+    background-color: transparent;
+    box-shadow: none;
+}
+
+[data-style="chalkboard"] [data-skin~="board"]:not([data-hint-mode]) [data-selected]::after,
+[data-style="chalkboard"] [data-skin~="board"] [data-variant="answer"]::after {
+    content: "";
+    position: absolute;
+    inset: 2px;
+    z-index: 4;
+    pointer-events: none;
+    border-radius: 48% 52% 45% 55% / 55% 45% 52% 48%;
+    box-shadow: inset 0 0 0 2.6px var(--color-primary);
+    transform: rotate(-9deg);
+}
+
+@supports ((mask-image: url("")) or (-webkit-mask-image: url(""))) {
+    [data-style="chalkboard"] [data-skin~="board"]:not([data-hint-mode]) [data-selected]::after,
+    [data-style="chalkboard"] [data-skin~="board"] [data-variant="answer"]::after {
+        inset: 0;
+        border-radius: 0;
+        box-shadow: none;
+        transform: none;
+        background-color: var(--color-primary);
+        -webkit-mask-image: url("@/style/styles/chalkboard/chalkboard-ring.svg");
+        mask-image: url("@/style/styles/chalkboard/chalkboard-ring.svg");
+        -webkit-mask-size: 100% 100%;
+        mask-size: 100% 100%;
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+    }
+
+    :root.dark[data-style="chalkboard"] [data-skin~="board"]:not([data-hint-mode]) [data-selected]::after,
+    :root.dark[data-style="chalkboard"] [data-skin~="board"] [data-variant="answer"]::after {
+        -webkit-mask-image: url("@/style/styles/chalkboard/chalkboard-ring.svg"), var(--chalkboard-grain);
+        mask-image: url("@/style/styles/chalkboard/chalkboard-ring.svg"), var(--chalkboard-grain);
+        -webkit-mask-size: 100% 100%, 48px 48px;
+        mask-size: 100% 100%, 48px 48px;
+        -webkit-mask-repeat: no-repeat, repeat;
+        mask-repeat: no-repeat, repeat;
+        -webkit-mask-composite: source-in;
+        mask-composite: intersect;
+    }
+}
+
+/* A hint's cells in 黑板: its red chalk (the struck-out notes) reads on no wash brighter than a breath, so the
+   scope and pattern washes are barely there (palette.ts). A chalk outline at each cell's edge marks them
+   instead, clear of every digit and note: faint chalk round the scope, yellow round the pattern. 白板's washes
+   carry them as the canvas does. */
+:root.dark[data-style="chalkboard"] [data-skin~="board"] [data-variant="scope"] {
+    box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--color-foreground) 35%, transparent);
+}
+
+:root.dark[data-style="chalkboard"] [data-skin~="board"] [data-variant="pattern"] {
+    box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--color-primary) 55%, transparent);
+}
+
+/* Notes: the selected digit's note in the primary, without the shared disc; a hint's emphasised candidate also
+   ringed in it, as the canvas does. A hint's candidates are the primary and its eliminated ones the error
+   colour, as everywhere. */
+[data-style="chalkboard"] [data-skin~="board"] [data-note-highlight] {
+    background-color: transparent;
+    color: var(--color-primary);
+}
+
+[data-style="chalkboard"] [data-skin~="board"][data-hint-mode] [data-note-highlight] {
+    box-shadow: inset 0 0 0 1.5px var(--color-primary);
+}
+
 /* Reduced motion: no scaling or sliding; the press wash stays */
 @media (prefers-reduced-motion: reduce) {
     [data-style="chalkboard"] .segmented-indicator-motion {
