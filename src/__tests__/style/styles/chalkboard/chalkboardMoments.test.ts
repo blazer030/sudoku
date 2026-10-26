@@ -307,12 +307,20 @@ describe("chalkboard moments", () => {
             expect(Math.max(spanOf(GROUP_STROKE_OF.box, "chalkboard-group-line").endMs, dustEnd)).toBeLessThanOrEqual(effectMs + 2 * GROUP_RIPPLE_STEP_MS);
         });
 
-        it("should lay the lines under the digits, the chalk lines and the selection ring", () => {
+        // GroupChalk draws its lines in a layer over the board (z4), over the digits and the chalk lines, level with
+        // the selection ring and after it, so over it too
+        it("should lay the lines over the digits and the chalk lines, level with the selection ring", () => {
             const line = zIndexOf(GROUP_LINE);
+            const grid = zIndexOf(`${SCOPE} [data-skin~="board-grid"]::after`);
+            const ring = zIndexOf(`${BOARD}:not([data-hint-mode]) [data-selected]::after`);
 
-            expect(line).toBe(1);
             expect(zIndexOf(`${BOARD} [data-variant] > div`)).toBe(2);
-            expect(zIndexOf(`${SCOPE} [data-skin~="board-grid"]::after`)).toBeGreaterThan(zIndexOf(`${BOARD} [data-variant] > div`));
+            expect(grid).toBe(3);
+            expect(line).toBeGreaterThan(grid);
+            expect(line).toBe(ring);
+            // Level with the ring, the overlay lies over it because it follows the cells
+            const game = readFileSync("src/presentation/pages/game/GameScreen.vue", "utf8");
+            expect(game.indexOf("<GroupOverlay")).toBeGreaterThan(game.indexOf("<Cell"));
             // Nothing lifts the group's cells into a layer of their own while the effect runs
             for (const { selector, declarations } of rulesMatching(/\[data-group\]/)) {
                 expect(declarations.has("transform") || declarations.has("z-index") || declarations.has("isolation"), selector).toBe(false);

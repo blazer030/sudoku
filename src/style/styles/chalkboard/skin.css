@@ -87,8 +87,7 @@
    four box lines, the frame) shown as a mask in the board's chalk or marker, over the cells (inside the grid's
    border), so its lines land on the cell edges. 黑板 grains it, both masks at once. Only where masks are
    supported do the plain cell lines and the grid's border give way to it, so an engine without masks keeps them
-   and draws no block of chalk. Above the digits (2), below the ring (4); a completed group's chalk line lies
-   under the digits (1). */
+   and draws no block of chalk. Above the digits (2), below the ring (4) and a completed group's chalk line (4). */
 @supports ((mask-image: url("")) or (-webkit-mask-image: url(""))) {
     [data-style="chalkboard"] [data-skin~="board-grid"] {
         --board-line: transparent;
@@ -123,7 +122,7 @@
     }
 }
 
-/* Cells: square; digits and notes sit above a group's chalk line (1) */
+/* Cells: square; digits and notes sit under the chalk lines (2) */
 [data-style="chalkboard"] [data-skin~="board"] [data-variant] {
     position: relative;
     border-radius: 0;
@@ -786,8 +785,9 @@
    白板) is dragged under the completed row or down the right of the completed column, and a wobbly ring goes
    round a completed box, 80ms later (ChalkboardGroupOverlay); each is held and fades by about 0.9s. As a stroke
    ends a few specks of dust drop off it (黑板 only; 白板's marker drops none). The group's digits flash yellow,
-   rippling out from the entered cell 45ms a step. The lines lie under the digits (2), the chalk lines (3) and
-   the selection ring (4). Every piece is unseen without its animation, so a stopped effect leaves no still cue.
+   rippling out from the entered cell 45ms a step. As on GroupChalk the lines are drawn over the board: over the
+   digits (2) and the chalk lines (3), level with the selection ring (4) and over it, as the overlay follows the
+   cells. Every piece is unseen without its animation, so a stopped effect leaves no still cue.
    The entered digit is written through its writer's mask, not an animation, so the flash on it replaces
    nothing; the flash's name marks it as the group's, so its end never settles the arrival. */
 [data-style="chalkboard"] [data-skin~="board"] [data-group]:not(.animate-hint-reveal-glow) {
@@ -810,7 +810,7 @@
 }
 
 [data-style="chalkboard"] .chalkboard-group-line {
-    z-index: 1;
+    z-index: 4;
     pointer-events: none;
 }
 
