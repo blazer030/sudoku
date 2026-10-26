@@ -665,6 +665,51 @@
     background-color: color-mix(in srgb, var(--color-scrim) 60%, transparent);
 }
 
+/* Erasing smears the digit: a ghost of the one that left (the cell's data-leaving-value) is dragged sideways by
+   a duster, widening and skewing, through a faint layer, and fades fully away (no hold: nothing stays on the
+   board). It is the cell's ::before, in the entered digit's chalk; its animationend settles leaving like the
+   digit's own. 黑板 blurs and grains it; 白板's marker is wiped without a blur. Unseen without its animation. */
+@keyframes chalkboard-smear {
+    0% { opacity: 1; filter: blur(0); transform: none; }
+    35% { opacity: 0.75; filter: blur(1.5px); transform: translateX(4px) scaleX(1.25) skewX(-8deg); }
+    65% { opacity: 0.2; filter: blur(2.5px); transform: translateX(-1px) scaleX(1.5) skewX(2deg); }
+    100% { opacity: 0; filter: blur(3px); transform: translateX(-3px) scaleX(1.7) skewX(6deg); }
+}
+
+@keyframes chalkboard-wipe {
+    0% { opacity: 1; transform: none; }
+    35% { opacity: 0.75; transform: translateX(4px) scaleX(1.25) skewX(-8deg); }
+    65% { opacity: 0.2; transform: translateX(-1px) scaleX(1.5) skewX(2deg); }
+    100% { opacity: 0; transform: translateX(-3px) scaleX(1.7) skewX(6deg); }
+}
+
+[data-style="chalkboard"] [data-skin~="board"] [data-variant].value-leave::before {
+    content: attr(data-leaving-value);
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    font-family: var(--font-entry);
+    font-size: calc(22px * var(--entry-scale, 1));
+    line-height: 1;
+    color: var(--color-accent);
+    opacity: 0;
+    animation: chalkboard-wipe 750ms ease-out;
+}
+
+:root.dark[data-style="chalkboard"] [data-skin~="board"] [data-variant].value-leave::before {
+    -webkit-mask-image: var(--chalkboard-grain);
+    mask-image: var(--chalkboard-grain);
+    -webkit-mask-size: 48px 48px;
+    mask-size: 48px 48px;
+    -webkit-mask-repeat: repeat;
+    mask-repeat: repeat;
+    animation: chalkboard-smear 750ms ease-out;
+}
+
 /* Reduced motion: no scaling or sliding; the press wash stays */
 @media (prefers-reduced-motion: reduce) {
     [data-style="chalkboard"] .segmented-indicator-motion {
@@ -676,6 +721,11 @@
     [data-style="chalkboard"] [data-press-motion][data-pressed],
     [data-style="chalkboard"] [data-press-bounce] {
         transform: none;
+        animation: none;
+    }
+
+    [data-style="chalkboard"] [data-skin~="board"] [data-variant].value-leave::before,
+    :root.dark[data-style="chalkboard"] [data-skin~="board"] [data-variant].value-leave::before {
         animation: none;
     }
 }

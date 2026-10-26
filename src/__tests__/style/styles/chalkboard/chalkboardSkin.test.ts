@@ -1,6 +1,7 @@
 import { readFileSync } from "fs";
 import postcss, { type AtRule, type Rule } from "postcss";
-import { declarationsOf } from "../../styleSheetRules";
+import { ARRIVAL_SETTLE_MS } from "@/presentation/components/board-cell/useArrivalMotion";
+import { animationTimingOf, declarationsOf, reducedMotionDeclarationsOf } from "../../styleSheetRules";
 
 const CHALKBOARD_CSS = readFileSync("src/style/styles/chalkboard/skin.css", "utf8");
 const GRID_SVG = readFileSync("src/style/styles/chalkboard/chalkboard-grid.svg", "utf8");
@@ -641,6 +642,79 @@ describe("chalkboard skin", () => {
         it("should ring a hint's emphasised candidate in the primary", () => {
             expect(declarationsOf(CHALKBOARD_CSS, `${BOARD}[data-hint-mode] [data-note-highlight]`).get("box-shadow"))
                 .toBe("inset 0 0 0 1.5px var(--color-primary)");
+        });
+    });
+
+    describe("erase smear", () => {
+        const GHOST = `${BOARD} [data-variant].value-leave::before`;
+        const DARK_GHOST = `${DARK_BOARD} [data-variant].value-leave::before`;
+
+        const framesOf = (name: string): Map<string, Map<string, string>> => {
+            const frames = new Map<string, Map<string, string>>();
+            postcss.parse(CHALKBOARD_CSS).walkAtRules("keyframes", (atRule) => {
+                if (atRule.params !== name) return;
+                atRule.walkRules((frame) => {
+                    const declarations = new Map<string, string>();
+                    frame.walkDecls((declaration) => {
+                        declarations.set(declaration.prop, collapse(declaration.value));
+                    });
+                    frames.set(collapse(frame.selector), declarations);
+                });
+            });
+            return frames;
+        };
+        const opacityOf = (frame: Map<string, string> | undefined): number => Number(frame?.get("opacity"));
+
+        it("should smear the erased digit in the entered digit's face and colour, untouchable", () => {
+            const ghost = declarationsOf(CHALKBOARD_CSS, GHOST);
+            const entered = declarationsOf(CHALKBOARD_CSS, `${BOARD} [data-value-kind="entered"] > div`);
+
+            expect(ghost.get("content")).toBe("attr(data-leaving-value)");
+            expect(ghost.get("pointer-events")).toBe("none");
+            expect(ghost.get("font-family")).toBe("var(--font-entry)");
+            expect(ghost.get("font-size")).toContain("var(--entry-scale, 1)");
+            expect(ghost.get("color")).toBe(entered.get("color"));
+            expect(ghost.get("opacity")).toBe("0");
+        });
+
+        it("should smear sideways through a faint layer to nothing, without a hold that keeps it visible", () => {
+            for (const name of ["chalkboard-smear", "chalkboard-wipe"]) {
+                const frames = framesOf(name);
+                const transform = frames.get("100%")?.get("transform") ?? "";
+
+                expect(opacityOf(frames.get("0%")), name).toBe(1);
+                expect(transform, name).toBe("translateX(-3px) scaleX(1.7) skewX(6deg)");
+                expect(opacityOf(frames.get("100%")), name).toBe(0);
+                const faint = [...frames.entries()].filter(([selector]) => selector !== "0%" && selector !== "100%");
+                expect(faint.some(([, frame]) => opacityOf(frame) > 0 && opacityOf(frame) <= 0.25), name).toBe(true);
+            }
+        });
+
+        it("should blur the smear in 黑板 and wipe it by a marker, with no blur, in 白板", () => {
+            const smear = [...framesOf("chalkboard-smear").values()];
+            const wipe = [...framesOf("chalkboard-wipe").values()];
+
+            expect(framesOf("chalkboard-smear").get("100%")?.get("filter")).toBe("blur(3px)");
+            expect(smear.some(frame => frame.has("filter"))).toBe(true);
+            expect(wipe.some(frame => frame.has("filter"))).toBe(false);
+            expect(declarationsOf(CHALKBOARD_CSS, GHOST).get("animation")).toContain("chalkboard-wipe");
+            expect(declarationsOf(CHALKBOARD_CSS, DARK_GHOST).get("animation")).toContain("chalkboard-smear");
+        });
+
+        it("should grain the smear in 黑板 only", () => {
+            expect(declarationsOf(CHALKBOARD_CSS, DARK_GHOST).get("mask-image")).toBe(GRAIN);
+            expect(declarationsOf(CHALKBOARD_CSS, GHOST).has("mask-image")).toBe(false);
+        });
+
+        it("should end before the cell settles, and stop under reduced motion", () => {
+            for (const [selector, name] of [[GHOST, "chalkboard-wipe"], [DARK_GHOST, "chalkboard-smear"]] as const) {
+                const timing = animationTimingOf(declarationsOf(CHALKBOARD_CSS, selector).get("animation") ?? "", name);
+
+                expect(timing, name).not.toBeNull();
+                expect((timing?.durationMs ?? 0) + (timing?.fixedDelayMs ?? 0), name).toBeLessThanOrEqual(ARRIVAL_SETTLE_MS);
+                expect(declarationsOf(CHALKBOARD_CSS, selector).get("animation"), name).not.toContain("forwards");
+                expect(reducedMotionDeclarationsOf(CHALKBOARD_CSS, selector).get("animation"), name).toBe("none");
+            }
         });
     });
 });
