@@ -18,8 +18,11 @@ const LAYOUT_PREFIXES = ["min-", "max-", "padding", "margin", "inset", "flex", "
 // The title plates are inline-block with a little space between them; nothing else may be set
 const TITLE_GLYPH_ALLOWED: Readonly<Record<string, string>> = { "display": "inline-block", "margin-inline": "0.12em" };
 
-// Chalk's board digits take room for Caveat Brush's overhang and give it back, so nothing moves
-const CHALKBOARD_DIGIT_ROOM_SELECTOR = '[data-style="chalkboard"] [data-skin~="board"] [data-variant] > :is(.font-clue, .font-entry)';
+// Chalk's board and key digits take room for Caveat Brush's overhang and give it back, so nothing moves
+const CHALKBOARD_DIGIT_ROOM_SELECTORS: ReadonlySet<string> = new Set([
+    '[data-style="chalkboard"] [data-skin~="board"] [data-variant] > :is(.font-clue, .font-entry)',
+    '[data-style="chalkboard"] [data-skin~="key"].font-key > span',
+]);
 const CHALKBOARD_DIGIT_ROOM_ALLOWED: Readonly<Record<string, string>> = { "padding-inline": "0.1em", "margin-inline": "-0.1em" };
 
 const isLayoutProperty = (property: string): boolean =>
@@ -54,7 +57,7 @@ export const findLayoutDeclarations = (css: string): string[] => {
         // Absolutely placed decorations do not take part in layout
         if (selectors.every(selector => /::(?:before|after)$/.test(selector))) return;
         const isTitleGlyph = selectors.every(selector => selector.endsWith('[data-skin~="title-glyph"]'));
-        const isChalkboardDigitRoom = selectors.every(selector => selector === CHALKBOARD_DIGIT_ROOM_SELECTOR);
+        const isChalkboardDigitRoom = selectors.every(selector => CHALKBOARD_DIGIT_ROOM_SELECTORS.has(selector));
         for (const declaration of ownDeclarations(rule)) {
             const property = declaration.prop.toLowerCase();
             if (property.startsWith("--")) continue;

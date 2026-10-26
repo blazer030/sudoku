@@ -565,21 +565,31 @@ describe("chalkboard skin", () => {
     });
 
     describe("keypad", () => {
-        it("should colour the chosen key in with chalk, its digit on it in the on-primary", () => {
+        // The canvas's .key.on: a faint wash of the primary, ringed and written in it
+        it("should wash the chosen key faintly in the primary, its outline and digit in the primary", () => {
             const chosen = declarationsOf(CHALKBOARD_CSS, CHOSEN_KEY);
 
-            expect(chosen.get("background-color")).toBe("var(--color-primary)");
-            expect(chosen.get("color")).toBe("var(--color-on-primary)");
+            expect(chosen.get("background-color")).toBe("var(--color-primary-light)");
+            expect(chosen.get("box-shadow")).toBe("inset 0 0 0 2px var(--color-primary)");
+            expect(chosen.get("color")).toBe("var(--color-primary)");
+        });
+
+        // The canvas grains a key's digit (.key .kd), never its outline or its fill
+        it("should grain only the keys' digits in 黑板, not the key with its outline and fill", () => {
+            const digit = declarationsOf(CHALKBOARD_CSS, `${DARK} [data-skin~="key"].font-key > span`);
+            const masked = allRules().filter(rule => rule.declarations.has("mask-image")).flatMap(rule => rule.selectors);
+
+            expect(digit.get("-webkit-mask-image")).toBe(GRAIN);
+            expect(digit.get("mask-image")).toBe(GRAIN);
+            expect(masked.filter(selector => /\[data-skin~="key"\](?:\[[^\]]+\]|:[a-z-]+)*$/.test(selector))).toEqual([]);
         });
 
         // A mask clips to its element's box, and Caveat Brush's strokes overhang a digit's own box
-        it("should grain the whole key in 黑板, its outline, fill and digit, not the digit alone", () => {
-            const key = declarationsOf(CHALKBOARD_CSS, `${DARK} [data-skin~="key"]`);
-            const masked = allRules().filter(rule => rule.declarations.has("mask-image")).flatMap(rule => rule.selectors);
+        it("should give a key's digit room for Caveat Brush's overhang and give it back, so nothing moves", () => {
+            const room = declarationsOf(CHALKBOARD_CSS, `${SCOPE} [data-skin~="key"].font-key > span`);
 
-            expect(key.get("-webkit-mask-image")).toBe(GRAIN);
-            expect(key.get("mask-image")).toBe(GRAIN);
-            expect(masked.filter(selector => selector.includes('[data-skin~="key"] '))).toEqual([]);
+            expect(room.get("padding-inline")).toBe("0.1em");
+            expect(room.get("margin-inline")).toBe("-0.1em");
         });
 
         it("should fade a finished key", () => {
