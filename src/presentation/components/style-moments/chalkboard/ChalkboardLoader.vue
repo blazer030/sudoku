@@ -99,13 +99,22 @@
                     />
                 </g>
             </svg>
-            <!-- The canvas's wiper: a soft smear round the duster, dragged across with it -->
-            <span class="chalkboard-loader-smear absolute -top-1.5 -left-[30px] h-[132px] w-[100px]" />
-            <span class="chalkboard-loader-duster absolute left-1 top-[46px] h-7 w-8" />
         </div>
         <p class="chalkboard-loader-caption m-0 text-[15px] text-foreground">
             {{ message ?? t("home.generatingPuzzle") }}
         </p>
+        <!-- The canvas's wiper: a soft smear round the duster, dragged across the sketch with it. It comes in from
+             past the card's left edge and leaves past its right, so it lies in a layer over the card, inside its 2px
+             chalk edge, that cuts it off there (skin.css clips it to the card's wobbly corners too). Placed on the
+             sketch, which sits on the card's centre line 22px down (20px in the layer): the smear from 6px above it
+             and 30px left of it, the duster 4px in and 46px down. -->
+        <span
+            class="chalkboard-loader-wipe pointer-events-none absolute inset-0.5 overflow-hidden"
+            aria-hidden="true"
+        >
+            <span class="chalkboard-loader-smear absolute top-3.5 left-[calc(50%-90px)] h-[132px] w-[100px]" />
+            <span class="chalkboard-loader-duster absolute top-[66px] left-[calc(50%-56px)] h-7 w-8" />
+        </span>
     </div>
 </template>
 

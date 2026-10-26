@@ -712,6 +712,17 @@ describe("chalkboard moments", () => {
             expect(hiddenUntil(duster.name)).toBeGreaterThanOrEqual(wholeFrom(reveals[reveals.length - 1], "stroke-dashoffset", "0"));
         });
 
+        // The duster comes in from past the card's left edge; the card's wobbly edge cuts it off, by a clip path as
+        // well as the layer's overflow, so it never shows over the scrim
+        it("should clip the duster and its smear to the card's edge", () => {
+            const wipe = declarationsOf(CHALKBOARD_CSS, `${SCOPE} .chalkboard-loader-wipe`);
+            const card = declarationsOf(CHALKBOARD_CSS, `${SCOPE} .chalkboard-loader`);
+
+            expect(card.get("border-radius")).toBe("var(--chalkboard-wob)");
+            expect(wipe.get("border-radius")).toBe(card.get("border-radius"));
+            expect(wipe.get("clip-path")).toBe(`inset(0 round ${card.get("border-radius")})`);
+        });
+
         // The canvas's wiper: the smudge is a soft band round the duster, dragged across with it
         it("should drag the smear across with the duster", () => {
             const [duster] = animationsOf(LOADER_DUSTER);

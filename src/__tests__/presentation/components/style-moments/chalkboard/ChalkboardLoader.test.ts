@@ -29,8 +29,24 @@ describe("ChalkboardLoader", () => {
         expect(digits).toHaveLength(4);
         expect(digits.every(digit => /^[1-9]$/.test(digit))).toBe(true);
         expect(new Set(digits).size).toBe(digits.length);
-        expect(sketch.find(".chalkboard-loader-duster").exists()).toBe(true);
-        expect(sketch.find(".chalkboard-loader-smear").exists()).toBe(true);
+        expect(wrapper.find(".chalkboard-loader-duster").exists()).toBe(true);
+        expect(wrapper.find(".chalkboard-loader-smear").exists()).toBe(true);
+    });
+
+    // MomentsChalk's wiper comes in from past the card's left edge, and the card's edge cuts it off: the duster and
+    // its smear lie in a layer over the card, inside its 2px chalk edge, that clips them; never on the sketch, which
+    // they overrun
+    it("should drag the duster and its smear in a layer clipped to the card's edge", () => {
+        const wrapper = mount(ChalkboardLoader);
+        const card = wrapper.get(".chalkboard-loader");
+        const wipe = card.get(".chalkboard-loader-wipe");
+
+        expect(wipe.element.parentElement).toBe(card.element);
+        expect(wipe.classes()).toEqual(expect.arrayContaining(["absolute", "inset-0.5", "overflow-hidden"]));
+        expect(wipe.attributes("aria-hidden")).toBe("true");
+        expect(wipe.find(".chalkboard-loader-duster").exists()).toBe(true);
+        expect(wipe.find(".chalkboard-loader-smear").exists()).toBe(true);
+        expect(card.get(".chalkboard-loader-sketch").find(".chalkboard-loader-duster").exists()).toBe(false);
     });
 
     it("should write each digit through its own reveal mask", () => {

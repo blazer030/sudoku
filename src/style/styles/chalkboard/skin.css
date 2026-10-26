@@ -1102,6 +1102,14 @@
     opacity: 0;
 }
 
+/* The duster and its smear come in from past the card's left edge, and the card's edge cuts them off, as on
+   MomentsChalk: their layer covers the card and clips to its wobbly corners, by its overflow and a clip path
+   both, so even a composited duster never shows over the scrim */
+[data-style="chalkboard"] .chalkboard-loader-wipe {
+    border-radius: var(--chalkboard-wob);
+    clip-path: inset(0 round var(--chalkboard-wob));
+}
+
 /* The duster: grey wood over its felt, as in the tray */
 [data-style="chalkboard"] .chalkboard-loader-duster {
     opacity: 0;
