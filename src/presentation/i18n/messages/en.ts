@@ -175,6 +175,8 @@ export const en = {
             review: "Review This Game",
             // Paper's rubber stamp on the completion card, written in Caveat
             stamp: "SOLVED",
+            // Chalkboard's cheer on the completion card, written in Chalk Digits
+            cheer: "Well done!",
         },
     },
     walkthrough: {

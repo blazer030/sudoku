@@ -7,7 +7,7 @@ import { zhHant } from "@/presentation/i18n/messages/zh-Hant";
 import { inkBrushTitles } from "@/style/styles/ink/brushTitles";
 
 const FONTS_CSS = "src/style/fonts.css";
-const BUNDLED_FONTS = ["outfit.woff2", "roboto-mono.woff2", "caveat.woff2", "lxgw-wenkai-tc-regular.woff2", "lxgw-wenkai-tc-bold.woff2", "press-start-2p.woff2", "silkscreen.woff2", "orbitron.woff2", "share-tech-mono.woff2", "yuji-boku.woff2", "noto-serif-tc.woff2", "eb-garamond.woff2", "eb-garamond-italic.woff2"];
+const BUNDLED_FONTS = ["outfit.woff2", "roboto-mono.woff2", "caveat.woff2", "lxgw-wenkai-tc-regular.woff2", "lxgw-wenkai-tc-bold.woff2", "press-start-2p.woff2", "silkscreen.woff2", "orbitron.woff2", "share-tech-mono.woff2", "yuji-boku.woff2", "noto-serif-tc.woff2", "eb-garamond.woff2", "eb-garamond-italic.woff2", "caveat-brush.woff2"];
 const CUBIC_11 = "cubic-11.woff2";
 
 interface FontFace {
@@ -73,6 +73,7 @@ describe("bundled fonts", () => {
         ["Ink Serif TC", "400 900"],
         ["Ink Garamond", "500 700"],
         ["Ink Garamond", "500 600"],
+        ["Chalk Digits", "400"],
     ])("should declare %s %s from a bundled woff2 with swap", (family, weight) => {
         const face = fontFaces().find(candidate => candidate.family === family && candidate.weight === weight);
 
@@ -85,7 +86,7 @@ describe("bundled fonts", () => {
 
     it("should ship each family's licence in the build", () => {
         // public/ is copied as is into dist/, which the web build serves and the Android app packs
-        for (const licence of ["Outfit-OFL.txt", "RobotoMono-OFL.txt", "Caveat-OFL.txt", "LXGWWenKaiTC-OFL.txt", "PressStart2P-OFL.txt", "Silkscreen-OFL.txt", "Cubic11-OFL.txt", "Orbitron-OFL.txt", "ShareTechMono-OFL.txt", "YujiBoku-OFL.txt", "NotoSerifTC-OFL.txt", "EBGaramond-OFL.txt"]) {
+        for (const licence of ["Outfit-OFL.txt", "RobotoMono-OFL.txt", "Caveat-OFL.txt", "LXGWWenKaiTC-OFL.txt", "PressStart2P-OFL.txt", "Silkscreen-OFL.txt", "Cubic11-OFL.txt", "Orbitron-OFL.txt", "ShareTechMono-OFL.txt", "YujiBoku-OFL.txt", "NotoSerifTC-OFL.txt", "EBGaramond-OFL.txt", "CaveatBrush-OFL.txt"]) {
             expect(readFileSync(`public/fonts/licenses/${licence}`, "utf8"), licence).toContain("SIL Open Font License");
         }
     });
@@ -177,6 +178,23 @@ describe("bundled fonts", () => {
         const mapped = mappedCodePoints(readFileSync(`src/assets/fonts/${file}`), digits);
 
         expect(digits.filter(codePoint => !mapped.has(codePoint))).toEqual([]);
+    });
+
+    // Chalk writes its digits, the timer's colon, the percent and the English cheer in Caveat Brush
+    it("caveat-brush.woff2 maps chalk's digits and the English cheer (run npm run generate:fonts)", () => {
+        const wanted = Array.from(new Set("0123456789:/%" + en.game.complete.cheer), character => character.codePointAt(0) ?? 0);
+        const mapped = mappedCodePoints(readFileSync("src/assets/fonts/caveat-brush.woff2"), wanted);
+
+        expect(en.game.complete.cheer).not.toBe("");
+        expect(wanted.filter(codePoint => !mapped.has(codePoint)).map(codePoint => String.fromCodePoint(codePoint))).toEqual([]);
+    });
+
+    it("lxgw-wenkai-tc-regular.woff2 maps the Chinese cheer", () => {
+        const wanted = Array.from(zhHant.game.complete.cheer, character => character.codePointAt(0) ?? 0);
+        const mapped = mappedCodePoints(readFileSync("src/assets/fonts/lxgw-wenkai-tc-regular.woff2"), wanted);
+
+        expect(zhHant.game.complete.cheer).not.toBe("");
+        expect(wanted.filter(codePoint => !mapped.has(codePoint))).toEqual([]);
     });
 
     it("noto-serif-tc.woff2 maps every Chinese character the app writes and ink's seals (run npm run generate:fonts)", () => {
