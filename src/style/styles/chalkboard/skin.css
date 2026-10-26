@@ -1,0 +1,49 @@
+/* Chalkboard: chalk on a green board (黑板, dark) and markers on a whiteboard (白板, light). This is a stub
+   that gives the press states and the segmented indicator their feedback; the board, the chalk and the type
+   come with the skin proper. Every rule is scoped by [data-style="chalkboard"]; keyframes start with
+   chalkboard-. */
+
+/* Press feedback: a faint wash of chalk or marker. It is a colour change, so it stays on under reduced motion. */
+[data-style="chalkboard"] [data-pressed] {
+    --press-overlay: color-mix(in srgb, var(--color-foreground) 8%, transparent);
+    background-image: linear-gradient(var(--press-overlay), var(--press-overlay));
+}
+
+[data-style="chalkboard"] [data-press-motion] {
+    transition-property: transform, background-color, color, box-shadow, opacity;
+    transition-duration: 160ms;
+    transition-timing-function: ease-out;
+}
+
+[data-style="chalkboard"] [data-press-motion][data-pressed] {
+    transform: scale(0.97);
+    transition-duration: 60ms;
+}
+
+@keyframes chalkboard-press-bounce {
+    0% { transform: scale(0.97); }
+    100% { transform: scale(1); }
+}
+
+[data-style="chalkboard"] [data-press-bounce] {
+    animation: chalkboard-press-bounce 180ms ease-out;
+}
+
+[data-style="chalkboard"] .segmented-indicator-motion {
+    transition: transform 180ms ease-out;
+}
+
+/* Reduced motion: no scaling or sliding; the press wash stays */
+@media (prefers-reduced-motion: reduce) {
+    [data-style="chalkboard"] .segmented-indicator-motion {
+        transition: none;
+    }
+
+    [data-style="chalkboard"] [data-pressed],
+    [data-style="chalkboard"] [data-press-motion],
+    [data-style="chalkboard"] [data-press-motion][data-pressed],
+    [data-style="chalkboard"] [data-press-bounce] {
+        transform: none;
+        animation: none;
+    }
+}

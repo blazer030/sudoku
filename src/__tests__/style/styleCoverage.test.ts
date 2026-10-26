@@ -93,6 +93,7 @@ const REQUIRED_SELECTORS: Record<StyleId, readonly string[]> = {
         '[data-skin~="hero-seal"]',
         '[data-skin~="hero-vertical"]',
     ],
+    chalkboard: PRESS,
 };
 
 const selectorsOf = (style: StyleId): string[] => {

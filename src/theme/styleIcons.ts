@@ -429,6 +429,8 @@ const artworkOf = (style: StyleId, palette: Palette, bleed = 0, idSuffix = ""): 
         case "pixel": return pixelArtwork(pixelColors(palette));
         case "cyber": return cyberArtwork(palette, idSuffix);
         case "ink": return inkArtwork(palette, bleed, idSuffix);
+        // The bare board for now
+        case "chalkboard": return [];
     }
 };
 
@@ -475,6 +477,8 @@ const monochromeArtwork = (style: StyleId): string[] => {
         ];
         // The 圓相, the grid and the seal with 獨 cut out of it
         case "ink": return inkMonochrome(color);
+        // A plain square until the artwork comes, so the themed icon is never empty
+        case "chalkboard": return [`<rect x="34" y="34" width="40" height="40" fill="${color}"/>`];
     }
 };
 

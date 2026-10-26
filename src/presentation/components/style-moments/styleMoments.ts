@@ -127,6 +127,14 @@ const INK_MOMENTS: StyleMoments = {
     celebrationBoardMs: 1450,
 };
 
+// Chalkboard borrows minimal's loading and timings until its own moments come
+const CHALKBOARD_MOMENTS: StyleMoments = {
+    loader: MinimalLoader,
+    celebration: null,
+    groupEffectMs: 620,
+    celebrationBoardMs: 640,
+};
+
 // One entry per style, so a style added without its moments is a type error
 export const STYLE_MOMENTS: Record<StyleId, StyleMoments> = {
     minimal: MINIMAL_MOMENTS,
@@ -135,6 +143,7 @@ export const STYLE_MOMENTS: Record<StyleId, StyleMoments> = {
     pixel: PIXEL_MOMENTS,
     cyber: CYBER_MOMENTS,
     ink: INK_MOMENTS,
+    chalkboard: CHALKBOARD_MOMENTS,
 };
 
 export const useStyleMoments = (): ComputedRef<StyleMoments> => {

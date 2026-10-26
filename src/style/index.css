@@ -8,6 +8,7 @@
 @import "./styles/pixel/skin.css";
 @import "./styles/cyber/skin.css";
 @import "./styles/ink/skin.css";
+@import "./styles/chalkboard/skin.css";
 
 @variant dark (&:where(.dark, .dark *));
 

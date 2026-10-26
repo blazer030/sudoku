@@ -1,6 +1,6 @@
 // The vocabulary of looks: styles, their colour themes and light/dark. Relative imports only:
 // scripts/ import this file through src/theme/palettes.ts.
-export const STYLE_IDS = ["minimal", "tactile", "paper", "pixel", "cyber", "ink"] as const;
+export const STYLE_IDS = ["minimal", "tactile", "paper", "pixel", "cyber", "ink", "chalkboard"] as const;
 export type StyleId = typeof STYLE_IDS[number];
 /** Minimal's themes; their light launcher aliases are named by these bare ids (launcherIcon.ts). */
 export const ICON_THEME_IDS = ["green", "blue", "purple", "orange", "pink", "teal"] as const;
@@ -17,6 +17,9 @@ export const THEME_IDS_BY_STYLE = {
     cyber: ["neon"],
     // Ink and washi's colours are fixed too: one vermilion seal theme, light only
     ink: ["vermilion"],
+    // Chalkboard's colours are fixed too: one classic theme, chalk on the green board in dark and markers on
+    // the whiteboard in light
+    chalkboard: ["classic"],
 } as const satisfies Record<StyleId, readonly string[]>;
 export type ColorThemeId = typeof THEME_IDS_BY_STYLE[StyleId][number];
 /** Every style's theme ids together, in first-seen order. */
@@ -31,9 +34,11 @@ export const STYLE_COLOR_MODES: Readonly<Record<StyleId, readonly ColorMode[]>> 
     pixel: ["light", "dark"],
     cyber: ["dark"],
     ink: ["light"],
+    // The chalkboard comes first: it is the style's own look, the whiteboard its light twin
+    chalkboard: ["dark", "light"],
 };
 /** Styles that give light and dark their own names (the i18n keys settings.colorMode.styled.<style>.<mode>). */
-export const STYLE_MODE_NAMES: Readonly<Partial<Record<StyleId, true>>> = { pixel: true };
+export const STYLE_MODE_NAMES: Readonly<Partial<Record<StyleId, true>>> = { pixel: true, chalkboard: true };
 /** The mode a style actually shows for the requested one: the requested mode when the style has it, else the style's first. */
 export const effectiveColorMode = (style: StyleId, mode: ColorMode): ColorMode => {
     const modes = STYLE_COLOR_MODES[style];

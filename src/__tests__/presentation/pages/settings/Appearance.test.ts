@@ -70,11 +70,11 @@ describe("Appearance.vue style cards", () => {
         vi.mocked(Capacitor.isNativePlatform).mockReturnValue(false);
     });
 
-    it("should list the six styles, each with its app icon and name", () => {
+    it("should list the seven styles, each with its app icon and name", () => {
         const wrapper = mountAppearance();
         const cards = wrapper.findAll("button[data-testid^='style-option-']");
 
-        expect(cards.map(card => card.attributes("data-testid"))).toEqual(["style-option-minimal", "style-option-tactile", "style-option-paper", "style-option-pixel", "style-option-cyber", "style-option-ink"]);
+        expect(cards.map(card => card.attributes("data-testid"))).toEqual(["style-option-minimal", "style-option-tactile", "style-option-paper", "style-option-pixel", "style-option-cyber", "style-option-ink", "style-option-chalkboard"]);
         for (const style of STYLE_IDS) {
             const card = wrapper.get(`[data-testid='style-option-${style}']`);
             const rendered = card.get(`[data-testid='style-icon-${style}'] svg`).element.outerHTML;
@@ -512,6 +512,24 @@ describe("Appearance.vue one-theme style", () => {
 
         expect(pixelEnglish).not.toEqual(minimalEnglish);
         expect(pixelChinese).not.toEqual(pixelEnglish);
+    });
+
+    // Review Focus 1: chalkboard's modes read 黑板 and 白板, never plain dark and light
+    it("should name chalkboard's modes in its own words, in either language, with no theme picker", async () => {
+        const wrapper = mountAppearance();
+        const modeTexts = () => ["appearance-light", "appearance-dark"].map(id => wrapper.get(`[data-testid='${id}']`).text());
+        const minimalEnglish = modeTexts();
+        useSettingsStore().setStyle("chalkboard");
+        await nextTick();
+        const chalkboardEnglish = modeTexts();
+        i18n.global.locale.value = "zh-Hant";
+        await nextTick();
+        const chalkboardChinese = modeTexts();
+
+        expect(chalkboardEnglish).not.toEqual(minimalEnglish);
+        expect(chalkboardChinese).not.toEqual(chalkboardEnglish);
+        expect(wrapper.find("[data-testid='appearance-theme-label']").exists()).toBe(false);
+        expect(wrapper.find("[data-testid='color-theme-classic']").exists()).toBe(false);
     });
 
     it("should bring minimal back to the theme last chosen there after a visit to pixel", () => {
