@@ -945,9 +945,9 @@
     text-shadow: 0 0 6px var(--color-card), 0 0 2px var(--color-card);
 }
 
-/* Chalk Digits holds the English cheer's letters; Chinese falls through it to WenKai */
+/* Chalk Cheer holds the English cheer's letters; Chinese falls through it to WenKai */
 [data-style="chalkboard"][data-chalkboard-fonts="ready"] .chalkboard-cheer-text {
-    font-family: var(--font-chalkboard-digits);
+    font-family: var(--font-chalkboard-cheer);
 }
 
 :root.dark[data-style="chalkboard"] .chalkboard-cheer-text {

@@ -29,6 +29,45 @@ describe("chalkboard font stack", () => {
     });
 });
 
+// The declarations of the @font-face rule naming a family
+const fontFaceOf = (family: string): Map<string, string> => {
+    const declarations = new Map<string, string>();
+    postcss.parse(readFileSync("src/style/fonts.css", "utf8")).walkAtRules("font-face", (atRule) => {
+        const faceDeclarations = new Map<string, string>();
+        atRule.walkDecls((declaration) => { faceDeclarations.set(declaration.prop, declaration.value.trim()); });
+        if (faceDeclarations.get("font-family")?.replace(/"/g, "") === family) {
+            faceDeclarations.forEach((value, property) => { declarations.set(property, value); });
+        }
+    });
+    return declarations;
+};
+
+describe("chalkboard's two faces on one Caveat Brush file", () => {
+    it("should limit Chalk Digits to digits and the colon, slash and percent, so English mono text keeps WenKai", () => {
+        expect(fontFaceOf("Chalk Digits").get("unicode-range")).toBe("U+0025, U+002F, U+0030-003A");
+    });
+
+    it("should declare Chalk Cheer on the same file, for the English cheer only", () => {
+        const cheer = fontFaceOf("Chalk Cheer");
+
+        expect(cheer.get("src")).toBeDefined();
+        expect(cheer.get("src")).toBe(fontFaceOf("Chalk Digits").get("src"));
+        expect(cheer.get("unicode-range")).toBeUndefined();
+    });
+
+    it("should set the cheer in Chalk Cheer and fall to WenKai", () => {
+        expect(families(themeFonts().get("--font-chalkboard-cheer") ?? "").slice(0, 2)).toEqual(["Chalk Cheer", "LXGW WenKai TC"]);
+    });
+
+    it("should keep Chalk Cheer out of every other stack", () => {
+        const others = [...themeFonts()].filter(([token]) => token !== "--font-chalkboard-cheer");
+
+        for (const [token, stack] of others) {
+            expect(families(stack), token).not.toContain("Chalk Cheer");
+        }
+    });
+});
+
 describe("syncChalkboardFonts", () => {
     const root = document.documentElement;
     let finishLoading: (() => void)[] = [];

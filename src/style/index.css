@@ -47,6 +47,8 @@
   --font-ink-digits: "Ink Garamond", "Ink Serif TC", "Songti TC", "PMingLiU", serif;
   /* Chalkboard's digits, on its bundled Caveat Brush (fonts.css); a character it lacks falls to WenKai */
   --font-chalkboard-digits: "Chalk Digits", "LXGW WenKai TC", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+  /* The English cheer's letters on the same file, a family with no range; Chinese falls to WenKai */
+  --font-chalkboard-cheer: "Chalk Cheer", "LXGW WenKai TC", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
   --font-print: "Times New Roman", "Noto Serif TC", "Songti TC", "PMingLiU", serif;
   /* Board, key and timer faces; a style may point them at its own stacks */
   --font-clue: var(--font-sans);

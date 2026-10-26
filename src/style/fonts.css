@@ -91,9 +91,21 @@
     src: url("../assets/fonts/share-tech-mono.woff2") format("woff2");
 }
 
-/* Chalkboard's digits and English cheer in Caveat Brush, under their own family name so no other style's stack reaches it */
+/* Chalkboard's digits in Caveat Brush, under their own family name so no other style's stack reaches it. The
+   range keeps the face to digits, the colon, slash and percent: English text in a mono slot falls to WenKai
+   instead of mixing faces. */
 @font-face {
     font-family: "Chalk Digits";
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url("../assets/fonts/caveat-brush.woff2") format("woff2");
+    unicode-range: U+0025, U+002F, U+0030-003A;
+}
+
+/* The same file again, for the English cheer's letters alone (no range) */
+@font-face {
+    font-family: "Chalk Cheer";
     font-style: normal;
     font-weight: 400;
     font-display: swap;

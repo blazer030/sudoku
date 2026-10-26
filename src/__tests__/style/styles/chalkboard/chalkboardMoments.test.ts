@@ -499,10 +499,10 @@ describe("chalkboard moments", () => {
         });
 
         describe("the cheer", () => {
-            it("should write the cheer in the primary chalk, in WenKai and then Chalk Digits once it has loaded", () => {
+            it("should write the cheer in the primary chalk, in WenKai and then Chalk Cheer once Caveat Brush has loaded", () => {
                 expect(declarationsOf(CHALKBOARD_CSS, CHEER_TEXT).get("font-family")).toBe("var(--font-wenkai)");
                 expect(declarationsOf(CHALKBOARD_CSS, `${SCOPE}[data-chalkboard-fonts="ready"] .chalkboard-cheer-text`).get("font-family"))
-                    .toBe("var(--font-chalkboard-digits)");
+                    .toBe("var(--font-chalkboard-cheer)");
                 expect(declarationsOf(CHALKBOARD_CSS, CHEER_TEXT).get("color")).toBe("var(--color-primary)");
                 expect(declarationsOf(CHALKBOARD_CSS, CHEER_TEXT).get("text-shadow")).toBe("0 0 6px var(--color-card), 0 0 2px var(--color-card)");
             });
