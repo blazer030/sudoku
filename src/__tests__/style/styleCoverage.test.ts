@@ -117,6 +117,11 @@ const REQUIRED_SELECTORS: Record<StyleId, readonly string[]> = {
         ".chalkboard-loader-duster",
         "[data-group]",
         ".chalkboard-group-line",
+        '[data-celebration="playing"]',
+        '[data-skin~="complete-title"]',
+        '[data-skin~="celebration"]:not([data-still])',
+        ".chalkboard-cheer-text",
+        ".chalkboard-doodle",
     ],
 };
 

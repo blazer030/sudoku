@@ -1133,6 +1133,7 @@
     --color-smudge: #1F2328;
     --color-smear: #1F2328;
     --color-icon-frame: #C9CDD3;
+    --color-doodle: #C2185B;
 }
 
 :root.dark[data-style="chalkboard"][data-color-theme="classic"] {
@@ -1177,4 +1178,5 @@
     --color-smudge: #FFFFFF;
     --color-smear: #FFFFFF;
     --color-icon-frame: #8A5A34;
+    --color-doodle: #F6A5BC;
 }

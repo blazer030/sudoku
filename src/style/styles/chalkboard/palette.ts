@@ -21,6 +21,8 @@ const CHALKBOARD = {
     // The wooden chalk tray and its lit top edge
     tray: "#8A5A34",
     trayEdge: "#A06C42",
+    // The pink chalk a solved board is doodled with, beside the yellow and the blue
+    pinkChalk: "#F6A5BC",
 } as const;
 
 const WHITEBOARD = {
@@ -38,6 +40,8 @@ const WHITEBOARD = {
     trayEdge: "#E6E8EB",
     // The app icon's frame (the canvas's --ai-frame), a shade darker than the tray
     frame: "#C9CDD3",
+    // The pink marker a solved board is doodled with, beside the orange and the blue
+    pinkMarker: "#C2185B",
 } as const;
 
 // The canvas's washes (peer 7.5% or 5%, same digit 14%, soft 18%), as far as the inks drawn on them still read.
@@ -96,7 +100,8 @@ const CHALKBOARD_LIGHT_NEUTRALS: Neutrals<LightThemeColors> = {
 // The continue card is a framed card in the board's text; the selected and focus cells have no fill (the
 // skin rings them); peer and scope cells are a faint wash of dust or marker, same-digit and pattern cells
 // the primary's. The tray, the erase smudge and the board's erased smears and the app icon's frame (the
-// wooden tray's wood round the 黑板, grey round the 白板) are chalkboard's own colours. The smudge and the smears
+// wooden tray's wood round the 黑板, grey round the 白板) and the pink a solved board is doodled with are
+// chalkboard's own colours. The smudge and the smears
 // are the dust or marker itself: the skin lays them as faint washes (color-mix with transparent, at the canvas's
 // strength), since they lie over the page's light and shade, a hint's washes and the cards, not the bare board.
 const chalkboardTheme = themeBuilder(
@@ -115,6 +120,7 @@ const chalkboardTheme = themeBuilder(
         "smudge": WHITEBOARD.marker,
         "smear": WHITEBOARD.marker,
         "icon-frame": WHITEBOARD.frame,
+        "doodle": WHITEBOARD.pinkMarker,
     },
     {
         "featured": CHALKBOARD_DARK_NEUTRALS.card,
@@ -131,6 +137,7 @@ const chalkboardTheme = themeBuilder(
         "smudge": CHALKBOARD.dust,
         "smear": CHALKBOARD.dust,
         "icon-frame": CHALKBOARD.tray,
+        "doodle": CHALKBOARD.pinkChalk,
     },
 );
 

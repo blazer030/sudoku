@@ -128,6 +128,8 @@ const spanOf = (selector: string, name: string): Span => {
     return { startMs: timing.fixedDelayMs, endMs: timing.fixedDelayMs + timing.durationMs };
 };
 
+const lastFrameOf = (name: string): Frame | undefined => framesOf(name)[framesOf(name).length - 1];
+
 const animatedPropertiesOf = (name: string): Set<string> => new Set(framesOf(name).flatMap(frame => [...frame.declarations.keys()]));
 
 // The z-index a selector sets anywhere outside keyframes and reduced motion
@@ -152,6 +154,39 @@ const rulesMatching = (pattern: RegExp): { selector: string; declarations: Map<s
     });
     return found;
 };
+
+const CELEBRATING = '[data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"])';
+const SOLVED = '[data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"], [data-celebration="still"])';
+const BOARD_RING = `${SCOPE} ${SOLVED} [data-skin~="board-grid"]::before`;
+const DARK_BOARD_RING = `${DARK} ${SOLVED} [data-skin~="board-grid"]::before`;
+const DRAWN_BOARD_RING = `${SCOPE} ${CELEBRATING} [data-skin~="board-grid"]::before`;
+const BOARD_RING_URL = 'url("@/style/styles/chalkboard/chalkboard-board-ring.svg")';
+const BOARD_RING_SVG = readFileSync("src/style/styles/chalkboard/chalkboard-board-ring.svg", "utf8");
+const CARD = `${SCOPE} [data-skin~="card"][data-skin~="celebration"]`;
+const LANDING_CARD = `${CARD}:not([data-still])`;
+const CHEER_TEXT = `${SCOPE} .chalkboard-cheer-text`;
+const WRITTEN_CHEER = `${LANDING_CARD} .chalkboard-cheer-text`;
+const CHEER_DUST = `${SCOPE} .chalkboard-cheer-dust`;
+const DARK_CHEER_DUST_STEPS = [0, 1, 2].map(step => `${DARK} .chalkboard-cheer-dust[data-step="${step}"]`);
+const DOODLE = `${SCOPE} .chalkboard-doodle`;
+const DRAWN_DOODLE_STEPS = [0, 1, 2, 3].map(step => `${SCOPE} .chalkboard-celebration:not([data-still]) .chalkboard-doodle[data-step="${step}"]`);
+const MASK_SUPPORTS = '((mask-image: url("")) or (-webkit-mask-image: url("")))';
+
+// The declarations of the rules inside the sheet's @supports block on masks that list `selector`
+const maskSupportsDeclarationsOf = (selector: string): Map<string, string> => {
+    const declarations = new Map<string, string>();
+    postcss.parse(CHALKBOARD_CSS).walkRules((rule) => {
+        const parent = rule.parent;
+        if (parent?.type !== "atrule" || (parent as postcss.AtRule).name !== "supports" || collapse((parent as postcss.AtRule).params) !== MASK_SUPPORTS) return;
+        if (!rule.selectors.map(collapse).includes(selector)) return;
+        rule.walkDecls((declaration) => { declarations.set(declaration.prop, collapse(declaration.value)); });
+    });
+    return declarations;
+};
+
+// Every selector of the celebration that animates: the board's ring, the card, the cheer and its dust, the doodles
+const celebrationAnimatingSelectors = (): string[] =>
+    [...new Set(["data-celebration", '[data-skin~="celebration"]', "chalkboard-cheer", "chalkboard-doodle"].flatMap(animatingSelectorsOf))];
 
 describe("chalkboard moments", () => {
     it("should write entered digits with chalk's pen", () => {
@@ -335,6 +370,233 @@ describe("chalkboard moments", () => {
                 const stopped = reducedMotionDeclarationsOf(selector);
                 expect(stopped.get("animation"), selector).toBe("none");
                 expect([...stopped.keys()], selector).toEqual(["animation"]);
+            }
+        });
+    });
+
+    // MomentsChalk's completion, its scrim coming in at 920ms: the teacher rings the board in yellow chalk (from 60ms
+    // for 900ms), the card lands like a note stuck on the board (from 980ms), 好棒！ is written left to right
+    // (1300ms, 700ms) with dust falling off it, and stars, a wave and rays are doodled round it (1500ms on, 200ms apart)
+    describe("celebration", () => {
+        const boardMs = STYLE_MOMENTS.chalkboard.celebrationBoardMs;
+        // A piece of the dialog's, on the board's clock: the dialog opens once the board phase has run
+        const onBoardClock = (span: Span): Span => ({ startMs: span.startMs + boardMs, endMs: span.endMs + boardMs });
+
+        it("should open the dialog as the scrim comes in, while the ring is closing", () => {
+            const ring = spanOf(DRAWN_BOARD_RING, "chalkboard-board-ring");
+
+            expect(boardMs).toBe(920);
+            expect(ring.endMs).toBeGreaterThan(boardMs);
+            expect(ring.endMs - boardMs).toBeLessThanOrEqual(100);
+        });
+
+        describe("the board's ring", () => {
+            it("should ring the solved board in the primary chalk, through MomentsChalk's loop as a mask, where masks work", () => {
+                const ring = maskSupportsDeclarationsOf(BOARD_RING);
+
+                expect(ring.get("content")).toBe('""');
+                expect(ring.get("background-color")).toBe("var(--color-primary)");
+                for (const property of ["mask-image", "-webkit-mask-image"]) {
+                    expect(ring.get(property)?.startsWith(`${BOARD_RING_URL}, conic-gradient(`), property).toBe(true);
+                }
+                expect(ring.get("pointer-events")).toBe("none");
+                // Over the chalk lines (3), the selection ring and the group lines (4)
+                expect(Number(ring.get("z-index"))).toBeGreaterThan(4);
+            });
+
+            it("should lay the loop round the board, past its edges as MomentsChalk draws it", () => {
+                const ring = maskSupportsDeclarationsOf(BOARD_RING);
+                const [minX = 0, minY = 0, width = 0, height = 0] = (/viewBox="([^"]+)"/.exec(BOARD_RING_SVG)?.[1] ?? "").split(/\s+/).map(Number);
+
+                expect(width).toBe(height);
+                expect(minX).toBe(minY);
+                // The drawing's origin is the board's corner: the pseudo-element reaches as far past the board
+                expect(ring.get("inset")).toBe(`calc(${minX} / ${width + 2 * minX} * 100%)`);
+                expect(BOARD_RING_SVG).toContain("M178 -14 C 332 -16, 372 40, 366 180 C 360 330, 300 370, 170 366 C 40 362, -16 320, -12 172 C -8 40, 52 -12, 196 -8");
+            });
+
+            it("should carry only alpha in its drawing: one stroke in currentColor, no filter", () => {
+                expect(BOARD_RING_SVG).not.toMatch(/#[0-9a-fA-F]{3,8}\b|rgba?\(|\bwhite\b|\bblack\b/);
+                expect(BOARD_RING_SVG).not.toContain("<filter");
+                expect(BOARD_RING_SVG.match(/<path/g)).toHaveLength(1);
+                expect(BOARD_RING_SVG).toContain('stroke="currentColor"');
+            });
+
+            // The chalk goes round from the top, clockwise, as the loop's path runs: a sweep of the loop's mask. It
+            // starts just past the tail that overruns the loop's start (196, -8 from the board's centre), so the
+            // tail is drawn last, closing the loop, never beside the first stroke.
+            it("should draw the loop round from the top, clockwise, over 900ms from 60ms", () => {
+                const ring = maskSupportsDeclarationsOf(BOARD_RING);
+                const drawn = declarationsOf(CHALKBOARD_CSS, DRAWN_BOARD_RING).get("animation") ?? "";
+                const property = postcss.parse(CHALKBOARD_CSS).nodes.find((node): node is postcss.AtRule =>
+                    node.type === "atrule" && node.name === "property" && node.params === "--chalkboard-ring-sweep");
+                const registered = new Map(property?.nodes?.filter((node): node is postcss.Declaration => node.type === "decl")
+                    .map(declaration => [declaration.prop, declaration.value.trim()]) ?? []);
+
+                const tailEnd = (Math.atan2(196 - 351 / 2, 351 / 2 + 8) * 180) / Math.PI;
+                const sweepStart = Number.parseFloat(/conic-gradient\(from ([\d.]+)deg/.exec(ring.get("mask-image") ?? "")?.[1] ?? "NaN");
+
+                expect(ring.get("mask-image")).toContain("at 50% 50%, var(--color-foreground) var(--chalkboard-ring-sweep), transparent 0)");
+                expect(sweepStart).toBeGreaterThan(tailEnd);
+                expect(sweepStart).toBeLessThan(tailEnd + 2);
+                expect(registered.get("syntax")).toBe('"<angle>"');
+                // Drawn whole unless it is being drawn, also where the property is not registered
+                expect(registered.get("initial-value")).toBe("360deg");
+                expect(ring.get("--chalkboard-ring-sweep")).toBe("360deg");
+                expect(framesOf("chalkboard-board-ring")[0]?.declarations.get("--chalkboard-ring-sweep")).toBe("0deg");
+                expect(lastFrameOf("chalkboard-board-ring")?.declarations.get("--chalkboard-ring-sweep")).toBe("360deg");
+                expect(drawn).toBe("chalkboard-board-ring 900ms cubic-bezier(0.5, 0, 0.4, 1) 60ms backwards");
+            });
+
+            it("should grain the ring in 黑板 only, intersecting the masks", () => {
+                const dark = maskSupportsDeclarationsOf(DARK_BOARD_RING);
+
+                expect(dark.get("mask-image")).toMatch(new RegExp(`^${BOARD_RING_URL.replace(/[()"]/g, "\\$&")}, conic-gradient\\(.*\\), var\\(--chalkboard-grain\\)$`));
+                expect(dark.get("mask-composite")).toBe("intersect");
+                expect(dark.get("-webkit-mask-composite")).toBe("source-in");
+                expect(maskSupportsDeclarationsOf(BOARD_RING).get("mask-image")).not.toContain(GRAIN);
+            });
+
+            it("should leave the ring on a still board, drawn whole", () => {
+                expect(maskSupportsDeclarationsOf(BOARD_RING).get("content")).toBe('""');
+                expect(BOARD_RING).toContain('[data-celebration="still"]');
+                expect(DRAWN_BOARD_RING).not.toContain("still");
+            });
+
+            // A cell's stacking context would drop the selection ring (4) under the chalk lines (3)
+            it("should give the cells no stacking context while the board is solved", () => {
+                for (const { selector, declarations } of rulesMatching(/data-celebration/)) {
+                    if (!selector.includes("[data-variant]") && !selector.includes("[data-value-kind]")) continue;
+                    for (const property of ["transform", "z-index", "isolation", "filter", "opacity"]) {
+                        expect(declarations.has(property), `${selector} → ${property}`).toBe(false);
+                    }
+                }
+            });
+        });
+
+        describe("the card", () => {
+            // ch-up: from a little small and askew to its place, as the scrim settles
+            it("should land like a note stuck on the board, as the scrim comes in", () => {
+                const landing = spanOf(LANDING_CARD, "chalkboard-card-stick");
+                const [first, last] = [framesOf("chalkboard-card-stick")[0], lastFrameOf("chalkboard-card-stick")];
+
+                expect(landing).toEqual({ startMs: 60, endMs: 440 });
+                expect(first.declarations.get("opacity")).toBe("0");
+                expect(first.declarations.get("transform")).toBe("scale(0.96) rotate(-1deg)");
+                expect(last?.declarations.get("opacity")).toBe("1");
+                expect(last?.declarations.get("transform")).toBe("none");
+                expect(declarationsOf(CHALKBOARD_CSS, LANDING_CARD).get("animation")).toMatch(/ ease-out 60ms both$/);
+            });
+
+            it("should grain the title and the trophy's cup in 黑板 only", () => {
+                expect(declarationsOf(CHALKBOARD_CSS, `${DARK} [data-skin~="complete-title"]`).get("mask-image")).toBe(GRAIN);
+                expect(declarationsOf(CHALKBOARD_CSS, `${DARK} [data-skin~="trophy"] > svg`).get("mask-image")).toBe(GRAIN);
+                expect(declarationsOf(CHALKBOARD_CSS, `${SCOPE} [data-skin~="complete-title"]`).get("mask-image")).toBeUndefined();
+            });
+        });
+
+        describe("the cheer", () => {
+            it("should write the cheer in the primary chalk, in WenKai and then Chalk Digits once it has loaded", () => {
+                expect(declarationsOf(CHALKBOARD_CSS, CHEER_TEXT).get("font-family")).toBe("var(--font-wenkai)");
+                expect(declarationsOf(CHALKBOARD_CSS, `${SCOPE}[data-chalkboard-fonts="ready"] .chalkboard-cheer-text`).get("font-family"))
+                    .toBe("var(--font-chalkboard-digits)");
+                expect(declarationsOf(CHALKBOARD_CSS, CHEER_TEXT).get("color")).toBe("var(--color-primary)");
+                expect(declarationsOf(CHALKBOARD_CSS, CHEER_TEXT).get("text-shadow")).toBe("0 0 6px var(--color-card), 0 0 2px var(--color-card)");
+            });
+
+            it("should write it left to right a step at a time, after the card has landed", () => {
+                const written = spanOf(WRITTEN_CHEER, "chalkboard-cheer-write");
+                const frames = framesOf("chalkboard-cheer-write");
+
+                expect(written).toEqual({ startMs: 380, endMs: 1080 });
+                expect(written.startMs).toBeGreaterThanOrEqual(spanOf(LANDING_CARD, "chalkboard-card-stick").endMs - 100);
+                expect(declarationsOf(CHALKBOARD_CSS, WRITTEN_CHEER).get("animation")).toContain("steps(8, end)");
+                expect(frames[0]?.declarations.get("clip-path")).toBe("inset(-6px 100% -6px -6px)");
+                expect(frames[frames.length - 1]?.declarations.get("clip-path")).toBe("inset(-6px -6px -6px -6px)");
+                // Whole unless it is being written
+                expect(declarationsOf(CHALKBOARD_CSS, CHEER_TEXT).has("clip-path")).toBe(false);
+            });
+
+            it("should drop dust off the cheer left to right as it is written, in 黑板 only", () => {
+                const written = spanOf(WRITTEN_CHEER, "chalkboard-cheer-write");
+                const dust = DARK_CHEER_DUST_STEPS.map(selector => spanOf(selector, "chalkboard-cheer-dust"));
+
+                expect(dust.map(span => span.startMs)).toEqual([530, 710, 880]);
+                // No fill: a speck shows only as it falls, never under a cheer not yet written
+                for (const selector of DARK_CHEER_DUST_STEPS) {
+                    expect(declarationsOf(CHALKBOARD_CSS, selector).get("animation"), selector).toMatch(/ \d+ms$/);
+                }
+                for (const span of dust) {
+                    expect(span.startMs).toBeGreaterThan(written.startMs);
+                    expect(span.endMs - span.startMs).toBe(900);
+                }
+                expect(declarationsOf(CHALKBOARD_CSS, CHEER_DUST).get("opacity")).toBe("0");
+                expect([...animatedPropertiesOf("chalkboard-cheer-dust")].sort()).toEqual(["opacity", "transform"]);
+                for (const { selector, declarations } of rulesMatching(/chalkboard-cheer-dust/)) {
+                    if (!declarations.has("animation") && !declarations.has("background-color")) continue;
+                    expect(selector.startsWith(DARK), selector).toBe(true);
+                }
+            });
+
+            it("should grain the cheer in 黑板 only", () => {
+                expect(declarationsOf(CHALKBOARD_CSS, `${DARK} .chalkboard-cheer-text`).get("mask-image")).toBe(GRAIN);
+                expect(declarationsOf(CHALKBOARD_CSS, `${DARK} .chalkboard-cheer-text`).get("-webkit-mask-image")).toBe(GRAIN);
+                expect(declarationsOf(CHALKBOARD_CSS, CHEER_TEXT).has("mask-image")).toBe(false);
+            });
+        });
+
+        describe("the doodles", () => {
+            it("should doodle each by stroke-dashoffset, 200ms apart, once the ring is drawn", () => {
+                const ring = spanOf(DRAWN_BOARD_RING, "chalkboard-board-ring");
+                const doodles = DRAWN_DOODLE_STEPS.map(selector => spanOf(selector, "chalkboard-doodle-draw"));
+                const doodle = declarationsOf(CHALKBOARD_CSS, DOODLE);
+                const frames = framesOf("chalkboard-doodle-draw");
+
+                expect(doodles.map(span => span.startMs)).toEqual([580, 780, 980, 1180]);
+                for (const span of doodles) {
+                    expect(span.endMs - span.startMs).toBe(520);
+                    expect(onBoardClock(span).startMs).toBeGreaterThan(ring.endMs);
+                }
+                expect(doodle.get("stroke-dasharray")).toBe("240");
+                // Drawn whole unless it is being drawn
+                expect(doodle.get("stroke-dashoffset")).toBe("0");
+                expect(frames[0]?.declarations.get("stroke-dashoffset")).toBe("240");
+                expect(frames[frames.length - 1]?.declarations.get("stroke-dashoffset")).toBe("0");
+                expect([...animatedPropertiesOf("chalkboard-doodle-draw")]).toEqual(["stroke-dashoffset"]);
+            });
+
+            it("should doodle in the yellow (orange) chalk, the pink and the blue", () => {
+                expect(declarationsOf(CHALKBOARD_CSS, `${DOODLE}[data-tone="primary"]`).get("color")).toBe("var(--color-primary)");
+                expect(declarationsOf(CHALKBOARD_CSS, `${DOODLE}[data-tone="doodle"]`).get("color")).toBe("var(--color-doodle)");
+                expect(declarationsOf(CHALKBOARD_CSS, `${DOODLE}[data-tone="accent"]`).get("color")).toBe("var(--color-accent)");
+            });
+
+            it("should grain the doodles in 黑板 only", () => {
+                expect(declarationsOf(CHALKBOARD_CSS, `${DARK} .chalkboard-doodles`).get("mask-image")).toBe(GRAIN);
+                expect(declarationsOf(CHALKBOARD_CSS, `${DARK} .chalkboard-doodles`).get("-webkit-mask-image")).toBe(GRAIN);
+            });
+        });
+
+        // Review Focus 5: no grain, dust or blur of chalk's on 白板, and no live filter anywhere
+        it("should keep 黑板's grain and dust out of 白板 and draw no filter", () => {
+            for (const { selector, declarations } of rulesMatching(/chalkboard-cheer|chalkboard-doodle|chalkboard-celebration|data-celebration/)) {
+                expect(declarations.has("filter"), selector).toBe(false);
+                if ([...declarations.values()].some(value => value.includes(GRAIN))) expect(selector.startsWith(DARK), selector).toBe(true);
+            }
+        });
+
+        it("should animate only a moving celebration, so a still board and a still card show the end at once", () => {
+            const animating = celebrationAnimatingSelectors();
+
+            expect(animating.length).toBeGreaterThanOrEqual(10);
+            for (const selector of animating) {
+                expect(selector.split(":not([data-still])").join(""), selector).not.toContain("still");
+            }
+        });
+
+        it("should stop everything under reduced motion, showing the end", () => {
+            for (const selector of celebrationAnimatingSelectors()) {
+                expect(reducedMotionDeclarationsOf(selector).get("animation"), selector).toBe("none");
             }
         });
     });
