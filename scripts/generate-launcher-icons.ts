@@ -93,6 +93,15 @@ const writeAdaptiveLayer = async (name: string, svg: string) => {
     }
 };
 
+// Renders one legacy (pre-adaptive) icon at every density
+const writeLegacyIcon = async (name: string, svg: string) => {
+    for (const density of DENSITIES) {
+        const outDir = resolve(RES_ROOT, `mipmap-${density.name}`);
+        mkdirSync(outDir, { recursive: true });
+        await sharp(Buffer.from(svg)).resize(density.size, density.size).png().toFile(resolve(outDir, `${name}.png`));
+    }
+};
+
 const main = async () => {
     // Minimal's themes that share a tile colour share one foreground
     const foregrounds = ICON_VARIANTS
@@ -113,15 +122,7 @@ const main = async () => {
     writeFileSync(resolve(RES_ROOT, "values/ic_launcher_theme_colors.xml"), themeColorsXml());
 
     for (const variant of ICON_VARIANTS) {
-        const svgBuffer = Buffer.from(roundedIconSvg(variant));
-        for (const density of DENSITIES) {
-            const outDir = resolve(RES_ROOT, `mipmap-${density.name}`);
-            mkdirSync(outDir, { recursive: true });
-            await sharp(svgBuffer)
-                .resize(density.size, density.size)
-                .png()
-                .toFile(resolve(outDir, `${launcherResourceName(variant.id)}.png`));
-        }
+        await writeLegacyIcon(launcherResourceName(variant.id), roundedIconSvg(variant));
     }
 
     writeManifestAliases();
