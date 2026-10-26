@@ -709,9 +709,11 @@ describe("chalkboard skin", () => {
             expect(note.get("background-color")).toBe("transparent");
         });
 
-        it("should ring a hint's emphasised candidate in the primary", () => {
-            expect(declarationsOf(CHALKBOARD_CSS, `${BOARD}[data-hint-mode] [data-note-highlight]`).get("box-shadow"))
-                .toBe("inset 0 0 0 1.5px var(--color-primary)");
+        it("should box a hint's emphasised candidate in a square of the primary, as the canvas does", () => {
+            const emphasised = declarationsOf(CHALKBOARD_CSS, `${BOARD}[data-hint-mode] [data-note-highlight]`);
+
+            expect(emphasised.get("box-shadow")).toBe("inset 0 0 0 1.5px var(--color-primary)");
+            expect(emphasised.get("border-radius")).toBe("0");
         });
     });
 
