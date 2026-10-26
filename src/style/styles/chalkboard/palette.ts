@@ -36,6 +36,8 @@ const WHITEBOARD = {
     // The grey marker tray and its lit top edge
     tray: "#D7DADF",
     trayEdge: "#E6E8EB",
+    // The app icon's frame (the canvas's --ai-frame), a shade darker than the tray
+    frame: "#C9CDD3",
 } as const;
 
 // The canvas's washes (peer 7.5% or 5%, same digit 14%, soft 18%), as far as the inks drawn on them still read.
@@ -93,7 +95,8 @@ const CHALKBOARD_LIGHT_NEUTRALS: Neutrals<LightThemeColors> = {
 
 // The continue card is a framed card in the board's text; the selected and focus cells have no fill (the
 // skin rings them); peer and scope cells are a faint wash of dust or marker, same-digit and pattern cells
-// the primary's. The tray, the erase smudge and its fading smear are chalkboard's own colours.
+// the primary's. The tray, the erase smudge and its fading smear and the app icon's frame (the wooden tray's
+// wood round the 黑板, grey round the 白板) are chalkboard's own colours.
 const chalkboardTheme = themeBuilder(
     CHALKBOARD_LIGHT_NEUTRALS,
     CHALKBOARD_DARK_NEUTRALS,
@@ -109,6 +112,7 @@ const chalkboardTheme = themeBuilder(
         "tray-edge": WHITEBOARD.trayEdge,
         "smudge": mixColors(WHITEBOARD.marker, 0.1, WHITEBOARD.board),
         "smear": mixColors(WHITEBOARD.marker, 0.035, WHITEBOARD.board),
+        "icon-frame": WHITEBOARD.frame,
     },
     {
         "featured": CHALKBOARD_DARK_NEUTRALS.card,
@@ -124,6 +128,7 @@ const chalkboardTheme = themeBuilder(
         "tray-edge": CHALKBOARD.trayEdge,
         "smudge": mixColors(CHALKBOARD.dust, 0.22, CHALKBOARD.board),
         "smear": mixColors(CHALKBOARD.dust, 0.05, CHALKBOARD.board),
+        "icon-frame": CHALKBOARD.tray,
     },
 );
 

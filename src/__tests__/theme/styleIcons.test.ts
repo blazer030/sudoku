@@ -11,6 +11,8 @@ const pixelHandheld = getPalette("pixel", "classic", "light");
 const pixelConsole = getPalette("pixel", "classic", "dark");
 const cyberNeon = getPalette("cyber", "neon", "dark");
 const inkVermilion = getPalette("ink", "vermilion", "light");
+const chalkboard = getPalette("chalkboard", "classic", "dark");
+const whiteboard = getPalette("chalkboard", "classic", "light");
 const firstPalette = (style: StyleId) => getPalette(style, THEME_IDS_BY_STYLE[style][0], "light");
 
 // Every colour the markup paints with, fills and strokes alike
@@ -166,6 +168,43 @@ describe("styleIcons", () => {
         const monochrome = styleIconMonochrome("ink");
 
         expect(monochrome).toMatch(new RegExp(`<path d="[^"]*${INK_SEAL_GLYPH_PATH.slice(0, 20)}[^"]*"[^>]*fill-rule="evenodd"`));
+    });
+
+    it("should draw chalkboard's 黑板 icon in white and yellow chalk on the green board", () => {
+        const svg = styleIconSvg("chalkboard", chalkboard);
+
+        for (const color of ["#2E4B3C", "#F4F1E8", "#F7C873"]) expect(paintsOf(svg), color).toContain(color);
+        expect(svg).not.toContain("<text");
+        expect(svg).not.toContain("filter");
+    });
+
+    it("should draw chalkboard's 白板 icon in black, orange and blue markers on the whiteboard", () => {
+        const svg = styleIconSvg("chalkboard", whiteboard);
+
+        for (const color of ["#F5F6F3", "#1F2328", "#B04A00", "#1D5FC2"]) expect(paintsOf(svg), color).toContain(color);
+        expect(svg).not.toContain("<text");
+        expect(svg).not.toBe(styleIconSvg("chalkboard", chalkboard));
+    });
+
+    it("should frame chalkboard's board in wood and the whiteboard in grey, from each palette's icon frame", () => {
+        const frameOf = (svg: string) => fillOf(svg, `width="108" height="108"`);
+        const dark = frameOf(styleIconSvg("chalkboard", chalkboard));
+        const light = frameOf(styleIconSvg("chalkboard", whiteboard));
+
+        expect(dark).toBe(chalkboard["icon-frame"]);
+        expect(light).toBe(whiteboard["icon-frame"]);
+        expect(dark).not.toBe(light);
+        expect(styleIconBackground("chalkboard", chalkboard)).toBe(dark);
+        expect(fillOf(styleIconSvg("chalkboard", chalkboard), `x="8" y="8" width="92" height="92" rx="4"`)).toBe(chalkboard.background);
+    });
+
+    it("should draw chalkboard's monochrome as the grid, the ring and the 7, not a placeholder", () => {
+        const monochrome = styleIconMonochrome("chalkboard");
+
+        expect(monochrome).toContain(`<path d="M44 24 Q43 54 45 84`);
+        expect(monochrome).toContain(`<path d="M45 38 Q34 36 33 46`);
+        expect(monochrome).toMatch(/<path d="M71\.1 80Q/);
+        expect(monochrome).not.toContain(`<rect x="34" y="34" width="40" height="40"`);
     });
 
     it.each(STYLE_IDS)("should draw the %s icon as a plain 108 square with no text", (style) => {

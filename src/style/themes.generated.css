@@ -1132,6 +1132,7 @@
     --color-tray-edge: #E6E8EB;
     --color-smudge: #E0E1DF;
     --color-smear: #EEEFEC;
+    --color-icon-frame: #C9CDD3;
 }
 
 :root.dark[data-style="chalkboard"][data-color-theme="classic"] {
@@ -1175,4 +1176,5 @@
     --color-tray-edge: #A06C42;
     --color-smudge: #5C7367;
     --color-smear: #385446;
+    --color-icon-frame: #8A5A34;
 }

@@ -72,7 +72,7 @@ describe("palettes", () => {
         expect(whiteboard.accent).toBe("#1D5FC2");
     });
 
-    it("should give chalkboard its own tray and erase colours in both modes, and no other style any", () => {
+    it("should give chalkboard its own tray, erase and icon frame colours in both modes, and no other style any", () => {
         for (const mode of STYLE_COLOR_MODES.chalkboard) {
             const palette = getPalette("chalkboard", "classic", mode);
             for (const token of STYLE_OWN_TOKENS) {
