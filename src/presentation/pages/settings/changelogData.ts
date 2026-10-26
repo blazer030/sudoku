@@ -30,6 +30,13 @@ export const CHANGELOG: ChangelogEntry[] = [
                 },
                 appOnly: true,
             },
+            {
+                text: {
+                    en: "The app no longer collects the advertising ID, and the privacy policy is updated",
+                    "zh-Hant": "不再收集廣告 ID，並更新隱私權政策",
+                },
+                appOnly: true,
+            },
         ],
     },
     {
