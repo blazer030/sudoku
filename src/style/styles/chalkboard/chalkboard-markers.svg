@@ -1,0 +1,7 @@
+<!-- Chalkboard: 白板's two markers lying in the tray, used as a mask (alpha only); the skin paints them in the dark and the blue marker. After the style-research canvas's light .stick (Chalk.dc.html: 52×10, corners 2px at the back and 5px at the tip; at 64px and 126px). -->
+<svg xmlns="http://www.w3.org/2000/svg" width="114" height="10" viewBox="0 0 114 10">
+    <g fill="currentColor">
+        <path d="M2 0H47A5 5 0 0 1 52 5A5 5 0 0 1 47 10H2A2 2 0 0 1 0 8V2A2 2 0 0 1 2 0Z"/>
+        <path d="M64 0H109A5 5 0 0 1 114 5A5 5 0 0 1 109 10H64A2 2 0 0 1 62 8V2A2 2 0 0 1 64 0Z"/>
+    </g>
+</svg>

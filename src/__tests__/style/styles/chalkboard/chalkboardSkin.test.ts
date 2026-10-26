@@ -9,6 +9,9 @@ const RING_SVG = readFileSync("src/style/styles/chalkboard/chalkboard-ring.svg",
 const GRAIN_SVG = readFileSync("src/style/styles/chalkboard/chalkboard-grain.svg", "utf8");
 const SMEARS_SVG = readFileSync("src/style/styles/chalkboard/chalkboard-smears.svg", "utf8");
 const SWOOSH_SVG = readFileSync("src/style/styles/chalkboard/chalkboard-swoosh.svg", "utf8");
+const STICKS_SVG = readFileSync("src/style/styles/chalkboard/chalkboard-sticks.svg", "utf8");
+const MARKERS_SVG = readFileSync("src/style/styles/chalkboard/chalkboard-markers.svg", "utf8");
+const DUSTER_SVG = readFileSync("src/style/styles/chalkboard/chalkboard-duster.svg", "utf8");
 
 const SCOPE = '[data-style="chalkboard"]';
 // 黑板: the codebase's dark mode selector
@@ -28,6 +31,9 @@ const RING_URL = 'url("@/style/styles/chalkboard/chalkboard-ring.svg")';
 const GRAIN_URL = 'url("@/style/styles/chalkboard/chalkboard-grain.svg")';
 const SMEARS_URL = 'url("@/style/styles/chalkboard/chalkboard-smears.svg")';
 const SWOOSH_URL = 'url("@/style/styles/chalkboard/chalkboard-swoosh.svg")';
+const STICKS_URL = 'url("@/style/styles/chalkboard/chalkboard-sticks.svg")';
+const MARKERS_URL = 'url("@/style/styles/chalkboard/chalkboard-markers.svg")';
+const DUSTER_URL = 'url("@/style/styles/chalkboard/chalkboard-duster.svg")';
 const GRAIN = "var(--chalkboard-grain)";
 const ROOT_PAGE = `${SCOPE} [data-skin~="page-ruled"]`;
 const DARK_ROOT_PAGE = `${DARK} [data-skin~="page-ruled"]`;
@@ -428,28 +434,89 @@ describe("chalkboard skin", () => {
     });
 
     describe("Home", () => {
-        it("should lay the chalk tray along the bottom of the screen, below every content layer and never taking taps", () => {
-            const tray = declarationsOf(CHALKBOARD_CSS, `${LOGO}::after`);
+        it.each(["::before", "::after"])("should lay the tray's %s along the bottom of the screen, below every content layer and never taking taps", (pseudo) => {
+            const layer = declarationsOf(CHALKBOARD_CSS, `${LOGO}${pseudo}`);
 
-            expect(tray.get("content")).toBe('""');
-            expect(tray.get("position")).toBe("fixed");
-            expect(tray.get("left")).toBe("0");
-            expect(tray.get("right")).toBe("0");
-            expect(tray.get("bottom")).toBe("0");
-            expect(tray.get("z-index")).toBe("-1");
-            expect(tray.get("pointer-events")).toBe("none");
+            expect(layer.get("content")).toBe('""');
+            expect(layer.get("position")).toBe("fixed");
+            expect(layer.get("left")).toBe("0");
+            expect(layer.get("right")).toBe("0");
+            expect(layer.get("bottom")).toBe("0");
+            expect(layer.get("z-index")).toBe("-1");
+            expect(layer.get("pointer-events")).toBe("none");
         });
 
-        it("should draw the tray, its lit edge, two sticks and a duster in gradients from the palette", () => {
-            const tray = declarationsOf(CHALKBOARD_CSS, `${LOGO}::after`);
-            const image = tray.get("background-image") ?? "";
+        // The canvas's .tray: 16px of wood (grey plastic on 白板) shading downwards, its lit edge 2px above it
+        it("should draw the tray on the ::before as the canvas does, shading down with its lit edge above", () => {
+            const tray = declarationsOf(CHALKBOARD_CSS, `${LOGO}::before`);
 
-            expect(image.match(/linear-gradient\(/g)?.length).toBeGreaterThanOrEqual(5);
-            expect(image).toContain("var(--color-tray)");
-            expect(image).toContain("var(--color-tray-edge)");
-            expect(image).toContain("var(--chalkboard-stick-first)");
-            expect(image).toContain("var(--chalkboard-stick-second)");
+            expect(tray.get("height")).toBe("16px");
+            expect(tray.get("background-image")).toBe("linear-gradient(var(--color-tray), var(--color-tray-shade))");
+            expect(tray.get("box-shadow")).toBe("0 -2px 0 var(--color-tray-edge)");
+        });
+
+        // The canvas's .stick and .duster are rounded pieces lying on the tray, so they come after it
+        it("should cut the sticks and the duster out of the ::after by rounded masks, for WebKit as well as the rest", () => {
+            const whiteboard = declarationsOf(CHALKBOARD_CSS, `${LOGO}::after`);
+            const chalkboard = declarationsOf(CHALKBOARD_CSS, `${DARK} [data-skin~="logo"]::after`);
+
+            for (const property of ["mask-image", "-webkit-mask-image"]) {
+                expect(whiteboard.get(property)).toBe(`${MARKERS_URL}, ${DUSTER_URL}`);
+                expect(chalkboard.get(property)).toBe(`${STICKS_URL}, ${DUSTER_URL}`);
+            }
+            for (const property of ["mask-repeat", "-webkit-mask-repeat"]) {
+                expect(whiteboard.get(property)).toBe("no-repeat");
+            }
+        });
+
+        it("should colour the pieces in the palette: the two sticks, then the duster's grey back on its felt", () => {
+            const pieces = declarationsOf(CHALKBOARD_CSS, `${LOGO}::after`);
+            const image = pieces.get("background-image") ?? "";
+
+            expect(image).toContain("linear-gradient(var(--chalkboard-stick-first), var(--chalkboard-stick-first))");
+            expect(image).toContain("linear-gradient(var(--chalkboard-stick-second), var(--chalkboard-stick-second))");
+            expect(image).toContain("linear-gradient(var(--color-duster) 0 55%, var(--color-duster-felt) 55%)");
             expect(image).not.toMatch(RAW_COLOUR);
+        });
+
+        // The canvas's 黑板 sticks: 46×8 and 30×8 at 64px and 124px, the second turned −4°, corners 3px. 白板's
+        // markers: 52×10 at 64px and 126px, square-ish at the back (2px) and rounded at the tip (5px).
+        describe("chalkboard-sticks.svg", () => {
+            const svg = parseSvg(STICKS_SVG);
+
+            it("should hold the two sticks as rounded rectangles, the second turned −4°, alpha only", () => {
+                const sticks = [...svg.getElementsByTagName("rect")];
+
+                expect(svg.getElementsByTagName("parsererror")).toHaveLength(0);
+                expect(sticks.map(stick => ["x", "width", "height", "rx"].map(name => stick.getAttribute(name)))).toEqual([["0", "46", "8", "3"], ["60", "30", "8", "3"]]);
+                expect(sticks[1].getAttribute("transform")).toMatch(/^rotate\(-4 /);
+                expect(STICKS_SVG).not.toMatch(RAW_COLOUR);
+            });
+        });
+
+        describe("chalkboard-markers.svg", () => {
+            const svg = parseSvg(MARKERS_SVG);
+
+            it("should hold two 52×10 markers 62px apart, rounded 2px at the back and 5px at the tip, alpha only", () => {
+                const markers = [...svg.getElementsByTagName("path")];
+
+                expect(svg.getElementsByTagName("parsererror")).toHaveLength(0);
+                expect(viewBoxOf(svg)).toEqual([0, 0, 114, 10]);
+                expect(markers).toHaveLength(2);
+                expect(MARKERS_SVG).not.toMatch(RAW_COLOUR);
+            });
+        });
+
+        describe("chalkboard-duster.svg", () => {
+            const svg = parseSvg(DUSTER_SVG);
+
+            it("should hold the 70×16 duster with 3px corners, alpha only", () => {
+                const duster = svg.getElementsByTagName("rect")[0];
+
+                expect(viewBoxOf(svg)).toEqual([0, 0, 70, 16]);
+                expect([duster.getAttribute("width"), duster.getAttribute("height"), duster.getAttribute("rx")]).toEqual(["70", "16", "3"]);
+                expect(DUSTER_SVG).not.toMatch(RAW_COLOUR);
+            });
         });
 
         it("should hold the board's chalk and yellow chalk in 黑板's tray, a dark and a blue marker in 白板's", () => {

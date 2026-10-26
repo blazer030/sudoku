@@ -16,10 +16,13 @@ export const PALETTE_TOKENS = [
     "primary-ink", "signal", "signal-surface",
 ] as const;
 export type PaletteToken = typeof PALETTE_TOKENS[number];
-// Colours only one style paints: chalkboard's chalk tray, its erase smudge and smear, its app icon's frame and the
-// pink chalk it doodles with on a solved board. A palette carries one only when its style sets it, so no other
+// Colours only one style paints: chalkboard's chalk tray (its top, its shaded foot and its lit edge) and the duster
+// lying in it (its back and its felt), its erase smudge and smear, its app icon's frame and the pink chalk it
+// doodles with on a solved board. A palette carries one only when its style sets it, so no other
 // style's blocks in themes.generated.css declare it.
-export const STYLE_OWN_TOKENS = ["tray", "tray-edge", "smudge", "smear", "icon-frame", "doodle"] as const;
+export const STYLE_OWN_TOKENS = [
+    "tray", "tray-shade", "tray-edge", "duster", "duster-felt", "smudge", "smear", "icon-frame", "doodle",
+] as const;
 export type StyleOwnToken = typeof STYLE_OWN_TOKENS[number];
 export type Palette = Record<PaletteToken, string> & Partial<Record<StyleOwnToken, string>>;
 

@@ -389,36 +389,58 @@
     mask-composite: intersect;
 }
 
-/* The chalk tray along the bottom of the screen, the logo's ::after fixed to it, below every content layer and
-   never taking taps: the tray's wood (grey plastic on 白板) with its lit top edge, and lying in it two sticks of
-   chalk (the board's chalk and yellow; on 白板 a dark marker and a blue one) and a duster, all gradients in the palette's
-   colours. */
+/* The chalk tray along the bottom of the screen, as the canvas draws it, on the logo's ::before and ::after fixed to
+   it, below every content layer and never taking taps. The ::before is the tray: 16px of wood (grey plastic on
+   白板) shading down to its foot, its lit edge 2px above it. The ::after lies on it: two sticks of chalk (the
+   board's chalk and yellow; on 白板 a dark marker and a blue one) and a duster, its grey back over its felt, each
+   a block of the palette's colour cut out by its rounded mask (chalkboard-sticks.svg, -markers.svg, -duster.svg). */
+[data-style="chalkboard"] [data-skin~="logo"]::before,
 [data-style="chalkboard"] [data-skin~="logo"]::after {
     content: "";
     position: fixed;
     left: 0;
     right: 0;
     bottom: 0;
-    height: 26px;
     z-index: -1;
     pointer-events: none;
+}
+
+[data-style="chalkboard"] [data-skin~="logo"]::before {
+    height: 16px;
+    background-image: linear-gradient(var(--color-tray), var(--color-tray-shade));
+    box-shadow: 0 -2px 0 var(--color-tray-edge);
+}
+
+[data-style="chalkboard"] [data-skin~="logo"]::after {
+    height: 26px;
     background-image:
         linear-gradient(var(--chalkboard-stick-first), var(--chalkboard-stick-first)),
         linear-gradient(var(--chalkboard-stick-second), var(--chalkboard-stick-second)),
-        linear-gradient(
-            color-mix(in srgb, var(--color-foreground-muted) 30%, var(--color-shadow)) 0 55%,
-            color-mix(in srgb, var(--color-tray-edge) 60%, var(--color-foreground)) 55%
-        ),
-        linear-gradient(var(--color-tray-edge), var(--color-tray-edge)),
-        linear-gradient(var(--color-tray), color-mix(in srgb, var(--color-tray) 65%, var(--color-shadow)));
-    background-size: 52px 10px, 52px 10px, 70px 16px, 100% 2px, 100% 16px;
-    background-position: left 64px bottom 9px, left 126px bottom 9px, right 56px bottom 10px, left 0 bottom 16px, left 0 bottom 0;
+        linear-gradient(var(--color-duster) 0 55%, var(--color-duster-felt) 55%);
+    background-size: 52px 10px, 52px 10px, 70px 16px;
+    background-position: left 64px bottom 9px, left 126px bottom 9px, right 56px bottom 10px;
     background-repeat: no-repeat;
+    -webkit-mask-image: url("@/style/styles/chalkboard/chalkboard-markers.svg"), url("@/style/styles/chalkboard/chalkboard-duster.svg");
+    mask-image: url("@/style/styles/chalkboard/chalkboard-markers.svg"), url("@/style/styles/chalkboard/chalkboard-duster.svg");
+    -webkit-mask-size: 114px 10px, 70px 16px;
+    mask-size: 114px 10px, 70px 16px;
+    -webkit-mask-position: left 64px bottom 9px, right 56px bottom 10px;
+    mask-position: left 64px bottom 9px, right 56px bottom 10px;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
 }
 
+/* 黑板's sticks: 46×8 and 30×8, the second turned −4°, so its block covers the turned stick and its mask is laid
+   2px lower to keep the turned corners */
 :root.dark[data-style="chalkboard"] [data-skin~="logo"]::after {
-    background-size: 46px 8px, 30px 8px, 70px 16px, 100% 2px, 100% 16px;
-    background-position: left 64px bottom 9px, left 124px bottom 9px, right 56px bottom 10px, left 0 bottom 16px, left 0 bottom 0;
+    background-size: 46px 8px, 32px 12px, 70px 16px;
+    background-position: left 64px bottom 9px, left 123px bottom 7px, right 56px bottom 10px;
+    -webkit-mask-image: url("@/style/styles/chalkboard/chalkboard-sticks.svg"), url("@/style/styles/chalkboard/chalkboard-duster.svg");
+    mask-image: url("@/style/styles/chalkboard/chalkboard-sticks.svg"), url("@/style/styles/chalkboard/chalkboard-duster.svg");
+    -webkit-mask-size: 91px 12px, 70px 16px;
+    mask-size: 91px 12px, 70px 16px;
+    -webkit-mask-position: left 64px bottom 7px, right 56px bottom 10px;
+    mask-position: left 64px bottom 7px, right 56px bottom 10px;
 }
 
 /* Titles: bold WenKai, grained in 黑板 like every piece of chalk (the Home title by its glyphs, so the swoosh

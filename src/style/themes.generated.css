@@ -1129,7 +1129,10 @@
     --color-signal: #EFE8E0;
     --color-signal-surface: #EFE8E0;
     --color-tray: #D7DADF;
+    --color-tray-shade: #B5BAC2;
     --color-tray-edge: #E6E8EB;
+    --color-duster: #5B5F66;
+    --color-duster-felt: #C9B79C;
     --color-smudge: #1F2328;
     --color-smear: #1F2328;
     --color-icon-frame: #C9CDD3;
@@ -1174,7 +1177,10 @@
     --color-signal: #4A5D44;
     --color-signal-surface: #4A5D44;
     --color-tray: #8A5A34;
+    --color-tray-shade: #5E3B20;
     --color-tray-edge: #A06C42;
+    --color-duster: #5B5F66;
+    --color-duster-felt: #C9B79C;
     --color-smudge: #FFFFFF;
     --color-smear: #FFFFFF;
     --color-icon-frame: #8A5A34;

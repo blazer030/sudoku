@@ -1,0 +1,4 @@
+<!-- Chalkboard: the duster lying in the tray, used as a mask (alpha only); the skin paints its grey back over its felt. After the style-research canvas's .duster (Chalk.dc.html: 70×16, corners 3px, 56px from the right). -->
+<svg xmlns="http://www.w3.org/2000/svg" width="70" height="16" viewBox="0 0 70 16">
+    <rect width="70" height="16" rx="3" fill="currentColor"/>
+</svg>

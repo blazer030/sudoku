@@ -18,8 +18,9 @@ const CHALKBOARD = {
     card: "#30503F",
     // The chalk dust the canvas lays its washes in
     dust: "#FFFFFF",
-    // The wooden chalk tray and its lit top edge
+    // The wooden chalk tray, shading down to its foot, and its lit top edge
     tray: "#8A5A34",
+    trayShade: "#5E3B20",
     trayEdge: "#A06C42",
     // The pink chalk a solved board is doodled with, beside the yellow and the blue
     pinkChalk: "#F6A5BC",
@@ -35,8 +36,9 @@ const WHITEBOARD = {
     redMarker: "#C62828",
     // The cards' white sheen over the board
     sheen: "#FFFFFF",
-    // The grey marker tray and its lit top edge
+    // The grey marker tray, shading down to its foot, and its lit top edge
     tray: "#D7DADF",
+    trayShade: "#B5BAC2",
     trayEdge: "#E6E8EB",
     // The app icon's frame (the canvas's --ai-frame), a shade darker than the tray
     frame: "#C9CDD3",
@@ -49,6 +51,9 @@ const WHITEBOARD = {
 // struck-out notes, are barely dusted; the peer and same-digit washes keep the canvas's strength, since an error
 // cell takes the error surface instead, and the soft wash eases to 14% under the yellow chalk. 白板's orange
 // marker is drawn on the same-digit, pattern and soft washes, so they stay at 8%.
+// The duster in either tray: a grey back over its felt
+const DUSTER = { back: "#5B5F66", felt: "#C9B79C" } as const;
+
 const CHALKBOARD_WASH = { peer: 0.075, scope: 0.02, sameDigit: 0.14, pattern: 0.035, soft: 0.14, error: 0.05 } as const;
 const WHITEBOARD_WASH = { peer: 0.05, scope: 0.05, sameDigit: 0.08, pattern: 0.08, soft: 0.08, error: 0.07 } as const;
 
@@ -99,7 +104,7 @@ const CHALKBOARD_LIGHT_NEUTRALS: Neutrals<LightThemeColors> = {
 
 // The continue card is a framed card in the board's text; the selected and focus cells have no fill (the
 // skin rings them); peer and scope cells are a faint wash of dust or marker, same-digit and pattern cells
-// the primary's. The tray, the erase smudge and the board's erased smears and the app icon's frame (the
+// the primary's. The tray and its duster, the erase smudge and the board's erased smears and the app icon's frame (the
 // wooden tray's wood round the 黑板, grey round the 白板) and the pink a solved board is doodled with are
 // chalkboard's own colours. The smudge and the smears
 // are the dust or marker itself: the skin lays them as faint washes (color-mix with transparent, at the canvas's
@@ -116,7 +121,10 @@ const chalkboardTheme = themeBuilder(
         "cell-scope": mixColors(WHITEBOARD.marker, WHITEBOARD_WASH.scope, WHITEBOARD.board),
         "cell-pattern": mixColors(WHITEBOARD.orangeMarker, WHITEBOARD_WASH.pattern, WHITEBOARD.board),
         "tray": WHITEBOARD.tray,
+        "tray-shade": WHITEBOARD.trayShade,
         "tray-edge": WHITEBOARD.trayEdge,
+        "duster": DUSTER.back,
+        "duster-felt": DUSTER.felt,
         "smudge": WHITEBOARD.marker,
         "smear": WHITEBOARD.marker,
         "icon-frame": WHITEBOARD.frame,
@@ -133,7 +141,10 @@ const chalkboardTheme = themeBuilder(
         "cell-scope": mixColors(CHALKBOARD.dust, CHALKBOARD_WASH.scope, CHALKBOARD.board),
         "cell-pattern": mixColors(CHALKBOARD.yellowChalk, CHALKBOARD_WASH.pattern, CHALKBOARD.board),
         "tray": CHALKBOARD.tray,
+        "tray-shade": CHALKBOARD.trayShade,
         "tray-edge": CHALKBOARD.trayEdge,
+        "duster": DUSTER.back,
+        "duster-felt": DUSTER.felt,
         "smudge": CHALKBOARD.dust,
         "smear": CHALKBOARD.dust,
         "icon-frame": CHALKBOARD.tray,
