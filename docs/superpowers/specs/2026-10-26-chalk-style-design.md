@@ -2,7 +2,7 @@
 
 ## 背景與目的
 
-風格研究畫布「數獨風格研究」（https://claude.ai/artifact/72nsZrRhPbd5nfnKt8UnWE）裡的第四個提案「黑板粉筆」，設計已經完整，這次照它做成第七個正式風格 `chalk`，分支 `feature/style-chalk`。
+風格研究畫布「數獨風格研究」（https://claude.ai/artifact/72nsZrRhPbd5nfnKt8UnWE）裡的第四個提案「黑板粉筆」，設計已經完整，這次照它做成第七個正式風格 `chalkboard`，分支 `feature/style-chalk`。
 
 設計來源（畫布裡的檔案，用 Artifact `read` 加 `path` 取得；畫面、顏色、尺寸、動畫時序以畫板為準，這份文件只記決定與取捨）：
 
@@ -16,7 +16,7 @@
 
 ## 目標
 
-- 新增風格 `chalk`，兩種模式改名：深色叫「黑板」，淺色叫「白板」（`STYLE_MODE_NAMES`，像 pixel）。
+- 新增風格 `chalkboard`，兩種模式改名：深色叫「黑板」，淺色叫「白板」（`STYLE_MODE_NAMES`，像 pixel）。
 - **顏色固定**，只有一組主題，不給主題色（設計筆記：「粉筆和麥克筆的顏色固定」；畫板 CSS 裡留著的 `t1`–`t3` 沒有出現在設定頁，是範本殘留，不做）。
   - 黑板：底 `#2E4B3C`、字 `#F4F1E8`、次要字 `#CFD8CC`、強調（黃粉筆）`#F7C873`、強調上的字 `#233A2E`、玩家數字（藍粉筆）`#A6D8F2`、錯誤 `#FF9E9E`。
   - 白板：底 `#F5F6F3`、字 `#1F2328`、次要字 `#4F5660`、強調（橘麥克筆）`#B04A00`、強調上的字 `#FFFFFF`、玩家數字（藍麥克筆）`#1D5FC2`、錯誤 `#C62828`。
@@ -44,17 +44,17 @@
 
 ## 限制與技術決定
 
-- **粉筆顆粒改用靜態材質圖**：畫板用 `feTurbulence` 濾鏡挖洞，正式版改成事先做好的 SVG 粉筆材質，用 `mask-image` 套上（`url("@/style/styles/chalk/<file>.svg")`），格線、選取圈、按鍵描邊、數字都一樣。設計筆記自己也是這個結論；專案規則也是「靜態 SVG，不用即時濾鏡」。（「填入筆順」畫板筆記說可以把濾鏡只套在數字上，這裡改用同一張靜態材質圖，以符合專案規則。——我的決定）
+- **粉筆顆粒改用靜態材質圖**：畫板用 `feTurbulence` 濾鏡挖洞，正式版改成事先做好的 SVG 粉筆材質，用 `mask-image` 套上（`url("@/style/styles/chalkboard/<file>.svg")`），格線、選取圈、按鍵描邊、數字都一樣。設計筆記自己也是這個結論；專案規則也是「靜態 SVG，不用即時濾鏡」。（「填入筆順」畫板筆記說可以把濾鏡只套在數字上，這裡改用同一張靜態材質圖，以符合專案規則。——我的決定）
 - **手繪格線**：一層靜態 SVG 疊在盤面上（像 ink 的 `brush-grid.svg`），黑板版有粉筆質感、白板版平滑。
-- **兩種模式**：`STYLE_COLOR_MODES.chalk = ["dark", "light"]`，用一般的 `themeBuilder`。模式跟隨玩家的深淺色設定；畫板預設深色，所以清單把 dark 放前面。（我的決定）
-- **主題 id**：一組，`chalkboard`（擁有者決定），規則同 pixel 的 `classic`。
-- **字型**：Caveat Brush 加進 `scripts/generate-fonts.ts`，裁到數字（`0123456789`）以及計時器、統計需要的符號（照畫板實際用 `--font-num` 的地方決定）；字體名稱要另取，不能遮住系統字體（照 ink 的作法，例如 "Chalk Digits"）。在 `styles/chalk/fonts.ts` 用 `markFontsReady` 做字型 gate，接到 `appearanceSync.ts`。
+- **兩種模式**：`STYLE_COLOR_MODES.chalkboard = ["dark", "light"]`，用一般的 `themeBuilder`。模式跟隨玩家的深淺色設定；畫板預設深色，所以清單把 dark 放前面。（我的決定）
+- **主題 id**：一組，`classic`（擁有者決定），同 pixel。
+- **字型**：Caveat Brush 加進 `scripts/generate-fonts.ts`，裁到數字（`0123456789`）以及計時器、統計需要的符號（照畫板實際用 `--font-num` 的地方決定）；字體名稱要另取，不能遮住系統字體（照 ink 的作法，例如 "Chalk Digits"）。在 `styles/chalkboard/fonts.ts` 用 `markFontsReady` 做字型 gate，接到 `appearanceSync.ts`。
 - **「好棒！」**：過關卡片的標題要新增 i18n key（兩種語言），WenKai 子集由 `sourceCharacters()` 從訊息檔產生，所以加了 key 就會涵蓋；仍要讓 `bundledFonts.test.ts` 驗證。英文版的文字照現有風格的語氣決定（例如 "Well done!"）。
-- **筆畫資料**：`style-moments/chalk/chalkDigitStrokes.ts`，從 `StrokeWriting.dc.html` 的黑板資料搬過來，並依打包後的 Caveat Brush 重新量字寬和基線（像 `paperDigitStrokes.ts`）。筆順依畫板：1 先旗再直、4 先斜下帶橫再直下、7 先橫再斜下、8 一筆 S 形繞回、5 先直下帶圓肚再補上橫。黑板筆寬 14 單位（格子 100 單位），兩筆之間停 50ms，最後 60ms 讓整個字形淡入。
+- **筆畫資料**：`style-moments/chalkboard/chalkboardDigitStrokes.ts`，從 `StrokeWriting.dc.html` 的黑板資料搬過來，並依打包後的 Caveat Brush 重新量字寬和基線（像 `paperDigitStrokes.ts`）。筆順依畫板：1 先旗再直、4 先斜下帶橫再直下、7 先橫再斜下、8 一筆 S 形繞回、5 先直下帶圓肚再補上橫。黑板筆寬 14 單位（格子 100 單位），兩筆之間停 50ms，最後 60ms 讓整個字形淡入。
 - **WebKit**：`digitWriter` 只在 `canMaskByReference()` 成立時掛上；Safari／iOS 直接顯示數字，粉塵也不出現。
 - **減少動態／完成動畫關閉**：照各畫板筆記（見下）。
 
-## 專屬時刻（`STYLE_MOMENTS.chalk`）
+## 專屬時刻（`STYLE_MOMENTS.chalkboard`）
 
 - **loader**（`MomentsChalk.dc.html`）：小黑板上，粉筆先畫一個封閉的 3×3 九宮（外框一筆、再四條內線），黃色粉筆圈住「正在解」的那一格，在那格寫下數字、掉一點粉塵，四格輪流；最後板擦從左拖到右，留下一層抹痕再擦乾淨，重來。一輪 4.4 秒，每個元素在每輪開頭都是隱藏的，循環沒有接縫。白板是麥克筆、沒有粉塵。減少動態時顯示畫好的九宮、數字、最後一格的圈和一道抹痕。
 - **groupOverlay**（`GroupChalk.dc.html`）：完成的列下方拖一條黃色粉筆線（欄畫在右側），宮被歪歪的粉筆圈起來；線畫完時掉粉塵，約 0.9 秒後淡掉；數字順便閃一下黃色。同時完成多組就同時畫，粉塵各掉各的。白板是麥克筆、沒有粉塵。動畫關閉時完全不播，也沒有靜態提示。`groupEffectMs` 依畫板時序算出。
@@ -64,7 +64,7 @@
 
 ## 註冊清單
 
-照專案 CLAUDE.md 的「Registering a style」逐項完成：`STYLES`、`style/index.css`、`styleIcons.ts`、`themeIds.ts`（含 `STYLE_MODE_NAMES`）、`index.html` 的 `barColors`（light 與 dark 都要）、i18n 名稱（`settings.style.names`、`settings.colorThemes`、`settings.colorMode.styled.chalk.light/dark` = 白板／黑板，Whiteboard／Chalkboard）、`REQUIRED_SELECTORS`、`paletteContrast.test.ts` 的盤面案例、`STYLE_HOME_HEROES`（看畫板應該是 `stacked`）、`<id>Moments.test.ts`；之後跑 `generate:theme-css`、`generate:icons`、`generate:launcher-icons`、`generate:fonts`。
+照專案 CLAUDE.md 的「Registering a style」逐項完成：`STYLES`、`style/index.css`、`styleIcons.ts`、`themeIds.ts`（含 `STYLE_MODE_NAMES`）、`index.html` 的 `barColors`（light 與 dark 都要）、i18n 名稱（`settings.style.names`、`settings.colorThemes`、`settings.colorMode.styled.chalkboard.light/dark` = 白板／黑板，Whiteboard／Chalkboard）、`REQUIRED_SELECTORS`、`paletteContrast.test.ts` 的盤面案例、`STYLE_HOME_HEROES`（看畫板應該是 `stacked`）、`<id>Moments.test.ts`；之後跑 `generate:theme-css`、`generate:icons`、`generate:launcher-icons`、`generate:fonts`。
 
 `UNRELEASED_CHANGES` 加一條「全新風格：黑板粉筆」（兩種語言）。商店／更新日誌文案不列出或計算風格數量。
 
