@@ -1,7 +1,15 @@
-/* Chalkboard: chalk on a green board (黑板, dark) and markers on a whiteboard (白板, light). This is a stub
-   that gives the press states and the segmented indicator their feedback; the board, the chalk and the type
-   come with the skin proper. Every rule is scoped by [data-style="chalkboard"]; keyframes start with
-   chalkboard-. */
+/* Chalkboard: chalk on a green board (黑板, dark) and markers on a whiteboard (白板, light). Pages are the board
+   itself, 黑板's dusted and smeared where it was wiped; cards, tiles, keys and buttons are chalk outlines with
+   uneven corners; chosen pieces are yellow chalk (an orange marker), as an outline or coloured in. The board is
+   drawn in hand-drawn chalk lines with a yellow ring. Every rule is scoped by [data-style="chalkboard"];
+   keyframes start with chalkboard-. No pressable piece sets a background-image of its own, so the press wash
+   below is never painted over. */
+
+/* Text in WenKai, as chalk or marker writing; the canvas's uneven chalk corners (--wob) */
+[data-style="chalkboard"] {
+    --font-sans: var(--font-wenkai);
+    --chalkboard-wob: 9px 14px 10px 16px / 14px 9px 16px 10px;
+}
 
 /* Press feedback: a faint wash of chalk or marker. It is a colour change, so it stays on under reduced motion. */
 [data-style="chalkboard"] [data-pressed] {
@@ -55,6 +63,7 @@
     --font-key: var(--font-chalkboard-digits);
     --font-timer: var(--font-chalkboard-digits);
     --font-note: var(--font-chalkboard-digits);
+    --font-mono: var(--font-chalkboard-digits);
 }
 
 /* The board: no frame and no card. The board and its plain cells lie bare on the page, and every wash (peers,
@@ -233,6 +242,447 @@
 
 [data-style="chalkboard"] [data-skin~="board"][data-hint-mode] [data-note-highlight] {
     box-shadow: inset 0 0 0 1.5px var(--color-primary);
+}
+
+/* The board as the page. The app's page scroller is the one sheet behind every screen: the board colour with a
+   soft light and a darker rim (黑板) or a whiteboard's sheen (白板). 黑板 is dusted with two fine layers of chalk
+   specks, and the smears where it was wiped (chalkboard-smears.svg, fixed to the screen) lie on its ::before,
+   above the board and below every content layer (the scroller is its own stacking context), never taking taps.
+   白板 has neither: markers leave no dust. */
+[data-style="chalkboard"] [data-skin~="page-ruled"] {
+    isolation: isolate;
+    background-color: var(--color-background);
+    background-image:
+        linear-gradient(115deg, transparent 30%, color-mix(in srgb, var(--color-card) 90%, transparent) 42%, transparent 54%),
+        radial-gradient(ellipse 120% 80% at 50% 50%, transparent 60%, color-mix(in srgb, var(--color-foreground) 6%, transparent));
+}
+
+:root.dark[data-style="chalkboard"] [data-skin~="page-ruled"] {
+    background-image:
+        radial-gradient(ellipse 70% 40% at 20% 18%, color-mix(in srgb, var(--color-foreground) 7%, transparent), transparent 70%),
+        radial-gradient(ellipse 60% 35% at 85% 70%, color-mix(in srgb, var(--color-foreground) 5%, transparent), transparent 70%),
+        radial-gradient(ellipse 120% 80% at 50% 50%, transparent 55%, color-mix(in srgb, var(--color-shadow) 40%, transparent)),
+        radial-gradient(color-mix(in srgb, var(--color-foreground) 10%, transparent) 0.8px, transparent 1.2px),
+        radial-gradient(color-mix(in srgb, var(--color-foreground) 6%, transparent) 0.6px, transparent 1px);
+    background-size: auto, auto, auto, 7px 9px, 11px 5px;
+    background-position: 0 0, 0 0, 0 0, 0 0, 3px 2px;
+}
+
+:root.dark[data-style="chalkboard"] [data-skin~="page-ruled"]::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-color: color-mix(in srgb, var(--color-smear) 5%, transparent);
+    -webkit-mask-image: url("@/style/styles/chalkboard/chalkboard-smears.svg");
+    mask-image: url("@/style/styles/chalkboard/chalkboard-smears.svg");
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+}
+
+/* Pages inside the scroller (Home, Settings) and pages that scroll on their own are clear, so the one sheet
+   shows through them, with no second copy of the dust or the smears */
+[data-style="chalkboard"] [data-skin~="page-ruled"] [data-skin~="page-ruled"],
+:root.dark[data-style="chalkboard"] [data-skin~="page-ruled"] [data-skin~="page-ruled"] {
+    isolation: auto;
+    background: transparent;
+}
+
+:root.dark[data-style="chalkboard"] [data-skin~="page-ruled"] [data-skin~="page-ruled"]::before {
+    content: none;
+}
+
+[data-style="chalkboard"] [data-skin~="page"] {
+    background-color: transparent;
+}
+
+/* A sticky header is clear at rest, so the board runs through it. Once its page has scrolled it frosts, fading
+   in over the first 64px of scroll (--header-scroll, 0 to 1): a translucent board over a blur, tapering out over
+   the header's empty bottom padding, with no rule underneath. */
+[data-style="chalkboard"] [data-skin~="page-header"] {
+    background-color: transparent;
+}
+
+[data-style="chalkboard"] [data-skin~="page-header"][data-scrolled] {
+    background-color: color-mix(in srgb, var(--color-background) calc(70% * var(--header-scroll, 0)), transparent);
+    -webkit-backdrop-filter: blur(calc(10px * var(--header-scroll, 0)));
+    backdrop-filter: blur(calc(10px * var(--header-scroll, 0)));
+    -webkit-mask-image: linear-gradient(to bottom, var(--color-foreground) calc(100% - 12px), transparent);
+    mask-image: linear-gradient(to bottom, var(--color-foreground) calc(100% - 12px), transparent);
+}
+
+/* Home. The logo's 九宮 is sketched in chalk: nine outlined squares, the bright ones in yellow chalk, grained in
+   黑板. The title is bold WenKai, turned −2° as the canvas writes it, underlined with a yellow chalk swoosh
+   (chalkboard-swoosh.svg) on its ::after, set close under the letters so it stays clear of the subtitle. */
+[data-style="chalkboard"] [data-skin~="logo"] {
+    --chalkboard-stick-first: var(--color-foreground);
+    --chalkboard-stick-second: var(--color-accent);
+    background-color: transparent;
+    box-shadow: none;
+}
+
+:root.dark[data-style="chalkboard"] [data-skin~="logo"] {
+    --chalkboard-stick-second: var(--color-primary);
+}
+
+[data-style="chalkboard"] [data-skin~="logo"] > div > div {
+    background-color: transparent;
+    box-shadow: inset 0 0 0 2px var(--color-border);
+    border-radius: 3px 5px 4px 6px;
+}
+
+[data-style="chalkboard"] [data-skin~="logo"] > div > div:nth-child(even) {
+    box-shadow: inset 0 0 0 2px var(--color-primary);
+}
+
+:root.dark[data-style="chalkboard"] [data-skin~="logo"] > div {
+    -webkit-mask-image: var(--chalkboard-grain);
+    mask-image: var(--chalkboard-grain);
+    -webkit-mask-size: 48px 48px;
+    mask-size: 48px 48px;
+    -webkit-mask-repeat: repeat;
+    mask-repeat: repeat;
+}
+
+[data-style="chalkboard"] [data-skin~="title"] {
+    position: relative;
+    rotate: -2deg;
+}
+
+[data-style="chalkboard"] [data-skin~="title"]::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: calc(100% - 4px);
+    width: 150px;
+    height: 14px;
+    translate: -50% 0;
+    pointer-events: none;
+    background-color: var(--color-primary);
+    -webkit-mask-image: url("@/style/styles/chalkboard/chalkboard-swoosh.svg");
+    mask-image: url("@/style/styles/chalkboard/chalkboard-swoosh.svg");
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+}
+
+:root.dark[data-style="chalkboard"] [data-skin~="title"]::after {
+    -webkit-mask-image: url("@/style/styles/chalkboard/chalkboard-swoosh.svg"), var(--chalkboard-grain);
+    mask-image: url("@/style/styles/chalkboard/chalkboard-swoosh.svg"), var(--chalkboard-grain);
+    -webkit-mask-size: 100% 100%, 48px 48px;
+    mask-size: 100% 100%, 48px 48px;
+    -webkit-mask-repeat: no-repeat, repeat;
+    mask-repeat: no-repeat, repeat;
+    -webkit-mask-composite: source-in;
+    mask-composite: intersect;
+}
+
+/* The chalk tray along the bottom of the screen, the logo's ::after fixed to it, below every content layer and
+   never taking taps: the tray's wood (grey plastic on 白板) with its lit top edge, and lying in it two sticks of
+   chalk (the board's chalk and yellow; on 白板 a dark marker and a blue one) and a duster, all gradients in the palette's
+   colours. */
+[data-style="chalkboard"] [data-skin~="logo"]::after {
+    content: "";
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 26px;
+    z-index: -1;
+    pointer-events: none;
+    background-image:
+        linear-gradient(var(--chalkboard-stick-first), var(--chalkboard-stick-first)),
+        linear-gradient(var(--chalkboard-stick-second), var(--chalkboard-stick-second)),
+        linear-gradient(
+            color-mix(in srgb, var(--color-foreground-muted) 30%, var(--color-shadow)) 0 55%,
+            color-mix(in srgb, var(--color-tray-edge) 60%, var(--color-foreground)) 55%
+        ),
+        linear-gradient(var(--color-tray-edge), var(--color-tray-edge)),
+        linear-gradient(var(--color-tray), color-mix(in srgb, var(--color-tray) 65%, var(--color-shadow)));
+    background-size: 52px 10px, 52px 10px, 70px 16px, 100% 2px, 100% 16px;
+    background-position: left 64px bottom 9px, left 126px bottom 9px, right 56px bottom 10px, left 0 bottom 16px, left 0 bottom 0;
+    background-repeat: no-repeat;
+}
+
+:root.dark[data-style="chalkboard"] [data-skin~="logo"]::after {
+    background-size: 46px 8px, 30px 8px, 70px 16px, 100% 2px, 100% 16px;
+    background-position: left 64px bottom 9px, left 124px bottom 9px, right 56px bottom 10px, left 0 bottom 16px, left 0 bottom 0;
+}
+
+/* Titles: bold WenKai, grained in 黑板 like every piece of chalk (the Home title by its glyphs, so the swoosh
+   beside them is not cut off) */
+[data-style="chalkboard"] [data-skin~="title"],
+[data-style="chalkboard"] [data-skin~="dialog-title"],
+[data-style="chalkboard"] [data-skin~="complete-title"] {
+    font-family: var(--font-wenkai);
+    font-weight: 700;
+}
+
+:root.dark[data-style="chalkboard"] [data-skin~="title-glyph"],
+:root.dark[data-style="chalkboard"] [data-skin~="dialog-title"] {
+    -webkit-mask-image: var(--chalkboard-grain);
+    mask-image: var(--chalkboard-grain);
+    -webkit-mask-size: 48px 48px;
+    mask-size: 48px 48px;
+    -webkit-mask-repeat: repeat;
+    mask-repeat: repeat;
+}
+
+/* Chalk outlines: cards, tiles, keys and the continue card are drawn in chalk (marker) on the board, with the
+   canvas's uneven corners and no fill. The continue card keeps a breath of the card. */
+[data-style="chalkboard"] [data-skin~="card"],
+[data-style="chalkboard"] [data-skin~="tile"],
+[data-style="chalkboard"] [data-skin~="key"] {
+    border-color: transparent;
+    background-color: transparent;
+    box-shadow: inset 0 0 0 2px var(--color-border);
+    border-radius: var(--chalkboard-wob);
+}
+
+/* Dialogs and the panels that float over a screen (the hint menu, the hint and playback panels, the
+   walkthrough's intro) are the solid card with its chalk outline and a soft shadow below, so nothing shows
+   through them */
+[data-style="chalkboard"] [data-skin~="card"]:is(.shadow-modal, .shadow-popup, .shadow-card-lg) {
+    background-color: var(--color-card);
+    box-shadow: inset 0 0 0 2px var(--color-border), 0 18px 40px -20px color-mix(in srgb, var(--color-shadow) 50%, transparent);
+}
+
+/* Buttons have uneven chalk corners. The main ones (and New Game, the main action on Home whether or not a game
+   is saved) are coloured in with yellow chalk; secondary ones are a chalk outline; the danger button is solid
+   error; the round playback button is a yellow chalk ring. */
+[data-style="chalkboard"] [data-skin~="button"] {
+    border-radius: 12px 8px 14px 9px / 9px 14px 8px 12px;
+}
+
+[data-style="chalkboard"] [data-skin~="button"]:is(.bg-card, .bg-primary-light, .hint-secondary) {
+    border-color: transparent;
+    background-color: transparent;
+    box-shadow: inset 0 0 0 2px var(--color-border);
+    color: var(--color-foreground);
+    border-radius: var(--chalkboard-wob);
+}
+
+[data-style="chalkboard"] [data-skin~="button"]:is(.bg-primary, .hint-primary),
+[data-style="chalkboard"] [data-skin~="button"][data-skin~="new-game"] {
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+    box-shadow: none;
+    border-radius: 12px 8px 14px 9px / 9px 14px 8px 12px;
+}
+
+[data-style="chalkboard"] [data-skin~="button"].bg-danger {
+    box-shadow: none;
+}
+
+[data-style="chalkboard"] [data-skin~="button"].rounded-full {
+    border-radius: 48% 52% 50% 50% / 52% 48% 52% 48%;
+    background-color: transparent;
+    box-shadow: inset 0 0 0 2px var(--color-primary);
+    color: var(--color-primary);
+}
+
+/* The continue card: a chalk outline over a breath of the card, its play mark yellow; its chips are small
+   chalk loops, the time among them in Chalk Digits */
+[data-style="chalkboard"] [data-skin~="continue"] {
+    background-color: color-mix(in srgb, var(--color-card) 70%, transparent);
+    box-shadow: inset 0 0 0 2px var(--color-border);
+    color: var(--color-foreground);
+    border-radius: var(--chalkboard-wob);
+}
+
+[data-style="chalkboard"] [data-skin~="caret"] {
+    color: var(--color-primary);
+}
+
+[data-style="chalkboard"] [data-skin~="chip"] {
+    background-color: transparent;
+    box-shadow: inset 0 0 0 1.5px var(--color-border);
+    border-radius: 45% 55% 50% 50% / 60% 40% 60% 40%;
+    color: var(--color-foreground);
+}
+
+[data-style="chalkboard"][data-chalkboard-fonts="ready"] [data-skin~="chip"]:nth-child(2) {
+    font-family: var(--font-chalkboard-digits);
+}
+
+/* Tiles: their icon in yellow chalk; a chosen option or toggle is ringed in yellow chalk instead of filled, its
+   icon yellow and its text the board's chalk */
+[data-style="chalkboard"] [data-skin~="tile"][aria-pressed="true"] {
+    background-color: transparent;
+    box-shadow: inset 0 0 0 2px var(--color-primary);
+    color: var(--color-foreground);
+}
+
+[data-style="chalkboard"] [data-skin~="tile"][aria-pressed="true"] > .text-on-primary {
+    color: var(--color-primary);
+}
+
+[data-style="chalkboard"] [data-skin~="tile"][aria-pressed="true"] span .text-on-primary {
+    color: var(--color-foreground-secondary);
+}
+
+/* A toggle's mark is a small uneven square in chalk; when on it is ringed in yellow with a yellow tick */
+[data-style="chalkboard"] [data-skin~="check"] {
+    border-radius: 4px 6px 5px 7px;
+    border-color: var(--color-border);
+}
+
+[data-style="chalkboard"] [data-skin~="tile"][aria-pressed="true"] [data-skin~="check"] {
+    background-color: transparent;
+    box-shadow: inset 0 0 0 2px var(--color-primary);
+    color: var(--color-primary);
+}
+
+/* Segmented controls: no well; the options stand apart and the chosen one is ringed in a yellow chalk loop */
+[data-style="chalkboard"] [data-skin~="segmented"] {
+    --segmented-gap: 6px;
+    --segmented-padding: 0px;
+    background-color: transparent;
+    box-shadow: none;
+}
+
+[data-style="chalkboard"] [data-skin~="segmented-indicator"] {
+    background-color: transparent;
+    box-shadow: inset 0 0 0 2px var(--color-primary);
+    border-radius: 45% 55% 50% 50% / 55% 45% 55% 45%;
+}
+
+[data-style="chalkboard"] [data-skin~="segment"][aria-pressed="true"] {
+    color: var(--color-primary);
+}
+
+/* The game header's difficulty pill, the completion card's tags and a step's tag are yellow chalk loops; the
+   hint-mode pill and a final step's tag are coloured in */
+[data-style="chalkboard"] [data-skin~="pill"],
+[data-style="chalkboard"] [data-skin~="tag"] {
+    background-color: transparent;
+    box-shadow: inset 0 0 0 2px var(--color-primary);
+    border-radius: 45% 55% 50% 50% / 60% 40% 60% 40%;
+    color: var(--color-primary);
+}
+
+[data-style="chalkboard"] [data-skin~="pill"] > span {
+    color: inherit;
+}
+
+[data-style="chalkboard"] [data-skin~="pill"][data-skin~="hint"] {
+    background-color: var(--color-primary);
+    box-shadow: none;
+    color: var(--color-on-primary);
+}
+
+[data-style="chalkboard"] [data-skin~="tag"][data-skin~="step"][data-skin~="strong"] {
+    background-color: var(--color-primary-light);
+}
+
+[data-style="chalkboard"] [data-skin~="tag"][data-skin~="new-record"] {
+    border-radius: 50% / 60%;
+    rotate: -4deg;
+}
+
+/* The trophy is a yellow chalk loop round a yellow cup */
+[data-style="chalkboard"] [data-skin~="trophy"] {
+    background-color: transparent;
+    box-shadow: inset 0 0 0 2px var(--color-primary);
+    border-radius: 48% 52% 45% 55% / 55% 45% 52% 48%;
+    color: var(--color-primary);
+}
+
+/* Controls are pale chalk with no tile; an active one is ringed in a yellow chalk loop */
+[data-style="chalkboard"] [data-skin~="control"] {
+    background-color: transparent;
+    box-shadow: none;
+    color: var(--color-foreground-secondary);
+}
+
+[data-style="chalkboard"] [aria-pressed="true"] > [data-skin~="control"] {
+    background-color: transparent;
+    box-shadow: inset 0 0 0 2px var(--color-primary);
+    border-radius: 45% 55% 50% 50% / 55% 45% 55% 45%;
+    color: var(--color-primary);
+}
+
+/* The keypad: chalk-outlined keys (above), their digits grained in 黑板. The chosen key is coloured in with
+   chalk: the primary behind the on-primary digit, in 黑板 on its ::before, grained, behind the digit (the key
+   is its own stacking context, so the fill stays inside it). A finished key fades; the remaining-count badge is
+   a board-coloured disc ringed in the primary. */
+[data-style="chalkboard"] [data-skin~="key"][aria-pressed="true"] {
+    background-color: var(--color-primary);
+    box-shadow: none;
+    color: var(--color-on-primary);
+}
+
+:root.dark[data-style="chalkboard"] [data-skin~="key"][aria-pressed="true"] {
+    position: relative;
+    isolation: isolate;
+    background-color: transparent;
+}
+
+:root.dark[data-style="chalkboard"] [data-skin~="key"][aria-pressed="true"]::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    border-radius: inherit;
+    background-color: var(--color-primary);
+    -webkit-mask-image: var(--chalkboard-grain);
+    mask-image: var(--chalkboard-grain);
+    -webkit-mask-size: 48px 48px;
+    mask-size: 48px 48px;
+    -webkit-mask-repeat: repeat;
+    mask-repeat: repeat;
+}
+
+:root.dark[data-style="chalkboard"] [data-skin~="key"] > span {
+    -webkit-mask-image: var(--chalkboard-grain);
+    mask-image: var(--chalkboard-grain);
+    -webkit-mask-size: 48px 48px;
+    mask-size: 48px 48px;
+    -webkit-mask-repeat: repeat;
+    mask-repeat: repeat;
+}
+
+[data-style="chalkboard"] [data-skin~="key"]:disabled {
+    opacity: 0.35;
+}
+
+[data-style="chalkboard"] [data-skin~="badge"] {
+    background-color: var(--color-background);
+    box-shadow: inset 0 0 0 1.5px var(--color-primary);
+    color: var(--color-primary);
+}
+
+[data-style="chalkboard"][data-chalkboard-fonts="ready"] [data-skin~="badge"] {
+    font-family: var(--font-chalkboard-digits);
+}
+
+/* Settings: group headings in the board's chalk, underlined in yellow chalk, their icons yellow; rows inside a
+   card are parted by dashed chalk lines */
+[data-style="chalkboard"] [data-skin~="group-heading"] {
+    color: var(--color-foreground);
+    text-decoration: underline 2px var(--color-primary);
+    text-underline-offset: 4px;
+}
+
+[data-style="chalkboard"] [data-skin~="card"].divide-y > *,
+[data-style="chalkboard"] [data-skin~="card"] .divide-y > * {
+    border-style: dashed;
+    border-color: var(--color-border);
+}
+
+/* Statistics: the overview's big numbers in plain Chalk Digits, as chalk writes them */
+[data-style="chalkboard"] [data-skin~="card"] .font-mono.text-3xl {
+    font-weight: 400;
+}
+
+/* The loader lies on the board's own dark wash, as the canvas's dialogs do */
+[data-style="chalkboard"] [data-skin~="loader-scrim"] {
+    background-color: color-mix(in srgb, var(--color-scrim) 60%, transparent);
 }
 
 /* Reduced motion: no scaling or sliding; the press wash stays */

@@ -95,8 +95,10 @@ const CHALKBOARD_LIGHT_NEUTRALS: Neutrals<LightThemeColors> = {
 
 // The continue card is a framed card in the board's text; the selected and focus cells have no fill (the
 // skin rings them); peer and scope cells are a faint wash of dust or marker, same-digit and pattern cells
-// the primary's. The tray, the erase smudge and its fading smear and the app icon's frame (the wooden tray's
-// wood round the 黑板, grey round the 白板) are chalkboard's own colours.
+// the primary's. The tray, the erase smudge and the board's erased smears and the app icon's frame (the
+// wooden tray's wood round the 黑板, grey round the 白板) are chalkboard's own colours. The smudge and the smears
+// are the dust or marker itself: the skin lays them as faint washes (color-mix with transparent, at the canvas's
+// strength), since they lie over the page's light and shade, a hint's washes and the cards, not the bare board.
 const chalkboardTheme = themeBuilder(
     CHALKBOARD_LIGHT_NEUTRALS,
     CHALKBOARD_DARK_NEUTRALS,
@@ -110,8 +112,8 @@ const chalkboardTheme = themeBuilder(
         "cell-pattern": mixColors(WHITEBOARD.orangeMarker, WHITEBOARD_WASH.pattern, WHITEBOARD.board),
         "tray": WHITEBOARD.tray,
         "tray-edge": WHITEBOARD.trayEdge,
-        "smudge": mixColors(WHITEBOARD.marker, 0.1, WHITEBOARD.board),
-        "smear": mixColors(WHITEBOARD.marker, 0.035, WHITEBOARD.board),
+        "smudge": WHITEBOARD.marker,
+        "smear": WHITEBOARD.marker,
         "icon-frame": WHITEBOARD.frame,
     },
     {
@@ -126,8 +128,8 @@ const chalkboardTheme = themeBuilder(
         "cell-pattern": mixColors(CHALKBOARD.yellowChalk, CHALKBOARD_WASH.pattern, CHALKBOARD.board),
         "tray": CHALKBOARD.tray,
         "tray-edge": CHALKBOARD.trayEdge,
-        "smudge": mixColors(CHALKBOARD.dust, 0.22, CHALKBOARD.board),
-        "smear": mixColors(CHALKBOARD.dust, 0.05, CHALKBOARD.board),
+        "smudge": CHALKBOARD.dust,
+        "smear": CHALKBOARD.dust,
         "icon-frame": CHALKBOARD.tray,
     },
 );

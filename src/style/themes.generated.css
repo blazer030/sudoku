@@ -1130,8 +1130,8 @@
     --color-signal-surface: #EFE8E0;
     --color-tray: #D7DADF;
     --color-tray-edge: #E6E8EB;
-    --color-smudge: #E0E1DF;
-    --color-smear: #EEEFEC;
+    --color-smudge: #1F2328;
+    --color-smear: #1F2328;
     --color-icon-frame: #C9CDD3;
 }
 
@@ -1174,7 +1174,7 @@
     --color-signal-surface: #4A5D44;
     --color-tray: #8A5A34;
     --color-tray-edge: #A06C42;
-    --color-smudge: #5C7367;
-    --color-smear: #385446;
+    --color-smudge: #FFFFFF;
+    --color-smear: #FFFFFF;
     --color-icon-frame: #8A5A34;
 }

@@ -6,6 +6,8 @@ const CHALKBOARD_CSS = readFileSync("src/style/styles/chalkboard/skin.css", "utf
 const GRID_SVG = readFileSync("src/style/styles/chalkboard/chalkboard-grid.svg", "utf8");
 const RING_SVG = readFileSync("src/style/styles/chalkboard/chalkboard-ring.svg", "utf8");
 const GRAIN_SVG = readFileSync("src/style/styles/chalkboard/chalkboard-grain.svg", "utf8");
+const SMEARS_SVG = readFileSync("src/style/styles/chalkboard/chalkboard-smears.svg", "utf8");
+const SWOOSH_SVG = readFileSync("src/style/styles/chalkboard/chalkboard-swoosh.svg", "utf8");
 
 const SCOPE = '[data-style="chalkboard"]';
 // 黑板: the codebase's dark mode selector
@@ -23,7 +25,22 @@ const ANSWER_RING = `${BOARD} [data-variant="answer"]::after`;
 const GRID_URL = 'url("@/style/styles/chalkboard/chalkboard-grid.svg")';
 const RING_URL = 'url("@/style/styles/chalkboard/chalkboard-ring.svg")';
 const GRAIN_URL = 'url("@/style/styles/chalkboard/chalkboard-grain.svg")';
+const SMEARS_URL = 'url("@/style/styles/chalkboard/chalkboard-smears.svg")';
+const SWOOSH_URL = 'url("@/style/styles/chalkboard/chalkboard-swoosh.svg")';
 const GRAIN = "var(--chalkboard-grain)";
+const ROOT_PAGE = `${SCOPE} [data-skin~="page-ruled"]`;
+const DARK_ROOT_PAGE = `${DARK} [data-skin~="page-ruled"]`;
+const NESTED_PAGE = `${SCOPE} [data-skin~="page-ruled"] [data-skin~="page-ruled"]`;
+const DARK_NESTED_PAGE = `${DARK} [data-skin~="page-ruled"] [data-skin~="page-ruled"]`;
+const LOGO = `${SCOPE} [data-skin~="logo"]`;
+const TITLE = `${SCOPE} [data-skin~="title"]`;
+const CHOSEN_KEY = `${SCOPE} [data-skin~="key"][aria-pressed="true"]`;
+const DARK_CHOSEN_KEY = `${DARK} [data-skin~="key"][aria-pressed="true"]`;
+// The canvas's uneven chalk corners (--wob)
+const WOBBLY_CORNERS = "var(--chalkboard-wob)";
+const CHALK_OUTLINE = /^inset 0 0 0 [\d.]+px var\(--color-border\)$/;
+// The pieces v-press washes by a background-image; none of them may set one of its own
+const PRESSABLE_TOKENS = ["card", "tile", "key", "button", "control", "segment", "chip", "continue", "new-game"];
 const RAW_COLOUR = /#[0-9a-fA-F]{3,8}\b|rgba?\(|hsla?\(|\bwhite\b|\bblack\b/;
 
 const collapse = (text: string): string => text.replace(/\s+/g, " ").trim();
@@ -58,6 +75,22 @@ const allDeclarations = (): { selectors: string[]; property: string; value: stri
     });
     return found;
 };
+
+// Every rule outside @keyframes and @supports, with its collapsed selectors and declarations
+const allRules = (): { selectors: string[]; declarations: Map<string, string> }[] => {
+    const rules: { selectors: string[]; declarations: Map<string, string> }[] = [];
+    postcss.parse(CHALKBOARD_CSS).walkRules((rule) => {
+        if (rule.parent?.type === "atrule" && (rule.parent as AtRule).name.endsWith("keyframes")) return;
+        const declarations = new Map<string, string>();
+        rule.walkDecls((declaration) => {
+            declarations.set(declaration.prop, collapse(declaration.value));
+        });
+        rules.push({ selectors: rule.selectors.map(collapse), declarations });
+    });
+    return rules;
+};
+
+const isPseudoElement = (selector: string): boolean => /::(?:before|after)$/.test(selector);
 
 const parseSvg = (source: string): Document => new DOMParser().parseFromString(source, "image/svg+xml");
 const viewBoxOf = (svg: Document): number[] => (svg.documentElement.getAttribute("viewBox") ?? "").split(/\s+/).map(Number);
@@ -311,6 +344,294 @@ describe("chalkboard skin", () => {
             const pattern = declarationsOf(CHALKBOARD_CSS, `${DARK_BOARD} [data-variant="pattern"]`);
 
             expect(pattern.get("box-shadow")).toMatch(/^inset 0 0 0 [\d.]+px color-mix\(in srgb, var\(--color-primary\) \d+%, transparent\)$/);
+        });
+    });
+
+    describe("chalkboard pages", () => {
+        it("should paint the app's page scroller as the board, lit and shaded from the palette alone", () => {
+            const page = declarationsOf(CHALKBOARD_CSS, ROOT_PAGE);
+
+            expect(page.get("background-color")).toBe("var(--color-background)");
+            expect(page.get("background-image")?.match(/gradient\(/g)?.length).toBeGreaterThanOrEqual(2);
+            expect(page.get("background-image")).not.toMatch(RAW_COLOUR);
+            // Its own stacking context, so a layer below content still lies above the board
+            expect(page.get("isolation")).toBe("isolate");
+        });
+
+        it("should dust 黑板 with two fine layers of chalk specks", () => {
+            const page = declarationsOf(CHALKBOARD_CSS, DARK_ROOT_PAGE);
+
+            expect(page.get("background-image")?.match(/radial-gradient\(/g)?.length).toBeGreaterThanOrEqual(2);
+            expect(page.get("background-image")).not.toMatch(RAW_COLOUR);
+            expect(page.get("background-size")).toContain("7px 9px");
+            expect(page.get("background-size")).toContain("11px 5px");
+        });
+
+        it("should lay the erased smears over 黑板, fixed to the screen, below every content layer and never taking taps", () => {
+            const smears = declarationsOf(CHALKBOARD_CSS, `${DARK_ROOT_PAGE}::before`);
+
+            expect(smears.get("content")).toBe('""');
+            expect(smears.get("position")).toBe("fixed");
+            expect(smears.get("inset")).toBe("0");
+            expect(smears.get("z-index")).toBe("-1");
+            expect(smears.get("pointer-events")).toBe("none");
+            expect(smears.get("-webkit-mask-image")).toBe(SMEARS_URL);
+            expect(smears.get("mask-image")).toBe(SMEARS_URL);
+            expect(smears.get("background-color")).toMatch(/^color-mix\(in srgb, var\(--color-smear\) [\d.]+%, transparent\)$/);
+        });
+
+        // 白板 is markers on a clean board: no dust and no smears (Review Focus 5)
+        it("should leave the whiteboard without dust or smears", () => {
+            const page = declarationsOf(CHALKBOARD_CSS, ROOT_PAGE);
+            const dusty = allRules().filter(rule => Array.from(rule.declarations.values())
+                .some(value => value.includes("chalkboard-smears.svg") || value.includes("--color-smear")));
+
+            expect(page.get("background-size")).toBeUndefined();
+            expect(page.get("background-image")).not.toMatch(/\d px|\dpx/);
+            expect(declarationsOf(CHALKBOARD_CSS, `${ROOT_PAGE}::before`).size).toBe(0);
+            expect(dusty.length).toBeGreaterThan(0);
+            for (const { selectors } of dusty) {
+                for (const selector of selectors) {
+                    expect(selector.startsWith(DARK), selector).toBe(true);
+                }
+            }
+        });
+
+        it("should leave a page nested in the scroller clear, without a second copy of the dust or smears", () => {
+            for (const selector of [NESTED_PAGE, DARK_NESTED_PAGE]) {
+                expect(declarationsOf(CHALKBOARD_CSS, selector).get("background"), selector).toBe("transparent");
+            }
+            expect(declarationsOf(CHALKBOARD_CSS, `${DARK_NESTED_PAGE}::before`).get("content")).toBe("none");
+            expect(declarationsOf(CHALKBOARD_CSS, `${SCOPE} [data-skin~="page"]`).get("background-color")).toBe("transparent");
+        });
+
+        it("should keep a sticky page header clear at rest, so the board runs through it", () => {
+            expect(declarationsOf(CHALKBOARD_CSS, `${SCOPE} [data-skin~="page-header"]`).get("background-color")).toBe("transparent");
+        });
+
+        describe("chalkboard-smears.svg", () => {
+            const svg = parseSvg(SMEARS_SVG);
+
+            it("should parse as a 390×844 drawing stretched to the screen, its softness drawn in without a filter", () => {
+                expect(svg.getElementsByTagName("parsererror")).toHaveLength(0);
+                expect(svg.documentElement.getAttribute("viewBox")).toBe("0 0 390 844");
+                expect(svg.documentElement.getAttribute("preserveAspectRatio")).toBe("none");
+                expect(svg.getElementsByTagName("filter")).toHaveLength(0);
+            });
+
+            it("should carry only alpha: every stroke in currentColor", () => {
+                expect(svg.getElementsByTagName("path").length).toBeGreaterThanOrEqual(7);
+                expect(SMEARS_SVG).not.toMatch(RAW_COLOUR);
+                expect(svg.getElementsByTagName("g")[0].getAttribute("stroke")).toBe("currentColor");
+            });
+        });
+    });
+
+    describe("Home", () => {
+        it("should lay the chalk tray along the bottom of the screen, below every content layer and never taking taps", () => {
+            const tray = declarationsOf(CHALKBOARD_CSS, `${LOGO}::after`);
+
+            expect(tray.get("content")).toBe('""');
+            expect(tray.get("position")).toBe("fixed");
+            expect(tray.get("left")).toBe("0");
+            expect(tray.get("right")).toBe("0");
+            expect(tray.get("bottom")).toBe("0");
+            expect(tray.get("z-index")).toBe("-1");
+            expect(tray.get("pointer-events")).toBe("none");
+        });
+
+        it("should draw the tray, its lit edge, two sticks and a duster in gradients from the palette", () => {
+            const tray = declarationsOf(CHALKBOARD_CSS, `${LOGO}::after`);
+            const image = tray.get("background-image") ?? "";
+
+            expect(image.match(/linear-gradient\(/g)?.length).toBeGreaterThanOrEqual(5);
+            expect(image).toContain("var(--color-tray)");
+            expect(image).toContain("var(--color-tray-edge)");
+            expect(image).toContain("var(--chalkboard-stick-first)");
+            expect(image).toContain("var(--chalkboard-stick-second)");
+            expect(image).not.toMatch(RAW_COLOUR);
+        });
+
+        it("should hold the board's chalk and yellow chalk in 黑板's tray, a dark and a blue marker in 白板's", () => {
+            const whiteboard = declarationsOf(CHALKBOARD_CSS, LOGO);
+            const chalkboard = declarationsOf(CHALKBOARD_CSS, `${DARK} [data-skin~="logo"]`);
+
+            expect(whiteboard.get("--chalkboard-stick-first")).toBe("var(--color-foreground)");
+            expect(whiteboard.get("--chalkboard-stick-second")).toBe("var(--color-accent)");
+            expect(chalkboard.get("--chalkboard-stick-second")).toBe("var(--color-primary)");
+        });
+
+        it("should sketch the logo's 九宮 in chalk outlines, with no block of colour", () => {
+            const logo = declarationsOf(CHALKBOARD_CSS, LOGO);
+            const squares = declarationsOf(CHALKBOARD_CSS, `${LOGO} > div > div`);
+
+            expect(logo.get("background-color")).toBe("transparent");
+            expect(logo.get("box-shadow")).toBe("none");
+            expect(squares.get("background-color")).toBe("transparent");
+            expect(squares.get("box-shadow")).toMatch(/^inset 0 0 0 [\d.]+px var\(--color-border\)$/);
+        });
+
+        it("should underline the title with a yellow chalk swoosh, never taking taps", () => {
+            const swoosh = declarationsOf(CHALKBOARD_CSS, `${TITLE}::after`);
+
+            expect(swoosh.get("content")).toBe('""');
+            expect(swoosh.get("position")).toBe("absolute");
+            expect(swoosh.get("pointer-events")).toBe("none");
+            expect(swoosh.get("background-color")).toBe("var(--color-primary)");
+            expect(swoosh.get("-webkit-mask-image")).toBe(SWOOSH_URL);
+            expect(swoosh.get("mask-image")).toBe(SWOOSH_URL);
+        });
+
+        it("should make the new-game button the yellow chalk fill whether or not a game is saved", () => {
+            const button = declarationsOf(CHALKBOARD_CSS, `${SCOPE} [data-skin~="button"][data-skin~="new-game"]`);
+
+            expect(button.get("background-color")).toBe("var(--color-primary)");
+            expect(button.get("color")).toBe("var(--color-on-primary)");
+        });
+
+        describe("chalkboard-swoosh.svg", () => {
+            const svg = parseSvg(SWOOSH_SVG);
+
+            it("should parse as the canvas's two strokes, with no filter, in currentColor", () => {
+                expect(svg.getElementsByTagName("parsererror")).toHaveLength(0);
+                expect(svg.getElementsByTagName("filter")).toHaveLength(0);
+                expect(SWOOSH_SVG).not.toMatch(RAW_COLOUR);
+                expect(svg.getElementsByTagName("path")[0].getAttribute("stroke")).toBe("currentColor");
+            });
+        });
+    });
+
+    describe("type", () => {
+        it("should set every text in WenKai, and the figures in Chalk Digits once the face has loaded", () => {
+            expect(declarationsOf(CHALKBOARD_CSS, SCOPE).get("--font-sans")).toBe("var(--font-wenkai)");
+            expect(declarationsOf(CHALKBOARD_CSS, FONTS_READY).get("--font-mono")).toBe("var(--font-chalkboard-digits)");
+        });
+
+        it.each(["title", "dialog-title", "complete-title"])("should write the %s in bold WenKai", (token) => {
+            const title = declarationsOf(CHALKBOARD_CSS, `${SCOPE} [data-skin~="${token}"]`);
+
+            expect(title.get("font-family")).toBe("var(--font-wenkai)");
+            expect(title.get("font-weight")).toBe("700");
+        });
+
+        it("should set no letter-spacing, font-size or border on any element (only placed decorations size themselves)", () => {
+            const offending = allRules().flatMap(rule => rule.selectors
+                .filter(selector => !isPseudoElement(selector))
+                .flatMap(selector => ["letter-spacing", "font-size", "border"]
+                    .filter(property => rule.declarations.has(property))
+                    .map(property => `${selector} → ${property}`)));
+
+            expect(offending).toEqual([]);
+        });
+    });
+
+    describe("chalk outlines", () => {
+        it.each(["card", "tile", "key", "continue"])("should draw a %s as a chalk outline with uneven corners", (token) => {
+            const surface = declarationsOf(CHALKBOARD_CSS, `${SCOPE} [data-skin~="${token}"]`);
+
+            expect(surface.get("border-radius")).toBe(WOBBLY_CORNERS);
+            expect(surface.get("box-shadow")).toMatch(CHALK_OUTLINE);
+        });
+
+        it("should give the canvas's uneven corners", () => {
+            expect(declarationsOf(CHALKBOARD_CSS, SCOPE).get("--chalkboard-wob")).toBe("9px 14px 10px 16px / 14px 9px 16px 10px");
+        });
+
+        it("should outline a secondary button in chalk and keep the main ones a fill", () => {
+            const secondary = declarationsOf(CHALKBOARD_CSS, `${SCOPE} [data-skin~="button"]:is(.bg-card, .bg-primary-light, .hint-secondary)`);
+            const main = declarationsOf(CHALKBOARD_CSS, `${SCOPE} [data-skin~="button"]:is(.bg-primary, .hint-primary)`);
+
+            expect(secondary.get("background-color")).toBe("transparent");
+            expect(secondary.get("box-shadow")).toMatch(CHALK_OUTLINE);
+            expect(main.get("background-color")).toBe("var(--color-primary)");
+            expect(main.get("color")).toBe("var(--color-on-primary)");
+        });
+
+        it("should give dialogs and floating panels the solid card, so the page under them does not show through", () => {
+            const floating = declarationsOf(CHALKBOARD_CSS, `${SCOPE} [data-skin~="card"]:is(.shadow-modal, .shadow-popup, .shadow-card-lg)`);
+
+            expect(floating.get("background-color")).toBe("var(--color-card)");
+            expect(floating.get("box-shadow")).toContain("var(--color-border)");
+        });
+
+        it("should give no pressable piece a background-image of its own, so the press wash is never painted over", () => {
+            const offending = allRules().flatMap(rule => rule.selectors
+                .filter(selector => !isPseudoElement(selector))
+                .filter(selector => PRESSABLE_TOKENS.some(token => selector.includes(`[data-skin~="${token}"]`)))
+                .filter(() => rule.declarations.has("background-image") || rule.declarations.has("background")));
+
+            expect(offending).toEqual([]);
+        });
+    });
+
+    describe("keypad", () => {
+        it("should colour the chosen key in with chalk, its digit on it in the on-primary", () => {
+            const chosen = declarationsOf(CHALKBOARD_CSS, CHOSEN_KEY);
+
+            expect(chosen.get("background-color")).toBe("var(--color-primary)");
+            expect(chosen.get("color")).toBe("var(--color-on-primary)");
+        });
+
+        it("should grain the chosen key's chalk in 黑板, behind its digit", () => {
+            const key = declarationsOf(CHALKBOARD_CSS, DARK_CHOSEN_KEY);
+            const fill = declarationsOf(CHALKBOARD_CSS, `${DARK_CHOSEN_KEY}::before`);
+
+            expect(key.get("background-color")).toBe("transparent");
+            expect(key.get("isolation")).toBe("isolate");
+            expect(fill.get("content")).toBe('""');
+            expect(fill.get("z-index")).toBe("-1");
+            expect(fill.get("pointer-events")).toBe("none");
+            expect(fill.get("background-color")).toBe("var(--color-primary)");
+            expect(fill.get("-webkit-mask-image")).toBe(GRAIN);
+            expect(fill.get("mask-image")).toBe(GRAIN);
+        });
+
+        it("should fade a finished key", () => {
+            expect(declarationsOf(CHALKBOARD_CSS, `${SCOPE} [data-skin~="key"]:disabled`).get("opacity")).toBe("0.35");
+        });
+
+        it("should draw the remaining-count badge as a page-coloured disc ringed in the primary", () => {
+            const badge = declarationsOf(CHALKBOARD_CSS, `${SCOPE} [data-skin~="badge"]`);
+
+            expect(badge.get("background-color")).toBe("var(--color-background)");
+            expect(badge.get("color")).toBe("var(--color-primary)");
+            expect(badge.get("box-shadow")).toBe("inset 0 0 0 1.5px var(--color-primary)");
+        });
+    });
+
+    describe("choices", () => {
+        it("should ring the chosen segment in the primary instead of filling it", () => {
+            const indicator = declarationsOf(CHALKBOARD_CSS, `${SCOPE} [data-skin~="segmented-indicator"]`);
+
+            expect(indicator.get("background-color")).toBe("transparent");
+            expect(indicator.get("box-shadow")).toBe("inset 0 0 0 2px var(--color-primary)");
+            expect(declarationsOf(CHALKBOARD_CSS, `${SCOPE} [data-skin~="segment"][aria-pressed="true"]`).get("color")).toBe("var(--color-primary)");
+        });
+
+        it("should outline a chosen tile in the primary instead of filling it", () => {
+            const chosen = declarationsOf(CHALKBOARD_CSS, `${SCOPE} [data-skin~="tile"][aria-pressed="true"]`);
+
+            expect(chosen.get("background-color")).toBe("transparent");
+            expect(chosen.get("box-shadow")).toBe("inset 0 0 0 2px var(--color-primary)");
+            expect(chosen.get("color")).toBe("var(--color-foreground)");
+        });
+
+        it("should ring the difficulty pill in the primary and fill the hint-mode pill", () => {
+            const pill = declarationsOf(CHALKBOARD_CSS, `${SCOPE} [data-skin~="pill"]`);
+            const hint = declarationsOf(CHALKBOARD_CSS, `${SCOPE} [data-skin~="pill"][data-skin~="hint"]`);
+
+            expect(pill.get("background-color")).toBe("transparent");
+            expect(pill.get("box-shadow")).toBe("inset 0 0 0 2px var(--color-primary)");
+            expect(hint.get("background-color")).toBe("var(--color-primary)");
+            expect(hint.get("color")).toBe("var(--color-on-primary)");
+        });
+
+        it("should ring an active control in the primary", () => {
+            const active = declarationsOf(CHALKBOARD_CSS, `${SCOPE} [aria-pressed="true"] > [data-skin~="control"]`);
+
+            expect(active.get("background-color")).toBe("transparent");
+            expect(active.get("box-shadow")).toBe("inset 0 0 0 2px var(--color-primary)");
+            expect(active.get("color")).toBe("var(--color-primary)");
         });
     });
 

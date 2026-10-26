@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 170 22" preserveAspectRatio="none">
+<!-- The Home title's yellow chalk swoosh: the canvas's two strokes under 數獨 (Chalk.dc .swoosh). Only alpha: the
+     skin paints it in the primary through mask-image. -->
+<path d="M4 14 C 40 6, 90 4, 166 9 M22 18 C 60 13, 110 12, 150 15" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+</svg>

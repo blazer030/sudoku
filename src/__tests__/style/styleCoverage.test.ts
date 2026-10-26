@@ -100,6 +100,16 @@ const REQUIRED_SELECTORS: Record<StyleId, readonly string[]> = {
         "[data-selected]::after",
         "[data-value-kind]",
         "[data-note-highlight]",
+        '[data-skin~="page-ruled"]::before',
+        '[data-skin~="page"]',
+        '[data-skin~="page-header"]',
+        '[data-skin~="logo"]::after',
+        '[data-skin~="title"]::after',
+        '[data-skin~="continue"]',
+        '[data-skin~="new-game"]',
+        '[data-skin~="key"][aria-pressed="true"]',
+        '[data-skin~="tile"][aria-pressed="true"]',
+        '[data-skin~="segmented-indicator"]',
     ],
 };
 
