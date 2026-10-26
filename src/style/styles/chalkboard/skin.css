@@ -685,6 +685,11 @@
     mask-repeat: repeat;
 }
 
+/* The game's toast takes the canvas's uneven chalk corners */
+[data-style="chalkboard"] [data-skin~="toast"] {
+    border-radius: var(--chalkboard-wob);
+}
+
 /* A step navigator's dots, as the canvas's .dots: the steps to come are chalk rings, the ones passed dimmed chalk */
 [data-style="chalkboard"] [data-skin~="step-dot"].bg-border {
     background-color: transparent;

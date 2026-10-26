@@ -680,6 +680,10 @@ describe("chalkboard skin", () => {
             expect(darkFill.get("-webkit-mask-image")).toBe(GRAIN);
         });
 
+        it("should give the toast the canvas's uneven chalk corners", () => {
+            expect(declarationsOf(CHALKBOARD_CSS, `${SCOPE} [data-skin~="toast"]`).get("border-radius")).toBe(WOBBLY_CORNERS);
+        });
+
         it("should ring the steps still to come and dim the ones passed to chalk", () => {
             const coming = declarationsOf(CHALKBOARD_CSS, `${SCOPE} [data-skin~="step-dot"].bg-border`);
             const passed = declarationsOf(CHALKBOARD_CSS, `${SCOPE} [data-skin~="step-dot"].bg-primary\\/40`);
