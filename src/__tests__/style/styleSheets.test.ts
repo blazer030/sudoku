@@ -12,6 +12,10 @@ describe("style sheet rules", () => {
         expect(findLayoutDeclarations('[data-style="tactile"] .x { position: relative; box-shadow: none }')).toHaveLength(0);
         expect(findLayoutDeclarations('[data-style="tactile"] [data-skin~="title-glyph"] { display: inline-block; margin-inline: 0.12em }')).toHaveLength(0);
         expect(findLayoutDeclarations('[data-style="tactile"] [data-skin~="title-glyph"] { padding: 2px }')).toHaveLength(1);
+        const chalkDigits = '[data-style="chalkboard"] [data-skin~="board"] [data-variant] > :is(.font-clue, .font-entry)';
+        expect(findLayoutDeclarations(`${chalkDigits} { padding-inline: 0.1em; margin-inline: -0.1em }`)).toHaveLength(0);
+        expect(findLayoutDeclarations(`${chalkDigits} { padding-inline: 0.2em; margin-inline: -0.1em }`)).toHaveLength(1);
+        expect(findLayoutDeclarations('[data-style="chalkboard"] [data-variant] > div { padding-inline: 0.1em }')).toHaveLength(1);
     });
 
     it("should flag selectors outside the style's scope", () => {

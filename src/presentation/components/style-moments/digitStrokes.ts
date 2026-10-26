@@ -34,4 +34,9 @@ export interface StrokeFace {
     advances: Partial<Record<number, number>>;
     /** The typeface's baseline in a one-em line box, in ems from its top. */
     baselineEm: number;
+    /**
+     * Room the skin gives the digit's box on either side of its advance, in ems, so a mask on the box reaches
+     * ink that overhangs the advance; none when the box is the advance alone.
+     */
+    boxPaddingEm?: number;
 }

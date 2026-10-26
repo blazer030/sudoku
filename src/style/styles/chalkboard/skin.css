@@ -140,6 +140,15 @@
     box-shadow: none;
 }
 
+/* Caveat Brush's ink overhangs its advance (the 4's bar by about 2px), and a mask clips to its element's box: a
+   board digit takes a little room either side, given back by an equal negative margin so nothing moves, for
+   黑板's grain and the writer's mask to reach the whole glyph. The writer counts the room in the digit's box
+   (CHALKBOARD_STROKE_FACE). */
+[data-style="chalkboard"] [data-skin~="board"] [data-variant] > :is(.font-clue, .font-entry) {
+    padding-inline: 0.1em;
+    margin-inline: -0.1em;
+}
+
 /* 黑板's digits and notes are chalk: grained like the lines */
 :root.dark[data-style="chalkboard"] [data-skin~="board"] [data-variant] > div {
     -webkit-mask-image: var(--chalkboard-grain);
@@ -710,6 +719,69 @@
     animation: chalkboard-smear 750ms ease-out;
 }
 
+/* A digit entered is written in by hand, stroke by stroke: ChalkboardDigitWriter draws its strokes, in writing
+   order with 50ms pen lifts, into the mask the digit is shown through, then settles the whole mask in over
+   60ms, so the last frame is the digit itself. The strokes follow Caveat Brush's digits, so the mask applies
+   only once it has loaded. In 黑板 the digit keeps its grain while it is written: the two masks intersect. A
+   digit placed with no writer mounted gets no var, and the first layer then lets the whole digit through. */
+@keyframes chalkboard-digit-stroke {
+    to { stroke-dashoffset: 0; }
+}
+
+@keyframes chalkboard-digit-settle {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+[data-style="chalkboard"][data-chalkboard-fonts="ready"] [data-skin~="board"] .font-entry.value-arrive {
+    -webkit-mask-image: var(--digit-writer-mask, none);
+    mask-image: var(--digit-writer-mask, none);
+}
+
+:root.dark[data-style="chalkboard"][data-chalkboard-fonts="ready"] [data-skin~="board"] [data-variant] > .font-entry.value-arrive {
+    -webkit-mask-image: var(--digit-writer-mask, linear-gradient(currentColor, currentColor)), var(--chalkboard-grain);
+    mask-image: var(--digit-writer-mask, linear-gradient(currentColor, currentColor)), var(--chalkboard-grain);
+    -webkit-mask-size: auto, 48px 48px;
+    mask-size: auto, 48px 48px;
+    -webkit-mask-repeat: no-repeat, repeat;
+    mask-repeat: no-repeat, repeat;
+    -webkit-mask-composite: source-in;
+    mask-composite: intersect;
+}
+
+[data-style="chalkboard"] .chalkboard-digit-stroke {
+    animation-name: chalkboard-digit-stroke;
+    animation-fill-mode: both;
+}
+
+[data-style="chalkboard"] .chalkboard-digit-settle {
+    opacity: 0;
+    animation-name: chalkboard-digit-settle;
+    animation-duration: 60ms;
+    animation-fill-mode: both;
+}
+
+/* Chalk dust: as each stroke ends a few specks of the board's chalk drop and fall away. 白板's marker drops
+   none, so they stay hidden there. The writer waits for the last to fall before it leaves, so the falls are
+   shorter than the board's 520ms: the 8's, the last, ends by 940ms, before the arrival would settle anyway. */
+@keyframes chalkboard-digit-dust {
+    0% { opacity: 0; transform: translate(0, 0); }
+    2% { opacity: 0.85; }
+    100% { opacity: 0; transform: translate(0, 9px); }
+}
+
+[data-style="chalkboard"] .chalkboard-digit-dust {
+    opacity: 0;
+    fill: var(--color-foreground);
+}
+
+:root.dark[data-style="chalkboard"] .chalkboard-digit-dust {
+    animation-name: chalkboard-digit-dust;
+    animation-duration: 400ms;
+    animation-timing-function: ease-in;
+    animation-fill-mode: both;
+}
+
 /* Reduced motion: no scaling or sliding; the press wash stays */
 @media (prefers-reduced-motion: reduce) {
     [data-style="chalkboard"] .segmented-indicator-motion {
@@ -725,7 +797,24 @@
     }
 
     [data-style="chalkboard"] [data-skin~="board"] [data-variant].value-leave::before,
-    :root.dark[data-style="chalkboard"] [data-skin~="board"] [data-variant].value-leave::before {
+    :root.dark[data-style="chalkboard"] [data-skin~="board"] [data-variant].value-leave::before,
+    [data-style="chalkboard"] .chalkboard-digit-stroke,
+    [data-style="chalkboard"] .chalkboard-digit-settle,
+    :root.dark[data-style="chalkboard"] .chalkboard-digit-dust {
         animation: none;
+    }
+
+    [data-style="chalkboard"][data-chalkboard-fonts="ready"] [data-skin~="board"] .font-entry.value-arrive {
+        -webkit-mask-image: none;
+        mask-image: none;
+    }
+
+    :root.dark[data-style="chalkboard"][data-chalkboard-fonts="ready"] [data-skin~="board"] [data-variant] > .font-entry.value-arrive {
+        -webkit-mask-image: var(--chalkboard-grain);
+        mask-image: var(--chalkboard-grain);
+        -webkit-mask-size: 48px 48px;
+        mask-size: 48px 48px;
+        -webkit-mask-repeat: repeat;
+        mask-repeat: repeat;
     }
 }

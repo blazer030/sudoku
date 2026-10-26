@@ -99,11 +99,13 @@ const settleDelayMs = computed(() => props.face.strokes[props.digit]?.settleDela
 
 const crossingsIdOf = (index: number): string => `${props.maskId}-crossings-${index}`;
 
-// From the board's units to fractions of the digit's box: one em is the box's height and its advance its
-// width; the board's advance centre lands on the box's centre and its baseline on the typeface's
+// From the board's units to fractions of the digit's box: one em is the box's height and its advance (with
+// any room either side) its width; the board's advance centre lands on the box's centre and its baseline on
+// the typeface's
 const glyphTransform = computed(() => {
     const advance = props.face.advances[props.digit] ?? 0.45;
-    const scaleX = 1 / (props.face.glyph.size * advance);
+    const boxWidth = advance + 2 * (props.face.boxPaddingEm ?? 0);
+    const scaleX = 1 / (props.face.glyph.size * boxWidth);
     const scaleY = 1 / props.face.glyph.size;
     const offsetX = 0.5 - props.face.glyph.centreX * scaleX;
     const offsetY = props.face.baselineEm - props.face.glyph.baselineY * scaleY;

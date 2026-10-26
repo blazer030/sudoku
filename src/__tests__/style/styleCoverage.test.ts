@@ -110,6 +110,9 @@ const REQUIRED_SELECTORS: Record<StyleId, readonly string[]> = {
         '[data-skin~="key"][aria-pressed="true"]',
         '[data-skin~="tile"][aria-pressed="true"]',
         '[data-skin~="segmented-indicator"]',
+        ".value-arrive",
+        ".chalkboard-digit-stroke",
+        ".chalkboard-digit-dust",
     ],
 };
 

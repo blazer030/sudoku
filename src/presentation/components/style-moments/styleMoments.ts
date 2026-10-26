@@ -16,6 +16,7 @@ import CyberGroupOverlay from "@/presentation/components/style-moments/cyber/Cyb
 import InkLoader from "@/presentation/components/style-moments/ink/InkLoader.vue";
 import InkGroupOverlay from "@/presentation/components/style-moments/ink/InkGroupOverlay.vue";
 import InkCardDecoration from "@/presentation/components/style-moments/ink/InkCardDecoration.vue";
+import ChalkboardDigitWriter from "@/presentation/components/style-moments/chalkboard/ChalkboardDigitWriter.vue";
 import type { CompletedGroup } from "@/domain/game/Sudoku";
 
 /** A group effect on the board: a new one gets a new id, which starts its drawings afresh. */
@@ -49,7 +50,8 @@ export interface StyleMoments {
     /**
      * Writes an entered digit in while it arrives (only when motion is allowed), given `{ digit, maskId }`:
      * it renders an SVG `<mask>` with that id, which the arriving digit carries as `--digit-writer-mask` for
-     * the skin to mask it by, and emits `written` once the digit shows whole, which settles the arrival.
+     * the skin to mask it by, and emits `written` once the digit shows whole (and anything else it draws, such as
+     * chalk's dust, has finished), which settles the arrival.
      * None when the skin's `.value-arrive` carries it all.
      */
     digitWriter?: Component | null;
@@ -127,12 +129,14 @@ const INK_MOMENTS: StyleMoments = {
     celebrationBoardMs: 1450,
 };
 
-// Chalkboard borrows minimal's loading and timings until its own moments come
+// Chalkboard borrows minimal's loading and timings until its own moments come. An entered digit is written in
+// stroke by stroke, in 420–560ms, a little chalk dust falling as each stroke ends (黑板 only).
 const CHALKBOARD_MOMENTS: StyleMoments = {
     loader: MinimalLoader,
     celebration: null,
     groupEffectMs: 620,
     celebrationBoardMs: 640,
+    digitWriter: ChalkboardDigitWriter,
 };
 
 // One entry per style, so a style added without its moments is a type error
