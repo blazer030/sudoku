@@ -586,7 +586,7 @@ describe("chalkboard skin", () => {
     });
 
     describe("chalk outlines", () => {
-        it.each(["card", "tile", "key", "continue"])("should draw a %s as a chalk outline with uneven corners", (token) => {
+        it.each(["card", "tile", "key", "continue", "recent-row"])("should draw a %s as a chalk outline with uneven corners", (token) => {
             const surface = declarationsOf(CHALKBOARD_CSS, `${SCOPE} [data-skin~="${token}"]`);
 
             expect(surface.get("border-radius")).toBe(WOBBLY_CORNERS);
@@ -621,6 +621,66 @@ describe("chalkboard skin", () => {
                 .filter(() => rule.declarations.has("background-image") || rule.declarations.has("background")));
 
             expect(offending).toEqual([]);
+        });
+    });
+
+    // The canvas's .dicon / .lchip / .ichip and .apptag: outlined loops, not filled discs; the .prog and .mdiv: dashed
+    describe("canvas details", () => {
+        const ICON_TILE = `${SCOPE} [data-skin~="icon-tile"]`;
+        const CHALK_LOOP = "48% 52% 45% 55% / 55% 45% 52% 48%";
+
+        it("should draw an icon tile as a yellow chalk loop with no fill", () => {
+            const tile = declarationsOf(CHALKBOARD_CSS, ICON_TILE);
+
+            expect(tile.get("background-color")).toBe("transparent");
+            expect(tile.get("box-shadow")).toBe("inset 0 0 0 2px var(--color-primary)");
+            expect(tile.get("border-radius")).toBe(CHALK_LOOP);
+        });
+
+        it.each([
+            ["danger", "var(--color-danger)"],
+            ["gave-up", "var(--color-accent)"],
+        ])("should loop a %s icon tile in its own colour", (token, colour) => {
+            const tile = declarationsOf(CHALKBOARD_CSS, `${ICON_TILE}[data-skin~="${token}"]`);
+
+            expect(tile.get("box-shadow")).toBe(`inset 0 0 0 2px ${colour}`);
+            expect(tile.get("color")).toBe(colour);
+        });
+
+        it("should outline the changelog's App tag in yellow chalk", () => {
+            const tag = declarationsOf(CHALKBOARD_CSS, `${SCOPE} [data-skin~="app-tag"]`);
+
+            expect(tag.get("background-color")).toBe("transparent");
+            expect(tag.get("box-shadow")).toBe("inset 0 0 0 1.5px var(--color-primary)");
+        });
+
+        it.each(["progress-track", "menu-divider"])("should draw the %s as a dashed chalk line instead of a solid bar", (token) => {
+            const line = declarationsOf(CHALKBOARD_CSS, `${SCOPE} [data-skin~="${token}"]`);
+            const dashes = declarationsOf(CHALKBOARD_CSS, `${SCOPE} [data-skin~="${token}"]::after`);
+
+            expect(line.get("background-color")).toBe("transparent");
+            expect(line.get("position")).toBe("relative");
+            expect(dashes.get("content")).toBe('""');
+            expect(dashes.get("position")).toBe("absolute");
+            expect([dashes.get("border-bottom"), dashes.get("border-top")]).toContain("2px dashed var(--color-border)");
+        });
+
+        it("should draw the progress as a thinner bar of yellow chalk over the dashes, grained in 黑板", () => {
+            const fill = declarationsOf(CHALKBOARD_CSS, `${SCOPE} [data-skin~="progress-fill"]`);
+            const darkFill = declarationsOf(CHALKBOARD_CSS, `${DARK} [data-skin~="progress-fill"]`);
+
+            expect(fill.get("clip-path")).toBe("inset(0 0 3px 0 round 3px)");
+            expect(darkFill.get("mask-image")).toBe(GRAIN);
+            expect(darkFill.get("-webkit-mask-image")).toBe(GRAIN);
+        });
+
+        it("should ring the steps still to come and dim the ones passed to chalk", () => {
+            const coming = declarationsOf(CHALKBOARD_CSS, `${SCOPE} [data-skin~="step-dot"].bg-border`);
+            const passed = declarationsOf(CHALKBOARD_CSS, `${SCOPE} [data-skin~="step-dot"].bg-primary\\/40`);
+
+            expect(coming.get("background-color")).toBe("transparent");
+            expect(coming.get("box-shadow")).toMatch(CHALK_OUTLINE);
+            expect(passed.get("background-color")).toBe("color-mix(in srgb, var(--color-border) 60%, transparent)");
         });
     });
 

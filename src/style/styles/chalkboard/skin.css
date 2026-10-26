@@ -633,6 +633,89 @@
     color: var(--color-primary);
 }
 
+/* Icon tiles (dialogs, the hint panel, the walkthrough's guide, recent games' chips) are chalk loops round their
+   icon, as the canvas's .dicon / .lchip / .ichip: yellow, red on a danger tile, blue on a given-up game's chip as
+   the app writes that game everywhere else */
+[data-style="chalkboard"] [data-skin~="icon-tile"] {
+    background-color: transparent;
+    box-shadow: inset 0 0 0 2px var(--color-primary);
+    border-radius: 48% 52% 45% 55% / 55% 45% 52% 48%;
+    color: var(--color-primary);
+}
+
+[data-style="chalkboard"] [data-skin~="icon-tile"][data-skin~="danger"] {
+    box-shadow: inset 0 0 0 2px var(--color-danger);
+    color: var(--color-danger);
+}
+
+[data-style="chalkboard"] [data-skin~="icon-tile"][data-skin~="gave-up"] {
+    box-shadow: inset 0 0 0 2px var(--color-accent);
+    color: var(--color-accent);
+}
+
+/* Statistics' recent games are chalk outlines like the cards; the changelog's App tag a thin yellow chalk loop */
+[data-style="chalkboard"] [data-skin~="recent-row"] {
+    background-color: transparent;
+    box-shadow: inset 0 0 0 2px var(--color-border);
+    border-radius: var(--chalkboard-wob);
+}
+
+[data-style="chalkboard"] [data-skin~="app-tag"] {
+    background-color: transparent;
+    box-shadow: inset 0 0 0 1.5px var(--color-primary);
+}
+
+/* The playback progress, as the canvas's .prog: a dashed chalk line along the track's foot (its ::after) under a
+   thinner bar of yellow chalk, cut off 3px above the dashes; the hint menu's divider is dashed the same way */
+[data-style="chalkboard"] [data-skin~="progress-track"],
+[data-style="chalkboard"] [data-skin~="menu-divider"] {
+    position: relative;
+    background-color: transparent;
+}
+
+[data-style="chalkboard"] [data-skin~="progress-track"]::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-bottom: 2px dashed var(--color-border);
+    pointer-events: none;
+}
+
+[data-style="chalkboard"] [data-skin~="menu-divider"]::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    border-top: 2px dashed var(--color-border);
+    pointer-events: none;
+}
+
+[data-style="chalkboard"] [data-skin~="progress-fill"] {
+    clip-path: inset(0 0 3px 0 round 3px);
+}
+
+:root.dark[data-style="chalkboard"] [data-skin~="progress-fill"] {
+    -webkit-mask-image: var(--chalkboard-grain);
+    mask-image: var(--chalkboard-grain);
+    -webkit-mask-size: 48px 48px;
+    mask-size: 48px 48px;
+    -webkit-mask-repeat: repeat;
+    mask-repeat: repeat;
+}
+
+/* A step navigator's dots, as the canvas's .dots: the steps to come are chalk rings, the ones passed dimmed chalk */
+[data-style="chalkboard"] [data-skin~="step-dot"].bg-border {
+    background-color: transparent;
+    box-shadow: inset 0 0 0 1.5px var(--color-border);
+}
+
+[data-style="chalkboard"] [data-skin~="step-dot"].bg-primary\/40 {
+    background-color: color-mix(in srgb, var(--color-border) 60%, transparent);
+}
+
 /* Controls are pale chalk with no tile; an active one is ringed in a yellow chalk loop */
 [data-style="chalkboard"] [data-skin~="control"] {
     background-color: transparent;
