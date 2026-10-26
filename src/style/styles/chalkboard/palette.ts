@@ -46,16 +46,16 @@ const WHITEBOARD = {
     pinkMarker: "#C2185B",
 } as const;
 
-// The canvas's washes (peer 7.5% or 5%, same digit 14%, soft 18%), as far as the inks drawn on them still read.
-// 黑板's red chalk reads only 4.9:1 on the bare board, so the hint's scope and pattern cells, which carry its
-// struck-out notes, are barely dusted; the peer and same-digit washes keep the canvas's strength, since an error
-// cell takes the error surface instead, and the soft wash eases to 14% under the yellow chalk. 白板's orange
-// marker is drawn on the same-digit, pattern and soft washes, so they stay at 8%.
 // The duster in either tray: a grey back over its felt
 const DUSTER = { back: "#5B5F66", felt: "#C9B79C" } as const;
 
-const CHALKBOARD_WASH = { peer: 0.075, scope: 0.02, sameDigit: 0.14, pattern: 0.035, soft: 0.14, error: 0.05 } as const;
-const WHITEBOARD_WASH = { peer: 0.05, scope: 0.05, sameDigit: 0.08, pattern: 0.08, soft: 0.08, error: 0.07 } as const;
+// The canvas's washes (peer 7.5% or 5%, same digit 14%, soft 18%), as far as the inks drawn on them still read.
+// A hint's scope cells take the peer wash and its pattern cells the same-digit wash, as the canvas lays them;
+// in 黑板 the red chalk of a hint's struck-out notes reads there as a struck mark (3.6:1 at the least), not as
+// text. The soft wash eases to 14% under 黑板's yellow chalk. 白板's orange marker is drawn on the same-digit,
+// pattern and soft washes, so they stay at 8%.
+const CHALKBOARD_WASH = { peer: 0.075, sameDigit: 0.14, soft: 0.14, error: 0.05 } as const;
+const WHITEBOARD_WASH = { peer: 0.05, sameDigit: 0.08, soft: 0.08, error: 0.07 } as const;
 
 const CHALKBOARD_DARK_NEUTRALS: Neutrals<DarkThemeColors> = {
     "background": CHALKBOARD.board,
@@ -118,8 +118,8 @@ const chalkboardTheme = themeBuilder(
         "cell-selected": WHITEBOARD.board,
         "cell-focus": WHITEBOARD.board,
         "cell-peer": mixColors(WHITEBOARD.marker, WHITEBOARD_WASH.peer, WHITEBOARD.board),
-        "cell-scope": mixColors(WHITEBOARD.marker, WHITEBOARD_WASH.scope, WHITEBOARD.board),
-        "cell-pattern": mixColors(WHITEBOARD.orangeMarker, WHITEBOARD_WASH.pattern, WHITEBOARD.board),
+        "cell-scope": mixColors(WHITEBOARD.marker, WHITEBOARD_WASH.peer, WHITEBOARD.board),
+        "cell-pattern": mixColors(WHITEBOARD.orangeMarker, WHITEBOARD_WASH.sameDigit, WHITEBOARD.board),
         "tray": WHITEBOARD.tray,
         "tray-shade": WHITEBOARD.trayShade,
         "tray-edge": WHITEBOARD.trayEdge,
@@ -138,8 +138,8 @@ const chalkboardTheme = themeBuilder(
         "cell-selected": CHALKBOARD.board,
         "cell-focus": CHALKBOARD.board,
         "cell-peer": mixColors(CHALKBOARD.dust, CHALKBOARD_WASH.peer, CHALKBOARD.board),
-        "cell-scope": mixColors(CHALKBOARD.dust, CHALKBOARD_WASH.scope, CHALKBOARD.board),
-        "cell-pattern": mixColors(CHALKBOARD.yellowChalk, CHALKBOARD_WASH.pattern, CHALKBOARD.board),
+        "cell-scope": mixColors(CHALKBOARD.dust, CHALKBOARD_WASH.peer, CHALKBOARD.board),
+        "cell-pattern": mixColors(CHALKBOARD.yellowChalk, CHALKBOARD_WASH.sameDigit, CHALKBOARD.board),
         "tray": CHALKBOARD.tray,
         "tray-shade": CHALKBOARD.trayShade,
         "tray-edge": CHALKBOARD.trayEdge,

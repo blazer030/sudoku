@@ -337,19 +337,12 @@ describe("chalkboard skin", () => {
         });
     });
 
-    // 黑板's red chalk keeps the hint's scope and pattern washes to a breath, so a chalk outline marks them instead,
-    // at the cell's edge, clear of every digit and note
-    describe("hint cells in 黑板", () => {
-        it("should outline the hint's scope cells in faint chalk", () => {
-            const scope = declarationsOf(CHALKBOARD_CSS, `${DARK_BOARD} [data-variant="scope"]`);
-
-            expect(scope.get("box-shadow")).toMatch(/^inset 0 0 0 [\d.]+px color-mix\(in srgb, var\(--color-foreground\) \d+%, transparent\)$/);
-        });
-
-        it("should outline the hint's pattern cells in yellow chalk", () => {
-            const pattern = declarationsOf(CHALKBOARD_CSS, `${DARK_BOARD} [data-variant="pattern"]`);
-
-            expect(pattern.get("box-shadow")).toMatch(/^inset 0 0 0 [\d.]+px color-mix\(in srgb, var\(--color-primary\) \d+%, transparent\)$/);
+    // A hint's scope and pattern cells are the canvas's washes alone (palette.ts), with no chalk outline round them
+    describe("hint cells", () => {
+        it.each(["scope", "pattern"])("should draw no outline round the hint's %s cells in either mode", (variant) => {
+            for (const board of [BOARD, DARK_BOARD]) {
+                expect(declarationsOf(CHALKBOARD_CSS, `${board} [data-variant="${variant}"]`).get("box-shadow"), board).toBeUndefined();
+            }
         });
     });
 

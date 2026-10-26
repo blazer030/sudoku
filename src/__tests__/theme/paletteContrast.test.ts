@@ -81,11 +81,14 @@ const BOARD_INKS: readonly PaletteToken[] = ["foreground", "primary", "error", "
 // 黑板's red chalk reads only 4.9:1 on the bare board, so it can lie on no wash brighter than a breath. An error
 // cell takes the error surface over the peer and same-digit washes (its variant wins), and nothing red is drawn on
 // the primary's soft surface, so in 黑板 those three pairs are never drawn; CHALKBOARD_BOARD_CASES checks where the
-// red does land.
+// red does land. On a hint's scope and pattern washes, the canvas's peer and same-digit washes, the red is only
+// ever a struck-out note; CHALKBOARD_BOARD_CASES holds it to the mark's 3:1 there.
 const CHALKBOARD_DARK_UNDRAWN: ReadonlySet<string> = new Set(["error on cell-peer", "error on highlight", "error on primary-light"]);
+const CHALKBOARD_DARK_STRUCK_OUT: ReadonlySet<string> = new Set(["error on cell-scope", "error on cell-pattern"]);
 const BOARD_PAIRS: readonly ContrastPair[] = BOARD_SURFACES.flatMap(surface => BOARD_INKS.map((ink) => {
     const boardPair = pair(ink, surface);
-    const exceptIn: readonly Exemption[] = CHALKBOARD_DARK_UNDRAWN.has(boardPair.name) ? ["pixel", "chalkboard/dark"] : ["pixel"];
+    const inChalkboardModel = CHALKBOARD_DARK_UNDRAWN.has(boardPair.name) || CHALKBOARD_DARK_STRUCK_OUT.has(boardPair.name);
+    const exceptIn: readonly Exemption[] = inChalkboardModel ? ["pixel", "chalkboard/dark"] : ["pixel"];
     return { ...boardPair, exceptIn };
 }));
 
@@ -423,8 +426,12 @@ const CHALKBOARD_BOARD_CASES: ChalkboardBoardCase[] = STYLES.chalkboard.themes.f
         ...surfaces.map(([surface, background]) => drawn(`ring (primary) on ${surface}`, palette.primary, background, LARGE_OR_ICON)),
         drawn("clue in an error cell (foreground) on error-surface", palette.foreground, palette["error-surface"]),
         drawn("note in an error cell on error-surface", palette.note, palette["error-surface"]),
-        ...([["the page", palette.background], ["error-surface", palette["error-surface"]], ["cell-scope", palette["cell-scope"]], ["cell-pattern", palette["cell-pattern"]]] as const)
+        ...([["the page", palette.background], ["error-surface", palette["error-surface"]]] as const)
             .map(([surface, background]) => drawn(`error on ${surface}`, palette.error, background)),
+        // A hint's struck-out notes: 黑板's red chalk on the canvas's washes (3.9:1 on the scope, 3.6:1 on the
+        // pattern) is held to a mark's 3:1, its strike carrying it; 白板's red marker reads as text
+        ...([["cell-scope", palette["cell-scope"]], ["cell-pattern", palette["cell-pattern"]]] as const)
+            .map(([surface, background]) => drawn(`struck-out note (error) on ${surface}`, palette.error, background, mode === "dark" ? LARGE_OR_ICON : TEXT)),
     ];
 }));
 

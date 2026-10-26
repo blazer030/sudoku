@@ -228,18 +228,6 @@
     }
 }
 
-/* A hint's cells in 黑板: its red chalk (the struck-out notes) reads on no wash brighter than a breath, so the
-   scope and pattern washes are barely there (palette.ts). A chalk outline at each cell's edge marks them
-   instead, clear of every digit and note: faint chalk round the scope, yellow round the pattern. 白板's washes
-   carry them as the canvas does. */
-:root.dark[data-style="chalkboard"] [data-skin~="board"] [data-variant="scope"] {
-    box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--color-foreground) 35%, transparent);
-}
-
-:root.dark[data-style="chalkboard"] [data-skin~="board"] [data-variant="pattern"] {
-    box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--color-primary) 55%, transparent);
-}
-
 /* Notes: the selected digit's note in the primary, without the shared disc; a hint's emphasised candidate also
    ringed in it, as the canvas does. A hint's candidates are the primary and its eliminated ones the error
    colour, as everywhere. */

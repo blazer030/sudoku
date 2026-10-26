@@ -72,6 +72,15 @@ describe("palettes", () => {
         expect(whiteboard.accent).toBe("#1D5FC2");
     });
 
+    it("should lay chalkboard's hint scope cells in the peer wash and its pattern cells in the same-digit wash, as the canvas does", () => {
+        for (const mode of STYLE_COLOR_MODES.chalkboard) {
+            const palette = getPalette("chalkboard", "classic", mode);
+
+            expect(palette["cell-scope"], mode).toBe(palette["cell-peer"]);
+            expect(palette["cell-pattern"], mode).toBe(palette.highlight);
+        }
+    });
+
     it("should colour chalkboard's tray and duster as the canvas paints them: wood on 黑板, grey plastic on 白板", () => {
         for (const [mode, tray, trayShade, trayEdge] of [["dark", "#8A5A34", "#5E3B20", "#A06C42"], ["light", "#D7DADF", "#B5BAC2", "#E6E8EB"]] as const) {
             const palette = getPalette("chalkboard", "classic", mode);
