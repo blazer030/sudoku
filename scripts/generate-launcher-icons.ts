@@ -2,10 +2,11 @@ import sharp from "sharp";
 import { mkdirSync, readFileSync, writeFileSync } from "fs";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
-import { ICON_VARIANTS, roundedIconSvg, type IconVariant } from "./iconArtwork";
+import { ICON_VARIANTS, roundedIconSvg, roundedSvg, type IconVariant } from "./iconArtwork";
 import { LEGACY_LAUNCHER_ALIASES, launcherResourceName, type LauncherIconKey } from "../src/theme/launcherIcon";
 import { styleIconBackground, styleIconForeground, styleIconMonochrome } from "../src/theme/styleIcons";
 import { STYLE_IDS, type StyleId } from "../src/theme/themeIds";
+import { BRAND_ICON_BACKGROUND, BRAND_ICON_RESOURCE, brandIconForeground, brandIconMonochrome, brandIconSvg } from "../src/theme/brandIcon";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -50,8 +51,18 @@ const adaptiveIconXml = (variant: IconVariant): string => {
 `;
 };
 
+// The app's own icon, which the main activity shows while no theme alias is on
+const brandAdaptiveIconXml = `<?xml version="1.0" encoding="utf-8"?>
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@color/${BRAND_ICON_RESOURCE}_background"/>
+    <foreground android:drawable="@mipmap/${BRAND_ICON_RESOURCE}_foreground"/>
+    <monochrome android:drawable="@mipmap/${BRAND_ICON_RESOURCE}_monochrome"/>
+</adaptive-icon>
+`;
+
 const themeColorsXml = (): string => `<?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="${BRAND_ICON_RESOURCE}_background">${BRAND_ICON_BACKGROUND}</color>
 ${ICON_VARIANTS.map(variant => `    <color name="${launcherResourceName(variant.id)}_background">${styleIconBackground(variant.style, variant.palette)}</color>`).join("\n")}
 </resources>
 `;
@@ -124,6 +135,11 @@ const main = async () => {
     for (const variant of ICON_VARIANTS) {
         await writeLegacyIcon(launcherResourceName(variant.id), roundedIconSvg(variant));
     }
+
+    await writeAdaptiveLayer(`${BRAND_ICON_RESOURCE}_foreground`, brandIconForeground());
+    await writeAdaptiveLayer(`${BRAND_ICON_RESOURCE}_monochrome`, brandIconMonochrome());
+    writeFileSync(resolve(xmlDir, `${BRAND_ICON_RESOURCE}.xml`), brandAdaptiveIconXml);
+    await writeLegacyIcon(BRAND_ICON_RESOURCE, roundedSvg(brandIconSvg()));
 
     writeManifestAliases();
     console.log(`Done! ${ICON_VARIANTS.length} launcher icons and ${ICON_VARIANTS.length + LEGACY_LAUNCHER_ALIASES.length} aliases generated.`);

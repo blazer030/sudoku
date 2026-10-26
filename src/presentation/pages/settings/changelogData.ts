@@ -16,7 +16,15 @@ export interface ChangelogEntry {
  * Player-facing changes merged since the last release, newest last. Develop builds show them on top of
  * the changelog; at release they move into the new version's entry (docs/release.md).
  */
-export const UNRELEASED_CHANGES: ChangelogChange[] = []
+export const UNRELEASED_CHANGES: ChangelogChange[] = [
+    {
+        text: {
+            en: "A brand-new app icon",
+            "zh-Hant": "全新 App 圖示",
+        },
+        appOnly: true,
+    },
+]
 
 export const CHANGELOG: ChangelogEntry[] = [
     {
