@@ -1,7 +1,7 @@
 import { readFileSync } from "fs";
 import postcss from "postcss";
 import { ARRIVAL_SETTLE_MS } from "@/presentation/components/board-cell/useArrivalMotion";
-import { CHALKBOARD_DIGIT_DUST } from "@/presentation/components/style-moments/chalkboard/chalkboardDigitStrokes";
+import { CHALKBOARD_DIGIT_DUST, CHALKBOARD_STROKE_FACE, DUST_SPECKS } from "@/presentation/components/style-moments/chalkboard/chalkboardDigitStrokes";
 import { STYLE_MOMENTS } from "@/presentation/components/style-moments/styleMoments";
 import { GROUP_RIPPLE_STEP_MS } from "@/presentation/pages/game/useGroupEffect";
 import ChalkboardDigitWriter from "@/presentation/components/style-moments/chalkboard/ChalkboardDigitWriter.vue";
@@ -621,6 +621,21 @@ describe("chalkboard moments", () => {
             expect(from.get("opacity")).toBe("0");
             expect(to.get("opacity")).toBe("0");
             expect(to.get("transform")).toMatch(/^translate\(0, \d+px\)$/);
+        });
+
+        // The specks lie on the digit's em square (glyph.size units across; an entry is 22px at scale 1). Seen on a
+        // phone as the cheer's and the group lines' are: one 3px across and two of 2px, apart from each other.
+        it("should drop specks as big as the cheer's, at the board's entry size", () => {
+            const pixelsPerUnit = 22 / CHALKBOARD_STROKE_FACE.glyph.size;
+            const [first, ...others] = DUST_SPECKS.map(speck => ({ ...speck, across: 2 * speck.radius * pixelsPerUnit }));
+
+            expect(first.across).toBeGreaterThanOrEqual(3);
+            expect(others).toHaveLength(2);
+            for (const speck of others) {
+                expect(speck.across).toBeGreaterThanOrEqual(2);
+                const apartPixels = Math.hypot(speck.dx - first.dx, speck.dy - first.dy) * pixelsPerUnit;
+                expect(apartPixels).toBeGreaterThan((first.across + speck.across) / 2 + 2);
+            }
         });
 
         // The writer stays until its dust has fallen, so the last fall ends before the arrival would settle anyway

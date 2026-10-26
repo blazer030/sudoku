@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { nextTick } from "vue";
 import { mount, type DOMWrapper } from "@vue/test-utils";
 import ChalkboardDigitWriter from "@/presentation/components/style-moments/chalkboard/ChalkboardDigitWriter.vue";
-import { CHALKBOARD_DIGIT_DUST, CHALKBOARD_STROKE_FACE } from "@/presentation/components/style-moments/chalkboard/chalkboardDigitStrokes";
+import { CHALKBOARD_DIGIT_DUST, CHALKBOARD_STROKE_FACE, DUST_SPECKS } from "@/presentation/components/style-moments/chalkboard/chalkboardDigitStrokes";
 import BoardCell from "@/presentation/components/board-cell/BoardCell.vue";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { declarationsOf } from "@/__tests__/style/styleSheetRules";
@@ -180,7 +180,10 @@ describe("ChalkboardDigitWriter", () => {
         it("should place the dust where the board drops it, below each stroke's end", () => {
             const specks = mountWriter(1).findAll(".chalkboard-digit-dust").map(speck => [speck.attributes("cx"), speck.attributes("cy"), speck.attributes("r")].map(Number));
 
-            expect(specks).toEqual([[52, 33, 1.1], [56.5, 34.5, 0.9], [54, 37, 0.8], [50, 76, 1.1], [54.5, 77.5, 0.9], [52, 80, 0.8]]);
+            // The 1's two strokes end at (52, 33) and (50, 76): each drops the three specks round its end
+            const expected = [{ x: 52, y: 33 }, { x: 50, y: 76 }].flatMap(fall => DUST_SPECKS.map(speck => [fall.x + speck.dx, fall.y + speck.dy, speck.radius]));
+
+            expect(specks).toEqual(expected);
         });
 
         // The dust lies on the digit's em square, centred on the cell as the digit is
