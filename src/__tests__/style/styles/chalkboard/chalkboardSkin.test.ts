@@ -715,6 +715,40 @@ describe("chalkboard skin", () => {
             expect(emphasised.get("box-shadow")).toBe("inset 0 0 0 1.5px var(--color-primary)");
             expect(emphasised.get("border-radius")).toBe("0");
         });
+
+        // The owner's own touch: in the live game, outside hint mode, the selected digit's notes are circled in
+        // the primary. The walkthrough, the review and hint mode keep their notes as they were.
+        describe("circled in play", () => {
+            const IN_PLAY = `${BOARD}[data-skin~="game-board"]:not([data-hint-mode]) [data-note-highlight]`;
+
+            it("should circle the selected digit's notes on the live game's board in a chalk ring of the primary", () => {
+                const ring = declarationsOf(CHALKBOARD_CSS, `${IN_PLAY}::after`);
+
+                expect(ring.get("content")).toBe('""');
+                expect(ring.get("position")).toBe("absolute");
+                expect(ring.get("pointer-events")).toBe("none");
+                expect(ring.get("box-shadow")).toBe("inset 0 0 0 1.5px var(--color-primary)");
+                expect(ring.get("border-radius")).toMatch(/%/);
+                expect(declarationsOf(CHALKBOARD_CSS, IN_PLAY).get("position")).toBe("relative");
+            });
+
+            it("should size the ring by the note's own type, so it never shrinks to a small phone's note slot", () => {
+                const ring = declarationsOf(CHALKBOARD_CSS, `${IN_PLAY}::after`);
+
+                expect(ring.get("width")).toMatch(/em$/);
+                expect(ring.get("height")).toBe(ring.get("width"));
+            });
+
+            it("should reach no highlighted note on another board or in hint mode", () => {
+                const circling = allRules()
+                    .flatMap(rule => rule.selectors)
+                    .filter(selector => selector.includes("[data-note-highlight]"))
+                    .filter(selector => selector !== `${BOARD} [data-note-highlight]` && selector !== `${BOARD}[data-hint-mode] [data-note-highlight]`);
+
+                expect(circling.length).toBeGreaterThan(0);
+                expect(circling.filter(selector => !selector.startsWith(IN_PLAY))).toEqual([]);
+            });
+        });
     });
 
     describe("erase smear", () => {

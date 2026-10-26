@@ -117,6 +117,16 @@ describe("skin hooks", () => {
         const boardTag = openingTags(source, "\\w+").find(tag => tag.includes('data-testid="game-board"'));
 
         expect(boardTag).toBeDefined();
-        expect(boardTag).toContain('data-skin="board"');
+        expect(hasSkinToken(boardTag ?? "", "board")).toBe(true);
+    });
+
+    it("should mark only the live game's board as the game board, so a style can tell play from the walkthrough and the review", () => {
+        const boardTagOf = (path: string, testId: string): string =>
+            openingTags(readFileSync(path, "utf8"), "\\w+").find(tag => tag.includes(`data-testid="${testId}"`)) ?? "";
+
+        expect(hasSkinToken(boardTagOf("src/presentation/pages/game/GameScreen.vue", "game-board"), "game-board")).toBe(true);
+        expect(hasSkinToken(boardTagOf("src/presentation/pages/solver-walkthrough/SolverWalkthrough.vue", "walkthrough-board"), "game-board")).toBe(false);
+        expect(hasSkinToken(boardTagOf("src/presentation/pages/game-review/GameReview.vue", "review-board"), "game-board")).toBe(false);
+        expect(hasSkinToken(boardTagOf("src/presentation/pages/solver-walkthrough/SolverWalkthrough.vue", "walkthrough-board"), "board")).toBe(true);
     });
 });
