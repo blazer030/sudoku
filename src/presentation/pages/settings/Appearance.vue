@@ -126,7 +126,7 @@ import { Check, Smartphone } from "lucide-vue-next";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { usePlatform } from "@/presentation/composables/usePlatform";
 import { STYLE_COLOR_MODES, STYLE_IDS, type ColorMode, type ColorThemeId, type StyleId } from "@/theme/themeIds";
-import { STYLES, getPalette, rememberedThemeFor } from "@/theme/palettes";
+import { STYLES, getPalette, rememberedAppearanceFor, rememberedThemeFor } from "@/theme/palettes";
 import { useColorModeLabel } from "@/presentation/i18n/colorModeLabels";
 import { vPress } from "@/presentation/directives/press";
 import PageHeader from "@/presentation/components/page-header/PageHeader.vue";
@@ -140,10 +140,10 @@ const settingsStore = useSettingsStore();
 const platform = usePlatform();
 const colorModeLabel = useColorModeLabel();
 
-// Each card shows the style's app icon in the theme it would come back to, in the current mode
+// Each card shows the style's app icon in the theme and mode it would come back to
 const styleCards = computed(() => STYLE_IDS.map(styleId => ({
     id: styleId,
-    palette: getPalette(styleId, rememberedThemeFor(styleId, settingsStore.colorThemeByStyle), settingsStore.appearance),
+    palette: getPalette(styleId, rememberedThemeFor(styleId, settingsStore.colorThemeByStyle), rememberedAppearanceFor(styleId, settingsStore.appearanceByStyle)),
 })));
 
 // The current style's own themes, each a solid circle of the primary the app would show in the current mode

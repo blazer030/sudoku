@@ -35,6 +35,7 @@ describe("SettingsStorage", () => {
                 style: "minimal",
                 highlightScope: true,
                 colorThemeByStyle: { minimal: "green" },
+                appearanceByStyle: { minimal: "light" },
             });
         });
 
@@ -146,6 +147,39 @@ describe("SettingsStorage", () => {
             expect(loadSettings().colorThemeByStyle).toEqual({ minimal: "green" });
         });
 
+        it("should round-trip the mode remembered for each style", () => {
+            localStorage.setItem("sudoku-settings", JSON.stringify({
+                style: "chalkboard",
+                appearance: "light",
+                appearanceByStyle: { minimal: "dark", chalkboard: "dark", pixel: "light" },
+            }));
+
+            expect(loadSettings().appearanceByStyle).toEqual({ minimal: "dark", chalkboard: "light", pixel: "light" });
+        });
+
+        it("should drop remembered modes of unknown styles or modes the style lacks", () => {
+            localStorage.setItem("sudoku-settings", JSON.stringify({
+                appearance: "dark",
+                appearanceByStyle: { neon: "dark", paper: "dark", cyber: "light", tactile: "sepia", ink: "light" },
+            }));
+
+            expect(loadSettings().appearanceByStyle).toEqual({ minimal: "dark", ink: "light" });
+        });
+
+        it("should seed the current style's mode for settings saved before the map existed", () => {
+            localStorage.setItem("sudoku-settings", JSON.stringify({ appearance: "dark" }));
+
+            expect(loadSettings().appearanceByStyle).toEqual({ minimal: "dark" });
+        });
+
+        it("should ignore a remembered mode map that is not an object", () => {
+            localStorage.setItem("sudoku-settings", JSON.stringify({ appearance: "dark", appearanceByStyle: ["dark"] }));
+            expect(loadSettings().appearanceByStyle).toEqual({ minimal: "dark" });
+
+            localStorage.setItem("sudoku-settings", JSON.stringify({ appearance: "dark", appearanceByStyle: null }));
+            expect(loadSettings().appearanceByStyle).toEqual({ minimal: "dark" });
+        });
+
         it("should carry the retired completionFlash choice over to motionEffects", () => {
             localStorage.setItem("sudoku-settings", JSON.stringify({ completionFlash: false }));
 
@@ -174,6 +208,7 @@ describe("SettingsStorage", () => {
                 style: "minimal",
                 highlightScope: false,
                 colorThemeByStyle: { minimal: "blue" },
+                appearanceByStyle: { minimal: "dark" },
             });
 
             const settings = loadSettings();

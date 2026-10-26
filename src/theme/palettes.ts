@@ -1,6 +1,6 @@
 // Every style's colours, gathered from src/style/styles/<id>/palette.ts. src/style/themes.generated.css
 // is rendered from them by `npm run generate:theme-css`. Relative imports only: scripts/ import this file.
-import { effectiveColorMode, type ColorMode, type ColorThemeId, type RememberedThemes, type StyleId } from "./themeIds";
+import { STYLE_COLOR_MODES, effectiveColorMode, type ColorMode, type ColorThemeId, type RememberedAppearances, type RememberedThemes, type StyleId } from "./themeIds";
 import { CHALKBOARD_STYLE } from "../style/styles/chalkboard/palette";
 import { CYBER_STYLE } from "../style/styles/cyber/palette";
 import { INK_STYLE } from "../style/styles/ink/palette";
@@ -33,6 +33,13 @@ const findTheme = (style: StyleId, themeId: ColorThemeId): ThemePalette => {
 export const rememberedThemeFor = (style: StyleId, remembered: RememberedThemes): ColorThemeId => {
     const themes = STYLES[style].themes;
     return themes.find(theme => theme.id === remembered[style])?.id ?? themes[0].id;
+};
+
+/** The mode a style comes back to: the one remembered for it, or the style's first mode. */
+export const rememberedAppearanceFor = (style: StyleId, remembered: RememberedAppearances): ColorMode => {
+    const modes = STYLE_COLOR_MODES[style];
+    const mode = remembered[style];
+    return mode !== undefined && modes.includes(mode) ? mode : modes[0];
 };
 
 /** The palette the style shows for a mode; a style with one mode answers with that mode's palette. */

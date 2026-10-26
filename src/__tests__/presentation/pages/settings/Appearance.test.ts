@@ -23,7 +23,7 @@ import { useSettingsStore } from "@/stores/settingsStore";
 import { startAppearanceSync } from "@/presentation/theme/appearanceSync";
 import { startLauncherIconSync } from "@/presentation/theme/launcherIconSync";
 import { handleBackButton } from "@/presentation/composables/backDismissal";
-import { STYLES, getPalette, rememberedThemeFor, type Palette } from "@/theme/palettes";
+import { STYLES, getPalette, rememberedAppearanceFor, rememberedThemeFor, type Palette } from "@/theme/palettes";
 import { styleIconSvg } from "@/theme/styleIcons";
 import { STYLE_IDS, type StyleId } from "@/theme/themeIds";
 import Appearance from "@/presentation/pages/settings/Appearance.vue";
@@ -61,7 +61,7 @@ const svgOf = (style: StyleId, palette: Palette, idSuffix = "") => {
 const iconSvgFor = (style: StyleId, rendered: string) => {
     const settingsStore = useSettingsStore();
     const idSuffix = /id="(?:cyber-edge|ink-rough)-([^"]+)"/.exec(rendered)?.[1];
-    return svgOf(style, getPalette(style, rememberedThemeFor(style, settingsStore.colorThemeByStyle), settingsStore.appearance), idSuffix);
+    return svgOf(style, getPalette(style, rememberedThemeFor(style, settingsStore.colorThemeByStyle), rememberedAppearanceFor(style, settingsStore.appearanceByStyle)), idSuffix);
 };
 
 describe("Appearance.vue style cards", () => {
@@ -88,6 +88,7 @@ describe("Appearance.vue style cards", () => {
         const settingsStore = useSettingsStore();
         settingsStore.setStyle("tactile");
         settingsStore.setColorTheme("rust");
+        settingsStore.setAppearance("dark");
         settingsStore.setStyle("minimal");
         settingsStore.setAppearance("dark");
         await nextTick();
@@ -98,6 +99,23 @@ describe("Appearance.vue style cards", () => {
         }
         expect(wrapper.get("[data-testid='style-icon-tactile'] svg").element.outerHTML)
             .toBe(svgOf("tactile", getPalette("tactile", "rust", "dark")));
+    });
+
+    it("should draw each card's icon in the mode remembered for that style", async () => {
+        const wrapper = mountAppearance();
+        const settingsStore = useSettingsStore();
+        settingsStore.setStyle("chalkboard");
+        settingsStore.setAppearance("light");
+        settingsStore.setStyle("minimal");
+        settingsStore.setAppearance("dark");
+        await nextTick();
+
+        expect(wrapper.get("[data-testid='style-icon-chalkboard'] svg").element.outerHTML)
+            .toBe(svgOf("chalkboard", getPalette("chalkboard", "classic", "light")));
+        expect(wrapper.get("[data-testid='style-icon-minimal'] svg").element.outerHTML)
+            .toBe(svgOf("minimal", getPalette("minimal", "green", "dark")));
+        expect(wrapper.get("[data-testid='style-icon-pixel'] svg").element.outerHTML)
+            .toBe(svgOf("pixel", getPalette("pixel", "classic", "light")));
     });
 
     it("should leave the icon to the card's name for screen readers", () => {
@@ -227,10 +245,10 @@ describe("Appearance.vue colour-theme swatches", () => {
     it("should fill each swatch with its dark primary in dark mode, for every style", async () => {
         const wrapper = mountAppearance();
         const settingsStore = useSettingsStore();
-        settingsStore.setAppearance("dark");
 
         for (const style of STYLE_IDS) {
             settingsStore.setStyle(style);
+            settingsStore.setAppearance("dark");
             await nextTick();
             expectSwatchesIn(wrapper, "dark");
         }
@@ -284,7 +302,7 @@ describe("Appearance.vue light and dark", () => {
         }
     });
 
-    it("should leave out light and dark for a one-mode style, keeping the stored mode", async () => {
+    it("should leave out light and dark for a one-mode style, and bring back the other style's own mode", async () => {
         const wrapper = mountAppearance();
         const settingsStore = useSettingsStore();
         settingsStore.setAppearance("dark");
@@ -293,7 +311,7 @@ describe("Appearance.vue light and dark", () => {
 
         expect(wrapper.find("[data-testid='appearance-mode-label']").exists()).toBe(false);
         expect(wrapper.find("[data-testid='appearance-switcher']").exists()).toBe(false);
-        expect(settingsStore.appearance).toBe("dark");
+        expect(settingsStore.appearance).toBe("light");
 
         await wrapper.get("[data-testid='style-option-minimal']").trigger("click");
 

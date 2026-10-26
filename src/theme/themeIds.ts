@@ -47,3 +47,6 @@ export const effectiveColorMode = (style: StyleId, mode: ColorMode): ColorMode =
 
 /** The colour theme last chosen under each style, so switching styles comes back to it. */
 export type RememberedThemes = Partial<Record<StyleId, ColorThemeId>>;
+
+/** The light or dark mode last chosen under each style, so switching styles comes back to it. */
+export type RememberedAppearances = Partial<Record<StyleId, ColorMode>>;
