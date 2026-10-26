@@ -169,7 +169,7 @@ const WRITTEN_CHEER = `${LANDING_CARD} .chalkboard-cheer-text`;
 const CHEER_DUST = `${SCOPE} .chalkboard-cheer-dust`;
 const DARK_CHEER_DUST_STEPS = [0, 1, 2].map(step => `${DARK} .chalkboard-cheer-dust[data-step="${step}"]`);
 const DOODLE = `${SCOPE} .chalkboard-doodle`;
-const DRAWN_DOODLE_STEPS = [0, 1, 2, 3].map(step => `${SCOPE} .chalkboard-celebration:not([data-still]) .chalkboard-doodle[data-step="${step}"]`);
+const DRAWN_DOODLE_STEPS = [0, 1, 2, 3].map(step => `${LANDING_CARD} .chalkboard-doodle[data-step="${step}"]`);
 const MASK_SUPPORTS = '((mask-image: url("")) or (-webkit-mask-image: url("")))';
 
 // The declarations of the rules inside the sheet's @supports block on masks that list `selector`
@@ -549,6 +549,12 @@ describe("chalkboard moments", () => {
         });
 
         describe("the doodles", () => {
+            // On the card, with the cheer, so the card never hides them: no decoration behind it
+            it("should doodle on the card, drawing nothing behind it", () => {
+                expect(STYLE_MOMENTS.chalkboard.celebration).toBeNull();
+                expect(CHALKBOARD_CSS).not.toContain("chalkboard-celebration");
+            });
+
             it("should doodle each by stroke-dashoffset, 200ms apart, once the ring is drawn", () => {
                 const ring = spanOf(DRAWN_BOARD_RING, "chalkboard-board-ring");
                 const doodles = DRAWN_DOODLE_STEPS.map(selector => spanOf(selector, "chalkboard-doodle-draw"));

@@ -955,8 +955,8 @@
    the board (60ms, 380ms), and the cheer on it (ChalkboardCardDecoration) is written in from the left in eight
    steps (380ms, 700ms), in the primary with a halo of the card so it reads over the trophy's loop; three specks of
    dust fall off it left to right as it is written (黑板 only). The title, the trophy's cup, the cheer and the doodles
-   are grained in 黑板. Stars, a wave and rays are then doodled round the scene behind the card (ChalkboardCelebration), 200ms
-   apart from 580ms. A still card (data-still) only fades in, like every style's, with the cheer written. */
+   are grained in 黑板. Stars, a wave and rays are then doodled round the cheer and the trophy on the card (also
+   ChalkboardCardDecoration, so the card never hides them), 200ms apart from 580ms. A still card (data-still) only fades in, like every style's, with the cheer written. */
 @keyframes chalkboard-card-stick {
     0% { opacity: 0; transform: scale(0.96) rotate(-1deg); }
     100% { opacity: 1; transform: none; }
@@ -1057,10 +1057,10 @@
     to { stroke-dashoffset: 0; }
 }
 
-[data-style="chalkboard"] .chalkboard-celebration:not([data-still]) .chalkboard-doodle[data-step="0"] { animation: chalkboard-doodle-draw 520ms 580ms both; }
-[data-style="chalkboard"] .chalkboard-celebration:not([data-still]) .chalkboard-doodle[data-step="1"] { animation: chalkboard-doodle-draw 520ms 780ms both; }
-[data-style="chalkboard"] .chalkboard-celebration:not([data-still]) .chalkboard-doodle[data-step="2"] { animation: chalkboard-doodle-draw 520ms 980ms both; }
-[data-style="chalkboard"] .chalkboard-celebration:not([data-still]) .chalkboard-doodle[data-step="3"] { animation: chalkboard-doodle-draw 520ms 1180ms both; }
+[data-style="chalkboard"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) .chalkboard-doodle[data-step="0"] { animation: chalkboard-doodle-draw 520ms 580ms both; }
+[data-style="chalkboard"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) .chalkboard-doodle[data-step="1"] { animation: chalkboard-doodle-draw 520ms 780ms both; }
+[data-style="chalkboard"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) .chalkboard-doodle[data-step="2"] { animation: chalkboard-doodle-draw 520ms 980ms both; }
+[data-style="chalkboard"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) .chalkboard-doodle[data-step="3"] { animation: chalkboard-doodle-draw 520ms 1180ms both; }
 
 /* The loader, from MomentsChalk: on a small board chalk draws a closed 九宮 (the outline in one stroke, then the
    inner lines), rings the cell being solved in yellow chalk and writes its digit through a mask wiped on left to
@@ -1363,10 +1363,10 @@
     :root.dark[data-style="chalkboard"] .chalkboard-cheer-dust[data-step="0"],
     :root.dark[data-style="chalkboard"] .chalkboard-cheer-dust[data-step="1"],
     :root.dark[data-style="chalkboard"] .chalkboard-cheer-dust[data-step="2"],
-    [data-style="chalkboard"] .chalkboard-celebration:not([data-still]) .chalkboard-doodle[data-step="0"],
-    [data-style="chalkboard"] .chalkboard-celebration:not([data-still]) .chalkboard-doodle[data-step="1"],
-    [data-style="chalkboard"] .chalkboard-celebration:not([data-still]) .chalkboard-doodle[data-step="2"],
-    [data-style="chalkboard"] .chalkboard-celebration:not([data-still]) .chalkboard-doodle[data-step="3"] {
+    [data-style="chalkboard"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) .chalkboard-doodle[data-step="0"],
+    [data-style="chalkboard"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) .chalkboard-doodle[data-step="1"],
+    [data-style="chalkboard"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) .chalkboard-doodle[data-step="2"],
+    [data-style="chalkboard"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) .chalkboard-doodle[data-step="3"] {
         animation: none;
     }
 
