@@ -113,6 +113,8 @@ const REQUIRED_SELECTORS: Record<StyleId, readonly string[]> = {
         ".value-arrive",
         ".chalkboard-digit-stroke",
         ".chalkboard-digit-dust",
+        ".chalkboard-loader-stroke",
+        ".chalkboard-loader-duster",
     ],
 };
 
