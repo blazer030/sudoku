@@ -121,6 +121,29 @@ describe("Home", () => {
         expect(stackedHeroes[0]).toContain('data-skin="logo"');
     });
 
+    it("should write chalkboard's title as a headline with no logo, in the player's language", async () => {
+        const { wrapper } = mountHome({ style: "chalkboard" });
+        const heading = async (locale: "en" | "zh-Hant") => {
+            i18n.global.locale.value = locale;
+            await nextTick();
+            return { title: wrapper.get("h1").text(), text: wrapper.get("[data-testid='home-hero']").text(), expected: [i18n.global.t("home.title"), i18n.global.t("home.subtitle")] };
+        };
+
+        const english = await heading("en");
+        const chinese = await heading("zh-Hant");
+
+        expect(wrapper.find("[data-testid='home-logo']").exists()).toBe(false);
+        expect(wrapper.get("[data-testid='home-hero']").attributes("data-skin")).toBe("hero-headline");
+        expect(wrapper.get("h1").attributes("data-skin")).toBe("title");
+        expect(wrapper.findAll("[data-testid='home-title-glyph']").length).toBeGreaterThan(0);
+        expect(english.title).not.toBe(chinese.title);
+        for (const { title, text, expected } of [english, chinese]) {
+            expect(title).toBe(expected[0]);
+            expect(text).toContain(expected[1]);
+        }
+        i18n.global.locale.value = "en";
+    });
+
     it("should set ink's title as a vertical emblem in Chinese, the same in both languages", async () => {
         const { wrapper } = mountHome({ style: "ink" });
         const emblemText = async (locale: "en" | "zh-Hant") => {

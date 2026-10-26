@@ -35,6 +35,28 @@
             >{{ EMBLEM.title }}</span>
         </div>
     </div>
+    <!-- The title written large with no logo above it, its letters spaced apart; a style draws under it -->
+    <div
+        v-else-if="layout === 'headline'"
+        class="flex flex-col items-center"
+        data-skin="hero-headline"
+        data-testid="home-hero"
+    >
+        <h1
+            class="text-foreground text-[66px] leading-[1.1] font-bold [letter-spacing:.08em] mr-[-.08em]"
+            data-skin="title"
+        >
+            <span
+                v-for="(glyph, glyphIndex) in titleGlyphs(t('home.title'))"
+                :key="glyphIndex"
+                data-skin="title-glyph"
+                data-testid="home-title-glyph"
+            >{{ glyph }}</span>
+        </h1>
+        <p class="mt-7 text-foreground-secondary text-base">
+            {{ t("home.subtitle") }}
+        </p>
+    </div>
     <div
         v-else
         class="flex flex-col items-center gap-2"

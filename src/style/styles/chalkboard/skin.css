@@ -332,37 +332,16 @@
     mask-image: linear-gradient(to bottom, var(--color-foreground) calc(100% - 12px), transparent);
 }
 
-/* Home. The logo's 九宮 is sketched in chalk: nine outlined squares, the bright ones in yellow chalk, grained in
-   黑板. The title is bold WenKai, turned −2° as the canvas writes it, underlined with a yellow chalk swoosh
-   (chalkboard-swoosh.svg) on its ::after, set close under the letters so it stays clear of the subtitle. */
-[data-style="chalkboard"] [data-skin~="logo"] {
+/* Home, as the canvas writes it: no logo, the title large in bold WenKai (the headline hero) turned −2°, underlined
+   with the canvas's yellow chalk swoosh (chalkboard-swoosh.svg, 170×22) on its ::after, 4px into its line box as the
+   canvas lays it, so it stays clear of the subtitle. The headline carries the tray's sticks' colours. */
+[data-style="chalkboard"] [data-skin~="hero-headline"] {
     --chalkboard-stick-first: var(--color-foreground);
     --chalkboard-stick-second: var(--color-accent);
-    background-color: transparent;
-    box-shadow: none;
 }
 
-:root.dark[data-style="chalkboard"] [data-skin~="logo"] {
+:root.dark[data-style="chalkboard"] [data-skin~="hero-headline"] {
     --chalkboard-stick-second: var(--color-primary);
-}
-
-[data-style="chalkboard"] [data-skin~="logo"] > div > div {
-    background-color: transparent;
-    box-shadow: inset 0 0 0 2px var(--color-border);
-    border-radius: 3px 5px 4px 6px;
-}
-
-[data-style="chalkboard"] [data-skin~="logo"] > div > div:nth-child(even) {
-    box-shadow: inset 0 0 0 2px var(--color-primary);
-}
-
-:root.dark[data-style="chalkboard"] [data-skin~="logo"] > div {
-    -webkit-mask-image: var(--chalkboard-grain);
-    mask-image: var(--chalkboard-grain);
-    -webkit-mask-size: 48px 48px;
-    mask-size: 48px 48px;
-    -webkit-mask-repeat: repeat;
-    mask-repeat: repeat;
 }
 
 [data-style="chalkboard"] [data-skin~="title"] {
@@ -375,8 +354,8 @@
     position: absolute;
     left: 50%;
     top: calc(100% - 4px);
-    width: 150px;
-    height: 14px;
+    width: 170px;
+    height: 22px;
     translate: -50% 0;
     pointer-events: none;
     background-color: var(--color-primary);
@@ -399,13 +378,13 @@
     mask-composite: intersect;
 }
 
-/* The chalk tray along the bottom of the screen, as the canvas draws it, on the logo's ::before and ::after fixed to
-   it, below every content layer and never taking taps. The ::before is the tray: 16px of wood (grey plastic on
+/* The chalk tray along the bottom of the screen, as the canvas draws it, on the headline's ::before and ::after fixed
+   to it, below every content layer and never taking taps. The ::before is the tray: 16px of wood (grey plastic on
    白板) shading down to its foot, its lit edge 2px above it. The ::after lies on it: two sticks of chalk (the
    board's chalk and yellow; on 白板 a dark marker and a blue one) and a duster, its grey back over its felt, each
    a block of the palette's colour cut out by its rounded mask (chalkboard-sticks.svg, -markers.svg, -duster.svg). */
-[data-style="chalkboard"] [data-skin~="logo"]::before,
-[data-style="chalkboard"] [data-skin~="logo"]::after {
+[data-style="chalkboard"] [data-skin~="hero-headline"]::before,
+[data-style="chalkboard"] [data-skin~="hero-headline"]::after {
     content: "";
     position: fixed;
     left: 0;
@@ -415,13 +394,13 @@
     pointer-events: none;
 }
 
-[data-style="chalkboard"] [data-skin~="logo"]::before {
+[data-style="chalkboard"] [data-skin~="hero-headline"]::before {
     height: 16px;
     background-image: linear-gradient(var(--color-tray), var(--color-tray-shade));
     box-shadow: 0 -2px 0 var(--color-tray-edge);
 }
 
-[data-style="chalkboard"] [data-skin~="logo"]::after {
+[data-style="chalkboard"] [data-skin~="hero-headline"]::after {
     height: 26px;
     background-image:
         linear-gradient(var(--chalkboard-stick-first), var(--chalkboard-stick-first)),
@@ -442,7 +421,7 @@
 
 /* 黑板's sticks: 46×8 and 30×8, the second turned −4°, so its block covers the turned stick and its mask is laid
    2px lower to keep the turned corners */
-:root.dark[data-style="chalkboard"] [data-skin~="logo"]::after {
+:root.dark[data-style="chalkboard"] [data-skin~="hero-headline"]::after {
     background-size: 46px 8px, 32px 12px, 70px 16px;
     background-position: left 64px bottom 9px, left 123px bottom 7px, right 56px bottom 10px;
     -webkit-mask-image: url("@/style/styles/chalkboard/chalkboard-sticks.svg"), url("@/style/styles/chalkboard/chalkboard-duster.svg");

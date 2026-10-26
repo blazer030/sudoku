@@ -39,7 +39,7 @@ const ROOT_PAGE = `${SCOPE} [data-skin~="page-ruled"]`;
 const DARK_ROOT_PAGE = `${DARK} [data-skin~="page-ruled"]`;
 const NESTED_PAGE = `${SCOPE} [data-skin~="page-ruled"] [data-skin~="page-ruled"]`;
 const DARK_NESTED_PAGE = `${DARK} [data-skin~="page-ruled"] [data-skin~="page-ruled"]`;
-const LOGO = `${SCOPE} [data-skin~="logo"]`;
+const HERO = `${SCOPE} [data-skin~="hero-headline"]`;
 const TITLE = `${SCOPE} [data-skin~="title"]`;
 const CHOSEN_KEY = `${SCOPE} [data-skin~="key"][aria-pressed="true"]`;
 // The canvas's uneven chalk corners (--wob)
@@ -428,7 +428,7 @@ describe("chalkboard skin", () => {
 
     describe("Home", () => {
         it.each(["::before", "::after"])("should lay the tray's %s along the bottom of the screen, below every content layer and never taking taps", (pseudo) => {
-            const layer = declarationsOf(CHALKBOARD_CSS, `${LOGO}${pseudo}`);
+            const layer = declarationsOf(CHALKBOARD_CSS, `${HERO}${pseudo}`);
 
             expect(layer.get("content")).toBe('""');
             expect(layer.get("position")).toBe("fixed");
@@ -441,7 +441,7 @@ describe("chalkboard skin", () => {
 
         // The canvas's .tray: 16px of wood (grey plastic on 白板) shading downwards, its lit edge 2px above it
         it("should draw the tray on the ::before as the canvas does, shading down with its lit edge above", () => {
-            const tray = declarationsOf(CHALKBOARD_CSS, `${LOGO}::before`);
+            const tray = declarationsOf(CHALKBOARD_CSS, `${HERO}::before`);
 
             expect(tray.get("height")).toBe("16px");
             expect(tray.get("background-image")).toBe("linear-gradient(var(--color-tray), var(--color-tray-shade))");
@@ -450,8 +450,8 @@ describe("chalkboard skin", () => {
 
         // The canvas's .stick and .duster are rounded pieces lying on the tray, so they come after it
         it("should cut the sticks and the duster out of the ::after by rounded masks, for WebKit as well as the rest", () => {
-            const whiteboard = declarationsOf(CHALKBOARD_CSS, `${LOGO}::after`);
-            const chalkboard = declarationsOf(CHALKBOARD_CSS, `${DARK} [data-skin~="logo"]::after`);
+            const whiteboard = declarationsOf(CHALKBOARD_CSS, `${HERO}::after`);
+            const chalkboard = declarationsOf(CHALKBOARD_CSS, `${DARK} [data-skin~="hero-headline"]::after`);
 
             for (const property of ["mask-image", "-webkit-mask-image"]) {
                 expect(whiteboard.get(property)).toBe(`${MARKERS_URL}, ${DUSTER_URL}`);
@@ -463,7 +463,7 @@ describe("chalkboard skin", () => {
         });
 
         it("should colour the pieces in the palette: the two sticks, then the duster's grey back on its felt", () => {
-            const pieces = declarationsOf(CHALKBOARD_CSS, `${LOGO}::after`);
+            const pieces = declarationsOf(CHALKBOARD_CSS, `${HERO}::after`);
             const image = pieces.get("background-image") ?? "";
 
             expect(image).toContain("linear-gradient(var(--chalkboard-stick-first), var(--chalkboard-stick-first))");
@@ -513,22 +513,19 @@ describe("chalkboard skin", () => {
         });
 
         it("should hold the board's chalk and yellow chalk in 黑板's tray, a dark and a blue marker in 白板's", () => {
-            const whiteboard = declarationsOf(CHALKBOARD_CSS, LOGO);
-            const chalkboard = declarationsOf(CHALKBOARD_CSS, `${DARK} [data-skin~="logo"]`);
+            const whiteboard = declarationsOf(CHALKBOARD_CSS, HERO);
+            const chalkboard = declarationsOf(CHALKBOARD_CSS, `${DARK} [data-skin~="hero-headline"]`);
 
             expect(whiteboard.get("--chalkboard-stick-first")).toBe("var(--color-foreground)");
             expect(whiteboard.get("--chalkboard-stick-second")).toBe("var(--color-accent)");
             expect(chalkboard.get("--chalkboard-stick-second")).toBe("var(--color-primary)");
         });
 
-        it("should sketch the logo's 九宮 in chalk outlines, with no block of colour", () => {
-            const logo = declarationsOf(CHALKBOARD_CSS, LOGO);
-            const squares = declarationsOf(CHALKBOARD_CSS, `${LOGO} > div > div`);
+        // The canvas has no logo, only the title and its swoosh; the logo would carry a logo look no screen shows
+        it("should style no logo, since chalkboard's Home has none", () => {
+            const logoRules = allRules().flatMap(rule => rule.selectors).filter(selector => selector.includes('[data-skin~="logo"]'));
 
-            expect(logo.get("background-color")).toBe("transparent");
-            expect(logo.get("box-shadow")).toBe("none");
-            expect(squares.get("background-color")).toBe("transparent");
-            expect(squares.get("box-shadow")).toMatch(/^inset 0 0 0 [\d.]+px var\(--color-border\)$/);
+            expect(logoRules).toEqual([]);
         });
 
         it("should underline the title with a yellow chalk swoosh, never taking taps", () => {
@@ -540,6 +537,15 @@ describe("chalkboard skin", () => {
             expect(swoosh.get("background-color")).toBe("var(--color-primary)");
             expect(swoosh.get("-webkit-mask-image")).toBe(SWOOSH_URL);
             expect(swoosh.get("mask-image")).toBe(SWOOSH_URL);
+        });
+
+        // The canvas's .mark: the 170×22 swoosh, 4px into the title's line box (gap 2px, margin-top −6px)
+        it("should lay the swoosh at the canvas's size, just under the title's letters", () => {
+            const swoosh = declarationsOf(CHALKBOARD_CSS, `${TITLE}::after`);
+
+            expect(swoosh.get("width")).toBe("170px");
+            expect(swoosh.get("height")).toBe("22px");
+            expect(swoosh.get("top")).toBe("calc(100% - 4px)");
         });
 
         it("should make the new-game button the yellow chalk fill whether or not a game is saved", () => {
