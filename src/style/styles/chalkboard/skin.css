@@ -784,8 +784,8 @@
 
 /* The loader, from MomentsChalk: on a small board chalk draws a closed 九宮 (the outline in one stroke, then the
    inner lines), rings the cell being solved in yellow chalk and writes its digit through a mask wiped on left to
-   right, a puff of dust falling (黑板 only), four cells in turn; then the duster drags across, the sketch fades to
-   a ghost under the smear it leaves, and all of it is wiped clean for the next round. Every piece starts each
+   right, a puff of dust falling (黑板 only), four cells in turn; then the duster drags its smear across, the sketch fades to
+   a ghost behind it, and all of it is wiped clean for the next round. Every piece starts each
    round hidden, so the loop has no seam. 白板 is the same in marker: smooth lines, no grain and no dust. The
    paths share a length of 100 (their pathLength). Loaders follow only the system's reduced motion. */
 [data-style="chalkboard"] .chalkboard-loader {
@@ -833,15 +833,17 @@
     );
 }
 
-/* The smear: a soft band of dust (a breath of marker on 白板), grown from the left behind the duster */
+/* The smear: a soft band of dust (a breath of marker on 白板) round the duster, dragged across with it. The
+   canvas blurs it; here a gradient across and a mask fading its ends stand in for the blur. */
 [data-style="chalkboard"] .chalkboard-loader-smear {
     opacity: 0;
-    transform-origin: left center;
-    background-image: radial-gradient(closest-side, color-mix(in srgb, var(--color-smudge) 10%, transparent), transparent);
+    background-image: linear-gradient(90deg, transparent, color-mix(in srgb, var(--color-smudge) 10%, transparent), transparent);
+    -webkit-mask-image: linear-gradient(transparent, currentColor 15%, currentColor 85%, transparent);
+    mask-image: linear-gradient(transparent, currentColor 15%, currentColor 85%, transparent);
 }
 
 :root.dark[data-style="chalkboard"] .chalkboard-loader-smear {
-    background-image: radial-gradient(closest-side, color-mix(in srgb, var(--color-smudge) 22%, transparent), transparent);
+    background-image: linear-gradient(90deg, transparent, color-mix(in srgb, var(--color-smudge) 22%, transparent), transparent);
 }
 
 @keyframes chalkboard-loader-stroke-0 {
@@ -996,34 +998,35 @@
 }
 
 @keyframes chalkboard-loader-smear {
-    0%, 68.5% { opacity: 0; transform: scaleX(0); }
-    83%, 94% { opacity: 1; transform: scaleX(1); }
-    100% { opacity: 0; transform: scaleX(1); }
+    0%, 67.5% { opacity: 0; transform: translateX(-60px); }
+    68.5% { opacity: 1; transform: translateX(-60px); }
+    83% { opacity: 1; transform: translateX(150px); }
+    84.5%, 100% { opacity: 0; transform: translateX(150px); }
 }
 
-[data-style="chalkboard"] .chalkboard-loader-stroke[data-step="0"] { animation: chalkboard-loader-stroke-0 4.4s linear infinite both; }
-[data-style="chalkboard"] .chalkboard-loader-stroke[data-step="1"] { animation: chalkboard-loader-stroke-1 4.4s linear infinite both; }
-[data-style="chalkboard"] .chalkboard-loader-stroke[data-step="2"] { animation: chalkboard-loader-stroke-2 4.4s linear infinite both; }
-[data-style="chalkboard"] .chalkboard-loader-stroke[data-step="3"] { animation: chalkboard-loader-stroke-3 4.4s linear infinite both; }
-[data-style="chalkboard"] .chalkboard-loader-stroke[data-step="4"] { animation: chalkboard-loader-stroke-4 4.4s linear infinite both; }
-[data-style="chalkboard"] .chalkboard-loader-ring[data-step="0"] { animation: chalkboard-loader-ring-0 4.4s ease-out infinite both; }
-[data-style="chalkboard"] .chalkboard-loader-ring[data-step="1"] { animation: chalkboard-loader-ring-1 4.4s ease-out infinite both; }
-[data-style="chalkboard"] .chalkboard-loader-ring[data-step="2"] { animation: chalkboard-loader-ring-2 4.4s ease-out infinite both; }
-[data-style="chalkboard"] .chalkboard-loader-ring[data-step="3"] { animation: chalkboard-loader-ring-3 4.4s ease-out infinite both; }
-[data-style="chalkboard"] .chalkboard-loader-digit[data-step="0"] { animation: chalkboard-loader-digit-0 4.4s linear infinite both; }
-[data-style="chalkboard"] .chalkboard-loader-digit[data-step="1"] { animation: chalkboard-loader-digit-1 4.4s linear infinite both; }
-[data-style="chalkboard"] .chalkboard-loader-digit[data-step="2"] { animation: chalkboard-loader-digit-2 4.4s linear infinite both; }
-[data-style="chalkboard"] .chalkboard-loader-digit[data-step="3"] { animation: chalkboard-loader-digit-3 4.4s linear infinite both; }
-[data-style="chalkboard"] .chalkboard-loader-reveal[data-step="0"] { animation: chalkboard-loader-reveal-0 4.4s steps(5, end) infinite both; }
-[data-style="chalkboard"] .chalkboard-loader-reveal[data-step="1"] { animation: chalkboard-loader-reveal-1 4.4s steps(5, end) infinite both; }
-[data-style="chalkboard"] .chalkboard-loader-reveal[data-step="2"] { animation: chalkboard-loader-reveal-2 4.4s steps(5, end) infinite both; }
-[data-style="chalkboard"] .chalkboard-loader-reveal[data-step="3"] { animation: chalkboard-loader-reveal-3 4.4s steps(5, end) infinite both; }
-:root.dark[data-style="chalkboard"] .chalkboard-loader-dust[data-step="0"] { animation: chalkboard-loader-dust-0 4.4s ease-in infinite both; }
-:root.dark[data-style="chalkboard"] .chalkboard-loader-dust[data-step="1"] { animation: chalkboard-loader-dust-1 4.4s ease-in infinite both; }
-:root.dark[data-style="chalkboard"] .chalkboard-loader-dust[data-step="2"] { animation: chalkboard-loader-dust-2 4.4s ease-in infinite both; }
-:root.dark[data-style="chalkboard"] .chalkboard-loader-dust[data-step="3"] { animation: chalkboard-loader-dust-3 4.4s ease-in infinite both; }
-[data-style="chalkboard"] .chalkboard-loader-duster { animation: chalkboard-loader-duster 4.4s linear infinite both; }
-[data-style="chalkboard"] .chalkboard-loader-smear { animation: chalkboard-loader-smear 4.4s linear infinite both; }
+[data-style="chalkboard"] .chalkboard-loader-stroke[data-step="0"] { animation: chalkboard-loader-stroke-0 5.2s linear infinite both; }
+[data-style="chalkboard"] .chalkboard-loader-stroke[data-step="1"] { animation: chalkboard-loader-stroke-1 5.2s linear infinite both; }
+[data-style="chalkboard"] .chalkboard-loader-stroke[data-step="2"] { animation: chalkboard-loader-stroke-2 5.2s linear infinite both; }
+[data-style="chalkboard"] .chalkboard-loader-stroke[data-step="3"] { animation: chalkboard-loader-stroke-3 5.2s linear infinite both; }
+[data-style="chalkboard"] .chalkboard-loader-stroke[data-step="4"] { animation: chalkboard-loader-stroke-4 5.2s linear infinite both; }
+[data-style="chalkboard"] .chalkboard-loader-ring[data-step="0"] { animation: chalkboard-loader-ring-0 5.2s ease-out infinite both; }
+[data-style="chalkboard"] .chalkboard-loader-ring[data-step="1"] { animation: chalkboard-loader-ring-1 5.2s ease-out infinite both; }
+[data-style="chalkboard"] .chalkboard-loader-ring[data-step="2"] { animation: chalkboard-loader-ring-2 5.2s ease-out infinite both; }
+[data-style="chalkboard"] .chalkboard-loader-ring[data-step="3"] { animation: chalkboard-loader-ring-3 5.2s ease-out infinite both; }
+[data-style="chalkboard"] .chalkboard-loader-digit[data-step="0"] { animation: chalkboard-loader-digit-0 5.2s linear infinite both; }
+[data-style="chalkboard"] .chalkboard-loader-digit[data-step="1"] { animation: chalkboard-loader-digit-1 5.2s linear infinite both; }
+[data-style="chalkboard"] .chalkboard-loader-digit[data-step="2"] { animation: chalkboard-loader-digit-2 5.2s linear infinite both; }
+[data-style="chalkboard"] .chalkboard-loader-digit[data-step="3"] { animation: chalkboard-loader-digit-3 5.2s linear infinite both; }
+[data-style="chalkboard"] .chalkboard-loader-reveal[data-step="0"] { animation: chalkboard-loader-reveal-0 5.2s steps(5, end) infinite both; }
+[data-style="chalkboard"] .chalkboard-loader-reveal[data-step="1"] { animation: chalkboard-loader-reveal-1 5.2s steps(5, end) infinite both; }
+[data-style="chalkboard"] .chalkboard-loader-reveal[data-step="2"] { animation: chalkboard-loader-reveal-2 5.2s steps(5, end) infinite both; }
+[data-style="chalkboard"] .chalkboard-loader-reveal[data-step="3"] { animation: chalkboard-loader-reveal-3 5.2s steps(5, end) infinite both; }
+:root.dark[data-style="chalkboard"] .chalkboard-loader-dust[data-step="0"] { animation: chalkboard-loader-dust-0 5.2s ease-in infinite both; }
+:root.dark[data-style="chalkboard"] .chalkboard-loader-dust[data-step="1"] { animation: chalkboard-loader-dust-1 5.2s ease-in infinite both; }
+:root.dark[data-style="chalkboard"] .chalkboard-loader-dust[data-step="2"] { animation: chalkboard-loader-dust-2 5.2s ease-in infinite both; }
+:root.dark[data-style="chalkboard"] .chalkboard-loader-dust[data-step="3"] { animation: chalkboard-loader-dust-3 5.2s ease-in infinite both; }
+[data-style="chalkboard"] .chalkboard-loader-duster { animation: chalkboard-loader-duster 5.2s linear infinite both; }
+[data-style="chalkboard"] .chalkboard-loader-smear { animation: chalkboard-loader-smear 5.2s linear infinite both; }
 
 /* Reduced motion: no scaling or sliding; the press wash stays */
 @media (prefers-reduced-motion: reduce) {
@@ -1099,9 +1102,14 @@
         stroke-dashoffset: 0;
     }
 
-    [data-style="chalkboard"] .chalkboard-loader-digit,
+    [data-style="chalkboard"] .chalkboard-loader-digit {
+        opacity: 1;
+    }
+
+    /* Where the canvas's still frame leaves the smear, partway across */
     [data-style="chalkboard"] .chalkboard-loader-smear {
         opacity: 1;
+        transform: translateX(80px);
     }
 
     [data-style="chalkboard"] .chalkboard-loader-reveal {

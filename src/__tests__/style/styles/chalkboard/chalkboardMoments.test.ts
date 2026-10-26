@@ -199,12 +199,12 @@ describe("chalkboard moments", () => {
     });
 
     describe("loader", () => {
-        it("should run every piece on one 4.4s infinite loop", () => {
+        it("should run every piece on one 5.2s infinite loop", () => {
             for (const piece of LOADER_PIECES) {
                 expect(animationsOf(piece).length, piece).toBeGreaterThan(0);
             }
             for (const { selector, animation, name } of loaderAnimations()) {
-                expect(animationTimingOf(animation, name)?.durationMs, selector).toBe(4400);
+                expect(animationTimingOf(animation, name)?.durationMs, selector).toBe(5200);
                 expect(animation, selector).toMatch(/ infinite both$/);
             }
         });
@@ -266,6 +266,15 @@ describe("chalkboard moments", () => {
             expect(hiddenUntil(duster.name)).toBeGreaterThanOrEqual(wholeFrom(reveals[reveals.length - 1], "stroke-dashoffset", "0"));
         });
 
+        // The canvas's wiper: the smudge is a soft band round the duster, dragged across with it
+        it("should drag the smear across with the duster", () => {
+            const [duster] = animationsOf(LOADER_DUSTER);
+            const [smear] = animationsOf(LOADER_SMEAR);
+            const travelOf = (name: string) => framesOf(name).map(frame => ({ offsets: frame.offsets, transform: frame.declarations.get("transform") }));
+
+            expect(travelOf(smear.name)).toEqual(travelOf(duster.name));
+        });
+
         // 白板 is markers: no dust, no grain and no blur (Review Focus 5)
         it("should drop no dust on 白板: hidden, and animated only in 黑板", () => {
             const dustSelectors = loaderAnimations().filter(({ selector }) => /chalkboard-loader-dust(?![\w-])/.test(selector)).map(({ selector }) => selector);
@@ -306,6 +315,8 @@ describe("chalkboard moments", () => {
             expect(reducedMotionDeclarationsOf(lastRing).get("opacity")).toBe("1");
             expect(reducedMotionDeclarationsOf(lastRing).get("stroke-dashoffset")).toBe("0");
             expect(reducedMotionDeclarationsOf(LOADER_SMEAR).get("opacity")).toBe("1");
+            // Left where the canvas's still frame leaves it, partway across
+            expect(reducedMotionDeclarationsOf(LOADER_SMEAR).get("transform")).toBe("translateX(80px)");
             // The duster has gone; its dust has fallen
             expect(reducedMotionDeclarationsOf(LOADER_DUSTER).get("opacity") ?? declarationsOf(CHALKBOARD_CSS, LOADER_DUSTER).get("opacity")).toBe("0");
             expect(declarationsOf(CHALKBOARD_CSS, LOADER_DUST).get("opacity")).toBe("0");

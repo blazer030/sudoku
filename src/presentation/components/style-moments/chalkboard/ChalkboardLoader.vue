@@ -2,7 +2,7 @@
     <div class="chalkboard-loader relative flex flex-col items-center gap-3 overflow-hidden bg-card pt-[22px] px-[34px] pb-[18px] text-foreground">
         <!-- A small board. skin.css chalks a sudoku box (the outline in one stroke, then the four inner lines), rings a
              cell in yellow chalk and writes its digit through a reveal mask with a puff of dust (黑板 only), four
-             cells in turn; then the duster drags across, leaving a smear over the faded sketch, and every piece
+             cells in turn; then the duster drags its smear across, fading the sketch to a ghost, and every piece
              is hidden again for the next round. 白板 is the same in marker: no grain and no dust. Under reduced
              motion the sketch is finished, the last cell ringed, with its smear. -->
         <div
@@ -99,8 +99,8 @@
                     />
                 </g>
             </svg>
-            <!-- The smear the duster leaves, grown from the left behind it, and the duster -->
-            <span class="chalkboard-loader-smear absolute inset-y-0 -inset-x-2.5" />
+            <!-- The canvas's wiper: a soft smear round the duster, dragged across with it -->
+            <span class="chalkboard-loader-smear absolute -top-1.5 -left-[30px] h-[132px] w-[100px]" />
             <span class="chalkboard-loader-duster absolute left-1 top-[46px] h-7 w-8" />
         </div>
         <p class="chalkboard-loader-caption m-0 text-[15px] text-foreground">
