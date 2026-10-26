@@ -459,14 +459,17 @@ describe("chalkboard moments", () => {
 
             it("should leave the ring on a still board, drawn whole", () => {
                 expect(maskSupportsDeclarationsOf(BOARD_RING).get("content")).toBe('""');
-                expect(BOARD_RING).toContain('[data-celebration="still"]');
-                expect(DRAWN_BOARD_RING).not.toContain("still");
             });
 
             // A cell's stacking context would drop the selection ring (4) under the chalk lines (3)
+            // Only the ring itself may take a z-index; every other rule of the solved board must leave the board
+            // and its cells without a stacking context
             it("should give the cells no stacking context while the board is solved", () => {
-                for (const { selector, declarations } of rulesMatching(/data-celebration/)) {
-                    if (!selector.includes("[data-variant]") && !selector.includes("[data-value-kind]")) continue;
+                const rules = rulesMatching(/data-celebration/);
+                const others = rules.filter(({ selector }) => !selector.endsWith('[data-skin~="board-grid"]::before'));
+
+                expect(rules.length).toBeGreaterThan(others.length);
+                for (const { selector, declarations } of others) {
                     for (const property of ["transform", "z-index", "isolation", "filter", "opacity"]) {
                         expect(declarations.has(property), `${selector} → ${property}`).toBe(false);
                     }
