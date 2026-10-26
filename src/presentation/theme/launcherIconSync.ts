@@ -13,7 +13,8 @@ export interface LauncherIconSources {
 /**
  * While matching is on, asks the icon service for the current theme's icon in the light or dark the
  * app shows: on start (the mode may have changed while the app was closed), whenever that icon
- * changes, and when matching is turned on. Turning matching off leaves the icon as it is.
+ * changes, and when matching is turned on. While matching is off the app keeps its own icon: asked
+ * for on start (a player may still sit on a theme's icon) and when matching is turned off.
  */
 export const startLauncherIconSync = (sources: LauncherIconSources, iconService: IconService): (() => void) => {
     const icon = computed(() => launcherIconKey(
@@ -24,7 +25,10 @@ export const startLauncherIconSync = (sources: LauncherIconSources, iconService:
 
     // On the immediate first run the previous values are undefined
     const stopWatching = watch([icon, sources.matchLauncherIconToTheme], ([key, matching], [previousKey, wasMatching]) => {
-        if (!matching) return;
+        if (!matching) {
+            if (wasMatching !== false) void iconService.resetIcon();
+            return;
+        }
         if (key !== previousKey || wasMatching !== true) void iconService.setIcon(key);
     }, { immediate: true });
 

@@ -1,11 +1,12 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
-const { change, addListener } = vi.hoisted(() => ({
+const { change, reset, addListener } = vi.hoisted(() => ({
     change: vi.fn(),
+    reset: vi.fn(),
     addListener: vi.fn(),
 }));
 
-vi.mock("@capacitor-community/app-icon", () => ({ AppIcon: { change } }));
+vi.mock("@capacitor-community/app-icon", () => ({ AppIcon: { change, reset } }));
 vi.mock("@capacitor/app", () => ({ App: { addListener } }));
 
 import { DynamicIconAdapter } from "@/infrastructure/icon/DynamicIconAdapter";
@@ -16,6 +17,7 @@ describe("DynamicIconAdapter", () => {
 
     beforeEach(() => {
         change.mockReset().mockResolvedValue(undefined);
+        reset.mockReset().mockResolvedValue(undefined);
         addListener.mockReset().mockImplementation((eventName: string, callback: () => void) => {
             if (eventName === "pause") triggerPause = callback;
             return Promise.resolve({ remove: vi.fn() });
@@ -74,6 +76,45 @@ describe("DynamicIconAdapter", () => {
         triggerPause();
         expect(change).toHaveBeenCalledTimes(1);
         expect(change).toHaveBeenCalledWith(expect.objectContaining({ name: "pink" }));
+    });
+
+    it("goes back to the app's own icon on pause, turning every alias off", async () => {
+        const adapter = new DynamicIconAdapter();
+        await adapter.resetIcon();
+        expect(reset).not.toHaveBeenCalled();
+
+        triggerPause();
+
+        expect(reset).toHaveBeenCalledExactlyOnceWith({ disable: [...ALL_LAUNCHER_ALIASES], suppressNotification: false });
+        expect(change).not.toHaveBeenCalled();
+    });
+
+    it("applies whichever of a theme icon and the app's own icon was asked for last", async () => {
+        const adapter = new DynamicIconAdapter();
+        await adapter.resetIcon();
+        await adapter.setIcon("blue");
+        triggerPause();
+        expect(reset).not.toHaveBeenCalled();
+        expect(change).toHaveBeenCalledWith(expect.objectContaining({ name: "blue" }));
+
+        await adapter.setIcon("pink");
+        await adapter.resetIcon();
+        triggerPause();
+        expect(reset).toHaveBeenCalledOnce();
+        expect(change).toHaveBeenCalledOnce();
+    });
+
+    it("logs instead of throwing when going back to the app's own icon fails", async () => {
+        const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
+        reset.mockRejectedValue(new Error("boom"));
+        const adapter = new DynamicIconAdapter();
+        await adapter.resetIcon();
+        expect(() => {
+            triggerPause();
+        }).not.toThrow();
+        await vi.waitFor(() => {
+            expect(consoleError).toHaveBeenCalled();
+        });
     });
 
     it("does nothing on pause when no icon is pending", () => {

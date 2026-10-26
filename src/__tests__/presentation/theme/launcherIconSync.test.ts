@@ -9,10 +9,11 @@ import { LAUNCHER_ICONS, type LauncherIconKey } from "@/theme/launcherIcon";
 describe("startLauncherIconSync", () => {
     let stop: (() => void) | undefined;
     let setIcon: Mock<(icon: LauncherIconKey) => Promise<void>>;
+    let resetIcon: Mock<() => Promise<void>>;
 
     const start = () => {
         const store = useSettingsStore();
-        stop = startLauncherIconSync(storeToRefs(store), { setIcon });
+        stop = startLauncherIconSync(storeToRefs(store), { setIcon, resetIcon });
         return store;
     };
 
@@ -20,6 +21,7 @@ describe("startLauncherIconSync", () => {
         localStorage.clear();
         setActivePinia(createPinia());
         setIcon = vi.fn<(icon: LauncherIconKey) => Promise<void>>().mockResolvedValue(undefined);
+        resetIcon = vi.fn<() => Promise<void>>().mockResolvedValue(undefined);
     });
 
     afterEach(() => {
@@ -143,16 +145,44 @@ describe("startLauncherIconSync", () => {
         expect(setIcon).toHaveBeenCalledWith("purple");
     });
 
-    it("should leave the icon alone when matching turns off", async () => {
+    it("should go back to the default icon when matching turns off", async () => {
         const store = start();
         store.setMatchLauncherIconToTheme(true);
         await nextTick();
-        setIcon.mockClear();
+        resetIcon.mockClear();
 
         store.setMatchLauncherIconToTheme(false);
         await nextTick();
 
+        expect(resetIcon).toHaveBeenCalledOnce();
+        expect(setIcon).toHaveBeenCalledOnce();
+    });
+
+    // A player who turned matching off in an older version may still sit on a theme's icon
+    it("should ask for the default icon on start when matching is off", () => {
+        start();
+
+        expect(resetIcon).toHaveBeenCalledOnce();
         expect(setIcon).not.toHaveBeenCalled();
+    });
+
+    it("should not ask for the default icon on start when matching is on", () => {
+        localStorage.setItem("sudoku-settings", JSON.stringify({ matchLauncherIconToTheme: true }));
+
+        start();
+
+        expect(resetIcon).not.toHaveBeenCalled();
+    });
+
+    it("should not ask for the default icon again when the look changes while matching is off", async () => {
+        const store = start();
+        resetIcon.mockClear();
+
+        store.setStyle("tactile");
+        store.setAppearance("dark");
+        await nextTick();
+
+        expect(resetIcon).not.toHaveBeenCalled();
     });
 
     it("should send the style's own icon when the style changes", async () => {
