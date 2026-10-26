@@ -37,6 +37,7 @@
                 :class="dotClass(index - 1)"
                 :data-testid="`${testIdPrefix}-dot-${index - 1}`"
                 class="h-2 rounded-full transition-all duration-300 cursor-pointer"
+                data-skin="step-dot"
                 @click="emit('goTo', index - 1)"
             />
         </div>

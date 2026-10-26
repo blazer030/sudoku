@@ -36,6 +36,7 @@
                     :class="game.completed
                         ? 'bg-primary-light text-primary'
                         : 'bg-accent/10 text-accent'"
+                    :data-skin="game.completed ? 'icon-tile' : 'icon-tile gave-up'"
                     class="w-9 h-9 rounded-icon flex items-center justify-center"
                 >
                     <Trophy

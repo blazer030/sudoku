@@ -101,6 +101,7 @@
                         :key="historyIndex"
                         :class="game.replay ? 'cursor-pointer' : 'cursor-default'"
                         class="flex items-center justify-between bg-card rounded-xl py-3 px-4 shadow-card-sm text-left"
+                        data-skin="recent-row"
                         data-testid="recent-game"
                         @click="openReview(game, historyIndex)"
                     >
@@ -109,6 +110,7 @@
                                 :class="game.completed
                                     ? 'bg-primary-light text-primary'
                                     : 'bg-accent/10 text-accent'"
+                                :data-skin="game.completed ? 'icon-tile' : 'icon-tile gave-up'"
                                 class="w-9 h-9 rounded-icon flex items-center justify-center"
                             >
                                 <Trophy

@@ -72,7 +72,10 @@
                     </span>
                 </button>
 
-                <div class="h-px bg-border mx-3" />
+                <div
+                    class="h-px bg-border mx-3"
+                    data-skin="menu-divider"
+                />
 
                 <button
                     v-press

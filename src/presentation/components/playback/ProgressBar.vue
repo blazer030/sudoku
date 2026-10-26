@@ -10,11 +10,13 @@
             <div
                 :class="isDragging ? 'h-3' : 'h-2 group-hover:h-3'"
                 class="w-full bg-border rounded-full transition-all duration-150"
+                data-skin="progress-track"
             >
                 <div
                     :class="isDragging ? 'h-3' : 'h-2 group-hover:h-3'"
                     :style="{ width: progressPercent }"
                     class="bg-primary rounded-full transition-all duration-150"
+                    data-skin="progress-fill"
                     :data-testid="`${testidPrefix}progress-fill`"
                 />
             </div>
