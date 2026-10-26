@@ -110,6 +110,20 @@ describe("BoardCell", () => {
             expect(wrapper.get("[data-testid='cell-value']").classes()).not.toContain("value-arrive");
         });
 
+        // The entered digit lies in its own completed group: the group's animation on it runs on the group
+        // effect's clock, and settling there would cut a writer still drawing (chalk's dust)
+        it("should keep a digit arriving when only its group's animation ends on it", async () => {
+            stubReducedMotion(false);
+            const wrapper = mountCell({ value: 0 });
+            await wrapper.setProps({ value: 5 });
+
+            await wrapper.get("[data-testid='cell-value']").trigger("animationend", { animationName: "chalkboard-group-flash" });
+            expect(wrapper.get("[data-testid='cell-value']").classes()).toContain("value-arrive");
+
+            await wrapper.get("[data-testid='cell-value']").trigger("animationend", { animationName: "tactile-drop" });
+            expect(wrapper.get("[data-testid='cell-value']").classes()).not.toContain("value-arrive");
+        });
+
         it("should drop the arriving mark when the active style has no arrival animation", async () => {
             // Minimal and paper never animate value-arrive, so no animationend ever comes
             vi.useFakeTimers();
