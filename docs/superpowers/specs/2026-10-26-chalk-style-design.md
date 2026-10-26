@@ -47,7 +47,7 @@
 - **粉筆顆粒改用靜態材質圖**：畫板用 `feTurbulence` 濾鏡挖洞，正式版改成事先做好的 SVG 粉筆材質，用 `mask-image` 套上（`url("@/style/styles/chalk/<file>.svg")`），格線、選取圈、按鍵描邊、數字都一樣。設計筆記自己也是這個結論；專案規則也是「靜態 SVG，不用即時濾鏡」。（「填入筆順」畫板筆記說可以把濾鏡只套在數字上，這裡改用同一張靜態材質圖，以符合專案規則。——我的決定）
 - **手繪格線**：一層靜態 SVG 疊在盤面上（像 ink 的 `brush-grid.svg`），黑板版有粉筆質感、白板版平滑。
 - **兩種模式**：`STYLE_COLOR_MODES.chalk = ["dark", "light"]`，用一般的 `themeBuilder`。模式跟隨玩家的深淺色設定；畫板預設深色，所以清單把 dark 放前面。（我的決定）
-- **主題 id**：一組，命名由實作決定（例如 `classroom`），規則同 pixel 的 `classic`。
+- **主題 id**：一組，`chalkboard`（擁有者決定），規則同 pixel 的 `classic`。
 - **字型**：Caveat Brush 加進 `scripts/generate-fonts.ts`，裁到數字（`0123456789`）以及計時器、統計需要的符號（照畫板實際用 `--font-num` 的地方決定）；字體名稱要另取，不能遮住系統字體（照 ink 的作法，例如 "Chalk Digits"）。在 `styles/chalk/fonts.ts` 用 `markFontsReady` 做字型 gate，接到 `appearanceSync.ts`。
 - **「好棒！」**：過關卡片的標題要新增 i18n key（兩種語言），WenKai 子集由 `sourceCharacters()` 從訊息檔產生，所以加了 key 就會涵蓋；仍要讓 `bundledFonts.test.ts` 驗證。英文版的文字照現有風格的語氣決定（例如 "Well done!"）。
 - **筆畫資料**：`style-moments/chalk/chalkDigitStrokes.ts`，從 `StrokeWriting.dc.html` 的黑板資料搬過來，並依打包後的 Caveat Brush 重新量字寬和基線（像 `paperDigitStrokes.ts`）。筆順依畫板：1 先旗再直、4 先斜下帶橫再直下、7 先橫再斜下、8 一筆 S 形繞回、5 先直下帶圓肚再補上橫。黑板筆寬 14 單位（格子 100 單位），兩筆之間停 50ms，最後 60ms 讓整個字形淡入。

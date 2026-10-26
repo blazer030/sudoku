@@ -28,10 +28,10 @@
 - **Before each commit** these run clean, with no new warnings: `npx vitest run`, `npm run lint`, `npx vue-tsc --noEmit`.
 - **Other styles unchanged:** minimal, tactile, paper, pixel, cyber and ink look and behave as before. After a palette change, `src/style/themes.generated.css` differs from `develop` only by the `chalk` blocks.
 - **Exact values:**
-  - Style id `chalk`, after `ink`. Names 「黑板粉筆」 / "Chalkboard". Theme id `classroom` (「教室」 / "Classroom").
+  - Style id `chalk`, after `ink`. Names 「黑板粉筆」 / "Chalkboard". Theme id `chalkboard` (「黑板」 / "Chalkboard"; the picker is hidden for a one-theme style).
   - `STYLE_COLOR_MODES.chalk = ["dark", "light"]`; `STYLE_MODE_NAMES.chalk = true`; `settings.colorMode.styled.chalk = { dark: "黑板", light: "白板" }` / `{ dark: "Chalkboard", light: "Whiteboard" }`.
-  - Launcher keys `chalkClassroom` (白板) and `chalkClassroomDark` (黑板); launcher icons 27 → 29.
-  - `barColors.chalk = { dark: { classroom: "#2E4B3C" }, light: { classroom: "#F5F6F3" } }` (the board backgrounds; adjust only if the system-bar test demands a different role, as pixel does).
+  - Launcher keys `chalkChalkboard` (白板) and `chalkChalkboardDark` (黑板); launcher icons 27 → 29.
+  - `barColors.chalk = { dark: { chalkboard: "#2E4B3C" }, light: { chalkboard: "#F5F6F3" } }` (the board backgrounds; adjust only if the system-bar test demands a different role, as pixel does).
 - **Palette:**
   - 黑板: background `#2E4B3C`, foreground `#F4F1E8`, secondary `#CFD8CC`, primary (yellow chalk) `#F7C873`, on-primary `#233A2E`, entry (blue chalk, `accent`) `#A6D8F2`, error `#FF9E9E`.
   - 白板: background `#F5F6F3`, foreground `#1F2328`, secondary `#4F5660`, primary (orange marker) `#B04A00`, on-primary `#FFFFFF`, entry (blue marker, `accent`) `#1D5FC2`, error `#C62828`.
@@ -63,22 +63,22 @@
 **Files:**
 - Create: `src/style/styles/chalk/palette.ts`, `src/style/styles/chalk/skin.css` (stub)
 - Modify: `src/theme/themeIds.ts`, `src/theme/palettes.ts`, `src/style/index.css` (import), `src/theme/styleIcons.ts` (a `chalk` case: background only), `src/presentation/components/style-moments/styleMoments.ts` (`CHALK_MOMENTS` placeholder), `src/presentation/pages/home/homeHeroes.ts` (`chalk: "stacked"`), `index.html` (`barColors`), `src/presentation/i18n/messages/{zh-Hant,en}.ts`, `src/presentation/pages/settings/changelogData.ts`
-- Generated: `src/style/themes.generated.css`, `public/*chalkClassroom*`, Android launcher resources and manifest aliases
+- Generated: `src/style/themes.generated.css`, `public/*chalkChalkboard*`, Android launcher resources and manifest aliases
 - Tests: `src/__tests__/theme/{palettes,paletteContrast,launcherIcon}.test.ts`, `src/__tests__/presentation/theme/noFlashScript.test.ts`, `src/__tests__/presentation/pages/settings/{Appearance,Settings}.test.ts`, `src/__tests__/style/styleCoverage.test.ts`
 
 **Interfaces:**
-- Produces: `STYLE_IDS` ends with `"chalk"`; `THEME_IDS_BY_STYLE.chalk = ["classroom"]`; `CHALK_STYLE: StyleDefinition`; `STYLE_MOMENTS.chalk`; `REQUIRED_SELECTORS.chalk` (press hooks only for now); palette extras for the tray (`tray`, `tray-edge`) and the dust/smear washes used by later tasks.
+- Produces: `STYLE_IDS` ends with `"chalk"`; `THEME_IDS_BY_STYLE.chalk = ["chalkboard"]`; `CHALK_STYLE: StyleDefinition`; `STYLE_MOMENTS.chalk`; `REQUIRED_SELECTORS.chalk` (press hooks only for now); palette extras for the tray (`tray`, `tray-edge`) and the dust/smear washes used by later tasks.
 
 - [ ] **Step 1: Write the failing tests.**
-  - `palettes.test.ts`: `STYLES.chalk.themes.map(theme => theme.id)` equals `["classroom"]`; `getPalette("chalk", "classroom", "dark")` has background `#2E4B3C`, primary `#F7C873`, accent `#A6D8F2`; the light one `#F5F6F3`, `#B04A00`, `#1D5FC2`.
-  - `launcherIcon.test.ts`: 29 icons, `chalkClassroom` and `chalkClassroomDark` among them; `pwaIconKey("chalk", "classroom") === "chalkClassroom"`.
+  - `palettes.test.ts`: `STYLES.chalk.themes.map(theme => theme.id)` equals `["chalkboard"]`; `getPalette("chalk", "chalkboard", "dark")` has background `#2E4B3C`, primary `#F7C873`, accent `#A6D8F2`; the light one `#F5F6F3`, `#B04A00`, `#1D5FC2`.
+  - `launcherIcon.test.ts`: 29 icons, `chalkChalkboard` and `chalkChalkboardDark` among them; `pwaIconKey("chalk", "chalkboard") === "chalkChalkboard"`.
   - `noFlashScript.test.ts` (Review Focus 1): saved `{ style: "chalk" }` with the system light paints no `dark` class and theme-color `#F5F6F3`; with the system dark paints `dark` and `#2E4B3C`.
   - `Appearance.test.ts` (Review Focus 1): the style cards end with `style-option-chalk`; with chalk chosen the colour-mode control shows the styled names (switching language switches them) and the theme picker is absent.
   - `Settings.test.ts`: with chalk, the appearance summary uses the styled mode name.
 - [ ] **Step 2:** Run them; they fail (`chalk` is unknown).
-- [ ] **Step 3: Build the palette** in `palette.ts` with `themeBuilder(CHALK_LIGHT_NEUTRALS, CHALK_DARK_NEUTRALS, extras)` (pixel's shape), one theme `classroom`, values from Global Constraints.
-- [ ] **Step 4: Fit the contrast tests.** Where a generic board rule fails only because chalk's cells are transparent washes on the board, add `exceptIn: ["chalk"]` naming the rule, and add a `CHALK_BOARD_CASES` list whose coverage test expects `chalk/classroom/light` and `chalk/classroom/dark`; Task 4 fills it.
-- [ ] **Step 5: Register and generate.** Ids, `STYLES`, `styleIcons.ts` `chalk` case returning the background only, i18n names (`settings.style.names.chalk`, `settings.colorThemes.classroom`, `settings.colorMode.styled.chalk`), `barColors`, home hero, a stub `skin.css` with the press selectors and a reduced-motion block (imported in `index.css`), `CHALK_MOMENTS = { loader: MinimalLoader, celebration: null, groupEffectMs: 620, celebrationBoardMs: 640 }`, the `UNRELEASED_CHANGES` line. Run `npm run generate:theme-css`, `generate:icons`, `generate:launcher-icons`.
+- [ ] **Step 3: Build the palette** in `palette.ts` with `themeBuilder(CHALK_LIGHT_NEUTRALS, CHALK_DARK_NEUTRALS, extras)` (pixel's shape), one theme `chalkboard`, values from Global Constraints.
+- [ ] **Step 4: Fit the contrast tests.** Where a generic board rule fails only because chalk's cells are transparent washes on the board, add `exceptIn: ["chalk"]` naming the rule, and add a `CHALK_BOARD_CASES` list whose coverage test expects `chalk/chalkboard/light` and `chalk/chalkboard/dark`; Task 4 fills it.
+- [ ] **Step 5: Register and generate.** Ids, `STYLES`, `styleIcons.ts` `chalk` case returning the background only, i18n names (`settings.style.names.chalk`, `settings.colorThemes.chalkboard`, `settings.colorMode.styled.chalk`), `barColors`, home hero, a stub `skin.css` with the press selectors and a reduced-motion block (imported in `index.css`), `CHALK_MOMENTS = { loader: MinimalLoader, celebration: null, groupEffectMs: 620, celebrationBoardMs: 640 }`, the `UNRELEASED_CHANGES` line. Run `npm run generate:theme-css`, `generate:icons`, `generate:launcher-icons`.
 - [ ] **Step 6:** `git diff develop -- src/style/themes.generated.css` shows only `chalk` blocks. Run the full suite (including `iconAssets`, `launcherIconAssets`, `AndroidManifest`), lint and vue-tsc; all clean.
 - [ ] **Step 7:** Commit `✨ feat: add the chalkboard style with its chalkboard and whiteboard palettes`.
 
@@ -86,7 +86,7 @@
 
 **Files:**
 - Modify: `src/theme/styleIcons.ts`
-- Generated: `public/*chalkClassroom*`, Android launcher resources
+- Generated: `public/*chalkChalkboard*`, Android launcher resources
 - Test: `src/__tests__/theme/styleIcons.test.ts`
 
 **Interfaces:**
