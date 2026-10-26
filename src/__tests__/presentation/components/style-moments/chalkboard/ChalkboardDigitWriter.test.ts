@@ -267,7 +267,7 @@ describe("ChalkboardDigitWriter", () => {
 
             const secondWriter = cell.findComponent(ChalkboardDigitWriter);
             expect(secondWriter.props("digit")).toBe(7);
-            expect(secondWriter.vm).not.toBe(firstWriter.vm);
+            expect(secondWriter.element === firstWriter.element).toBe(false);
             expect(cell.get("[data-testid='cell-value']").attributes("style")).toContain(`url(#${String(secondWriter.props("maskId"))})`);
 
             await cell.get(".chalkboard-digit-settle").trigger("animationend");
