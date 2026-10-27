@@ -462,6 +462,22 @@
     border-radius: var(--chalkboard-wob);
 }
 
+/* Home's entry tiles are dashed chalk, as the canvas's .tile: the dashes lie on the tile's ::after over its whole
+   box, since a border on the tile would grow it; the option and toggle tiles keep the solid outline */
+[data-style="chalkboard"] [data-skin~="home-tile"] {
+    position: relative;
+    box-shadow: none;
+}
+
+[data-style="chalkboard"] [data-skin~="home-tile"]::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border: 2px dashed var(--color-border);
+    border-radius: inherit;
+    pointer-events: none;
+}
+
 /* Dialogs and the panels that float over a screen (the hint menu, the hint and playback panels, the
    walkthrough's intro) are the solid card with its chalk outline and a soft shadow below, so nothing shows
    through them */

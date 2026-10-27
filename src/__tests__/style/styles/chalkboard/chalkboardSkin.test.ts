@@ -603,6 +603,23 @@ describe("chalkboard skin", () => {
             expect(surface.get("box-shadow")).toMatch(CHALK_OUTLINE);
         });
 
+        // The canvas's .tile: Home's entry tiles are dashed chalk, drawn on the tile's ::after over its whole box (a
+        // border on the tile itself would grow it); the option and toggle tiles keep the solid outline
+        it("should dash Home's entry tiles in chalk without growing them, with uneven corners", () => {
+            const tile = declarationsOf(CHALKBOARD_CSS, `${SCOPE} [data-skin~="home-tile"]`);
+            const dashes = declarationsOf(CHALKBOARD_CSS, `${SCOPE} [data-skin~="home-tile"]::after`);
+
+            expect(tile.get("box-shadow")).toBe("none");
+            expect(tile.get("position")).toBe("relative");
+            expect(dashes.get("content")).toBe('""');
+            expect(dashes.get("position")).toBe("absolute");
+            expect(dashes.get("inset")).toBe("0");
+            expect(dashes.get("border")).toBe("2px dashed var(--color-border)");
+            expect(dashes.get("border-radius")).toBe("inherit");
+            expect(dashes.get("pointer-events")).toBe("none");
+            expect(declarationsOf(CHALKBOARD_CSS, `${SCOPE} [data-skin~="tile"]`).get("box-shadow")).toMatch(CHALK_OUTLINE);
+        });
+
         // The canvas's .group.lrow sets border:0 over the chalk .group outline: a recent game is bare board
         it("should leave a recent game's row unfilled and unoutlined, with uneven corners", () => {
             const row = declarationsOf(CHALKBOARD_CSS, `${SCOPE} [data-skin~="recent-row"]`);
