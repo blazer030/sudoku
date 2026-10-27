@@ -39,8 +39,9 @@ const DUSTER_URL = 'url("@/style/styles/chalkboard/chalkboard-duster.svg")';
 const GRAIN = "var(--chalkboard-grain)";
 const ROOT_PAGE = `${SCOPE} [data-skin~="page-ruled"]`;
 const DARK_ROOT_PAGE = `${DARK} [data-skin~="page-ruled"]`;
-const NESTED_PAGE = `${SCOPE} [data-skin~="page-ruled"] [data-skin~="page-ruled"]`;
-const DARK_NESTED_PAGE = `${DARK} [data-skin~="page-ruled"] [data-skin~="page-ruled"]`;
+// The sheet lies on the body, so it spans the whole window, not just the app's column
+const SHEET = `${SCOPE} body`;
+const DARK_SHEET = `${DARK} body`;
 const HERO = `${SCOPE} [data-skin~="hero-headline"]`;
 const TITLE = `${SCOPE} [data-skin~="title"]`;
 const CHOSEN_KEY = `${SCOPE} [data-skin~="key"][aria-pressed="true"]`;
@@ -351,27 +352,27 @@ describe("chalkboard skin", () => {
     });
 
     describe("chalkboard pages", () => {
-        it("should paint the app's page scroller as the board, lit and shaded from the palette alone", () => {
-            const page = declarationsOf(CHALKBOARD_CSS, ROOT_PAGE);
+        it("should paint the whole window as the board, lit and shaded from the palette alone", () => {
+            const sheet = declarationsOf(CHALKBOARD_CSS, SHEET);
 
-            expect(page.get("background-color")).toBe("var(--color-background)");
-            expect(page.get("background-image")?.match(/gradient\(/g)?.length).toBeGreaterThanOrEqual(2);
-            expect(page.get("background-image")).not.toMatch(RAW_COLOUR);
-            // Its own stacking context, so a layer below content still lies above the board
-            expect(page.get("isolation")).toBe("isolate");
+            expect(sheet.get("background-color")).toBe("var(--color-background)");
+            expect(sheet.get("background-image")?.match(/gradient\(/g)?.length).toBeGreaterThanOrEqual(2);
+            expect(sheet.get("background-image")).not.toMatch(RAW_COLOUR);
+            // Laid out on the window, so the light and the rim frame the screen at any width
+            expect(sheet.get("background-attachment")).toBe("fixed");
         });
 
         it("should dust 黑板 with two fine layers of chalk specks", () => {
-            const page = declarationsOf(CHALKBOARD_CSS, DARK_ROOT_PAGE);
+            const sheet = declarationsOf(CHALKBOARD_CSS, DARK_SHEET);
 
-            expect(page.get("background-image")?.match(/radial-gradient\(/g)?.length).toBeGreaterThanOrEqual(2);
-            expect(page.get("background-image")).not.toMatch(RAW_COLOUR);
-            expect(page.get("background-size")).toContain("7px 9px");
-            expect(page.get("background-size")).toContain("11px 5px");
+            expect(sheet.get("background-image")?.match(/radial-gradient\(/g)?.length).toBeGreaterThanOrEqual(2);
+            expect(sheet.get("background-image")).not.toMatch(RAW_COLOUR);
+            expect(sheet.get("background-size")).toContain("7px 9px");
+            expect(sheet.get("background-size")).toContain("11px 5px");
         });
 
         it("should lay the erased smears over 黑板, fixed to the screen, below every content layer and never taking taps", () => {
-            const smears = declarationsOf(CHALKBOARD_CSS, `${DARK_ROOT_PAGE}::before`);
+            const smears = declarationsOf(CHALKBOARD_CSS, `${DARK_SHEET}::before`);
 
             expect(smears.get("content")).toBe('""');
             expect(smears.get("position")).toBe("fixed");
@@ -385,13 +386,13 @@ describe("chalkboard skin", () => {
 
         // 白板 is markers on a clean board: no dust and no smears (Review Focus 5)
         it("should leave the whiteboard without dust or smears", () => {
-            const page = declarationsOf(CHALKBOARD_CSS, ROOT_PAGE);
+            const sheet = declarationsOf(CHALKBOARD_CSS, SHEET);
             const dusty = allRules().filter(rule => Array.from(rule.declarations.values())
                 .some(value => value.includes("chalkboard-smears.svg") || value.includes("--color-smear")));
 
-            expect(page.get("background-size")).toBeUndefined();
-            expect(page.get("background-image")).not.toMatch(/\d px|\dpx/);
-            expect(declarationsOf(CHALKBOARD_CSS, `${ROOT_PAGE}::before`).size).toBe(0);
+            expect(sheet.get("background-size")).toBeUndefined();
+            expect(sheet.get("background-image")).not.toMatch(/\d px|\dpx/);
+            expect(declarationsOf(CHALKBOARD_CSS, `${SHEET}::before`).size).toBe(0);
             expect(dusty.length).toBeGreaterThan(0);
             for (const { selectors } of dusty) {
                 for (const selector of selectors) {
@@ -400,11 +401,15 @@ describe("chalkboard skin", () => {
             }
         });
 
-        it("should leave a page nested in the scroller clear, without a second copy of the dust or smears", () => {
-            for (const selector of [NESTED_PAGE, DARK_NESTED_PAGE]) {
-                expect(declarationsOf(CHALKBOARD_CSS, selector).get("background"), selector).toBe("transparent");
-            }
-            expect(declarationsOf(CHALKBOARD_CSS, `${DARK_NESTED_PAGE}::before`).get("content")).toBe("none");
+        it("should leave the app's page scroller and every page clear, so the one sheet shows through without a strip at the column", () => {
+            const scroller = declarationsOf(CHALKBOARD_CSS, ROOT_PAGE);
+
+            expect(scroller.get("background")).toBe("transparent");
+            // Its own stacking context, so the tray below its content still lies above the smears
+            expect(scroller.get("isolation")).toBe("isolate");
+            expect(declarationsOf(CHALKBOARD_CSS, `${ROOT_PAGE} [data-skin~="page-ruled"]`).get("isolation")).toBe("auto");
+            expect(declarationsOf(CHALKBOARD_CSS, DARK_ROOT_PAGE).size).toBe(0);
+            expect(declarationsOf(CHALKBOARD_CSS, `${DARK_ROOT_PAGE}::before`).size).toBe(0);
             expect(declarationsOf(CHALKBOARD_CSS, `${SCOPE} [data-skin~="page"]`).get("background-color")).toBe("transparent");
         });
 

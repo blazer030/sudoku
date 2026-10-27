@@ -262,20 +262,21 @@
     transform: translate(-50%, -50%) rotate(-9deg);
 }
 
-/* The board as the page. The app's page scroller is the one sheet behind every screen: the board colour with a
-   soft light and a darker rim (黑板) or a whiteboard's sheen (白板). 黑板 is dusted with two fine layers of chalk
-   specks, and the smears where it was wiped (chalkboard-smears.svg, fixed to the screen) lie on its ::before,
-   above the board and below every content layer (the scroller is its own stacking context), never taking taps.
-   白板 has neither: markers leave no dust. */
-[data-style="chalkboard"] [data-skin~="page-ruled"] {
-    isolation: isolate;
+/* The board as the page. The body is the one sheet behind every screen, across the whole window, so on a wide
+   screen the app's column shows no strip or rim of its own: the board colour with a soft light and a darker rim
+   (黑板) or a whiteboard's sheen (白板), laid out on the window (fixed), so the light and the rim frame the screen
+   at any width. 黑板 is dusted with two fine layers of chalk specks, fixed to the window with the rest, and the
+   smears where it was wiped (chalkboard-smears.svg, stretched to the screen) lie on the body's ::before, above
+   the board and below every content layer, never taking taps. 白板 has neither: markers leave no dust. */
+[data-style="chalkboard"] body {
     background-color: var(--color-background);
     background-image:
         linear-gradient(115deg, transparent 30%, color-mix(in srgb, var(--color-card) 90%, transparent) 42%, transparent 54%),
         radial-gradient(ellipse 120% 80% at 50% 50%, transparent 60%, color-mix(in srgb, var(--color-foreground) 6%, transparent));
+    background-attachment: fixed;
 }
 
-:root.dark[data-style="chalkboard"] [data-skin~="page-ruled"] {
+:root.dark[data-style="chalkboard"] body {
     background-image:
         radial-gradient(ellipse 70% 40% at 20% 18%, color-mix(in srgb, var(--color-foreground) 7%, transparent), transparent 70%),
         radial-gradient(ellipse 60% 35% at 85% 70%, color-mix(in srgb, var(--color-foreground) 5%, transparent), transparent 70%),
@@ -286,7 +287,7 @@
     background-position: 0 0, 0 0, 0 0, 0 0, 3px 2px;
 }
 
-:root.dark[data-style="chalkboard"] [data-skin~="page-ruled"]::before {
+:root.dark[data-style="chalkboard"] body::before {
     content: "";
     position: fixed;
     inset: 0;
@@ -301,16 +302,16 @@
     mask-repeat: no-repeat;
 }
 
-/* Pages inside the scroller (Home, Settings) and pages that scroll on their own are clear, so the one sheet
-   shows through them, with no second copy of the dust or the smears */
-[data-style="chalkboard"] [data-skin~="page-ruled"] [data-skin~="page-ruled"],
-:root.dark[data-style="chalkboard"] [data-skin~="page-ruled"] [data-skin~="page-ruled"] {
-    isolation: auto;
+/* The app's page scroller, the pages inside it (Home, Settings) and pages that scroll on their own are clear, so
+   the one sheet shows through them. The scroller stays its own stacking context, so the tray that lies below its
+   content still lies above the smears. */
+[data-style="chalkboard"] [data-skin~="page-ruled"] {
+    isolation: isolate;
     background: transparent;
 }
 
-:root.dark[data-style="chalkboard"] [data-skin~="page-ruled"] [data-skin~="page-ruled"]::before {
-    content: none;
+[data-style="chalkboard"] [data-skin~="page-ruled"] [data-skin~="page-ruled"] {
+    isolation: auto;
 }
 
 [data-style="chalkboard"] [data-skin~="page"] {
