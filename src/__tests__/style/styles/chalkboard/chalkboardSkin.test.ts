@@ -829,16 +829,20 @@ describe("chalkboard skin", () => {
             expect(note.get("background-color")).toBe("transparent");
         });
 
-        // The canvas's chalk .nt.emph keeps the shared rule's border-radius:50% under its ring: a circle, not a square
-        it("should ring a hint's emphasised candidate in a circle of the primary, as the canvas does", () => {
-            const emphasised = declarationsOf(CHALKBOARD_CSS, `${BOARD}[data-hint-mode] [data-note-highlight]`);
+        // The canvas's chalk .nt.emph keeps the shared rule's border-radius:50% under its ring: a circle, not a square.
+        // The walkthrough and the review show a step's candidates the same way as hint mode does.
+        it.each([
+            ["hint mode", `${BOARD}[data-hint-mode] [data-note-highlight]`],
+            ["the walkthrough's and the review's boards", `${BOARD}:not([data-skin~="game-board"]) [data-note-highlight]`],
+        ])("should ring an emphasised candidate in %s in a circle of the primary, as the canvas does", (_place, selector) => {
+            const emphasised = declarationsOf(CHALKBOARD_CSS, selector);
 
             expect(emphasised.get("box-shadow")).toBe("inset 0 0 0 1.5px var(--color-primary)");
             expect(emphasised.get("border-radius")).toBe("50%");
         });
 
         // The owner's own touch: in the live game, outside hint mode, the selected digit's notes are circled in
-        // the primary. The walkthrough, the review and hint mode keep their notes as they were.
+        // the primary. The walkthrough, the review and hint mode ring only a step's emphasised candidates.
         describe("circled in play", () => {
             const IN_PLAY = `${BOARD}[data-skin~="game-board"]:not([data-hint-mode]) [data-note-highlight]`;
 
@@ -864,7 +868,7 @@ describe("chalkboard skin", () => {
                 const circling = allRules()
                     .flatMap(rule => rule.selectors)
                     .filter(selector => selector.includes("[data-note-highlight]"))
-                    .filter(selector => selector !== `${BOARD} [data-note-highlight]` && selector !== `${BOARD}[data-hint-mode] [data-note-highlight]`);
+                    .filter(selector => ![`${BOARD} [data-note-highlight]`, `${BOARD}[data-hint-mode] [data-note-highlight]`, `${BOARD}:not([data-skin~="game-board"]) [data-note-highlight]`].includes(selector));
 
                 expect(circling.length).toBeGreaterThan(0);
                 expect(circling.filter(selector => !selector.startsWith(IN_PLAY))).toEqual([]);

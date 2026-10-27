@@ -228,23 +228,24 @@
     }
 }
 
-/* Notes: the selected digit's note in the primary, without the shared disc; a hint's emphasised candidate also
-   ringed in a circle of it, as the canvas does. A hint's candidates are the primary and its eliminated ones the
+/* Notes: the selected digit's note in the primary, without the shared disc; a hint's emphasised candidate, and a
+   step's in the walkthrough and the review, also ringed in a circle of it, as the canvas does. A hint's candidates are the primary and its eliminated ones the
    error colour, as everywhere. */
 [data-style="chalkboard"] [data-skin~="board"] [data-note-highlight] {
     background-color: transparent;
     color: var(--color-primary);
 }
 
-[data-style="chalkboard"] [data-skin~="board"][data-hint-mode] [data-note-highlight] {
+[data-style="chalkboard"] [data-skin~="board"][data-hint-mode] [data-note-highlight],
+[data-style="chalkboard"] [data-skin~="board"]:not([data-skin~="game-board"]) [data-note-highlight] {
     border-radius: 50%;
     box-shadow: inset 0 0 0 1.5px var(--color-primary);
 }
 
 /* In the live game, outside hint mode, the selected digit's notes are also circled in a loop of the primary, a
    size up from the note so it clears the digit on the smallest phone's note slot (it reaches a little past the
-   slot, into the space between the notes). The walkthrough, the review and hint mode keep their notes as they
-   are. In 黑板 the notes' grain reaches the ring too. */
+   slot, into the space between the notes). The walkthrough, the review and hint mode ring only a step's
+   emphasised candidates (above). In 黑板 the notes' grain reaches the ring too. */
 [data-style="chalkboard"] [data-skin~="board"][data-skin~="game-board"]:not([data-hint-mode]) [data-note-highlight] {
     position: relative;
 }
