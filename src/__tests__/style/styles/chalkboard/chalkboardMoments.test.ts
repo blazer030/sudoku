@@ -623,16 +623,19 @@ describe("chalkboard moments", () => {
             expect(to.get("transform")).toMatch(/^translate\(0, \d+px\)$/);
         });
 
-        // The specks lie on the digit's em square (glyph.size units across; an entry is 22px at scale 1). Seen on a
-        // phone as the cheer's and the group lines' are: one 3px across and two of 2px, apart from each other.
-        it("should drop specks as big as the cheer's, at the board's entry size", () => {
+        // The specks lie on the digit's em square (glyph.size units across; an entry is 22px at scale 1). The
+        // owner found the cheer's 3px and 2px too big on a digit, and the first cut's half-pixel ones unseen: about
+        // halfway between, one near 1.8px across and two near 1.25px, still apart from each other.
+        it("should drop specks halfway between the first cut's and the cheer's, at the board's entry size", () => {
             const pixelsPerUnit = 22 / CHALKBOARD_STROKE_FACE.glyph.size;
             const [first, ...others] = DUST_SPECKS.map(speck => ({ ...speck, across: 2 * speck.radius * pixelsPerUnit }));
 
-            expect(first.across).toBeGreaterThanOrEqual(3);
+            expect(first.across).toBeGreaterThanOrEqual(1.6);
+            expect(first.across).toBeLessThanOrEqual(2);
             expect(others).toHaveLength(2);
             for (const speck of others) {
-                expect(speck.across).toBeGreaterThanOrEqual(2);
+                expect(speck.across).toBeGreaterThanOrEqual(1.1);
+                expect(speck.across).toBeLessThanOrEqual(1.4);
                 const apartPixels = Math.hypot(speck.dx - first.dx, speck.dy - first.dy) * pixelsPerUnit;
                 expect(apartPixels).toBeGreaterThan((first.across + speck.across) / 2 + 2);
             }

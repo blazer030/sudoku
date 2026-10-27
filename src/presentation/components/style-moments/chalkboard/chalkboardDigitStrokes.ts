@@ -136,13 +136,14 @@ export interface DustFall {
 }
 
 /**
- * Each fall is three specks as the cheer's are, in the board's units (an entry's 22px em is 74 of them): one 3px
- * across at the fall's point, a 2px one 6px right and 2px down of it, another 5px left and 5px down.
+ * Each fall is three specks laid out as the cheer's are but smaller, in the board's units (an entry's 22px em is 74
+ * of them): one about 1.8px across at the fall's point, a 1.25px one 3.6px right and 1.2px down of it, another 3px
+ * left and 3px down.
  */
 export const DUST_SPECKS: readonly { dx: number; dy: number; radius: number }[] = [
-    { dx: 0, dy: 0, radius: 5.1 },
-    { dx: 20, dy: 6.5, radius: 3.4 },
-    { dx: -17, dy: 17, radius: 3.4 },
+    { dx: 0, dy: 0, radius: 3.1 },
+    { dx: 12, dy: 4, radius: 2.1 },
+    { dx: -10, dy: 10, radius: 2.1 },
 ];
 
 /** One fall at the end of each of the digit's pen strokes, in the board's units. */
