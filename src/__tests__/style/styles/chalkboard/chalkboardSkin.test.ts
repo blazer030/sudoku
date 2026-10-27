@@ -797,11 +797,12 @@ describe("chalkboard skin", () => {
             expect(note.get("background-color")).toBe("transparent");
         });
 
-        it("should box a hint's emphasised candidate in a square of the primary, as the canvas does", () => {
+        // The canvas's chalk .nt.emph keeps the shared rule's border-radius:50% under its ring: a circle, not a square
+        it("should ring a hint's emphasised candidate in a circle of the primary, as the canvas does", () => {
             const emphasised = declarationsOf(CHALKBOARD_CSS, `${BOARD}[data-hint-mode] [data-note-highlight]`);
 
             expect(emphasised.get("box-shadow")).toBe("inset 0 0 0 1.5px var(--color-primary)");
-            expect(emphasised.get("border-radius")).toBe("0");
+            expect(emphasised.get("border-radius")).toBe("50%");
         });
 
         // The owner's own touch: in the live game, outside hint mode, the selected digit's notes are circled in
