@@ -171,6 +171,11 @@ const DARK_CHEER_DUST_STEPS = [0, 1, 2].map(step => `${DARK} .chalkboard-cheer-d
 const DOODLE = `${SCOPE} .chalkboard-doodle`;
 const DRAWN_DOODLE_STEPS = [0, 1, 2, 3].map(step => `${LANDING_CARD} .chalkboard-doodle[data-step="${step}"]`);
 const MASK_SUPPORTS = '((mask-image: url("")) or (-webkit-mask-image: url("")))';
+const SOLVED_GRID = `${SCOPE} ${SOLVED} [data-skin~="board-grid"]`;
+const RING_ANCHOR = "--chalkboard-solved-grid";
+const ANCHOR_SUPPORTS = `(anchor-name: ${RING_ANCHOR})`;
+// The live board's grid, whose border the anchor's box takes in and the loop's drawing does not
+const GAME_SCREEN = readFileSync("src/presentation/pages/game/GameScreen.vue", "utf8");
 
 // The declarations of the rules inside the sheet's @supports block on masks that list `selector`
 const maskSupportsDeclarationsOf = (selector: string): Map<string, string> => {
@@ -178,6 +183,18 @@ const maskSupportsDeclarationsOf = (selector: string): Map<string, string> => {
     postcss.parse(CHALKBOARD_CSS).walkRules((rule) => {
         const parent = rule.parent;
         if (parent?.type !== "atrule" || (parent as postcss.AtRule).name !== "supports" || collapse((parent as postcss.AtRule).params) !== MASK_SUPPORTS) return;
+        if (!rule.selectors.map(collapse).includes(selector)) return;
+        rule.walkDecls((declaration) => { declarations.set(declaration.prop, collapse(declaration.value)); });
+    });
+    return declarations;
+};
+
+// The declarations of the rules inside an @supports block with `params` that list `selector`
+const supportsDeclarationsOf = (params: string, selector: string): Map<string, string> => {
+    const declarations = new Map<string, string>();
+    postcss.parse(CHALKBOARD_CSS).walkRules((rule) => {
+        const parent = rule.parent;
+        if (parent?.type !== "atrule" || (parent as postcss.AtRule).name !== "supports" || collapse((parent as postcss.AtRule).params) !== params) return;
         if (!rule.selectors.map(collapse).includes(selector)) return;
         rule.walkDecls((declaration) => { declarations.set(declaration.prop, collapse(declaration.value)); });
     });
@@ -413,6 +430,26 @@ describe("chalkboard moments", () => {
                 // The drawing's origin is the board's corner: the pseudo-element reaches as far past the board
                 expect(ring.get("inset")).toBe(`calc(${minX} / ${width + 2 * minX} * 100%)`);
                 expect(BOARD_RING_SVG).toContain("M178 -14 C 332 -16, 372 40, 366 180 C 360 330, 300 370, 170 366 C 40 362, -16 320, -12 172 C -8 40, 52 -12, 196 -8");
+            });
+
+            // The page scroller clips what overflows it, and on a tall wide window the board nearly fills the app's
+            // column, so the loop past its edges was cut flat at the column's sides. Where anchor positioning works
+            // the loop is fixed, out of the scroller's clip, and laid on the grid by its anchor at the same size.
+            it("should lift the loop out of the page scroller's clip, laid on the grid at the same size, where anchors work", () => {
+                const grid = supportsDeclarationsOf(ANCHOR_SUPPORTS, SOLVED_GRID);
+                const ring = supportsDeclarationsOf(ANCHOR_SUPPORTS, BOARD_RING);
+                const [minX = 0, , width = 0] = (/viewBox="([^"]+)"/.exec(BOARD_RING_SVG)?.[1] ?? "").split(/\s+/).map(Number);
+                const gridBorderPx = Number(/class="[^"]*\bborder-(\d+)\b[^"]*"\s+data-skin="board-grid"/.exec(GAME_SCREEN)?.[1] ?? Number.NaN);
+
+                expect(grid.get("anchor-name")).toBe(RING_ANCHOR);
+                expect(ring.get("position")).toBe("fixed");
+                expect(ring.get("position-anchor")).toBe(RING_ANCHOR);
+                expect(ring.get("inset")).toBe("auto");
+                expect(ring.get("position-area")).toBe("center");
+                // The drawing spans the grid's padding box (the absolute loop's inset) and its overrun, both sides
+                for (const [property, axis] of [["width", "width"], ["height", "height"]]) {
+                    expect(ring.get(property), property).toBe(`calc((anchor-size(${axis}) - ${2 * gridBorderPx}px) * ${width} / ${width + 2 * minX})`);
+                }
             });
 
             it("should carry only alpha in its drawing: one stroke in currentColor, no filter", () => {
