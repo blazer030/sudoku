@@ -173,7 +173,8 @@ const DRAWN_DOODLE_STEPS = [0, 1, 2, 3].map(step => `${LANDING_CARD} .chalkboard
 const MASK_SUPPORTS = '((mask-image: url("")) or (-webkit-mask-image: url("")))';
 const SOLVED_GRID = `${SCOPE} ${SOLVED} [data-skin~="board-grid"]`;
 const RING_ANCHOR = "--chalkboard-solved-grid";
-const ANCHOR_SUPPORTS = `(anchor-name: ${RING_ANCHOR})`;
+// Every anchor feature the lifted loop uses, so a browser with only some of them keeps the absolute loop
+const ANCHOR_SUPPORTS = `(anchor-name: ${RING_ANCHOR}) and (position-area: center) and (width: anchor-size(width))`;
 // The live board's grid, whose border the anchor's box takes in and the loop's drawing does not
 const GAME_SCREEN = readFileSync("src/presentation/pages/game/GameScreen.vue", "utf8");
 

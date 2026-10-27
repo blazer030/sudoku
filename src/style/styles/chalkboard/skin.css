@@ -1039,8 +1039,10 @@
 /* The page scroller clips what overflows it, and on a tall wide window the board nearly fills the app's column, so
    the loop past its edges would be cut flat at the column's sides. Where anchor positioning works the loop is
    fixed, out of the scroller's clip, and centred on the grid by its anchor at the same size: the drawing's 399 over
-   the grid's padding box (its border-3 off the anchor's box) as its 351. Elsewhere it stays absolute on the grid. */
-@supports (anchor-name: --chalkboard-solved-grid) {
+   the grid's padding box (its border-3 off the anchor's box) as its 351. Elsewhere, or where only some of the anchor
+   features work, it stays absolute on the grid. A fixed loop escapes the scroller only while no ancestor of the
+   grid has a transform or a filter, which would make that ancestor its containing block. */
+@supports (anchor-name: --chalkboard-solved-grid) and (position-area: center) and (width: anchor-size(width)) {
     [data-style="chalkboard"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"], [data-celebration="still"]) [data-skin~="board-grid"] {
         anchor-name: --chalkboard-solved-grid;
     }
