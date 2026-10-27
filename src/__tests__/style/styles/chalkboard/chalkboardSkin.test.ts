@@ -1,6 +1,8 @@
 import { readFileSync } from "fs";
 import postcss, { type AtRule, type Rule } from "postcss";
 import { ARRIVAL_SETTLE_MS } from "@/presentation/components/board-cell/useArrivalMotion";
+import { contrastRatio, mixColors } from "@/theme/contrast";
+import { getPalette } from "@/theme/palettes";
 import { animationTimingOf, declarationsOf, reducedMotionDeclarationsOf } from "../../styleSheetRules";
 
 const CHALKBOARD_CSS = readFileSync("src/style/styles/chalkboard/skin.css", "utf8");
@@ -42,6 +44,8 @@ const DARK_NESTED_PAGE = `${DARK} [data-skin~="page-ruled"] [data-skin~="page-ru
 const HERO = `${SCOPE} [data-skin~="hero-headline"]`;
 const TITLE = `${SCOPE} [data-skin~="title"]`;
 const CHOSEN_KEY = `${SCOPE} [data-skin~="key"][aria-pressed="true"]`;
+// The canvas's --soft: color-mix(in srgb, var(--acc) 18%, transparent)
+const CANVAS_KEY_WASH_PERCENT = 18;
 // The canvas's uneven chalk corners (--wob)
 const WOBBLY_CORNERS = "var(--chalkboard-wob)";
 const CHALK_OUTLINE = /^inset 0 0 0 [\d.]+px var\(--color-border\)$/;
@@ -713,13 +717,25 @@ describe("chalkboard skin", () => {
     });
 
     describe("keypad", () => {
-        // The canvas's .key.on: a faint wash of the primary, ringed and written in it
+        // The canvas's .key.on: a faint wash of the primary (its --soft, the primary at 18% over the board), ringed
+        // and written in it. 白板 takes the canvas's wash; 黑板 keeps its yellow chalk's softer 14% (primary-light).
         it("should wash the chosen key faintly in the primary, its outline and digit in the primary", () => {
             const chosen = declarationsOf(CHALKBOARD_CSS, CHOSEN_KEY);
 
-            expect(chosen.get("background-color")).toBe("var(--color-primary-light)");
+            expect(chosen.get("background-color")).toBe(`color-mix(in srgb, var(--color-primary) ${CANVAS_KEY_WASH_PERCENT}%, transparent)`);
             expect(chosen.get("box-shadow")).toBe("inset 0 0 0 2px var(--color-primary)");
             expect(chosen.get("color")).toBe("var(--color-primary)");
+            expect(declarationsOf(CHALKBOARD_CSS, `${DARK} [data-skin~="key"][aria-pressed="true"]`).get("background-color"))
+                .toBe("var(--color-primary-light)");
+        });
+
+        // A key's digit is 24px, large text, so 3:1 applies. Note mode's 18px digits read the same 3.9:1, under
+        // text's 4.5:1: the canvas's own wash, which the owner chose over the 8% that held 4.5:1.
+        it("should keep 白板's chosen key's digit readable on the canvas's wash", () => {
+            const palette = getPalette("chalkboard", "classic", "light");
+            const wash = mixColors(palette.primary, CANVAS_KEY_WASH_PERCENT / 100, palette.background);
+
+            expect(contrastRatio(palette.primary, wash)).toBeGreaterThanOrEqual(3);
         });
 
         // The canvas grains a key's digit (.key .kd), never its outline or its fill
