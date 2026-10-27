@@ -829,16 +829,29 @@ describe("chalkboard skin", () => {
             expect(note.get("background-color")).toBe("transparent");
         });
 
-        // The canvas's chalk .nt.emph keeps the shared rule's border-radius:50% under its ring: a circle, not a square.
-        // The walkthrough and the review show a step's candidates the same way as hint mode does.
+        // The owner's call over the canvas's ring: the cell's own chalk loop covered a ringed candidate, so a step's
+        // emphasised candidate lies on a see-through disc of the primary instead. The walkthrough and the review
+        // show a step's candidates the same way as hint mode does.
         it.each([
             ["hint mode", `${BOARD}[data-hint-mode] [data-note-highlight]`],
             ["the walkthrough's and the review's boards", `${BOARD}:not([data-skin~="game-board"]) [data-note-highlight]`],
-        ])("should ring an emphasised candidate in %s in a circle of the primary, as the canvas does", (_place, selector) => {
+        ])("should lay an emphasised candidate in %s on a see-through disc of the primary, with no ring", (_place, selector) => {
             const emphasised = declarationsOf(CHALKBOARD_CSS, selector);
 
-            expect(emphasised.get("box-shadow")).toBe("inset 0 0 0 1.5px var(--color-primary)");
+            expect(emphasised.get("background-color")).toBe("color-mix(in srgb, var(--color-primary) 20%, transparent)");
             expect(emphasised.get("border-radius")).toBe("50%");
+            expect(emphasised.get("box-shadow")).toBeUndefined();
+        });
+
+        // The cell's chalk loop (z-index 4) lay over its candidates and hid the emphasised one, so a cell holding one
+        // lifts its candidates above the loop
+        it.each([
+            `${BOARD}[data-hint-mode] [data-variant] > div:has([data-note-highlight])`,
+            `${BOARD}:not([data-skin~="game-board"]) [data-variant] > div:has([data-note-highlight])`,
+        ])("should lift a cell's candidates over its chalk loop while one is emphasised (%s)", (selector) => {
+            const loop = declarationsOf(CHALKBOARD_CSS, `${BOARD} [data-variant="answer"]::after`);
+
+            expect(Number(declarationsOf(CHALKBOARD_CSS, selector).get("z-index"))).toBeGreaterThan(Number(loop.get("z-index")));
         });
 
         // The owner's own touch: in the live game, outside hint mode, the selected digit's notes are circled in
@@ -868,7 +881,11 @@ describe("chalkboard skin", () => {
                 const circling = allRules()
                     .flatMap(rule => rule.selectors)
                     .filter(selector => selector.includes("[data-note-highlight]"))
-                    .filter(selector => ![`${BOARD} [data-note-highlight]`, `${BOARD}[data-hint-mode] [data-note-highlight]`, `${BOARD}:not([data-skin~="game-board"]) [data-note-highlight]`].includes(selector));
+                    .filter(selector => ![
+                        `${BOARD} [data-note-highlight]`,
+                        ...[`${BOARD}[data-hint-mode]`, `${BOARD}:not([data-skin~="game-board"])`]
+                            .flatMap(board => [`${board} [data-note-highlight]`, `${board} [data-variant] > div:has([data-note-highlight])`]),
+                    ].includes(selector));
 
                 expect(circling.length).toBeGreaterThan(0);
                 expect(circling.filter(selector => !selector.startsWith(IN_PLAY))).toEqual([]);
