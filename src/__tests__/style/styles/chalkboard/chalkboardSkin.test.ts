@@ -654,12 +654,21 @@ describe("chalkboard skin", () => {
 
         it.each([
             ["danger", "var(--color-danger)"],
-            ["gave-up", "var(--color-accent)"],
+            ["gave-up", "var(--color-danger)"],
         ])("should loop a %s icon tile in its own colour", (token, colour) => {
             const tile = declarationsOf(CHALKBOARD_CSS, `${ICON_TILE}[data-skin~="${token}"]`);
 
             expect(tile.get("box-shadow")).toBe(`inset 0 0 0 2px ${colour}`);
             expect(tile.get("color")).toBe(colour);
+        });
+
+        // The canvas's .lchip.gave and .lside b.gave: a given-up game's chip and its "Gave up" read one red
+        it("should write a given-up game's result in the red of its chip", () => {
+            const result = declarationsOf(CHALKBOARD_CSS, `${SCOPE} [data-skin~="game-result"][data-skin~="gave-up"]`);
+            const chip = declarationsOf(CHALKBOARD_CSS, `${ICON_TILE}[data-skin~="gave-up"]`);
+
+            expect(result.get("color")).toBe("var(--color-danger)");
+            expect(result.get("color")).toBe(chip.get("color"));
         });
 
         it("should outline the changelog's App tag in yellow chalk", () => {
