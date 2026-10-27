@@ -592,11 +592,20 @@ describe("chalkboard skin", () => {
     });
 
     describe("chalk outlines", () => {
-        it.each(["card", "tile", "key", "continue", "recent-row"])("should draw a %s as a chalk outline with uneven corners", (token) => {
+        it.each(["card", "tile", "key", "continue"])("should draw a %s as a chalk outline with uneven corners", (token) => {
             const surface = declarationsOf(CHALKBOARD_CSS, `${SCOPE} [data-skin~="${token}"]`);
 
             expect(surface.get("border-radius")).toBe(WOBBLY_CORNERS);
             expect(surface.get("box-shadow")).toMatch(CHALK_OUTLINE);
+        });
+
+        // The canvas's .group.lrow sets border:0 over the chalk .group outline: a recent game is bare board
+        it("should leave a recent game's row unfilled and unoutlined, with uneven corners", () => {
+            const row = declarationsOf(CHALKBOARD_CSS, `${SCOPE} [data-skin~="recent-row"]`);
+
+            expect(row.get("background-color")).toBe("transparent");
+            expect(row.get("box-shadow")).toBe("none");
+            expect(row.get("border-radius")).toBe(WOBBLY_CORNERS);
         });
 
         it("should give the canvas's uneven corners", () => {
