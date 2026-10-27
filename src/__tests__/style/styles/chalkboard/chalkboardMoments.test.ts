@@ -177,18 +177,6 @@ const ANCHOR_SUPPORTS = `(anchor-name: ${RING_ANCHOR})`;
 // The live board's grid, whose border the anchor's box takes in and the loop's drawing does not
 const GAME_SCREEN = readFileSync("src/presentation/pages/game/GameScreen.vue", "utf8");
 
-// The declarations of the rules inside the sheet's @supports block on masks that list `selector`
-const maskSupportsDeclarationsOf = (selector: string): Map<string, string> => {
-    const declarations = new Map<string, string>();
-    postcss.parse(CHALKBOARD_CSS).walkRules((rule) => {
-        const parent = rule.parent;
-        if (parent?.type !== "atrule" || (parent as postcss.AtRule).name !== "supports" || collapse((parent as postcss.AtRule).params) !== MASK_SUPPORTS) return;
-        if (!rule.selectors.map(collapse).includes(selector)) return;
-        rule.walkDecls((declaration) => { declarations.set(declaration.prop, collapse(declaration.value)); });
-    });
-    return declarations;
-};
-
 // The declarations of the rules inside an @supports block with `params` that list `selector`
 const supportsDeclarationsOf = (params: string, selector: string): Map<string, string> => {
     const declarations = new Map<string, string>();
@@ -200,6 +188,9 @@ const supportsDeclarationsOf = (params: string, selector: string): Map<string, s
     });
     return declarations;
 };
+
+// The declarations of the rules inside the sheet's @supports block on masks that list `selector`
+const maskSupportsDeclarationsOf = (selector: string): Map<string, string> => supportsDeclarationsOf(MASK_SUPPORTS, selector);
 
 // Every selector of the celebration that animates: the board's ring, the card, the cheer and its dust, the doodles
 const celebrationAnimatingSelectors = (): string[] =>
