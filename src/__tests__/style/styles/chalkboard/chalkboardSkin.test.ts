@@ -833,51 +833,34 @@ describe("chalkboard skin", () => {
             expect(note.get("background-color")).toBe("transparent");
         });
 
-        // The canvas's chalk .nt.emph keeps the shared rule's border-radius:50% under its ring: a circle, not a square.
-        // The walkthrough and the review show a step's candidates the same way as hint mode does.
-        it.each([
-            ["hint mode", `${BOARD}[data-hint-mode] [data-note-highlight]`],
-            ["the walkthrough's and the review's boards", `${BOARD}:not([data-skin~="game-board"]) [data-note-highlight]`],
-        ])("should ring an emphasised candidate in %s in a circle of the primary, as the canvas does", (_place, selector) => {
-            const emphasised = declarationsOf(CHALKBOARD_CSS, selector);
+        // The owner's own touch: the selected digit's notes in play are circled in the primary, and hint mode, the
+        // walkthrough and the review circle a step's emphasised candidates in the same loop, so both read the same size
+        describe("circled", () => {
+            const highlighted = `${BOARD} [data-note-highlight]`;
 
-            expect(emphasised.get("box-shadow")).toBe("inset 0 0 0 1.5px var(--color-primary)");
-            expect(emphasised.get("border-radius")).toBe("50%");
-        });
-
-        // The owner's own touch: in the live game, outside hint mode, the selected digit's notes are circled in
-        // the primary. The walkthrough, the review and hint mode ring only a step's emphasised candidates.
-        describe("circled in play", () => {
-            const IN_PLAY = `${BOARD}[data-skin~="game-board"]:not([data-hint-mode]) [data-note-highlight]`;
-
-            it("should circle the selected digit's notes on the live game's board in a chalk ring of the primary", () => {
-                const ring = declarationsOf(CHALKBOARD_CSS, `${IN_PLAY}::after`);
+            it("should circle the highlighted note in a chalk ring of the primary", () => {
+                const ring = declarationsOf(CHALKBOARD_CSS, `${highlighted}::after`);
 
                 expect(ring.get("content")).toBe('""');
                 expect(ring.get("position")).toBe("absolute");
                 expect(ring.get("pointer-events")).toBe("none");
                 expect(ring.get("box-shadow")).toBe("inset 0 0 0 1.5px var(--color-primary)");
                 expect(ring.get("border-radius")).toMatch(/%/);
-                expect(declarationsOf(CHALKBOARD_CSS, IN_PLAY).get("position")).toBe("relative");
+                expect(declarationsOf(CHALKBOARD_CSS, highlighted).get("position")).toBe("relative");
             });
 
             it("should size the ring by the note's own type, so it never shrinks to a small phone's note slot", () => {
-                const ring = declarationsOf(CHALKBOARD_CSS, `${IN_PLAY}::after`);
+                const ring = declarationsOf(CHALKBOARD_CSS, `${highlighted}::after`);
 
                 expect(ring.get("width")).toMatch(/em$/);
                 expect(ring.get("height")).toBe(ring.get("width"));
             });
 
-            it("should reach no highlighted note on another board or in hint mode", () => {
-                const circling = allRules()
-                    .flatMap(rule => rule.selectors)
-                    .filter(selector => selector.includes("[data-note-highlight]"))
-                    .filter(selector => ![`${BOARD} [data-note-highlight]`, `${BOARD}[data-hint-mode] [data-note-highlight]`, `${BOARD}:not([data-skin~="game-board"]) [data-note-highlight]`].includes(selector));
-
-                expect(circling.length).toBeGreaterThan(0);
-                expect(circling.filter(selector => !selector.startsWith(IN_PLAY))).toEqual([]);
+            it("should not ring the note itself as well", () => {
+                expect(declarationsOf(CHALKBOARD_CSS, highlighted).get("box-shadow")).toBeUndefined();
             });
         });
+
     });
 
     describe("erase smear", () => {
