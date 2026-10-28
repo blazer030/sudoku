@@ -5,7 +5,7 @@ import { ALL_LAUNCHER_ALIASES, LAUNCHER_ICONS, LEGACY_LAUNCHER_ALIASES, launcher
 import { styleIconBackground } from "@/theme/styleIcons";
 import { BRAND_ICON_BACKGROUND, BRAND_ICON_RESOURCE, brandTileColors } from "@/theme/brandIcon";
 import { ICON_THEME_IDS, type ColorMode, type StyleId } from "@/theme/themeIds";
-import type { Palette, PaletteToken } from "@/theme/palettes";
+import type { Palette, PaletteToken, StyleOwnToken } from "@/theme/palettes";
 
 // The Android launcher icons are generated (npm run generate:launcher-icons); regenerate them
 // whenever a palette or the artwork in styleIcons.ts changes.
@@ -42,7 +42,7 @@ const pixelAt = async (path: string, across: number, down: number): Promise<{ co
 interface ArtworkSample {
     x: number;
     y: number;
-    token: PaletteToken;
+    token: PaletteToken | StyleOwnToken;
     mode?: ColorMode;
     legacyOnly?: boolean;
     foregroundOnly?: boolean;
@@ -86,6 +86,12 @@ const SAMPLES: Record<StyleId, ArtworkSample[]> = {
     ink: [
         { x: 5.4, y: 54, token: "background" },
         { x: -20, y: 54, token: "background", foregroundOnly: true },
+    ],
+    // The frame round the board, and the bare board above the grid
+    chalkboard: [
+        { x: 4, y: 54, token: "icon-frame" },
+        { x: -20, y: 54, token: "icon-frame", foregroundOnly: true },
+        { x: 54, y: 14, token: "background" },
     ],
 };
 const samplesAt = (style: StyleId, mode: ColorMode, density: string) => SAMPLES[style]
@@ -161,7 +167,7 @@ describe("launcher icon assets", () => {
 
                 for (const { x, y, token } of samplesAt(icon.style, icon.mode, density).filter(sample => !sample.legacyOnly)) {
                     expect(await pixelAt(path, inForeground(x), inForeground(y)), `${path} ${token}`)
-                        .toEqual({ color: icon.palette[token].toUpperCase(), alpha: 255 });
+                        .toEqual({ color: icon.palette[token]?.toUpperCase(), alpha: 255 });
                 }
             }
         }
@@ -174,7 +180,7 @@ describe("launcher icon assets", () => {
 
                 for (const { x, y, token } of samplesAt(icon.style, icon.mode, density).filter(sample => !sample.foregroundOnly)) {
                     expect(await pixelAt(path, x / 108, y / 108), `${path} ${token}`)
-                        .toEqual({ color: icon.palette[token].toUpperCase(), alpha: 255 });
+                        .toEqual({ color: icon.palette[token]?.toUpperCase(), alpha: 255 });
                 }
             }
         }

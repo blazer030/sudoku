@@ -16,7 +16,20 @@ export interface ChangelogEntry {
  * Player-facing changes merged since the last release, newest last. Develop builds show them on top of
  * the changelog; at release they move into the new version's entry (docs/release.md).
  */
-export const UNRELEASED_CHANGES: ChangelogChange[] = []
+export const UNRELEASED_CHANGES: ChangelogChange[] = [
+    {
+        text: {
+            en: "New style: Chalkboard",
+            "zh-Hant": "全新風格「黑板粉筆」",
+        },
+    },
+    {
+        text: {
+            en: "Interface improvements",
+            "zh-Hant": "介面優化",
+        },
+    },
+];
 
 export const CHANGELOG: ChangelogEntry[] = [
     {

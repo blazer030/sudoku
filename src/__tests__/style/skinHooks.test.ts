@@ -117,6 +117,6 @@ describe("skin hooks", () => {
         const boardTag = openingTags(source, "\\w+").find(tag => tag.includes('data-testid="game-board"'));
 
         expect(boardTag).toBeDefined();
-        expect(boardTag).toContain('data-skin="board"');
+        expect(hasSkinToken(boardTag ?? "", "board")).toBe(true);
     });
 });

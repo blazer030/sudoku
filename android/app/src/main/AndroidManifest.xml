@@ -387,6 +387,32 @@
         </activity-alias>
 
         <activity-alias
+            android:name=".chalkboardClassicDark"
+            android:enabled="false"
+            android:icon="@mipmap/ic_launcher_chalkboard_classic_dark"
+            android:label="@string/title_activity_main"
+            android:targetActivity=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <activity-alias
+            android:name=".chalkboardClassic"
+            android:enabled="false"
+            android:icon="@mipmap/ic_launcher_chalkboard_classic"
+            android:label="@string/title_activity_main"
+            android:targetActivity=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <activity-alias
             android:name=".paperBlueInkDark"
             android:enabled="false"
             android:icon="@mipmap/ic_launcher_paper_blue_ink"

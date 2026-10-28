@@ -3,9 +3,9 @@ import type { StyleId } from "@/theme/themeIds";
 /**
  * How a style sets Home's title. "stacked": the logo, the title and the subtitle centred one above
  * another. "vertical": the title set vertically at the right, the subtitle running down its left and a
- * seal under the title.
+ * seal under the title. "headline": no logo, the title written large over the subtitle.
  */
-export type HomeHeroLayout = "stacked" | "vertical";
+export type HomeHeroLayout = "stacked" | "vertical" | "headline";
 
 // One entry per style, so a style added without its hero is a type error
 export const STYLE_HOME_HEROES: Record<StyleId, HomeHeroLayout> = {
@@ -15,4 +15,5 @@ export const STYLE_HOME_HEROES: Record<StyleId, HomeHeroLayout> = {
     pixel: "stacked",
     cyber: "stacked",
     ink: "vertical",
+    chalkboard: "headline",
 };

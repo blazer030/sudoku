@@ -1,5 +1,5 @@
 import { STYLE_IDS, THEME_IDS_BY_STYLE, STYLE_COLOR_MODES, type ColorThemeId } from "@/theme/themeIds";
-import { STYLES, getPalette, rememberedThemeFor, systemBarColor } from "@/theme/palettes";
+import { STYLES, STYLE_OWN_TOKENS, getPalette, rememberedThemeFor, systemBarColor } from "@/theme/palettes";
 import { darkOnlyThemeBuilder } from "@/theme/paletteBuilder";
 import { contrastRatio } from "@/theme/contrast";
 
@@ -15,7 +15,7 @@ describe("palettes", () => {
         for (const style of STYLE_IDS) {
             for (const theme of STYLES[style].themes) {
                 const modes = (["light", "dark"] as const).filter(mode => theme[mode] !== undefined);
-                expect(modes, `${style}/${theme.id}`).toEqual([...STYLE_COLOR_MODES[style]]);
+                expect(new Set(modes), `${style}/${theme.id}`).toEqual(new Set(STYLE_COLOR_MODES[style]));
             }
         }
     });
@@ -57,6 +57,54 @@ describe("palettes", () => {
         expect(palette.background).toBe("#F2ECDF");
         expect(palette.primary).toBe("#B3261E");
         expect(palette.accent).toBe("#2C3E5C");
+    });
+
+    it("should give chalkboard one classic theme: yellow chalk on the green board, orange marker on the whiteboard", () => {
+        const chalkboard = getPalette("chalkboard", "classic", "dark");
+        const whiteboard = getPalette("chalkboard", "classic", "light");
+
+        expect(STYLES.chalkboard.themes.map(theme => theme.id)).toEqual(["classic"]);
+        expect(chalkboard.background).toBe("#2E4B3C");
+        expect(chalkboard.primary).toBe("#F7C873");
+        expect(chalkboard.accent).toBe("#A6D8F2");
+        expect(whiteboard.background).toBe("#F5F6F3");
+        expect(whiteboard.primary).toBe("#B04A00");
+        expect(whiteboard.accent).toBe("#1D5FC2");
+    });
+
+    it("should lay chalkboard's hint scope cells in the peer wash and its pattern cells in the same-digit wash, as the canvas does", () => {
+        for (const mode of STYLE_COLOR_MODES.chalkboard) {
+            const palette = getPalette("chalkboard", "classic", mode);
+
+            expect(palette["cell-scope"], mode).toBe(palette["cell-peer"]);
+            expect(palette["cell-pattern"], mode).toBe(palette.highlight);
+        }
+    });
+
+    it("should colour chalkboard's tray and duster as the canvas paints them: wood on 黑板, grey plastic on 白板", () => {
+        for (const [mode, tray, trayShade, trayEdge] of [["dark", "#8A5A34", "#5E3B20", "#A06C42"], ["light", "#D7DADF", "#B5BAC2", "#E6E8EB"]] as const) {
+            const palette = getPalette("chalkboard", "classic", mode);
+
+            expect([palette.tray, palette["tray-shade"], palette["tray-edge"]], mode).toEqual([tray, trayShade, trayEdge]);
+            expect([palette.duster, palette["duster-felt"]], mode).toEqual(["#5B5F66", "#C9B79C"]);
+        }
+    });
+
+    it("should give chalkboard its own tray, erase and icon frame colours in both modes, and no other style any", () => {
+        for (const mode of STYLE_COLOR_MODES.chalkboard) {
+            const palette = getPalette("chalkboard", "classic", mode);
+            for (const token of STYLE_OWN_TOKENS) {
+                expect(palette[token], `${mode} ${token}`).toMatch(/^#[0-9A-F]{6}$/);
+            }
+        }
+        for (const style of STYLE_IDS.filter(id => id !== "chalkboard")) {
+            for (const theme of STYLES[style].themes) {
+                for (const mode of STYLE_COLOR_MODES[style]) {
+                    const palette = getPalette(style, theme.id, mode);
+                    expect(STYLE_OWN_TOKENS.filter(token => token in palette), `${style}/${theme.id}/${mode}`).toEqual([]);
+                }
+            }
+        }
     });
 
     it("should let a style set a board tint directly instead of deriving it from the primary", () => {
@@ -158,7 +206,7 @@ describe("palettes", () => {
     });
 
     it("should keep paper's lines invisible in other styles", () => {
-        for (const style of [STYLES.minimal, STYLES.tactile, STYLES.pixel, STYLES.cyber, STYLES.ink]) {
+        for (const style of [STYLES.minimal, STYLES.tactile, STYLES.pixel, STYLES.cyber, STYLES.ink, STYLES.chalkboard]) {
             for (const theme of style.themes) {
                 for (const mode of STYLE_COLOR_MODES[style.id]) {
                     const palette = getPalette(style.id, theme.id, mode);

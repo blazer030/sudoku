@@ -1,11 +1,13 @@
 // Renders the palettes into src/style/themes.generated.css. Relative imports only.
-import { DEFAULT_STYLE_ID, PALETTE_TOKENS, STYLES, getPalette, type Palette } from "./palettes";
+import { DEFAULT_STYLE_ID, PALETTE_TOKENS, STYLE_OWN_TOKENS, STYLES, getPalette, type Palette } from "./palettes";
 
 const HEADER = "/* Generated from src/theme/palettes.ts by npm run generate:theme-css. Do not edit. */";
 const INDENT = "    ";
 
 const renderBlock = (selector: string, palette: Palette): string => {
-    const declarations = PALETTE_TOKENS.map(token => `${INDENT}--color-${token}: ${palette[token]};`);
+    // A style's own colours only where its palette sets them
+    const tokens = [...PALETTE_TOKENS, ...STYLE_OWN_TOKENS.filter(token => palette[token] !== undefined)];
+    const declarations = tokens.map(token => `${INDENT}--color-${token}: ${palette[token]};`);
     return [`${selector} {`, ...declarations, "}"].join("\n");
 };
 

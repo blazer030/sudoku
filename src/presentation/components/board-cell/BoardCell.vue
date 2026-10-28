@@ -28,7 +28,7 @@
             ]"
             :style="digitWriter ? { '--digit-writer-mask': `url(#${writerMaskId})` } : undefined"
             data-testid="cell-value"
-            @animationend="settle"
+            @animationend="settleFromDigit"
         >
             {{ value }}
         </div>
@@ -182,6 +182,14 @@ watch(() => props.value, (current) => {
 const moments = useStyleMoments();
 const writerMaskId = `digit-writer-${useId()}`;
 const digitWriter = computed(() => (arriving.value && props.value !== 0 && canMaskByReference() ? moments.value.digitWriter ?? null : null));
+
+// The entered digit lies in its own completed group; the group's animation on it (named <style>-group-…)
+// runs on the group effect's clock, so it never settles the arrival
+const settleFromDigit = (event: AnimationEvent) => {
+    // jsdom's plain events carry no name
+    const name = event.animationName as string | undefined;
+    if (!(name ?? "").includes("-group-")) settle();
+};
 
 const settleFromCell = (event: AnimationEvent) => {
     if (event.pseudoElement) settle();

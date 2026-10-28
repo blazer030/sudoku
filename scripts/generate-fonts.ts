@@ -166,6 +166,12 @@ const main = async (): Promise<void> => {
             jobs: [{ output: "noto-serif-tc.woff2", source: "ofl/notoseriftc/NotoSerifTC[wght].ttf", text: chineseText, weights: { min: 400, max: 900 } }],
         },
         {
+            licence: "ofl/caveatbrush/OFL.txt",
+            licenceOutput: "CaveatBrush-OFL.txt",
+            // Chalkboard's digits (clues, entries, keys, timer, notes) and its English cheer, game.complete.cheer
+            jobs: [{ output: "caveat-brush.woff2", source: "ofl/caveatbrush/CaveatBrush-Regular.ttf", text: "0123456789:/%" + en.game.complete.cheer }],
+        },
+        {
             licence: "ofl/ebgaramond/OFL.txt",
             licenceOutput: "EBGaramond-OFL.txt",
             // Ink's digits: clues, keys and the timer upright, the player's digits in italic

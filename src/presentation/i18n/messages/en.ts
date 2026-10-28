@@ -31,13 +31,14 @@ export const en = {
             dark: "Dark",
             styled: {
                 pixel: { light: "Handheld", dark: "Console" },
+                chalkboard: { light: "Whiteboard", dark: "Chalkboard" },
             },
         },
         appearanceSummary: "{mode} · {theme}",
         colorTheme: "Color theme",
         style: {
             label: "Style",
-            names: { minimal: "Minimal Motion", tactile: "Tactile Tiles", paper: "Paper Notebook", pixel: "8-bit", cyber: "Cyberpunk", ink: "Ink & Washi" },
+            names: { minimal: "Minimal Motion", tactile: "Tactile Tiles", paper: "Paper Notebook", pixel: "8-bit", cyber: "Cyberpunk", ink: "Ink & Washi", chalkboard: "Chalkboard" },
         },
         colorThemes: {
             green: "Green",
@@ -174,6 +175,8 @@ export const en = {
             review: "Review This Game",
             // Paper's rubber stamp on the completion card, written in Caveat
             stamp: "SOLVED",
+            // Chalkboard's cheer on the completion card, written in Chalk Digits
+            cheer: "Well done!",
         },
     },
     walkthrough: {

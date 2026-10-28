@@ -16,7 +16,15 @@ export const PALETTE_TOKENS = [
     "primary-ink", "signal", "signal-surface",
 ] as const;
 export type PaletteToken = typeof PALETTE_TOKENS[number];
-export type Palette = Record<PaletteToken, string>;
+// Colours only one style paints: chalkboard's chalk tray (its top, its shaded foot and its lit edge) and the duster
+// lying in it (its back and its felt), its erase smudge and smear, its app icon's frame and the pink chalk it
+// doodles with on a solved board. A palette carries one only when its style sets it, so no other
+// style's blocks in themes.generated.css declare it.
+export const STYLE_OWN_TOKENS = [
+    "tray", "tray-shade", "tray-edge", "duster", "duster-felt", "smudge", "smear", "icon-frame", "doodle",
+] as const;
+export type StyleOwnToken = typeof STYLE_OWN_TOKENS[number];
+export type Palette = Record<PaletteToken, string> & Partial<Record<StyleOwnToken, string>>;
 
 export interface ThemePalette {
     id: ColorThemeId;
@@ -37,12 +45,12 @@ type DerivedToken = "primary-light" | "highlight" | "cell-focus" | "cell-scope" 
 // Tokens that repeat another token of the same palette unless a style sets its own
 type AliasToken = "note" | "cell-selected" | "featured" | "on-featured" | "rule" | "margin-line"
     | "primary-ink" | "signal" | "signal-surface";
-// A style's own values for aliases, and for the same-digit fill, the primary's light surface and the board
-// tints where a fixed palette sets them rather than tinting the primary
+// A style's own values for aliases, for the same-digit fill, the primary's light surface and the board
+// tints where a fixed palette sets them rather than tinting the primary, and for its own colours
 type StyleExtras = Partial<Pick<Palette,
     "featured" | "on-featured" | "rule" | "margin-line" | "highlight" | "primary-light"
     | "primary-ink" | "signal" | "signal-surface"
-    | "cell-selected" | "cell-focus" | "cell-scope" | "cell-pattern" | "cell-peer">>;
+    | "cell-selected" | "cell-focus" | "cell-scope" | "cell-pattern" | "cell-peer">> & Partial<Record<StyleOwnToken, string>>;
 export type Neutrals<ThemeColors> = Omit<Palette, keyof ThemeColors | DerivedToken | AliasToken>;
 
 // Values are tuned so every pair in paletteContrast.test.ts meets WCAG AA. The board layers

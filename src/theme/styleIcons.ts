@@ -418,6 +418,68 @@ const inkMonochrome = (color: string): string[] => [
     `<path d="${inkSealOutlineInGlyphUnits()}${INK_SEAL_GLYPH_PATH}" transform="${INK_GLYPH_PLACEMENT}" fill="${color}" fill-rule="evenodd"/>`,
 ];
 
+// Chalkboard: a board in its frame (the wooden tray's wood round the 黑板, grey round the 白板), a hand-drawn grid in
+// the chalk or marker, a ring round the top-left cell, a 7 at the bottom right, and two stubs along the board's foot.
+// Ported from the style-research canvas (Chalk.dc.html). The 黑板's chalk (grid, ring and 7, not the stubs) is
+// roughened by the canvas's chalk filter, baked into the launcher PNGs and drawn live on the 外觀 card and the
+// favicon; the 白板's marker and the monochrome silhouette stay plain.
+const CHALKBOARD_BOARD = { inset: 8, size: 92, radius: 4 };
+const CHALKBOARD_GRID = "M44 24 Q43 54 45 84 M65 23 Q66 54 64 85 M24 44 Q54 42 84 45 M23 65 Q54 66 85 63";
+const CHALKBOARD_RING = "M45 38 Q34 36 33 46 Q34 57 46 56 Q56 54 55 45 Q53 37 44 39";
+// Caveat Brush's 7 (ofl/caveatbrush/CaveatBrush-Regular.ttf, google/fonts at the commit scripts/generate-fonts.ts
+// pins) at 22 units, centred on x 74 with its baseline at y 83 as the canvas sets it, outlined once with harfbuzzjs
+const CHALKBOARD_SEVEN = "M71.1 80Q71.1 79.6 71.2 79Q71.4 78.3 71.5 78.1Q71.6 77.9 71.6 77.7Q71.6 77.6 71.8 77.2Q72 76.8 72 76.8Q72.1 76.7 72.1 76.5Q72.2 76.4 72.3 75.9Q72.4 75.9 72.6 75.5Q72.6 75.2 72.7 75.1Q72.7 75.1 72.8 75Q72.8 75 72.9 74.6Q73.1 74.2 73.1 74.2Q73.1 74.2 73.1 74.1Q73.3 73.7 73.4 73.6Q73.5 73.1 73.6 72.8Q73.8 72.4 73.8 72.2Q73.9 71.9 73.9 71.8Q73.8 71.7 73 71.8Q72.2 71.9 71.3 71.7Q71 71.7 70.8 71.5Q70.6 71.2 70.5 71.1Q70.1 71 69.8 70.3Q69.6 69.9 69.6 69.5Q69.6 69.2 70 68.8Q70.2 68.8 70.3 68.9Q70.7 68.9 71.5 69Q72.1 69 72.3 68.9Q72.5 68.9 72.6 68.9L72.9 68.9Q73.1 68.8 73.4 68.7Q73.6 68.7 73.7 68.6Q73.9 68.5 74 68.5Q74.2 68.5 75 68.6Q75.2 68.5 75.3 68.5Q75.5 68.5 76.5 68.6Q76.6 68.6 76.8 68.8Q77 69 77.1 69.3Q77.2 69.6 77.1 69.7Q77.1 69.8 77.1 69.8Q77.2 69.9 77.5 70Q77.8 70.4 78.2 70.6Q78.2 70.6 78.2 70.7Q78.3 70.8 78.3 70.8Q78.4 70.9 78.4 71Q78.7 71.2 78.1 71.3Q77.7 71.4 76.8 72.8Q76 74.3 75.1 76.2Q74.6 77.1 74 79Q73.5 80.9 73.6 82.4Q73.5 82.7 73.4 82.9Q73.2 83.1 73.1 83Q72.9 82.8 72.5 82.9Q72.2 83 72 83Q71.8 83 71.4 82.5Q70.9 82 71.1 80Z";
+const CHALKBOARD_STUBS = { chalk: { x: 16, width: 22 }, coloured: { x: 42, width: 14 }, y: 92, height: 5, radius: 2 };
+
+interface ChalkboardColors {
+    board: string;
+    writing: string;
+    ring: string;
+    stub: string;
+}
+
+// The ring is the canvas's hot colour: the yellow chalk on the 黑板, the blue marker on the 白板. The coloured stub
+// is the primary in both, the yellow chalk or the orange marker.
+const chalkboardColors = (palette: Palette): ChalkboardColors => ({
+    board: palette.background,
+    writing: palette.foreground,
+    ring: isDark(palette) ? palette.primary : palette.accent,
+    stub: palette.primary,
+});
+
+const chalkboardStub = (stub: { x: number; width: number }, color: string): string => {
+    const { y, height, radius } = CHALKBOARD_STUBS;
+    return `<rect x="${stub.x}" y="${y}" width="${stub.width}" height="${height}" rx="${radius}" fill="${color}"/>`;
+};
+
+const chalkFilterId = (idSuffix: string): string => idSuffix === "" ? "chalk-grain" : `chalk-grain-${idSuffix}`;
+
+const chalkGrainFilter = (id: string): string =>
+    `<defs><filter id="${id}" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence type="fractalNoise" baseFrequency="1.25" numOctaves="2" seed="7" result="noise"/><feColorMatrix in="noise" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -4 2.9" result="mask"/><feComposite in="SourceGraphic" in2="mask" operator="in" result="grain"/><feDisplacementMap in="grain" in2="noise" scale="1.4"/></filter></defs>`;
+
+// `filterId` roughens the grid, the ring and the 7 when given
+const chalkboardWriting = (colors: Omit<ChalkboardColors, "board">, filterId?: string): string[] => {
+    const grain = filterId === undefined ? "" : ` filter="url(#${filterId})"`;
+    return [
+        `<path d="${CHALKBOARD_GRID}" fill="none" stroke="${colors.writing}" stroke-width="3.4" stroke-linecap="round"${grain}/>`,
+        `<path d="${CHALKBOARD_RING}" fill="none" stroke="${colors.ring}" stroke-width="3" stroke-linecap="round"${grain}/>`,
+        `<path d="${CHALKBOARD_SEVEN}" fill="${colors.writing}"${grain}/>`,
+        chalkboardStub(CHALKBOARD_STUBS.chalk, colors.writing),
+        chalkboardStub(CHALKBOARD_STUBS.coloured, colors.stub),
+    ];
+};
+
+const chalkboardArtwork = (palette: Palette, idSuffix: string): string[] => {
+    const { inset, size, radius } = CHALKBOARD_BOARD;
+    const colors = chalkboardColors(palette);
+    const filterId = isDark(palette) ? chalkFilterId(idSuffix) : undefined;
+    return [
+        ...(filterId === undefined ? [] : [chalkGrainFilter(filterId)]),
+        `<rect x="${inset}" y="${inset}" width="${size}" height="${size}" rx="${radius}" fill="${colors.board}"/>`,
+        ...chalkboardWriting(colors, filterId),
+    ];
+};
+
 const artworkOf = (style: StyleId, palette: Palette, bleed = 0, idSuffix = ""): string[] => {
     switch (style) {
         case "minimal": return minimalTiles(palette["on-primary"]);
@@ -429,16 +491,21 @@ const artworkOf = (style: StyleId, palette: Palette, bleed = 0, idSuffix = ""): 
         case "pixel": return pixelArtwork(pixelColors(palette));
         case "cyber": return cyberArtwork(palette, idSuffix);
         case "ink": return inkArtwork(palette, bleed, idSuffix);
+        case "chalkboard": return chalkboardArtwork(palette, idSuffix);
     }
 };
 
 /** The colour behind a style's artwork: the adaptive icon's background layer. */
-export const styleIconBackground = (style: StyleId, palette: Palette): string =>
-    style === "minimal" ? palette.primary : palette.background;
+export const styleIconBackground = (style: StyleId, palette: Palette): string => {
+    if (style === "minimal") return palette.primary;
+    // The frame round the board, so it carries on past the foreground's viewport
+    if (style === "chalkboard" && palette["icon-frame"]) return palette["icon-frame"];
+    return palette.background;
+};
 
 /**
  * A style's icon as a full 108-unit square SVG in the palette's colours, unrounded. An icon that uses
- * ids (cyberpunk's gradient and glow, ink's brush filter) takes `idSuffix` into them, so copies on one page do not share.
+ * ids (cyberpunk's gradient and glow, ink's brush filter, the 黑板's chalk grain) takes `idSuffix` into them, so copies on one page do not share.
  */
 export const styleIconSvg = (style: StyleId, palette: Palette, idSuffix = ""): string =>
     svgOf(fillSquare(styleIconBackground(style, palette)), ...artworkOf(style, palette, 0, idSuffix));
@@ -475,6 +542,8 @@ const monochromeArtwork = (style: StyleId): string[] => {
         ];
         // The 圓相, the grid and the seal with 獨 cut out of it
         case "ink": return inkMonochrome(color);
+        // The writing without the board and its frame: the grid, the ring, the 7 and the stubs
+        case "chalkboard": return chalkboardWriting({ writing: color, ring: color, stub: color });
     }
 };
 

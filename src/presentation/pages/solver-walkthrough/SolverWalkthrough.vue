@@ -123,7 +123,10 @@
                             data-skin="card"
                         >
                             <div class="flex items-start gap-3">
-                                <span class="w-10 h-10 rounded-xl bg-primary-light text-primary flex items-center justify-center shrink-0">
+                                <span
+                                    class="w-10 h-10 rounded-xl bg-primary-light text-primary flex items-center justify-center shrink-0"
+                                    data-skin="icon-tile"
+                                >
                                     <Wand2 :size="20" />
                                 </span>
                                 <p class="text-[15px] leading-snug text-foreground">

@@ -16,6 +16,10 @@ import CyberGroupOverlay from "@/presentation/components/style-moments/cyber/Cyb
 import InkLoader from "@/presentation/components/style-moments/ink/InkLoader.vue";
 import InkGroupOverlay from "@/presentation/components/style-moments/ink/InkGroupOverlay.vue";
 import InkCardDecoration from "@/presentation/components/style-moments/ink/InkCardDecoration.vue";
+import ChalkboardDigitWriter from "@/presentation/components/style-moments/chalkboard/ChalkboardDigitWriter.vue";
+import ChalkboardLoader from "@/presentation/components/style-moments/chalkboard/ChalkboardLoader.vue";
+import ChalkboardGroupOverlay from "@/presentation/components/style-moments/chalkboard/ChalkboardGroupOverlay.vue";
+import ChalkboardCardDecoration from "@/presentation/components/style-moments/chalkboard/ChalkboardCardDecoration.vue";
 import type { CompletedGroup } from "@/domain/game/Sudoku";
 
 /** A group effect on the board: a new one gets a new id, which starts its drawings afresh. */
@@ -49,7 +53,8 @@ export interface StyleMoments {
     /**
      * Writes an entered digit in while it arrives (only when motion is allowed), given `{ digit, maskId }`:
      * it renders an SVG `<mask>` with that id, which the arriving digit carries as `--digit-writer-mask` for
-     * the skin to mask it by, and emits `written` once the digit shows whole, which settles the arrival.
+     * the skin to mask it by, and emits `written` once the digit shows whole (and anything else it draws, such as
+     * chalk's dust, has finished), which settles the arrival.
      * None when the skin's `.value-arrive` carries it all.
      */
     digitWriter?: Component | null;
@@ -127,6 +132,27 @@ const INK_MOMENTS: StyleMoments = {
     celebrationBoardMs: 1450,
 };
 
+// From the boards: each cell's digits flash yellow from 100ms for 520ms, 45ms a step. A line's chalk is
+// dragged on from 100ms and fades by 960ms; a box's ring starts 180ms in and fades by 1080ms, and the
+// last dust (黑板) falls by 1000ms. A box completed alone from its centre (its farthest cell two steps out,
+// 1120ms) still outlasts its ring by the frames the overlay takes to start. The solved board: the teacher
+// rings it in yellow chalk from 60ms for 900ms, and the dialog opens as the board's scrim comes in, while the
+// loop is closing; the card then lands like a note stuck on the board, the cheer is written on it with dust
+// falling off it and stars, a wave and rays are doodled round it and the trophy (ChalkboardCardDecoration), so
+// nothing is drawn behind the card.
+// While a puzzle loads, chalk draws a sudoku box on a small board, rings and writes four cells in turn and a
+// duster wipes it (ChalkboardLoader). An entered digit is written in stroke by stroke, in 420–560ms, a little
+// chalk dust falling as each stroke ends (黑板 only).
+const CHALKBOARD_MOMENTS: StyleMoments = {
+    loader: ChalkboardLoader,
+    celebration: null,
+    cardDecoration: ChalkboardCardDecoration,
+    groupEffectMs: 1000,
+    groupOverlay: ChalkboardGroupOverlay,
+    celebrationBoardMs: 920,
+    digitWriter: ChalkboardDigitWriter,
+};
+
 // One entry per style, so a style added without its moments is a type error
 export const STYLE_MOMENTS: Record<StyleId, StyleMoments> = {
     minimal: MINIMAL_MOMENTS,
@@ -135,6 +161,7 @@ export const STYLE_MOMENTS: Record<StyleId, StyleMoments> = {
     pixel: PIXEL_MOMENTS,
     cyber: CYBER_MOMENTS,
     ink: INK_MOMENTS,
+    chalkboard: CHALKBOARD_MOMENTS,
 };
 
 export const useStyleMoments = (): ComputedRef<StyleMoments> => {

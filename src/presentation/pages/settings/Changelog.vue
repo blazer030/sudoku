@@ -39,6 +39,7 @@
                         <span
                             v-if="change.appOnly"
                             class="ml-0.5 inline-block align-[1px] rounded-full bg-primary-light text-primary text-[11px] font-semibold leading-4 px-1.5"
+                            data-skin="app-tag"
                             data-testid="changelog-app-badge"
                         >{{ t("changelog.appBadge") }}</span>
                     </li>

@@ -36,6 +36,7 @@
                     :class="game.completed
                         ? 'bg-primary-light text-primary'
                         : 'bg-accent/10 text-accent'"
+                    :data-skin="game.completed ? 'icon-tile' : 'icon-tile gave-up'"
                     class="w-9 h-9 rounded-icon flex items-center justify-center"
                 >
                     <Trophy
@@ -59,6 +60,7 @@
             <div class="flex flex-col items-end gap-0.5">
                 <span
                     :class="game.completed ? 'text-primary' : 'text-accent'"
+                    :data-skin="game.completed ? 'game-result' : 'game-result gave-up'"
                     class="text-base font-semibold font-mono"
                 >
                     {{ game.completed ? formatTime(game.elapsedSeconds) : t("statistics.gaveUp") }}

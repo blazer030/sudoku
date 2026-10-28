@@ -247,6 +247,7 @@ describe("startAppearanceSync", () => {
             delete document.documentElement.dataset.pixelFonts;
             delete document.documentElement.dataset.cyberFonts;
             delete document.documentElement.dataset.inkFonts;
+            delete document.documentElement.dataset.chalkboardFonts;
         });
 
         it("should mark paper's fonts ready once Caveat's digits have loaded", async () => {
@@ -304,6 +305,18 @@ describe("startAppearanceSync", () => {
             expect(families).toContain("Ink Serif TC");
             expect(families).toContain("Ink Garamond");
             expect(document.documentElement.dataset.inkFonts).toBe("ready");
+        });
+
+        it("should mark chalkboard's fonts ready once Chalk Digits has loaded", async () => {
+            const load = stubFontLoading(1);
+            const sources = buildSources("classic", "dark", "chalkboard");
+            stop = startAppearanceSync(sources, systemBar, appearanceBridge);
+            expect(document.documentElement.dataset.chalkboardFonts).toBeUndefined();
+
+            await finishLoadingFonts();
+
+            expect(load.mock.calls.map(([font]) => font).join(" ")).toContain("Chalk Digits");
+            expect(document.documentElement.dataset.chalkboardFonts).toBe("ready");
         });
 
         it("should drop pixel's ready mark when leaving pixel", async () => {

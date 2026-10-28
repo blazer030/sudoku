@@ -152,6 +152,24 @@ describe("index.html no-flash script", () => {
         expect(meta.content).toBe(systemBarColor("ink", "vermilion", "light"));
     });
 
+    // Review Focus 1: a cold start in chalkboard follows the system to the whiteboard or the chalkboard.
+    // The browser's bar takes the light mode's primary, as every style's does; the app's own bars take the page.
+    it.each([
+        { systemDark: false, dark: false, mode: "light", barColor: "#B04A00" },
+        { systemDark: true, dark: true, mode: "dark", barColor: "#2E4B3C" },
+    ] as const)("should paint chalkboard dark=$dark with its own bar colour on a system dark=$systemDark", ({ systemDark, dark, mode, barColor }) => {
+        stubSystemDark(systemDark);
+        storeSettings({ style: "chalkboard" });
+
+        runInlineScript();
+
+        expect(root.dataset.style).toBe("chalkboard");
+        expect(root.dataset.colorTheme).toBe("classic");
+        expect(root.classList.contains("dark")).toBe(dark);
+        expect(meta.content).toBe(barColor);
+        expect(meta.content).toBe(systemBarColor("chalkboard", "classic", mode));
+    });
+
     it("should paint paper light for a stored system appearance on a dark system", () => {
         stubSystemDark(true);
         storeSettings({ style: "paper", appearance: "system" });

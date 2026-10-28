@@ -28,13 +28,14 @@ export const zhHant: MessageSchema = {
             dark: "深色",
             styled: {
                 pixel: { light: "掌機", dark: "紅白機" },
+                chalkboard: { light: "白板", dark: "黑板" },
             },
         },
         appearanceSummary: "{mode}・{theme}",
         colorTheme: "色彩主題",
         style: {
             label: "風格",
-            names: { minimal: "極簡動態", tactile: "實體方塊", paper: "紙本筆記", pixel: "8-bit 電玩", cyber: "賽博龐克", ink: "水墨和紙" },
+            names: { minimal: "極簡動態", tactile: "實體方塊", paper: "紙本筆記", pixel: "8-bit 電玩", cyber: "賽博龐克", ink: "水墨和紙", chalkboard: "黑板粉筆" },
         },
         colorThemes: {
             green: "綠",
@@ -169,6 +170,7 @@ export const zhHant: MessageSchema = {
             newRecord: "新紀錄！",
             playAgain: "再玩一局",
             review: "看這局回顧",
+            cheer: "好棒！",
             stamp: "完成",
         },
     },

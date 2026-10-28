@@ -23,7 +23,7 @@ import { useSettingsStore } from "@/stores/settingsStore";
 import { startAppearanceSync } from "@/presentation/theme/appearanceSync";
 import { startLauncherIconSync } from "@/presentation/theme/launcherIconSync";
 import { handleBackButton } from "@/presentation/composables/backDismissal";
-import { STYLES, getPalette, rememberedThemeFor, type Palette } from "@/theme/palettes";
+import { STYLES, getPalette, rememberedAppearanceFor, rememberedThemeFor, type Palette } from "@/theme/palettes";
 import { styleIconSvg } from "@/theme/styleIcons";
 import { STYLE_IDS, type StyleId } from "@/theme/themeIds";
 import Appearance from "@/presentation/pages/settings/Appearance.vue";
@@ -60,8 +60,8 @@ const svgOf = (style: StyleId, palette: Palette, idSuffix = "") => {
 // The icon the settings should have drawn. A card's ids carry its own suffix, so the expected icon takes it from the rendered one.
 const iconSvgFor = (style: StyleId, rendered: string) => {
     const settingsStore = useSettingsStore();
-    const idSuffix = /id="(?:cyber-edge|ink-rough)-([^"]+)"/.exec(rendered)?.[1];
-    return svgOf(style, getPalette(style, rememberedThemeFor(style, settingsStore.colorThemeByStyle), settingsStore.appearance), idSuffix);
+    const idSuffix = /id="(?:cyber-edge|ink-rough|chalk-grain)-([^"]+)"/.exec(rendered)?.[1];
+    return svgOf(style, getPalette(style, rememberedThemeFor(style, settingsStore.colorThemeByStyle), rememberedAppearanceFor(style, settingsStore.appearanceByStyle)), idSuffix);
 };
 
 describe("Appearance.vue style cards", () => {
@@ -70,11 +70,11 @@ describe("Appearance.vue style cards", () => {
         vi.mocked(Capacitor.isNativePlatform).mockReturnValue(false);
     });
 
-    it("should list the six styles, each with its app icon and name", () => {
+    it("should list the seven styles, each with its app icon and name", () => {
         const wrapper = mountAppearance();
         const cards = wrapper.findAll("button[data-testid^='style-option-']");
 
-        expect(cards.map(card => card.attributes("data-testid"))).toEqual(["style-option-minimal", "style-option-tactile", "style-option-paper", "style-option-pixel", "style-option-cyber", "style-option-ink"]);
+        expect(cards.map(card => card.attributes("data-testid"))).toEqual(["style-option-minimal", "style-option-tactile", "style-option-paper", "style-option-pixel", "style-option-cyber", "style-option-ink", "style-option-chalkboard"]);
         for (const style of STYLE_IDS) {
             const card = wrapper.get(`[data-testid='style-option-${style}']`);
             const rendered = card.get(`[data-testid='style-icon-${style}'] svg`).element.outerHTML;
@@ -88,6 +88,7 @@ describe("Appearance.vue style cards", () => {
         const settingsStore = useSettingsStore();
         settingsStore.setStyle("tactile");
         settingsStore.setColorTheme("rust");
+        settingsStore.setAppearance("dark");
         settingsStore.setStyle("minimal");
         settingsStore.setAppearance("dark");
         await nextTick();
@@ -98,6 +99,23 @@ describe("Appearance.vue style cards", () => {
         }
         expect(wrapper.get("[data-testid='style-icon-tactile'] svg").element.outerHTML)
             .toBe(svgOf("tactile", getPalette("tactile", "rust", "dark")));
+    });
+
+    it("should draw each card's icon in the mode remembered for that style", async () => {
+        const wrapper = mountAppearance();
+        const settingsStore = useSettingsStore();
+        settingsStore.setStyle("chalkboard");
+        settingsStore.setAppearance("light");
+        settingsStore.setStyle("minimal");
+        settingsStore.setAppearance("dark");
+        await nextTick();
+
+        expect(wrapper.get("[data-testid='style-icon-chalkboard'] svg").element.outerHTML)
+            .toBe(svgOf("chalkboard", getPalette("chalkboard", "classic", "light")));
+        expect(wrapper.get("[data-testid='style-icon-minimal'] svg").element.outerHTML)
+            .toBe(svgOf("minimal", getPalette("minimal", "green", "dark")));
+        expect(wrapper.get("[data-testid='style-icon-pixel'] svg").element.outerHTML)
+            .toBe(svgOf("pixel", getPalette("pixel", "classic", "light")));
     });
 
     it("should leave the icon to the card's name for screen readers", () => {
@@ -227,10 +245,10 @@ describe("Appearance.vue colour-theme swatches", () => {
     it("should fill each swatch with its dark primary in dark mode, for every style", async () => {
         const wrapper = mountAppearance();
         const settingsStore = useSettingsStore();
-        settingsStore.setAppearance("dark");
 
         for (const style of STYLE_IDS) {
             settingsStore.setStyle(style);
+            settingsStore.setAppearance("dark");
             await nextTick();
             expectSwatchesIn(wrapper, "dark");
         }
@@ -284,7 +302,7 @@ describe("Appearance.vue light and dark", () => {
         }
     });
 
-    it("should leave out light and dark for a one-mode style, keeping the stored mode", async () => {
+    it("should leave out light and dark for a one-mode style, and bring back the other style's own mode", async () => {
         const wrapper = mountAppearance();
         const settingsStore = useSettingsStore();
         settingsStore.setAppearance("dark");
@@ -293,7 +311,7 @@ describe("Appearance.vue light and dark", () => {
 
         expect(wrapper.find("[data-testid='appearance-mode-label']").exists()).toBe(false);
         expect(wrapper.find("[data-testid='appearance-switcher']").exists()).toBe(false);
-        expect(settingsStore.appearance).toBe("dark");
+        expect(settingsStore.appearance).toBe("light");
 
         await wrapper.get("[data-testid='style-option-minimal']").trigger("click");
 
@@ -512,6 +530,24 @@ describe("Appearance.vue one-theme style", () => {
 
         expect(pixelEnglish).not.toEqual(minimalEnglish);
         expect(pixelChinese).not.toEqual(pixelEnglish);
+    });
+
+    // Review Focus 1: chalkboard's modes read 黑板 and 白板, never plain dark and light
+    it("should name chalkboard's modes in its own words, in either language, with no theme picker", async () => {
+        const wrapper = mountAppearance();
+        const modeTexts = () => ["appearance-light", "appearance-dark"].map(id => wrapper.get(`[data-testid='${id}']`).text());
+        const minimalEnglish = modeTexts();
+        useSettingsStore().setStyle("chalkboard");
+        await nextTick();
+        const chalkboardEnglish = modeTexts();
+        i18n.global.locale.value = "zh-Hant";
+        await nextTick();
+        const chalkboardChinese = modeTexts();
+
+        expect(chalkboardEnglish).not.toEqual(minimalEnglish);
+        expect(chalkboardChinese).not.toEqual(chalkboardEnglish);
+        expect(wrapper.find("[data-testid='appearance-theme-label']").exists()).toBe(false);
+        expect(wrapper.find("[data-testid='color-theme-classic']").exists()).toBe(false);
     });
 
     it("should bring minimal back to the theme last chosen there after a visit to pixel", () => {

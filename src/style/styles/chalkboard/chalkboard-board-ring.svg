@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-24 -24 399 399">
+<!-- The yellow chalk loop the teacher draws round a solved board (MomentsChalk .loop): the board is the 351-square
+     at the origin, and the loop runs past its edges. Only alpha: the skin paints it in the primary through
+     mask-image and sweeps it on. -->
+<path d="M178 -14 C 332 -16, 372 40, 366 180 C 360 330, 300 370, 170 366 C 40 362, -16 320, -12 172 C -8 40, 52 -12, 196 -8" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+</svg>

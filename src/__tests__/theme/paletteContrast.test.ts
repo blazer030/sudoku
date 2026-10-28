@@ -78,7 +78,19 @@ const BOARD_INKS: readonly PaletteToken[] = ["foreground", "primary", "error", "
 // 8-bit paints its board in four fixed shades: the selected cell is inverted, 紅白機's same digit is a
 // blue only white reads on, and scope, peer and error cells are patterns rather than tints. Its board
 // model (PIXEL_BOARD_CASES) checks the ink drawn on each of those instead.
-const BOARD_PAIRS: readonly ContrastPair[] = BOARD_SURFACES.flatMap(surface => BOARD_INKS.map(ink => ({ ...pair(ink, surface), exceptIn: ["pixel"] as const })));
+// 黑板's red chalk reads only 4.9:1 on the bare board, so it can lie on no wash brighter than a breath. An error
+// cell takes the error surface over the peer and same-digit washes (its variant wins), and nothing red is drawn on
+// the primary's soft surface, so in 黑板 those three pairs are never drawn; CHALKBOARD_BOARD_CASES checks where the
+// red does land. On a hint's scope and pattern washes, the canvas's peer and same-digit washes, the red is only
+// ever a struck-out note; CHALKBOARD_BOARD_CASES holds it to the mark's 3:1 there.
+const CHALKBOARD_DARK_UNDRAWN: ReadonlySet<string> = new Set(["error on cell-peer", "error on highlight", "error on primary-light"]);
+const CHALKBOARD_DARK_STRUCK_OUT: ReadonlySet<string> = new Set(["error on cell-scope", "error on cell-pattern"]);
+const BOARD_PAIRS: readonly ContrastPair[] = BOARD_SURFACES.flatMap(surface => BOARD_INKS.map((ink) => {
+    const boardPair = pair(ink, surface);
+    const inChalkboardModel = CHALKBOARD_DARK_UNDRAWN.has(boardPair.name) || CHALKBOARD_DARK_STRUCK_OUT.has(boardPair.name);
+    const exceptIn: readonly Exemption[] = inChalkboardModel ? ["pixel", "chalkboard/dark"] : ["pixel"];
+    return { ...boardPair, exceptIn };
+}));
 
 // Board layers must look different from each other, not just carry readable ink. 8-bit's four shades
 // cannot sit that far apart (#8BAC0F on #9BBC0F is about 1.2): it tells its layers apart by pattern
@@ -88,12 +100,14 @@ const BOARD_PAIRS: readonly ContrastPair[] = BOARD_SURFACES.flatMap(surface => B
 // board model checks the ink drawn on each. Ink and washi's board and cells are transparent on the page:
 // clues sit on the bare page like every other cell, so there is no clue layer to set apart from the card,
 // and a same-digit cell is told apart by its vermilion digit, not by a wash darker than the clue or peer
-// cells'; its board model (INK_BOARD_CASES) checks the ink drawn on each wash.
+// cells'; its board model (INK_BOARD_CASES) checks the ink drawn on each wash. Chalkboard's board is the same:
+// transparent cells on the page under faint washes of chalk or marker, a same-digit cell told apart by its
+// yellow or orange digit; CHALKBOARD_BOARD_CASES checks the ink drawn on each wash.
 const SURFACE_PAIRS: readonly ContrastPair[] = [
-    { ...pair("cell-clue", "card", 1.25), exceptIn: ["pixel", "cyber", "ink"] },
-    { ...pair("highlight", "cell-clue", 1.25), exceptIn: ["pixel", "cyber", "ink"] },
-    { ...pair("highlight", "card", 1.25), exceptIn: ["pixel", "cyber"] },
-    { ...pair("highlight", "cell-peer", 1.25), exceptIn: ["pixel", "cyber", "ink"] },
+    { ...pair("cell-clue", "card", 1.25), exceptIn: ["pixel", "cyber", "ink", "chalkboard"] },
+    { ...pair("highlight", "cell-clue", 1.25), exceptIn: ["pixel", "cyber", "ink", "chalkboard"] },
+    { ...pair("highlight", "card", 1.25), exceptIn: ["pixel", "cyber", "chalkboard"] },
+    { ...pair("highlight", "cell-peer", 1.25), exceptIn: ["pixel", "cyber", "ink", "chalkboard"] },
     { ...pair("cell-peer", "card", 1.08), exceptIn: ["pixel", "cyber"] },
     // The selection outline is a UI component, so 3:1 applies
     { ...pair("primary", "cell-selected", LARGE_OR_ICON), exceptIn: ["pixel"] },
@@ -221,15 +235,16 @@ const CASES = modeCases((style, themeId, mode, palette) =>
 
 // Text levels must stay apart, so notes and secondary text never read as bright as primary text.
 // 掌機 has one text ink, #0F380F, the only green that reads on the light greens; its levels differ by
-// font and size instead.
+// font and size instead. 黑板's pale chalk is the canvas's, a hair under the step to the white chalk (1.296).
 const ONE_TEXT_INK: readonly Exemption[] = ["pixel/light"];
-const TEXT_HIERARCHY = [
-    { name: "foreground over foreground-secondary", upper: "foreground", lower: "foreground-secondary", minimum: 1.3 },
+const TEXT_HIERARCHY: readonly { name: string; upper: PaletteToken; lower: PaletteToken; minimum: number; exceptIn?: readonly Exemption[] }[] = [
+    { name: "foreground over foreground-secondary", upper: "foreground", lower: "foreground-secondary", minimum: 1.3, exceptIn: ["chalkboard/dark"] },
     { name: "foreground over foreground-muted", upper: "foreground", lower: "foreground-muted", minimum: 1.4 },
     { name: "foreground-secondary over foreground-muted", upper: "foreground-secondary", lower: "foreground-muted", minimum: 1.05 },
-] as const;
+];
 
-const HIERARCHY_CASES = modeCases((style, themeId, mode, palette) => (isExempt(ONE_TEXT_INK, style, mode) ? [] : TEXT_HIERARCHY).map(level => ({
+const HIERARCHY_CASES = modeCases((style, themeId, mode, palette) => (isExempt(ONE_TEXT_INK, style, mode) ? [] : TEXT_HIERARCHY)
+    .filter(level => !isExempt(level.exceptIn, style, mode)).map(level => ({
     label: `${style}/${themeId}/${mode}: ${level.name} ≥ ${level.minimum}`,
     palette,
     level,
@@ -382,6 +397,59 @@ const INK_BOARD_CASES: InkBoardCase[] = STYLES.ink.themes.flatMap(theme => STYLE
     ];
 }));
 
+const CHALKBOARD_CSS = readFileSync("src/style/styles/chalkboard/skin.css", "utf8");
+
+// A step's answer cell is washed in the primary over the page by --chalkboard-answer-wash, set per mode in chalk's sheet
+const chalkboardAnswerWash = (mode: ColorMode): number => {
+    const selector = mode === "dark" ? ':root.dark[data-style="chalkboard"]' : '[data-style="chalkboard"]';
+    let percent: string | undefined;
+    postcss.parse(CHALKBOARD_CSS).walkRules((rule) => {
+        if (rule.selector !== selector) return;
+        rule.walkDecls("--chalkboard-answer-wash", (declaration) => { percent = declaration.value; });
+    });
+    if (percent === undefined) throw new Error(`no --chalkboard-answer-wash on ${selector}`);
+    return parseFloat(percent) / 100;
+};
+
+// Chalkboard's board: the ink actually drawn on the surface actually drawn. The board and its cells are
+// transparent, so every cell lies on the page or on a wash mixed over it (palette.ts). The red lies only on the
+// bare board, the error surface and the hint's scope, pattern and answer washes (its struck-out notes).
+interface ChalkboardBoardCase { label: string; foreground: string; background: string; minimum: number }
+
+const CHALKBOARD_BOARD_CASES: ChalkboardBoardCase[] = STYLES.chalkboard.themes.flatMap(theme => STYLE_COLOR_MODES.chalkboard.flatMap((mode) => {
+    const palette = getPalette("chalkboard", theme.id, mode);
+    const prefix = `chalkboard/${theme.id}/${mode}`;
+    const drawn = (name: string, foreground: string, background: string, minimum = TEXT): ChalkboardBoardCase => ({
+        label: `${prefix}: ${name} ≥ ${minimum}`, foreground, background, minimum,
+    });
+    const surfaces: readonly (readonly [string, string])[] = [
+        ["the page", palette.background],
+        ["cell-peer", palette["cell-peer"]],
+        ["cell-scope", palette["cell-scope"]],
+        ["cell-pattern", palette["cell-pattern"]],
+        ["highlight", palette.highlight],
+        ["the answer wash", mixColors(palette.primary, chalkboardAnswerWash(mode), palette.background)],
+    ];
+    // A clue, a player's digit, a note and a highlighted note can lie on any wash a hint or the selection puts under them
+    const onEverySurface = (name: string, ink: string) => surfaces.map(([surface, background]) => drawn(`${name} on ${surface}`, ink, background));
+    return [
+        ...onEverySurface("clue (foreground)", palette.foreground),
+        ...onEverySurface("entry (accent)", palette.accent),
+        ...onEverySurface("note", palette.note),
+        ...onEverySurface("same digit and highlighted note (primary)", palette.primary),
+        // The selection's chalk ring and a hint's emphasised note ring are marks, not text, so 3:1 applies
+        ...surfaces.map(([surface, background]) => drawn(`ring (primary) on ${surface}`, palette.primary, background, LARGE_OR_ICON)),
+        drawn("clue in an error cell (foreground) on error-surface", palette.foreground, palette["error-surface"]),
+        drawn("note in an error cell on error-surface", palette.note, palette["error-surface"]),
+        ...([["the page", palette.background], ["error-surface", palette["error-surface"]]] as const)
+            .map(([surface, background]) => drawn(`error on ${surface}`, palette.error, background)),
+        // A hint's struck-out notes: 黑板's red chalk on the canvas's washes (3.9:1 on the scope, 3.6:1 on the
+        // pattern, 3.6:1 on the answer wash) is held to a mark's 3:1, its strike carrying it; 白板's red marker reads as text
+        ...surfaces.filter(([surface]) => ["cell-scope", "cell-pattern", "the answer wash"].includes(surface))
+            .map(([surface, background]) => drawn(`struck-out note (error) on ${surface}`, palette.error, background, mode === "dark" ? LARGE_OR_ICON : TEXT)),
+    ];
+}));
+
 describe("palette contrast", () => {
     it("should check every style, theme and the modes the style has", () => {
         const expected = STYLE_IDS.flatMap(style => THEME_IDS_BY_STYLE[style].flatMap(theme =>
@@ -434,6 +502,14 @@ describe("palette contrast", () => {
 
     it("should check ink's board in its one mode", () => {
         expect(new Set(INK_BOARD_CASES.map(boardCase => boardCase.label.split(":")[0]))).toEqual(new Set(["ink/vermilion/light"]));
+    });
+
+    it("should check chalkboard's board in both of its modes", () => {
+        expect(new Set(CHALKBOARD_BOARD_CASES.map(boardCase => boardCase.label.split(":")[0]))).toEqual(new Set(["chalkboard/classic/light", "chalkboard/classic/dark"]));
+    });
+
+    it.each(CHALKBOARD_BOARD_CASES)("$label", ({ foreground, background, minimum }) => {
+        expect(contrastRatio(foreground, background)).toBeGreaterThanOrEqual(minimum);
     });
 
     it.each(INK_BOARD_CASES)("$label", ({ foreground, background, minimum }) => {

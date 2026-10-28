@@ -1,0 +1,7 @@
+<!-- Chalkboard: 黑板's two sticks of chalk lying in the tray, used as a mask (alpha only); the skin paints them in the board's chalk and the yellow. After the style-research canvas's .stick (Chalk.dc.html: 8px tall, corners 3px; the first 46px wide at 64px, the second 30px wide at 124px, turned -4deg), laid 2px above the mask's foot so the turned stick keeps its corners. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="91" height="12" viewBox="0 0 91 12">
+    <g fill="currentColor">
+        <rect x="0" y="2" width="46" height="8" rx="3"/>
+        <rect x="60" y="2" width="30" height="8" rx="3" transform="rotate(-4 75 6)"/>
+    </g>
+</svg>

@@ -14,6 +14,7 @@
             >
                 <div
                     :class="content.confirmTone === 'danger' ? 'bg-danger/10' : 'bg-primary-light'"
+                    :data-skin="content.confirmTone === 'danger' ? 'icon-tile danger' : 'icon-tile'"
                     class="w-16 h-16 rounded-2xl flex items-center justify-center"
                 >
                     <component
