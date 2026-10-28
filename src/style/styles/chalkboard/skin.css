@@ -54,6 +54,15 @@
     --chalkboard-grain: url("@/style/styles/chalkboard/chalkboard-grain.svg");
 }
 
+/* A step's answer cell wash: as much of the primary as each mode's candidates allow, an emphasised one holding 4.5:1 */
+[data-style="chalkboard"] {
+    --chalkboard-answer-wash: 8%;
+}
+
+:root.dark[data-style="chalkboard"] {
+    --chalkboard-answer-wash: 15%;
+}
+
 /* Type: Caveat Brush (Chalk Digits) for every digit (clues, the player's digits, keys, the timer, notes),
    repointed only once the face has loaded (fonts.ts beside this sheet marks it), so nothing paints in a
    half-loaded stack. */
@@ -188,7 +197,7 @@
 }
 
 [data-style="chalkboard"] [data-skin~="board"] [data-variant="answer"] {
-    background-color: color-mix(in srgb, var(--color-primary) 20%, transparent);
+    background-color: color-mix(in srgb, var(--color-primary) var(--chalkboard-answer-wash), transparent);
     box-shadow: none;
 }
 

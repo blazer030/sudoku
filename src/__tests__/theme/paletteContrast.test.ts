@@ -397,9 +397,23 @@ const INK_BOARD_CASES: InkBoardCase[] = STYLES.ink.themes.flatMap(theme => STYLE
     ];
 }));
 
+const CHALKBOARD_CSS = readFileSync("src/style/styles/chalkboard/skin.css", "utf8");
+
+// A step's answer cell is washed in the primary over the page by --chalkboard-answer-wash, set per mode in chalk's sheet
+const chalkboardAnswerWash = (mode: ColorMode): number => {
+    const selector = mode === "dark" ? ':root.dark[data-style="chalkboard"]' : '[data-style="chalkboard"]';
+    let percent: string | undefined;
+    postcss.parse(CHALKBOARD_CSS).walkRules((rule) => {
+        if (rule.selector !== selector) return;
+        rule.walkDecls("--chalkboard-answer-wash", (declaration) => { percent = declaration.value; });
+    });
+    if (percent === undefined) throw new Error(`no --chalkboard-answer-wash on ${selector}`);
+    return parseFloat(percent) / 100;
+};
+
 // Chalkboard's board: the ink actually drawn on the surface actually drawn. The board and its cells are
 // transparent, so every cell lies on the page or on a wash mixed over it (palette.ts). The red lies only on the
-// bare board, the error surface and the hint's scope and pattern washes (its struck-out notes).
+// bare board, the error surface and the hint's scope, pattern and answer washes (its struck-out notes).
 interface ChalkboardBoardCase { label: string; foreground: string; background: string; minimum: number }
 
 const CHALKBOARD_BOARD_CASES: ChalkboardBoardCase[] = STYLES.chalkboard.themes.flatMap(theme => STYLE_COLOR_MODES.chalkboard.flatMap((mode) => {
@@ -414,6 +428,7 @@ const CHALKBOARD_BOARD_CASES: ChalkboardBoardCase[] = STYLES.chalkboard.themes.f
         ["cell-scope", palette["cell-scope"]],
         ["cell-pattern", palette["cell-pattern"]],
         ["highlight", palette.highlight],
+        ["the answer wash", mixColors(palette.primary, chalkboardAnswerWash(mode), palette.background)],
     ];
     // A clue, a player's digit, a note and a highlighted note can lie on any wash a hint or the selection puts under them
     const onEverySurface = (name: string, ink: string) => surfaces.map(([surface, background]) => drawn(`${name} on ${surface}`, ink, background));
@@ -422,15 +437,15 @@ const CHALKBOARD_BOARD_CASES: ChalkboardBoardCase[] = STYLES.chalkboard.themes.f
         ...onEverySurface("entry (accent)", palette.accent),
         ...onEverySurface("note", palette.note),
         ...onEverySurface("same digit and highlighted note (primary)", palette.primary),
-        // The selection's and the answer's chalk ring and a hint's emphasised note ring are marks, not text, so 3:1 applies
+        // The selection's chalk ring and a hint's emphasised note ring are marks, not text, so 3:1 applies
         ...surfaces.map(([surface, background]) => drawn(`ring (primary) on ${surface}`, palette.primary, background, LARGE_OR_ICON)),
         drawn("clue in an error cell (foreground) on error-surface", palette.foreground, palette["error-surface"]),
         drawn("note in an error cell on error-surface", palette.note, palette["error-surface"]),
         ...([["the page", palette.background], ["error-surface", palette["error-surface"]]] as const)
             .map(([surface, background]) => drawn(`error on ${surface}`, palette.error, background)),
         // A hint's struck-out notes: 黑板's red chalk on the canvas's washes (3.9:1 on the scope, 3.6:1 on the
-        // pattern) is held to a mark's 3:1, its strike carrying it; 白板's red marker reads as text
-        ...([["cell-scope", palette["cell-scope"]], ["cell-pattern", palette["cell-pattern"]]] as const)
+        // pattern, 3.6:1 on the answer wash) is held to a mark's 3:1, its strike carrying it; 白板's red marker reads as text
+        ...surfaces.filter(([surface]) => ["cell-scope", "cell-pattern", "the answer wash"].includes(surface))
             .map(([surface, background]) => drawn(`struck-out note (error) on ${surface}`, palette.error, background, mode === "dark" ? LARGE_OR_ICON : TEXT)),
     ];
 }));

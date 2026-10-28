@@ -313,8 +313,15 @@ describe("chalkboard skin", () => {
             const cell = declarationsOf(CHALKBOARD_CSS, `${BOARD} [data-variant="answer"]`);
 
             expect(cell.get("box-shadow")).toBe("none");
-            expect(cell.get("background-color")).toBe("color-mix(in srgb, var(--color-primary) 20%, transparent)");
+            expect(cell.get("background-color")).toBe("color-mix(in srgb, var(--color-primary) var(--chalkboard-answer-wash), transparent)");
             expect(allRules().flatMap(rule => rule.selectors).filter(selector => selector.includes(ANSWER_RING))).toEqual([]);
+        });
+
+        // As light as each mode's candidates need: 黑板's emphasised one holds 4.5:1 at 15%, 白板's at 8%
+        // (paletteContrast.test.ts checks every ink on it)
+        it("should wash the answer cell lighter in 白板 than in 黑板", () => {
+            expect(declarationsOf(CHALKBOARD_CSS, SCOPE).get("--chalkboard-answer-wash")).toBe("8%");
+            expect(declarationsOf(CHALKBOARD_CSS, DARK).get("--chalkboard-answer-wash")).toBe("15%");
         });
 
         it("should give the selected cell no shared ring and no fill", () => {
