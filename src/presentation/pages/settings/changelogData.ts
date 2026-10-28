@@ -23,6 +23,12 @@ export const UNRELEASED_CHANGES: ChangelogChange[] = [
             "zh-Hant": "全新風格「黑板粉筆」",
         },
     },
+    {
+        text: {
+            en: "Interface improvements",
+            "zh-Hant": "介面優化",
+        },
+    },
 ];
 
 export const CHANGELOG: ChangelogEntry[] = [
