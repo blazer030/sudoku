@@ -114,9 +114,15 @@ export const loadSettings = (): Settings => {
     }
     // The current theme is the truth for the current style, which also seeds settings saved before the map existed
     settings.colorThemeByStyle = { ...remembered, [settings.style]: settings.colorTheme };
+    // Before the map, one appearance served every style, kept even through a style with one mode only: each style
+    // the player had already chosen keeps it, and a style they never chose starts on its first mode
+    const savedBeforeTheMap = !("appearanceByStyle" in parsed);
+    const carriedOver: RememberedAppearances = savedBeforeTheMap
+        ? Object.fromEntries(STYLE_IDS.filter(style => style in remembered).map(style => [style, effectiveColorMode(style, settings.appearance)]))
+        : usableRememberedAppearances(settings.appearanceByStyle);
     // Likewise the current appearance is the truth for the current style (a style with one mode only holds that mode)
     settings.appearanceByStyle = {
-        ...usableRememberedAppearances(settings.appearanceByStyle),
+        ...carriedOver,
         [settings.style]: effectiveColorMode(settings.style, settings.appearance),
     };
     if (!appearanceChosen) {

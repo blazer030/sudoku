@@ -172,6 +172,19 @@ describe("SettingsStorage", () => {
             expect(loadSettings().appearanceByStyle).toEqual({ minimal: "dark" });
         });
 
+        // Before the map, one appearance served every style: each style the player had already chosen keeps it, even
+        // while they sit on a style with one mode only
+        it("should seed every style the player had chosen with the saved mode for settings saved before the map existed", () => {
+            localStorage.setItem("sudoku-settings", JSON.stringify({
+                style: "paper",
+                colorTheme: "blueInk",
+                appearance: "dark",
+                colorThemeByStyle: { minimal: "green", tactile: "rust", paper: "blueInk" },
+            }));
+
+            expect(loadSettings().appearanceByStyle).toEqual({ minimal: "dark", tactile: "dark", paper: "light" });
+        });
+
         it("should ignore a remembered mode map that is not an object", () => {
             localStorage.setItem("sudoku-settings", JSON.stringify({ appearance: "dark", appearanceByStyle: ["dark"] }));
             expect(loadSettings().appearanceByStyle).toEqual({ minimal: "dark" });
