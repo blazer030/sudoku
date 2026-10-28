@@ -583,9 +583,8 @@
     color: var(--color-primary);
 }
 
-/* The game header's difficulty pill, the completion card's tags and a step's tag are yellow chalk loops, their
-   uneven corners in px so a long label keeps clear of the loop; the hint-mode pill and a final step's tag are
-   coloured in */
+/* The game header's difficulty pill and the completion card's tags are yellow chalk loops, their uneven corners in px
+   so a long label keeps clear of the loop; the hint-mode pill is coloured in */
 [data-style="chalkboard"] [data-skin~="pill"],
 [data-style="chalkboard"] [data-skin~="tag"] {
     background-color: transparent;
@@ -604,7 +603,26 @@
     color: var(--color-on-primary);
 }
 
-[data-style="chalkboard"] [data-skin~="tag"][data-skin~="step"][data-skin~="strong"] {
+/* The canvas's .steptag: a lopsided oval, drawn on ::after round the tag and out to the canvas's 30px height, so a long
+   technique stays inside the loop and the tag keeps its size; a final step's wash fills the oval */
+[data-style="chalkboard"] [data-skin~="tag"][data-skin~="step"] {
+    position: relative;
+    isolation: isolate;
+    background-color: transparent;
+    box-shadow: none;
+}
+
+[data-style="chalkboard"] [data-skin~="tag"][data-skin~="step"]::after {
+    content: "";
+    position: absolute;
+    inset: -4px -6px;
+    z-index: -1;
+    border-radius: 45% 55% 50% 50% / 60% 40% 60% 40%;
+    box-shadow: inset 0 0 0 2px var(--color-primary);
+    pointer-events: none;
+}
+
+[data-style="chalkboard"] [data-skin~="tag"][data-skin~="step"][data-skin~="strong"]::after {
     background-color: var(--color-primary-light);
 }
 

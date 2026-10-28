@@ -680,6 +680,29 @@ describe("chalkboard skin", () => {
             expect(tile.get("border-radius")).toBe(CHALK_LOOP);
         });
 
+        // The canvas's .steptag: a lopsided chalk oval drawn round the tag out to the canvas's 30px, so a long technique
+        // stays inside the loop and the tag keeps its size
+        it("should loop a step's tag in the canvas's lopsided oval, drawn round it", () => {
+            const STEP_TAG = `${SCOPE} [data-skin~="tag"][data-skin~="step"]`;
+            const tag = declarationsOf(CHALKBOARD_CSS, STEP_TAG);
+            const loop = declarationsOf(CHALKBOARD_CSS, `${STEP_TAG}::after`);
+
+            expect(tag.get("box-shadow")).toBe("none");
+            expect(tag.get("background-color")).toBe("transparent");
+            expect(tag.get("isolation")).toBe("isolate");
+            expect(loop.get("inset")).toBe("-4px -6px");
+            expect(loop.get("z-index")).toBe("-1");
+            expect(loop.get("border-radius")).toBe("45% 55% 50% 50% / 60% 40% 60% 40%");
+            expect(loop.get("box-shadow")).toBe("inset 0 0 0 2px var(--color-primary)");
+        });
+
+        it("should fill a final step's oval with the wash, not the tag's own box", () => {
+            const STRONG_TAG = `${SCOPE} [data-skin~="tag"][data-skin~="step"][data-skin~="strong"]`;
+
+            expect(declarationsOf(CHALKBOARD_CSS, `${STRONG_TAG}::after`).get("background-color")).toBe("var(--color-primary-light)");
+            expect(declarationsOf(CHALKBOARD_CSS, STRONG_TAG).get("background-color")).toBeUndefined();
+        });
+
         it.each([
             ["danger", "var(--color-danger)"],
             ["gave-up", "var(--color-danger)"],
