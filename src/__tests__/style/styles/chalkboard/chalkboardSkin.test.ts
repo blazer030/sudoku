@@ -829,13 +829,19 @@ describe("chalkboard skin", () => {
             expect(chosen.get("color")).toBe("var(--color-foreground)");
         });
 
-        it("should ring the difficulty pill in the primary and fill the hint-mode pill", () => {
-            const pill = declarationsOf(CHALKBOARD_CSS, `${SCOPE} [data-skin~="pill"]`);
-            const hint = declarationsOf(CHALKBOARD_CSS, `${SCOPE} [data-skin~="pill"][data-skin~="hint"]`);
+        // The canvas's .pill and .pill.hintpill: the step tags' lopsided oval, the hint-mode one filled in
+        it("should loop the difficulty pill in the step tags' oval and fill the hint-mode pill's oval", () => {
+            const PILL = `${SCOPE} [data-skin~="pill"]`;
+            const pill = declarationsOf(CHALKBOARD_CSS, PILL);
+            const loop = declarationsOf(CHALKBOARD_CSS, `${PILL}::after`);
+            const hint = declarationsOf(CHALKBOARD_CSS, `${PILL}[data-skin~="hint"]`);
 
             expect(pill.get("background-color")).toBe("transparent");
-            expect(pill.get("box-shadow")).toBe("inset 0 0 0 2px var(--color-primary)");
-            expect(hint.get("background-color")).toBe("var(--color-primary)");
+            expect(pill.get("box-shadow")).toBe("none");
+            expect(pill.get("isolation")).toBe("isolate");
+            expect(loop).toEqual(declarationsOf(CHALKBOARD_CSS, `${SCOPE} [data-skin~="tag"][data-skin~="step"]::after`));
+            expect(declarationsOf(CHALKBOARD_CSS, `${PILL}[data-skin~="hint"]::after`).get("background-color")).toBe("var(--color-primary)");
+            expect(hint.get("background-color")).toBeUndefined();
             expect(hint.get("color")).toBe("var(--color-on-primary)");
         });
 
