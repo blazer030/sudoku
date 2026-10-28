@@ -421,8 +421,8 @@ const inkMonochrome = (color: string): string[] => [
 // Chalkboard: a board in its frame (the wooden tray's wood round the 黑板, grey round the 白板), a hand-drawn grid in
 // the chalk or marker, a ring round the top-left cell, a 7 at the bottom right, and two stubs along the board's foot.
 // Ported from the style-research canvas (Chalk.dc.html). The 黑板's chalk (grid, ring and 7, not the stubs) is
-// roughened by the canvas's chalk filter, baked into the pre-rendered icons; the 白板's marker and the monochrome
-// silhouette stay plain.
+// roughened by the canvas's chalk filter, baked into the launcher PNGs and drawn live on the 外觀 card and the
+// favicon; the 白板's marker and the monochrome silhouette stay plain.
 const CHALKBOARD_BOARD = { inset: 8, size: 92, radius: 4 };
 const CHALKBOARD_GRID = "M44 24 Q43 54 45 84 M65 23 Q66 54 64 85 M24 44 Q54 42 84 45 M23 65 Q54 66 85 63";
 const CHALKBOARD_RING = "M45 38 Q34 36 33 46 Q34 57 46 56 Q56 54 55 45 Q53 37 44 39";
