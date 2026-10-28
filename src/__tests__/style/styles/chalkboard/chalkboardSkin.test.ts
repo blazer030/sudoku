@@ -198,11 +198,8 @@ describe("chalkboard skin", () => {
             expect(digits.get("mask-image")).toBe(GRAIN);
         });
 
-        it.each([
-            ["the selected cell", `${DARK_BOARD}:not([data-hint-mode]) [data-selected]::after`],
-            ["a hint's answer cell", `${DARK_BOARD} [data-variant="answer"]::after`],
-        ])("should grain the yellow ring around %s in 黑板", (_name, selector) => {
-            const ring = maskSupportsDeclarationsOf(selector);
+        it("should grain the yellow ring around the selected cell in 黑板", () => {
+            const ring = maskSupportsDeclarationsOf(`${DARK_BOARD}:not([data-hint-mode]) [data-selected]::after`);
 
             expect(ring.get("-webkit-mask-image")).toBe(`${RING_URL}, ${GRAIN}`);
             expect(ring.get("mask-image")).toBe(`${RING_URL}, ${GRAIN}`);
@@ -286,19 +283,16 @@ describe("chalkboard skin", () => {
     });
 
     describe("selection ring", () => {
-        it.each([
-            ["the selected cell", SELECTED_RING],
-            ["a hint's answer cell", ANSWER_RING],
-        ])("should ring %s above the chalk lines, never taking taps", (_name, selector) => {
-            const ring = declarationsOf(CHALKBOARD_CSS, selector);
+        it("should ring the selected cell above the chalk lines, never taking taps", () => {
+            const ring = declarationsOf(CHALKBOARD_CSS, SELECTED_RING);
 
             expect(ring.get("content")).toBe('""');
             expect(ring.get("z-index")).toBe("4");
             expect(ring.get("pointer-events")).toBe("none");
         });
 
-        it.each([SELECTED_RING, ANSWER_RING])("should draw the hand-drawn ring in the primary through the mask in %s", (selector) => {
-            const ring = maskSupportsDeclarationsOf(selector);
+        it("should draw the selected cell's hand-drawn ring in the primary through the mask", () => {
+            const ring = maskSupportsDeclarationsOf(SELECTED_RING);
 
             expect(ring.get("-webkit-mask-image")).toBe(RING_URL);
             expect(ring.get("mask-image")).toBe(RING_URL);
@@ -306,15 +300,25 @@ describe("chalkboard skin", () => {
             expect(ring.get("box-shadow")).toBe("none");
         });
 
-        it.each([SELECTED_RING, ANSWER_RING])("should fall back to a plain round ring in the primary where masks are unsupported in %s", (selector) => {
-            const ring = declarationsOf(CHALKBOARD_CSS, selector);
+        it("should fall back to a plain round ring in the primary where masks are unsupported", () => {
+            const ring = declarationsOf(CHALKBOARD_CSS, SELECTED_RING);
 
             expect(ring.get("box-shadow")).toContain("var(--color-primary)");
             expect(ring.get("background-color")).toBeUndefined();
         });
 
-        it.each(["selected", "answer"])("should give the %s cell no shared ring and no fill", (variant) => {
-            const cell = declarationsOf(CHALKBOARD_CSS, `${BOARD} [data-variant="${variant}"]`);
+        // The owner's call: a step's answer cell is washed in the primary instead of looped, so the loop never
+        // covers the emphasised candidate's own small ring
+        it("should wash a hint's answer cell in a see-through primary, with no loop", () => {
+            const cell = declarationsOf(CHALKBOARD_CSS, `${BOARD} [data-variant="answer"]`);
+
+            expect(cell.get("box-shadow")).toBe("none");
+            expect(cell.get("background-color")).toBe("color-mix(in srgb, var(--color-primary) 20%, transparent)");
+            expect(allRules().flatMap(rule => rule.selectors).filter(selector => selector.includes(ANSWER_RING))).toEqual([]);
+        });
+
+        it("should give the selected cell no shared ring and no fill", () => {
+            const cell = declarationsOf(CHALKBOARD_CSS, `${BOARD} [data-variant="selected"]`);
 
             expect(cell.get("box-shadow")).toBe("none");
             expect(cell.get("background-color")).toBe("transparent");

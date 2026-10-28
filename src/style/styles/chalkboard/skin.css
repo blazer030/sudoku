@@ -177,18 +177,22 @@
     color: var(--color-primary);
 }
 
-/* The selected cell and a hint's answer have no fill and no shared ring: a hand-drawn ring of yellow chalk (an
-   orange marker on 白板) instead (chalkboard-ring.svg), grained in 黑板. It marks the selected cell whatever its
-   variant (a selected error still shows where the player is); hint mode marks its answer instead. Where masks
-   are unsupported, a plain wobbly ring stands in. */
-[data-style="chalkboard"] [data-skin~="board"] [data-variant="selected"],
-[data-style="chalkboard"] [data-skin~="board"] [data-variant="answer"] {
+/* The selected cell has no fill and no shared ring: a hand-drawn ring of yellow chalk (an orange marker on 白板)
+   instead (chalkboard-ring.svg), grained in 黑板. It marks the selected cell whatever its variant (a selected error
+   still shows where the player is); where masks are unsupported, a plain wobbly ring stands in. A step's answer
+   cell (hint mode, the walkthrough, the review) is washed in the primary instead, the owner's call, so no loop
+   covers its emphasised candidate's own small ring. */
+[data-style="chalkboard"] [data-skin~="board"] [data-variant="selected"] {
     background-color: transparent;
     box-shadow: none;
 }
 
-[data-style="chalkboard"] [data-skin~="board"]:not([data-hint-mode]) [data-selected]::after,
-[data-style="chalkboard"] [data-skin~="board"] [data-variant="answer"]::after {
+[data-style="chalkboard"] [data-skin~="board"] [data-variant="answer"] {
+    background-color: color-mix(in srgb, var(--color-primary) 20%, transparent);
+    box-shadow: none;
+}
+
+[data-style="chalkboard"] [data-skin~="board"]:not([data-hint-mode]) [data-selected]::after {
     content: "";
     position: absolute;
     inset: 2px;
@@ -200,8 +204,7 @@
 }
 
 @supports ((mask-image: url("")) or (-webkit-mask-image: url(""))) {
-    [data-style="chalkboard"] [data-skin~="board"]:not([data-hint-mode]) [data-selected]::after,
-    [data-style="chalkboard"] [data-skin~="board"] [data-variant="answer"]::after {
+    [data-style="chalkboard"] [data-skin~="board"]:not([data-hint-mode]) [data-selected]::after {
         inset: 0;
         border-radius: 0;
         box-shadow: none;
@@ -215,8 +218,7 @@
         mask-repeat: no-repeat;
     }
 
-    :root.dark[data-style="chalkboard"] [data-skin~="board"]:not([data-hint-mode]) [data-selected]::after,
-    :root.dark[data-style="chalkboard"] [data-skin~="board"] [data-variant="answer"]::after {
+    :root.dark[data-style="chalkboard"] [data-skin~="board"]:not([data-hint-mode]) [data-selected]::after {
         -webkit-mask-image: url("@/style/styles/chalkboard/chalkboard-ring.svg"), var(--chalkboard-grain);
         mask-image: url("@/style/styles/chalkboard/chalkboard-ring.svg"), var(--chalkboard-grain);
         -webkit-mask-size: 100% 100%, 48px 48px;
