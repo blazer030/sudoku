@@ -105,6 +105,15 @@ describe("BlueprintBoardFrame", () => {
         expect(wrapper.findAll("[data-axis='row'][data-target]").map(label => label.attributes("data-index"))).toEqual(["4"]);
     });
 
+    it("should back each label in the paper, tight to its glyphs, so no graph-paper line runs under it", () => {
+        const label = declarationsOf(".blueprint-frame-label");
+
+        expect(label.get("background-color")).toBe("var(--color-background)");
+        // Grid items stretch to their track: these keep the backing to the label's own width
+        expect(declarationsOf('.blueprint-frame-label[data-axis="column"]').get("justify-self")).toBe("center");
+        expect(declarationsOf('.blueprint-frame-label[data-axis="row"]').get("justify-self")).toBe("end");
+    });
+
     it("should hide the target column's label under the tag and colour the target row's label", () => {
         expect(declarationsOf('.blueprint-frame-label[data-axis="column"][data-target]').get("visibility")).toBe("hidden");
         expect(declarationsOf('.blueprint-frame-label[data-axis="row"][data-target]').get("color")).toBe("var(--color-primary)");

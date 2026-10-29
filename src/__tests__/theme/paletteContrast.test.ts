@@ -467,10 +467,27 @@ const CHALKBOARD_BOARD_CASES: ChalkboardBoardCase[] = STYLES.chalkboard.themes.f
     ];
 }));
 
+const BLUEPRINT_FRAME_STYLE = /<style scoped>([\s\S]*?)<\/style>/
+    .exec(readFileSync("src/presentation/components/board-frame/blueprint/BlueprintBoardFrame.vue", "utf8"))?.[1] ?? "";
+
+// What lies under the board frame's labels: their own paper backing if they carry one, else the graph paper, whose
+// major lines are the darkest it puts under a glyph
+const blueprintLabelGround = (palette: Palette): readonly [string, string] => {
+    let backing: string | undefined;
+    postcss.parse(BLUEPRINT_FRAME_STYLE).walkRules((rule) => {
+        if (!rule.selectors.includes(".blueprint-frame-label")) return;
+        rule.walkDecls(/^background(?:-color)?$/, (declaration) => { backing = declaration.value.trim(); });
+    });
+    if (backing === "var(--color-background)") return ["their paper backing", palette.background];
+    const gridMajor = palette["grid-major"];
+    if (gridMajor === undefined) throw new Error("blueprint has no grid-major");
+    return ["the major grid lines", gridMajor];
+};
+
 // Blueprint's board: the ink actually drawn on the surface actually drawn. The grid is laid on the page's paper
 // colour, every cell on the paper or on a wash or hatching mixed over it (palette.ts). A hatching's lines are the
 // darkest a digit or note under them meets, so each is checked at its line colour. Its labels lie outside the board,
-// on the graph paper, the major lines the darkest they cross.
+// on the graph paper (blueprintLabelGround).
 interface BlueprintBoardCase { label: string; foreground: string; background: string; minimum: number }
 
 const BLUEPRINT_BOARD_CASES: BlueprintBoardCase[] = STYLES.blueprint.themes.flatMap(theme => STYLE_COLOR_MODES.blueprint.flatMap((mode) => {
@@ -491,7 +508,6 @@ const BLUEPRINT_BOARD_CASES: BlueprintBoardCase[] = STYLES.blueprint.themes.flat
     // The same digit's wash, which a step's pattern cells take too
     const sameDigitWash = ["the same-digit wash", palette.highlight] as const;
     const errorHatching = ["the error hatching", ownToken("error-hatch")] as const;
-    const gridMajor = ["the major grid lines", ownToken("grid-major")] as const;
     const on = (name: string, ink: string, surfaces: readonly (readonly [string, string])[], minimum = TEXT) =>
         surfaces.map(([surface, background]) => drawn(`${name} on ${surface}`, ink, background, minimum));
     return [
@@ -509,8 +525,9 @@ const BLUEPRINT_BOARD_CASES: BlueprintBoardCase[] = STYLES.blueprint.themes.flat
         drawn("emphasised candidate (on-primary) on primary", palette["on-primary"], palette.primary),
         // A step's struck-out notes are marks, their strike carrying them, so 3:1 applies
         ...on("struck-out note (error)", palette.error, [page, hatching, sameDigitWash, selectedWash], LARGE_OR_ICON),
-        // The frame's labels and the target cell's tag beside the board
-        ...on("label (foreground-secondary)", palette["foreground-secondary"], [page, gridMajor]),
+        // The frame's labels, the target row's lit label and the target cell's tag beside the board
+        ...on("label (foreground-secondary)", palette["foreground-secondary"], [blueprintLabelGround(palette)]),
+        ...on("lit row label (primary)", palette.primary, [blueprintLabelGround(palette)]),
         drawn("cell tag (on-primary) on primary", palette["on-primary"], palette.primary),
         // The selected cell's dashed frame and the answer cell's solid one are marks, so 3:1 applies; a selected
         // error cell keeps its dashed frame over the error hatching

@@ -133,6 +133,17 @@ const callout = computed(() => {
     font-size: 10px;
     line-height: 1;
     color: var(--color-foreground-secondary);
+    /* On a block of the paper's colour, as the dimension's words, so no graph-paper line runs under a glyph */
+    background-color: var(--color-background);
+}
+
+/* Grid items stretch to their track; these keep each label's paper to its own width */
+.blueprint-frame-label[data-axis="column"] {
+    justify-self: center;
+}
+
+.blueprint-frame-label[data-axis="row"] {
+    justify-self: end;
 }
 
 /* The grid's width, end stops and a centre line, its words on a block of the paper's colour */
