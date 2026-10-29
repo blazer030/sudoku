@@ -440,14 +440,18 @@
     border-radius: 0;
 }
 
-/* The grid keeps its 3px border (a width is layout), painted in the ink as the frame; the plain cell lines give way
-   to the drafted ones below */
+/* The grid keeps its 3px border (a width is layout) in the paper, and its frame is 2px of ink over the border's
+   inner 2px (an outline, which takes no room): with the outer box lines' halves inside it, the frame is 3px, one
+   step heavier than the 2px box lines, and every line still meets it. The plain cell lines give way to the drafted
+   ones below. */
 [data-style="blueprint"] [data-skin~="board-grid"] {
     --board-line: transparent;
     --board-box-line: transparent;
     position: relative;
     background-color: var(--color-background);
-    border-color: var(--color-foreground);
+    border-color: transparent;
+    outline: 2px solid var(--color-foreground);
+    outline-offset: -3px;
     border-radius: 0;
     box-shadow: none;
 }

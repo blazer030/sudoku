@@ -249,7 +249,8 @@ const callout = computed(() => {
 }
 
 /* The target cell's name in its column's label place: centred on the column, its foot on the labels' line
-   8px above the cells, with a short leader down to the board grid's 3px top border, never over a cell. It
+   8px above the cells, with a short leader down to the frame's ink (2px above the cells, inside the board grid's
+   3px border), never over a cell. It
    sits over the corner registration crosses, which a C1 or C9 tag reaches */
 .blueprint-callout {
     position: absolute;
@@ -265,7 +266,7 @@ const callout = computed(() => {
     top: 100%;
     left: -0.75px;
     width: 1.5px;
-    height: 5px;
+    height: 6px;
     background: var(--color-primary);
 }
 

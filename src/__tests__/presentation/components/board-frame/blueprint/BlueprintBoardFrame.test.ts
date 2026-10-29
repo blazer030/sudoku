@@ -129,11 +129,11 @@ describe("BlueprintBoardFrame", () => {
         const callout = declarationsOf(".blueprint-callout");
         const leader = declarationsOf(".blueprint-callout::after");
 
-        // The tag sits where the column labels do, 8px above the cells; the leader stops at the board grid's
-        // 3px top border, so neither ever lies over a cell
+        // The tag sits where the column labels do, 8px above the cells; the leader meets the frame's ink, 2px
+        // above the cells inside the board grid's 3px border, so neither ever lies over a cell
         expect(callout.get("bottom")).toBe("calc(100% + 8px)");
         expect(leader.get("top")).toBe("100%");
-        expect(leader.get("height")).toBe("5px");
+        expect(leader.get("height")).toBe("6px");
     });
 
     it("should lay the tag over the corner registration crosses it meets on C1 and C9", () => {

@@ -537,9 +537,6 @@ describe("blueprint skin", () => {
             expect(grid.get("border-radius")).toBe("0");
             expect(grid.get("--board-line")).toBe("transparent");
             expect(grid.get("--board-box-line")).toBe("transparent");
-            // The grid keeps its 3px border (a width is layout), painted in the ink as the frame: with the box
-            // lines' outer halves inside it, it reads as the canvas's frame, with no strip of paper between
-            expect(grid.get("border-color")).toBe("var(--color-foreground)");
             expect(grid.get("box-shadow")).toBe("none");
         });
 
@@ -557,6 +554,17 @@ describe("blueprint skin", () => {
             expect(image.match(/color-mix\(in srgb, var\(--color-foreground\) 42%, transparent\) 0 1px, transparent 1px/g)).toHaveLength(2);
             expect(lines.get("background-size")).toBe("calc(100% / 3) 100%, 100% calc(100% / 3), calc(100% / 9) 100%, 100% calc(100% / 9)");
             expect(lines.get("background-position")).toBe("-1px 0, 0 -1px, -0.5px 0, 0 -0.5px");
+        });
+
+        // The grid keeps its 3px border (a width is layout) in the paper; 2px of ink over the border's inner 2px
+        // and the outer box lines' 1px halves make a 3px frame, one step heavier than the 2px box lines, that every
+        // line still meets
+        it("should frame the grid in 3px of ink, one step heavier than the box lines", () => {
+            const grid = declarationsOf(BLUEPRINT_CSS, GRID);
+
+            expect(grid.get("border-color")).toBe("transparent");
+            expect(grid.get("outline")).toBe("2px solid var(--color-foreground)");
+            expect(grid.get("outline-offset")).toBe("-3px");
         });
 
         it("should keep digits and notes below the lines, and square every cell without the shared ring", () => {
