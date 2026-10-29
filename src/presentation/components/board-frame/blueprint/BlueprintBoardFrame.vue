@@ -14,6 +14,7 @@
                         v-for="index in INDICES"
                         :key="`column-${index}`"
                         :data-index="index"
+                        :data-lit="isLit('column', index) || undefined"
                         :data-target="target?.column === index || undefined"
                         class="blueprint-frame-label"
                         data-axis="column"
@@ -24,6 +25,7 @@
                         v-for="index in INDICES"
                         :key="`row-${index}`"
                         :data-index="index"
+                        :data-lit="isLit('row', index) || undefined"
                         :data-target="target?.row === index || undefined"
                         class="blueprint-frame-label"
                         data-axis="row"
@@ -62,6 +64,11 @@ const { t } = useI18n();
 
 const INDICES = [0, 1, 2, 3, 4, 5, 6, 7, 8] as const;
 const CORNERS = ["top-left", "top-right", "bottom-left", "bottom-right"] as const;
+
+// A completed row's or column's label lights while its group effect runs (skin.css); a box lights none, having no
+// label of its own beside the board
+const isLit = (kind: "row" | "column", index: number): boolean =>
+    props.effect?.groups.some(group => group.kind === kind && group.index === index) ?? false;
 
 // The middle of a column, as a percentage of the grid's width
 const columnMiddle = (column: number): string => `${((column + 0.5) * 100 / INDICES.length).toFixed(4)}%`;

@@ -656,6 +656,69 @@
     animation: blueprint-digit-ink 235ms ease 605ms both;
 }
 
+/* Completing a group (only with motion allowed), from GroupBlueprint: a dimension line of the primary, its stops at
+   both ends, snaps out in three steps along the completed row or down the completed column from the cell just
+   filled (R5 · 9), a dashed outline of the primary snaps round a completed box (B5) a beat later
+   (BlueprintGroupOverlay), and each fades by about 1s. The group's cells are hatched in 45% of the primary, rippling
+   out from the entered cell 45ms a step, and a completed line's margin label lights in the primary (a box lights
+   none). The hatch is the cells' background, so the entered cell's crosshairs (its ::before) and its digit's ink run
+   on untouched; its name marks it as the group's. Over the drafted lines (3), level with the selection frame (4)
+   and over it, as the overlay follows the cells. Every piece is unseen without its animation, so a stopped effect
+   leaves no still cue. */
+[data-style="blueprint"] [data-skin~="board"] [data-group]:not(.animate-hint-reveal-glow) {
+    --group-ripple-step: 45ms;
+    animation: blueprint-group-hatch 560ms linear calc(100ms + var(--group-delay, 0ms));
+}
+
+@keyframes blueprint-group-hatch {
+    20%, 70% { background-image: repeating-linear-gradient(45deg, color-mix(in srgb, var(--color-primary) 45%, transparent) 0 1px, transparent 1px 5px); }
+}
+
+[data-style="blueprint"] .blueprint-group-dimension {
+    z-index: 4;
+    pointer-events: none;
+    opacity: 0;
+}
+
+@keyframes blueprint-group-snap-x {
+    0% { opacity: 1; transform: scaleX(0); }
+    100% { opacity: 1; transform: none; }
+}
+
+@keyframes blueprint-group-snap-y {
+    0% { opacity: 1; transform: scaleY(0); }
+    100% { opacity: 1; transform: none; }
+}
+
+@keyframes blueprint-group-snap-box {
+    0% { opacity: 1; transform: scale(0.333); }
+    100% { opacity: 1; transform: none; }
+}
+
+@keyframes blueprint-group-fade {
+    to { opacity: 0; }
+}
+
+[data-style="blueprint"] .blueprint-group-dimension[data-kind="row"] {
+    animation: blueprint-group-snap-x 240ms steps(3, end) 100ms both, blueprint-group-fade 200ms 780ms forwards;
+}
+
+[data-style="blueprint"] .blueprint-group-dimension[data-kind="column"] {
+    animation: blueprint-group-snap-y 240ms steps(3, end) 100ms both, blueprint-group-fade 200ms 780ms forwards;
+}
+
+[data-style="blueprint"] .blueprint-group-dimension[data-kind="box"] {
+    animation: blueprint-group-snap-box 240ms steps(3, end) 140ms both, blueprint-group-fade 200ms 800ms forwards;
+}
+
+@keyframes blueprint-group-lit {
+    0%, 100% { color: var(--color-primary); }
+}
+
+[data-style="blueprint"] .blueprint-frame-label[data-lit] {
+    animation: blueprint-group-lit 900ms steps(1, end);
+}
+
 /* Settings and 外觀, as the canvas's .group / .gh: each card framed in 1.5px of ink, each group's heading in the
    ink at 500 (Statistics' cards take the same frame, below), its icon in the ink, and numbered on its right as a drawing's sections, B-01, B-02…, in the pale Mono */
 [data-style="blueprint"] [data-skin~="settings-card"],
@@ -1005,6 +1068,15 @@
     [data-style="blueprint"] [data-skin~="board"] [data-variant].value-leave::before,
     [data-style="blueprint"] [data-skin~="board"] [data-variant][data-arriving]::before,
     [data-style="blueprint"] [data-skin~="board"] [data-variant] > .value-arrive {
+        animation: none;
+    }
+
+    /* A completed group shows nothing: no dimension, outline, hatch or lit label */
+    [data-style="blueprint"] [data-skin~="board"] [data-group]:not(.animate-hint-reveal-glow),
+    [data-style="blueprint"] .blueprint-group-dimension[data-kind="row"],
+    [data-style="blueprint"] .blueprint-group-dimension[data-kind="column"],
+    [data-style="blueprint"] .blueprint-group-dimension[data-kind="box"],
+    [data-style="blueprint"] .blueprint-frame-label[data-lit] {
         animation: none;
     }
 

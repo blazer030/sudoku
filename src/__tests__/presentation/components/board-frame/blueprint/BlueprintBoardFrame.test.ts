@@ -7,6 +7,7 @@ import { i18n } from "@/presentation/i18n";
 import BlueprintBoardFrame from "@/presentation/components/board-frame/blueprint/BlueprintBoardFrame.vue";
 import { STYLE_BOARD_FRAMES } from "@/presentation/components/board-frame/boardFrames";
 import type { BoardFrameProps } from "@/presentation/components/board-frame/boardFrames";
+import type { CompletedGroup } from "@/domain/game/Sudoku";
 
 const SOURCE = readFileSync("src/presentation/components/board-frame/blueprint/BlueprintBoardFrame.vue", "utf8");
 const STYLE_BLOCK = /<style scoped>([\s\S]*?)<\/style>/.exec(SOURCE)?.[1] ?? "";
@@ -176,6 +177,37 @@ describe("BlueprintBoardFrame", () => {
         }
         expect(clipping).toEqual([]);
         expect(STYLE_BLOCK).not.toMatch(ANY_OVERFLOW_HIDDEN);
+    });
+
+    describe("completed groups", () => {
+        const mountWithEffect = (groups: CompletedGroup[]) => mount(BlueprintBoardFrame, {
+            props: { target: null, effect: { id: 1, groups, origin: { row: 4, column: 4 } }, celebration: null },
+        });
+        const litLabels = (wrapper: ReturnType<typeof mountWithEffect>): string[] =>
+            wrapper.findAll("[data-lit]").map(label => label.text());
+
+        it("should light a completed row's label", () => {
+            expect(litLabels(mountWithEffect([{ kind: "row", index: 4 }]))).toEqual(["R5"]);
+        });
+
+        it("should light a completed column's label", () => {
+            expect(litLabels(mountWithEffect([{ kind: "column", index: 4 }]))).toEqual(["C5"]);
+        });
+
+        // Ruling 9: a box has no label of its own beside the board, and lights none of its rows' or columns'
+        it("should light no label for a completed box", () => {
+            expect(litLabels(mountWithEffect([{ kind: "box", index: 4 }]))).toEqual([]);
+        });
+
+        it("should light each completed line's label together", () => {
+            const groups: CompletedGroup[] = [{ kind: "row", index: 1 }, { kind: "box", index: 1 }, { kind: "column", index: 7 }];
+
+            expect(litLabels(mountWithEffect(groups))).toEqual(["C8", "R2"]);
+        });
+
+        it("should light no label without an effect", () => {
+            expect(mountFrame({ row: 4, column: 4 }).findAll("[data-lit]")).toHaveLength(0);
+        });
     });
 
     it("should move the callout to a new target without remounting the frame", async () => {

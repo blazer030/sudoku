@@ -2,6 +2,7 @@ import { readFileSync } from "fs";
 import postcss from "postcss";
 import { ARRIVAL_SETTLE_MS } from "@/presentation/components/board-cell/useArrivalMotion";
 import { STYLE_MOMENTS } from "@/presentation/components/style-moments/styleMoments";
+import { GROUP_RIPPLE_STEP_MS } from "@/presentation/pages/game/useGroupEffect";
 import { animationTimingOf, declarationsOf, reducedMotionDeclarationsOf } from "../../styleSheetRules";
 
 const BLUEPRINT_CSS = readFileSync("src/style/styles/blueprint/skin.css", "utf8");
@@ -304,6 +305,145 @@ describe("blueprint moments", () => {
             expect(reducedMotionDeclarationsOf(BLUEPRINT_CSS, ARRIVING_DIGIT).get("animation")).toBe("none");
             expect(reducedMotionDeclarationsOf(BLUEPRINT_CSS, CROSSHAIRS).get("animation")).toBe("none");
             expect(declarationsOf(BLUEPRINT_CSS, ARRIVING_DIGIT).has("opacity")).toBe(false);
+        });
+    });
+    // GroupBlueprint: a dimension line snaps out along a completed row or column in three steps, a box gets a dashed
+    // outline of the primary, the group's cells are hatched in the primary rippling out, and the line's margin
+    // label lights; only with motion allowed, and nothing at all is left when it stops
+    describe("group completion", () => {
+        const GROUP_CELL = `${BOARD} [data-group]:not(.animate-hint-reveal-glow)`;
+        const DIMENSION = `${SCOPE} .blueprint-group-dimension`;
+        const DIMENSION_OF = {
+            row: `${DIMENSION}[data-kind="row"]`,
+            column: `${DIMENSION}[data-kind="column"]`,
+            box: `${DIMENSION}[data-kind="box"]`,
+        };
+        const LIT_LABEL = `${SCOPE} .blueprint-frame-label[data-lit]`;
+        const HATCH = "repeating-linear-gradient(45deg, color-mix(in srgb, var(--color-primary) 45%, transparent) 0 1px, transparent 1px 5px)";
+        const PRIMARY = "var(--color-primary)";
+
+        const animationOf = (selector: string): string => declarationsOf(BLUEPRINT_CSS, selector).get("animation") ?? "";
+        const spanOf = (selector: string, name: string): { startMs: number; endMs: number } => {
+            const timing = animationTimingOf(animationOf(selector), name);
+            if (timing === null) throw new Error(`${selector} does not run ${name}`);
+            return { startMs: timing.fixedDelayMs, endMs: timing.fixedDelayMs + timing.durationMs };
+        };
+        const animatedPropertiesOf = (name: string): string[] =>
+            [...new Set([...framesOf(name).values()].flatMap(frame => [...frame.keys()]))].sort();
+
+        // Every rule outside @keyframes and reduced motion that names a group piece, with its declarations
+        const groupRules = (): { selector: string; declarations: Map<string, string> }[] => {
+            const rules: { selector: string; declarations: Map<string, string> }[] = [];
+            postcss.parse(BLUEPRINT_CSS).walkRules((rule) => {
+                if (rule.parent?.type === "atrule") return;
+                const declarations = new Map<string, string>();
+                rule.walkDecls((declaration) => { declarations.set(declaration.prop, collapse(declaration.value)); });
+                for (const selector of rule.selectors.map(collapse).filter(item => /\[data-group\]|blueprint-group|\[data-lit\]/.test(item))) {
+                    rules.push({ selector, declarations });
+                }
+            });
+            return rules;
+        };
+
+        it("should snap a row's dimension out in three steps from 100ms over 240ms, and fade it from 780ms over 200ms", () => {
+            const animation = animationOf(DIMENSION_OF.row);
+
+            expect(spanOf(DIMENSION_OF.row, "blueprint-group-snap-x")).toEqual({ startMs: 100, endMs: 340 });
+            expect(spanOf(DIMENSION_OF.row, "blueprint-group-fade")).toEqual({ startMs: 780, endMs: 980 });
+            expect(animation).toContain("steps(3, end)");
+            expect(framesOf("blueprint-group-snap-x").get("0%")).toEqual(new Map([["opacity", "1"], ["transform", "scaleX(0)"]]));
+            expect(framesOf("blueprint-group-snap-x").get("100%")).toEqual(new Map([["opacity", "1"], ["transform", "none"]]));
+        });
+
+        it("should snap a column's dimension down it as a row's along it", () => {
+            expect(spanOf(DIMENSION_OF.column, "blueprint-group-snap-y")).toEqual({ startMs: 100, endMs: 340 });
+            expect(spanOf(DIMENSION_OF.column, "blueprint-group-fade")).toEqual({ startMs: 780, endMs: 980 });
+            expect(animationOf(DIMENSION_OF.column)).toContain("steps(3, end)");
+            expect(framesOf("blueprint-group-snap-y").get("0%")).toEqual(new Map([["opacity", "1"], ["transform", "scaleY(0)"]]));
+        });
+
+        it("should snap a box's outline out from a third from 140ms, and fade it from 800ms", () => {
+            expect(spanOf(DIMENSION_OF.box, "blueprint-group-snap-box")).toEqual({ startMs: 140, endMs: 380 });
+            expect(spanOf(DIMENSION_OF.box, "blueprint-group-fade")).toEqual({ startMs: 800, endMs: 1000 });
+            expect(animationOf(DIMENSION_OF.box)).toContain("steps(3, end)");
+            expect(framesOf("blueprint-group-snap-box").get("0%")).toEqual(new Map([["opacity", "1"], ["transform", "scale(0.333)"]]));
+            expect(framesOf("blueprint-group-fade").get("to")).toEqual(new Map([["opacity", "0"]]));
+        });
+
+        it("should leave every dimension unseen without its animation, over the board's lines and untouchable", () => {
+            const dimension = declarationsOf(BLUEPRINT_CSS, DIMENSION);
+
+            expect(dimension.get("opacity")).toBe("0");
+            expect(dimension.get("pointer-events")).toBe("none");
+            // Over the drafted lines (3), level with the selection frame (4) and after it
+            expect(dimension.get("z-index")).toBe("4");
+            expect(animatedPropertiesOf("blueprint-group-snap-x")).toEqual(["opacity", "transform"]);
+            expect(animatedPropertiesOf("blueprint-group-snap-box")).toEqual(["opacity", "transform"]);
+        });
+
+        it("should light a completed line's margin label in the primary for 900ms, held in one step", () => {
+            expect(spanOf(LIT_LABEL, "blueprint-group-lit")).toEqual({ startMs: 0, endMs: 900 });
+            expect(animationOf(LIT_LABEL)).toContain("steps(1, end)");
+            expect(framesOf("blueprint-group-lit").get("0%, 100%")).toEqual(new Map([["color", PRIMARY]]));
+        });
+
+        it("should hatch the group's cells in 45% of the primary, 5px apart, from 100ms for 560ms, rippling out 45ms a step", () => {
+            const step = declarationsOf(BLUEPRINT_CSS, GROUP_CELL).get("--group-ripple-step") ?? "";
+            const hatch = animationOf(GROUP_CELL);
+
+            expect(Number.parseFloat(step)).toBe(45);
+            expect(Number.parseFloat(step)).toBeLessThanOrEqual(GROUP_RIPPLE_STEP_MS);
+            expect(spanOf(GROUP_CELL, "blueprint-group-hatch")).toEqual({ startMs: 100, endMs: 660 });
+            expect(hatch).toContain("var(--group-delay, 0ms)");
+            expect(hatch).toContain(" linear ");
+            expect(animatedPropertiesOf("blueprint-group-hatch")).toEqual(["background-image"]);
+            expect(framesOf("blueprint-group-hatch").get("20%, 70%")).toEqual(new Map([["background-image", HATCH]]));
+        });
+
+        // The entered digit is in its own completed group (CLAUDE.md's trap): the hatch is on the cell's background, so
+        // its crosshairs (the cell's ::before) and its ink (the digit's .value-arrive) run on untouched
+        it("should leave the digits, the crosshairs and the strike to their own animations", () => {
+            for (const { selector, declarations } of groupRules()) {
+                if (!declarations.has("animation")) continue;
+                expect(selector, selector).not.toMatch(/> div|::before|::after|value-arrive/);
+            }
+            expect(animationOf(`${BOARD} [data-variant] > .value-arrive`)).toMatch(/^blueprint-digit-ink /);
+            expect(animationOf(CROSSHAIRS)).toMatch(/^blueprint-digit-crosshairs /);
+        });
+
+        it("should end each piece within the group effect", () => {
+            const effectMs = STYLE_MOMENTS.blueprint.groupEffectMs;
+
+            expect(effectMs).toBe(900);
+            // The entered cell's hatch ends latest past its own ripple delay, and the label lights with it
+            expect(spanOf(GROUP_CELL, "blueprint-group-hatch").endMs).toBeLessThanOrEqual(effectMs);
+            expect(spanOf(LIT_LABEL, "blueprint-group-lit").endMs).toBeLessThanOrEqual(effectMs);
+            // A line's farthest cell is at least four steps from the entered one, a box's two (from its centre)
+            for (const kind of ["row", "column"] as const) {
+                expect(spanOf(DIMENSION_OF[kind], "blueprint-group-fade").endMs, kind).toBeLessThanOrEqual(effectMs + 4 * GROUP_RIPPLE_STEP_MS);
+            }
+            expect(spanOf(DIMENSION_OF.box, "blueprint-group-fade").endMs).toBeLessThanOrEqual(effectMs + 2 * GROUP_RIPPLE_STEP_MS);
+        });
+
+        it("should move nothing with a filter, a mask or a motion path, and lift no cell into a layer of its own", () => {
+            for (const { selector, declarations } of groupRules()) {
+                const properties = [...declarations.keys()];
+                expect(properties.some(property => /filter|mask|offset-/.test(property)), selector).toBe(false);
+                if (selector.includes("[data-group]")) {
+                    expect(properties.some(property => ["transform", "z-index", "isolation"].includes(property)), selector).toBe(false);
+                }
+            }
+        });
+
+        it("should stop every piece under reduced motion and leave no still cue", () => {
+            const animated = groupRules().filter(({ declarations }) => declarations.has("animation"));
+
+            expect(animated.map(({ selector }) => selector).sort()).toEqual([GROUP_CELL, LIT_LABEL, ...Object.values(DIMENSION_OF)].sort());
+            for (const { selector } of animated) {
+                const stopped = reducedMotionDeclarationsOf(BLUEPRINT_CSS, selector);
+                expect(stopped.get("animation"), selector).toBe("none");
+                expect([...stopped.keys()], selector).toEqual(["animation"]);
+            }
         });
     });
 });

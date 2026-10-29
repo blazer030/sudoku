@@ -137,6 +137,8 @@ const REQUIRED_SELECTORS: Record<StyleId, readonly string[]> = {
         "> .value-arrive",
         ".blueprint-loader-plot",
         ".blueprint-loader-pen",
+        "[data-group]",
+        ".blueprint-group-dimension",
         "body::before",
         '[data-skin~="card"]',
         '[data-skin~="pill"]',
