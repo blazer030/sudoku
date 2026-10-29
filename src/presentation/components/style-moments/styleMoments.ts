@@ -20,6 +20,7 @@ import ChalkboardDigitWriter from "@/presentation/components/style-moments/chalk
 import ChalkboardLoader from "@/presentation/components/style-moments/chalkboard/ChalkboardLoader.vue";
 import ChalkboardGroupOverlay from "@/presentation/components/style-moments/chalkboard/ChalkboardGroupOverlay.vue";
 import ChalkboardCardDecoration from "@/presentation/components/style-moments/chalkboard/ChalkboardCardDecoration.vue";
+import BlueprintDigitWriter from "@/presentation/components/style-moments/blueprint/BlueprintDigitWriter.vue";
 import type { CompletedGroup } from "@/domain/game/Sudoku";
 
 /** A group effect on the board: a new one gets a new id, which starts its drawings afresh. */
@@ -162,6 +163,7 @@ const BLUEPRINT_MOMENTS: StyleMoments = {
     cardDecoration: null,
     groupEffectMs: 900,
     celebrationBoardMs: 1300,
+    digitWriter: BlueprintDigitWriter,
 };
 
 // One entry per style, so a style added without its moments is a type error

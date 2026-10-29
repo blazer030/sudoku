@@ -617,6 +617,74 @@
     animation: blueprint-strike 700ms ease-in;
 }
 
+/* A digit entered is plotted, then inked in, as the canvas's fill at 0.8 of its 1.05s so it ends before the arrival
+   settles on its own: BlueprintDigitWriter traces the digit's outline (Architects Daughter's own, as paths with
+   pathLength 1, so the whole dash is the whole outline) in 0.8px of the primary over 0–655ms while two 1px
+   crosshairs wander the cell on the canvas's headA over 0–640ms; the mask the digit is shown through inks it in
+   over 605–840ms and the outline lifts over 740–840ms, leaving the digit itself. The outlines are Blueprint Hand's,
+   so the mask and the pen apply only once it has loaded; a digit placed with no writer mounted gets no var and
+   shows whole. */
+@keyframes blueprint-digit-plot {
+    from { stroke-dashoffset: 1; }
+    to { stroke-dashoffset: 0; }
+}
+
+@keyframes blueprint-digit-lift {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+@keyframes blueprint-digit-ink {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes blueprint-digit-crosshairs {
+    0% { opacity: 1; transform: translate(-30%, -30%); }
+    25% { transform: translate(22%, -18%); }
+    50% { transform: translate(-14%, 12%); }
+    75% { opacity: 1; transform: translate(16%, 24%); }
+    100% { opacity: 0; transform: none; }
+}
+
+[data-style="blueprint"][data-blueprint-fonts="ready"] [data-skin~="board"] .font-entry.value-arrive {
+    -webkit-mask-image: var(--digit-writer-mask, none);
+    mask-image: var(--digit-writer-mask, none);
+}
+
+[data-style="blueprint"] .blueprint-digit-outline {
+    fill: none;
+    stroke: var(--color-primary);
+    /* 0.8px at the entry's size, in the font units the outline is drawn in: a non-scaling stroke would dash in
+       screen pixels against a length counted in those units, and draw nearly whole at once */
+    stroke-width: calc(0.8 * var(--blueprint-digit-units-per-em) / (22 * var(--entry-scale, 1)));
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    opacity: 0;
+}
+
+[data-style="blueprint"][data-blueprint-fonts="ready"] .blueprint-digit-outline {
+    animation: blueprint-digit-plot 655ms linear both, blueprint-digit-lift 100ms linear 740ms both;
+}
+
+[data-style="blueprint"] .blueprint-digit-crosshairs {
+    opacity: 0;
+}
+
+[data-style="blueprint"][data-blueprint-fonts="ready"] .blueprint-digit-crosshairs {
+    animation: blueprint-digit-crosshairs 640ms linear;
+}
+
+[data-style="blueprint"] .blueprint-digit-crosshair {
+    stroke: var(--color-primary);
+    stroke-width: 1;
+}
+
+[data-style="blueprint"] .blueprint-digit-ink {
+    opacity: 0;
+    animation: blueprint-digit-ink 235ms ease 605ms both;
+}
+
 /* Settings and 外觀, as the canvas's .group / .gh: each card framed in 1.5px of ink, each group's heading in the
    ink at 500 (Statistics' cards take the same frame, below), its icon in the ink, and numbered on its right as a drawing's sections, B-01, B-02…, in the pale Mono */
 [data-style="blueprint"] [data-skin~="settings-card"],
@@ -901,7 +969,15 @@
         animation: none;
     }
 
-    [data-style="blueprint"] [data-skin~="board"] [data-variant].value-leave::before {
+    [data-style="blueprint"] [data-skin~="board"] [data-variant].value-leave::before,
+    [data-style="blueprint"][data-blueprint-fonts="ready"] .blueprint-digit-outline,
+    [data-style="blueprint"][data-blueprint-fonts="ready"] .blueprint-digit-crosshairs,
+    [data-style="blueprint"] .blueprint-digit-ink {
         animation: none;
+    }
+
+    [data-style="blueprint"][data-blueprint-fonts="ready"] [data-skin~="board"] .font-entry.value-arrive {
+        -webkit-mask-image: none;
+        mask-image: none;
     }
 }
