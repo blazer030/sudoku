@@ -38,8 +38,8 @@ describe("StepPlaybackPanel", () => {
         const skinOf = (testId: string): string[] => (wrapper.find(`[data-testid='${testId}']`).attributes("data-skin") ?? "").split(" ");
 
         expect(skinOf("demo-play")).toEqual(["button", "play"]);
-        expect(skinOf("demo-dot-0")).toEqual(["step-dot", "past"]);
-        expect(skinOf("demo-dot-1")).toEqual(["step-dot", "current"]);
+        expect(skinOf("demo-dot-0")).toEqual(["step-dot", "step-dot-past"]);
+        expect(skinOf("demo-dot-1")).toEqual(["step-dot", "step-dot-current"]);
         expect(skinOf("demo-dot-2")).toEqual(["step-dot"]);
         expect(skinOf("demo-previous")).toEqual(["step-arrow"]);
         expect(skinOf("demo-next")).toEqual(["step-arrow"]);

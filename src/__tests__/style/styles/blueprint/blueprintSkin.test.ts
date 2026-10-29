@@ -476,8 +476,8 @@ describe("blueprint skin", () => {
 
         it("should square the step dots in the pale ink, this step's filled with the primary and the ones passed half the pale ink", () => {
             const dot = declarationsOf(BLUEPRINT_CSS, skin("step-dot"));
-            const current = declarationsOf(BLUEPRINT_CSS, skin("step-dot current"));
-            const past = declarationsOf(BLUEPRINT_CSS, skin("step-dot past"));
+            const current = declarationsOf(BLUEPRINT_CSS, skin("step-dot step-dot-current"));
+            const past = declarationsOf(BLUEPRINT_CSS, skin("step-dot step-dot-past"));
 
             expect(dot.get("border-radius")).toBe("0");
             expect(dot.get("background-color")).toBe("transparent");

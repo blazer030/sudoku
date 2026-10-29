@@ -595,12 +595,12 @@
     border-radius: 0;
 }
 
-[data-style="blueprint"] [data-skin~="step-dot"][data-skin~="current"] {
+[data-style="blueprint"] [data-skin~="step-dot"][data-skin~="step-dot-current"] {
     background-color: var(--color-primary);
     box-shadow: none;
 }
 
-[data-style="blueprint"] [data-skin~="step-dot"][data-skin~="past"] {
+[data-style="blueprint"] [data-skin~="step-dot"][data-skin~="step-dot-past"] {
     background-color: color-mix(in srgb, var(--color-foreground-secondary) 50%, transparent);
     box-shadow: none;
 }
