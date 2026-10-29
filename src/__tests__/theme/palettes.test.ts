@@ -1,5 +1,5 @@
 import { STYLE_IDS, THEME_IDS_BY_STYLE, STYLE_COLOR_MODES, type ColorThemeId, type StyleId } from "@/theme/themeIds";
-import { STYLES, STYLE_OWN_TOKENS, getPalette, rememberedThemeFor, systemBarColor, type StyleOwnToken } from "@/theme/palettes";
+import { STYLES, STYLE_OWN_TOKENS, getPalette, rememberedThemeFor, swatchColors, systemBarColor, type StyleOwnToken } from "@/theme/palettes";
 import { darkOnlyThemeBuilder } from "@/theme/paletteBuilder";
 import { contrastRatio, mixColors } from "@/theme/contrast";
 
@@ -280,5 +280,13 @@ describe("palettes", () => {
                 expect(contrastRatio(toast, background), `${style.id}/${theme.id}`).toBeLessThan(contrastRatio(toast, foreground));
             }
         }
+    });
+
+    describe("swatchColors", () => {
+        it("should show a style's primary with the colour on it by default", () => {
+            const palette = getPalette("minimal", "blue", "light");
+
+            expect(swatchColors("minimal", "light", palette)).toEqual({ fill: palette.primary, mark: palette["on-primary"] });
+        });
     });
 });

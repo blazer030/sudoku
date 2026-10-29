@@ -60,3 +60,9 @@ export const systemBarColor = (style: StyleId, themeId: ColorThemeId, mode: Colo
     const palette = getPalette(style, themeId, mode);
     return effectiveColorMode(style, mode) === "light" ? palette.primary : palette.background;
 };
+
+/** The disc a colour-theme swatch is drawn as, and the colour of the check mark on it. */
+export const swatchColors = (_style: StyleId, _mode: ColorMode, palette: Palette): { fill: string; mark: string } => ({
+    fill: palette.primary,
+    mark: palette["on-primary"],
+});

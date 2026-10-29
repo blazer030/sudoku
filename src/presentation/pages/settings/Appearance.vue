@@ -76,14 +76,15 @@
                     :aria-pressed="swatch.id === settingsStore.colorTheme"
                     :class="swatch.id === settingsStore.colorTheme ? 'ring-2 ring-offset-2 ring-offset-card ring-primary' : ''"
                     :data-testid="`color-theme-${swatch.id}`"
-                    :style="{ backgroundColor: swatch.palette.primary }"
+                    :style="{ backgroundColor: swatch.fill }"
                     class="relative aspect-square w-full max-w-15 rounded-full cursor-pointer overflow-hidden"
+                    data-skin="swatch"
                     type="button"
                     @click="onSelectColorTheme(swatch.id)"
                 >
                     <div
                         v-if="swatch.id === settingsStore.colorTheme"
-                        :style="{ color: swatch.palette['on-primary'] }"
+                        :style="{ color: swatch.mark }"
                         class="absolute inset-0 flex items-center justify-center"
                         data-testid="color-theme-check"
                     >
@@ -126,7 +127,7 @@ import { Check, Smartphone } from "lucide-vue-next";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { usePlatform } from "@/presentation/composables/usePlatform";
 import { STYLE_COLOR_MODES, STYLE_IDS, type ColorMode, type ColorThemeId, type StyleId } from "@/theme/themeIds";
-import { STYLES, getPalette, rememberedAppearanceFor, rememberedThemeFor } from "@/theme/palettes";
+import { STYLES, getPalette, rememberedAppearanceFor, rememberedThemeFor, swatchColors } from "@/theme/palettes";
 import { useColorModeLabel } from "@/presentation/i18n/colorModeLabels";
 import { vPress } from "@/presentation/directives/press";
 import PageHeader from "@/presentation/components/page-header/PageHeader.vue";
@@ -146,10 +147,10 @@ const styleCards = computed(() => STYLE_IDS.map(styleId => ({
     palette: getPalette(styleId, rememberedThemeFor(styleId, settingsStore.colorThemeByStyle), rememberedAppearanceFor(styleId, settingsStore.appearanceByStyle)),
 })));
 
-// The current style's own themes, each a solid circle of the primary the app would show in the current mode
+// The current style's own themes, each a solid circle in the colour the style gives it for the current mode
 const swatches = computed(() => STYLES[settingsStore.style].themes.map(theme => ({
     id: theme.id,
-    palette: getPalette(settingsStore.style, theme.id, settingsStore.appearance),
+    ...swatchColors(settingsStore.style, settingsStore.appearance, getPalette(settingsStore.style, theme.id, settingsStore.appearance)),
 })));
 
 const modeOptions = computed((): { value: ColorMode; label: string }[] =>
