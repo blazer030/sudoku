@@ -124,9 +124,14 @@ const REQUIRED_SELECTORS: Record<StyleId, readonly string[]> = {
         ".chalkboard-cheer-text",
         ".chalkboard-doodle",
     ],
-    // The press hooks and the shared pieces for now; the board and moments add theirs
+    // The press hooks, the shared pieces and the board for now; the moments add theirs
     blueprint: [
         ...PRESS,
+        '[data-skin~="board"]',
+        '[data-skin~="board-grid"]::after',
+        "[data-selected]::after",
+        "[data-value-kind]",
+        "[data-note-highlight]",
         "body::before",
         '[data-skin~="card"]',
         '[data-skin~="pill"]',

@@ -2,7 +2,7 @@ import { readFileSync } from "fs";
 import postcss from "postcss";
 import { THEME_IDS_BY_STYLE, STYLE_IDS, STYLE_COLOR_MODES, type ColorMode, type ColorThemeId, type StyleId } from "@/theme/themeIds";
 import { contrastRatio, mixColors } from "@/theme/contrast";
-import { STYLES, getPalette, type Palette, type PaletteToken } from "@/theme/palettes";
+import { STYLES, getPalette, type Palette, type PaletteToken, type StyleOwnToken } from "@/theme/palettes";
 
 const TEXT = 4.5;
 const LARGE_OR_ICON = 3;
@@ -87,10 +87,11 @@ const BOARD_INKS: readonly PaletteToken[] = ["foreground", "primary", "error", "
 // ever a struck-out note; CHALKBOARD_BOARD_CASES holds it to the mark's 3:1 there.
 const CHALKBOARD_DARK_UNDRAWN: ReadonlySet<string> = new Set(["error on cell-peer", "error on highlight", "error on primary-light"]);
 const CHALKBOARD_DARK_STRUCK_OUT: ReadonlySet<string> = new Set(["error on cell-scope", "error on cell-pattern"]);
-// 藍曬圖's cells sit on the paper, never on the card, and its error cell lays its own error hatching over every wash (an error cell's variant wins over the selected,
-// peer and same-digit ones), so its red digit lies only on the page and the error hatching; on a hint's hatched scope
-// cells and same-digit pattern cells the red is only ever a struck-out note. BLUEPRINT_BOARD_CASES checks where the red
-// does land.
+// 藍曬圖's cells sit on the paper, never on the card, and its error cell lays its own error hatching over every wash (an
+// error cell's variant wins over the selected, peer and same-digit ones), so its red digit lies only on the page and
+// the error hatching. On a step's hatched scope cells, its same-digit pattern cells and its answer cell (the selected
+// wash, which the focus and primary-light tokens share) the red is only ever a struck-out note. BLUEPRINT_BOARD_CASES
+// checks where the red does land.
 const BLUEPRINT_DARK_UNDRAWN: ReadonlySet<string> = new Set([
     "error on card", "error on primary-light", "error on highlight", "error on cell-focus", "error on cell-scope", "error on cell-pattern",
     "error on cell-selected", "error on cell-peer",
@@ -466,9 +467,10 @@ const CHALKBOARD_BOARD_CASES: ChalkboardBoardCase[] = STYLES.chalkboard.themes.f
     ];
 }));
 
-// Blueprint's board: the ink actually drawn on the surface actually drawn. The board is laid on the page's paper
-// colour, every cell on the paper or on a wash or hatching mixed over it (palette.ts). This holds where the red lands
-// that the general board pairs skip in 藍曬圖; the board's other inks and washes come with the board's skin.
+// Blueprint's board: the ink actually drawn on the surface actually drawn. The grid is laid on the page's paper
+// colour, every cell on the paper or on a wash or hatching mixed over it (palette.ts). A hatching's lines are the
+// darkest a digit or note under them meets, so each is checked at its line colour. Its labels lie outside the board,
+// on the graph paper, the major lines the darkest they cross.
 interface BlueprintBoardCase { label: string; foreground: string; background: string; minimum: number }
 
 const BLUEPRINT_BOARD_CASES: BlueprintBoardCase[] = STYLES.blueprint.themes.flatMap(theme => STYLE_COLOR_MODES.blueprint.flatMap((mode) => {
@@ -477,14 +479,42 @@ const BLUEPRINT_BOARD_CASES: BlueprintBoardCase[] = STYLES.blueprint.themes.flat
     const drawn = (name: string, foreground: string, background: string, minimum = TEXT): BlueprintBoardCase => ({
         label: `${prefix}: ${name} ≥ ${minimum}`, foreground, background, minimum,
     });
-    const errorHatch = palette["error-hatch"] ?? palette.background;
-    const hatch = palette.hatch ?? palette.background;
+    const ownToken = (token: StyleOwnToken): string => {
+        const colour = palette[token];
+        if (colour === undefined) throw new Error(`${prefix} has no ${token}`);
+        return colour;
+    };
+    const page = ["the page", palette.background] as const;
+    const hatching = ["the hatching", ownToken("hatch")] as const;
+    // The selected cell's wash, which a step's answer cell takes too
+    const selectedWash = ["the selected wash", palette["cell-selected"]] as const;
+    // The same digit's wash, which a step's pattern cells take too
+    const sameDigitWash = ["the same-digit wash", palette.highlight] as const;
+    const errorHatching = ["the error hatching", ownToken("error-hatch")] as const;
+    const gridMajor = ["the major grid lines", ownToken("grid-major")] as const;
+    const on = (name: string, ink: string, surfaces: readonly (readonly [string, string])[], minimum = TEXT) =>
+        surfaces.map(([surface, background]) => drawn(`${name} on ${surface}`, ink, background, minimum));
     return [
-        drawn("error on the page", palette.error, palette.background),
-        drawn("error on its hatching", palette.error, errorHatch),
-        // A hint's struck-out notes are marks, their strike carrying them, so 3:1 applies
-        drawn("struck-out note (error) on the hatching", palette.error, hatch, LARGE_OR_ICON),
-        drawn("struck-out note (error) on the same-digit wash", palette.error, palette.highlight, LARGE_OR_ICON),
+        // A clue or the player's digit (both in the ink) on a plain, peer, selected or same-digit cell, and in an error cell
+        ...on("digit (foreground)", palette.foreground, [page, hatching, selectedWash, sameDigitWash, errorHatching]),
+        // The same digit and the selected cell's digit
+        ...on("chosen digit (primary)", palette.primary, [selectedWash, sameDigitWash]),
+        // The player's notes and the selected digit's note, in a plain, peer or selected cell
+        ...on("note", palette.note, [page, hatching, selectedWash]),
+        ...on("highlighted note (primary)", palette.primary, [page, hatching, selectedWash]),
+        // A wrong digit: an error cell's hatching lies over every other wash
+        ...on("error digit (error)", palette.error, [page, errorHatching]),
+        // A step's candidates, in plain, scope, pattern and answer cells
+        ...on("candidate (foreground)", palette.foreground, [page, hatching, sameDigitWash, selectedWash]),
+        drawn("emphasised candidate (on-primary) on primary", palette["on-primary"], palette.primary),
+        // A step's struck-out notes are marks, their strike carrying them, so 3:1 applies
+        ...on("struck-out note (error)", palette.error, [page, hatching, sameDigitWash, selectedWash], LARGE_OR_ICON),
+        // The frame's labels and the target cell's tag beside the board
+        ...on("label (foreground-secondary)", palette["foreground-secondary"], [page, gridMajor]),
+        drawn("cell tag (on-primary) on primary", palette["on-primary"], palette.primary),
+        // The selected cell's dashed frame and the answer cell's solid one are marks, so 3:1 applies; a selected
+        // error cell keeps its dashed frame over the error hatching
+        ...on("selection frame (primary)", palette.primary, [selectedWash, errorHatching], LARGE_OR_ICON),
     ];
 }));
 

@@ -495,4 +495,189 @@ describe("blueprint skin", () => {
             expect(past.get("box-shadow")).toBe("none");
         });
     });
+
+    describe("board", () => {
+        const BOARD = `${SCOPE} [data-skin~="board"]`;
+        const GRID = skin("board-grid");
+        const cell = (variant: string): string => `${BOARD} [data-variant="${variant}"]`;
+        const HATCH = "repeating-linear-gradient(45deg, var(--color-hatch) 0 1px, transparent 1px 6px)";
+        // Heavier than the peers' hatching, so in 製圖紙, where it is the selected wash's 8% red, it still reads as a pattern on a phone
+        const ERROR_HATCH = "repeating-linear-gradient(45deg, var(--color-error-hatch) 0 2px, transparent 2px 5px)";
+        const PRESS_WASH = "linear-gradient(var(--press-overlay), var(--press-overlay))";
+        // The index of the last top-level rule that lists the selector, so the sheet's order can be checked
+        const lastRuleIndexOf = (selector: string): number => allRules().map(rule => rule.selectors.includes(selector)).lastIndexOf(true);
+
+        it("should lay the board bare on the page, without a card, a shadow or round corners", () => {
+            const board = declarationsOf(BLUEPRINT_CSS, BOARD);
+
+            expect(board.get("background-color")).toBe("transparent");
+            expect(board.get("box-shadow")).toBe("none");
+            expect(board.get("border-radius")).toBe("0");
+        });
+
+        it("should set clues at their own size and the player's digits 1.25 times it, the canvas's 23:18", () => {
+            const board = declarationsOf(BLUEPRINT_CSS, BOARD);
+
+            expect(board.get("--clue-scale")).toBe("1");
+            expect(board.get("--entry-scale")).toBe("1.25");
+        });
+
+        it("should lay the grid on the page's paper, so the graph paper stops at the frame, framed in the ink", () => {
+            const grid = declarationsOf(BLUEPRINT_CSS, GRID);
+
+            expect(grid.get("background-color")).toBe("var(--color-background)");
+            expect(grid.get("border-radius")).toBe("0");
+            expect(grid.get("--board-line")).toBe("transparent");
+            expect(grid.get("--board-box-line")).toBe("transparent");
+            // The grid keeps its 3px border (a width is layout), painted in the ink as the frame: with the box
+            // lines' outer halves inside it, it reads as the canvas's frame, with no strip of paper between
+            expect(grid.get("border-color")).toBe("var(--color-foreground)");
+            expect(grid.get("box-shadow")).toBe("none");
+        });
+
+        it("should rule 2px box lines and 1px cell lines (42% of the ink) over the cells, above the digits, never taking taps", () => {
+            const lines = declarationsOf(BLUEPRINT_CSS, `${GRID}::after`);
+            const image = lines.get("background-image") ?? "";
+
+            expect(lines.get("content")).toBe('""');
+            expect(lines.get("position")).toBe("absolute");
+            expect(lines.get("inset")).toBe("0");
+            expect(lines.get("z-index")).toBe("3");
+            expect(lines.get("pointer-events")).toBe("none");
+            expect(image.match(/linear-gradient\(/g)).toHaveLength(4);
+            expect(image.match(/var\(--color-foreground\) 0 2px, transparent 2px/g)).toHaveLength(2);
+            expect(image.match(/color-mix\(in srgb, var\(--color-foreground\) 42%, transparent\) 0 1px, transparent 1px/g)).toHaveLength(2);
+            expect(lines.get("background-size")).toBe("calc(100% / 3) 100%, 100% calc(100% / 3), calc(100% / 9) 100%, 100% calc(100% / 9)");
+            expect(lines.get("background-position")).toBe("-1px 0, 0 -1px, -0.5px 0, 0 -0.5px");
+        });
+
+        it("should keep digits and notes below the lines, and square every cell without the shared ring", () => {
+            const cells = declarationsOf(BLUEPRINT_CSS, `${BOARD} [data-variant]`);
+            const digits = declarationsOf(BLUEPRINT_CSS, `${BOARD} [data-variant] > div`);
+
+            expect(cells.get("position")).toBe("relative");
+            expect(cells.get("border-radius")).toBe("0");
+            expect(cells.get("box-shadow")).toBe("none");
+            expect(digits.get("position")).toBe("relative");
+            expect(digits.get("z-index")).toBe("2");
+        });
+
+        it("should set clues in Mono 500 and the player's digits in Hand 400, both in the ink", () => {
+            expect(declarationsOf(BLUEPRINT_CSS, `${BOARD} [data-value-kind] > div`).get("color")).toBe("var(--color-foreground)");
+            expect(declarationsOf(BLUEPRINT_CSS, `${BOARD} [data-value-kind="given"] > div`).get("font-weight")).toBe("500");
+            expect(declarationsOf(BLUEPRINT_CSS, `${BOARD} [data-value-kind="entered"] > div`).get("font-weight")).toBe("400");
+        });
+
+        it("should lay plain cells and clues on the grid's paper", () => {
+            expect(declarationsOf(BLUEPRINT_CSS, cell("default")).get("background-color")).toBe("transparent");
+            expect(declarationsOf(BLUEPRINT_CSS, cell("clue")).get("background-color")).toBe("transparent");
+        });
+
+        it("should hatch peer cells at 45° in 1px lines 6px apart, over the paper, keeping the press wash", () => {
+            const peer = declarationsOf(BLUEPRINT_CSS, cell("peer"));
+            const pressed = declarationsOf(BLUEPRINT_CSS, `${cell("peer")}[data-pressed]`);
+
+            expect(peer.get("background-color")).toBe("transparent");
+            expect(peer.get("background-image")).toBe(HATCH);
+            expect(pressed.get("background-image")).toBe(`${PRESS_WASH}, ${HATCH}`);
+        });
+
+        it("should wash a same-digit cell flat in the highlight and write its digit in the primary, with no hatching", () => {
+            const sameDigit = declarationsOf(BLUEPRINT_CSS, cell("same-digit"));
+
+            expect(sameDigit.get("background-color")).toBe("var(--color-highlight)");
+            expect(sameDigit.has("background-image")).toBe(false);
+            expect(declarationsOf(BLUEPRINT_CSS, `${cell("same-digit")}[data-value-kind] > div`).get("color")).toBe("var(--color-primary)");
+        });
+
+        it("should wash the selected cell flat and write its digit in the primary, with no hatching", () => {
+            const selected = declarationsOf(BLUEPRINT_CSS, cell("selected"));
+
+            expect(selected.get("background-color")).toBe("var(--color-cell-selected)");
+            expect(selected.has("background-image")).toBe(false);
+            expect(declarationsOf(BLUEPRINT_CSS, `${cell("selected")}[data-value-kind] > div`).get("color")).toBe("var(--color-primary)");
+        });
+
+        it("should frame the selected cell 3px in with a 1.5px dashed line of the primary, above the lines, never taking taps", () => {
+            const frame = declarationsOf(BLUEPRINT_CSS, `${BOARD}:not([data-hint-mode]) [data-selected]::after`);
+
+            expect(frame.get("content")).toBe('""');
+            expect(frame.get("position")).toBe("absolute");
+            expect(frame.get("inset")).toBe("3px");
+            expect(frame.get("z-index")).toBe("4");
+            expect(frame.get("pointer-events")).toBe("none");
+            expect(frame.get("border")).toBe("1.5px dashed var(--color-primary)");
+        });
+
+        it("should hatch an error cell in the error hatching alone, with no flat wash, writing its digit in the error colour", () => {
+            for (const variant of ["error", "wrong"]) {
+                const error = declarationsOf(BLUEPRINT_CSS, cell(variant));
+
+                expect(error.get("background-color"), variant).toBe("transparent");
+                expect(error.get("background-image"), variant).toBe(ERROR_HATCH);
+                expect(declarationsOf(BLUEPRINT_CSS, `${cell(variant)}[data-pressed]`).get("background-image"), variant).toBe(`${PRESS_WASH}, ${ERROR_HATCH}`);
+                expect(declarationsOf(BLUEPRINT_CSS, `${cell(variant)}[data-value-kind="entered"] > div`).get("color"), variant).toBe("var(--color-error)");
+            }
+        });
+
+        it("should lay the error cell's rules after the peer and same-digit ones, so an error wins over both", () => {
+            const errorIndex = lastRuleIndexOf(cell("error"));
+
+            expect(errorIndex).toBeGreaterThan(lastRuleIndexOf(cell("peer")));
+            expect(errorIndex).toBeGreaterThan(lastRuleIndexOf(cell("same-digit")));
+            expect(errorIndex).toBeGreaterThan(lastRuleIndexOf(`${cell("peer")}[data-pressed]`));
+        });
+
+        it("should write notes in the pale ink and the selected digit's note in the primary, with no disc", () => {
+            const highlighted = declarationsOf(BLUEPRINT_CSS, `${BOARD} [data-note-highlight]`);
+
+            expect(highlighted.get("background-color")).toBe("transparent");
+            expect(highlighted.get("color")).toBe("var(--color-primary)");
+        });
+    });
+
+    describe("hint cells", () => {
+        const BOARD = `${SCOPE} [data-skin~="board"]`;
+        const cell = (variant: string): string => `${BOARD} [data-variant="${variant}"]`;
+        const HATCH = "repeating-linear-gradient(45deg, var(--color-hatch) 0 1px, transparent 1px 6px)";
+
+        it("should hatch a step's scope cells like peers and wash its pattern cells like the same digit", () => {
+            expect(declarationsOf(BLUEPRINT_CSS, cell("scope")).get("background-color")).toBe("transparent");
+            expect(declarationsOf(BLUEPRINT_CSS, cell("scope")).get("background-image")).toBe(HATCH);
+            expect(declarationsOf(BLUEPRINT_CSS, cell("pattern")).get("background-color")).toBe("var(--color-highlight)");
+        });
+
+        // Not under [data-hint-mode]: the walkthrough's and the review's boards show steps too
+        it("should wash a step's answer cell like the selected one and frame it 3px in with a solid 1.5px line of the primary", () => {
+            const answer = declarationsOf(BLUEPRINT_CSS, cell("answer"));
+            const frame = declarationsOf(BLUEPRINT_CSS, `${cell("answer")}::after`);
+
+            expect(answer.get("background-color")).toBe("var(--color-cell-selected)");
+            expect(frame.get("content")).toBe('""');
+            expect(frame.get("position")).toBe("absolute");
+            expect(frame.get("inset")).toBe("3px");
+            expect(frame.get("z-index")).toBe("4");
+            expect(frame.get("pointer-events")).toBe("none");
+            expect(frame.get("border")).toBe("1.5px solid var(--color-primary)");
+        });
+
+        it("should frame a step's wrong cell like an answer, in the error colour", () => {
+            expect(declarationsOf(BLUEPRINT_CSS, `${cell("wrong")}::after`).get("border")).toBe("1.5px solid var(--color-error)");
+        });
+
+        it("should write a step's candidates in the ink at 600", () => {
+            const candidate = declarationsOf(BLUEPRINT_CSS, `${BOARD} .font-note.text-primary`);
+
+            expect(candidate.get("color")).toBe("var(--color-foreground)");
+            expect(candidate.get("font-weight")).toBe("600");
+        });
+
+        it("should set a step's emphasised candidate in a square block of the primary, written in on-primary", () => {
+            const emphasised = declarationsOf(BLUEPRINT_CSS, `${BOARD} :is([data-variant="answer"], [data-variant="pattern"]) [data-note-highlight]`);
+
+            expect(emphasised.get("background-color")).toBe("var(--color-primary)");
+            expect(emphasised.get("color")).toBe("var(--color-on-primary)");
+            expect(emphasised.get("border-radius")).toBe("0");
+        });
+    });
 });

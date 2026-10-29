@@ -410,6 +410,178 @@
     font-family: var(--font-blueprint-mono);
 }
 
+/* The board, as the canvas's .board: no card, no shadow, the grid laid on the page's paper so the graph paper stops
+   at its frame (ruling 3). Clues keep their size and the player's digits are 1.25 times it, the canvas's 23:18. */
+[data-style="blueprint"] [data-skin~="board"] {
+    --clue-scale: 1;
+    --entry-scale: 1.25;
+    background-color: transparent;
+    box-shadow: none;
+    border-radius: 0;
+}
+
+/* The grid keeps its 3px border (a width is layout), painted in the ink as the frame; the plain cell lines give way
+   to the drafted ones below */
+[data-style="blueprint"] [data-skin~="board-grid"] {
+    --board-line: transparent;
+    --board-box-line: transparent;
+    position: relative;
+    background-color: var(--color-background);
+    border-color: var(--color-foreground);
+    border-radius: 0;
+    box-shadow: none;
+}
+
+/* Drafted lines over the cells, above the digits (2) and below the selection (4): 2px box lines in the ink and 1px
+   cell lines in 42% of it, each centred on its cell edge, the outer box lines' halves lying along the frame */
+[data-style="blueprint"] [data-skin~="board-grid"]::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    pointer-events: none;
+    background-image:
+        linear-gradient(90deg, var(--color-foreground) 0 2px, transparent 2px),
+        linear-gradient(180deg, var(--color-foreground) 0 2px, transparent 2px),
+        linear-gradient(90deg, color-mix(in srgb, var(--color-foreground) 42%, transparent) 0 1px, transparent 1px),
+        linear-gradient(180deg, color-mix(in srgb, var(--color-foreground) 42%, transparent) 0 1px, transparent 1px);
+    background-size: calc(100% / 3) 100%, 100% calc(100% / 3), calc(100% / 9) 100%, 100% calc(100% / 9);
+    background-position: -1px 0, 0 -1px, -0.5px 0, 0 -0.5px;
+}
+
+/* Cells are square, without the shared ring; digits and notes sit below the lines. A cell's ::after is its
+   selection or answer frame, its ::before is left for the eraser. */
+[data-style="blueprint"] [data-skin~="board"] [data-variant] {
+    position: relative;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+[data-style="blueprint"] [data-skin~="board"] [data-variant] > div {
+    position: relative;
+    z-index: 2;
+}
+
+/* Clues in Mono 500 and the player's digits in Hand, both in the ink, told apart by their hand */
+[data-style="blueprint"] [data-skin~="board"] [data-value-kind] > div {
+    color: var(--color-foreground);
+}
+
+[data-style="blueprint"] [data-skin~="board"] [data-value-kind="given"] > div {
+    font-weight: 500;
+}
+
+[data-style="blueprint"] [data-skin~="board"] [data-value-kind="entered"] > div {
+    font-weight: 400;
+}
+
+/* Plain cells and clues lie on the grid's paper */
+[data-style="blueprint"] [data-skin~="board"] [data-variant="default"],
+[data-style="blueprint"] [data-skin~="board"] [data-variant="clue"] {
+    background-color: transparent;
+}
+
+/* Peers, and a step's scope, are hatched at 45° in 1px lines 6px apart over the paper; pressed, the press wash
+   lies over the hatching */
+[data-style="blueprint"] [data-skin~="board"] [data-variant="peer"],
+[data-style="blueprint"] [data-skin~="board"] [data-variant="scope"] {
+    background-color: transparent;
+    background-image: repeating-linear-gradient(45deg, var(--color-hatch) 0 1px, transparent 1px 6px);
+}
+
+[data-style="blueprint"] [data-skin~="board"] [data-variant="peer"][data-pressed],
+[data-style="blueprint"] [data-skin~="board"] [data-variant="scope"][data-pressed] {
+    background-image:
+        linear-gradient(var(--press-overlay), var(--press-overlay)),
+        repeating-linear-gradient(45deg, var(--color-hatch) 0 1px, transparent 1px 6px);
+}
+
+/* The same digit, and a step's pattern cells, take a flat wash of the primary; the same digit is written in it */
+[data-style="blueprint"] [data-skin~="board"] [data-variant="same-digit"],
+[data-style="blueprint"] [data-skin~="board"] [data-variant="pattern"] {
+    background-color: var(--color-highlight);
+}
+
+[data-style="blueprint"] [data-skin~="board"] [data-variant="same-digit"][data-value-kind] > div {
+    color: var(--color-primary);
+}
+
+/* The selected cell, and a step's answer cell, take the selected wash; the selected digit is in the primary */
+[data-style="blueprint"] [data-skin~="board"] [data-variant="selected"],
+[data-style="blueprint"] [data-skin~="board"] [data-variant="answer"] {
+    background-color: var(--color-cell-selected);
+}
+
+[data-style="blueprint"] [data-skin~="board"] [data-variant="selected"][data-value-kind] > div {
+    color: var(--color-primary);
+}
+
+/* The selected cell's frame: a 1.5px dashed line of the primary 3px in, whatever its variant (a selected error
+   still shows where the player is). The frame beside the board tags it. A step's answer cell is framed in a solid
+   line instead, and its wrong cell in the error colour, on every board that shows a step. */
+[data-style="blueprint"] [data-skin~="board"]:not([data-hint-mode]) [data-selected]::after,
+[data-style="blueprint"] [data-skin~="board"] [data-variant="answer"]::after,
+[data-style="blueprint"] [data-skin~="board"] [data-variant="wrong"]::after {
+    content: "";
+    position: absolute;
+    inset: 3px;
+    z-index: 4;
+    pointer-events: none;
+}
+
+[data-style="blueprint"] [data-skin~="board"]:not([data-hint-mode]) [data-selected]::after {
+    border: 1.5px dashed var(--color-primary);
+}
+
+[data-style="blueprint"] [data-skin~="board"] [data-variant="answer"]::after {
+    border: 1.5px solid var(--color-primary);
+}
+
+[data-style="blueprint"] [data-skin~="board"] [data-variant="wrong"]::after {
+    border: 1.5px solid var(--color-error);
+}
+
+/* An error cell is hatched in the error colour alone, with no flat wash, so in 製圖紙, whose red pen is also the
+   primary, it is told from the selected and same-digit cells by its pattern: 2px lines 5px apart, heavier than the
+   peers' so the pale red still reads as stripes on a phone. Laid after the peer and same-digit cells, its digit in
+   the error colour, so it never lies on the ink's hatching (ruling 5). */
+[data-style="blueprint"] [data-skin~="board"] [data-variant="error"],
+[data-style="blueprint"] [data-skin~="board"] [data-variant="wrong"] {
+    background-color: transparent;
+    background-image: repeating-linear-gradient(45deg, var(--color-error-hatch) 0 2px, transparent 2px 5px);
+}
+
+[data-style="blueprint"] [data-skin~="board"] [data-variant="error"][data-pressed],
+[data-style="blueprint"] [data-skin~="board"] [data-variant="wrong"][data-pressed] {
+    background-image:
+        linear-gradient(var(--press-overlay), var(--press-overlay)),
+        repeating-linear-gradient(45deg, var(--color-error-hatch) 0 2px, transparent 2px 5px);
+}
+
+[data-style="blueprint"] [data-skin~="board"] [data-variant="error"][data-value-kind="entered"] > div,
+[data-style="blueprint"] [data-skin~="board"] [data-variant="wrong"][data-value-kind="entered"] > div {
+    color: var(--color-error);
+}
+
+/* Notes are the pale ink in Mono; the selected digit's note is the primary, without the shared disc. A step's
+   candidates are the ink at 600, its emphasised candidate a square block of the primary on every board that shows
+   a step (only answer and pattern cells carry one), and its struck-out ones keep the error colour and the strike. */
+[data-style="blueprint"] [data-skin~="board"] [data-note-highlight] {
+    background-color: transparent;
+    color: var(--color-primary);
+}
+
+[data-style="blueprint"] [data-skin~="board"] .font-note.text-primary {
+    color: var(--color-foreground);
+    font-weight: 600;
+}
+
+[data-style="blueprint"] [data-skin~="board"] :is([data-variant="answer"], [data-variant="pattern"]) [data-note-highlight] {
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+    border-radius: 0;
+}
+
 /* Settings and 外觀, as the canvas's .group / .gh: each card framed in 1.5px of ink, each group's heading in the
    ink at 500 (Statistics' cards take the same frame, below), its icon in the ink, and numbered on its right as a drawing's sections, B-01, B-02…, in the pale Mono */
 [data-style="blueprint"] [data-skin~="settings-card"],
