@@ -1,7 +1,20 @@
 /* Blueprint: an engineering drawing on graph paper, pale lines on a blueprint (藍曬圖, dark) and inks on drafting
-   paper (製圖紙, light), amber or a red pen for everything chosen. This is a stub that gives the press states and
-   the segmented indicator their feedback; the paper, the board, the frames and the type come with the skin
-   proper. Every rule is scoped by [data-style="blueprint"]; keyframes start with blueprint-. */
+   paper (製圖紙, light), amber or a red pen for everything chosen. Every screen lies on one sheet of graph paper
+   inside a drawing frame; cards, buttons, pills and tags are square, drawn in lines of ink rather than filled,
+   and only what is chosen or main is filled in the primary. Every rule is scoped by [data-style="blueprint"];
+   keyframes start with blueprint-. No pressable piece sets a background-image of its own, so the press wash
+   below is never painted over. */
+
+/* The frames every drawn piece shares: a 1px line of ink, a 1.5px one, and the canvas's double frame (a 1.5px
+   frame, 5px of paper and a 0.75px line), all inset so no scroller or overflow clips them */
+[data-style="blueprint"] {
+    --blueprint-frame: inset 0 0 0 1px var(--color-foreground);
+    --blueprint-frame-strong: inset 0 0 0 1.5px var(--color-foreground);
+    --blueprint-double-frame:
+        inset 0 0 0 0.75px var(--color-border),
+        inset 0 0 0 4.25px var(--color-background),
+        inset 0 0 0 5.75px var(--color-foreground);
+}
 
 /* Press feedback: a faint wash of the lines' ink. It is a colour change, so it stays on under reduced motion. */
 [data-style="blueprint"] [data-pressed] {
@@ -31,6 +44,261 @@
 
 [data-style="blueprint"] .segmented-indicator-motion {
     transition: transform 180ms ease-out;
+}
+
+/* Type: the interface in Noto Sans TC, clues, keys, the timer and notes in IBM Plex Mono, the player's digits in
+   Architects Daughter. Repointed only once every face has loaded (fonts.ts beside this sheet marks it), so nothing
+   paints in a half-loaded stack; titles are set light and dialog titles medium in the same faces. */
+[data-style="blueprint"][data-blueprint-fonts="ready"] {
+    --font-sans: var(--font-blueprint-sans);
+    --font-clue: var(--font-blueprint-mono);
+    --font-entry: var(--font-blueprint-hand);
+    --font-key: var(--font-blueprint-mono);
+    --font-timer: var(--font-blueprint-mono);
+    --font-note: var(--font-blueprint-mono);
+    --font-mono: var(--font-blueprint-mono);
+}
+
+[data-style="blueprint"][data-blueprint-fonts="ready"] [data-skin~="title"] {
+    font-weight: 300;
+}
+
+[data-style="blueprint"][data-blueprint-fonts="ready"] [data-skin~="dialog-title"] {
+    font-weight: 500;
+}
+
+/* Icons are drawn with a drafting pen: thinner strokes, square ends, mitred corners */
+[data-style="blueprint"] svg.lucide {
+    stroke-width: 1.5;
+    stroke-linecap: square;
+    stroke-linejoin: miter;
+}
+
+/* The sheet. The body is the one sheet of graph paper behind every screen, across the whole window, so on a wide
+   screen the app's column shows no strip of its own: 40px major and 8px minor squares laid out on the window
+   (fixed). The drawing frame (the canvas's .sheet) is fixed to the window as well, below every content layer and
+   never taking taps: a 1.5px line 10px in (::before), then a 0.75px line 4px inside it with a tick hanging from
+   the frame's top every quarter (::after). */
+[data-style="blueprint"] body {
+    background-color: var(--color-background);
+    background-image:
+        linear-gradient(var(--color-grid-major) 1px, transparent 1px),
+        linear-gradient(90deg, var(--color-grid-major) 1px, transparent 1px),
+        linear-gradient(var(--color-grid-minor) 1px, transparent 1px),
+        linear-gradient(90deg, var(--color-grid-minor) 1px, transparent 1px);
+    background-size: 40px 40px, 40px 40px, 8px 8px, 8px 8px;
+    background-position: -1px -1px;
+    background-attachment: fixed;
+}
+
+[data-style="blueprint"] body::before {
+    content: "";
+    position: fixed;
+    inset: 10px;
+    z-index: -1;
+    pointer-events: none;
+    box-shadow: inset 0 0 0 1.5px var(--color-border);
+}
+
+/* The fine line's four sides sit 1.5px of frame and 4px of paper in; the ticks start on the frame's top */
+[data-style="blueprint"] body::after {
+    content: "";
+    position: fixed;
+    inset: 10px;
+    z-index: -1;
+    pointer-events: none;
+    background-image:
+        linear-gradient(var(--color-border), var(--color-border)),
+        linear-gradient(var(--color-border), var(--color-border)),
+        linear-gradient(var(--color-border), var(--color-border)),
+        linear-gradient(var(--color-border), var(--color-border)),
+        linear-gradient(90deg, var(--color-border) 1px, transparent 1px);
+    background-size:
+        calc(100% - 11px) 0.75px,
+        calc(100% - 11px) 0.75px,
+        0.75px calc(100% - 11px),
+        0.75px calc(100% - 11px),
+        25% 6px;
+    background-position:
+        5.5px 5.5px,
+        5.5px calc(100% - 5.5px),
+        5.5px 5.5px,
+        calc(100% - 5.5px) 5.5px,
+        12.5% 0;
+    background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, repeat-x;
+}
+
+/* The app's page scroller, the pages inside it and pages that scroll on their own are clear, so the one sheet
+   shows through them */
+[data-style="blueprint"] [data-skin~="page-ruled"] {
+    background: transparent;
+}
+
+[data-style="blueprint"] [data-skin~="page"] {
+    background-color: transparent;
+}
+
+/* A sticky header is clear at rest, so the paper runs through it. Once its page has scrolled it is laid over
+   with paper, fading in over the first 64px of scroll (--header-scroll, 0 to 1) and tapering out over the
+   header's empty bottom padding, so the content scrolls out of sight under its title. */
+[data-style="blueprint"] [data-skin~="page-header"] {
+    background-color: transparent;
+}
+
+[data-style="blueprint"] [data-skin~="page-header"][data-scrolled] {
+    background-color: color-mix(in srgb, var(--color-background) calc(92% * var(--header-scroll, 0)), transparent);
+    -webkit-mask-image: linear-gradient(to bottom, var(--color-foreground) calc(100% - 12px), transparent);
+    mask-image: linear-gradient(to bottom, var(--color-foreground) calc(100% - 12px), transparent);
+}
+
+/* Cards, dialogs and floating panels are the page's own paper inside the double frame, never the card token (the
+   contrast model counts 藍曬圖's danger and error on the paper alone); the floating ones cast a soft shadow so
+   they lift off the screen below. */
+[data-style="blueprint"] [data-skin~="card"] {
+    border-color: transparent;
+    background-color: var(--color-background);
+    box-shadow: var(--blueprint-double-frame);
+    border-radius: 0;
+}
+
+[data-style="blueprint"] [data-skin~="card"]:is(.shadow-modal, .shadow-popup, .shadow-card-lg) {
+    background-color: var(--color-background);
+    box-shadow: var(--blueprint-double-frame), 0 24px 40px -18px color-mix(in srgb, var(--color-shadow) 45%, transparent);
+}
+
+/* The loader's layer and the dialogs' veil the screen in the paper rather than darkening it */
+[data-style="blueprint"] [data-skin~="loader-scrim"],
+[data-style="blueprint"] [data-skin~="dialog-scrim"] {
+    background-color: color-mix(in srgb, var(--color-background) 72%, transparent);
+}
+
+/* The hint menu's options are square; Reveal Cell keeps the primary its markup gives it */
+[data-style="blueprint"] [data-skin~="menu-option"] {
+    border-radius: 0;
+}
+
+/* Buttons are square. The main ones are filled with the primary; secondary and outlined ones are clear inside a
+   1px line of ink; the danger button is filled with the error colour and written in the paper. */
+[data-style="blueprint"] [data-skin~="button"] {
+    border-radius: 0;
+}
+
+[data-style="blueprint"] [data-skin~="button"]:is(.bg-primary, .hint-primary) {
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+    box-shadow: none;
+}
+
+[data-style="blueprint"] [data-skin~="button"]:is(.bg-card, .bg-primary-light, .hint-secondary) {
+    border-color: transparent;
+    background-color: transparent;
+    box-shadow: var(--blueprint-frame);
+    color: var(--color-foreground);
+}
+
+[data-style="blueprint"] [data-skin~="button"].bg-danger {
+    background-color: var(--color-danger);
+    color: var(--color-on-danger);
+    box-shadow: none;
+}
+
+/* The continue card's play mark is the primary */
+[data-style="blueprint"] [data-skin~="caret"] {
+    color: var(--color-primary);
+}
+
+/* Icon tiles (dialogs, the hint panel, the walkthrough's guide, recent games' chips) are clear squares inside a
+   1px line of ink round an icon in ink, as the canvas's .dicon / .lchip / .ichip; a danger tile and a given-up
+   game's chip are lined and drawn in the error colour */
+[data-style="blueprint"] [data-skin~="icon-tile"] {
+    background-color: transparent;
+    box-shadow: var(--blueprint-frame);
+    border-radius: 0;
+    color: var(--color-foreground);
+}
+
+[data-style="blueprint"] [data-skin~="icon-tile"] > svg {
+    color: inherit;
+}
+
+[data-style="blueprint"] [data-skin~="icon-tile"][data-skin~="danger"],
+[data-style="blueprint"] [data-skin~="icon-tile"][data-skin~="gave-up"] {
+    box-shadow: inset 0 0 0 1px var(--color-danger);
+    color: var(--color-danger);
+}
+
+/* The trophy stays round */
+[data-style="blueprint"] [data-skin~="trophy"] {
+    border-radius: 50%;
+}
+
+/* The game header's pills are square, in a 1px line of ink; the hint-mode pill is filled with the primary */
+[data-style="blueprint"] [data-skin~="pill"] {
+    background-color: transparent;
+    box-shadow: var(--blueprint-frame);
+    border-radius: 0;
+    color: var(--color-foreground);
+}
+
+[data-style="blueprint"] [data-skin~="pill"] > span {
+    color: inherit;
+}
+
+[data-style="blueprint"] [data-skin~="pill"][data-skin~="hint"] {
+    background-color: var(--color-primary);
+    box-shadow: inset 0 0 0 1px var(--color-primary);
+    color: var(--color-on-primary);
+}
+
+/* Tags are square: the completion card's in a 1px line of ink, a new record stamped in a 2px line of the primary
+   and turned −6°, in Mono; a step's tag in a 1px line of ink, a final step's filled with the primary */
+[data-style="blueprint"] [data-skin~="tag"] {
+    background-color: transparent;
+    box-shadow: var(--blueprint-frame);
+    border-radius: 0;
+    color: var(--color-foreground);
+}
+
+[data-style="blueprint"] [data-skin~="tag"][data-skin~="new-record"] {
+    background-color: transparent;
+    box-shadow: inset 0 0 0 2px var(--color-primary);
+    color: var(--color-primary);
+    transform: rotate(-6deg);
+}
+
+[data-style="blueprint"][data-blueprint-fonts="ready"] [data-skin~="tag"][data-skin~="new-record"] {
+    font-family: var(--font-blueprint-mono);
+}
+
+[data-style="blueprint"] [data-skin~="tag"][data-skin~="step"] {
+    background-color: transparent;
+    box-shadow: var(--blueprint-frame);
+    color: var(--color-foreground);
+}
+
+[data-style="blueprint"] [data-skin~="tag"][data-skin~="step"][data-skin~="strong"] {
+    background-color: var(--color-primary);
+    box-shadow: none;
+    color: var(--color-on-primary);
+}
+
+/* The changelog's App tag is a 1px line of the primary */
+[data-style="blueprint"] [data-skin~="app-tag"] {
+    background-color: transparent;
+    box-shadow: inset 0 0 0 1px var(--color-primary);
+    border-radius: 0;
+    color: var(--color-primary);
+}
+
+/* The game's toast is square, written in the paper on the ink, in Mono */
+[data-style="blueprint"] [data-skin~="toast"] {
+    background-color: var(--color-foreground);
+    color: var(--color-background);
+    border-radius: 0;
+}
+
+[data-style="blueprint"][data-blueprint-fonts="ready"] [data-skin~="toast"] {
+    font-family: var(--font-blueprint-mono);
 }
 
 /* Reduced motion: no scaling or sliding; the press wash stays */
