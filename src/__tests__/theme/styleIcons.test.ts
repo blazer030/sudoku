@@ -249,6 +249,54 @@ describe("styleIcons", () => {
         });
     });
 
+    describe("blueprint", () => {
+        const blueprintBlue = getPalette("blueprint", "blue", "dark");
+        const draftingTeal = getPalette("blueprint", "teal", "light");
+
+        it("should draw the 藍曬圖 icon in white lines and amber on the blue paper's graph grid", () => {
+            const svg = styleIconSvg("blueprint", blueprintBlue);
+
+            for (const color of ["#123F78", "#F2F7FF", "#FFD166", blueprintBlue["grid-major"] ?? ""]) expect(paintsOf(svg), color).toContain(color);
+            expect(svg).not.toContain("<text");
+        });
+
+        it("should draw the 製圖紙 icon in the theme's ink and the red pen on the white paper", () => {
+            const svg = styleIconSvg("blueprint", draftingTeal);
+
+            for (const color of ["#FAFBFC", "#0B5563", "#C0392B"]) expect(paintsOf(svg), color).toContain(color);
+        });
+
+        it("should draw a different icon for each paper in each mode", () => {
+            const icons = THEME_IDS_BY_STYLE.blueprint.flatMap(themeId =>
+                COLOR_MODES.map(mode => styleIconSvg("blueprint", getPalette("blueprint", themeId, mode))));
+
+            expect(icons).toHaveLength(8);
+            expect(new Set(icons).size).toBe(8);
+        });
+
+        it("should frame the centre cell in a dashed box and draw 9×9 as a path", () => {
+            const svg = styleIconSvg("blueprint", blueprintBlue);
+
+            expect(svg).toMatch(/<rect x="49" y="53" width="10" height="10" [^>]*stroke-dasharray="3 2"/);
+            expect(svg).toMatch(/<path d="M50\.09 92\.46Q/);
+        });
+
+        it("should keep only the ink lines and the dashed box in the monochrome layer, without the graph paper", () => {
+            const monochrome = styleIconMonochrome("blueprint");
+
+            expect(monochrome).toContain(`<rect x="30" y="34" width="48" height="48"`);
+            expect(monochrome).toContain(`stroke-dasharray="3 2"`);
+            expect(monochrome).toMatch(/<path d="M50\.09 92\.46Q/);
+            expect(monochrome).not.toContain(`stroke-width=".6"`);
+            expect(monochrome).not.toContain(`<rect x="34" y="34" width="40" height="40"`);
+        });
+
+        it("should run the graph paper to the edges of the foreground layer", () => {
+            expect(styleIconForeground("blueprint", blueprintBlue)).toContain("M-22.5 -27V135");
+            expect(styleIconForeground("blueprint", blueprintBlue)).toContain("M-27 130.5H135");
+        });
+    });
+
     it.each(STYLE_IDS)("should draw the %s icon as a plain 108 square with no text", (style) => {
         const svg = styleIconSvg(style, firstPalette(style));
 

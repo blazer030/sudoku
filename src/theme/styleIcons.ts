@@ -480,6 +480,78 @@ const chalkboardArtwork = (palette: Palette, idSuffix: string): string[] => {
     ];
 };
 
+// Blueprint: a drawing on graph paper. A 3×3 board with dimension lines and arrowheads above it and to its right, the
+// centre cell framed in a dashed box with a leader running up to the right, and 9×9 lettered below. Ported from the
+// style-research canvas (PickerC.dc.html and PickerFlow.dc.html). The paper, the ink and the accent follow the paper
+// and the mode, so each of the four papers draws its own icon in 藍曬圖 and in 製圖紙.
+const BLUEPRINT_GRID_STEP = 9;
+// The canvas's 9-unit grid, moved half a cell so no line crosses the point the icon assets sample the background at
+// (5% across, halfway down); the grid then sits even about the icon's centre
+const BLUEPRINT_GRID_OFFSET = 4.5;
+const BLUEPRINT_BOARD = { x: 30, y: 34, size: 48 };
+const BLUEPRINT_BOARD_LINES = "M46 34 V82 M62 34 V82 M30 50 H78 M30 66 H78";
+const BLUEPRINT_DIMENSIONS = "M30 28 V20 M78 28 V20 M30 24 H78 M84 34 H92 M84 82 H92 M88 34 V82";
+const BLUEPRINT_ARROWHEADS = "M30 24 l5 -2 v4z M78 24 l-5 -2 v4z M88 34 l-2 5 h4z M88 82 l-2 -5 h4z";
+const BLUEPRINT_LEADER = "M58 54 L70 44 H82";
+// "9×9" in IBM Plex Mono Regular (ofl/ibmplexmono/IBMPlexMono-Regular.ttf, google/fonts at the commit
+// scripts/generate-fonts.ts pins) at 8 units with 1 unit between the glyphs, centred on x 54 with its baseline at
+// y 96 as the canvas sets it, outlined once with harfbuzzjs (hb.shape, then font.glyphToPath per glyph, scaled by
+// 8/1000 and flipped onto the baseline, rounded to 0.01)
+const BLUEPRINT_NINE_BY_NINE = "M50.09 92.46Q50.09 93.09 49.9 93.64Q49.71 94.18 49.42 94.64Q49.12 95.09 48.76 95.44Q48.41 95.78 48.06 96L47.2 96Q47.66 95.67 48.01 95.36Q48.37 95.05 48.64 94.71Q48.91 94.37 49.1 93.98Q49.28 93.59 49.4 93.1L49.36 93.09Q49.15 93.43 48.83 93.66Q48.5 93.89 47.98 93.89Q47.62 93.89 47.31 93.77Q47 93.65 46.78 93.42Q46.56 93.2 46.44 92.88Q46.31 92.57 46.31 92.17Q46.31 91.76 46.44 91.42Q46.58 91.08 46.82 90.84Q47.07 90.59 47.42 90.46Q47.77 90.32 48.19 90.32Q48.63 90.32 48.98 90.47Q49.34 90.62 49.58 90.89Q49.82 91.17 49.96 91.57Q50.09 91.97 50.09 92.46ZM48.2 93.34Q48.78 93.34 49.09 93.02Q49.41 92.71 49.41 92.14L49.41 92.08Q49.41 91.51 49.09 91.2Q48.78 90.89 48.2 90.89Q47.62 90.89 47.31 91.2Q46.99 91.51 46.99 92.08L46.99 92.14Q46.99 92.71 47.31 93.02Q47.62 93.34 48.2 93.34ZM54 93.95L52.7 95.26L52.3 94.86L53.61 93.56L52.3 92.26L52.7 91.86L54 93.17L55.3 91.86L55.7 92.26L54.39 93.56L55.7 94.86L55.3 95.26L54 93.95ZM61.69 92.46Q61.69 93.09 61.5 93.64Q61.31 94.18 61.02 94.64Q60.72 95.09 60.36 95.44Q60.01 95.78 59.66 96L58.8 96Q59.26 95.67 59.61 95.36Q59.97 95.05 60.24 94.71Q60.51 94.37 60.7 93.98Q60.88 93.59 61 93.1L60.96 93.09Q60.75 93.43 60.43 93.66Q60.1 93.89 59.58 93.89Q59.22 93.89 58.91 93.77Q58.6 93.65 58.38 93.42Q58.16 93.2 58.04 92.88Q57.91 92.57 57.91 92.17Q57.91 91.76 58.04 91.42Q58.18 91.08 58.42 90.84Q58.67 90.59 59.02 90.46Q59.37 90.32 59.79 90.32Q60.23 90.32 60.58 90.47Q60.94 90.62 61.18 90.89Q61.42 91.17 61.56 91.57Q61.69 91.97 61.69 92.46ZM59.8 93.34Q60.38 93.34 60.69 93.02Q61.01 92.71 61.01 92.14L61.01 92.08Q61.01 91.51 60.69 91.2Q60.38 90.89 59.8 90.89Q59.22 90.89 58.91 91.2Q58.59 91.51 58.59 92.08L58.59 92.14Q58.59 92.71 58.91 93.02Q59.22 93.34 59.8 93.34Z";
+
+interface BlueprintColors {
+    paper: string;
+    ink: string;
+    grid: string;
+    hot: string;
+}
+
+// The canvas's --ai-bg, --ai-ink, --ai-minor and --ai-hot: the paper, the lines, the major grid lines and the accent
+const blueprintColors = (palette: Palette): BlueprintColors => ({
+    paper: palette.background,
+    ink: palette.foreground,
+    grid: palette["grid-major"] ?? palette.border,
+    hot: palette.primary,
+});
+
+// The grid runs `bleed` units past each edge of the artwork, so a foreground layer has no seam
+const blueprintGrid = (color: string, bleed: number): string => {
+    const lines: number[] = [];
+    const first = BLUEPRINT_GRID_OFFSET - BLUEPRINT_GRID_STEP * Math.floor((BLUEPRINT_GRID_OFFSET + bleed) / BLUEPRINT_GRID_STEP);
+    for (let line = first; line <= ICON_SIZE + bleed; line += BLUEPRINT_GRID_STEP) lines.push(line);
+    const start = -bleed;
+    const end = ICON_SIZE + bleed;
+    const path = [
+        ...lines.map(line => `M${line} ${start}V${end}`),
+        ...lines.map(line => `M${start} ${line}H${end}`),
+    ].join("");
+    return `<path d="${path}" fill="none" stroke="${color}" stroke-width=".6"/>`;
+};
+
+// The ink's lines and lettering and the dashed box; the colourful icon adds the leader
+const blueprintDrawing = (ink: string, hot: string): string[] => {
+    const { x, y, size } = BLUEPRINT_BOARD;
+    return [
+        `<g fill="none" stroke="${ink}">`,
+        `<rect x="${x}" y="${y}" width="${size}" height="${size}" stroke-width="2.2"/>`,
+        `<path d="${BLUEPRINT_BOARD_LINES}" stroke-width="1"/>`,
+        `<path d="${BLUEPRINT_DIMENSIONS}" stroke-width="1"/>`,
+        "</g>",
+        `<path d="${BLUEPRINT_ARROWHEADS}" fill="${ink}"/>`,
+        `<path d="${BLUEPRINT_NINE_BY_NINE}" fill="${ink}"/>`,
+        `<rect x="49" y="53" width="10" height="10" fill="none" stroke="${hot}" stroke-width="1.6" stroke-dasharray="3 2"/>`,
+    ];
+};
+
+const blueprintArtwork = (palette: Palette, bleed: number): string[] => {
+    const colors = blueprintColors(palette);
+    return [
+        blueprintGrid(colors.grid, bleed),
+        ...blueprintDrawing(colors.ink, colors.hot),
+        `<path d="${BLUEPRINT_LEADER}" fill="none" stroke="${colors.hot}" stroke-width="1.4"/>`,
+    ];
+};
+
 const artworkOf = (style: StyleId, palette: Palette, bleed = 0, idSuffix = ""): string[] => {
     switch (style) {
         case "minimal": return minimalTiles(palette["on-primary"]);
@@ -492,8 +564,7 @@ const artworkOf = (style: StyleId, palette: Palette, bleed = 0, idSuffix = ""): 
         case "cyber": return cyberArtwork(palette, idSuffix);
         case "ink": return inkArtwork(palette, bleed, idSuffix);
         case "chalkboard": return chalkboardArtwork(palette, idSuffix);
-        // The bare paper for now
-        case "blueprint": return [];
+        case "blueprint": return blueprintArtwork(palette, bleed);
     }
 };
 
@@ -546,8 +617,8 @@ const monochromeArtwork = (style: StyleId): string[] => {
         case "ink": return inkMonochrome(color);
         // The writing without the board and its frame: the grid, the ring, the 7 and the stubs
         case "chalkboard": return chalkboardWriting({ writing: color, ring: color, stub: color });
-        // A plain square until the artwork comes, so the themed icon is never empty
-        case "blueprint": return [`<rect x="34" y="34" width="40" height="40" fill="${color}"/>`];
+        // The ink's lines, the arrowheads, 9×9 and the dashed box, without the graph paper or the leader
+        case "blueprint": return blueprintDrawing(color, color);
     }
 };
 
