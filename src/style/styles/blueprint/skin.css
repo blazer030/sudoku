@@ -202,6 +202,11 @@
     box-shadow: none;
 }
 
+/* A button that is only its words keeps its hover wash, square like every other button */
+[data-style="blueprint"] [data-skin~="text-button"] {
+    border-radius: 0;
+}
+
 /* Home, as the canvas's .home. The logo is a small drawing (blueprint-logo.svg, a mask) in the ink; the stacked
    logo's squares are hidden so they never show through it. The title and subtitle are spaced out by the "spaced"
    hero. */

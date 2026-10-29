@@ -134,7 +134,7 @@ describe("blueprint skin", () => {
     });
 
     describe("shared pieces", () => {
-        it.each(["card", "button", "pill", "tag", "icon-tile", "toast", "menu-option"])("should square the corners of a %s", (token) => {
+        it.each(["card", "button", "text-button", "pill", "tag", "icon-tile", "toast", "menu-option"])("should square the corners of a %s", (token) => {
             expect(declarationsOf(BLUEPRINT_CSS, skin(token)).get("border-radius")).toBe("0");
         });
 
