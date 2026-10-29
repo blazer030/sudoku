@@ -582,6 +582,11 @@
     border-radius: 0;
 }
 
+/* A step navigator's arrows are square, so their hover wash is (button[…] outranks their own scoped rounding) */
+[data-style="blueprint"] button[data-skin~="step-arrow"] {
+    border-radius: 0;
+}
+
 /* A step navigator's dots are square in a 1px line of the pale ink; this step's (20px wide) is filled with the
    primary, the ones passed with half the pale ink */
 [data-style="blueprint"] [data-skin~="step-dot"] {

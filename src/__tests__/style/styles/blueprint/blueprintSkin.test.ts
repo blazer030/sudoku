@@ -469,6 +469,11 @@ describe("blueprint skin", () => {
             expect(play.get("border-radius")).toBe("0");
         });
 
+        // button[…] outranks the arrows' own scoped .step-arrow, which rounds them
+        it("should square a step navigator's arrows, so their hover wash is square", () => {
+            expect(declarationsOf(BLUEPRINT_CSS, `${SCOPE} button[data-skin~="step-arrow"]`).get("border-radius")).toBe("0");
+        });
+
         it("should square the step dots in the pale ink, this step's filled with the primary and the ones passed half the pale ink", () => {
             const dot = declarationsOf(BLUEPRINT_CSS, skin("step-dot"));
             const current = declarationsOf(BLUEPRINT_CSS, skin("step-dot current"));
