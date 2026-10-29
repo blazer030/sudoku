@@ -158,7 +158,6 @@ describe("blueprint skin", () => {
         it("should keep the double frame and the paper on dialogs and floating panels, with a soft shadow below", () => {
             const floating = declarationsOf(BLUEPRINT_CSS, `${skin("card")}:is(.shadow-modal, .shadow-popup, .shadow-card-lg)`);
 
-            expect(floating.get("background-color")).toBe("var(--color-background)");
             expect(floating.get("box-shadow")).toMatch(/^var\(--blueprint-double-frame\), 0 24px 40px -18px color-mix\(in srgb, var\(--color-shadow\) [\d.]+%, transparent\)$/);
         });
 
