@@ -9,53 +9,59 @@
         <div class="flex-1" />
 
         <div class="flex flex-col items-center gap-6">
-            <div
-                :class="hintMode.active.value ? 'ring-2 ring-primary/50' : 'ring-0 ring-transparent'"
-                :data-celebration="celebration ?? undefined"
-                :data-group-effect="groupEffect?.id"
-                :data-hint-mode="hintMode.active.value || undefined"
-                :data-selected-cell="selectedCellName"
-                class="bg-card rounded-2xl shadow-card-lg p-2 self-center w-[calc(100%+1.5rem)] max-w-board-fit transition-shadow duration-300"
-                :style="groupEffectPlacement"
-                data-skin="board"
-                data-testid="game-board"
+            <BoardFrame
+                :celebration="celebration"
+                :effect="groupEffect"
+                :target="frameTarget"
             >
                 <div
-                    class="relative flex flex-col border-3 border-foreground/20 rounded-xl"
-                    data-skin="board-grid"
+                    :class="hintMode.active.value ? 'ring-2 ring-primary/50' : 'ring-0 ring-transparent'"
+                    :data-celebration="celebration ?? undefined"
+                    :data-group-effect="groupEffect?.id"
+                    :data-hint-mode="hintMode.active.value || undefined"
+                    :data-selected-cell="selectedCellName"
+                    class="bg-card rounded-2xl shadow-card-lg p-2 self-center w-[calc(100%+1.5rem)] max-w-board-fit transition-shadow duration-300"
+                    :style="groupEffectPlacement"
+                    data-skin="board"
+                    data-testid="game-board"
                 >
                     <div
-                        v-for="(row, rowIndex) in sudoku.puzzle"
-                        :key="rowIndex"
-                        class="grid grid-cols-9"
+                        class="relative flex flex-col border-3 border-foreground/20 rounded-xl"
+                        data-skin="board-grid"
                     >
-                        <Cell
-                            v-for="(puzzleCell, columnIndex) in row"
-                            :key="`cell-${rowIndex}-${columnIndex}`"
-                            :column="columnIndex"
-                            :data-testid="`cell-${rowIndex}-${columnIndex}`"
-                            :error="isError(rowIndex, columnIndex)"
-                            :group-effect-id="groupEffect?.id ?? null"
-                            :group-kinds="isInGroupEffect(rowIndex, columnIndex)"
-                            :highlight-same-digit="settingsStore.highlightSameDigit"
-                            :hint="hintMode.cellViews.value?.[rowIndex][columnIndex] ?? null"
-                            :peer="settingsStore.highlightScope && isPeerOfSelected(rowIndex, columnIndex)"
-                            :puzzle-cell="puzzleCell.raw()"
-                            :revealed="isRevealed(rowIndex, columnIndex)"
-                            :selected-digit="highlightedDigit"
-                            :row="rowIndex"
-                            :selected="isSelected(rowIndex, columnIndex)"
-                            @click="clickCell(rowIndex, columnIndex)"
-                            @long-press="longPressCell(rowIndex, columnIndex)"
+                        <div
+                            v-for="(row, rowIndex) in sudoku.puzzle"
+                            :key="rowIndex"
+                            class="grid grid-cols-9"
+                        >
+                            <Cell
+                                v-for="(puzzleCell, columnIndex) in row"
+                                :key="`cell-${rowIndex}-${columnIndex}`"
+                                :column="columnIndex"
+                                :data-testid="`cell-${rowIndex}-${columnIndex}`"
+                                :error="isError(rowIndex, columnIndex)"
+                                :group-effect-id="groupEffect?.id ?? null"
+                                :group-kinds="isInGroupEffect(rowIndex, columnIndex)"
+                                :highlight-same-digit="settingsStore.highlightSameDigit"
+                                :hint="hintMode.cellViews.value?.[rowIndex][columnIndex] ?? null"
+                                :peer="settingsStore.highlightScope && isPeerOfSelected(rowIndex, columnIndex)"
+                                :puzzle-cell="puzzleCell.raw()"
+                                :revealed="isRevealed(rowIndex, columnIndex)"
+                                :selected-digit="highlightedDigit"
+                                :row="rowIndex"
+                                :selected="isSelected(rowIndex, columnIndex)"
+                                @click="clickCell(rowIndex, columnIndex)"
+                                @long-press="longPressCell(rowIndex, columnIndex)"
+                            />
+                        </div>
+                        <GroupOverlay :effect="groupEffect" />
+                        <StepLinkOverlay
+                            v-if="hintMode.active.value"
+                            :links="hintMode.links.value"
                         />
                     </div>
-                    <GroupOverlay :effect="groupEffect" />
-                    <StepLinkOverlay
-                        v-if="hintMode.active.value"
-                        :links="hintMode.links.value"
-                    />
                 </div>
-            </div>
+            </BoardFrame>
 
             <!-- The hint panel covers the controls in place, so the board never moves. -->
             <div
@@ -139,6 +145,7 @@ import HintMenuPopup from "@/presentation/pages/game/components/HintMenuPopup.vu
 import GameToast from "@/presentation/pages/game/components/GameToast.vue";
 import DigitPad from "@/presentation/components/digit-pad/DigitPad.vue";
 import Cell from "@/presentation/components/board-cell/Cell.vue";
+import BoardFrame from "@/presentation/components/board-frame/BoardFrame.vue";
 import { cellName } from "@/presentation/components/board-cell/cellName";
 import GroupOverlay from "@/presentation/components/style-moments/GroupOverlay.vue";
 import { GROUP_RIPPLE_STEP_MS } from "@/presentation/pages/game/useGroupEffect";
@@ -150,6 +157,7 @@ import { InputMode } from "@/presentation/pages/game/InputMode";
 import { useGameInteraction } from "@/presentation/pages/game/useGameInteraction";
 import { useGameSession } from "@/presentation/pages/game/useGameSession";
 import { useSettingsStore } from "@/stores/settingsStore";
+import type { CellReference } from "@/domain/solver/SolveStep";
 
 const emit = defineEmits<{ playAgain: [] }>();
 
@@ -238,6 +246,14 @@ const groupEffectPlacement = computed(() => {
 });
 
 const selectedCellName = computed(() => selectedCell.value === null ? undefined : cellName(selectedCell.value.row, selectedCell.value.column));
+
+// The cell a style's board frame points at: none while the solved board celebrates, the answer's in hint mode,
+// and otherwise the selected one
+const frameTarget = computed((): CellReference | null => {
+    if (celebration.value !== null) return null;
+    if (hintMode.active.value) return hintMode.answer.value?.cell ?? null;
+    return selectedCell.value;
+});
 </script>
 
 <style scoped>

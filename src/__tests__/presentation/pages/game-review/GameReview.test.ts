@@ -7,6 +7,7 @@ import GameReview from "@/presentation/pages/game-review/GameReview.vue";
 import { useStatisticsStore } from "@/stores/statisticsStore";
 import { i18n } from "@/presentation/i18n";
 import type { GameStep } from "@/domain/game/GameStep";
+import { StubBoardFrame, frameMinimalWithStubInEachTest, frameTarget } from "@/__tests__/fixtures/boardFrameStub";
 
 const emptyBoard = () => Array.from({ length: 9 }, () =>
     Array.from({ length: 9 }, () => ({ clue: 0, entry: 0, notes: [] as number[] }))
@@ -127,6 +128,23 @@ describe("GameReview", () => {
         const cells = wrapper.findAll("[data-testid^='review-cell-']");
         expect(cells).toHaveLength(81);
         expect(cells.filter((cell) => cell.classes().includes("ring-primary"))).toHaveLength(0);
+    });
+
+    describe("board frame", () => {
+        frameMinimalWithStubInEachTest();
+
+        it("should frame the review board and point it at no cell before the first step", async () => {
+            const wrapper = await mountReview({ nextClicks: 0 });
+
+            expect(wrapper.findComponent(StubBoardFrame).find("[data-testid='review-board']").exists()).toBe(true);
+            expect(frameTarget(wrapper)).toBeNull();
+        });
+
+        it("should point the frame at the cell the step changed, with no group effect or celebration", async () => {
+            const wrapper = await mountReview({ nextClicks: 1 });
+
+            expect(wrapper.findComponent(StubBoardFrame).props()).toEqual({ target: { row: 0, column: 1 }, effect: null, celebration: null });
+        });
     });
 
     it("should count positions with dots for a short game", async () => {

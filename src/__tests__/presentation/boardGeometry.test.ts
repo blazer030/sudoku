@@ -56,4 +56,10 @@ describe("board geometry", () => {
         expect(utility).toContain("safe-area-inset-top");
         expect(utility).toContain("safe-area-inset-bottom");
     });
+
+    it("should shrink the boards by the height a style's board frame adds, so the digit keys stay on a short screen", () => {
+        const utility = /@utility max-w-board-fit \{([^}]*)\}/.exec(readFileSync("src/style/index.css", "utf8"))?.[1] ?? "";
+        // A frame sets --board-frame-block on its own element; the board inside it, being square, gives up that much width
+        expect(utility).toContain("- var(--board-frame-block, 0px)");
+    });
 });
