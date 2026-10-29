@@ -72,6 +72,26 @@ describe("skin hooks", () => {
         expect(offenders).toEqual([]);
     });
 
+    it("should mark the Settings and 外觀 pages' cards as settings cards", () => {
+        const groupCards = openingTags(readFileSync("src/presentation/pages/settings/components/SettingsGroup.vue", "utf8"), "div")
+            .filter(tag => hasSkinToken(tag, "card"));
+        const appearanceCards = openingTags(readFileSync("src/presentation/pages/settings/Appearance.vue", "utf8"), "div")
+            .filter(tag => hasSkinToken(tag, "card"));
+
+        expect(groupCards).toHaveLength(1);
+        expect(appearanceCards).toHaveLength(2);
+        expect([...groupCards, ...appearanceCards].every(tag => hasSkinToken(tag, "settings-card"))).toBe(true);
+    });
+
+    it("should mark Statistics' section headings and its figures", () => {
+        const tags = openingTags(readFileSync("src/presentation/pages/statistics/Statistics.vue", "utf8"), "span");
+
+        // Overview, By Difficulty and Recent Games
+        expect(tags.filter(tag => hasSkinToken(tag, "stat-heading"))).toHaveLength(3);
+        // The overview's three numbers and each difficulty's best, average and completed
+        expect(tags.filter(tag => hasSkinToken(tag, "stat-value"))).toHaveLength(6);
+    });
+
     it("should mark opaque page roots and sticky headers, so a style's page background reaches them", () => {
         const offenders = VUE_FILES.flatMap(path => openingTags(readFileSync(path, "utf8"), "div")
             .filter(tag => /\bbg-background\b/.test(tag))

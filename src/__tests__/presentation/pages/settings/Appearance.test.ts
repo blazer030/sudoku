@@ -531,7 +531,7 @@ describe("Appearance.vue one-theme style", () => {
         expect(stylesCard.find("[data-testid='appearance-theme-label']").exists()).toBe(false);
         expect(coloursCard.find("[data-testid='appearance-theme-label']").exists()).toBe(true);
         expect(coloursCard.find("[data-testid='appearance-switcher']").exists()).toBe(true);
-        expect(coloursCard.attributes("data-skin")).toBe("card");
+        expect(coloursCard.attributes("data-skin")?.split(" ")).toContain("card");
     });
 
     it("should name the modes in the style's own words, in either language", async () => {

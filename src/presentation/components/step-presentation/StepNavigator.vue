@@ -36,8 +36,8 @@
                 :aria-label="t('stepPanel.stepCounter', { current: index, total: totalSteps })"
                 :class="dotClass(index - 1)"
                 :data-testid="`${testIdPrefix}-dot-${index - 1}`"
+                :data-skin="index - 1 === stepIndex ? 'step-dot current' : index - 1 < stepIndex ? 'step-dot past' : 'step-dot'"
                 class="h-2 rounded-full transition-all duration-300 cursor-pointer"
-                data-skin="step-dot"
                 @click="emit('goTo', index - 1)"
             />
         </div>

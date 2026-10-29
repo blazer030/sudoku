@@ -11,7 +11,7 @@
         <!-- Every choice applies at once: there is no apply button -->
         <div
             class="flex flex-col bg-card rounded-2xl shadow-card-sm p-3"
-            data-skin="card"
+            data-skin="card settings-card"
             data-testid="appearance-style-card"
         >
             <span class="text-foreground text-[15px] font-medium">{{ t("settings.style.label") }}</span>
@@ -55,7 +55,7 @@
         <div
             v-if="swatches.length > 1 || modeOptions.length > 1"
             class="flex flex-col bg-card rounded-2xl shadow-card-sm p-3"
-            data-skin="card"
+            data-skin="card settings-card"
             data-testid="appearance-colours-card"
         >
             <!-- A style with one theme has nothing to choose -->
