@@ -9,7 +9,7 @@ const BLUEPRINT_CSS = readFileSync("src/style/styles/blueprint/skin.css", "utf8"
 const SCOPE = '[data-style="blueprint"]';
 const BOARD = `${SCOPE} [data-skin~="board"]`;
 const ARRIVING_DIGIT = `${BOARD} [data-variant] > .value-arrive`;
-const CROSSHAIRS = `${BOARD} [data-variant]:has(> .value-arrive)::before`;
+const CROSSHAIRS = `${BOARD} [data-variant][data-arriving]::before`;
 
 const LOADER_PLOT = `${SCOPE} .blueprint-loader-plot`;
 const LOADER_PEN = `${SCOPE} .blueprint-loader-pen`;
@@ -295,6 +295,8 @@ describe("blueprint moments", () => {
                 expect(properties.some(property => /mask|offset-|filter/.test(property)), selector).toBe(false);
             }
             expect(BLUEPRINT_CSS).not.toContain("--digit-writer-mask");
+            // The cell's own data-arriving, not :has(), which older engines lack
+            expect(BLUEPRINT_CSS).not.toContain(":has(");
         });
 
         // Reduced motion, like the motion setting turned off, leaves no arrival: the digit simply appears

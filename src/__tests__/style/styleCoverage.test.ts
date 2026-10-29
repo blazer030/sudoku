@@ -133,7 +133,7 @@ const REQUIRED_SELECTORS: Record<StyleId, readonly string[]> = {
         "[data-value-kind]",
         "[data-note-highlight]",
         ".value-leave::before",
-        ":has(> .value-arrive)::before",
+        "[data-arriving]::before",
         "> .value-arrive",
         ".blueprint-loader-plot",
         ".blueprint-loader-pen",
