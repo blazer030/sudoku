@@ -1,12 +1,15 @@
 import { readFileSync } from "fs";
 import postcss from "postcss";
 import { ARRIVAL_SETTLE_MS } from "@/presentation/components/board-cell/useArrivalMotion";
+import { STYLE_MOMENTS } from "@/presentation/components/style-moments/styleMoments";
 import { animationTimingOf, declarationsOf, reducedMotionDeclarationsOf } from "../../styleSheetRules";
 
 const BLUEPRINT_CSS = readFileSync("src/style/styles/blueprint/skin.css", "utf8");
 
 const SCOPE = '[data-style="blueprint"]';
 const BOARD = `${SCOPE} [data-skin~="board"]`;
+const ARRIVING_DIGIT = `${BOARD} [data-variant] > .value-arrive`;
+const CROSSHAIRS = `${BOARD} [data-variant]:has(> .value-arrive)::before`;
 
 const LOADER_PLOT = `${SCOPE} .blueprint-loader-plot`;
 const LOADER_PEN = `${SCOPE} .blueprint-loader-pen`;
@@ -214,6 +217,91 @@ describe("blueprint moments", () => {
         it("should stop under reduced motion, leaving nothing seen", () => {
             expect(reducedMotionDeclarationsOf(BLUEPRINT_CSS, STRIKE).get("animation")).toBe("none");
             expect(declarationsOf(BLUEPRINT_CSS, STRIKE).get("opacity")).toBe("0");
+        });
+    });
+
+    describe("digit arrival", () => {
+        const timingOf = (selector: string, name: string) => animationTimingOf(declarationsOf(BLUEPRINT_CSS, selector).get("animation") ?? "", name);
+        const endOf = (selector: string, name: string): number => {
+            const timing = timingOf(selector, name);
+            return (timing?.fixedDelayMs ?? Number.NaN) + (timing?.durationMs ?? Number.NaN);
+        };
+        // One 1px line of the primary
+        const LINE = "linear-gradient(var(--color-primary), var(--color-primary))";
+
+        // A pen masked by reference draws nothing in WebKit, so the arrival is the skin's alone
+        it("should have no digit writer, so every engine shows the same arrival", () => {
+            expect(STYLE_MOMENTS.blueprint.digitWriter).toBeUndefined();
+        });
+
+        it("should cross the arriving digit's cell with two 1px lines of the primary, above its frame, untouchable", () => {
+            const crosshairs = declarationsOf(BLUEPRINT_CSS, CROSSHAIRS);
+
+            expect(crosshairs.get("content")).toBe('""');
+            expect(crosshairs.get("position")).toBe("absolute");
+            expect(crosshairs.get("inset")).toBe("0");
+            expect(crosshairs.get("z-index")).toBe("5");
+            expect(crosshairs.get("pointer-events")).toBe("none");
+            expect(crosshairs.get("background-image")).toBe(`${LINE}, ${LINE}`);
+            expect(crosshairs.get("background-size")).toBe("100% 1px, 1px 100%");
+            expect(crosshairs.get("background-position")).toBe("0 50%, 50% 0");
+            expect(crosshairs.get("background-repeat")).toBe("no-repeat");
+            // Unseen without its animation
+            expect(crosshairs.get("opacity")).toBe("0");
+        });
+
+        // The canvas's headA over 0.8 of its 0.8s; the lines then stay away until the ink is in, so their end
+        // (a cell pseudo-element's, which settles the arrival) never comes before the digit's
+        it("should sweep the crosshairs along the canvas's headA over 0–640ms, linearly, gone until 840ms", () => {
+            const frames = framesOf("blueprint-digit-crosshairs");
+
+            expect(timingOf(CROSSHAIRS, "blueprint-digit-crosshairs")).toEqual({ durationMs: 840, fixedDelayMs: 0 });
+            expect(declarationsOf(BLUEPRINT_CSS, CROSSHAIRS).get("animation")).toContain(" linear");
+            expect(frames.get("0%")).toEqual(new Map([["opacity", "1"], ["transform", "translate(-30%, -30%)"]]));
+            expect(frames.get("19.048%")).toEqual(new Map([["transform", "translate(22%, -18%)"]]));
+            expect(frames.get("38.095%")).toEqual(new Map([["transform", "translate(-14%, 12%)"]]));
+            expect(frames.get("57.143%")).toEqual(new Map([["opacity", "1"], ["transform", "translate(16%, 24%)"]]));
+            // 640ms of the 840
+            expect(frames.get("76.19%, 100%")).toEqual(new Map([["opacity", "0"], ["transform", "none"]]));
+        });
+
+        it("should ink the digit in from 605 to 840ms, as the canvas's inkA", () => {
+            const digit = declarationsOf(BLUEPRINT_CSS, ARRIVING_DIGIT);
+
+            expect(timingOf(ARRIVING_DIGIT, "blueprint-digit-ink")).toEqual({ durationMs: 235, fixedDelayMs: 605 });
+            expect(digit.get("animation")).toContain(" ease ");
+            expect(digit.get("animation")).toContain(" both");
+            expect(framesOf("blueprint-digit-ink").get("from")).toEqual(new Map([["opacity", "0"]]));
+            expect(framesOf("blueprint-digit-ink").get("to")).toEqual(new Map([["opacity", "1"]]));
+        });
+
+        it("should settle from the ink, the crosshairs ending with it, all before the arrival settles on its own", () => {
+            const inkEndMs = endOf(ARRIVING_DIGIT, "blueprint-digit-ink");
+
+            expect(inkEndMs).toBe(840);
+            expect(endOf(CROSSHAIRS, "blueprint-digit-crosshairs")).toBe(inkEndMs);
+            expect(inkEndMs).toBeLessThan(ARRIVAL_SETTLE_MS);
+        });
+
+        // Opacity and transform only: no mask, motion path or filter, so every engine draws it alike
+        it("should animate only opacity and transform, with no mask, motion path or filter", () => {
+            for (const name of ["blueprint-digit-crosshairs", "blueprint-digit-ink"]) {
+                const properties = [...framesOf(name).values()].flatMap(frame => [...frame.keys()]);
+                expect(properties.length, name).toBeGreaterThan(0);
+                expect(properties.every(property => ["opacity", "transform"].includes(property)), name).toBe(true);
+            }
+            for (const selector of [ARRIVING_DIGIT, CROSSHAIRS]) {
+                const properties = [...declarationsOf(BLUEPRINT_CSS, selector).keys()];
+                expect(properties.some(property => /mask|offset-|filter/.test(property)), selector).toBe(false);
+            }
+            expect(BLUEPRINT_CSS).not.toContain("--digit-writer-mask");
+        });
+
+        // Reduced motion, like the motion setting turned off, leaves no arrival: the digit simply appears
+        it("should stop under reduced motion, the digit shown and the crosshairs unseen", () => {
+            expect(reducedMotionDeclarationsOf(BLUEPRINT_CSS, ARRIVING_DIGIT).get("animation")).toBe("none");
+            expect(reducedMotionDeclarationsOf(BLUEPRINT_CSS, CROSSHAIRS).get("animation")).toBe("none");
+            expect(declarationsOf(BLUEPRINT_CSS, ARRIVING_DIGIT).has("opacity")).toBe(false);
         });
     });
 });

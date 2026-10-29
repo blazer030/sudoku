@@ -452,7 +452,7 @@
 }
 
 /* Cells are square, without the shared ring; digits and notes sit below the lines. A cell's ::after is its
-   selection or answer frame, its ::before is left for the eraser. */
+   selection or answer frame, its ::before the eraser's strike or, while a digit arrives, its crosshairs. */
 [data-style="blueprint"] [data-skin~="board"] [data-variant] {
     position: relative;
     border-radius: 0;
@@ -615,6 +615,45 @@
         linear-gradient(-45deg, transparent calc(50% - 1px), var(--color-primary) calc(50% - 1px) calc(50% + 1px), transparent calc(50% + 1px));
     opacity: 0;
     animation: blueprint-strike 700ms ease-in;
+}
+
+/* A digit entered is plotted under crosshairs, then inked in, as the canvas's fill at 0.8 of its 1.05s so it ends
+   before the arrival settles on its own. Only opacity and transform move, so every engine (Safari and iOS too)
+   draws the same: the cell's ::before, free while a digit arrives (the strike holds it only while one leaves), is
+   two 1px lines of the primary across the cell, above its frame, sweeping the canvas's headA, a fixed path, over
+   0–640ms; the digit itself inks in over 605–840ms. A cell's pseudo-element settles the arrival when its animation
+   ends, so the lines' animation runs on, unseen, to 840ms, ending with the ink and never before it. */
+@keyframes blueprint-digit-crosshairs {
+    0% { opacity: 1; transform: translate(-30%, -30%); }
+    19.048% { transform: translate(22%, -18%); }
+    38.095% { transform: translate(-14%, 12%); }
+    57.143% { opacity: 1; transform: translate(16%, 24%); }
+    76.19%, 100% { opacity: 0; transform: none; }
+}
+
+@keyframes blueprint-digit-ink {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+[data-style="blueprint"] [data-skin~="board"] [data-variant]:has(> .value-arrive)::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    pointer-events: none;
+    background-image:
+        linear-gradient(var(--color-primary), var(--color-primary)),
+        linear-gradient(var(--color-primary), var(--color-primary));
+    background-size: 100% 1px, 1px 100%;
+    background-position: 0 50%, 50% 0;
+    background-repeat: no-repeat;
+    opacity: 0;
+    animation: blueprint-digit-crosshairs 840ms linear;
+}
+
+[data-style="blueprint"] [data-skin~="board"] [data-variant] > .value-arrive {
+    animation: blueprint-digit-ink 235ms ease 605ms both;
 }
 
 /* Settings and 外觀, as the canvas's .group / .gh: each card framed in 1.5px of ink, each group's heading in the
@@ -963,7 +1002,9 @@
         animation: none;
     }
 
-    [data-style="blueprint"] [data-skin~="board"] [data-variant].value-leave::before {
+    [data-style="blueprint"] [data-skin~="board"] [data-variant].value-leave::before,
+    [data-style="blueprint"] [data-skin~="board"] [data-variant]:has(> .value-arrive)::before,
+    [data-style="blueprint"] [data-skin~="board"] [data-variant] > .value-arrive {
         animation: none;
     }
 
