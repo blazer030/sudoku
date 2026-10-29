@@ -203,7 +203,7 @@
 }
 
 /* Home, as the canvas's .home. The logo is a small drawing (blueprint-logo.svg, a mask) in the ink; the stacked
-   logo's squares are cleared so they never show through it. The title and subtitle are spaced out by the "spaced"
+   logo's squares are hidden so they never show through it. The title and subtitle are spaced out by the "spaced"
    hero. */
 [data-style="blueprint"] [data-skin~="logo"] {
     background-color: var(--color-foreground);
@@ -217,8 +217,8 @@
     mask-repeat: no-repeat;
 }
 
-[data-style="blueprint"] [data-skin~="logo"] > * > * {
-    background-color: transparent;
+[data-style="blueprint"] [data-skin~="logo"] > * {
+    visibility: hidden;
 }
 
 /* The continue card is a drawing's title block (its title-block layout): a 1.5px frame of ink, its play mark in the
@@ -252,7 +252,7 @@
 }
 
 /* The new game card is framed in 1.5px of ink like the continue card, not the double frame */
-[data-style="blueprint"] [data-skin~="card"]:has(> [data-skin~="new-game"]) {
+[data-style="blueprint"] [data-skin~="new-game-card"] {
     box-shadow: var(--blueprint-frame-strong);
 }
 

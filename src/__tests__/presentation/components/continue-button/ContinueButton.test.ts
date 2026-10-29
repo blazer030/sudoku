@@ -32,6 +32,7 @@ const mountContinueButton = (style: StyleId = "minimal") => {
 
 afterEach(() => {
     localStorage.clear();
+    i18n.global.locale.value = "en";
 });
 
 describe("ContinueButton", () => {

@@ -265,7 +265,7 @@ describe("blueprint skin", () => {
             expect(logo.get("background-color")).toBe("var(--color-foreground)");
             expect(logo.get("box-shadow")).toBe("none");
             // The stacked logo's squares would show through the mask
-            expect(declarationsOf(BLUEPRINT_CSS, `${skin("logo")} > * > *`).get("background-color")).toBe("transparent");
+            expect(declarationsOf(BLUEPRINT_CSS, `${skin("logo")} > *`).get("visibility")).toBe("hidden");
         });
 
         it("should draw the logo with no words and no filters: a 3×3 grid, two dimension lines, a leader and a cross", () => {
@@ -288,7 +288,7 @@ describe("blueprint skin", () => {
         });
 
         it("should frame the new game card in 1.5px of ink", () => {
-            expect(declarationsOf(BLUEPRINT_CSS, `${skin("card")}:has(> [data-skin~="new-game"])`).get("box-shadow")).toBe("var(--blueprint-frame-strong)");
+            expect(declarationsOf(BLUEPRINT_CSS, skin("new-game-card")).get("box-shadow")).toBe("var(--blueprint-frame-strong)");
         });
 
         it("should rule a segmented control into square cells, the chosen one written in the paper on the ink", () => {
