@@ -52,7 +52,7 @@ describe("board geometry", () => {
         const utility = /@utility max-w-board-fit \{([^}]*)\}/.exec(readFileSync("src/style/index.css", "utf8"))?.[1] ?? "";
         // A short but wide window (a phone in landscape, split screen) keeps a usable board and scrolls
         // 15rem (240px) still fits a 640px phone whose status and navigation bars take 72px
-        expect(utility).toMatch(/max-width: max\(15rem, calc\(100dvh - /);
+        expect(utility).toMatch(/max-width: (?:calc\()?max\(15rem, calc\(100dvh - /);
         expect(utility).toContain("safe-area-inset-top");
         expect(utility).toContain("safe-area-inset-bottom");
     });
@@ -61,5 +61,11 @@ describe("board geometry", () => {
         const utility = /@utility max-w-board-fit \{([^}]*)\}/.exec(readFileSync("src/style/index.css", "utf8"))?.[1] ?? "";
         // A frame sets --board-frame-block on its own element; the board inside it, being square, gives up that much width
         expect(utility).toContain("- var(--board-frame-block, 0px)");
+    });
+
+    it("should let a style's board frame, which carries the board's width, grow by the width it adds round the board", () => {
+        const utility = /@utility max-w-board-fit \{([^}]*)\}/.exec(readFileSync("src/style/index.css", "utf8"))?.[1] ?? "";
+        // A frame sets --board-frame-inline on its own element, so the board it holds keeps the size the height allows
+        expect(utility).toMatch(/max-width: calc\(max\(15rem, calc\(100dvh - .*\) \+ var\(--board-frame-inline, 0px\)\);/);
     });
 });

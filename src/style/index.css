@@ -102,9 +102,11 @@
    the board is square, so its width is its height. It never goes under 15rem, which still fits a
    640px phone after its system bars; a shorter window (a phone in landscape, split screen) scrolls.
    A style's board frame sets --board-frame-block on its own element to the height it adds round the
-   board, and the board gives that up too. */
+   board, and the board gives that up too. A frame that takes over the board's width (the board then
+   fills it) also carries this utility and sets --board-frame-inline to the width it adds, so the frame
+   grows by its sides and the board inside keeps the size the height allows. */
 @utility max-w-board-fit {
-  max-width: max(15rem, calc(100dvh - 331px - var(--board-frame-block, 0px) - var(--safe-area-inset-top, env(safe-area-inset-top)) - var(--safe-area-inset-bottom, env(safe-area-inset-bottom))));
+  max-width: calc(max(15rem, calc(100dvh - 331px - var(--board-frame-block, 0px) - var(--safe-area-inset-top, env(safe-area-inset-top)) - var(--safe-area-inset-bottom, env(safe-area-inset-bottom)))) + var(--board-frame-inline, 0px));
 }
 
 :root {
