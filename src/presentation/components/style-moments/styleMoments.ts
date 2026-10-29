@@ -20,7 +20,6 @@ import ChalkboardDigitWriter from "@/presentation/components/style-moments/chalk
 import ChalkboardLoader from "@/presentation/components/style-moments/chalkboard/ChalkboardLoader.vue";
 import ChalkboardGroupOverlay from "@/presentation/components/style-moments/chalkboard/ChalkboardGroupOverlay.vue";
 import ChalkboardCardDecoration from "@/presentation/components/style-moments/chalkboard/ChalkboardCardDecoration.vue";
-import BlueprintDigitWriter from "@/presentation/components/style-moments/blueprint/BlueprintDigitWriter.vue";
 import BlueprintLoader from "@/presentation/components/style-moments/blueprint/BlueprintLoader.vue";
 import type { CompletedGroup } from "@/domain/game/Sudoku";
 
@@ -156,15 +155,13 @@ const CHALKBOARD_MOMENTS: StyleMoments = {
 };
 
 // While a puzzle loads, a plotter draws a sudoku box on a small drawing sheet, its pen running along the line as it
-// is plotted, and dimensions it in 3 columns (BlueprintLoader). An entered digit is plotted in outline under a pair
-// of crosshairs and inked in by 840ms (BlueprintDigitWriter).
+// is plotted, and dimensions it in 3 columns (BlueprintLoader).
 const BLUEPRINT_MOMENTS: StyleMoments = {
     loader: BlueprintLoader,
     celebration: null,
     cardDecoration: null,
     groupEffectMs: 900,
     celebrationBoardMs: 1300,
-    digitWriter: BlueprintDigitWriter,
 };
 
 // One entry per style, so a style added without its moments is a type error
