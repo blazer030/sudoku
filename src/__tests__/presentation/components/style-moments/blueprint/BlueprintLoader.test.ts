@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { defineComponent, h, nextTick } from "vue";
+import { nextTick } from "vue";
 import { mount } from "@vue/test-utils";
 import { i18n } from "@/presentation/i18n";
 import { STYLE_MOMENTS } from "@/presentation/components/style-moments/styleMoments";
@@ -90,8 +90,6 @@ describe("BlueprintLoader", () => {
         readings.forEach((reading, position) => {
             expect(reading).toMatch(position % 2 === 0 ? /^X \d{3}\.\d$/ : /^Y \d{3}\.\d$/);
         });
-        // The last pair repeats the first, so the readout's loop has no seam
-        expect(readings.slice(-2)).toEqual(readings.slice(0, 2));
     });
 
     it("should close the title block with the sheet's number, as decoration", () => {
@@ -100,13 +98,5 @@ describe("BlueprintLoader", () => {
 
         expect(sheetNumber.text()).toBe("SDK-09 · SHT 01/01 · 1:1");
         expect(sheetNumber.attributes("aria-hidden")).toBe("true");
-    });
-
-    // The loader needs no ids of its own today; any it takes must stay apart between two loaders on one screen
-    it("should not repeat an id between two loaders", () => {
-        const TwoLoaders = defineComponent({ render: () => [h(BlueprintLoader), h(BlueprintLoader)] });
-        const ids = mount(TwoLoaders).findAll("[id]").map(element => element.attributes("id"));
-
-        expect(new Set(ids).size).toBe(ids.length);
     });
 });

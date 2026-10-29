@@ -100,7 +100,7 @@ withDefaults(defineProps<{
 const PLOT = "M10 10 H110 V110 H10 V10 H43 V110 H77 V10 H110 V43 H10 V77 H110";
 const PEN_PATH = { "--blueprint-loader-path": `path("${PLOT}")` };
 
-// The readout ticks through six of these in a round; the seventh repeats the first, so the loop has no seam
+// The readout ticks through these six in a round, then starts over
 const READOUT = [
     { x: 10, y: 10 },
     { x: 110, y: 110 },
@@ -108,7 +108,6 @@ const READOUT = [
     { x: 77, y: 10 },
     { x: 110, y: 43 },
     { x: 10, y: 77 },
-    { x: 10, y: 10 },
 ];
 
 const coordinateOf = (value: number): string => value.toFixed(1).padStart(5, "0");
