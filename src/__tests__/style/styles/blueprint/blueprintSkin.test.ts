@@ -413,6 +413,8 @@ describe("blueprint skin", () => {
             const value = declarationsOf(BLUEPRINT_CSS, skin("stat-value"));
 
             expect(value.get("font-weight")).toBe("500");
+            // No colour of its own: the markup's text-primary (wins, win rate, best times) and text-foreground stay,
+            // which the canvas draws as .acc and the plain ink
             expect(value.get("color")).toBeUndefined();
         });
 
@@ -424,9 +426,14 @@ describe("blueprint skin", () => {
             expect(row.get("border-radius")).toBe("0");
         });
 
-        it("should write a game's result in the ink, a given-up one too", () => {
+        // The row lies on the paper, where paletteContrast checks "danger on background"
+        it("should write a game's time in the ink and a given-up one in the error colour, as the canvas's .lside b.gave", () => {
             expect(declarationsOf(BLUEPRINT_CSS, skin("game-result")).get("color")).toBe("var(--color-foreground)");
-            expect(declarationsOf(BLUEPRINT_CSS, skin("game-result gave-up")).get("color")).toBeUndefined();
+            expect(declarationsOf(BLUEPRINT_CSS, skin("game-result gave-up")).get("color")).toBe("var(--color-danger)");
+        });
+
+        it("should frame Statistics' cards in 1.5px of ink, as the settings cards", () => {
+            expect(declarationsOf(BLUEPRINT_CSS, skin("stat-card")).get("box-shadow")).toBe("var(--blueprint-frame-strong)");
         });
     });
 

@@ -411,8 +411,9 @@
 }
 
 /* Settings and 外觀, as the canvas's .group / .gh: each card framed in 1.5px of ink, each group's heading in the
-   ink at 500, its icon in the ink, and numbered on its right as a drawing's sections, B-01, B-02…, in the pale Mono */
-[data-style="blueprint"] [data-skin~="settings-card"] {
+   ink at 500 (Statistics' cards take the same frame, below), its icon in the ink, and numbered on its right as a drawing's sections, B-01, B-02…, in the pale Mono */
+[data-style="blueprint"] [data-skin~="settings-card"],
+[data-style="blueprint"] [data-skin~="stat-card"] {
     box-shadow: var(--blueprint-frame-strong);
 }
 
@@ -517,7 +518,8 @@
 
 /* Statistics, as the canvas's .sec / .statnum / .lrow: section headings in the pale Mono at 500, the figures in Mono
    at 500 (the best times and the overview's wins keep the markup's primary), recent games' rows framed in 1.5px of
-   ink on the paper, and a game's result, a time or "Gave up", in the ink */
+   ink on the paper, a game's time in the ink and "Gave up" in the error colour (the canvas's .lside b.gave). The
+   overview and By Difficulty cards are framed in 1.5px of ink like the settings cards (above). */
 [data-style="blueprint"] [data-skin~="stat-heading"] {
     color: var(--color-foreground-secondary);
     font-weight: 500;
@@ -539,6 +541,10 @@
 
 [data-style="blueprint"] [data-skin~="game-result"] {
     color: var(--color-foreground);
+}
+
+[data-style="blueprint"] [data-skin~="game-result"][data-skin~="gave-up"] {
+    color: var(--color-danger);
 }
 
 /* Playback, as the canvas's .prog / .playb / .dots. The progress track is a ruler: a 12px strip on its ::before,
