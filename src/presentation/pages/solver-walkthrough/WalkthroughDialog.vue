@@ -60,6 +60,7 @@
                         v-if="content.cancelKey !== null"
                         v-press
                         class="w-full h-11 flex items-center justify-center cursor-pointer rounded-button text-base font-semibold text-foreground transition-all duration-200 hover:bg-foreground/5"
+                        data-skin="text-button"
                         data-testid="walkthrough-dialog-cancel"
                         @click="close('cancel')"
                     >

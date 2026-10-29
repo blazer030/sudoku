@@ -107,6 +107,7 @@
                     <button
                         v-press
                         class="w-full h-11 rounded-button text-foreground-secondary text-[15px] font-medium flex items-center justify-center cursor-pointer transition-all duration-200 hover:bg-foreground/5"
+                        data-skin="text-button"
                         data-testid="back-to-home-button"
                         @click="close('home')"
                     >

@@ -57,6 +57,7 @@
                     <button
                         v-press
                         class="w-full h-11 flex items-center justify-center cursor-pointer rounded-button text-danger text-[15px] font-semibold transition-all duration-200 hover:bg-foreground/5"
+                        data-skin="text-button"
                         data-testid="give-up-and-start-new-button"
                         @click="close('giveUp')"
                     >
@@ -66,6 +67,7 @@
                     <button
                         v-press
                         class="w-full h-11 flex items-center justify-center cursor-pointer rounded-button text-foreground-secondary text-[15px] font-medium transition-all duration-200 hover:bg-foreground/5"
+                        data-skin="text-button"
                         data-testid="new-game-stay-button"
                         @click="close('stay')"
                     >

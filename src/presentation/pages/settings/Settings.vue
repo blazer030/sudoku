@@ -85,6 +85,7 @@
                 v-press
                 :disabled="!hasRecords"
                 class="flex items-center justify-center gap-2 w-full h-11 rounded-button text-danger disabled:text-foreground-muted cursor-pointer disabled:cursor-default"
+                data-skin="text-button"
                 data-testid="clear-records-button"
                 type="button"
                 @click="handleClearRecords"

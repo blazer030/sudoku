@@ -62,6 +62,16 @@ describe("skin hooks", () => {
         expect(missing).toEqual([]);
     });
 
+    // A button that is only its words (a dialog's cancel or second action, Settings' Clear Records) has no
+    // surface of its own but a hover wash in the button's rounded shape; it carries a hook so a style can shape it
+    it("should mark every text-only rounded button as a text button", () => {
+        const offenders = VUE_FILES.flatMap(path => openingTags(readFileSync(path, "utf8"), "button")
+            .filter(tag => /\brounded-button\b/.test(tag) && !/[\s"]bg-/.test(tag) && !hasSkinToken(tag, "button") && !hasSkinToken(tag, "text-button"))
+            .map(tag => `${path}: ${(/data-testid="([^"]+)"/.exec(tag)?.[1] ?? tag.replace(/\s+/g, " ").slice(0, 80))}`));
+
+        expect(offenders).toEqual([]);
+    });
+
     it("should mark opaque page roots and sticky headers, so a style's page background reaches them", () => {
         const offenders = VUE_FILES.flatMap(path => openingTags(readFileSync(path, "utf8"), "div")
             .filter(tag => /\bbg-background\b/.test(tag))

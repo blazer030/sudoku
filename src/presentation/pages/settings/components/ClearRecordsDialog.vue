@@ -46,6 +46,7 @@
                     <button
                         v-press
                         class="w-full h-[44px] flex items-center justify-center cursor-pointer rounded-button transition-all duration-200 hover:bg-foreground/5"
+                        data-skin="text-button"
                         data-testid="clear-records-cancel-button"
                         @click="close('cancel')"
                     >
