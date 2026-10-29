@@ -1,8 +1,7 @@
 import { computed, type Component, type ComputedRef } from "vue";
 import type { StyleId } from "@/theme/themeIds";
 import type { CellReference } from "@/domain/solver/SolveStep";
-import type { GroupEffect } from "@/presentation/components/style-moments/styleMoments";
-import type { CelebrationPhase } from "@/presentation/pages/game/useGameSession";
+import type { CelebrationPhase, GroupEffect } from "@/presentation/components/style-moments/styleMoments";
 import { useSettingsStore } from "@/stores/settingsStore";
 import BlueprintBoardFrame from "@/presentation/components/board-frame/blueprint/BlueprintBoardFrame.vue";
 

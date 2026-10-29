@@ -2,8 +2,7 @@ import { afterEach, beforeEach } from "vitest";
 import { defineComponent, h, type PropType } from "vue";
 import type { VueWrapper } from "@vue/test-utils";
 import type { CellReference } from "@/domain/solver/SolveStep";
-import type { GroupEffect } from "@/presentation/components/style-moments/styleMoments";
-import type { CelebrationPhase } from "@/presentation/pages/game/useGameSession";
+import type { CelebrationPhase, GroupEffect } from "@/presentation/components/style-moments/styleMoments";
 import { STYLE_BOARD_FRAMES } from "@/presentation/components/board-frame/boardFrames";
 
 /** A board frame that only wraps the board, so a test can read what the page hands a style's frame. */

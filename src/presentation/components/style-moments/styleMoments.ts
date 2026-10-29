@@ -32,6 +32,9 @@ export interface GroupEffect {
     origin: { row: number; column: number };
 }
 
+/** The board's part of the celebration: its phase playing, its end state after, or the still end state. */
+export type CelebrationPhase = "playing" | "done" | "still";
+
 export interface StyleMoments {
     loader: Component;
     /**
