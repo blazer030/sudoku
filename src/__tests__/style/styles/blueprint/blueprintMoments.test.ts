@@ -18,6 +18,12 @@ const READY_CROSSHAIRS = `${READY} .blueprint-digit-crosshairs`;
 const CROSSHAIR = `${SCOPE} .blueprint-digit-crosshair`;
 const INK = `${SCOPE} .blueprint-digit-ink`;
 
+const LOADER_PLOT = `${SCOPE} .blueprint-loader-plot`;
+const LOADER_PEN = `${SCOPE} .blueprint-loader-pen`;
+const LOADER_DIMENSION = `${SCOPE} .blueprint-loader-dimension`;
+const LOADER_READINGS = `${SCOPE} .blueprint-loader-coordinates > span`;
+const PEN_SUPPORT = 'offset-path: path("M0 0")';
+
 const collapse = (text: string): string => text.replace(/\s+/g, " ").trim();
 
 // Each frame of a @keyframes block, by its collapsed selector
@@ -36,7 +42,135 @@ const framesOf = (name: string): Map<string, Map<string, string>> => {
     return frames;
 };
 
+interface LoaderAnimation { selector: string; animation: string; name: string; supports: string | null }
+
+// Every animated loader rule outside @keyframes and reduced motion, with the @supports it sits in, if any
+const loaderAnimations = (): LoaderAnimation[] => {
+    const animations: LoaderAnimation[] = [];
+    postcss.parse(BLUEPRINT_CSS).walkRules((rule) => {
+        const parent = rule.parent?.type === "atrule" ? rule.parent as postcss.AtRule : null;
+        if (parent !== null && ["keyframes", "media"].includes(parent.name)) return;
+        rule.walkDecls("animation", (declaration) => {
+            for (const selector of rule.selectors.map(collapse).filter(item => item.includes(".blueprint-loader"))) {
+                const animation = collapse(declaration.value);
+                animations.push({ selector, animation, name: animation.split(" ")[0] ?? "", supports: parent === null ? null : collapse(parent.params) });
+            }
+        });
+    });
+    return animations;
+};
+
+const loaderAnimationOf = (selector: string): LoaderAnimation | undefined =>
+    loaderAnimations().find(animation => animation.selector === selector);
+
+// The declarations of the rules listing a selector inside an @supports block with these conditions
+const supportedDeclarationsOf = (selector: string, conditions: string): Map<string, string> => {
+    const declarations = new Map<string, string>();
+    postcss.parse(BLUEPRINT_CSS).walkAtRules("supports", (atRule) => {
+        if (collapse(atRule.params) !== `(${conditions})`) return;
+        atRule.walkRules((rule) => {
+            if (!rule.selectors.map(collapse).includes(selector)) return;
+            rule.walkDecls((declaration) => { declarations.set(declaration.prop, collapse(declaration.value)); });
+        });
+    });
+    return declarations;
+};
+
 describe("blueprint moments", () => {
+    describe("loader", () => {
+        const LOADER_PIECES = [LOADER_PLOT, LOADER_PEN, LOADER_DIMENSION, LOADER_READINGS];
+        const frameOf = (selector: string, offset: string): Map<string, string> | undefined =>
+            framesOf(loaderAnimationOf(selector)?.name ?? "").get(offset);
+
+        it("should run every piece on one 3.8s infinite loop", () => {
+            for (const piece of LOADER_PIECES) {
+                expect(loaderAnimationOf(piece), piece).toBeDefined();
+            }
+            for (const { selector, animation, name } of loaderAnimations()) {
+                expect(animationTimingOf(animation, name)?.durationMs, selector).toBe(3800);
+                expect(animation, selector).toContain(" infinite");
+            }
+        });
+
+        // The line is dashed on and the pen moved along one path at the same steady pace
+        it("should plot the line and move the pen linearly together, the readout ticking in six steps", () => {
+            expect(loaderAnimationOf(LOADER_PLOT)?.animation).toContain(" linear ");
+            expect(loaderAnimationOf(LOADER_PEN)?.animation).toContain(" linear ");
+            expect(loaderAnimationOf(LOADER_DIMENSION)?.animation).toContain(" linear ");
+            expect(loaderAnimationOf(LOADER_READINGS)?.animation).toContain(" steps(6, end) ");
+            expect(frameOf(LOADER_READINGS, "0%")?.get("transform")).toBe("translateY(0)");
+            // Six pairs of 14px readings
+            expect(frameOf(LOADER_READINGS, "100%")?.get("transform")).toBe("translateY(-168px)");
+        });
+
+        it("should start every drawn piece hidden and end it hidden, so the loop has no seam", () => {
+            const plot = declarationsOf(BLUEPRINT_CSS, LOADER_PLOT);
+
+            expect(plot.get("stroke-dasharray")).toBe("1");
+            expect(plot.get("stroke-dashoffset")).toBe("1");
+            expect(frameOf(LOADER_PLOT, "0%")?.get("stroke-dashoffset")).toBe("1");
+            expect(frameOf(LOADER_PLOT, "96%, 100%")?.get("opacity")).toBe("0");
+            expect(frameOf(LOADER_PEN, "0%")?.get("opacity")).toBe("0");
+            expect(frameOf(LOADER_PEN, "72%, 100%")?.get("opacity")).toBe("0");
+            expect(frameOf(LOADER_DIMENSION, "0%, 68%")?.get("opacity")).toBe("0");
+            expect(frameOf(LOADER_DIMENSION, "96%, 100%")?.get("opacity")).toBe("0");
+            expect(declarationsOf(BLUEPRINT_CSS, LOADER_DIMENSION).get("opacity")).toBe("0");
+        });
+
+        it("should plot from 0 to 68%, then spread the dimension from its middle by 76%, hold to 86% and fade by 96%", () => {
+            expect(frameOf(LOADER_PLOT, "68%")?.get("stroke-dashoffset")).toBe("0");
+            expect(frameOf(LOADER_PLOT, "86%")).toEqual(new Map([["stroke-dashoffset", "0"], ["opacity", "1"]]));
+            expect(frameOf(LOADER_PEN, "68%")?.get("offset-distance")).toBe("100%");
+            expect(frameOf(LOADER_DIMENSION, "0%, 68%")?.get("clip-path")).toBe("inset(-8px 50% -8px 50%)");
+            expect(frameOf(LOADER_DIMENSION, "76%, 86%")).toEqual(new Map([["opacity", "1"], ["clip-path", "inset(-8px 0 -8px 0)"]]));
+        });
+
+        it("should animate only opacity, transform, the dash offset, the pen's distance and the clip", () => {
+            const allowed = ["opacity", "transform", "stroke-dashoffset", "offset-distance", "clip-path"];
+
+            expect(loaderAnimations().length).toBeGreaterThan(0);
+            for (const { name } of loaderAnimations()) {
+                const properties = [...framesOf(name).values()].flatMap(frame => [...frame.keys()]);
+                expect(properties.every(property => allowed.includes(property)), name).toBe(true);
+            }
+        });
+
+        // Android WebView before Chrome 116 has no offset-path: there the line is plotted without a pen
+        it("should move the pen only where offset-path is supported, along the plot's path", () => {
+            const pen = supportedDeclarationsOf(LOADER_PEN, PEN_SUPPORT);
+
+            expect(loaderAnimationOf(LOADER_PEN)?.supports).toBe(`(${PEN_SUPPORT})`);
+            expect(pen.get("offset-path")).toBe("var(--blueprint-loader-path)");
+            expect(pen.get("offset-rotate")).toBe("0deg");
+            expect(pen.get("visibility")).toBe("visible");
+            expect(declarationsOf(BLUEPRINT_CSS, LOADER_PEN).get("visibility")).toBe("hidden");
+            expect(declarationsOf(BLUEPRINT_CSS, LOADER_PEN).has("animation")).toBe(false);
+        });
+
+        it("should stop under reduced motion on the plotted box, its dimension and still readings, without the pen", () => {
+            for (const { selector } of loaderAnimations()) {
+                expect(reducedMotionDeclarationsOf(BLUEPRINT_CSS, selector).get("animation"), selector).toBe("none");
+            }
+            expect(reducedMotionDeclarationsOf(BLUEPRINT_CSS, LOADER_PLOT).get("stroke-dashoffset")).toBe("0");
+            expect(reducedMotionDeclarationsOf(BLUEPRINT_CSS, LOADER_DIMENSION).get("opacity")).toBe("1");
+            expect(reducedMotionDeclarationsOf(BLUEPRINT_CSS, LOADER_DIMENSION).get("clip-path")).toBe("none");
+            expect(reducedMotionDeclarationsOf(BLUEPRINT_CSS, LOADER_PEN).get("visibility")).toBe("hidden");
+        });
+
+        // Loaders obey only the system's reduced motion, never the app's motion setting
+        it("should not tie any loader rule to the motion setting", () => {
+            const loaderSelectors: string[] = [];
+            postcss.parse(BLUEPRINT_CSS).walkRules((rule) => {
+                loaderSelectors.push(...rule.selectors.map(collapse).filter(selector => selector.includes(".blueprint-loader")));
+            });
+
+            expect(loaderSelectors.length).toBeGreaterThan(0);
+            for (const selector of loaderSelectors) {
+                expect(selector).toMatch(/^\[data-style="blueprint"\] \.blueprint-loader[\w-]*(?: > span)?$/);
+            }
+        });
+    });
+
     describe("erase strike", () => {
         const STRIKE = `${BOARD} [data-variant].value-leave::before`;
         // One 2px diagonal of the primary across the cell

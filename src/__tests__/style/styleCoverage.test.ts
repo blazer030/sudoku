@@ -135,6 +135,8 @@ const REQUIRED_SELECTORS: Record<StyleId, readonly string[]> = {
         ".value-leave::before",
         ".blueprint-digit-outline",
         ".blueprint-digit-crosshair",
+        ".blueprint-loader-plot",
+        ".blueprint-loader-pen",
         "body::before",
         '[data-skin~="card"]',
         '[data-skin~="pill"]',

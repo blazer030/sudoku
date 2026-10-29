@@ -955,6 +955,68 @@
     color: var(--color-primary);
 }
 
+/* While a puzzle loads, as the canvas's .bload: a plotter draws a sudoku box on a small drawing sheet, one round
+   in 3.8s. The line is dashed on along one path (pathLength 1) while the pen runs along that same path at the same
+   pace, both linear, the outline first and then the four inner lines, done at 68%; the 3-column dimension spreads
+   from its middle by 76%, everything holds to 86% and has faded by 96%. Each piece starts the round hidden, so the
+   loop has no seam, and the X/Y readout ticks through six pairs. Loading follows only the system's reduced
+   motion. */
+[data-style="blueprint"] .blueprint-loader-plot {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: blueprint-loader-plot 3.8s linear infinite both;
+}
+
+@keyframes blueprint-loader-plot {
+    0% { stroke-dashoffset: 1; opacity: 1; }
+    68% { stroke-dashoffset: 0; }
+    86% { stroke-dashoffset: 0; opacity: 1; }
+    96%, 100% { stroke-dashoffset: 0; opacity: 0; }
+}
+
+/* The pen only where offset-path is (Android WebView from Chrome 116); elsewhere the line is plotted alone. It
+   comes in over the round's first 1%, so it too starts hidden. */
+[data-style="blueprint"] .blueprint-loader-pen {
+    visibility: hidden;
+}
+
+@supports (offset-path: path("M0 0")) {
+    [data-style="blueprint"] .blueprint-loader-pen {
+        visibility: visible;
+        offset-path: var(--blueprint-loader-path);
+        offset-rotate: 0deg;
+        animation: blueprint-loader-pen 3.8s linear infinite both;
+    }
+}
+
+@keyframes blueprint-loader-pen {
+    0% { offset-distance: 0%; opacity: 0; }
+    1% { opacity: 1; }
+    68% { offset-distance: 100%; opacity: 1; }
+    72%, 100% { offset-distance: 100%; opacity: 0; }
+}
+
+[data-style="blueprint"] .blueprint-loader-dimension {
+    opacity: 0;
+    animation: blueprint-loader-dimension 3.8s linear infinite both;
+}
+
+@keyframes blueprint-loader-dimension {
+    0%, 68% { opacity: 0; clip-path: inset(-8px 50% -8px 50%); }
+    76%, 86% { opacity: 1; clip-path: inset(-8px 0 -8px 0); }
+    96%, 100% { opacity: 0; clip-path: inset(-8px 0 -8px 0); }
+}
+
+/* Six pairs of 14px readings, a pair at a time */
+[data-style="blueprint"] .blueprint-loader-coordinates > span {
+    animation: blueprint-loader-coordinates 3.8s steps(6, end) infinite;
+}
+
+@keyframes blueprint-loader-coordinates {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-168px); }
+}
+
 /* Reduced motion: no scaling or sliding; the press wash stays */
 @media (prefers-reduced-motion: reduce) {
     [data-style="blueprint"] .segmented-indicator-motion {
@@ -979,5 +1041,26 @@
     [data-style="blueprint"][data-blueprint-fonts="ready"] [data-skin~="board"] .font-entry.value-arrive {
         -webkit-mask-image: none;
         mask-image: none;
+    }
+
+    /* The box plotted and dimensioned, the readings still, and no pen */
+    [data-style="blueprint"] .blueprint-loader-plot,
+    [data-style="blueprint"] .blueprint-loader-pen,
+    [data-style="blueprint"] .blueprint-loader-dimension,
+    [data-style="blueprint"] .blueprint-loader-coordinates > span {
+        animation: none;
+    }
+
+    [data-style="blueprint"] .blueprint-loader-plot {
+        stroke-dashoffset: 0;
+    }
+
+    [data-style="blueprint"] .blueprint-loader-pen {
+        visibility: hidden;
+    }
+
+    [data-style="blueprint"] .blueprint-loader-dimension {
+        opacity: 1;
+        clip-path: none;
     }
 }

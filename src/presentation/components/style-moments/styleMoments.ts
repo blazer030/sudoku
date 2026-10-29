@@ -21,6 +21,7 @@ import ChalkboardLoader from "@/presentation/components/style-moments/chalkboard
 import ChalkboardGroupOverlay from "@/presentation/components/style-moments/chalkboard/ChalkboardGroupOverlay.vue";
 import ChalkboardCardDecoration from "@/presentation/components/style-moments/chalkboard/ChalkboardCardDecoration.vue";
 import BlueprintDigitWriter from "@/presentation/components/style-moments/blueprint/BlueprintDigitWriter.vue";
+import BlueprintLoader from "@/presentation/components/style-moments/blueprint/BlueprintLoader.vue";
 import type { CompletedGroup } from "@/domain/game/Sudoku";
 
 /** A group effect on the board: a new one gets a new id, which starts its drawings afresh. */
@@ -154,11 +155,11 @@ const CHALKBOARD_MOMENTS: StyleMoments = {
     digitWriter: ChalkboardDigitWriter,
 };
 
-// Blueprint borrows minimal's loading until its own moments come; its timings are already the boards': a cell's
-// hatching sweeps past from 100ms for 560ms and the snapped dimension lines fade by 1000ms, and the dialog opens
-// as the board's scrim comes in, while the locking frame is still closing
+// While a puzzle loads, a plotter draws a sudoku box on a small drawing sheet, its pen running along the line as it
+// is plotted, and dimensions it in 3 columns (BlueprintLoader). An entered digit is plotted in outline under a pair
+// of crosshairs and inked in by 840ms (BlueprintDigitWriter).
 const BLUEPRINT_MOMENTS: StyleMoments = {
-    loader: MinimalLoader,
+    loader: BlueprintLoader,
     celebration: null,
     cardDecoration: null,
     groupEffectMs: 900,
