@@ -428,16 +428,26 @@ describe("blueprint skin", () => {
             expect(value.get("color")).toBeUndefined();
         });
 
-        // The canvas's .lrow lies on its card, rgba(255,255,255,.88) on 製圖紙; on 藍曬圖 its .04 would drop teal's
-        // "Gave up" under 4.5:1, so it is .03 there (paletteContrast's BLUEPRINT_ROW_CASES)
-        it("should lay a recent game's row on a faint wash of white over the graph paper, unframed and square", () => {
+        // The two modes are each other's inverse: 藍曬圖's rows lie on a faint wash of its white lines, 製圖紙's on a
+        // faint wash of its ink. On 藍曬圖 the canvas's .04 would drop teal's "Gave up" under 4.5:1, so it is .03
+        // there (paletteContrast's BLUEPRINT_ROW_CASES)
+        it("should lay a recent game's row on a faint wash of the ink over the graph paper, unframed and square", () => {
             const row = declarationsOf(BLUEPRINT_CSS, skin("recent-row"));
             const darkRow = declarationsOf(BLUEPRINT_CSS, `:root.dark${SCOPE} [data-skin~="recent-row"]`);
 
-            expect(row.get("background-color")).toBe("color-mix(in srgb, var(--color-card) 88%, transparent)");
+            expect(row.get("background-color")).toBe("color-mix(in srgb, var(--color-foreground) 5%, transparent)");
             expect(darkRow.get("background-color")).toBe("color-mix(in srgb, var(--color-foreground) 3%, transparent)");
             expect(row.get("box-shadow")).toBe("none");
             expect(row.get("border-radius")).toBe("0");
+        });
+
+        // The muted ink falls under 4.5:1 on 製圖紙's ink wash (paletteContrast's BLUEPRINT_ROW_CASES)
+        it("should write a 製圖紙 row's date and hints in the pale ink, and leave 藍曬圖's muted", () => {
+            const row = declarationsOf(BLUEPRINT_CSS, skin("recent-row"));
+            const darkRow = declarationsOf(BLUEPRINT_CSS, `:root.dark${SCOPE} [data-skin~="recent-row"]`);
+
+            expect(row.get("--color-foreground-muted")).toBe("var(--color-foreground-secondary)");
+            expect(darkRow.get("--color-foreground-muted")).toBe("inherit");
         });
 
         it("should write a game's time in the ink and a given-up one in the error colour, as the canvas's .lside b.gave", () => {

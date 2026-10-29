@@ -971,9 +971,10 @@
 
 /* Statistics, as the canvas's .sec / .statnum / .lrow: section headings in the pale Mono at 500, the figures in Mono
    at 500 (the best times and the overview's wins keep the markup's primary), recent games' rows unframed on a faint
-   pale wash over the graph paper (the canvas's card: 88% on 製圖紙; 3% of the lines on 藍曬圖, a step under the
-   canvas's 4%, keeps teal's "Gave up" at 4.5:1), a game's time in the ink and "Gave up" in the error colour (the canvas's .lside b.gave). The
-   overview and By Difficulty cards are framed in 1.5px of ink like the settings cards (above). */
+   wash over the graph paper, each mode the other's inverse (5% of the ink on 製圖紙; 3% of the pale lines on 藍曬圖,
+   a step under the canvas's 4%, keeps teal's "Gave up" at 4.5:1), a game's time in the ink and "Gave up" in the
+   error colour (the canvas's .lside b.gave). The overview and By Difficulty cards are framed in 1.5px of ink like the
+   settings cards (above). */
 [data-style="blueprint"] [data-skin~="stat-heading"] {
     color: var(--color-foreground-secondary);
     font-weight: 500;
@@ -987,13 +988,17 @@
     font-weight: 500;
 }
 
+/* On 製圖紙's ink wash the muted ink falls under 4.5:1, so a row writes its date and hints in the pale ink, a step
+   darker; 藍曬圖's row keeps the page's muted lines */
 [data-style="blueprint"] [data-skin~="recent-row"] {
-    background-color: color-mix(in srgb, var(--color-card) 88%, transparent);
+    --color-foreground-muted: var(--color-foreground-secondary);
+    background-color: color-mix(in srgb, var(--color-foreground) 5%, transparent);
     box-shadow: none;
     border-radius: 0;
 }
 
 :root.dark[data-style="blueprint"] [data-skin~="recent-row"] {
+    --color-foreground-muted: inherit;
     background-color: color-mix(in srgb, var(--color-foreground) 3%, transparent);
 }
 

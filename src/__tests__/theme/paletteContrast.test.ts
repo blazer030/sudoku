@@ -1,5 +1,5 @@
 import { readFileSync } from "fs";
-import postcss from "postcss";
+import postcss, { type Rule } from "postcss";
 import { THEME_IDS_BY_STYLE, STYLE_IDS, STYLE_COLOR_MODES, type ColorMode, type ColorThemeId, type StyleId } from "@/theme/themeIds";
 import { contrastRatio, mixColors } from "@/theme/contrast";
 import { STYLES, getPalette, type Palette, type PaletteToken, type StyleOwnToken } from "@/theme/palettes";
@@ -537,22 +537,41 @@ const BLUEPRINT_BOARD_CASES: BlueprintBoardCase[] = STYLES.blueprint.themes.flat
 
 const BLUEPRINT_SKIN = readFileSync("src/style/styles/blueprint/skin.css", "utf8");
 
-// A recent game's row: a wash of a token over the graph paper (skin.css), read back as the colour it lays
-const blueprintRowGround = (palette: Palette, mode: ColorMode): string => {
-    const selector = `${mode === "dark" ? ":root.dark" : ""}[data-style="blueprint"] [data-skin~="recent-row"]`;
-    let wash: string | undefined;
+// A recent game's row rules in skin.css: the one for both modes, then 藍曬圖's own, so the last one read wins
+const blueprintRowRules = (mode: ColorMode): Rule[] => {
+    const row = `[data-style="blueprint"] [data-skin~="recent-row"]`;
+    const selectors = mode === "dark" ? [row, `:root.dark${row}`] : [row];
+    const rules: Rule[] = [];
     postcss.parse(BLUEPRINT_SKIN).walkRules((rule) => {
-        if (!rule.selectors.includes(selector)) return;
-        rule.walkDecls("background-color", (declaration) => { wash = declaration.value.trim(); });
+        if (rule.selectors.some(selector => selectors.includes(selector))) rules.push(rule);
     });
+    return rules.sort((first, second) => selectors.indexOf(first.selector) - selectors.indexOf(second.selector));
+};
+
+const blueprintRowDeclaration = (mode: ColorMode, property: string): string | undefined => {
+    let value: string | undefined;
+    for (const rule of blueprintRowRules(mode)) rule.walkDecls(property, (declaration) => { value = declaration.value.trim(); });
+    return value;
+};
+
+// A recent game's row: a wash of a token over the graph paper, read back as the colour it lays
+const blueprintRowGround = (palette: Palette, mode: ColorMode): string => {
+    const wash = blueprintRowDeclaration(mode, "background-color");
     const match = /^color-mix\(in srgb, var\(--color-([a-z-]+)\) (\d+(?:\.\d+)?)%, transparent\)$/.exec(wash ?? "");
     if (match === null) throw new Error(`blueprint's ${mode} recent row lays no wash: ${wash}`);
     const [, token, percent] = match;
     return mixColors(palette[token as PaletteToken], Number(percent) / 100, palette.background);
 };
 
+// A token as a recent game's row sees it: the palette's (also when the row inherits it), unless the row points it at
+// another token
+const blueprintRowToken = (palette: Palette, mode: ColorMode, token: PaletteToken): string => {
+    const pointed = /^var\(--color-([a-z-]+)\)$/.exec(blueprintRowDeclaration(mode, `--color-${token}`) ?? "");
+    return pointed === null ? palette[token] : palette[pointed[1] as PaletteToken];
+};
+
 // What a recent game's row writes on its wash: its difficulty and time in the ink, its date and hints muted, "Gave
-// up" in the danger colour, and its chip's 1px line and icon in the primary's place (the ink) or the danger colour
+// up" in the danger colour, and its chip's 1px line and icon in the ink or the danger colour
 const BLUEPRINT_ROW_CASES = STYLES.blueprint.themes.flatMap(theme => STYLE_COLOR_MODES.blueprint.flatMap((mode) => {
     const palette = getPalette("blueprint", theme.id, mode);
     const ground = blueprintRowGround(palette, mode);
@@ -561,8 +580,9 @@ const BLUEPRINT_ROW_CASES = STYLES.blueprint.themes.flatMap(theme => STYLE_COLOR
     });
     return [
         drawn("difficulty and time (foreground)", palette.foreground),
-        drawn("date and hints (foreground-muted)", palette["foreground-muted"]),
+        drawn("date and hints (foreground-muted)", blueprintRowToken(palette, mode, "foreground-muted")),
         drawn("gave up (danger)", palette.danger),
+        drawn("chip (foreground)", palette.foreground, LARGE_OR_ICON),
         drawn("gave-up chip (danger)", palette.danger, LARGE_OR_ICON),
     ];
 }));
