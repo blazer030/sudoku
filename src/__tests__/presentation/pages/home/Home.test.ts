@@ -112,6 +112,12 @@ describe("Home", () => {
         expect(wrapper.get("[data-testid='home-logo']").attributes("data-skin")).toBe("logo");
     });
 
+    it("should mark the new game card for styles to frame apart from other cards", () => {
+        const { wrapper } = mountHome();
+
+        expect(wrapper.get("[data-testid='new-game-card']").attributes("data-skin")).toBe("card new-game-card");
+    });
+
     it("should give every stacked style the same hero", () => {
         const stackedHeroes = STYLE_IDS.filter(style => STYLE_HOME_HEROES[style] === "stacked")
             .map(style => mountHome({ style }).wrapper.get("[data-testid='home-hero']").html());
