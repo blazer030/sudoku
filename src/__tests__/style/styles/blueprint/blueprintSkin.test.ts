@@ -694,4 +694,68 @@ describe("blueprint skin", () => {
             expect(emphasised.get("border-radius")).toBe("0");
         });
     });
+    describe("keypad and controls", () => {
+        const KEY = skin("key");
+
+        it("should draw a key square on the card in a 1px frame of the ink, written in Mono at 500", () => {
+            const key = declarationsOf(BLUEPRINT_CSS, KEY);
+
+            expect(key.get("background-color")).toBe("var(--color-card)");
+            expect(key.get("box-shadow")).toBe("var(--blueprint-frame)");
+            expect(key.get("border-radius")).toBe("0");
+            expect(key.get("font-weight")).toBe("500");
+            expect(key.get("position")).toBe("relative");
+        });
+
+        it("should mark a key's four corners with L-shaped ticks, eight 6px strokes inset 3px, in the line colour", () => {
+            const marks = declarationsOf(BLUEPRINT_CSS, `${KEY}::before`);
+            const image = marks.get("background-image") ?? "";
+
+            expect(marks.get("inset")).toBe("3px");
+            expect(marks.get("pointer-events")).toBe("none");
+            expect(marks.get("z-index")).toBeUndefined();
+            expect(image.match(/linear-gradient\(var\(--color-border\), var\(--color-border\)\)/g)).toHaveLength(8);
+            expect(marks.get("background-size")?.match(/6px 1px|1px 6px/g)).toHaveLength(8);
+        });
+
+        it("should fill the chosen key with the primary, frame it in the primary and write it in on-primary", () => {
+            const chosen = declarationsOf(BLUEPRINT_CSS, `${KEY}[aria-pressed="true"]`);
+
+            expect(chosen.get("background-color")).toBe("var(--color-primary)");
+            expect(chosen.get("box-shadow")).toBe("inset 0 0 0 1px var(--color-primary)");
+            expect(chosen.get("color")).toBe("var(--color-on-primary)");
+        });
+
+        it("should fade a finished key to 0.35", () => {
+            expect(declarationsOf(BLUEPRINT_CSS, `${KEY}:disabled`).get("opacity")).toBe("0.35");
+        });
+
+        it("should draw the remaining-count badge square on the paper in a 1px frame of the ink, in Mono", () => {
+            const badge = declarationsOf(BLUEPRINT_CSS, skin("badge"));
+
+            expect(badge.get("background-color")).toBe("var(--color-background)");
+            expect(badge.get("box-shadow")).toBe("var(--blueprint-frame)");
+            expect(badge.get("color")).toBe("var(--color-foreground)");
+            expect(badge.get("border-radius")).toBe("0");
+            expect(declarationsOf(BLUEPRINT_CSS, `${FONTS_READY} ${skin("badge").slice(SCOPE.length + 1)}`).get("font-family"))
+                .toBe("var(--font-blueprint-mono)");
+        });
+
+        it("should draw a control tile square in a 1px line, with no fill or shadow of its own", () => {
+            const control = declarationsOf(BLUEPRINT_CSS, skin("control"));
+
+            expect(control.get("background-color")).toBe("var(--color-card)");
+            expect(control.get("box-shadow")).toBe("inset 0 0 0 1px var(--color-border)");
+            expect(control.get("border-radius")).toBe("0");
+            expect(control.get("color")).toBe("var(--color-foreground)");
+        });
+
+        it("should ring a control that is on twice in the primary, frame and icon alike, on a clear tile", () => {
+            const on = declarationsOf(BLUEPRINT_CSS, `${SCOPE} [aria-pressed="true"] > [data-skin~="control"]`);
+
+            expect(on.get("background-color")).toBe("transparent");
+            expect(on.get("color")).toBe("var(--color-primary)");
+            expect(on.get("box-shadow")).toBe("inset 0 0 0 1px var(--color-primary), inset 0 0 0 2px var(--color-background), inset 0 0 0 3px var(--color-primary)");
+        });
+    });
 });
