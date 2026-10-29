@@ -218,8 +218,8 @@ describe("Appearance.vue colour-theme swatches", () => {
             const label = `${settingsStore.style} ${theme.id} in ${mode}`;
             const { fill, mark } = swatchColors(settingsStore.style, mode, palette);
             expect((swatch.element as HTMLElement).style.backgroundColor, label).toBe(cssColor(fill));
-            // One solid colour: no second half in the accent (unless the style's accent is the swatch's fill or mark)
-            if (palette.accent !== fill && palette.accent !== mark) expect(swatch.html(), label).not.toContain(cssColor(palette.accent));
+            // One solid colour: no second half in the accent (blueprint's accent is its ink, so it may be the fill or the mark)
+            if (settingsStore.style !== "blueprint" || (palette.accent !== fill && palette.accent !== mark)) expect(swatch.html(), label).not.toContain(cssColor(palette.accent));
             expect(swatch.findAll("[style*='background']"), label).toHaveLength(0);
         }
         const check = wrapper.get("[data-testid='color-theme-check']");
@@ -265,7 +265,9 @@ describe("Appearance.vue colour-theme swatches", () => {
             await nextTick();
             const fills = STYLES.blueprint.themes.map(theme => (wrapper.get(`[data-testid='color-theme-${theme.id}']`).element as HTMLElement).style.backgroundColor);
             expect(new Set(fills).size, mode).toBe(4);
-            expect(wrapper.get("[data-testid^='color-theme-blue']").attributes("data-skin")).toBe("swatch");
+        }
+        for (const theme of STYLES.blueprint.themes) {
+            expect(wrapper.get(`[data-testid='color-theme-${theme.id}']`).attributes("data-skin"), theme.id).toBe("swatch");
         }
     });
 
