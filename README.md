@@ -20,7 +20,7 @@ progressive web app (PWA) and as a native Android app via Capacitor.
 - **Visual styles** — Minimal Motion, Tactile Tiles, Paper Notebook, 8-bit,
   Cyberpunk, Ink & Washi (水墨和紙), Chalkboard and Blueprint (藍圖工程) — each with its own colour themes, in light or dark (Paper
   Notebook is light only; 8-bit has fixed colours, 掌機 handheld green or 紅白機 console;
-  Cyberpunk is dark only with one fixed neon palette; Ink & Washi is light only with one fixed palette; Chalkboard has one fixed palette as a blackboard or a whiteboard; Blueprint has four paper colours as a 藍曬圖 cyanotype or a 製圖紙 drafting sheet)
+  Cyberpunk is dark only with one fixed neon palette; Ink & Washi is light only with one fixed palette; Chalkboard has one fixed palette as a blackboard or a whiteboard; Blueprint has four colour themes, as a 藍曬圖 cyanotype or a 製圖紙 drafting sheet)
 - **English and Traditional Chinese**, following the system language or chosen in Settings
 - **Offline support** via service worker (web build)
 - **Native Android app** — Google Play Billing donations and a dynamic app
