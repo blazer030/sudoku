@@ -184,6 +184,9 @@ export const en = {
             review: "Review This Game",
             // Paper's rubber stamp on the completion card, written in Caveat
             stamp: "SOLVED",
+            // Blueprint's approval stamp over the completion scene, and its small line, by the app's major.minor
+            approvalStamp: "APPROVED",
+            approvalRevision: "REV {version}",
             // Chalkboard's cheer on the completion card, written in Chalk Digits
             cheer: "Well done!",
         },

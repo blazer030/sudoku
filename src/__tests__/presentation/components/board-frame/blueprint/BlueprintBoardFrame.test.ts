@@ -210,6 +210,75 @@ describe("BlueprintBoardFrame", () => {
         });
     });
 
+    // Ruling 11: the frame, which has room round the board, draws the solved board's lock and its verdict
+    describe("the solved board", () => {
+        const mountSolved = (celebration: BoardFrameProps["celebration"]) => mount(BlueprintBoardFrame, {
+            props: { target: null, effect: null, celebration },
+        });
+
+        it.each(["playing", "done", "still"] as const)("should lock the whole board in a dashed frame with its verdict while %s", (celebration) => {
+            const wrapper = mountSolved(celebration);
+            const grid = wrapper.get(".blueprint-frame-marks .blueprint-frame-grid");
+            const lock = grid.get(".blueprint-frame-lock");
+
+            expect(lock.element.tagName.toLowerCase()).toBe("svg");
+            expect(lock.get("rect").attributes("stroke-dasharray")).toBe("6 4");
+            expect(lock.get("rect").attributes("stroke")).toBe("currentColor");
+            expect(grid.get(".blueprint-frame-verdict").text()).toBe("R1–R9 · C1–C9 OK");
+        });
+
+        it("should write the verdict alike in both languages", async () => {
+            const wrapper = mountSolved("playing");
+            const english = wrapper.get(".blueprint-frame-verdict").text();
+
+            i18n.global.locale.value = "zh-Hant";
+            await nextTick();
+
+            expect(wrapper.get(".blueprint-frame-verdict").text()).toBe(english);
+        });
+
+        it("should mark the lock and the verdict still on a still board, and only there", () => {
+            const still = mountSolved("still");
+            const moving = mountSolved("playing");
+
+            expect(still.get(".blueprint-frame-lock").attributes("data-still")).toBeDefined();
+            expect(still.get(".blueprint-frame-verdict").attributes("data-still")).toBeDefined();
+            expect(moving.get(".blueprint-frame-lock").attributes("data-still")).toBeUndefined();
+            expect(moving.get(".blueprint-frame-verdict").attributes("data-still")).toBeUndefined();
+        });
+
+        it("should draw neither before the board is solved", () => {
+            const wrapper = mountSolved(null);
+
+            expect(wrapper.find(".blueprint-frame-lock").exists()).toBe(false);
+            expect(wrapper.find(".blueprint-frame-verdict").exists()).toBe(false);
+        });
+
+        it("should keep the same lock from the board phase to the dialog, so its dashes march on", async () => {
+            const wrapper = mountSolved("playing");
+            const lock = wrapper.get(".blueprint-frame-lock").element;
+
+            await wrapper.setProps({ celebration: "done" });
+
+            expect(wrapper.get(".blueprint-frame-lock").element).toBe(lock);
+        });
+
+        // The canvas's .aframe: 9px round the cells; its verdict hangs from its top right corner
+        it("should lay the lock 9px round the cells and hang the verdict from its top right corner", () => {
+            expect(declarationsOf(".blueprint-frame-lock").get("inset")).toBe("-9px");
+            expect(declarationsOf(".blueprint-frame-lock").get("overflow")).toBe("visible");
+            const verdict = declarationsOf(".blueprint-frame-verdict");
+            expect(verdict.get("top")).toBe("-9px");
+            expect(verdict.get("right")).toBe("-6px");
+            const leader = declarationsOf(".blueprint-frame-verdict::before");
+            expect(leader.get("width")).toBe("34px");
+            expect(leader.get("transform")).toBe("rotate(-140deg)");
+            const text = declarationsOf(".blueprint-frame-verdict-text");
+            expect(text.get("background")).toBe("var(--color-primary)");
+            expect(text.get("color")).toBe("var(--color-on-primary)");
+        });
+    });
+
     it("should move the callout to a new target without remounting the frame", async () => {
         const wrapper = mountFrame({ row: 4, column: 4 });
         const frame = wrapper.get(".blueprint-frame").element;

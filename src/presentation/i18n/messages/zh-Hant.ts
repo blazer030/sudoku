@@ -181,6 +181,8 @@ export const zhHant: MessageSchema = {
             review: "看這局回顧",
             cheer: "好棒！",
             stamp: "完成",
+            approvalStamp: "核可",
+            approvalRevision: "APPROVED · REV {version}",
         },
     },
     walkthrough: {

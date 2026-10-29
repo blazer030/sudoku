@@ -446,4 +446,199 @@ describe("blueprint moments", () => {
             }
         });
     });
+    // MomentsBlueprint: two amber crosshairs sweep the board like an inspection pass, each digit they cross flashing
+    // amber; a dashed frame then locks the board with its verdict (BlueprintBoardFrame draws both, ruling 11), and
+    // once the dialog opens the card is plotted in from the left, the trophy ringed and the 核可 stamp pressed on
+    // (BlueprintCelebration), on the dialog's clock (ruling 12)
+    describe("celebration", () => {
+        const PLAYING = `${BOARD}[data-celebration="playing"]`;
+        const SWEEP = `${PLAYING}::before`;
+        const FLASH = `${PLAYING} [data-variant] > div`;
+        const FLASH_ARRIVING = `${FLASH}.value-arrive`;
+        const LOCK = `${SCOPE} .blueprint-frame-lock`;
+        const MARCHING_LOCK = `${SCOPE} .blueprint-frame-lock:not([data-still]) rect`;
+        const LEADER = `${SCOPE} .blueprint-frame-verdict:not([data-still])::before`;
+        const VERDICT_TEXT = `${SCOPE} .blueprint-frame-verdict:not([data-still]) .blueprint-frame-verdict-text`;
+        const CARD = `${SCOPE} [data-skin~="card"][data-skin~="celebration"]`;
+        const DRAWN_CARD = `${CARD}:not([data-still])`;
+        const TROPHY = `${SCOPE} [data-skin~="trophy"]`;
+        const RING = `${TROPHY}::before`;
+        const DRAWN_RING = `${DRAWN_CARD} [data-skin~="trophy"]::before`;
+        const STAMP = `${SCOPE} .blueprint-stamp`;
+        const PRESSED_STAMP = `${SCOPE} .blueprint-celebration:not([data-still]) .blueprint-stamp`;
+        const ANIMATED = [SWEEP, FLASH, FLASH_ARRIVING, MARCHING_LOCK, LEADER, VERDICT_TEXT, DRAWN_CARD, DRAWN_RING, PRESSED_STAMP];
+        const PRIMARY_LINE = (angle: string): string =>
+            `linear-gradient(${angle}, transparent, color-mix(in srgb, var(--color-primary) 60%, transparent) 3px, var(--color-primary) 3px 4px, color-mix(in srgb, var(--color-primary) 60%, transparent) 4px, transparent)`;
+
+        const animationOf = (selector: string): string => declarationsOf(BLUEPRINT_CSS, selector).get("animation") ?? "";
+        const spanOf = (selector: string, name: string): { startMs: number; endMs: number } => {
+            const timing = animationTimingOf(animationOf(selector), name);
+            if (timing === null) throw new Error(`${selector} does not run ${name}`);
+            return { startMs: timing.fixedDelayMs, endMs: timing.fixedDelayMs + timing.durationMs };
+        };
+        const nameOf = (selector: string): string => animationOf(selector).split(" ")[0] ?? "";
+
+        it("should open the dialog at 1300ms, as the lock is closing", () => {
+            const boardMs = STYLE_MOMENTS.blueprint.celebrationBoardMs;
+
+            expect(boardMs).toBe(1300);
+            expect(STYLE_MOMENTS.blueprint.cardDecoration).toBeNull();
+            expect(spanOf(MARCHING_LOCK, "blueprint-celebration-lock").endMs).toBeGreaterThan(boardMs);
+        });
+
+        describe("the sweep", () => {
+            it("should cross the board with two 1px lines of the primary, glowing, past its cells, over every mark of the board", () => {
+                const sweep = declarationsOf(BLUEPRINT_CSS, SWEEP);
+
+                expect(declarationsOf(BLUEPRINT_CSS, BOARD).get("position")).toBe("relative");
+                expect(sweep.get("content")).toBe('""');
+                expect(sweep.get("position")).toBe("absolute");
+                // The board's p-2 and the grid's 3px border are 11px; the lines reach 14px past the cells
+                expect(sweep.get("inset")).toBe("-3px");
+                expect(sweep.get("pointer-events")).toBe("none");
+                // Over the cells' crosshairs (5), under the frame's lock (8)
+                expect(sweep.get("z-index")).toBe("6");
+                expect(sweep.get("background-image")).toBe(`${PRIMARY_LINE("90deg")}, ${PRIMARY_LINE("180deg")}`);
+                expect(sweep.get("background-size")).toBe("7px 100%, 100% 7px");
+                expect(sweep.get("background-repeat")).toBe("no-repeat");
+                // Unseen without its animation
+                expect(sweep.get("opacity")).toBe("0");
+                expect(sweep.has("filter")).toBe(false);
+            });
+
+            it("should sweep both from the top left to the bottom right in 760ms, linearly, gone at the end", () => {
+                const frames = framesOf("blueprint-celebration-sweep");
+
+                expect(spanOf(SWEEP, "blueprint-celebration-sweep")).toEqual({ startMs: 0, endMs: 760 });
+                expect(animationOf(SWEEP)).toContain(" linear");
+                expect(frames.get("0%")).toEqual(new Map([["opacity", "1"], ["background-position", "10.5px 0, 0 10.5px"]]));
+                expect(frames.get("92%")).toEqual(new Map([["opacity", "1"]]));
+                expect(frames.get("100%")).toEqual(new Map([["opacity", "0"], ["background-position", "calc(100% - 10.5px) 0, 0 calc(100% - 10.5px)"]]));
+            });
+
+            it("should flash each digit in the primary as the lines cross it, 42ms a step from the top left, for 420ms", () => {
+                const flash = animationOf(FLASH);
+
+                expect(nameOf(FLASH)).toBe("blueprint-group-sweep");
+                expect(animationTimingOf(flash, "blueprint-group-sweep")?.durationMs).toBe(420);
+                expect(flash).toContain("calc((var(--cell-row) + var(--cell-column)) * 42ms)");
+                expect(flash).toContain(" ease-out ");
+                expect(framesOf("blueprint-group-sweep").get("from")).toEqual(new Map([["color", "var(--color-primary)"]]));
+                // The farthest cell (16 steps) has flashed before the dialog opens
+                expect(16 * 42 + 420).toBeLessThanOrEqual(STYLE_MOMENTS.blueprint.celebrationBoardMs);
+            });
+
+            // CLAUDE.md's trap: the last digit entered is still arriving, so the flash would replace its ink; named
+            // *-group-*, the flash's end never settles the arrival either
+            it("should keep the arriving digit's ink beside its flash", () => {
+                const both = animationOf(FLASH_ARRIVING);
+
+                expect(animationTimingOf(both, "blueprint-group-sweep")).toEqual(animationTimingOf(animationOf(FLASH), "blueprint-group-sweep"));
+                expect(animationTimingOf(both, "blueprint-digit-ink")).toEqual(animationTimingOf(animationOf(ARRIVING_DIGIT), "blueprint-digit-ink"));
+                expect(both).toContain(" both");
+            });
+        });
+
+        describe("the lock", () => {
+            it("should march the lock's dashes on from 720ms over 700ms, coming in over its first 12%", () => {
+                const frames = framesOf("blueprint-celebration-lock");
+
+                expect(spanOf(MARCHING_LOCK, "blueprint-celebration-lock")).toEqual({ startMs: 720, endMs: 1420 });
+                expect(animationOf(MARCHING_LOCK)).toContain(" linear ");
+                expect(animationOf(MARCHING_LOCK)).toContain(" both");
+                // Six of its 6 4 dashes
+                expect(frames.get("0%")).toEqual(new Map([["opacity", "0"], ["stroke-dashoffset", "60"]]));
+                expect(frames.get("12%")).toEqual(new Map([["opacity", "1"]]));
+                expect(frames.get("100%")).toEqual(new Map([["opacity", "1"], ["stroke-dashoffset", "0"]]));
+                expect(declarationsOf(BLUEPRINT_CSS, LOCK).get("pointer-events")).toBe("none");
+            });
+
+            it("should pull the verdict's leader out from 1000ms over 260ms and show its words from 1220ms", () => {
+                expect(spanOf(LEADER, "blueprint-celebration-lead")).toEqual({ startMs: 1000, endMs: 1260 });
+                expect(animationOf(LEADER)).toContain(" ease-out ");
+                expect(framesOf("blueprint-celebration-lead").get("from")).toEqual(new Map([["transform", "rotate(-140deg) scaleX(0)"]]));
+                expect(framesOf("blueprint-celebration-lead").get("to")).toEqual(new Map([["transform", "rotate(-140deg) scaleX(1)"]]));
+                expect(spanOf(VERDICT_TEXT, "blueprint-celebration-fade-in")).toEqual({ startMs: 1220, endMs: 1420 });
+                expect(framesOf("blueprint-celebration-fade-in").get("from")).toEqual(new Map([["opacity", "0"]]));
+            });
+        });
+
+        describe("the dialog", () => {
+            it("should plot the card in from the left from 60ms over 520ms, its frame and shadow whole at the end", () => {
+                const frames = framesOf("blueprint-celebration-draw");
+
+                expect(spanOf(DRAWN_CARD, "blueprint-celebration-draw")).toEqual({ startMs: 60, endMs: 580 });
+                expect(animationOf(DRAWN_CARD)).toContain(" linear ");
+                expect(animationOf(DRAWN_CARD)).toContain(" both");
+                expect(frames.get("0%")).toEqual(new Map([["clip-path", "inset(-64px 100% -64px -64px)"]]));
+                expect(frames.get("100%")).toEqual(new Map([["clip-path", "inset(-64px -64px -64px -64px)"]]));
+            });
+
+            it("should ring the trophy in a 1.5px dashed line of the primary on a clear ground, the cup in the primary", () => {
+                const trophy = declarationsOf(BLUEPRINT_CSS, TROPHY);
+                const ring = declarationsOf(BLUEPRINT_CSS, RING);
+
+                expect(trophy.get("position")).toBe("relative");
+                expect(trophy.get("background-color")).toBe("transparent");
+                expect(trophy.get("color")).toBe("var(--color-primary)");
+                expect(ring.get("content")).toBe('""');
+                expect(ring.get("position")).toBe("absolute");
+                expect(ring.get("inset")).toBe("0");
+                expect(ring.get("border")).toBe("1.5px dashed var(--color-primary)");
+                expect(ring.get("border-radius")).toBe("50%");
+                expect(ring.get("pointer-events")).toBe("none");
+            });
+
+            it("should draw the trophy's ring in from 580ms over 1s", () => {
+                expect(spanOf(DRAWN_RING, "blueprint-celebration-trophy")).toEqual({ startMs: 580, endMs: 1580 });
+                expect(animationOf(DRAWN_RING)).toContain(" ease-out ");
+                expect(framesOf("blueprint-celebration-trophy").get("from")).toEqual(new Map([["border-color", "transparent"]]));
+                expect(framesOf("blueprint-celebration-trophy").get("to")).toEqual(new Map([["border-color", "var(--color-primary)"]]));
+            });
+
+            // Ruling 12: the stamp at −12°, pressed from large, on a ground of 92% of the paper
+            it("should press the stamp on from 700ms over 460ms, from large, turned −12°, on 92% of the paper", () => {
+                const stamp = declarationsOf(BLUEPRINT_CSS, STAMP);
+                const frames = framesOf("blueprint-celebration-stamp");
+
+                expect(stamp.get("transform")).toBe("rotate(-12deg)");
+                expect(stamp.get("background-color")).toBe("color-mix(in srgb, var(--color-background) 92%, transparent)");
+                expect(spanOf(PRESSED_STAMP, "blueprint-celebration-stamp")).toEqual({ startMs: 700, endMs: 1160 });
+                expect(animationOf(PRESSED_STAMP)).toContain(" cubic-bezier(0.2, 0.8, 0.2, 1) ");
+                expect(animationOf(PRESSED_STAMP)).toContain(" both");
+                expect(frames.get("0%")).toEqual(new Map([["opacity", "0"], ["transform", "rotate(-6deg) scale(1.6)"]]));
+                expect(frames.get("70%")).toEqual(new Map([["opacity", "1"], ["transform", "rotate(-12deg) scale(0.95)"]]));
+                expect(frames.get("100%")).toEqual(new Map([["opacity", "1"], ["transform", "rotate(-12deg) scale(1)"]]));
+            });
+        });
+
+        // A still board neither sweeps nor flashes, and a still lock, verdict, card and stamp stand at their end
+        it("should animate only a moving celebration, so a still board shows the end at once", () => {
+            for (const selector of ANIMATED) {
+                expect(animationOf(selector), selector).not.toBe("");
+                expect(selector.split(":not([data-still])").join(""), selector).not.toMatch(/still/);
+            }
+            for (const selector of [SWEEP, FLASH, FLASH_ARRIVING]) {
+                expect(selector, selector).toContain('[data-celebration="playing"]');
+            }
+        });
+
+        it("should move nothing through a filter, a mask or a motion path", () => {
+            const names = ANIMATED.flatMap(selector => animationOf(selector).split(",").map(layer => layer.trim().split(" ")[0] ?? ""));
+            for (const name of names) {
+                const properties = [...framesOf(name).values()].flatMap(frame => [...frame.keys()]);
+                expect(properties.some(property => /filter|mask|offset-/.test(property)), name).toBe(false);
+            }
+            for (const selector of ANIMATED) {
+                const properties = [...declarationsOf(BLUEPRINT_CSS, selector).keys()];
+                expect(properties.some(property => /filter|mask|offset-/.test(property)), selector).toBe(false);
+            }
+        });
+
+        it("should stop everything under reduced motion, showing the end", () => {
+            for (const selector of ANIMATED) {
+                expect(reducedMotionDeclarationsOf(BLUEPRINT_CSS, selector).get("animation"), selector).toBe("none");
+            }
+        });
+    });
 });

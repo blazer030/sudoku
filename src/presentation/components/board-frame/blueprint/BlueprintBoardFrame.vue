@@ -41,6 +41,28 @@
                 >
                     <span class="blueprint-callout-text">{{ callout.name }}</span>
                 </span>
+                <template v-if="celebration !== null">
+                    <!-- A dashed SVG line, not a dashed border: WebKit leaves out a 1.5px dashed border's sides -->
+                    <svg
+                        :data-still="celebration === 'still' || undefined"
+                        class="blueprint-frame-lock text-primary"
+                    >
+                        <rect
+                            fill="none"
+                            height="100%"
+                            stroke="currentColor"
+                            stroke-dasharray="6 4"
+                            stroke-width="1.5"
+                            width="100%"
+                        />
+                    </svg>
+                    <span
+                        :data-still="celebration === 'still' || undefined"
+                        class="blueprint-frame-verdict"
+                    >
+                        <span class="blueprint-frame-verdict-text">{{ VERDICT }}</span>
+                    </span>
+                </template>
             </div>
             <i
                 v-for="corner in CORNERS"
@@ -64,6 +86,8 @@ const { t } = useI18n();
 
 const INDICES = [0, 1, 2, 3, 4, 5, 6, 7, 8] as const;
 const CORNERS = ["top-left", "top-right", "bottom-left", "bottom-right"] as const;
+// A drawing's codes, the same in both languages
+const VERDICT = "R1–R9 · C1–C9 OK";
 
 // A completed row's or column's label lights while its group effect runs (skin.css); a box lights none, having no
 // label of its own beside the board
@@ -255,5 +279,51 @@ const callout = computed(() => {
     color: var(--color-on-primary);
     background: var(--color-primary);
     transform: translateX(-50%);
+}
+
+/* The solved board, as the canvas's .aframe and .callout: a dashed frame of the primary locks the cells 9px round
+   them, and the verdict hangs from its top right corner on a 34px leader up to the left, on the primary like the
+   tag. Drawn at their end here; skin.css marches the dashes and pulls the leader out unless the board is still. */
+.blueprint-frame-lock {
+    position: absolute;
+    inset: -9px;
+    width: calc(100% + 18px);
+    height: calc(100% + 18px);
+    overflow: visible;
+}
+
+.blueprint-frame-verdict {
+    position: absolute;
+    z-index: 1;
+    top: -9px;
+    right: -6px;
+    width: 0;
+    height: 0;
+}
+
+.blueprint-frame-verdict::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 34px;
+    height: 1.5px;
+    background: var(--color-primary);
+    transform-origin: 0 50%;
+    transform: rotate(-140deg);
+}
+
+.blueprint-frame-verdict-text {
+    position: absolute;
+    right: 22px;
+    bottom: 16px;
+    padding: 2px 6px;
+    font-family: var(--font-blueprint-mono);
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.3;
+    white-space: nowrap;
+    color: var(--color-on-primary);
+    background: var(--color-primary);
 }
 </style>

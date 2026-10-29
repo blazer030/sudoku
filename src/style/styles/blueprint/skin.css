@@ -336,9 +336,22 @@
     color: var(--color-danger);
 }
 
-/* The trophy stays round */
+/* The trophy stays round: a cup in the primary on a clear ground, ringed in a 1.5px dashed line of the primary (its
+   ::before, so the ring is no border of the trophy's own) */
 [data-style="blueprint"] [data-skin~="trophy"] {
+    position: relative;
+    background-color: transparent;
     border-radius: 50%;
+    color: var(--color-primary);
+}
+
+[data-style="blueprint"] [data-skin~="trophy"]::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border: 1.5px dashed var(--color-primary);
+    border-radius: 50%;
+    pointer-events: none;
 }
 
 /* The game header's pills are square, in a 1px line of ink; the hint-mode pill is filled with the primary */
@@ -417,6 +430,7 @@
 [data-style="blueprint"] [data-skin~="board"] {
     --clue-scale: 1;
     --entry-scale: 1.25;
+    position: relative;
     background-color: transparent;
     box-shadow: none;
     border-radius: 0;
@@ -717,6 +731,119 @@
 
 [data-style="blueprint"] .blueprint-frame-label[data-lit] {
     animation: blueprint-group-lit 900ms steps(1, end);
+}
+
+/* The solved board, from MomentsBlueprint (only with motion allowed): two 1px lines of the primary, glowing, sweep the
+   board from its top left to its bottom right in 760ms like an inspection pass, reaching 14px past the cells (the
+   board's ::before, over the cells' crosshairs and under the frame's marks), and each digit flashes in the primary as
+   they cross it, 42ms a step from the top left, for 420ms. The last digit entered is still arriving, so its flash
+   is listed with its ink, and named blueprint-group-… its end never settles the arrival. From 720ms the frame's
+   dashed lock marches round the board in 700ms, and from 1000ms its verdict's leader is pulled out and the words
+   show (BlueprintBoardFrame draws both at their end, so a still board shows them at once). Only opacity, the
+   background's place, the digits' colour, the dash offset and transforms move; the glow is drawn in the lines,
+   not filtered. */
+@keyframes blueprint-celebration-sweep {
+    0% { opacity: 1; background-position: 10.5px 0, 0 10.5px; }
+    92% { opacity: 1; }
+    100% { opacity: 0; background-position: calc(100% - 10.5px) 0, 0 calc(100% - 10.5px); }
+}
+
+[data-style="blueprint"] [data-skin~="board"][data-celebration="playing"]::before {
+    content: "";
+    position: absolute;
+    inset: -3px;
+    z-index: 6;
+    pointer-events: none;
+    background-image:
+        linear-gradient(90deg, transparent, color-mix(in srgb, var(--color-primary) 60%, transparent) 3px, var(--color-primary) 3px 4px, color-mix(in srgb, var(--color-primary) 60%, transparent) 4px, transparent),
+        linear-gradient(180deg, transparent, color-mix(in srgb, var(--color-primary) 60%, transparent) 3px, var(--color-primary) 3px 4px, color-mix(in srgb, var(--color-primary) 60%, transparent) 4px, transparent);
+    background-size: 7px 100%, 100% 7px;
+    background-repeat: no-repeat;
+    opacity: 0;
+    animation: blueprint-celebration-sweep 760ms linear;
+}
+
+@keyframes blueprint-group-sweep {
+    from { color: var(--color-primary); }
+}
+
+[data-style="blueprint"] [data-skin~="board"][data-celebration="playing"] [data-variant] > div {
+    animation: blueprint-group-sweep 420ms ease-out calc((var(--cell-row) + var(--cell-column)) * 42ms);
+}
+
+[data-style="blueprint"] [data-skin~="board"][data-celebration="playing"] [data-variant] > div.value-arrive {
+    animation:
+        blueprint-group-sweep 420ms ease-out calc((var(--cell-row) + var(--cell-column)) * 42ms),
+        blueprint-digit-ink 235ms ease 605ms both;
+}
+
+[data-style="blueprint"] .blueprint-frame-lock {
+    pointer-events: none;
+}
+
+@keyframes blueprint-celebration-lock {
+    0% { opacity: 0; stroke-dashoffset: 60; }
+    12% { opacity: 1; }
+    100% { opacity: 1; stroke-dashoffset: 0; }
+}
+
+[data-style="blueprint"] .blueprint-frame-lock:not([data-still]) rect {
+    animation: blueprint-celebration-lock 700ms linear 720ms both;
+}
+
+@keyframes blueprint-celebration-lead {
+    from { transform: rotate(-140deg) scaleX(0); }
+    to { transform: rotate(-140deg) scaleX(1); }
+}
+
+[data-style="blueprint"] .blueprint-frame-verdict:not([data-still])::before {
+    animation: blueprint-celebration-lead 260ms ease-out 1000ms both;
+}
+
+@keyframes blueprint-celebration-fade-in {
+    from { opacity: 0; }
+}
+
+[data-style="blueprint"] .blueprint-frame-verdict:not([data-still]) .blueprint-frame-verdict-text {
+    animation: blueprint-celebration-fade-in 200ms 1220ms both;
+}
+
+/* The dialog, on its own clock (ruling 12: the scrim comes in at 1300ms): the plotter draws the card in from the left
+   from 60ms over 520ms, clipped 64px out so its double frame and shadow come whole; the trophy's dashed ring is
+   inked in from 580ms over 1s, and from 700ms the 核可 stamp is pressed on over the header (BlueprintCelebration),
+   from large, turned −12°, on a ground of 92% of the paper so the header never shows through its words. A still
+   card, ring and stamp are simply there. */
+@keyframes blueprint-celebration-draw {
+    0% { clip-path: inset(-64px 100% -64px -64px); }
+    100% { clip-path: inset(-64px -64px -64px -64px); }
+}
+
+[data-style="blueprint"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) {
+    animation: blueprint-celebration-draw 520ms linear 60ms both;
+}
+
+@keyframes blueprint-celebration-trophy {
+    from { border-color: transparent; }
+    to { border-color: var(--color-primary); }
+}
+
+[data-style="blueprint"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) [data-skin~="trophy"]::before {
+    animation: blueprint-celebration-trophy 1s ease-out 580ms both;
+}
+
+[data-style="blueprint"] .blueprint-stamp {
+    background-color: color-mix(in srgb, var(--color-background) 92%, transparent);
+    transform: rotate(-12deg);
+}
+
+@keyframes blueprint-celebration-stamp {
+    0% { opacity: 0; transform: rotate(-6deg) scale(1.6); }
+    70% { opacity: 1; transform: rotate(-12deg) scale(0.95); }
+    100% { opacity: 1; transform: rotate(-12deg) scale(1); }
+}
+
+[data-style="blueprint"] .blueprint-celebration:not([data-still]) .blueprint-stamp {
+    animation: blueprint-celebration-stamp 460ms cubic-bezier(0.2, 0.8, 0.2, 1) 700ms both;
 }
 
 /* Settings and 外觀, as the canvas's .group / .gh: each card framed in 1.5px of ink, each group's heading in the
@@ -1077,6 +1204,20 @@
     [data-style="blueprint"] .blueprint-group-dimension[data-kind="column"],
     [data-style="blueprint"] .blueprint-group-dimension[data-kind="box"],
     [data-style="blueprint"] .blueprint-frame-label[data-lit] {
+        animation: none;
+    }
+
+    /* The solved board shows its end: no sweep or flash, the lock, its verdict, the card, the ring and the stamp
+       simply there */
+    [data-style="blueprint"] [data-skin~="board"][data-celebration="playing"]::before,
+    [data-style="blueprint"] [data-skin~="board"][data-celebration="playing"] [data-variant] > div,
+    [data-style="blueprint"] [data-skin~="board"][data-celebration="playing"] [data-variant] > div.value-arrive,
+    [data-style="blueprint"] .blueprint-frame-lock:not([data-still]) rect,
+    [data-style="blueprint"] .blueprint-frame-verdict:not([data-still])::before,
+    [data-style="blueprint"] .blueprint-frame-verdict:not([data-still]) .blueprint-frame-verdict-text,
+    [data-style="blueprint"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]),
+    [data-style="blueprint"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) [data-skin~="trophy"]::before,
+    [data-style="blueprint"] .blueprint-celebration:not([data-still]) .blueprint-stamp {
         animation: none;
     }
 
