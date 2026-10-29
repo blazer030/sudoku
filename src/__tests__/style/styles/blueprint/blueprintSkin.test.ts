@@ -191,6 +191,14 @@ describe("blueprint skin", () => {
             expect(danger.get("box-shadow")).toBe("none");
         });
 
+        // HintPanel's scoped .hint-primary / .hint-secondary round their corners at the same weight as the
+        // shared square rule and come later, so only a heavier rule squares them
+        it("should square the hint panel's buttons over their own rounded corners", () => {
+            for (const selector of [`${skin("button")}:is(.bg-primary, .hint-primary)`, `${skin("button")}:is(.bg-card, .bg-primary-light, .hint-secondary)`]) {
+                expect(declarationsOf(BLUEPRINT_CSS, selector).get("border-radius"), selector).toBe("0");
+            }
+        });
+
         it("should draw icon tiles clear inside a 1px line of ink, a danger or given-up one in the error colour", () => {
             const tile = declarationsOf(BLUEPRINT_CSS, skin("icon-tile"));
 

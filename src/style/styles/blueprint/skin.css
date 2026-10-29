@@ -179,18 +179,21 @@
 }
 
 /* Buttons are square. The main ones are filled with the primary; secondary and outlined ones are clear inside a
-   1px line of ink; the danger button is filled with the error colour and written in the paper. */
+   1px line of ink; the danger button is filled with the error colour and written in the paper. The filled and
+   outlined rules square their corners again, as the hint panel's own rounded classes tie the plain rule. */
 [data-style="blueprint"] [data-skin~="button"] {
     border-radius: 0;
 }
 
 [data-style="blueprint"] [data-skin~="button"]:is(.bg-primary, .hint-primary) {
+    border-radius: 0;
     background-color: var(--color-primary);
     color: var(--color-on-primary);
     box-shadow: none;
 }
 
 [data-style="blueprint"] [data-skin~="button"]:is(.bg-card, .bg-primary-light, .hint-secondary) {
+    border-radius: 0;
     border-color: transparent;
     background-color: transparent;
     box-shadow: var(--blueprint-frame);
