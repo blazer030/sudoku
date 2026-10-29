@@ -449,7 +449,7 @@ describe("blueprint moments", () => {
     // MomentsBlueprint: two amber crosshairs sweep the board like an inspection pass, each digit they cross flashing
     // amber; a dashed frame then locks the board with its verdict (BlueprintBoardFrame draws both, ruling 11), and
     // once the dialog opens the card is plotted in from the left, the trophy ringed and the 核可 stamp pressed on
-    // (BlueprintCelebration), on the dialog's clock (ruling 12)
+    // just above the card's top edge (BlueprintCardDecoration), on the dialog's clock (ruling 12)
     describe("celebration", () => {
         const PLAYING = `${BOARD}[data-celebration="playing"]`;
         const SWEEP = `${PLAYING}::before`;
@@ -466,7 +466,7 @@ describe("blueprint moments", () => {
         const RING = `${TROPHY}::before`;
         const DRAWN_RING = `${DRAWN_CARD} [data-skin~="trophy"]::before`;
         const STAMP = `${SCOPE} .blueprint-stamp`;
-        const PRESSED_STAMP = `${SCOPE} .blueprint-celebration:not([data-still]) .blueprint-stamp`;
+        const PRESSED_STAMP = `${DRAWN_CARD} .blueprint-stamp`;
         const ANIMATED = [SWEEP, FLASH, FLASH_ARRIVING, FLASH_POPPING, MARCHING_LOCK, LEADER, VERDICT_TEXT, DRAWN_CARD, DRAWN_RING, PRESSED_STAMP];
         const PRIMARY_LINE = (angle: string): string =>
             `linear-gradient(${angle}, transparent, color-mix(in srgb, var(--color-primary) 60%, transparent) 3px, var(--color-primary) 3px 4px, color-mix(in srgb, var(--color-primary) 60%, transparent) 4px, transparent)`;
@@ -483,7 +483,6 @@ describe("blueprint moments", () => {
             const boardMs = STYLE_MOMENTS.blueprint.celebrationBoardMs;
 
             expect(boardMs).toBe(1300);
-            expect(STYLE_MOMENTS.blueprint.cardDecoration).toBeNull();
             expect(spanOf(MARCHING_LOCK, "blueprint-celebration-lock").endMs).toBeGreaterThan(boardMs);
         });
 
@@ -572,14 +571,15 @@ describe("blueprint moments", () => {
         });
 
         describe("the dialog", () => {
-            it("should plot the card in from the left from 60ms over 520ms, its frame and shadow whole at the end", () => {
+            // Clipped 64px out, and 120px above, so the stamp standing on the card's top edge comes whole
+            it("should plot the card in from the left from 60ms over 520ms, its frame, shadow and stamp whole at the end", () => {
                 const frames = framesOf("blueprint-celebration-draw");
 
                 expect(spanOf(DRAWN_CARD, "blueprint-celebration-draw")).toEqual({ startMs: 60, endMs: 580 });
                 expect(animationOf(DRAWN_CARD)).toContain(" linear ");
                 expect(animationOf(DRAWN_CARD)).toContain(" both");
-                expect(frames.get("0%")).toEqual(new Map([["clip-path", "inset(-64px 100% -64px -64px)"]]));
-                expect(frames.get("100%")).toEqual(new Map([["clip-path", "inset(-64px -64px -64px -64px)"]]));
+                expect(frames.get("0%")).toEqual(new Map([["clip-path", "inset(-120px 100% -64px -64px)"]]));
+                expect(frames.get("100%")).toEqual(new Map([["clip-path", "inset(-120px -64px -64px -64px)"]]));
             });
 
             it("should ring the trophy in a 1.5px dashed line of the primary on a clear ground, the cup in the primary", () => {

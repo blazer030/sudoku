@@ -22,7 +22,7 @@ import ChalkboardGroupOverlay from "@/presentation/components/style-moments/chal
 import ChalkboardCardDecoration from "@/presentation/components/style-moments/chalkboard/ChalkboardCardDecoration.vue";
 import BlueprintLoader from "@/presentation/components/style-moments/blueprint/BlueprintLoader.vue";
 import BlueprintGroupOverlay from "@/presentation/components/style-moments/blueprint/BlueprintGroupOverlay.vue";
-import BlueprintCelebration from "@/presentation/components/style-moments/blueprint/BlueprintCelebration.vue";
+import BlueprintCardDecoration from "@/presentation/components/style-moments/blueprint/BlueprintCardDecoration.vue";
 import type { CompletedGroup } from "@/domain/game/Sudoku";
 
 /** A group effect on the board: a new one gets a new id, which starts its drawings afresh. */
@@ -167,13 +167,14 @@ const CHALKBOARD_MOMENTS: StyleMoments = {
 // flashing as they cross it (42ms a step, 420ms each); from 720ms a dashed lock marches round it and from 1000ms its
 // verdict, R1–R9 · C1–C9 OK, is pulled out on a leader (BlueprintBoardFrame). The dialog opens at 1300ms, as the lock
 // is closing: the card is plotted in from the left from 60ms over 520ms, the trophy's dashed ring is inked in from
-// 580ms and the 核可 stamp pressed on over the header from 700ms (BlueprintCelebration), so nothing is drawn on the card.
+// 580ms and the 核可 stamp pressed on from 700ms, standing on the card's top edge (BlueprintCardDecoration), so
+// nothing is drawn over the scene.
 // While a puzzle loads, a plotter draws a sudoku box on a small drawing sheet, its pen running along the line as it
 // is plotted, and dimensions it in 3 columns (BlueprintLoader).
 const BLUEPRINT_MOMENTS: StyleMoments = {
     loader: BlueprintLoader,
-    celebration: BlueprintCelebration,
-    cardDecoration: null,
+    celebration: null,
+    cardDecoration: BlueprintCardDecoration,
     groupEffectMs: 900,
     groupOverlay: BlueprintGroupOverlay,
     celebrationBoardMs: 1300,

@@ -821,13 +821,13 @@
 }
 
 /* The dialog, on its own clock (ruling 12: the scrim comes in at 1300ms): the plotter draws the card in from the left
-   from 60ms over 520ms, clipped 64px out so its double frame and shadow come whole; the trophy's dashed ring is
-   inked in from 580ms over 1s, and from 700ms the 核可 stamp is pressed on over the header (BlueprintCelebration),
-   from large, turned −12°, on a ground of 92% of the paper so the header never shows through its words. A still
-   card, ring and stamp are simply there. */
+   from 60ms over 520ms, clipped 64px out so its double frame and shadow come whole (120px above, for the stamp on
+   its top edge); the trophy's dashed ring is inked in from 580ms over 1s, and from 700ms the 核可 stamp is pressed
+   on just above the card (BlueprintCardDecoration), from large, turned −12°, on a ground of 92% of the paper so
+   nothing behind shows through its words. A still card, ring and stamp are simply there. */
 @keyframes blueprint-celebration-draw {
-    0% { clip-path: inset(-64px 100% -64px -64px); }
-    100% { clip-path: inset(-64px -64px -64px -64px); }
+    0% { clip-path: inset(-120px 100% -64px -64px); }
+    100% { clip-path: inset(-120px -64px -64px -64px); }
 }
 
 [data-style="blueprint"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) {
@@ -854,7 +854,7 @@
     100% { opacity: 1; transform: rotate(-12deg) scale(1); }
 }
 
-[data-style="blueprint"] .blueprint-celebration:not([data-still]) .blueprint-stamp {
+[data-style="blueprint"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) .blueprint-stamp {
     animation: blueprint-celebration-stamp 460ms cubic-bezier(0.2, 0.8, 0.2, 1) 700ms both;
 }
 
@@ -1231,7 +1231,7 @@
     [data-style="blueprint"] .blueprint-frame-verdict:not([data-still]) .blueprint-frame-verdict-text,
     [data-style="blueprint"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]),
     [data-style="blueprint"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) [data-skin~="trophy"]::before,
-    [data-style="blueprint"] .blueprint-celebration:not([data-still]) .blueprint-stamp {
+    [data-style="blueprint"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) .blueprint-stamp {
         animation: none;
     }
 
