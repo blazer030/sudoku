@@ -83,9 +83,15 @@ describe("skin hooks", () => {
         expect([...groupCards, ...appearanceCards].every(tag => hasSkinToken(tag, "settings-card"))).toBe(true);
     });
 
-    it("should mark Statistics' section headings and its figures", () => {
+    it("should mark Statistics' cards, section headings and figures", () => {
         const tags = openingTags(readFileSync("src/presentation/pages/statistics/Statistics.vue", "utf8"), "span");
 
+        const cards = openingTags(readFileSync("src/presentation/pages/statistics/Statistics.vue", "utf8"), "div")
+            .filter(tag => hasSkinToken(tag, "card"));
+
+        // The overview's three cards and the By Difficulty card
+        expect(cards).toHaveLength(4);
+        expect(cards.every(tag => hasSkinToken(tag, "stat-card"))).toBe(true);
         // Overview, By Difficulty and Recent Games
         expect(tags.filter(tag => hasSkinToken(tag, "stat-heading"))).toHaveLength(3);
         // The overview's three numbers and each difficulty's best, average and completed

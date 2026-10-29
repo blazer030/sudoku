@@ -19,7 +19,7 @@
                     <div
                         class="flex-1 flex flex-col items-center gap-1 bg-card rounded-2xl px-2 py-4 shadow-card"
                         data-testid="games-won"
-                        data-skin="card"
+                        data-skin="card stat-card"
                     >
                         <span
                             class="text-3xl font-bold text-primary font-mono"
@@ -30,7 +30,7 @@
                     <div
                         class="flex-1 flex flex-col items-center gap-1 bg-card rounded-2xl px-2 py-4 shadow-card"
                         data-testid="win-rate"
-                        data-skin="card"
+                        data-skin="card stat-card"
                     >
                         <span
                             class="text-3xl font-bold text-primary font-mono"
@@ -41,7 +41,7 @@
                     <div
                         class="flex-1 flex flex-col items-center gap-1 bg-card rounded-2xl px-2 py-4 shadow-card"
                         data-testid="day-streak"
-                        data-skin="card"
+                        data-skin="card stat-card"
                     >
                         <span
                             class="text-3xl font-bold text-foreground font-mono"
@@ -59,7 +59,7 @@
                 >{{ t("statistics.byDifficulty") }}</span>
                 <div
                     class="bg-card rounded-2xl p-4 shadow-card flex flex-col divide-y divide-border"
-                    data-skin="card"
+                    data-skin="card stat-card"
                 >
                     <div
                         v-for="difficulty in DIFFICULTIES"
