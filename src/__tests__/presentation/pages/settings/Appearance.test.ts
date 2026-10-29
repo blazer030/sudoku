@@ -23,7 +23,7 @@ import { useSettingsStore } from "@/stores/settingsStore";
 import { startAppearanceSync } from "@/presentation/theme/appearanceSync";
 import { startLauncherIconSync } from "@/presentation/theme/launcherIconSync";
 import { handleBackButton } from "@/presentation/composables/backDismissal";
-import { STYLES, getPalette, rememberedAppearanceFor, rememberedThemeFor, type Palette } from "@/theme/palettes";
+import { STYLES, getPalette, rememberedAppearanceFor, rememberedThemeFor, swatchColors, type Palette } from "@/theme/palettes";
 import { styleIconSvg } from "@/theme/styleIcons";
 import { STYLE_IDS, type StyleId } from "@/theme/themeIds";
 import Appearance from "@/presentation/pages/settings/Appearance.vue";
@@ -216,14 +216,15 @@ describe("Appearance.vue colour-theme swatches", () => {
             const palette = getPalette(settingsStore.style, theme.id, mode);
             const swatch = wrapper.get(`[data-testid='color-theme-${theme.id}']`);
             const label = `${settingsStore.style} ${theme.id} in ${mode}`;
-            expect((swatch.element as HTMLElement).style.backgroundColor, label).toBe(cssColor(palette.primary));
-            // One solid colour: no second half in the accent
-            expect(swatch.html(), label).not.toContain(cssColor(palette.accent));
+            const { fill, mark } = swatchColors(settingsStore.style, mode, palette);
+            expect((swatch.element as HTMLElement).style.backgroundColor, label).toBe(cssColor(fill));
+            // One solid colour: no second half in the accent (unless the style's accent is the swatch's fill or mark)
+            if (palette.accent !== fill && palette.accent !== mark) expect(swatch.html(), label).not.toContain(cssColor(palette.accent));
             expect(swatch.findAll("[style*='background']"), label).toHaveLength(0);
         }
         const check = wrapper.get("[data-testid='color-theme-check']");
         const selected = getPalette(settingsStore.style, settingsStore.colorTheme, mode);
-        expect((check.element as HTMLElement).style.color).toBe(cssColor(selected["on-primary"]));
+        expect((check.element as HTMLElement).style.color).toBe(cssColor(swatchColors(settingsStore.style, mode, selected).mark));
     };
 
     it("should list the current style's themes with names and state", () => {
@@ -251,6 +252,20 @@ describe("Appearance.vue colour-theme swatches", () => {
             settingsStore.setAppearance("dark");
             await nextTick();
             expectSwatchesIn(wrapper, "dark");
+        }
+    });
+
+    it("should tell blueprint's four swatches apart in both modes", async () => {
+        const wrapper = mountAppearance();
+        const settingsStore = useSettingsStore();
+        settingsStore.setStyle("blueprint");
+
+        for (const mode of ["dark", "light"] as const) {
+            settingsStore.setAppearance(mode);
+            await nextTick();
+            const fills = STYLES.blueprint.themes.map(theme => (wrapper.get(`[data-testid='color-theme-${theme.id}']`).element as HTMLElement).style.backgroundColor);
+            expect(new Set(fills).size, mode).toBe(4);
+            expect(wrapper.get("[data-testid^='color-theme-blue']").attributes("data-skin")).toBe("swatch");
         }
     });
 

@@ -288,5 +288,25 @@ describe("palettes", () => {
 
             expect(swatchColors("minimal", "light", palette)).toEqual({ fill: palette.primary, mark: palette["on-primary"] });
         });
+
+        it("should show blueprint's dark swatches as four different papers", () => {
+            const fills = THEME_IDS_BY_STYLE.blueprint.map(themeId => {
+                const palette = getPalette("blueprint", themeId, "dark");
+                expect(swatchColors("blueprint", "dark", palette), themeId).toEqual({ fill: palette.background, mark: palette.foreground });
+                return swatchColors("blueprint", "dark", palette).fill;
+            });
+
+            expect(new Set(fills).size).toBe(4);
+        });
+
+        it("should show blueprint's light swatches as four different inks", () => {
+            const fills = THEME_IDS_BY_STYLE.blueprint.map(themeId => {
+                const palette = getPalette("blueprint", themeId, "light");
+                expect(swatchColors("blueprint", "light", palette), themeId).toEqual({ fill: palette.foreground, mark: palette.background });
+                return swatchColors("blueprint", "light", palette).fill;
+            });
+
+            expect(new Set(fills).size).toBe(4);
+        });
     });
 });

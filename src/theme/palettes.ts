@@ -62,7 +62,12 @@ export const systemBarColor = (style: StyleId, themeId: ColorThemeId, mode: Colo
 };
 
 /** The disc a colour-theme swatch is drawn as, and the colour of the check mark on it. */
-export const swatchColors = (_style: StyleId, _mode: ColorMode, palette: Palette): { fill: string; mark: string } => ({
-    fill: palette.primary,
-    mark: palette["on-primary"],
-});
+export const swatchColors = (style: StyleId, mode: ColorMode, palette: Palette): { fill: string; mark: string } => {
+    // Blueprint's primary is one colour in all four themes: dark swaps the paper, light swaps the ink
+    if (style === "blueprint") {
+        return effectiveColorMode(style, mode) === "dark"
+            ? { fill: palette.background, mark: palette.foreground }
+            : { fill: palette.foreground, mark: palette.background };
+    }
+    return { fill: palette.primary, mark: palette["on-primary"] };
+};
