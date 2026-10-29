@@ -36,7 +36,7 @@ describe("BlueprintBoardFrame", () => {
         i18n.global.locale.value = "en";
     });
 
-    it("should be blueprint's board frame, and the only one", () => {
+    it("should be blueprint's board frame", () => {
         expect(STYLE_BOARD_FRAMES.blueprint).toBe(BlueprintBoardFrame);
     });
 
@@ -124,6 +124,14 @@ describe("BlueprintBoardFrame", () => {
         expect(callout.get("bottom")).toBe("calc(100% + 8px)");
         expect(leader.get("top")).toBe("100%");
         expect(leader.get("height")).toBe("5px");
+    });
+
+    it("should lay the tag over the corner registration crosses it meets on C1 and C9", () => {
+        // The crosses sit later in the marks layer with no z-index; the grid holding the tag sets none either,
+        // so the tag's own z-index lifts it over them
+        expect(declarationsOf(".blueprint-frame-register").has("z-index")).toBe(false);
+        expect(declarationsOf(".blueprint-frame-grid").has("z-index")).toBe(false);
+        expect(Number(declarationsOf(".blueprint-callout").get("z-index"))).toBeGreaterThan(0);
     });
 
     it("should call out nothing and light no label without a target", () => {
