@@ -92,7 +92,7 @@ describe("BlueprintGroupOverlay", () => {
 
     it("should draw the labels in the primary, on the paper, so no graph line runs under them", () => {
         for (const label of mountOverlay(effectOf(ROW_AND_BOX)).findAll(".blueprint-group-label")) {
-            expect(label.classes()).toEqual(expect.arrayContaining(["text-primary", "bg-background", "font-blueprint-mono"]));
+            expect(label.classes()).toEqual(expect.arrayContaining(["text-primary", "bg-background", "font-mono"]));
         }
     });
 

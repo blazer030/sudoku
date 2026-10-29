@@ -70,7 +70,7 @@ const RULERS: Record<LineKind, { ruler: string; line: string; stops: string[]; l
     },
 };
 
-const LABEL_CLASSES = "blueprint-group-label absolute whitespace-nowrap bg-background px-1 font-blueprint-mono text-[10px] leading-3 font-medium text-primary";
+const LABEL_CLASSES = "blueprint-group-label absolute whitespace-nowrap bg-background px-1 font-mono text-[10px] leading-3 font-medium text-primary";
 
 const percent = (part: number, whole: number): string => `${(part / whole * 100).toFixed(4)}%`;
 

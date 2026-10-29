@@ -163,7 +163,7 @@ const callout = computed(() => {
 }
 
 .blueprint-frame-label {
-    font-family: var(--font-blueprint-mono);
+    font-family: var(--font-mono);
     font-size: 10px;
     line-height: 1;
     color: var(--color-foreground-secondary);
@@ -215,7 +215,7 @@ const callout = computed(() => {
     position: relative;
     z-index: 1;
     padding: 0 8px;
-    font-family: var(--font-blueprint-mono);
+    font-family: var(--font-mono);
     font-size: 11px;
     line-height: 1;
     letter-spacing: 0.1em;
@@ -274,7 +274,7 @@ const callout = computed(() => {
     bottom: 0;
     left: 0;
     padding: 2px 6px;
-    font-family: var(--font-blueprint-mono);
+    font-family: var(--font-mono);
     font-size: 11px;
     font-weight: 600;
     line-height: 1.3;
@@ -321,7 +321,7 @@ const callout = computed(() => {
     right: 22px;
     bottom: 16px;
     padding: 2px 6px;
-    font-family: var(--font-blueprint-mono);
+    font-family: var(--font-mono);
     font-size: 11px;
     font-weight: 600;
     line-height: 1.3;
