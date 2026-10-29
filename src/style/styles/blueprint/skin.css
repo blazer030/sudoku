@@ -129,13 +129,14 @@
 }
 
 /* The app's page scroller, the pages inside it and pages that scroll on their own are clear, so the one sheet
-   shows through them */
+   shows through them. Each page counts its settings groups afresh (B-01, B-02…, below). */
 [data-style="blueprint"] [data-skin~="page-ruled"] {
     background: transparent;
 }
 
 [data-style="blueprint"] [data-skin~="page"] {
     background-color: transparent;
+    counter-reset: blueprint-group;
 }
 
 /* A sticky header is clear at rest, so the paper runs through it. Once its page has scrolled it is laid over
@@ -407,6 +408,196 @@
 
 [data-style="blueprint"][data-blueprint-fonts="ready"] [data-skin~="toast"] {
     font-family: var(--font-blueprint-mono);
+}
+
+/* Settings and 外觀, as the canvas's .group / .gh: each card framed in 1.5px of ink, each group's heading in the
+   ink at 500, its icon in the ink, and numbered on its right as a drawing's sections, B-01, B-02…, in the pale Mono */
+[data-style="blueprint"] [data-skin~="settings-card"] {
+    box-shadow: var(--blueprint-frame-strong);
+}
+
+[data-style="blueprint"] [data-skin~="group-heading"] {
+    color: var(--color-foreground);
+    font-weight: 500;
+}
+
+[data-style="blueprint"] [data-skin~="group-heading"] > svg {
+    color: var(--color-foreground);
+}
+
+[data-style="blueprint"] [data-skin~="group-heading"]::after {
+    counter-increment: blueprint-group;
+    content: "B-" counter(blueprint-group, decimal-leading-zero) / "";
+    margin-left: auto;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--color-foreground-secondary);
+}
+
+/* Option and toggle tiles (the tiles that are a choice, unlike Home's) are clear and square in a 1px line, as the
+   canvas's .opt / .tg; a chosen one is not filled but lined in the primary with a second line inside it, its icon
+   in the primary and its words in the inks (the markup inks them for a filled tile) */
+[data-style="blueprint"] [data-skin~="tile"][aria-pressed] {
+    border-color: transparent;
+    background-color: transparent;
+    box-shadow: inset 0 0 0 1px var(--color-border);
+    border-radius: 0;
+    color: var(--color-foreground);
+}
+
+[data-style="blueprint"] [data-skin~="tile"][aria-pressed="true"] {
+    background-color: transparent;
+    box-shadow: inset 0 0 0 1px var(--color-primary), inset 0 0 0 2px var(--color-primary);
+    color: var(--color-foreground);
+}
+
+[data-style="blueprint"] [data-skin~="tile"][aria-pressed="true"] > .text-on-primary {
+    color: var(--color-primary);
+}
+
+[data-style="blueprint"] [data-skin~="tile"][aria-pressed="true"] span .text-on-primary {
+    color: var(--color-foreground-secondary);
+}
+
+/* A toggle's mark, as the canvas's .ind: its own ring and check are hidden, and a 16px square of ink is drawn in its
+   middle by four 1px strokes of its own background, laid from its border box so the square sits the same whether or
+   not the mark has its border (a ::before would need the mark positioned, and the wide tile's mark is not); when
+   on, the square is in the primary and crossed by two strokes of the primary */
+[data-style="blueprint"] [data-skin~="check"] {
+    --blueprint-check-ink: var(--color-foreground);
+    border-color: transparent;
+    background-color: transparent;
+    border-radius: 0;
+    background-image:
+        linear-gradient(var(--blueprint-check-ink), var(--blueprint-check-ink)),
+        linear-gradient(var(--blueprint-check-ink), var(--blueprint-check-ink)),
+        linear-gradient(var(--blueprint-check-ink), var(--blueprint-check-ink)),
+        linear-gradient(var(--blueprint-check-ink), var(--blueprint-check-ink));
+    background-size: 16px 1px, 16px 1px, 1px 16px, 1px 16px;
+    background-position: 2px 2px, 2px 17px, 2px 2px, 17px 2px;
+    background-repeat: no-repeat;
+    background-origin: border-box;
+    background-clip: border-box;
+}
+
+[data-style="blueprint"] [data-skin~="check"] > svg {
+    visibility: hidden;
+}
+
+[data-style="blueprint"] [data-skin~="tile"][aria-pressed="true"] [data-skin~="check"] {
+    --blueprint-check-ink: var(--color-primary);
+    background-color: transparent;
+    background-image:
+        linear-gradient(var(--blueprint-check-ink), var(--blueprint-check-ink)),
+        linear-gradient(var(--blueprint-check-ink), var(--blueprint-check-ink)),
+        linear-gradient(var(--blueprint-check-ink), var(--blueprint-check-ink)),
+        linear-gradient(var(--blueprint-check-ink), var(--blueprint-check-ink)),
+        linear-gradient(45deg, transparent calc(50% - 1px), var(--color-primary) calc(50% - 1px) calc(50% + 1px), transparent calc(50% + 1px)),
+        linear-gradient(-45deg, transparent calc(50% - 1px), var(--color-primary) calc(50% - 1px) calc(50% + 1px), transparent calc(50% + 1px));
+    background-size: 16px 1px, 16px 1px, 1px 16px, 1px 16px, 16px 16px, 16px 16px;
+    background-position: 2px 2px, 2px 17px, 2px 2px, 17px 2px, 2px 2px, 2px 2px;
+}
+
+/* The colour swatches are square in a 1px line of ink (藍曬圖's swatches are its papers, the paper itself among
+   them, which shows only by its line); a chosen one is ringed twice in the primary, the canvas's .sw.on */
+[data-style="blueprint"] [data-skin~="swatch"] {
+    box-shadow: inset 0 0 0 1px var(--color-foreground);
+    border-radius: 0;
+}
+
+[data-style="blueprint"] [data-skin~="swatch"][aria-pressed="true"] {
+    box-shadow:
+        inset 0 0 0 1px var(--color-foreground),
+        0 0 0 3px var(--color-background),
+        0 0 0 4px var(--color-primary),
+        0 0 0 5px var(--color-background),
+        0 0 0 6px var(--color-primary);
+}
+
+/* Statistics, as the canvas's .sec / .statnum / .lrow: section headings in the pale Mono at 500, the figures in Mono
+   at 500 (the best times and the overview's wins keep the markup's primary), recent games' rows framed in 1.5px of
+   ink on the paper, and a game's result, a time or "Gave up", in the ink */
+[data-style="blueprint"] [data-skin~="stat-heading"] {
+    color: var(--color-foreground-secondary);
+    font-weight: 500;
+}
+
+[data-style="blueprint"][data-blueprint-fonts="ready"] [data-skin~="stat-heading"] {
+    font-family: var(--font-blueprint-mono);
+}
+
+[data-style="blueprint"] [data-skin~="stat-value"] {
+    font-weight: 500;
+}
+
+[data-style="blueprint"] [data-skin~="recent-row"] {
+    background-color: var(--color-background);
+    box-shadow: var(--blueprint-frame-strong);
+    border-radius: 0;
+}
+
+[data-style="blueprint"] [data-skin~="game-result"] {
+    color: var(--color-foreground);
+}
+
+/* Playback, as the canvas's .prog / .playb / .dots. The progress track is a ruler: a 12px strip on its ::before,
+   centred on the track whatever its height, in a 1px line with a tick every 10%; the progress is a 4px bar of the
+   primary through its middle, drawn by the fill's background so the fill keeps its own height. */
+[data-style="blueprint"] [data-skin~="progress-track"] {
+    position: relative;
+    isolation: isolate;
+    background-color: transparent;
+    border-radius: 0;
+}
+
+[data-style="blueprint"] [data-skin~="progress-track"]::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 12px;
+    transform: translateY(-50%);
+    z-index: -1;
+    background-image: repeating-linear-gradient(90deg, var(--color-border) 0 1px, transparent 1px 10%);
+    box-shadow: inset 0 0 0 1px var(--color-border);
+    pointer-events: none;
+}
+
+[data-style="blueprint"] [data-skin~="progress-fill"] {
+    border-radius: 0;
+    background-color: transparent;
+    background-image: linear-gradient(var(--color-primary), var(--color-primary));
+    background-size: 100% 4px;
+    background-position: 0 50%;
+    background-repeat: no-repeat;
+}
+
+/* The play button is a clear square key in a 1.5px line of the primary */
+[data-style="blueprint"] [data-skin~="button"][data-skin~="play"] {
+    background-color: transparent;
+    box-shadow: inset 0 0 0 1.5px var(--color-primary);
+    color: var(--color-primary);
+    border-radius: 0;
+}
+
+/* A step navigator's dots are square in a 1px line of the pale ink; this step's (20px wide) is filled with the
+   primary, the ones passed with half the pale ink */
+[data-style="blueprint"] [data-skin~="step-dot"] {
+    background-color: transparent;
+    box-shadow: inset 0 0 0 1px var(--color-foreground-secondary);
+    border-radius: 0;
+}
+
+[data-style="blueprint"] [data-skin~="step-dot"][data-skin~="current"] {
+    background-color: var(--color-primary);
+    box-shadow: none;
+}
+
+[data-style="blueprint"] [data-skin~="step-dot"][data-skin~="past"] {
+    background-color: color-mix(in srgb, var(--color-foreground-secondary) 50%, transparent);
+    box-shadow: none;
 }
 
 /* Reduced motion: no scaling or sliding; the press wash stays */

@@ -323,4 +323,164 @@ describe("blueprint skin", () => {
             expect(declarationsOf(BLUEPRINT_CSS, `${skin("home-tile")} > svg`).get("color")).toBe("var(--color-foreground)");
         });
     });
+
+    describe("Settings and 外觀", () => {
+        const CHOICE = `${skin("tile")}[aria-pressed]`;
+        const CHOSEN = `${skin("tile")}[aria-pressed="true"]`;
+        const CROSS_STROKE = (angle: string): string =>
+            `linear-gradient(${angle}, transparent calc(50% - 1px), var(--color-primary) calc(50% - 1px) calc(50% + 1px), transparent calc(50% + 1px))`;
+
+        it("should frame each settings card in 1.5px of ink", () => {
+            expect(declarationsOf(BLUEPRINT_CSS, skin("settings-card")).get("box-shadow")).toBe("var(--blueprint-frame-strong)");
+        });
+
+        it("should number each group's heading B-01, B-02… on its right in the pale Mono, counted from the page", () => {
+            const heading = declarationsOf(BLUEPRINT_CSS, skin("group-heading"));
+            const number = declarationsOf(BLUEPRINT_CSS, `${skin("group-heading")}::after`);
+
+            expect(declarationsOf(BLUEPRINT_CSS, skin("page")).get("counter-reset")).toBe("blueprint-group");
+            expect(heading.get("color")).toBe("var(--color-foreground)");
+            expect(heading.get("font-weight")).toBe("500");
+            expect(declarationsOf(BLUEPRINT_CSS, `${skin("group-heading")} > svg`).get("color")).toBe("var(--color-foreground)");
+            expect(number.get("counter-increment")).toBe("blueprint-group");
+            expect(number.get("content")).toBe('"B-" counter(blueprint-group, decimal-leading-zero) / ""');
+            expect(number.get("margin-left")).toBe("auto");
+            expect(number.get("font-family")).toBe("var(--font-mono)");
+            expect(number.get("font-size")).toBe("11px");
+            expect(number.get("font-weight")).toBe("400");
+            expect(number.get("color")).toBe("var(--color-foreground-secondary)");
+        });
+
+        it("should draw option and toggle tiles clear and square in a 1px line, a chosen one in the primary with a line inside it", () => {
+            const choice = declarationsOf(BLUEPRINT_CSS, CHOICE);
+            const chosen = declarationsOf(BLUEPRINT_CSS, CHOSEN);
+
+            expect(choice.get("border-color")).toBe("transparent");
+            expect(choice.get("background-color")).toBe("transparent");
+            expect(choice.get("box-shadow")).toBe("inset 0 0 0 1px var(--color-border)");
+            expect(choice.get("border-radius")).toBe("0");
+            expect(choice.get("color")).toBe("var(--color-foreground)");
+            expect(chosen.get("background-color")).toBe("transparent");
+            expect(chosen.get("box-shadow")).toBe("inset 0 0 0 1px var(--color-primary), inset 0 0 0 2px var(--color-primary)");
+            expect(chosen.get("color")).toBe("var(--color-foreground)");
+            // The markup inks a chosen tile's icon and words for a filled tile
+            expect(declarationsOf(BLUEPRINT_CSS, `${CHOSEN} > .text-on-primary`).get("color")).toBe("var(--color-primary)");
+            expect(declarationsOf(BLUEPRINT_CSS, `${CHOSEN} span .text-on-primary`).get("color")).toBe("var(--color-foreground-secondary)");
+        });
+
+        it("should draw a toggle's mark as a 16px square of ink in its middle, crossed in the primary when on", () => {
+            const mark = declarationsOf(BLUEPRINT_CSS, skin("check"));
+            const on = declarationsOf(BLUEPRINT_CSS, `${CHOSEN} [data-skin~="check"]`);
+            const SIDES = "linear-gradient(var(--blueprint-check-ink), var(--blueprint-check-ink))";
+
+            expect(mark.get("--blueprint-check-ink")).toBe("var(--color-foreground)");
+            expect(mark.get("border-color")).toBe("transparent");
+            expect(mark.get("background-color")).toBe("transparent");
+            expect(mark.get("border-radius")).toBe("0");
+            expect(declarationsOf(BLUEPRINT_CSS, `${skin("check")} > svg`).get("visibility")).toBe("hidden");
+            // Four 1px sides of a 16px square, 2px in from the mark's 20px border box whether or not it has its border
+            expect(mark.get("background-image")).toBe(Array<string>(4).fill(SIDES).join(", "));
+            expect(mark.get("background-size")).toBe("16px 1px, 16px 1px, 1px 16px, 1px 16px");
+            expect(mark.get("background-position")).toBe("2px 2px, 2px 17px, 2px 2px, 17px 2px");
+            expect(mark.get("background-origin")).toBe("border-box");
+            expect(on.get("--blueprint-check-ink")).toBe("var(--color-primary)");
+            expect(on.get("background-image")).toBe([...Array<string>(4).fill(SIDES), CROSS_STROKE("45deg"), CROSS_STROKE("-45deg")].join(", "));
+            expect(on.get("background-size")).toBe("16px 1px, 16px 1px, 1px 16px, 1px 16px, 16px 16px, 16px 16px");
+        });
+
+        it("should square the swatches in a 1px line of ink, so 藍曬圖's paper swatch shows, and ring a chosen one twice in the primary", () => {
+            const swatch = declarationsOf(BLUEPRINT_CSS, skin("swatch"));
+            const chosen = declarationsOf(BLUEPRINT_CSS, `${skin("swatch")}[aria-pressed="true"]`);
+
+            expect(swatch.get("border-radius")).toBe("0");
+            expect(swatch.get("box-shadow")).toBe("inset 0 0 0 1px var(--color-foreground)");
+            expect(chosen.get("box-shadow")).toBe(
+                "inset 0 0 0 1px var(--color-foreground), 0 0 0 3px var(--color-background), 0 0 0 4px var(--color-primary), 0 0 0 5px var(--color-background), 0 0 0 6px var(--color-primary)",
+            );
+        });
+    });
+
+    describe("Statistics", () => {
+        it("should set the section headings in the pale Mono 500", () => {
+            const heading = declarationsOf(BLUEPRINT_CSS, skin("stat-heading"));
+
+            expect(heading.get("color")).toBe("var(--color-foreground-secondary)");
+            expect(heading.get("font-weight")).toBe("500");
+            expect(declarationsOf(BLUEPRINT_CSS, `${FONTS_READY} [data-skin~="stat-heading"]`).get("font-family")).toBe("var(--font-blueprint-mono)");
+        });
+
+        it("should set the figures in Mono 500, keeping the markup's primary on the best time", () => {
+            const value = declarationsOf(BLUEPRINT_CSS, skin("stat-value"));
+
+            expect(value.get("font-weight")).toBe("500");
+            expect(value.get("color")).toBeUndefined();
+        });
+
+        it("should frame a recent game's row in 1.5px of ink on the paper, square", () => {
+            const row = declarationsOf(BLUEPRINT_CSS, skin("recent-row"));
+
+            expect(row.get("background-color")).toBe("var(--color-background)");
+            expect(row.get("box-shadow")).toBe("var(--blueprint-frame-strong)");
+            expect(row.get("border-radius")).toBe("0");
+        });
+
+        it("should write a game's result in the ink, a given-up one too", () => {
+            expect(declarationsOf(BLUEPRINT_CSS, skin("game-result")).get("color")).toBe("var(--color-foreground)");
+            expect(declarationsOf(BLUEPRINT_CSS, skin("game-result gave-up")).get("color")).toBeUndefined();
+        });
+    });
+
+    describe("playback", () => {
+        it("should rule the progress track as a 12px ruler on its ::before: a 1px line with a tick every 10%", () => {
+            const track = declarationsOf(BLUEPRINT_CSS, skin("progress-track"));
+            const ruler = declarationsOf(BLUEPRINT_CSS, `${skin("progress-track")}::before`);
+
+            expect(track.get("position")).toBe("relative");
+            expect(track.get("isolation")).toBe("isolate");
+            expect(track.get("background-color")).toBe("transparent");
+            expect(track.get("border-radius")).toBe("0");
+            expect(ruler.get("content")).toBe('""');
+            expect(ruler.get("position")).toBe("absolute");
+            expect(ruler.get("height")).toBe("12px");
+            expect(ruler.get("z-index")).toBe("-1");
+            expect(ruler.get("background-image")).toBe("repeating-linear-gradient(90deg, var(--color-border) 0 1px, transparent 1px 10%)");
+            expect(ruler.get("box-shadow")).toBe("inset 0 0 0 1px var(--color-border)");
+            expect(ruler.get("pointer-events")).toBe("none");
+        });
+
+        it("should draw the progress as a 4px bar of the primary through the ruler's middle, sized by its background", () => {
+            const fill = declarationsOf(BLUEPRINT_CSS, skin("progress-fill"));
+
+            expect(fill.get("height")).toBeUndefined();
+            expect(fill.get("border-radius")).toBe("0");
+            expect(fill.get("background-color")).toBe("transparent");
+            expect(fill.get("background-image")).toBe("linear-gradient(var(--color-primary), var(--color-primary))");
+            expect(fill.get("background-size")).toBe("100% 4px");
+            expect(fill.get("background-position")).toBe("0 50%");
+            expect(fill.get("background-repeat")).toBe("no-repeat");
+        });
+
+        it("should draw the play button as a clear square key in a 1.5px line of the primary", () => {
+            const play = declarationsOf(BLUEPRINT_CSS, skin("button play"));
+
+            expect(play.get("background-color")).toBe("transparent");
+            expect(play.get("box-shadow")).toBe("inset 0 0 0 1.5px var(--color-primary)");
+            expect(play.get("color")).toBe("var(--color-primary)");
+            expect(play.get("border-radius")).toBe("0");
+        });
+
+        it("should square the step dots in the pale ink, this step's filled with the primary and the ones passed half the pale ink", () => {
+            const dot = declarationsOf(BLUEPRINT_CSS, skin("step-dot"));
+            const current = declarationsOf(BLUEPRINT_CSS, skin("step-dot current"));
+            const past = declarationsOf(BLUEPRINT_CSS, skin("step-dot past"));
+
+            expect(dot.get("border-radius")).toBe("0");
+            expect(dot.get("background-color")).toBe("transparent");
+            expect(dot.get("box-shadow")).toBe("inset 0 0 0 1px var(--color-foreground-secondary)");
+            expect(current.get("background-color")).toBe("var(--color-primary)");
+            expect(current.get("box-shadow")).toBe("none");
+            expect(past.get("background-color")).toBe("color-mix(in srgb, var(--color-foreground-secondary) 50%, transparent)");
+            expect(past.get("box-shadow")).toBe("none");
+        });
+    });
 });
