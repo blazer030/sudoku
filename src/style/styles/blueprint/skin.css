@@ -777,6 +777,13 @@
         blueprint-digit-ink 235ms ease 605ms both;
 }
 
+/* A Reveal Cell answer may be the last digit: it keeps its pop beside its flash */
+[data-style="blueprint"] [data-skin~="board"][data-celebration="playing"] [data-variant] > div.animate-hint-reveal-pop {
+    animation:
+        blueprint-group-sweep 420ms ease-out calc((var(--cell-row) + var(--cell-column)) * 42ms),
+        hint-reveal-pop 450ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
 [data-style="blueprint"] .blueprint-frame-lock {
     pointer-events: none;
 }
@@ -1212,6 +1219,7 @@
     [data-style="blueprint"] [data-skin~="board"][data-celebration="playing"]::before,
     [data-style="blueprint"] [data-skin~="board"][data-celebration="playing"] [data-variant] > div,
     [data-style="blueprint"] [data-skin~="board"][data-celebration="playing"] [data-variant] > div.value-arrive,
+    [data-style="blueprint"] [data-skin~="board"][data-celebration="playing"] [data-variant] > div.animate-hint-reveal-pop,
     [data-style="blueprint"] .blueprint-frame-lock:not([data-still]) rect,
     [data-style="blueprint"] .blueprint-frame-verdict:not([data-still])::before,
     [data-style="blueprint"] .blueprint-frame-verdict:not([data-still]) .blueprint-frame-verdict-text,

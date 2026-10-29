@@ -223,6 +223,11 @@ describe("BlueprintBoardFrame", () => {
 
             expect(lock.element.tagName.toLowerCase()).toBe("svg");
             expect(lock.get("rect").attributes("stroke-dasharray")).toBe("6 4");
+            // Inset by half its stroke, as the canvas's, so the whole line lies on the lock's box
+            expect(lock.get("rect").attributes("x")).toBe("0.75");
+            expect(lock.get("rect").attributes("y")).toBe("0.75");
+            expect(lock.get("rect").attributes("width")).toBe("calc(100% - 1.5px)");
+            expect(lock.get("rect").attributes("height")).toBe("calc(100% - 1.5px)");
             expect(lock.get("rect").attributes("stroke")).toBe("currentColor");
             expect(grid.get(".blueprint-frame-verdict").text()).toBe("R1–R9 · C1–C9 OK");
         });

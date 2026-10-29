@@ -47,13 +47,16 @@
                         :data-still="celebration === 'still' || undefined"
                         class="blueprint-frame-lock text-primary"
                     >
+                        <!-- Inset by half its stroke, as the canvas's, so the whole line lies on the lock's box -->
                         <rect
                             fill="none"
-                            height="100%"
+                            height="calc(100% - 1.5px)"
                             stroke="currentColor"
                             stroke-dasharray="6 4"
                             stroke-width="1.5"
-                            width="100%"
+                            width="calc(100% - 1.5px)"
+                            x="0.75"
+                            y="0.75"
                         />
                     </svg>
                     <span

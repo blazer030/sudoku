@@ -455,6 +455,7 @@ describe("blueprint moments", () => {
         const SWEEP = `${PLAYING}::before`;
         const FLASH = `${PLAYING} [data-variant] > div`;
         const FLASH_ARRIVING = `${FLASH}.value-arrive`;
+        const FLASH_POPPING = `${FLASH}.animate-hint-reveal-pop`;
         const LOCK = `${SCOPE} .blueprint-frame-lock`;
         const MARCHING_LOCK = `${SCOPE} .blueprint-frame-lock:not([data-still]) rect`;
         const LEADER = `${SCOPE} .blueprint-frame-verdict:not([data-still])::before`;
@@ -466,7 +467,7 @@ describe("blueprint moments", () => {
         const DRAWN_RING = `${DRAWN_CARD} [data-skin~="trophy"]::before`;
         const STAMP = `${SCOPE} .blueprint-stamp`;
         const PRESSED_STAMP = `${SCOPE} .blueprint-celebration:not([data-still]) .blueprint-stamp`;
-        const ANIMATED = [SWEEP, FLASH, FLASH_ARRIVING, MARCHING_LOCK, LEADER, VERDICT_TEXT, DRAWN_CARD, DRAWN_RING, PRESSED_STAMP];
+        const ANIMATED = [SWEEP, FLASH, FLASH_ARRIVING, FLASH_POPPING, MARCHING_LOCK, LEADER, VERDICT_TEXT, DRAWN_CARD, DRAWN_RING, PRESSED_STAMP];
         const PRIMARY_LINE = (angle: string): string =>
             `linear-gradient(${angle}, transparent, color-mix(in srgb, var(--color-primary) 60%, transparent) 3px, var(--color-primary) 3px 4px, color-mix(in srgb, var(--color-primary) 60%, transparent) 4px, transparent)`;
 
@@ -536,6 +537,13 @@ describe("blueprint moments", () => {
                 expect(animationTimingOf(both, "blueprint-group-sweep")).toEqual(animationTimingOf(animationOf(FLASH), "blueprint-group-sweep"));
                 expect(animationTimingOf(both, "blueprint-digit-ink")).toEqual(animationTimingOf(animationOf(ARRIVING_DIGIT), "blueprint-digit-ink"));
                 expect(both).toContain(" both");
+            });
+            // A Reveal Cell answer may be the last digit: its pop (index.css) stays beside its flash
+            it("should keep a revealed digit's pop beside its flash", () => {
+                const both = animationOf(FLASH_POPPING);
+
+                expect(animationTimingOf(both, "blueprint-group-sweep")).toEqual(animationTimingOf(animationOf(FLASH), "blueprint-group-sweep"));
+                expect(both).toContain("hint-reveal-pop 450ms cubic-bezier(0.2, 0.8, 0.2, 1)");
             });
         });
 
@@ -618,7 +626,7 @@ describe("blueprint moments", () => {
                 expect(animationOf(selector), selector).not.toBe("");
                 expect(selector.split(":not([data-still])").join(""), selector).not.toMatch(/still/);
             }
-            for (const selector of [SWEEP, FLASH, FLASH_ARRIVING]) {
+            for (const selector of [SWEEP, FLASH, FLASH_ARRIVING, FLASH_POPPING]) {
                 expect(selector, selector).toContain('[data-celebration="playing"]');
             }
         });
