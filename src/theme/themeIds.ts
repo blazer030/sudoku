@@ -21,7 +21,7 @@ export const THEME_IDS_BY_STYLE = {
     // the whiteboard in light
     chalkboard: ["classic"],
     // Blueprint's four papers: in 藍曬圖 each is a paper colour under the same white lines and amber, on 製圖紙 an
-    // ink colour on the same white paper under the same red pen. Their names are settings.colorThemes' own.
+    // ink colour on the same white paper under the same orange pen. Their names are settings.colorThemes' own.
     blueprint: ["blue", "teal", "slate", "rust"],
 } as const satisfies Record<StyleId, readonly string[]>;
 export type ColorThemeId = typeof THEME_IDS_BY_STYLE[StyleId][number];

@@ -1,5 +1,5 @@
 /* Blueprint: an engineering drawing on graph paper, pale lines on a blueprint (藍曬圖, dark) and inks on drafting
-   paper (製圖紙, light), amber or a red pen for everything chosen. Every screen lies on one sheet of graph paper
+   paper (製圖紙, light), amber or an orange pen for everything chosen. Every screen lies on one sheet of graph paper
    inside a drawing frame; cards, buttons, pills and tags are square, drawn in lines of ink rather than filled,
    and only what is chosen or main is filled in the primary. Every rule is scoped by [data-style="blueprint"];
    keyframes start with blueprint-. No pressable piece sets a background-image of its own, so the press wash
@@ -570,7 +570,7 @@
 }
 
 /* An error cell is hatched in the error colour alone, with no flat wash, so it is told from the selected and
-   same-digit cells by its pattern as well as its colour (製圖紙's crimson beside its red pen): 2px lines 5px apart,
+   same-digit cells by its pattern as well as its colour (製圖紙's crimson beside its orange pen): 2px lines 5px apart,
    heavier than the peers' so the pale crimson still reads as stripes on a phone. Laid after the peer and same-digit cells, its digit in
    the error colour, so it never lies on the ink's hatching (ruling 5). */
 [data-style="blueprint"] [data-skin~="board"] [data-variant="error"],

@@ -128,13 +128,13 @@ describe("palettes", () => {
         expect(palette.accent).toBe(palette.foreground);
     });
 
-    it("should change the ink on 製圖紙: rust ink under a red pen that marks choices, and a crimson one for errors", () => {
+    it("should change the ink on 製圖紙: rust ink under a burnt-orange pen that marks choices, and a crimson one for errors", () => {
         const palette = getPalette("blueprint", "rust", "light");
 
         expect(palette.foreground).toBe("#6B3A1E");
         expect(palette["foreground-secondary"]).toBe("#7A5A44");
         expect(palette.background).toBe("#FAFBFC");
-        expect(palette.primary).toBe("#C0392B");
+        expect(palette.primary).toBe("#B34A00");
         expect(palette.error).toBe("#B5175F");
     });
 

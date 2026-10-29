@@ -5,7 +5,7 @@ import type { ColorThemeId } from "../../../theme/themeIds";
 
 // Blueprint: an engineering drawing on graph paper, from the style-research canvas (Blueprint.dc.html, .m-dark and
 // .m-light). 藍曬圖 (dark) is white lines on a blueprint whose paper each theme changes, with amber for everything
-// chosen; 製圖紙 (light) is one white drafting paper whose ink each theme changes, with a red pen for everything
+// chosen; 製圖紙 (light) is one white drafting paper whose ink each theme changes, with an orange pen for everything
 // chosen and a crimson one for errors and danger. A theme's neutrals change with it, so each theme builds its own (themeBuilder once per
 // theme). The board is laid on the page's paper colour, so every board wash is mixed over the page, as the canvas
 // lays them; washes, lines and hatching are eased where the fixed inks must still read (the spec's 對比度的取捨).
@@ -36,11 +36,13 @@ interface DraftingInk { ink: string; paleInk: string }
 
 const DRAFTING = {
     paper: "#FAFBFC",
-    redPen: "#C0392B",
-    redPenHover: "#A93226",
-    onRedPen: "#FFFFFF",
-    // The canvas marks errors in the red pen too, which then passes for a chosen digit; a crimson leaning to
-    // magenta still reads as wrong, apart from the red pen and every ink (rust's brown too)
+    // The canvas's red pen (#C0392B) sat too close to the crimson; a burnt orange keeps the pen warm, the light
+    // twin of 藍曬圖's amber, and apart from the crimson and every ink
+    orangePen: "#B34A00",
+    orangePenHover: "#9E4100",
+    onOrangePen: "#FFFFFF",
+    // The canvas marks errors in its red pen too, which then passes for a chosen digit; a crimson leaning to
+    // magenta still reads as wrong, apart from the orange pen and every ink (rust's brown too)
     crimsonPen: "#B5175F",
     crimsonPenHover: "#9C1351",
     // The graph paper and its hatching are printed in one blue whatever the ink, as the canvas prints them
@@ -59,7 +61,7 @@ const DRAFTING_INKS: Readonly<Record<"blue" | "teal" | "slate" | "rust", Draftin
 };
 
 // The washes over the page: the selected cell, the same digit, the hatching's lines, the major grid lines and the
-// error cell's. 製圖紙's red pen is drawn on the selected and same-digit washes and on the hatching, so they ease to
+// error cell's. 製圖紙's orange pen is drawn on the selected and same-digit washes and on the hatching, so they ease to
 // 8%; 藍曬圖's pale lines are drawn on the hatching and the major lines, so they ease to 12%.
 const BLUEPRINT_WASH = { selected: 0.12, sameDigit: 0.16, hatch: 0.12, gridMinor: 0.065, gridMajor: 0.12, error: 0.05, errorHatch: 0.06, card: 0.04, border: 0.45 } as const;
 const DRAFTING_WASH = { selected: 0.08, sameDigit: 0.08, hatch: 0.08, error: 0.05, errorHatch: 0.08, card: 0.88, border: 0.35 } as const;
@@ -103,7 +105,7 @@ const draftingNeutrals = ({ ink, paleInk }: DraftingInk): Neutrals<LightThemeCol
     "error": DRAFTING.crimsonPen,
     "error-surface": mixColors(DRAFTING.crimsonPen, DRAFTING_WASH.error, DRAFTING.paper),
     "shadow": ink,
-    "on-primary": DRAFTING.onRedPen,
+    "on-primary": DRAFTING.onOrangePen,
     "on-danger": DRAFTING.paper,
     "scrim": DRAFTING.paper,
     "on-scrim": ink,
@@ -118,7 +120,7 @@ const draftingNeutrals = ({ ink, paleInk }: DraftingInk): Neutrals<LightThemeCol
 const blueprintTheme = (id: ColorThemeId, papers: BlueprintPaper, inks: DraftingInk): ThemePalette => {
     const { paper } = papers;
     const amberWash = (strength: number) => mixColors(BLUEPRINT.amber, strength, paper);
-    const redPenWash = (strength: number) => mixColors(DRAFTING.redPen, strength, DRAFTING.paper);
+    const orangePenWash = (strength: number) => mixColors(DRAFTING.orangePen, strength, DRAFTING.paper);
     const darkHatch = mixColors(BLUEPRINT.line, BLUEPRINT_WASH.hatch, paper);
     const lightHatch = mixColors(DRAFTING.printBlue, DRAFTING_WASH.hatch, DRAFTING.paper);
     return themeBuilder(
@@ -127,11 +129,11 @@ const blueprintTheme = (id: ColorThemeId, papers: BlueprintPaper, inks: Drafting
         {
             "featured": DRAFTING.paper,
             "on-featured": inks.ink,
-            "cell-selected": redPenWash(DRAFTING_WASH.selected),
-            "cell-focus": redPenWash(DRAFTING_WASH.selected),
+            "cell-selected": orangePenWash(DRAFTING_WASH.selected),
+            "cell-focus": orangePenWash(DRAFTING_WASH.selected),
             "cell-peer": lightHatch,
             "cell-scope": lightHatch,
-            "cell-pattern": redPenWash(DRAFTING_WASH.sameDigit),
+            "cell-pattern": orangePenWash(DRAFTING_WASH.sameDigit),
             "grid-minor": DRAFTING.gridMinor,
             "grid-major": DRAFTING.gridMajor,
             "hatch": lightHatch,
@@ -154,12 +156,12 @@ const blueprintTheme = (id: ColorThemeId, papers: BlueprintPaper, inks: Drafting
         },
     )(id,
         {
-            "primary": DRAFTING.redPen,
-            "primary-hover": DRAFTING.redPenHover,
-            "primary-light": redPenWash(DRAFTING_WASH.selected),
+            "primary": DRAFTING.orangePen,
+            "primary-hover": DRAFTING.orangePenHover,
+            "primary-light": orangePenWash(DRAFTING_WASH.selected),
             // The player's digits are in the clues' ink, told apart by their hand
             "accent": inks.ink,
-            "highlight": redPenWash(DRAFTING_WASH.sameDigit),
+            "highlight": orangePenWash(DRAFTING_WASH.sameDigit),
         },
         { "primary": BLUEPRINT.amber, "primary-hover": BLUEPRINT.amberHover, "accent": BLUEPRINT.line });
 };

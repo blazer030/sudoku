@@ -4,7 +4,7 @@
   "description": "Train your brain with Sudoku puzzles",
   "background_color": "#FAFBFC",
   "display": "standalone",
-  "theme_color": "#C0392B",
+  "theme_color": "#B34A00",
   "icons": [
     {
       "src": "pwa-192x192-blueprintSlate.png",

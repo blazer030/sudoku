@@ -260,10 +260,10 @@ describe("styleIcons", () => {
             expect(svg).not.toContain("<text");
         });
 
-        it("should draw the 製圖紙 icon in the theme's ink and the red pen on the white paper", () => {
+        it("should draw the 製圖紙 icon in the theme's ink and the orange pen on the white paper", () => {
             const svg = styleIconSvg("blueprint", draftingTeal);
 
-            for (const color of ["#FAFBFC", "#0B5563", "#C0392B"]) expect(paintsOf(svg), color).toContain(color);
+            for (const color of ["#FAFBFC", "#0B5563", "#B34A00"]) expect(paintsOf(svg), color).toContain(color);
         });
 
         it("should draw a different icon for each paper in each mode", () => {
