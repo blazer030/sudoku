@@ -535,6 +535,38 @@ const BLUEPRINT_BOARD_CASES: BlueprintBoardCase[] = STYLES.blueprint.themes.flat
     ];
 }));
 
+const BLUEPRINT_SKIN = readFileSync("src/style/styles/blueprint/skin.css", "utf8");
+
+// A recent game's row: a wash of a token over the graph paper (skin.css), read back as the colour it lays
+const blueprintRowGround = (palette: Palette, mode: ColorMode): string => {
+    const selector = `${mode === "dark" ? ":root.dark" : ""}[data-style="blueprint"] [data-skin~="recent-row"]`;
+    let wash: string | undefined;
+    postcss.parse(BLUEPRINT_SKIN).walkRules((rule) => {
+        if (!rule.selectors.includes(selector)) return;
+        rule.walkDecls("background-color", (declaration) => { wash = declaration.value.trim(); });
+    });
+    const match = /^color-mix\(in srgb, var\(--color-([a-z-]+)\) (\d+(?:\.\d+)?)%, transparent\)$/.exec(wash ?? "");
+    if (match === null) throw new Error(`blueprint's ${mode} recent row lays no wash: ${wash}`);
+    const [, token, percent] = match;
+    return mixColors(palette[token as PaletteToken], Number(percent) / 100, palette.background);
+};
+
+// What a recent game's row writes on its wash: its difficulty and time in the ink, its date and hints muted, "Gave
+// up" in the danger colour, and its chip's 1px line and icon in the primary's place (the ink) or the danger colour
+const BLUEPRINT_ROW_CASES = STYLES.blueprint.themes.flatMap(theme => STYLE_COLOR_MODES.blueprint.flatMap((mode) => {
+    const palette = getPalette("blueprint", theme.id, mode);
+    const ground = blueprintRowGround(palette, mode);
+    const drawn = (name: string, foreground: string, minimum = TEXT) => ({
+        label: `blueprint/${theme.id}/${mode}: ${name} on the recent row ≥ ${minimum}`, foreground, background: ground, minimum,
+    });
+    return [
+        drawn("difficulty and time (foreground)", palette.foreground),
+        drawn("date and hints (foreground-muted)", palette["foreground-muted"]),
+        drawn("gave up (danger)", palette.danger),
+        drawn("gave-up chip (danger)", palette.danger, LARGE_OR_ICON),
+    ];
+}));
+
 describe("palette contrast", () => {
     it("should check every style, theme and the modes the style has", () => {
         const expected = STYLE_IDS.flatMap(style => THEME_IDS_BY_STYLE[style].flatMap(theme =>
@@ -599,6 +631,10 @@ describe("palette contrast", () => {
     });
 
     it.each(BLUEPRINT_BOARD_CASES)("$label", ({ foreground, background, minimum }) => {
+        expect(contrastRatio(foreground, background)).toBeGreaterThanOrEqual(minimum);
+    });
+
+    it.each(BLUEPRINT_ROW_CASES)("$label", ({ foreground, background, minimum }) => {
         expect(contrastRatio(foreground, background)).toBeGreaterThanOrEqual(minimum);
     });
 

@@ -428,15 +428,18 @@ describe("blueprint skin", () => {
             expect(value.get("color")).toBeUndefined();
         });
 
-        it("should frame a recent game's row in 1.5px of ink on the paper, square", () => {
+        // The canvas's .lrow lies on its card, rgba(255,255,255,.88) on 製圖紙; on 藍曬圖 its .04 would drop teal's
+        // "Gave up" under 4.5:1, so it is .03 there (paletteContrast's BLUEPRINT_ROW_CASES)
+        it("should lay a recent game's row on a faint wash of white over the graph paper, unframed and square", () => {
             const row = declarationsOf(BLUEPRINT_CSS, skin("recent-row"));
+            const darkRow = declarationsOf(BLUEPRINT_CSS, `:root.dark${SCOPE} [data-skin~="recent-row"]`);
 
-            expect(row.get("background-color")).toBe("var(--color-background)");
-            expect(row.get("box-shadow")).toBe("var(--blueprint-frame-strong)");
+            expect(row.get("background-color")).toBe("color-mix(in srgb, var(--color-card) 88%, transparent)");
+            expect(darkRow.get("background-color")).toBe("color-mix(in srgb, var(--color-foreground) 3%, transparent)");
+            expect(row.get("box-shadow")).toBe("none");
             expect(row.get("border-radius")).toBe("0");
         });
 
-        // The row lies on the paper, where paletteContrast checks "danger on background"
         it("should write a game's time in the ink and a given-up one in the error colour, as the canvas's .lside b.gave", () => {
             expect(declarationsOf(BLUEPRINT_CSS, skin("game-result")).get("color")).toBe("var(--color-foreground)");
             expect(declarationsOf(BLUEPRINT_CSS, skin("game-result gave-up")).get("color")).toBe("var(--color-danger)");
