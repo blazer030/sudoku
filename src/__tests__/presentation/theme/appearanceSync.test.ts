@@ -248,6 +248,7 @@ describe("startAppearanceSync", () => {
             delete document.documentElement.dataset.cyberFonts;
             delete document.documentElement.dataset.inkFonts;
             delete document.documentElement.dataset.chalkboardFonts;
+            delete document.documentElement.dataset.blueprintFonts;
         });
 
         it("should mark paper's fonts ready once Caveat's digits have loaded", async () => {
@@ -317,6 +318,21 @@ describe("startAppearanceSync", () => {
 
             expect(load.mock.calls.map(([font]) => font).join(" ")).toContain("Chalk Digits");
             expect(document.documentElement.dataset.chalkboardFonts).toBe("ready");
+        });
+
+        it("should mark blueprint's fonts ready once Blueprint Mono, Hand and Sans TC have loaded", async () => {
+            const load = stubFontLoading(1);
+            const sources = buildSources("blue", "dark", "blueprint");
+            stop = startAppearanceSync(sources, systemBar, appearanceBridge);
+            expect(document.documentElement.dataset.blueprintFonts).toBeUndefined();
+
+            await finishLoadingFonts();
+
+            const families = load.mock.calls.map(([font]) => font).join(" ");
+            expect(families).toContain("Blueprint Mono");
+            expect(families).toContain("Blueprint Hand");
+            expect(families).toContain("Blueprint Sans TC");
+            expect(document.documentElement.dataset.blueprintFonts).toBe("ready");
         });
 
         it("should drop pixel's ready mark when leaving pixel", async () => {

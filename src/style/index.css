@@ -50,6 +50,12 @@
   --font-chalkboard-digits: "Chalk Digits", "LXGW WenKai TC", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
   /* The English cheer's letters on the same file, a family with no range; Chinese falls to WenKai */
   --font-chalkboard-cheer: "Chalk Cheer", "LXGW WenKai TC", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+  /* Blueprint's stacks, on its bundled faces (fonts.css): Blueprint Mono (IBM Plex Mono) for labels, clues and
+     keys; Blueprint Hand (Architects Daughter, digits only) for the player's digits; Blueprint Sans TC
+     (Noto Sans TC) for all other text. */
+  --font-blueprint-mono: "Blueprint Mono", "Blueprint Sans TC", ui-monospace, monospace;
+  --font-blueprint-hand: "Blueprint Hand", "Blueprint Mono", "Blueprint Sans TC", monospace;
+  --font-blueprint-sans: "Blueprint Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
   --font-print: "Times New Roman", "Noto Serif TC", "Songti TC", "PMingLiU", serif;
   /* Board, key and timer faces; a style may point them at its own stacks */
   --font-clue: var(--font-sans);

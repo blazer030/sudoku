@@ -92,6 +92,7 @@ const downloadCubic = (path: string): Promise<Buffer> => downloadCached(cubicUrl
 const main = async (): Promise<void> => {
     const chineseText = ASCII + sourceCharacters();
     const inkBrushText = inkBrushCharacters();
+    const blueprintMonoText = ASCII + "\u00b7\u2013\u00d7";
     const families: Family[] = [
         {
             licence: "ofl/outfit/OFL.txt",
@@ -179,6 +180,29 @@ const main = async (): Promise<void> => {
                 { output: "eb-garamond.woff2", source: "ofl/ebgaramond/EBGaramond[wght].ttf", text: "0123456789:/%", weights: { min: 500, max: 700 } },
                 { output: "eb-garamond-italic.woff2", source: "ofl/ebgaramond/EBGaramond-Italic[wght].ttf", text: "0123456789", weights: { min: 500, max: 600 } },
             ],
+        },
+        {
+            licence: "ofl/ibmplexmono/OFL.txt",
+            licenceOutput: "IBMPlexMono-OFL.txt",
+            // Blueprint's labels, clues, keys and timer: three static weights of printable ASCII plus the
+            // middle dot, en dash and multiplication sign
+            jobs: [
+                { output: "blueprint-mono-regular.woff2", source: "ofl/ibmplexmono/IBMPlexMono-Regular.ttf", text: blueprintMonoText },
+                { output: "blueprint-mono-medium.woff2", source: "ofl/ibmplexmono/IBMPlexMono-Medium.ttf", text: blueprintMonoText },
+                { output: "blueprint-mono-semibold.woff2", source: "ofl/ibmplexmono/IBMPlexMono-SemiBold.ttf", text: blueprintMonoText },
+            ],
+        },
+        {
+            licence: "ofl/architectsdaughter/OFL.txt",
+            licenceOutput: "ArchitectsDaughter-OFL.txt",
+            // Blueprint's player digits, by hand
+            jobs: [{ output: "architects-daughter.woff2", source: "ofl/architectsdaughter/ArchitectsDaughter-Regular.ttf", text: "0123456789" }],
+        },
+        {
+            licence: "ofl/notosanstc/OFL.txt",
+            licenceOutput: "NotoSansTC-OFL.txt",
+            // Blueprint's text, cut to the characters the app writes like WenKai
+            jobs: [{ output: "noto-sans-tc.woff2", source: "ofl/notosanstc/NotoSansTC[wght].ttf", text: chineseText, weights: { min: 300, max: 600 } }],
         },
     ];
 

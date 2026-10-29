@@ -149,3 +149,50 @@
     font-display: swap;
     src: url("../assets/fonts/eb-garamond-italic.woff2") format("woff2");
 }
+
+/* Blueprint's faces carry their own family names, so a stack naming the system's IBM Plex Mono or
+   Noto Sans TC never reaches the bundled subsets. */
+
+/* Blueprint's labels, clues, keys and timer in IBM Plex Mono: three static weights of printable ASCII
+   plus the middle dot, en dash and multiplication sign; Chinese falls to Blueprint Sans TC */
+@font-face {
+    font-family: "Blueprint Mono";
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url("../assets/fonts/blueprint-mono-regular.woff2") format("woff2");
+}
+
+@font-face {
+    font-family: "Blueprint Mono";
+    font-style: normal;
+    font-weight: 500;
+    font-display: swap;
+    src: url("../assets/fonts/blueprint-mono-medium.woff2") format("woff2");
+}
+
+@font-face {
+    font-family: "Blueprint Mono";
+    font-style: normal;
+    font-weight: 600;
+    font-display: swap;
+    src: url("../assets/fonts/blueprint-mono-semibold.woff2") format("woff2");
+}
+
+/* The player's digits in Architects Daughter; the file holds digits only */
+@font-face {
+    font-family: "Blueprint Hand";
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url("../assets/fonts/architects-daughter.woff2") format("woff2");
+}
+
+/* Blueprint's text in Noto Sans TC, cut to the characters the app writes */
+@font-face {
+    font-family: "Blueprint Sans TC";
+    font-style: normal;
+    font-weight: 300 600;
+    font-display: swap;
+    src: url("../assets/fonts/noto-sans-tc.woff2") format("woff2");
+}

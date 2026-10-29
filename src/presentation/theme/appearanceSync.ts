@@ -7,6 +7,7 @@ import { syncCyberFonts } from "@/style/styles/cyber/fonts";
 import { syncPixelFonts } from "@/style/styles/pixel/fonts";
 import { syncInkFonts } from "@/style/styles/ink/fonts";
 import { syncChalkboardFonts } from "@/style/styles/chalkboard/fonts";
+import { syncBlueprintFonts } from "@/style/styles/blueprint/fonts";
 import { effectiveColorMode, type ColorMode, type ColorThemeId, type StyleId } from "@/theme/themeIds";
 import type { SystemBarService } from "@/application/systemBar/SystemBarService";
 import type { AppearanceBridgeService } from "@/application/appearanceBridge/AppearanceBridgeService";
@@ -37,6 +38,7 @@ export const startAppearanceSync = (
         syncCyberFonts(sources.style.value === "cyber");
         syncInkFonts(sources.style.value === "ink");
         syncChalkboardFonts(sources.style.value === "chalkboard");
+        syncBlueprintFonts(sources.style.value === "blueprint");
         updateMetaThemeColor(systemBarColor(sources.style.value, sources.colorTheme.value, mode));
         updateFavicon(launcherIconKey(sources.style.value, sources.colorTheme.value, mode));
         void systemBar.apply(mode);
