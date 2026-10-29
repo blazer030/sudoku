@@ -565,9 +565,9 @@
     border: 1.5px solid var(--color-error);
 }
 
-/* An error cell is hatched in the error colour alone, with no flat wash, so in 製圖紙, whose red pen is also the
-   primary, it is told from the selected and same-digit cells by its pattern: 2px lines 5px apart, heavier than the
-   peers' so the pale red still reads as stripes on a phone. Laid after the peer and same-digit cells, its digit in
+/* An error cell is hatched in the error colour alone, with no flat wash, so it is told from the selected and
+   same-digit cells by its pattern as well as its colour (製圖紙's crimson beside its red pen): 2px lines 5px apart,
+   heavier than the peers' so the pale crimson still reads as stripes on a phone. Laid after the peer and same-digit cells, its digit in
    the error colour, so it never lies on the ink's hatching (ruling 5). */
 [data-style="blueprint"] [data-skin~="board"] [data-variant="error"],
 [data-style="blueprint"] [data-skin~="board"] [data-variant="wrong"] {

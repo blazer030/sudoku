@@ -128,14 +128,24 @@ describe("palettes", () => {
         expect(palette.accent).toBe(palette.foreground);
     });
 
-    it("should change the ink on 製圖紙: rust ink under a red pen that marks both choices and errors", () => {
+    it("should change the ink on 製圖紙: rust ink under a red pen that marks choices, and a crimson one for errors", () => {
         const palette = getPalette("blueprint", "rust", "light");
 
         expect(palette.foreground).toBe("#6B3A1E");
         expect(palette["foreground-secondary"]).toBe("#7A5A44");
         expect(palette.background).toBe("#FAFBFC");
         expect(palette.primary).toBe("#C0392B");
-        expect(palette.error).toBe("#C0392B");
+        expect(palette.error).toBe("#B5175F");
+    });
+
+    // A wrong digit must never pass for a chosen one, and a danger button never for the primary
+    it("should mark 製圖紙's errors and danger in their own crimson, apart from every theme's red pen", () => {
+        for (const theme of STYLES.blueprint.themes) {
+            const palette = getPalette("blueprint", theme.id, "light");
+            expect(palette.error, theme.id).not.toBe(palette.primary);
+            expect(palette.danger, theme.id).toBe(palette.error);
+            expect(palette["danger-hover"], theme.id).not.toBe(palette["primary-hover"]);
+        }
     });
 
     it("should give 藍曬圖's toast the lines' ink with the paper's colour on it", () => {

@@ -6,7 +6,7 @@ import type { ColorThemeId } from "../../../theme/themeIds";
 // Blueprint: an engineering drawing on graph paper, from the style-research canvas (Blueprint.dc.html, .m-dark and
 // .m-light). 藍曬圖 (dark) is white lines on a blueprint whose paper each theme changes, with amber for everything
 // chosen; 製圖紙 (light) is one white drafting paper whose ink each theme changes, with a red pen for everything
-// chosen and for errors. A theme's neutrals change with it, so each theme builds its own (themeBuilder once per
+// chosen and a crimson one for errors and danger. A theme's neutrals change with it, so each theme builds its own (themeBuilder once per
 // theme). The board is laid on the page's paper colour, so every board wash is mixed over the page, as the canvas
 // lays them; washes, lines and hatching are eased where the fixed inks must still read (the spec's 對比度的取捨).
 
@@ -39,6 +39,10 @@ const DRAFTING = {
     redPen: "#C0392B",
     redPenHover: "#A93226",
     onRedPen: "#FFFFFF",
+    // The canvas marks errors in the red pen too, which then passes for a chosen digit; a crimson leaning to
+    // magenta still reads as wrong, apart from the red pen and every ink (rust's brown too)
+    crimsonPen: "#B5175F",
+    crimsonPenHover: "#9C1351",
     // The graph paper and its hatching are printed in one blue whatever the ink, as the canvas prints them
     printBlue: "#0F3A73",
     gridMinor: "#E6EDF6",
@@ -94,10 +98,10 @@ const draftingNeutrals = ({ ink, paleInk }: DraftingInk): Neutrals<LightThemeCol
     "foreground-secondary": paleInk,
     "foreground-muted": mixColors(paleInk, MUTED_STRENGTH, DRAFTING.paper),
     "cell-clue": DRAFTING.paper,
-    "danger": DRAFTING.redPen,
-    "danger-hover": DRAFTING.redPenHover,
-    "error": DRAFTING.redPen,
-    "error-surface": mixColors(DRAFTING.redPen, DRAFTING_WASH.error, DRAFTING.paper),
+    "danger": DRAFTING.crimsonPen,
+    "danger-hover": DRAFTING.crimsonPenHover,
+    "error": DRAFTING.crimsonPen,
+    "error-surface": mixColors(DRAFTING.crimsonPen, DRAFTING_WASH.error, DRAFTING.paper),
     "shadow": ink,
     "on-primary": DRAFTING.onRedPen,
     "on-danger": DRAFTING.paper,
@@ -131,7 +135,7 @@ const blueprintTheme = (id: ColorThemeId, papers: BlueprintPaper, inks: Drafting
             "grid-minor": DRAFTING.gridMinor,
             "grid-major": DRAFTING.gridMajor,
             "hatch": lightHatch,
-            "error-hatch": redPenWash(DRAFTING_WASH.errorHatch),
+            "error-hatch": mixColors(DRAFTING.crimsonPen, DRAFTING_WASH.errorHatch, DRAFTING.paper),
         },
         {
             "featured": paper,

@@ -1200,10 +1200,10 @@
     --color-accent: #0F3A73;
     --color-highlight: #F5EBEB;
     --color-cell-clue: #FAFBFC;
-    --color-danger: #C0392B;
-    --color-danger-hover: #A93226;
-    --color-error: #C0392B;
-    --color-error-surface: #F7F1F2;
+    --color-danger: #B5175F;
+    --color-danger-hover: #9C1351;
+    --color-error: #B5175F;
+    --color-error-surface: #F7F0F4;
     --color-shadow: #0F3A73;
     --color-on-primary: #FFFFFF;
     --color-on-danger: #FAFBFC;
@@ -1227,7 +1227,7 @@
     --color-grid-minor: #E6EDF6;
     --color-grid-major: #D6E1EF;
     --color-hatch: #E7ECF1;
-    --color-error-hatch: #F5EBEB;
+    --color-error-hatch: #F4E9EF;
 }
 
 :root.dark[data-style="blueprint"][data-color-theme="blue"] {
@@ -1286,10 +1286,10 @@
     --color-accent: #0B5563;
     --color-highlight: #F5EBEB;
     --color-cell-clue: #FAFBFC;
-    --color-danger: #C0392B;
-    --color-danger-hover: #A93226;
-    --color-error: #C0392B;
-    --color-error-surface: #F7F1F2;
+    --color-danger: #B5175F;
+    --color-danger-hover: #9C1351;
+    --color-error: #B5175F;
+    --color-error-surface: #F7F0F4;
     --color-shadow: #0B5563;
     --color-on-primary: #FFFFFF;
     --color-on-danger: #FAFBFC;
@@ -1313,7 +1313,7 @@
     --color-grid-minor: #E6EDF6;
     --color-grid-major: #D6E1EF;
     --color-hatch: #E7ECF1;
-    --color-error-hatch: #F5EBEB;
+    --color-error-hatch: #F4E9EF;
 }
 
 :root.dark[data-style="blueprint"][data-color-theme="teal"] {
@@ -1372,10 +1372,10 @@
     --color-accent: #2B3A4E;
     --color-highlight: #F5EBEB;
     --color-cell-clue: #FAFBFC;
-    --color-danger: #C0392B;
-    --color-danger-hover: #A93226;
-    --color-error: #C0392B;
-    --color-error-surface: #F7F1F2;
+    --color-danger: #B5175F;
+    --color-danger-hover: #9C1351;
+    --color-error: #B5175F;
+    --color-error-surface: #F7F0F4;
     --color-shadow: #2B3A4E;
     --color-on-primary: #FFFFFF;
     --color-on-danger: #FAFBFC;
@@ -1399,7 +1399,7 @@
     --color-grid-minor: #E6EDF6;
     --color-grid-major: #D6E1EF;
     --color-hatch: #E7ECF1;
-    --color-error-hatch: #F5EBEB;
+    --color-error-hatch: #F4E9EF;
 }
 
 :root.dark[data-style="blueprint"][data-color-theme="slate"] {
@@ -1458,10 +1458,10 @@
     --color-accent: #6B3A1E;
     --color-highlight: #F5EBEB;
     --color-cell-clue: #FAFBFC;
-    --color-danger: #C0392B;
-    --color-danger-hover: #A93226;
-    --color-error: #C0392B;
-    --color-error-surface: #F7F1F2;
+    --color-danger: #B5175F;
+    --color-danger-hover: #9C1351;
+    --color-error: #B5175F;
+    --color-error-surface: #F7F0F4;
     --color-shadow: #6B3A1E;
     --color-on-primary: #FFFFFF;
     --color-on-danger: #FAFBFC;
@@ -1485,7 +1485,7 @@
     --color-grid-minor: #E6EDF6;
     --color-grid-major: #D6E1EF;
     --color-hatch: #E7ECF1;
-    --color-error-hatch: #F5EBEB;
+    --color-error-hatch: #F4E9EF;
 }
 
 :root.dark[data-style="blueprint"][data-color-theme="rust"] {
