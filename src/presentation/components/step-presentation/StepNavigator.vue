@@ -6,6 +6,7 @@
             :data-testid="`${testIdPrefix}-previous`"
             :disabled="stepIndex <= 0"
             class="step-arrow"
+            data-skin="step-arrow"
             @click="emit('previous')"
         >
             <ChevronLeft :size="20" />
@@ -47,6 +48,7 @@
             :data-testid="`${testIdPrefix}-next`"
             :disabled="stepIndex >= totalSteps - 1"
             class="step-arrow"
+            data-skin="step-arrow"
             @click="emit('next')"
         >
             <ChevronRight :size="20" />
