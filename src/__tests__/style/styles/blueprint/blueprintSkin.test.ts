@@ -28,6 +28,9 @@ const allRules = (): { selectors: string[]; declarations: Map<string, string> }[
     return rules;
 };
 
+// The index of the last rule that lists the selector, so the sheet's order can be checked
+const lastRuleIndexOf = (selector: string): number => allRules().map(rule => rule.selectors.includes(selector)).lastIndexOf(true);
+
 const isPseudoElement = (selector: string): boolean => /::(?:before|after)$/.test(selector);
 
 describe("blueprint skin", () => {
@@ -504,8 +507,6 @@ describe("blueprint skin", () => {
         // Heavier than the peers' hatching, so in 製圖紙, where it is the selected wash's 8% red, it still reads as a pattern on a phone
         const ERROR_HATCH = "repeating-linear-gradient(45deg, var(--color-error-hatch) 0 2px, transparent 2px 5px)";
         const PRESS_WASH = "linear-gradient(var(--press-overlay), var(--press-overlay))";
-        // The index of the last top-level rule that lists the selector, so the sheet's order can be checked
-        const lastRuleIndexOf = (selector: string): number => allRules().map(rule => rule.selectors.includes(selector)).lastIndexOf(true);
 
         it("should lay the board bare on the page, without a card, a shadow or round corners", () => {
             const board = declarationsOf(BLUEPRINT_CSS, BOARD);
@@ -659,6 +660,19 @@ describe("blueprint skin", () => {
             expect(frame.get("z-index")).toBe("4");
             expect(frame.get("pointer-events")).toBe("none");
             expect(frame.get("border")).toBe("1.5px solid var(--color-primary)");
+        });
+
+        // A selected cell's dashed frame outranks a plain [data-variant] one, so the step's frames name the selected
+        // cell too and come after it: a step's answer or wrong cell keeps its solid frame on any board, in any mode
+        it("should keep a step's solid answer and wrong frames over the dashed selection, whether or not hint mode is on", () => {
+            const dashedIndex = lastRuleIndexOf(`${BOARD}:not([data-hint-mode]) [data-selected]::after`);
+
+            for (const [variant, colour] of [["answer", "primary"], ["wrong", "error"]]) {
+                const selector = `${BOARD} [data-selected][data-variant="${variant}"]::after`;
+
+                expect(declarationsOf(BLUEPRINT_CSS, selector).get("border"), variant).toBe(`1.5px solid var(--color-${colour})`);
+                expect(lastRuleIndexOf(selector), variant).toBeGreaterThan(dashedIndex);
+            }
         });
 
         it("should frame a step's wrong cell like an answer, in the error colour", () => {

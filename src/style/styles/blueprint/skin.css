@@ -411,7 +411,9 @@
 }
 
 /* The board, as the canvas's .board: no card, no shadow, the grid laid on the page's paper so the graph paper stops
-   at its frame (ruling 3). Clues keep their size and the player's digits are 1.25 times it, the canvas's 23:18. */
+   at its frame (ruling 3). Clues keep their size and the player's digits are 1.25 times it, the canvas's 23:18.
+   Dropping the shadow drops the hint-mode ring the board's markup draws as one, on purpose: the filled hint-mode
+   pill says hint mode is on. */
 [data-style="blueprint"] [data-skin~="board"] {
     --clue-scale: 1;
     --entry-scale: 1.25;
@@ -533,11 +535,15 @@
     border: 1.5px dashed var(--color-primary);
 }
 
-[data-style="blueprint"] [data-skin~="board"] [data-variant="answer"]::after {
+/* The step's frames also name the selected cell, so they match the dashed rule's weight and, coming after it, win
+   on any board in any mode */
+[data-style="blueprint"] [data-skin~="board"] [data-variant="answer"]::after,
+[data-style="blueprint"] [data-skin~="board"] [data-selected][data-variant="answer"]::after {
     border: 1.5px solid var(--color-primary);
 }
 
-[data-style="blueprint"] [data-skin~="board"] [data-variant="wrong"]::after {
+[data-style="blueprint"] [data-skin~="board"] [data-variant="wrong"]::after,
+[data-style="blueprint"] [data-skin~="board"] [data-selected][data-variant="wrong"]::after {
     border: 1.5px solid var(--color-error);
 }
 
