@@ -131,6 +131,9 @@ export const zhHant: MessageSchema = {
         },
     },
     game: {
+        boardFrame: {
+            columns: "{n} 欄",
+        },
         hints: {
             title: "提示",
             remaining: "本局還剩 {count} 次提示",

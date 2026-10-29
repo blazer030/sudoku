@@ -4,6 +4,7 @@ import type { CellReference } from "@/domain/solver/SolveStep";
 import type { GroupEffect } from "@/presentation/components/style-moments/styleMoments";
 import type { CelebrationPhase } from "@/presentation/pages/game/useGameSession";
 import { useSettingsStore } from "@/stores/settingsStore";
+import BlueprintBoardFrame from "@/presentation/components/board-frame/blueprint/BlueprintBoardFrame.vue";
 
 /**
  * What a style's board frame is given, the same on the game, Game Review and Walkthrough boards. A frame
@@ -32,7 +33,7 @@ export const STYLE_BOARD_FRAMES: Record<StyleId, Component | null> = {
     cyber: null,
     ink: null,
     chalkboard: null,
-    blueprint: null,
+    blueprint: BlueprintBoardFrame,
 };
 
 export const useBoardFrame = (): ComputedRef<Component | null> => {

@@ -134,6 +134,9 @@ export const en = {
         },
     },
     game: {
+        boardFrame: {
+            columns: "{n} cols",
+        },
         hints: {
             title: "Hints",
             remaining: "{count} hint left this game | {count} hints left this game",

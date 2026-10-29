@@ -28,8 +28,10 @@ afterEach(() => {
 });
 
 describe("BoardFrame", () => {
-    it("should give every style no frame yet", () => {
-        expect(STYLE_IDS.map((style) => STYLE_BOARD_FRAMES[style])).toEqual(STYLE_IDS.map(() => null));
+    it("should give every style but blueprint no frame", () => {
+        const unframed = STYLE_IDS.filter((style) => style !== "blueprint");
+
+        expect(unframed.map((style) => STYLE_BOARD_FRAMES[style])).toEqual(unframed.map(() => null));
     });
 
     it("should render only the board when the style has no frame, with no element around it", () => {
