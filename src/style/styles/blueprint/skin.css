@@ -588,6 +588,35 @@
     border-radius: 0;
 }
 
+/* Erasing strikes the digit out, as the canvas's strike: the digit that left (the cell's data-leaving-value), in
+   the player's hand and ink, crossed by two 2px diagonals of the primary, holds for 60% of 700ms and then fades
+   fully away (no ghost stays). It is the cell's ::before, below the lines and the selection frame on the ::after,
+   so a selected cell keeps its frame; its animationend settles leaving. Unseen without its animation. */
+@keyframes blueprint-strike {
+    0%, 60% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+[data-style="blueprint"] [data-skin~="board"] [data-variant].value-leave::before {
+    content: attr(data-leaving-value) / "";
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    font-family: var(--font-entry);
+    font-size: calc(22px * var(--entry-scale, 1));
+    line-height: 1;
+    color: var(--color-foreground);
+    background-image:
+        linear-gradient(45deg, transparent calc(50% - 1px), var(--color-primary) calc(50% - 1px) calc(50% + 1px), transparent calc(50% + 1px)),
+        linear-gradient(-45deg, transparent calc(50% - 1px), var(--color-primary) calc(50% - 1px) calc(50% + 1px), transparent calc(50% + 1px));
+    opacity: 0;
+    animation: blueprint-strike 700ms ease-in;
+}
+
 /* Settings and 外觀, as the canvas's .group / .gh: each card framed in 1.5px of ink, each group's heading in the
    ink at 500 (Statistics' cards take the same frame, below), its icon in the ink, and numbered on its right as a drawing's sections, B-01, B-02…, in the pale Mono */
 [data-style="blueprint"] [data-skin~="settings-card"],
@@ -869,6 +898,10 @@
     [data-style="blueprint"] [data-press-motion][data-pressed],
     [data-style="blueprint"] [data-press-bounce] {
         transform: none;
+        animation: none;
+    }
+
+    [data-style="blueprint"] [data-skin~="board"] [data-variant].value-leave::before {
         animation: none;
     }
 }

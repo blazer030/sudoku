@@ -132,6 +132,7 @@ const REQUIRED_SELECTORS: Record<StyleId, readonly string[]> = {
         "[data-selected]::after",
         "[data-value-kind]",
         "[data-note-highlight]",
+        ".value-leave::before",
         "body::before",
         '[data-skin~="card"]',
         '[data-skin~="pill"]',
