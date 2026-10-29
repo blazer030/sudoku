@@ -111,6 +111,11 @@ export const en = {
         newGame: "New Game",
         continueGame: "Continue Game",
         continueProgress: "{percent}% filled",
+        continueCaptions: {
+            difficulty: "Difficulty",
+            time: "Time",
+            progress: "Progress",
+        },
         statistics: "Statistics",
         walkthrough: "Walkthrough",
         entries: {

@@ -108,6 +108,11 @@ export const zhHant: MessageSchema = {
         newGame: "新遊戲",
         continueGame: "繼續遊戲",
         continueProgress: "已填 {percent}%",
+        continueCaptions: {
+            difficulty: "難度",
+            time: "時間",
+            progress: "進度",
+        },
         statistics: "統計",
         walkthrough: "解題演示",
         entries: {
