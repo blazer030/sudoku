@@ -332,6 +332,17 @@ describe("Settings.vue appearance row", () => {
         expect(summaryOf(wrapper)).not.toContain(t("settings.colorThemes.classic"));
     });
 
+    it("should summarise blueprint's mode in its own name beside its paper", async () => {
+        const wrapper = mountSettings();
+        const settingsStore = useSettingsStore();
+        settingsStore.setStyle("blueprint");
+        await nextTick();
+
+        expect(summaryOf(wrapper)).toContain(t("settings.colorMode.styled.blueprint.dark"));
+        expect(summaryOf(wrapper)).toContain(t("settings.colorThemes.blue"));
+        expect(summaryOf(wrapper)).not.toContain(t("settings.colorMode.dark"));
+    });
+
     it.each([
         { style: "cyber", themeId: "neon" },
         { style: "ink", themeId: "vermilion" },

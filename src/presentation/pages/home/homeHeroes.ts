@@ -16,4 +16,5 @@ export const STYLE_HOME_HEROES: Record<StyleId, HomeHeroLayout> = {
     cyber: "stacked",
     ink: "vertical",
     chalkboard: "headline",
+    blueprint: "stacked",
 };

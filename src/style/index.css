@@ -9,6 +9,7 @@
 @import "./styles/cyber/skin.css";
 @import "./styles/ink/skin.css";
 @import "./styles/chalkboard/skin.css";
+@import "./styles/blueprint/skin.css";
 
 @variant dark (&:where(.dark, .dark *));
 

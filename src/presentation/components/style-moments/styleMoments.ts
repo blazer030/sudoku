@@ -153,6 +153,17 @@ const CHALKBOARD_MOMENTS: StyleMoments = {
     digitWriter: ChalkboardDigitWriter,
 };
 
+// Blueprint borrows minimal's loading until its own moments come; its timings are already the boards': a cell's
+// hatching sweeps past from 100ms for 560ms and the snapped dimension lines fade by 1000ms, and the dialog opens
+// as the board's scrim comes in, while the locking frame is still closing
+const BLUEPRINT_MOMENTS: StyleMoments = {
+    loader: MinimalLoader,
+    celebration: null,
+    cardDecoration: null,
+    groupEffectMs: 900,
+    celebrationBoardMs: 1300,
+};
+
 // One entry per style, so a style added without its moments is a type error
 export const STYLE_MOMENTS: Record<StyleId, StyleMoments> = {
     minimal: MINIMAL_MOMENTS,
@@ -162,6 +173,7 @@ export const STYLE_MOMENTS: Record<StyleId, StyleMoments> = {
     cyber: CYBER_MOMENTS,
     ink: INK_MOMENTS,
     chalkboard: CHALKBOARD_MOMENTS,
+    blueprint: BLUEPRINT_MOMENTS,
 };
 
 export const useStyleMoments = (): ComputedRef<StyleMoments> => {

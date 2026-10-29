@@ -1,0 +1,49 @@
+/* Blueprint: an engineering drawing on graph paper, pale lines on a blueprint (藍曬圖, dark) and inks on drafting
+   paper (製圖紙, light), amber or a red pen for everything chosen. This is a stub that gives the press states and
+   the segmented indicator their feedback; the paper, the board, the frames and the type come with the skin
+   proper. Every rule is scoped by [data-style="blueprint"]; keyframes start with blueprint-. */
+
+/* Press feedback: a faint wash of the lines' ink. It is a colour change, so it stays on under reduced motion. */
+[data-style="blueprint"] [data-pressed] {
+    --press-overlay: color-mix(in srgb, var(--color-foreground) 8%, transparent);
+    background-image: linear-gradient(var(--press-overlay), var(--press-overlay));
+}
+
+[data-style="blueprint"] [data-press-motion] {
+    transition-property: transform, background-color, color, box-shadow, opacity;
+    transition-duration: 160ms;
+    transition-timing-function: ease-out;
+}
+
+[data-style="blueprint"] [data-press-motion][data-pressed] {
+    transform: scale(0.97);
+    transition-duration: 60ms;
+}
+
+@keyframes blueprint-press-bounce {
+    0% { transform: scale(0.97); }
+    100% { transform: scale(1); }
+}
+
+[data-style="blueprint"] [data-press-bounce] {
+    animation: blueprint-press-bounce 180ms ease-out;
+}
+
+[data-style="blueprint"] .segmented-indicator-motion {
+    transition: transform 180ms ease-out;
+}
+
+/* Reduced motion: no scaling or sliding; the press wash stays */
+@media (prefers-reduced-motion: reduce) {
+    [data-style="blueprint"] .segmented-indicator-motion {
+        transition: none;
+    }
+
+    [data-style="blueprint"] [data-pressed],
+    [data-style="blueprint"] [data-press-motion],
+    [data-style="blueprint"] [data-press-motion][data-pressed],
+    [data-style="blueprint"] [data-press-bounce] {
+        transform: none;
+        animation: none;
+    }
+}

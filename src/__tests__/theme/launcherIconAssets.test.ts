@@ -93,6 +93,11 @@ const SAMPLES: Record<StyleId, ArtworkSample[]> = {
         { x: -20, y: 54, token: "icon-frame", foregroundOnly: true },
         { x: 54, y: 14, token: "background" },
     ],
+    // The bare paper until the artwork comes
+    blueprint: [
+        { x: 5.4, y: 54, token: "background" },
+        { x: -20, y: 54, token: "background", foregroundOnly: true },
+    ],
 };
 const samplesAt = (style: StyleId, mode: ColorMode, density: string) => SAMPLES[style]
     .filter(sample => (!sample.fine || density === "xxxhdpi") && (!sample.mode || sample.mode === mode));

@@ -492,6 +492,8 @@ const artworkOf = (style: StyleId, palette: Palette, bleed = 0, idSuffix = ""): 
         case "cyber": return cyberArtwork(palette, idSuffix);
         case "ink": return inkArtwork(palette, bleed, idSuffix);
         case "chalkboard": return chalkboardArtwork(palette, idSuffix);
+        // The bare paper for now
+        case "blueprint": return [];
     }
 };
 
@@ -544,6 +546,8 @@ const monochromeArtwork = (style: StyleId): string[] => {
         case "ink": return inkMonochrome(color);
         // The writing without the board and its frame: the grid, the ring, the 7 and the stubs
         case "chalkboard": return chalkboardWriting({ writing: color, ring: color, stub: color });
+        // A plain square until the artwork comes, so the themed icon is never empty
+        case "blueprint": return [`<rect x="34" y="34" width="40" height="40" fill="${color}"/>`];
     }
 };
 
