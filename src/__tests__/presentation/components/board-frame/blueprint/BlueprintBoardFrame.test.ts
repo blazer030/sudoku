@@ -95,34 +95,57 @@ describe("BlueprintBoardFrame", () => {
         expect(board.get("--board-frame-inline")).toBe("0px");
     });
 
-    it("should call out the target cell by name, pulling right", () => {
-        const callout = mountFrame({ row: 4, column: 4 }).get(".blueprint-frame-marks .blueprint-callout");
+    it("should tag the target cell by name in its column's label place, and light its row's label", () => {
+        const wrapper = mountFrame({ row: 4, column: 4 });
+        const callout = wrapper.get(".blueprint-frame-marks .blueprint-frame-grid > .blueprint-callout");
 
         expect(callout.get(".blueprint-callout-text").text()).toBe("R5C5");
-        expect(callout.attributes("data-direction")).toBe("right");
+        expect(percentOf(callout.element, "left")).toBeCloseTo(4.5 * 100 / 9, 3);
+        expect(wrapper.findAll("[data-axis='column'][data-target]").map(label => label.attributes("data-index"))).toEqual(["4"]);
+        expect(wrapper.findAll("[data-axis='row'][data-target]").map(label => label.attributes("data-index"))).toEqual(["4"]);
     });
 
-    it.each([6, 7, 8])("should pull the callout left in column index %i", (column) => {
-        const callout = mountFrame({ row: 2, column }).get(".blueprint-callout");
-
-        expect(callout.attributes("data-direction")).toBe("left");
+    it("should hide the target column's label under the tag and colour the target row's label", () => {
+        expect(declarationsOf('.blueprint-frame-label[data-axis="column"][data-target]').get("visibility")).toBe("hidden");
+        expect(declarationsOf('.blueprint-frame-label[data-axis="row"][data-target]').get("color")).toBe("var(--color-primary)");
+        const text = declarationsOf(".blueprint-callout-text");
+        expect(text.get("background")).toBe("var(--color-primary)");
+        expect(text.get("color")).toBe("var(--color-on-primary)");
+        expect(text.get("font-size")).toBe("11px");
+        expect(text.get("font-weight")).toBe("600");
     });
 
-    it("should call out nothing without a target", () => {
-        expect(mountFrame(null).find(".blueprint-callout").exists()).toBe(false);
+    it("should keep the tag and its leader in the frame's top margin, clear of the cells", () => {
+        const callout = declarationsOf(".blueprint-callout");
+        const leader = declarationsOf(".blueprint-callout::after");
+
+        // The tag sits where the column labels do, 8px above the cells; the leader stops at the board grid's
+        // 3px top border, so neither ever lies over a cell
+        expect(callout.get("bottom")).toBe("calc(100% + 8px)");
+        expect(leader.get("top")).toBe("100%");
+        expect(leader.get("height")).toBe("5px");
+    });
+
+    it("should call out nothing and light no label without a target", () => {
+        const wrapper = mountFrame(null);
+
+        expect(wrapper.find(".blueprint-callout").exists()).toBe(false);
+        expect(wrapper.findAll("[data-target]")).toHaveLength(0);
     });
 
     it.each([
-        { name: "R1C1", target: { row: 0, column: 0 }, left: 100 / 9, top: 0 },
-        { name: "R1C9", target: { row: 0, column: 8 }, left: 800 / 9, top: 0 },
-        { name: "R9C1", target: { row: 8, column: 0 }, left: 100 / 9, top: 800 / 9 },
-        { name: "R9C9", target: { row: 8, column: 8 }, left: 800 / 9, top: 800 / 9 },
-    ])("should pin $name's callout to its top outer corner, by the cell's place on the grid", ({ name, target, left, top }) => {
-        const callout = mountFrame(target).get(".blueprint-callout");
+        { name: "R1C1", target: { row: 0, column: 0 } },
+        { name: "R1C9", target: { row: 0, column: 8 } },
+        { name: "R9C1", target: { row: 8, column: 0 } },
+        { name: "R9C9", target: { row: 8, column: 8 } },
+    ])("should tag $name above its column, whatever its row", ({ name, target }) => {
+        const wrapper = mountFrame(target);
+        const callout = wrapper.get(".blueprint-callout");
 
         expect(callout.text()).toBe(name);
-        expect(percentOf(callout.element, "left")).toBeCloseTo(left, 3);
-        expect(percentOf(callout.element, "top")).toBeCloseTo(top, 3);
+        expect(percentOf(callout.element, "left")).toBeCloseTo((target.column + 0.5) * 100 / 9, 3);
+        expect((callout.element as HTMLElement).style.top).toBe("");
+        expect(wrapper.get(`[data-axis='row'][data-index='${target.row}']`).attributes("data-target")).toBeDefined();
     });
 
     it("should let a corner cell's callout reach past the frame, nothing round it clipping", () => {
@@ -150,6 +173,7 @@ describe("BlueprintBoardFrame", () => {
         expect(wrapper.get("[data-testid='framed-board']").element).toBe(board);
         expect(wrapper.get(".blueprint-callout").element).toBe(callout);
         expect(wrapper.get(".blueprint-callout-text").text()).toBe("R2C8");
-        expect(wrapper.get(".blueprint-callout").attributes("data-direction")).toBe("left");
+        expect(percentOf(callout, "left")).toBeCloseTo(7.5 * 100 / 9, 3);
+        expect(wrapper.findAll("[data-target]").map(label => `${label.attributes("data-axis")} ${label.attributes("data-index")}`)).toEqual(["column 7", "row 1"]);
     });
 });

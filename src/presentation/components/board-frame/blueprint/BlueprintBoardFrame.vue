@@ -14,6 +14,7 @@
                         v-for="index in INDICES"
                         :key="`column-${index}`"
                         :data-index="index"
+                        :data-target="target?.column === index || undefined"
                         class="blueprint-frame-label"
                         data-axis="column"
                     >C{{ index + 1 }}</span>
@@ -23,6 +24,7 @@
                         v-for="index in INDICES"
                         :key="`row-${index}`"
                         :data-index="index"
+                        :data-target="target?.row === index || undefined"
                         class="blueprint-frame-label"
                         data-axis="row"
                     >R{{ index + 1 }}</span>
@@ -32,8 +34,7 @@
                 </div>
                 <span
                     v-if="callout !== null"
-                    :data-direction="callout.direction"
-                    :style="{ left: callout.left, top: callout.top }"
+                    :style="{ left: callout.left }"
                     class="blueprint-callout"
                 >
                     <span class="blueprint-callout-text">{{ callout.name }}</span>
@@ -62,23 +63,14 @@ const { t } = useI18n();
 const INDICES = [0, 1, 2, 3, 4, 5, 6, 7, 8] as const;
 const CORNERS = ["top-left", "top-right", "bottom-left", "bottom-right"] as const;
 
-// From the seventh column on, the callout pulls left so it stays over the board's side
-const FIRST_LEFTWARD_COLUMN = 6;
+// The middle of a column, as a percentage of the grid's width
+const columnMiddle = (column: number): string => `${((column + 0.5) * 100 / INDICES.length).toFixed(4)}%`;
 
-// A grid line's place across the board, as a percentage of the grid
-const gridLine = (index: number): string => `${(index * 100 / INDICES.length).toFixed(4)}%`;
-
-// The callout starts at the target cell's top outer corner: its top right, or its top left when it pulls left
+// The target cell's name stands in its column's label place, above the board, so it never covers a digit
 const callout = computed(() => {
     if (props.target === null) return null;
     const { row, column } = props.target;
-    const direction = column >= FIRST_LEFTWARD_COLUMN ? "left" : "right";
-    return {
-        name: cellName(row, column),
-        direction,
-        left: gridLine(direction === "left" ? column : column + 1),
-        top: gridLine(row),
-    };
+    return { name: cellName(row, column), left: columnMiddle(column) };
 });
 </script>
 
@@ -202,29 +194,38 @@ const callout = computed(() => {
 .blueprint-frame-register[data-corner="bottom-left"] { bottom: 6px; left: 4px; }
 .blueprint-frame-register[data-corner="bottom-right"] { right: 0; bottom: 6px; }
 
-/* A point on the target cell's corner: a 24px leader rising at 38 degrees and the cell's name at its end */
+/* The tag hides its column's label and the row's label lights, so the pair reads as the cell's place */
+.blueprint-frame-label[data-axis="column"][data-target] {
+    visibility: hidden;
+}
+
+.blueprint-frame-label[data-axis="row"][data-target] {
+    color: var(--color-primary);
+}
+
+/* The target cell's name in its column's label place: centred on the column, its foot on the labels' line
+   8px above the cells, with a short leader down to the board grid's 3px top border, never over a cell */
 .blueprint-callout {
     position: absolute;
+    bottom: calc(100% + 8px);
     width: 0;
     height: 0;
 }
 
-.blueprint-callout::before {
+.blueprint-callout::after {
     content: "";
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 24px;
-    height: 1.5px;
+    top: 100%;
+    left: -0.75px;
+    width: 1.5px;
+    height: 5px;
     background: var(--color-primary);
-    transform-origin: 0 50%;
-    transform: rotate(-38deg);
 }
 
 .blueprint-callout-text {
     position: absolute;
-    bottom: 13px;
-    left: 17px;
+    bottom: 0;
+    left: 0;
     padding: 2px 6px;
     font-family: var(--font-blueprint-mono);
     font-size: 11px;
@@ -233,17 +234,6 @@ const callout = computed(() => {
     white-space: nowrap;
     color: var(--color-on-primary);
     background: var(--color-primary);
-}
-
-.blueprint-callout[data-direction="left"]::before {
-    right: 0;
-    left: auto;
-    transform-origin: 100% 50%;
-    transform: rotate(38deg);
-}
-
-.blueprint-callout[data-direction="left"] .blueprint-callout-text {
-    right: 17px;
-    left: auto;
+    transform: translateX(-50%);
 }
 </style>
