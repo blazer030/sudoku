@@ -250,6 +250,7 @@
 }
 
 [data-style="blueprint"] [data-skin~="chip"]::before {
+    content: attr(data-caption);
     content: attr(data-caption) / "";
     display: block;
     font-family: var(--font-sans);
@@ -303,6 +304,7 @@
 }
 
 [data-style="blueprint"] [data-skin~="home-tile"]::before {
+    content: "A" counter(blueprint-tile);
     content: "A" counter(blueprint-tile) / "";
     position: absolute;
     top: 4px;
@@ -614,6 +616,7 @@
 }
 
 [data-style="blueprint"] [data-skin~="board"] [data-variant].value-leave::before {
+    content: attr(data-leaving-value);
     content: attr(data-leaving-value) / "";
     position: absolute;
     inset: 0;
@@ -873,6 +876,7 @@
 
 [data-style="blueprint"] [data-skin~="group-heading"]::after {
     counter-increment: blueprint-group;
+    content: "B-" counter(blueprint-group, decimal-leading-zero);
     content: "B-" counter(blueprint-group, decimal-leading-zero) / "";
     margin-left: auto;
     font-family: var(--font-mono);
