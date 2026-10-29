@@ -3,6 +3,7 @@
         <div
             v-if="visible"
             class="fixed inset-0 bg-scrim/60 flex items-center justify-center z-50"
+            data-skin="dialog-scrim"
             data-testid="game-complete-modal"
         >
             <component

@@ -6,6 +6,7 @@
         >
             <div
                 class="absolute inset-0 bg-scrim/30"
+                data-skin="dialog-scrim"
                 data-testid="hint-overlay"
                 @click="close('close')"
             />
@@ -42,6 +43,7 @@
                     v-press
                     :disabled="remaining === 0"
                     class="hint-option"
+                    data-skin="menu-option"
                     data-testid="hint-auto-notes"
                     @click="close('autoNotes')"
                 >
@@ -56,6 +58,7 @@
                     v-press
                     :disabled="remaining === 0"
                     class="hint-option"
+                    data-skin="menu-option"
                     data-testid="hint-check-conflicts"
                     @click="close('checkConflicts')"
                 >
@@ -81,6 +84,7 @@
                     v-press
                     :disabled="remaining === 0"
                     class="hint-option"
+                    data-skin="menu-option"
                     data-testid="hint-reveal-cell"
                     @click="close('revealCell')"
                 >
