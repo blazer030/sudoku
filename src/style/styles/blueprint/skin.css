@@ -841,8 +841,8 @@
     font-family: var(--font-blueprint-mono);
 }
 
-/* A control tile is a square in a 1px line; one that is on is ringed twice in the primary (a 1px line, a strip of
-   paper, another 1px line) and written in it, on a clear tile */
+/* A control tile is a square in a 1px line; one that is on is ringed in the primary (the canvas's 1px border plus
+   1px inset line, which reads as 2px) and written in it, on a clear tile */
 [data-style="blueprint"] [data-skin~="control"] {
     background-color: var(--color-card);
     box-shadow: inset 0 0 0 1px var(--color-border);
@@ -854,8 +854,7 @@
     background-color: transparent;
     box-shadow:
         inset 0 0 0 1px var(--color-primary),
-        inset 0 0 0 2px var(--color-background),
-        inset 0 0 0 3px var(--color-primary);
+        inset 0 0 0 2px var(--color-primary);
     color: var(--color-primary);
 }
 

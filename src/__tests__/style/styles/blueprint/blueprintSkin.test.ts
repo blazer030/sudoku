@@ -697,7 +697,7 @@ describe("blueprint skin", () => {
     describe("keypad and controls", () => {
         const KEY = skin("key");
 
-        it("should draw a key square on the card in a 1px frame of the ink, written in Mono at 500", () => {
+        it("should draw a key square on the card in a 1px frame of the ink, weighted 500, in Blueprint Mono once the fonts are ready", () => {
             const key = declarationsOf(BLUEPRINT_CSS, KEY);
 
             expect(key.get("background-color")).toBe("var(--color-card)");
@@ -705,6 +705,19 @@ describe("blueprint skin", () => {
             expect(key.get("border-radius")).toBe("0");
             expect(key.get("font-weight")).toBe("500");
             expect(key.get("position")).toBe("relative");
+            expect(declarationsOf(BLUEPRINT_CSS, FONTS_READY).get("--font-key")).toBe("var(--font-blueprint-mono)");
+        });
+
+        it("should press a key without resizing its layout and stop the motion under reduced motion", () => {
+            const pressed = declarationsOf(BLUEPRINT_CSS, `${SCOPE} [data-press-motion][data-pressed]`);
+            const bounce = declarationsOf(BLUEPRINT_CSS, `${SCOPE} [data-press-bounce]`);
+            const reduced = postcss.parse(BLUEPRINT_CSS).nodes.filter((node): node is AtRule => node.type === "atrule" && node.name === "media" && node.params.includes("prefers-reduced-motion"));
+            const reducedText = reduced.map(node => collapse(node.toString())).join(" ");
+
+            expect(pressed.get("transform")).toBe("scale(0.97)");
+            expect(bounce.get("animation")).toContain("blueprint-press-bounce");
+            expect(reducedText).toContain('[data-press-bounce]');
+            expect(reducedText).toContain("animation: none");
         });
 
         it("should mark a key's four corners with L-shaped ticks, eight 6px strokes inset 3px, in the line colour", () => {
@@ -737,7 +750,7 @@ describe("blueprint skin", () => {
             expect(badge.get("box-shadow")).toBe("var(--blueprint-frame)");
             expect(badge.get("color")).toBe("var(--color-foreground)");
             expect(badge.get("border-radius")).toBe("0");
-            expect(declarationsOf(BLUEPRINT_CSS, `${FONTS_READY} ${skin("badge").slice(SCOPE.length + 1)}`).get("font-family"))
+            expect(declarationsOf(BLUEPRINT_CSS, `${FONTS_READY} [data-skin~="badge"]`).get("font-family"))
                 .toBe("var(--font-blueprint-mono)");
         });
 
@@ -750,12 +763,12 @@ describe("blueprint skin", () => {
             expect(control.get("color")).toBe("var(--color-foreground)");
         });
 
-        it("should ring a control that is on twice in the primary, frame and icon alike, on a clear tile", () => {
+        it("should ring a control that is on in a 2px line of the primary, frame and icon alike, on a clear tile", () => {
             const on = declarationsOf(BLUEPRINT_CSS, `${SCOPE} [aria-pressed="true"] > [data-skin~="control"]`);
 
             expect(on.get("background-color")).toBe("transparent");
             expect(on.get("color")).toBe("var(--color-primary)");
-            expect(on.get("box-shadow")).toBe("inset 0 0 0 1px var(--color-primary), inset 0 0 0 2px var(--color-background), inset 0 0 0 3px var(--color-primary)");
+            expect(on.get("box-shadow")).toBe("inset 0 0 0 1px var(--color-primary), inset 0 0 0 2px var(--color-primary)");
         });
     });
 });
