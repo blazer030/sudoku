@@ -252,4 +252,75 @@ describe("blueprint skin", () => {
             expect(declarationsOf(BLUEPRINT_CSS, skin("caret")).get("color")).toBe("var(--color-primary)");
         });
     });
+
+    describe("Home", () => {
+        const LOGO_SVG = readFileSync("src/style/styles/blueprint/blueprint-logo.svg", "utf8");
+        const LOGO_URL = 'url("@/style/styles/blueprint/blueprint-logo.svg")';
+
+        it("should draw the logo as a small drawing, its mask painted in the ink", () => {
+            const logo = declarationsOf(BLUEPRINT_CSS, skin("logo"));
+
+            expect(logo.get("-webkit-mask-image")).toBe(LOGO_URL);
+            expect(logo.get("mask-image")).toBe(LOGO_URL);
+            expect(logo.get("background-color")).toBe("var(--color-foreground)");
+            expect(logo.get("box-shadow")).toBe("none");
+            // The stacked logo's squares would show through the mask
+            expect(declarationsOf(BLUEPRINT_CSS, `${skin("logo")} > * > *`).get("background-color")).toBe("transparent");
+        });
+
+        it("should draw the logo with no words and no filters: a 3×3 grid, two dimension lines, a leader and a cross", () => {
+            expect(LOGO_SVG).not.toMatch(/<text\b/);
+            expect(LOGO_SVG).not.toMatch(/<filter\b/);
+            expect(LOGO_SVG).toMatch(/<rect\b/);
+            expect(LOGO_SVG).toMatch(/<circle\b/);
+            // Two pairs of arrowheads, filled
+            expect(LOGO_SVG.match(/data-part="arrowheads"/g)).toHaveLength(2);
+            expect(LOGO_SVG).toMatch(/data-part="cross"/);
+        });
+
+        it("should frame the continue card in 1.5px of ink and caption each column in the pale ink", () => {
+            const caption = declarationsOf(BLUEPRINT_CSS, `${skin("chip")}::before`);
+
+            expect(declarationsOf(BLUEPRINT_CSS, skin("continue")).get("box-shadow")).toBe("var(--blueprint-frame-strong)");
+            expect(declarationsOf(BLUEPRINT_CSS, skin("chip")).get("background-color")).toBe("transparent");
+            expect(caption.get("content")).toBe('attr(data-caption) / ""');
+            expect(caption.get("color")).toBe("var(--color-foreground-secondary)");
+        });
+
+        it("should frame the new game card in 1.5px of ink", () => {
+            expect(declarationsOf(BLUEPRINT_CSS, `${skin("card")}:has(> [data-skin~="new-game"])`).get("box-shadow")).toBe("var(--blueprint-frame-strong)");
+        });
+
+        it("should rule a segmented control into square cells, the chosen one written in the paper on the ink", () => {
+            const segmented = declarationsOf(BLUEPRINT_CSS, skin("segmented"));
+            const indicator = declarationsOf(BLUEPRINT_CSS, skin("segmented-indicator"));
+
+            expect(segmented.get("--segmented-gap")).toBe("0px");
+            expect(segmented.get("--segmented-padding")).toBe("0px");
+            expect(segmented.get("background-color")).toBe("transparent");
+            expect(segmented.get("box-shadow")).toBe("inset 0 0 0 1px var(--color-border)");
+            expect(segmented.get("border-radius")).toBe("0");
+            expect(indicator.get("background-color")).toBe("var(--color-foreground)");
+            expect(indicator.get("box-shadow")).toBe("none");
+            expect(indicator.get("border-radius")).toBe("0");
+            expect(declarationsOf(BLUEPRINT_CSS, skin("segment")).get("border-radius")).toBe("0");
+            expect(declarationsOf(BLUEPRINT_CSS, `${skin("segment")}:not(:last-child)`).get("box-shadow")).toBe("inset -1px 0 0 var(--color-border)");
+            expect(declarationsOf(BLUEPRINT_CSS, `${skin("segment")}[aria-pressed="true"]`).get("color")).toBe("var(--color-background)");
+        });
+
+        it("should frame Home's tiles in 1px of ink, numbered A1–A3 in the pale Mono, their icons in the ink", () => {
+            const tile = declarationsOf(BLUEPRINT_CSS, skin("home-tile"));
+            const number = declarationsOf(BLUEPRINT_CSS, `${skin("home-tile")}::before`);
+
+            expect(tile.get("box-shadow")).toBe("var(--blueprint-frame)");
+            expect(tile.get("border-radius")).toBe("0");
+            expect(tile.get("position")).toBe("relative");
+            expect(tile.get("counter-increment")).toBe("blueprint-tile");
+            expect(number.get("content")).toBe('"A" counter(blueprint-tile) / ""');
+            expect(number.get("font-family")).toBe("var(--font-mono)");
+            expect(number.get("color")).toBe("var(--color-foreground-secondary)");
+            expect(number.get("pointer-events")).toBe("none");
+            expect(declarationsOf(BLUEPRINT_CSS, `${skin("home-tile")} > svg`).get("color")).toBe("var(--color-foreground)");
+        });
+    });
 });

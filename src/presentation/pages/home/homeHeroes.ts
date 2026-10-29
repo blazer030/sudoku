@@ -3,9 +3,10 @@ import type { StyleId } from "@/theme/themeIds";
 /**
  * How a style sets Home's title. "stacked": the logo, the title and the subtitle centred one above
  * another. "vertical": the title set vertically at the right, the subtitle running down its left and a
- * seal under the title. "headline": no logo, the title written large over the subtitle.
+ * seal under the title. "headline": no logo, the title written large over the subtitle. "spaced": the stacked
+ * logo over a light title and a subtitle, their letters spaced wide apart.
  */
-export type HomeHeroLayout = "stacked" | "vertical" | "headline";
+export type HomeHeroLayout = "stacked" | "vertical" | "headline" | "spaced";
 
 // One entry per style, so a style added without its hero is a type error
 export const STYLE_HOME_HEROES: Record<StyleId, HomeHeroLayout> = {
@@ -16,5 +17,5 @@ export const STYLE_HOME_HEROES: Record<StyleId, HomeHeroLayout> = {
     cyber: "stacked",
     ink: "vertical",
     chalkboard: "headline",
-    blueprint: "stacked",
+    blueprint: "spaced",
 };

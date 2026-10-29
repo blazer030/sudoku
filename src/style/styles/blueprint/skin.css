@@ -202,9 +202,112 @@
     box-shadow: none;
 }
 
-/* The continue card's play mark is the primary */
+/* Home, as the canvas's .home. The logo is a small drawing (blueprint-logo.svg, a mask) in the ink; the stacked
+   logo's squares are cleared so they never show through it. The title and subtitle are spaced out by the "spaced"
+   hero. */
+[data-style="blueprint"] [data-skin~="logo"] {
+    background-color: var(--color-foreground);
+    box-shadow: none;
+    border-radius: 0;
+    -webkit-mask-image: url("@/style/styles/blueprint/blueprint-logo.svg");
+    mask-image: url("@/style/styles/blueprint/blueprint-logo.svg");
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+}
+
+[data-style="blueprint"] [data-skin~="logo"] > * > * {
+    background-color: transparent;
+}
+
+/* The continue card is a drawing's title block (its title-block layout): a 1.5px frame of ink, its play mark in the
+   primary, and over each column its caption in the pale ink; the difficulty stays in Sans, the time and the
+   progress are in Mono */
+[data-style="blueprint"] [data-skin~="continue"] {
+    box-shadow: var(--blueprint-frame-strong);
+}
+
 [data-style="blueprint"] [data-skin~="caret"] {
     color: var(--color-primary);
+}
+
+[data-style="blueprint"] [data-skin~="chip"] {
+    background-color: transparent;
+    border-radius: 0;
+}
+
+[data-style="blueprint"][data-blueprint-fonts="ready"] [data-skin~="chip"]:not(:first-child) {
+    font-family: var(--font-blueprint-mono);
+}
+
+[data-style="blueprint"] [data-skin~="chip"]::before {
+    content: attr(data-caption) / "";
+    display: block;
+    font-family: var(--font-sans);
+    font-size: 11px;
+    line-height: 1.3;
+    letter-spacing: 0.1em;
+    color: var(--color-foreground-secondary);
+}
+
+/* The new game card is framed in 1.5px of ink like the continue card, not the double frame */
+[data-style="blueprint"] [data-skin~="card"]:has(> [data-skin~="new-game"]) {
+    box-shadow: var(--blueprint-frame-strong);
+}
+
+/* Segmented controls are a strip of square cells in a 1px line, ruled apart; the chosen one is filled with the ink
+   and written in the paper */
+[data-style="blueprint"] [data-skin~="segmented"] {
+    --segmented-gap: 0px;
+    --segmented-padding: 0px;
+    background-color: transparent;
+    box-shadow: inset 0 0 0 1px var(--color-border);
+    border-radius: 0;
+}
+
+[data-style="blueprint"] [data-skin~="segmented-indicator"] {
+    background-color: var(--color-foreground);
+    box-shadow: none;
+    border-radius: 0;
+}
+
+[data-style="blueprint"] [data-skin~="segment"] {
+    border-radius: 0;
+}
+
+[data-style="blueprint"] [data-skin~="segment"]:not(:last-child) {
+    box-shadow: inset -1px 0 0 var(--color-border);
+}
+
+[data-style="blueprint"] [data-skin~="segment"][aria-pressed="true"] {
+    color: var(--color-background);
+    font-weight: 500;
+}
+
+/* Home's entry tiles are framed in 1px of ink, numbered A1–A3 at their top left in the pale Mono as a drawing's
+   sheets, their icons in the ink */
+[data-style="blueprint"] [data-skin~="home-tile"] {
+    position: relative;
+    counter-increment: blueprint-tile;
+    box-shadow: var(--blueprint-frame);
+    border-radius: 0;
+}
+
+[data-style="blueprint"] [data-skin~="home-tile"]::before {
+    content: "A" counter(blueprint-tile) / "";
+    position: absolute;
+    top: 4px;
+    left: 6px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    line-height: 1;
+    color: var(--color-foreground-secondary);
+    pointer-events: none;
+}
+
+[data-style="blueprint"] [data-skin~="home-tile"] > svg {
+    color: var(--color-foreground);
 }
 
 /* Icon tiles (dialogs, the hint panel, the walkthrough's guide, recent games' chips) are clear squares inside a

@@ -1,0 +1,16 @@
+<!-- Blueprint: Home's logo, a small engineering drawing used as a mask (alpha only); the skin paints it in the ink. After the style-research canvas's .drawing (Blueprint.dc.html, 170×104), in its coordinates: a 3×3 grid, a dimension line with arrowheads above it and one at its right, a small circle at its centre with a leader, and a registration cross at its left. The canvas's words (3 欄, 3 列, 宮) are left out, as a mask cannot follow the language; strokes are a little heavier, as the logo is drawn at 80px. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="37.5 5.5 100 100">
+    <g fill="none" stroke="currentColor">
+        <rect x="55" y="30" width="60" height="60" stroke-width="1.6"/>
+        <path d="M75 30v60M95 30v60M55 50h60M55 70h60" stroke-width="1"/>
+        <path d="M55 24V10M115 24V10M121 30h14M121 90h14" stroke-width="0.9"/>
+        <path d="M55 15h60M130 30v60" stroke-width="1.1"/>
+        <circle cx="85" cy="60" r="4" stroke-width="1.1"/>
+        <path d="M89 57l18-14h12" stroke-width="1.1"/>
+        <path data-part="cross" d="M40 60h8M44 56v8" stroke-width="0.9"/>
+    </g>
+    <g fill="currentColor">
+        <path data-part="arrowheads" d="M55 15l6-2.5v5zM115 15l-6-2.5v5z"/>
+        <path data-part="arrowheads" d="M130 30l-2.5 6h5zM130 90l-2.5-6h5z"/>
+    </g>
+</svg>

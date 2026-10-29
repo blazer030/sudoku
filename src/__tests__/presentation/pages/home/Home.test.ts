@@ -121,6 +121,19 @@ describe("Home", () => {
         expect(stackedHeroes[0]).toContain('data-skin="logo"');
     });
 
+    it("should space blueprint's title and subtitle out under the logo, in the player's language", () => {
+        const { wrapper } = mountHome({ style: "blueprint" });
+        const hero = wrapper.get("[data-testid='home-hero']");
+        const title = hero.get("h1");
+
+        expect(STYLE_HOME_HEROES.blueprint).toBe("spaced");
+        expect(hero.get("[data-testid='home-logo']").attributes("data-skin")).toBe("logo");
+        expect(title.attributes("data-skin")).toBe("title");
+        expect(title.text()).toBe(i18n.global.t("home.title"));
+        expect(title.classes()).toEqual(expect.arrayContaining(["text-[44px]", "font-light", "[letter-spacing:.5em]", "mr-[-.5em]"]));
+        expect(hero.get("p").classes()).toContain("[letter-spacing:.2em]");
+    });
+
     it("should write chalkboard's title as a headline with no logo, in the player's language", async () => {
         const { wrapper } = mountHome({ style: "chalkboard" });
         const heading = async (locale: "en" | "zh-Hant") => {

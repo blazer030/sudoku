@@ -59,4 +59,11 @@ describe("ContinueButton", () => {
             expect(wrapper.get(`[data-testid='${id}']`).classes()).toEqual(["text-sm", "bg-on-featured/20", "rounded-full", "px-2.5", "py-0.5"]);
         }
     });
+
+    it("should lay blueprint's card out as a title block of three equal columns", () => {
+        const wrapper = mountContinueButton("blueprint");
+
+        expect(wrapper.get("[data-testid='continue-button']").attributes("data-layout")).toBe("title-block");
+        for (const id of CHIP_IDS) expect(wrapper.get(`[data-testid='${id}']`).classes()).toContain("flex-1");
+    });
 });
