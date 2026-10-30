@@ -7,7 +7,7 @@
              centre; each light's bright colour and its glow are the pseudo-elements, which only fade. Under
              reduced motion the halo holds still and only the centre light stays lit. -->
         <span
-            class="aurora-loader-halo pointer-events-none absolute top-[62px] left-1/2 -mt-[75px] -ml-[75px] size-[150px] rounded-full opacity-[0.55]"
+            class="aurora-loader-halo pointer-events-none absolute top-[62px] left-1/2 -mt-[75px] -ml-[75px] size-[150px] rounded-full"
             aria-hidden="true"
         />
         <div

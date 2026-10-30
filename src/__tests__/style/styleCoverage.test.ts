@@ -166,6 +166,8 @@ const REQUIRED_SELECTORS: Record<StyleId, readonly string[]> = {
         "[data-arriving]::before",
         "> .value-arrive",
         ".value-leave::before",
+        ".aurora-loader-halo",
+        ".aurora-loader-dot",
     ],
 };
 

@@ -221,6 +221,77 @@
     background-color: color-mix(in srgb, var(--color-background) var(--aurora-loader-scrim), transparent);
 }
 
+/* The loader's card is dialog glass rounded 28px (MomentsAurora's .aload). Four soft lights in a ring turn under nine
+   lights, in place of the canvas's blurred conic halo: the halo moves by transform alone, each light by transform
+   alone, and the light's bright primary (::before) and its glow (::after) are drawn once and only fade, in step with
+   the breath. Every round starts dark. Loading follows only the system's reduced motion. */
+[data-style="aurora"] .aurora-loader {
+    border-radius: 28px;
+}
+
+[data-style="aurora"] .aurora-loader-halo {
+    background-image:
+        radial-gradient(circle 40px at 75px 39px, var(--color-aurora-1) 0, transparent),
+        radial-gradient(circle 40px at 111px 75px, var(--color-aurora-2) 0, transparent),
+        radial-gradient(circle 40px at 75px 111px, var(--color-aurora-3) 0, transparent),
+        radial-gradient(circle 40px at 39px 75px, var(--color-aurora-4) 0, transparent);
+    opacity: 0.55;
+    animation: aurora-loader-spin 7s linear infinite;
+}
+
+@keyframes aurora-loader-spin {
+    100% { transform: rotate(360deg); }
+}
+
+[data-style="aurora"] .aurora-loader-dot {
+    background-color: color-mix(in srgb, var(--color-foreground) 18%, transparent);
+    animation: aurora-loader-breathe 2.4s ease-in-out var(--aurora-loader-delay) infinite;
+}
+
+[data-style="aurora"] .aurora-loader-dot[data-ring="centre"] {
+    --aurora-loader-delay: 0s;
+}
+
+[data-style="aurora"] .aurora-loader-dot[data-ring="edge"] {
+    --aurora-loader-delay: 0.28s;
+}
+
+[data-style="aurora"] .aurora-loader-dot[data-ring="corner"] {
+    --aurora-loader-delay: 0.56s;
+}
+
+@keyframes aurora-loader-breathe {
+    0%, 100% { transform: scale(0.7); }
+    30% { transform: scale(1.2); }
+    60% { transform: scale(1); }
+}
+
+[data-style="aurora"] .aurora-loader-dot::before,
+[data-style="aurora"] .aurora-loader-dot::after {
+    content: "";
+    position: absolute;
+    border-radius: 50%;
+    opacity: 0;
+    animation: aurora-loader-glow 2.4s ease-in-out var(--aurora-loader-delay) infinite;
+}
+
+[data-style="aurora"] .aurora-loader-dot::before {
+    inset: 0;
+    background-color: var(--color-primary);
+}
+
+[data-style="aurora"] .aurora-loader-dot::after {
+    inset: -12px;
+    background-image: radial-gradient(circle, color-mix(in srgb, var(--color-primary) 70%, transparent) 0, transparent 70%);
+}
+
+@keyframes aurora-loader-glow {
+    0% { opacity: 0; }
+    30% { opacity: 1; }
+    60% { opacity: 0; }
+    100% { opacity: 0; }
+}
+
 /* The toast is dialog glass in its rim alone, rounded 16px, in the text colour */
 [data-style="aurora"] [data-skin~="toast"] {
     background-color: var(--aurora-glass-dialog-fill);
@@ -970,5 +1041,23 @@
     [data-style="aurora"] [data-skin~="board"] [data-variant][data-arriving]::before,
     [data-style="aurora"] [data-skin~="board"] [data-variant].value-leave::before {
         animation: none;
+    }
+
+    /* The loader holds still with only its centre light lit */
+    [data-style="aurora"] .aurora-loader-halo,
+    [data-style="aurora"] .aurora-loader-dot,
+    [data-style="aurora"] .aurora-loader-dot::before,
+    [data-style="aurora"] .aurora-loader-dot::after {
+        animation: none;
+    }
+
+    [data-style="aurora"] .aurora-loader-dot[data-ring="centre"]::before,
+    [data-style="aurora"] .aurora-loader-dot[data-ring="centre"]::after {
+        opacity: 1;
+    }
+
+    [data-style="aurora"] .aurora-loader-dot:not([data-ring="centre"])::before,
+    [data-style="aurora"] .aurora-loader-dot:not([data-ring="centre"])::after {
+        opacity: 0;
     }
 }

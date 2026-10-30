@@ -157,4 +157,98 @@ describe("aurora moments", () => {
             expect(declarationsOf(AURORA_CSS, ARRIVING_DIGIT).has("opacity")).toBe(false);
         });
     });
+    // From MomentsAurora.dc's .halo / .lights, without the halo's blur and its conic-gradient (spec ruling 12): four
+    // soft lights in a ring turn instead. Only the halo's transform, the lights' transform and the pseudo-elements'
+    // opacity move (plan ruling 10).
+    describe("loader", () => {
+        const LOADER = `${AURORA_SCOPE} .aurora-loader`;
+        const HALO = `${LOADER}-halo`;
+        const DOT = `${LOADER}-dot`;
+        const BRIGHT = `${DOT}::before`;
+        const GLOW = `${DOT}::after`;
+        const RINGS = ["centre", "edge", "corner"] as const;
+        const DELAYS = { centre: "0s", edge: "0.28s", corner: "0.56s" };
+
+        it("should turn a 150px halo of the four aurora lights in a ring, at 55% opacity, once in 7s", () => {
+            const halo = declarationsOf(AURORA_CSS, HALO);
+            const lights = halo.get("background-image") ?? "";
+
+            expect(lights.match(/radial-gradient\(/g)).toHaveLength(4);
+            for (const light of ["aurora-1", "aurora-2", "aurora-3", "aurora-4"]) {
+                expect(lights, light).toContain(`var(--color-${light})`);
+            }
+            expect(lights).not.toContain("conic-gradient");
+            expect(halo.get("opacity")).toBe("0.55");
+            expect(animationTimingOf(halo.get("animation") ?? "", "aurora-loader-spin")).toEqual({ durationMs: 7000, fixedDelayMs: 0 });
+            expect(halo.get("animation")).toContain("linear infinite");
+            expect([...framesOf("aurora-loader-spin")]).toEqual([["100%", new Map([["transform", "rotate(360deg)"]])]]);
+        });
+
+        it("should breathe each light in 2.4s, the centre first, then the edges, then the corners", () => {
+            expect(animationTimingOf(animationOf(DOT), "aurora-loader-breathe")).toEqual({ durationMs: 2400, fixedDelayMs: 0 });
+            expect(animationOf(DOT)).toContain("infinite");
+            for (const ring of RINGS) {
+                expect(declarationsOf(AURORA_CSS, `${DOT}[data-ring="${ring}"]`).get("--aurora-loader-delay"), ring).toBe(DELAYS[ring]);
+            }
+            expect(animationOf(DOT)).toContain("var(--aurora-loader-delay)");
+        });
+
+        it("should scale the light from 0.7 up to 1.2 at 30% and to 1 at 60%, back to 0.7, and nothing else", () => {
+            const frames = framesOf("aurora-loader-breathe");
+
+            expect(frames.get("0%, 100%")).toEqual(new Map([["transform", "scale(0.7)"]]));
+            expect(frames.get("30%")).toEqual(new Map([["transform", "scale(1.2)"]]));
+            expect(frames.get("60%")).toEqual(new Map([["transform", "scale(1)"]]));
+            expect(propertiesOf("aurora-loader-breathe").every(property => property === "transform")).toBe(true);
+        });
+
+        // The bright colour and the glow are drawn once and only faded, so no colour or shadow is repainted
+        it("should light the primary on the ::before and its soft glow on the ::after, each only fading in step with the breath", () => {
+            const frames = framesOf("aurora-loader-glow");
+
+            expect(declarationsOf(AURORA_CSS, BRIGHT).get("background-color")).toBe("var(--color-primary)");
+            expect(declarationsOf(AURORA_CSS, GLOW).get("background-image")).toBe(
+                "radial-gradient(circle, color-mix(in srgb, var(--color-primary) 70%, transparent) 0, transparent 70%)",
+            );
+            for (const selector of [BRIGHT, GLOW]) {
+                expect(animationTimingOf(animationOf(selector), "aurora-loader-glow"), selector).toEqual({ durationMs: 2400, fixedDelayMs: 0 });
+                expect(animationOf(selector), selector).toContain("var(--aurora-loader-delay)");
+                expect(declarationsOf(AURORA_CSS, selector).get("opacity"), selector).toBe("0");
+            }
+            expect(propertiesOf("aurora-loader-glow").every(property => property === "opacity")).toBe(true);
+            // Every round starts dark and ends dark
+            expect(frames.get("0%")).toEqual(new Map([["opacity", "0"]]));
+            expect(frames.get("30%")).toEqual(new Map([["opacity", "1"]]));
+            expect(frames.get("100%")).toEqual(new Map([["opacity", "0"]]));
+        });
+
+        it("should use no filter and no mask anywhere in the loader", () => {
+            for (const selector of [HALO, DOT, BRIGHT, GLOW]) {
+                expect([...declarationsOf(AURORA_CSS, selector).keys()].some(property => /filter|mask/.test(property)), selector).toBe(false);
+            }
+        });
+
+        it("should hold still under reduced motion, only the centre light lit", () => {
+            for (const selector of [HALO, DOT, BRIGHT, GLOW]) {
+                expect(reducedMotionDeclarationsOf(AURORA_CSS, selector).get("animation"), selector).toBe("none");
+            }
+            for (const selector of [`${DOT}[data-ring="centre"]::before`, `${DOT}[data-ring="centre"]::after`]) {
+                expect(reducedMotionDeclarationsOf(AURORA_CSS, selector).get("opacity"), selector).toBe("1");
+            }
+            for (const selector of [`${DOT}:not([data-ring="centre"])::before`, `${DOT}:not([data-ring="centre"])::after`]) {
+                expect(reducedMotionDeclarationsOf(AURORA_CSS, selector).get("opacity"), selector).toBe("0");
+            }
+        });
+
+        // Loading follows the system's reduced motion alone
+        it("should not look at the motion setting", () => {
+            const loaderSelectors: string[] = [];
+            postcss.parse(AURORA_CSS).walkRules((rule) => {
+                loaderSelectors.push(...rule.selectors.filter(selector => selector.includes("aurora-loader")));
+            });
+
+            expect(loaderSelectors.length).toBeGreaterThan(0);
+            expect(loaderSelectors.some(selector => /data-(?:motion|still)|\.no-motion/.test(selector))).toBe(false);
+        });
+    });
 });
