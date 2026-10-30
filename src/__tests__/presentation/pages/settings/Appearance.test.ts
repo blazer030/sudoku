@@ -70,7 +70,7 @@ describe("Appearance.vue style cards", () => {
         vi.mocked(Capacitor.isNativePlatform).mockReturnValue(false);
     });
 
-    it("should list the eight styles, each with its app icon and name", () => {
+    it("should list every style, each with its app icon and name", () => {
         const wrapper = mountAppearance();
         const cards = wrapper.findAll("button[data-testid^='style-option-']");
 

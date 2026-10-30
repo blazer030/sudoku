@@ -98,13 +98,10 @@ const BLUEPRINT_DARK_UNDRAWN: ReadonlySet<string> = new Set([
 ]);
 // Aurora's selected cell is the solid theme colour with on-primary written on it, so no ink but on-primary is ever on
 // that surface; AURORA_BOARD_CASES checks on-primary there. An error cell wears the error colour (a wash and stripes of
-// it on the glass), so the theme colour is never written on the error surface. In 夜空 the peer and scope cells lay
-// the sheen over the cell's glass (the skin's sheen-peer), and the purple's primary reads only 3.98:1 on it, under the
-// 4.5 the other three themes meet; AURORA_BOARD_CASES holds the purple to what it reaches and the rest to 4.5.
+// it on the glass), so the theme colour is never written on the error surface.
 const AURORA_UNDRAWN: ReadonlySet<string> = new Set([
     "foreground on cell-selected", "primary on cell-selected", "error on cell-selected", "note on cell-selected", "primary on error-surface",
 ]);
-const AURORA_DARK_PEER: ReadonlySet<string> = new Set(["primary on cell-peer", "primary on cell-scope"]);
 const BOARD_PAIRS: readonly ContrastPair[] = BOARD_SURFACES.flatMap(surface => BOARD_INKS.map((ink) => {
     const boardPair = pair(ink, surface);
     const inChalkboardModel = CHALKBOARD_DARK_UNDRAWN.has(boardPair.name) || CHALKBOARD_DARK_STRUCK_OUT.has(boardPair.name);
@@ -113,7 +110,6 @@ const BOARD_PAIRS: readonly ContrastPair[] = BOARD_SURFACES.flatMap(surface => B
         ...(inChalkboardModel ? ["chalkboard/dark" as const] : []),
         ...(BLUEPRINT_DARK_UNDRAWN.has(boardPair.name) ? ["blueprint/dark" as const] : []),
         ...(AURORA_UNDRAWN.has(boardPair.name) ? ["aurora" as const] : []),
-        ...(AURORA_DARK_PEER.has(boardPair.name) ? ["aurora/dark" as const] : []),
     ];
     return { ...boardPair, exceptIn };
 }));
@@ -553,11 +549,9 @@ const BLUEPRINT_BOARD_CASES: BlueprintBoardCase[] = STYLES.blueprint.themes.flat
 }));
 
 // Aurora's board: the ink actually drawn on the glass actually drawn (palette.ts). The selected cell is the solid theme
-// colour under on-primary; in 夜空 a peer or scope cell is the cell's glass under the sheen, which the purple's
-// primary reads 3.9:1 on, the other three themes 4.5:1.
+// colour under on-primary; a peer or scope cell is the cell's glass under the sheen, on which every theme's primary
+// (the player's digit) reads 4.5:1.
 interface AuroraBoardCase { label: string; foreground: string; background: string; minimum: number }
-
-const AURORA_PURPLE_PEER_FLOOR = 3.9;
 
 const AURORA_BOARD_CASES: AuroraBoardCase[] = STYLES.aurora.themes.flatMap(theme => STYLE_COLOR_MODES.aurora.flatMap((mode) => {
     const palette = getPalette("aurora", theme.id, mode);
@@ -565,11 +559,10 @@ const AURORA_BOARD_CASES: AuroraBoardCase[] = STYLES.aurora.themes.flatMap(theme
     const drawn = (name: string, foreground: string, background: string, minimum = TEXT): AuroraBoardCase => ({
         label: `${prefix}: ${name} ≥ ${minimum}`, foreground, background, minimum,
     });
-    const peerMinimum = mode === "dark" && theme.id === "purple" ? AURORA_PURPLE_PEER_FLOOR : TEXT;
     return [
         drawn("selected digit (on-primary) on cell-selected", palette["on-primary"], palette["cell-selected"]),
-        drawn("player's digit (primary) on cell-peer", palette.primary, palette["cell-peer"], mode === "dark" ? peerMinimum : TEXT),
-        drawn("player's digit (primary) on cell-scope", palette.primary, palette["cell-scope"], mode === "dark" ? peerMinimum : TEXT),
+        drawn("player's digit (primary) on cell-peer", palette.primary, palette["cell-peer"]),
+        drawn("player's digit (primary) on cell-scope", palette.primary, palette["cell-scope"]),
     ];
 }));
 
