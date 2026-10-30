@@ -1,6 +1,7 @@
 import { computed, type Component, type ComputedRef } from "vue";
 import type { StyleId } from "@/theme/themeIds";
 import { useSettingsStore } from "@/stores/settingsStore";
+import AuroraLoader from "@/presentation/components/style-moments/aurora/AuroraLoader.vue";
 import MinimalLoader from "@/presentation/components/style-moments/minimal/MinimalLoader.vue";
 import TactileLoader from "@/presentation/components/style-moments/tactile/TactileLoader.vue";
 import PaperLoader from "@/presentation/components/style-moments/paper/PaperLoader.vue";
@@ -171,9 +172,10 @@ const CHALKBOARD_MOMENTS: StyleMoments = {
 // nothing is drawn over the scene.
 // While a puzzle loads, a plotter draws a sudoku box on a small drawing sheet, its pen running along the line as it
 // is plotted, and dimensions it in 3 columns (BlueprintLoader).
-// Aurora Glass borrows minimal's loader and has no celebration for now; the moments come in later tasks.
+// While a puzzle loads, nine lights breathe outward from the centre under a slowly turning aurora (AuroraLoader).
+// Aurora Glass has no celebration for now; the rest of its moments come in later tasks.
 const AURORA_MOMENTS: StyleMoments = {
-    loader: MinimalLoader,
+    loader: AuroraLoader,
     celebration: null,
     cardDecoration: null,
     groupEffectMs: 900,
