@@ -1,7 +1,136 @@
 /* Aurora Glass: four lights drifting behind panes of frosted glass, in a night sky (夜空, dark) and a dawn
-   (晨光, light). An empty shell for now: the press hooks and a reduced-motion block. Every rule is scoped by
+   (晨光, light). For now: the lights, the press hooks and a reduced-motion block. Every rule is scoped by
    [data-style="aurora"]; keyframes start with aurora-. No filter, no backdrop-filter, no :has(), no masks by
    reference: the glass is plain translucent fills, so every engine paints it alike. */
+
+/* The lights' strength per mode: each light's opacity, the same numbers as AURORA_DENSITIES in palette.ts, which
+   the contrast model reads. 晨光 (light) first, 夜空 (dark) over it. */
+:root[data-style="aurora"] {
+    --aurora-strength: 0.85;
+}
+
+:root.dark[data-style="aurora"] {
+    --aurora-strength: 0.42;
+}
+
+/* The lights' geometry, from the canvas's 390×844 phone in vmax, so a wider window scales it up. Each light is a
+   square of --aurora-blob-size; its x and y are how far that square sits from the two window edges it is anchored
+   to (negative: past them). The lights only translate, never scale, so auroraSkin.test.ts can check that no two
+   cores ever meet: two lights on one layer sit at least a fade radius (0.66 × size × √2 ⁄ 2) apart, two on
+   different layers that far apart even with both drifts against them. The overscan lets each layer reach past
+   the window by more than either drift, so a drifting layer never shows its edge. The ribbon's two lights and
+   its strength are AURORA_RIBBON's. */
+[data-style="aurora"] {
+    --aurora-blob-size: 48vmax;
+    --aurora-a1-x: -16vmax;
+    --aurora-a1-y: -16vmax;
+    --aurora-a2-x: -24vmax;
+    --aurora-a2-y: 12vmax;
+    --aurora-a3-x: -20vmax;
+    --aurora-a3-y: 0vmax;
+    --aurora-a4-x: -20vmax;
+    --aurora-a4-y: -28vmax;
+    --aurora-drift-1-x: 6vmax;
+    --aurora-drift-1-y: 8vmax;
+    --aurora-drift-2-x: -8vmax;
+    --aurora-drift-2-y: 6vmax;
+    --aurora-overscan: 8vmax;
+    --aurora-ribbon-first: 55%;
+    --aurora-ribbon-second: 45%;
+    --aurora-ribbon-strength: 0.8;
+}
+
+/* The sky. The body carries the page colour alone, under every screen and across the whole window, so a wide
+   screen shows no strip beside the app's column; the app's page scroller, the pages and their headers are clear,
+   so the lights show through them all. */
+[data-style="aurora"] body {
+    background-color: var(--color-background);
+}
+
+[data-style="aurora"] [data-skin~="page-ruled"],
+[data-style="aurora"] [data-skin~="page"],
+[data-style="aurora"] [data-skin~="page-header"] {
+    background-color: transparent;
+}
+
+/* A sticky header is clear at rest. Once its page has scrolled it is laid over with the page colour, fading in
+   over the first 64px of scroll (--header-scroll, 0 to 1) and tapering out over its empty bottom padding, so the
+   content scrolls out of sight under its title. No frosting: the lights behind it are soft already. */
+[data-style="aurora"] [data-skin~="page-header"][data-scrolled] {
+    background-color: color-mix(in srgb, var(--color-background) calc(88% * var(--header-scroll, 0)), transparent);
+    -webkit-mask-image: linear-gradient(to bottom, var(--color-foreground) calc(100% - 12px), transparent);
+    mask-image: linear-gradient(to bottom, var(--color-foreground) calc(100% - 12px), transparent);
+}
+
+/* The four lights, two to a layer fixed to the window, below every content layer and never taking taps: a1 top
+   left and a3 bottom left drift together (::before), a2 top right and a4 bottom right on another path (::after).
+   Each is a radial gradient that has faded out well inside its square, so no blur is needed. They move by
+   transform alone, each layer composited on its own, so the glass above never repaints. */
+[data-style="aurora"] body::before,
+[data-style="aurora"] body::after {
+    content: "";
+    position: fixed;
+    inset: calc(-1 * var(--aurora-overscan));
+    z-index: -1;
+    pointer-events: none;
+    will-change: transform;
+    opacity: var(--aurora-strength);
+    background-size: var(--aurora-blob-size) var(--aurora-blob-size);
+    background-repeat: no-repeat;
+}
+
+[data-style="aurora"] body::before {
+    background-image:
+        radial-gradient(circle, var(--color-aurora-1) 0, transparent 66%),
+        radial-gradient(circle, var(--color-aurora-3) 0, transparent 66%);
+    background-position:
+        left calc(var(--aurora-overscan) + var(--aurora-a1-x)) top calc(var(--aurora-overscan) + var(--aurora-a1-y)),
+        left calc(var(--aurora-overscan) + var(--aurora-a3-x)) bottom calc(var(--aurora-overscan) + var(--aurora-a3-y));
+    animation: aurora-drift-first 19s ease-in-out infinite alternate;
+}
+
+[data-style="aurora"] body::after {
+    background-image:
+        radial-gradient(circle, var(--color-aurora-2) 0, transparent 66%),
+        radial-gradient(circle, var(--color-aurora-4) 0, transparent 66%);
+    background-position:
+        right calc(var(--aurora-overscan) + var(--aurora-a2-x)) top calc(var(--aurora-overscan) + var(--aurora-a2-y)),
+        right calc(var(--aurora-overscan) + var(--aurora-a4-x)) bottom calc(var(--aurora-overscan) + var(--aurora-a4-y));
+    animation: aurora-drift-second 23s ease-in-out infinite alternate-reverse;
+}
+
+@keyframes aurora-drift-first {
+    to { transform: translate(var(--aurora-drift-1-x), var(--aurora-drift-1-y)); }
+}
+
+@keyframes aurora-drift-second {
+    to { transform: translate(var(--aurora-drift-2-x), var(--aurora-drift-2-y)); }
+}
+
+/* The ribbon across the top of the page: two long ellipses side by side, a1 on the left and a2 on the right, each
+   fading out inside the band, so its tilt never shows an edge. It swings from -12deg to -4deg and back. */
+[data-style="aurora"] .app-safe-area::before {
+    content: "";
+    position: fixed;
+    left: -20%;
+    right: -20%;
+    top: 12%;
+    height: 26vmax;
+    z-index: -1;
+    pointer-events: none;
+    will-change: transform;
+    opacity: calc(var(--aurora-strength) * var(--aurora-ribbon-strength));
+    background-image:
+        radial-gradient(ellipse 24% 50% at 33% 50%, color-mix(in srgb, var(--color-aurora-1) var(--aurora-ribbon-first), transparent) 0, transparent),
+        radial-gradient(ellipse 24% 50% at 64% 50%, color-mix(in srgb, var(--color-aurora-2) var(--aurora-ribbon-second), transparent) 0, transparent);
+    transform: rotate(-12deg);
+    animation: aurora-ribbon 16s ease-in-out infinite alternate;
+}
+
+@keyframes aurora-ribbon {
+    from { transform: rotate(-12deg); }
+    to { transform: rotate(-4deg); }
+}
 
 /* Chinese in Aurora Sans TC, Latin and digits in Outfit. Repointed only once the face has loaded (fonts.ts beside
    this sheet marks it), so nothing jumps: only the face differs. Titles stop at 600, the heaviest bundled weight. */
@@ -44,8 +173,15 @@
     transition: transform 180ms ease-out;
 }
 
-/* Reduced motion: no scaling or sliding; the press wash stays */
+/* Reduced motion: no scaling or sliding; the press wash stays. The lights and the ribbon hold still where they
+   start, the ribbon at its resting tilt. */
 @media (prefers-reduced-motion: reduce) {
+    [data-style="aurora"] body::before,
+    [data-style="aurora"] body::after,
+    [data-style="aurora"] .app-safe-area::before {
+        animation: none;
+    }
+
     [data-style="aurora"] .segmented-indicator-motion {
         transition: none;
     }
