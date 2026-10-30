@@ -93,6 +93,11 @@ const SAMPLES: Record<StyleId, ArtworkSample[]> = {
         { x: -20, y: 54, token: "icon-frame", foregroundOnly: true },
         { x: 54, y: 14, token: "background" },
     ],
+    // Only the ground colour until the style's art is drawn
+    aurora: [
+        { x: 5.4, y: 54, token: "background" },
+        { x: -20, y: 54, token: "background", foregroundOnly: true },
+    ],
     // The paper in the middle of a grid cell, the board's outline and the leader (the 0.6-unit grid lines fill no
     // whole pixel at any density)
     blueprint: [

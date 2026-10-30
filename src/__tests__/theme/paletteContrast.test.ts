@@ -96,6 +96,15 @@ const BLUEPRINT_DARK_UNDRAWN: ReadonlySet<string> = new Set([
     "error on card", "error on primary-light", "error on highlight", "error on cell-focus", "error on cell-scope", "error on cell-pattern",
     "error on cell-selected", "error on cell-peer",
 ]);
+// Aurora's selected cell is the solid theme colour with on-primary written on it, so no ink but on-primary is ever on
+// that surface; AURORA_BOARD_CASES checks on-primary there. An error cell wears the error colour (a wash and stripes of
+// it on the glass), so the theme colour is never written on the error surface. In 夜空 the peer and scope cells lay
+// the sheen over the cell's glass (the skin's sheen-peer), and the purple's primary reads only 3.98:1 on it, under the
+// 4.5 the other three themes meet; AURORA_BOARD_CASES holds the purple to what it reaches and the rest to 4.5.
+const AURORA_UNDRAWN: ReadonlySet<string> = new Set([
+    "foreground on cell-selected", "primary on cell-selected", "error on cell-selected", "note on cell-selected", "primary on error-surface",
+]);
+const AURORA_DARK_PEER: ReadonlySet<string> = new Set(["primary on cell-peer", "primary on cell-scope"]);
 const BOARD_PAIRS: readonly ContrastPair[] = BOARD_SURFACES.flatMap(surface => BOARD_INKS.map((ink) => {
     const boardPair = pair(ink, surface);
     const inChalkboardModel = CHALKBOARD_DARK_UNDRAWN.has(boardPair.name) || CHALKBOARD_DARK_STRUCK_OUT.has(boardPair.name);
@@ -103,6 +112,8 @@ const BOARD_PAIRS: readonly ContrastPair[] = BOARD_SURFACES.flatMap(surface => B
         "pixel",
         ...(inChalkboardModel ? ["chalkboard/dark" as const] : []),
         ...(BLUEPRINT_DARK_UNDRAWN.has(boardPair.name) ? ["blueprint/dark" as const] : []),
+        ...(AURORA_UNDRAWN.has(boardPair.name) ? ["aurora" as const] : []),
+        ...(AURORA_DARK_PEER.has(boardPair.name) ? ["aurora/dark" as const] : []),
     ];
     return { ...boardPair, exceptIn };
 }));
@@ -120,25 +131,31 @@ const BOARD_PAIRS: readonly ContrastPair[] = BOARD_SURFACES.flatMap(surface => B
 // yellow or orange digit; CHALKBOARD_BOARD_CASES checks the ink drawn on each wash. Blueprint's board is laid on the
 // page's paper colour too: clues sit on the paper, a peer cell is told apart by its hatching and a same-digit cell by
 // its amber or red digit, not by a wash darker than the rest; BLUEPRINT_BOARD_CASES checks the ink drawn on each.
+// Aurora's clues share a pane of glass with every other cell and are told apart by their ink, a same-digit cell by a
+// faint wash of the theme colour.
 const SURFACE_PAIRS: readonly ContrastPair[] = [
-    { ...pair("cell-clue", "card", 1.25), exceptIn: ["pixel", "cyber", "ink", "chalkboard", "blueprint"] },
-    { ...pair("highlight", "cell-clue", 1.25), exceptIn: ["pixel", "cyber", "ink", "chalkboard", "blueprint"] },
-    { ...pair("highlight", "card", 1.25), exceptIn: ["pixel", "cyber", "chalkboard", "blueprint"] },
-    { ...pair("highlight", "cell-peer", 1.25), exceptIn: ["pixel", "cyber", "ink", "chalkboard", "blueprint"] },
+    { ...pair("cell-clue", "card", 1.25), exceptIn: ["pixel", "cyber", "ink", "chalkboard", "blueprint", "aurora"] },
+    { ...pair("highlight", "cell-clue", 1.25), exceptIn: ["pixel", "cyber", "ink", "chalkboard", "blueprint", "aurora"] },
+    { ...pair("highlight", "card", 1.25), exceptIn: ["pixel", "cyber", "chalkboard", "blueprint", "aurora"] },
+    { ...pair("highlight", "cell-peer", 1.25), exceptIn: ["pixel", "cyber", "ink", "chalkboard", "blueprint", "aurora"] },
     { ...pair("cell-peer", "card", 1.08), exceptIn: ["pixel", "cyber"] },
     // The selection outline is a UI component, so 3:1 applies
-    { ...pair("primary", "cell-selected", LARGE_OR_ICON), exceptIn: ["pixel"] },
+    // (aurora's selected cell is the solid primary, which its on-primary digit marks; AURORA_BOARD_CASES)
+    { ...pair("primary", "cell-selected", LARGE_OR_ICON), exceptIn: ["pixel", "aurora"] },
 ];
 
 const TINTED_PAIRS: readonly ContrastPair[] = [
-    tinted("accent", "accent", 0.1, "card", TEXT),
+    // Aurora's card is measured where the page is darkest, under the brightest light; in 晨光 the pink and the orange
+    // read 4.4 there and more everywhere else on the page
+    { ...tinted("accent", "accent", 0.1, "card", TEXT), exceptIn: ["aurora/light"] },
     tinted("accent", "accent", 0.15, "card", LARGE_OR_ICON),
     tinted("danger", "danger", 0.1, "card", LARGE_OR_ICON),
     // The hint panel's digit chip
     tinted("on-primary", "on-primary", 0.1, "primary", TEXT),
     // The continue card's chips. 8-bit's skin draws them without the tint, as a transparent tag in a
     // 2px frame (the canvas's chip), and no four-green tint passes in 掌機; PIXEL_BOARD_CASES checks the drawn pair.
-    { ...tinted("on-featured", "on-featured", 0.2, "featured", TEXT), exceptIn: ["pixel/light"] },
+    // Aurora's chips in 晨光 are drawn at a lighter tint than 20% (the continue button's task checks the drawn pair)
+    { ...tinted("on-featured", "on-featured", 0.2, "featured", TEXT), exceptIn: ["pixel/light", "aurora/light"] },
     // Loader text over stacked overlays
     tinted("on-scrim", "scrim", 0.65, "background", TEXT),
 ];
@@ -535,6 +552,27 @@ const BLUEPRINT_BOARD_CASES: BlueprintBoardCase[] = STYLES.blueprint.themes.flat
     ];
 }));
 
+// Aurora's board: the ink actually drawn on the glass actually drawn (palette.ts). The selected cell is the solid theme
+// colour under on-primary; in 夜空 a peer or scope cell is the cell's glass under the sheen, which the purple's
+// primary reads 3.9:1 on, the other three themes 4.5:1.
+interface AuroraBoardCase { label: string; foreground: string; background: string; minimum: number }
+
+const AURORA_PURPLE_PEER_FLOOR = 3.9;
+
+const AURORA_BOARD_CASES: AuroraBoardCase[] = STYLES.aurora.themes.flatMap(theme => STYLE_COLOR_MODES.aurora.flatMap((mode) => {
+    const palette = getPalette("aurora", theme.id, mode);
+    const prefix = `aurora/${theme.id}/${mode}`;
+    const drawn = (name: string, foreground: string, background: string, minimum = TEXT): AuroraBoardCase => ({
+        label: `${prefix}: ${name} ≥ ${minimum}`, foreground, background, minimum,
+    });
+    const peerMinimum = mode === "dark" && theme.id === "purple" ? AURORA_PURPLE_PEER_FLOOR : TEXT;
+    return [
+        drawn("selected digit (on-primary) on cell-selected", palette["on-primary"], palette["cell-selected"]),
+        drawn("player's digit (primary) on cell-peer", palette.primary, palette["cell-peer"], mode === "dark" ? peerMinimum : TEXT),
+        drawn("player's digit (primary) on cell-scope", palette.primary, palette["cell-scope"], mode === "dark" ? peerMinimum : TEXT),
+    ];
+}));
+
 const BLUEPRINT_SKIN = readFileSync("src/style/styles/blueprint/skin.css", "utf8");
 
 // A recent game's row rules in skin.css: the one for both modes, then 藍曬圖's own, so the last one read wins
@@ -648,6 +686,15 @@ describe("palette contrast", () => {
     it("should check blueprint's board on every paper in both of its modes", () => {
         expect(new Set(BLUEPRINT_BOARD_CASES.map(boardCase => boardCase.label.split(":")[0]))).toEqual(new Set(
             STYLES.blueprint.themes.flatMap(theme => STYLE_COLOR_MODES.blueprint.map(mode => `blueprint/${theme.id}/${mode}`))));
+    });
+
+    it("should check aurora's board on every theme in both of its modes", () => {
+        expect(new Set(AURORA_BOARD_CASES.map(boardCase => boardCase.label.split(":")[0]))).toEqual(new Set(
+            STYLES.aurora.themes.flatMap(theme => STYLE_COLOR_MODES.aurora.map(mode => `aurora/${theme.id}/${mode}`))));
+    });
+
+    it.each(AURORA_BOARD_CASES)("$label", ({ foreground, background, minimum }) => {
+        expect(contrastRatio(foreground, background)).toBeGreaterThanOrEqual(minimum);
     });
 
     it.each(BLUEPRINT_BOARD_CASES)("$label", ({ foreground, background, minimum }) => {

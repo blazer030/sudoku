@@ -565,6 +565,8 @@ const artworkOf = (style: StyleId, palette: Palette, bleed = 0, idSuffix = ""): 
         case "ink": return inkArtwork(palette, bleed, idSuffix);
         case "chalkboard": return chalkboardArtwork(palette, idSuffix);
         case "blueprint": return blueprintArtwork(palette, bleed);
+        // Only the ground colour for now: the art is drawn in a later task
+        case "aurora": return [];
     }
 };
 
@@ -619,6 +621,8 @@ const monochromeArtwork = (style: StyleId): string[] => {
         case "chalkboard": return chalkboardWriting({ writing: color, ring: color, stub: color });
         // The ink's lines, the arrowheads, 9×9 and the dashed box, without the graph paper or the leader
         case "blueprint": return blueprintDrawing(color, color);
+        // Nothing drawn yet
+        case "aurora": return [];
     }
 };
 

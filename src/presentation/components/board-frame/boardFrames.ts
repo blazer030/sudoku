@@ -33,6 +33,7 @@ export const STYLE_BOARD_FRAMES: Record<StyleId, Component | null> = {
     ink: null,
     chalkboard: null,
     blueprint: BlueprintBoardFrame,
+    aurora: null,
 };
 
 export const useBoardFrame = (): ComputedRef<Component | null> => {

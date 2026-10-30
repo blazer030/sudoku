@@ -171,6 +171,15 @@ const CHALKBOARD_MOMENTS: StyleMoments = {
 // nothing is drawn over the scene.
 // While a puzzle loads, a plotter draws a sudoku box on a small drawing sheet, its pen running along the line as it
 // is plotted, and dimensions it in 3 columns (BlueprintLoader).
+// Aurora Glass borrows minimal's loader and has no celebration for now; the moments come in later tasks.
+const AURORA_MOMENTS: StyleMoments = {
+    loader: MinimalLoader,
+    celebration: null,
+    cardDecoration: null,
+    groupEffectMs: 900,
+    celebrationBoardMs: 800,
+};
+
 const BLUEPRINT_MOMENTS: StyleMoments = {
     loader: BlueprintLoader,
     celebration: null,
@@ -190,6 +199,7 @@ export const STYLE_MOMENTS: Record<StyleId, StyleMoments> = {
     ink: INK_MOMENTS,
     chalkboard: CHALKBOARD_MOMENTS,
     blueprint: BLUEPRINT_MOMENTS,
+    aurora: AURORA_MOMENTS,
 };
 
 export const useStyleMoments = (): ComputedRef<StyleMoments> => {

@@ -10,6 +10,7 @@
 @import "./styles/ink/skin.css";
 @import "./styles/chalkboard/skin.css";
 @import "./styles/blueprint/skin.css";
+@import "./styles/aurora/skin.css";
 
 @variant dark (&:where(.dark, .dark *));
 

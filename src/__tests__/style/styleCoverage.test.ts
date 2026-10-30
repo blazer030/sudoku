@@ -148,6 +148,8 @@ const REQUIRED_SELECTORS: Record<StyleId, readonly string[]> = {
         '[data-skin~="pill"]',
         '[data-skin~="toast"]',
     ],
+    // The press hooks for now; the board, the moments and the pages add theirs
+    aurora: [...PRESS],
 };
 
 const selectorsOf = (style: StyleId): string[] => {

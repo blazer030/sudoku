@@ -33,13 +33,14 @@ export const en = {
                 pixel: { light: "Handheld", dark: "Console" },
                 chalkboard: { light: "Whiteboard", dark: "Chalkboard" },
                 blueprint: { light: "Drafting Paper", dark: "Blueprint" },
+                aurora: { light: "Dawn", dark: "Night Sky" },
             },
         },
         appearanceSummary: "{mode} · {theme}",
         colorTheme: "Color theme",
         style: {
             label: "Style",
-            names: { minimal: "Minimal Motion", tactile: "Tactile Tiles", paper: "Paper Notebook", pixel: "8-bit", cyber: "Cyberpunk", ink: "Ink & Washi", chalkboard: "Chalkboard", blueprint: "Blueprint" },
+            names: { minimal: "Minimal Motion", tactile: "Tactile Tiles", paper: "Paper Notebook", pixel: "8-bit", cyber: "Cyberpunk", ink: "Ink & Washi", chalkboard: "Chalkboard", blueprint: "Blueprint", aurora: "Aurora Glass" },
         },
         colorThemes: {
             green: "Green",

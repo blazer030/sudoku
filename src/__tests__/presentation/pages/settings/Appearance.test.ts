@@ -74,7 +74,7 @@ describe("Appearance.vue style cards", () => {
         const wrapper = mountAppearance();
         const cards = wrapper.findAll("button[data-testid^='style-option-']");
 
-        expect(cards.map(card => card.attributes("data-testid"))).toEqual(["style-option-minimal", "style-option-tactile", "style-option-paper", "style-option-pixel", "style-option-cyber", "style-option-ink", "style-option-chalkboard", "style-option-blueprint"]);
+        expect(cards.map(card => card.attributes("data-testid"))).toEqual(["style-option-minimal", "style-option-tactile", "style-option-paper", "style-option-pixel", "style-option-cyber", "style-option-ink", "style-option-chalkboard", "style-option-blueprint", "style-option-aurora"]);
         for (const style of STYLE_IDS) {
             const card = wrapper.get(`[data-testid='style-option-${style}']`);
             const rendered = card.get(`[data-testid='style-icon-${style}'] svg`).element.outerHTML;
@@ -218,8 +218,8 @@ describe("Appearance.vue colour-theme swatches", () => {
             const label = `${settingsStore.style} ${theme.id} in ${mode}`;
             const { fill, mark } = swatchColors(settingsStore.style, mode, palette);
             expect((swatch.element as HTMLElement).style.backgroundColor, label).toBe(cssColor(fill));
-            // One solid colour: no second half in the accent (blueprint's accent is its ink, so it may be the fill or the mark)
-            if (settingsStore.style !== "blueprint" || (palette.accent !== fill && palette.accent !== mark)) expect(swatch.html(), label).not.toContain(cssColor(palette.accent));
+            // One solid colour: no second half in the accent (blueprint's accent is its ink and aurora's is its primary, so it may be the fill or the mark)
+            if (palette.accent !== fill && palette.accent !== mark) expect(swatch.html(), label).not.toContain(cssColor(palette.accent));
             expect(swatch.findAll("[style*='background']"), label).toHaveLength(0);
         }
         const check = wrapper.get("[data-testid='color-theme-check']");
@@ -583,6 +583,30 @@ describe("Appearance.vue one-theme style", () => {
         expect(blueprintChinese).not.toEqual(blueprintEnglish);
         expect(wrapper.findAll("button[data-testid^='color-theme-']").map(swatch => swatch.attributes("data-testid")))
             .toEqual(["color-theme-blue", "color-theme-teal", "color-theme-slate", "color-theme-rust"]);
+    });
+
+    it("should name aurora's modes in its own words, in either language, beside its four colours painted as their primaries", async () => {
+        const wrapper = mountAppearance();
+        const modeTexts = () => ["appearance-light", "appearance-dark"].map(id => wrapper.get(`[data-testid='${id}']`).text());
+        const minimalEnglish = modeTexts();
+        const settingsStore = useSettingsStore();
+        settingsStore.setStyle("aurora");
+        await nextTick();
+        const auroraEnglish = modeTexts();
+        i18n.global.locale.value = "zh-Hant";
+        await nextTick();
+        const auroraChinese = modeTexts();
+
+        expect(auroraEnglish).not.toEqual(minimalEnglish);
+        expect(auroraChinese).not.toEqual(auroraEnglish);
+        expect(wrapper.findAll("button[data-testid^='color-theme-']").map(swatch => swatch.attributes("data-testid")))
+            .toEqual(["color-theme-purple", "color-theme-teal", "color-theme-pink", "color-theme-orange"]);
+        for (const theme of STYLES.aurora.themes) {
+            const swatch = wrapper.get(`[data-testid='color-theme-${theme.id}']`).element as HTMLElement;
+            const probe = document.createElement("div");
+            probe.style.backgroundColor = getPalette("aurora", theme.id, "dark").primary;
+            expect(swatch.style.backgroundColor, theme.id).toBe(probe.style.backgroundColor);
+        }
     });
 
     it("should bring minimal back to the theme last chosen there after a visit to pixel", () => {

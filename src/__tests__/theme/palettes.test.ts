@@ -94,6 +94,7 @@ describe("palettes", () => {
     const OWN_TOKENS_BY_STYLE: Partial<Record<StyleId, readonly StyleOwnToken[]>> = {
         chalkboard: ["tray", "tray-shade", "tray-edge", "duster", "duster-felt", "smudge", "smear", "icon-frame", "doodle"],
         blueprint: ["grid-minor", "grid-major", "hatch", "error-hatch"],
+        aurora: ["aurora-1", "aurora-2", "aurora-3", "aurora-4", "glass", "glass-sheen"],
     };
 
     it("should give chalkboard and blueprint only their own colours, and no other style any", () => {
@@ -109,6 +110,61 @@ describe("palettes", () => {
                         expect(palette[token], `${label} ${token}`).toMatch(/^#[0-9A-F]{6}$/);
                     }
                 }
+            }
+        }
+    });
+
+    it("should give aurora its four colours in the picker's order", () => {
+        expect(STYLES.aurora.themes.map(theme => theme.id)).toEqual(["purple", "teal", "pink", "orange"]);
+    });
+
+    it("should paint the night sky: a deep ground, pale text and four lights under a dark glass", () => {
+        const palette = getPalette("aurora", "pink", "dark");
+
+        expect(palette.background).toBe("#060914");
+        expect(palette.foreground).toBe("#F2F5FF");
+        expect(palette["foreground-secondary"]).toBe("#B0B9D3");
+        expect(palette.primary).toBe("#FF8CC6");
+        expect(palette["on-primary"]).toBe("#3A0820");
+        expect(palette.accent).toBe("#FF8CC6");
+        expect(palette["cell-selected"]).toBe("#FF8CC6");
+        expect(palette.error).toBe("#FF948A");
+        expect(palette["on-danger"]).toBe("#060914");
+        expect([palette["aurora-1"], palette["aurora-2"], palette["aurora-3"], palette["aurora-4"]])
+            .toEqual(["#19E6A3", "#7C4DFF", "#1FB6FF", "#FF6FB5"]);
+        expect(palette.glass).toBe("#141A34");
+        expect(palette["glass-sheen"]).toBe("#FFFFFF");
+    });
+
+    it("should paint the dawn: a pale ground, dark text and four soft lights under a white glass", () => {
+        const palette = getPalette("aurora", "orange", "light");
+
+        expect(palette.background).toBe("#EEF0F7");
+        expect(palette.foreground).toBe("#151A2D");
+        expect(palette["foreground-secondary"]).toBe("#48506A");
+        expect(palette.primary).toBe("#A84808");
+        expect(palette["on-primary"]).toBe("#FFFFFF");
+        expect(palette.error).toBe("#B71C1C");
+        expect(palette["on-danger"]).toBe("#FFFFFF");
+        expect([palette["aurora-1"], palette["aurora-2"], palette["aurora-3"], palette["aurora-4"]])
+            .toEqual(["#7FE7C9", "#B7A4FF", "#8CCBFF", "#FFC2A6"]);
+        expect(palette.glass).toBe("#FFFFFF");
+    });
+
+    it("should change only the accent colours between aurora's themes, the sky and glass staying the same", () => {
+        for (const mode of ["light", "dark"] as const) {
+            const palettes = STYLES.aurora.themes.map(theme => getPalette("aurora", theme.id, mode));
+            for (const token of ["background", "card", "cell-clue", "cell-peer", "aurora-1", "aurora-2", "aurora-3", "aurora-4", "glass"] as const) {
+                expect(new Set(palettes.map(palette => palette[token])).size, `${mode} ${token}`).toBe(1);
+            }
+        }
+    });
+
+    it("should keep aurora's error colour apart from every colour a theme chooses with", () => {
+        for (const mode of ["light", "dark"] as const) {
+            const primaries = STYLES.aurora.themes.map(theme => getPalette("aurora", theme.id, mode).primary);
+            for (const theme of STYLES.aurora.themes) {
+                expect(primaries, `${theme.id}/${mode}`).not.toContain(getPalette("aurora", theme.id, mode).error);
             }
         }
     });
@@ -263,7 +319,7 @@ describe("palettes", () => {
     });
 
     it("should keep paper's lines invisible in other styles", () => {
-        for (const style of [STYLES.minimal, STYLES.tactile, STYLES.pixel, STYLES.cyber, STYLES.ink, STYLES.chalkboard, STYLES.blueprint]) {
+        for (const style of [STYLES.minimal, STYLES.tactile, STYLES.pixel, STYLES.cyber, STYLES.ink, STYLES.chalkboard, STYLES.blueprint, STYLES.aurora]) {
             for (const theme of style.themes) {
                 for (const mode of STYLE_COLOR_MODES[style.id]) {
                     const palette = getPalette(style.id, theme.id, mode);

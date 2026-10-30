@@ -1,0 +1,49 @@
+/* Aurora Glass: four lights drifting behind panes of frosted glass, in a night sky (夜空, dark) and a dawn
+   (晨光, light). An empty shell for now: the press hooks and a reduced-motion block. Every rule is scoped by
+   [data-style="aurora"]; keyframes start with aurora-. No filter, no backdrop-filter, no :has(), no masks by
+   reference: the glass is plain translucent fills, so every engine paints it alike. */
+
+/* Press feedback: a faint wash of the text colour. It is a colour change, so it stays on under reduced motion. */
+[data-style="aurora"] [data-pressed] {
+    --press-overlay: color-mix(in srgb, var(--color-foreground) 8%, transparent);
+    background-image: linear-gradient(var(--press-overlay), var(--press-overlay));
+}
+
+[data-style="aurora"] [data-press-motion] {
+    transition-property: transform, background-color, color, box-shadow, opacity;
+    transition-duration: 160ms;
+    transition-timing-function: ease-out;
+}
+
+[data-style="aurora"] [data-press-motion][data-pressed] {
+    transform: scale(0.97);
+    transition-duration: 60ms;
+}
+
+@keyframes aurora-press-bounce {
+    0% { transform: scale(0.97); }
+    100% { transform: scale(1); }
+}
+
+[data-style="aurora"] [data-press-bounce] {
+    animation: aurora-press-bounce 200ms ease-out;
+}
+
+[data-style="aurora"] .segmented-indicator-motion {
+    transition: transform 180ms ease-out;
+}
+
+/* Reduced motion: no scaling or sliding; the press wash stays */
+@media (prefers-reduced-motion: reduce) {
+    [data-style="aurora"] .segmented-indicator-motion {
+        transition: none;
+    }
+
+    [data-style="aurora"] [data-pressed],
+    [data-style="aurora"] [data-press-motion],
+    [data-style="aurora"] [data-press-motion][data-pressed],
+    [data-style="aurora"] [data-press-bounce] {
+        transform: none;
+        animation: none;
+    }
+}

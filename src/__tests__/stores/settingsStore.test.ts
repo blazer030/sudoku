@@ -149,6 +149,17 @@ describe("settingsStore", () => {
         expect(store.colorTheme).toBe("blue");
     });
 
+    it("should start aurora in the night sky on its purple the first time it is chosen", () => {
+        const store = useSettingsStore();
+        store.setAppearance("light");
+        store.setColorTheme("teal");
+
+        store.setStyle("aurora");
+
+        expect(store.appearance).toBe("dark");
+        expect(store.colorTheme).toBe("purple");
+    });
+
     it("should keep a light appearance through a visit to the dark-only cyber", () => {
         const store = useSettingsStore();
         store.setAppearance("light");

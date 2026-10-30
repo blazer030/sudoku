@@ -343,6 +343,17 @@ describe("Settings.vue appearance row", () => {
         expect(summaryOf(wrapper)).not.toContain(t("settings.colorMode.dark"));
     });
 
+    it("should summarise aurora's mode in its own name beside its colour", async () => {
+        const wrapper = mountSettings();
+        const settingsStore = useSettingsStore();
+        settingsStore.setStyle("aurora");
+        await nextTick();
+
+        expect(summaryOf(wrapper)).toContain(t("settings.colorMode.styled.aurora.dark"));
+        expect(summaryOf(wrapper)).toContain(t("settings.colorThemes.purple"));
+        expect(summaryOf(wrapper)).not.toContain(t("settings.colorMode.dark"));
+    });
+
     it.each([
         { style: "cyber", themeId: "neon" },
         { style: "ink", themeId: "vermilion" },

@@ -18,4 +18,5 @@ export const STYLE_HOME_HEROES: Record<StyleId, HomeHeroLayout> = {
     ink: "vertical",
     chalkboard: "headline",
     blueprint: "spaced",
+    aurora: "stacked",
 };
