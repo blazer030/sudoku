@@ -9,6 +9,7 @@ const BOARD = `${AURORA_SCOPE} [data-skin~="board"]`;
 const ARRIVING_DIGIT = `${BOARD} [data-variant] > .value-arrive`;
 const PULSE = `${BOARD} [data-variant][data-arriving]::before`;
 const GHOST = `${BOARD} [data-variant].value-leave::before`;
+const SELECTED_GHOST = `${BOARD} [data-variant="selected"].value-leave::before`;
 
 const collapse = (text: string): string => text.replace(/\s+/g, " ").trim();
 
@@ -116,7 +117,7 @@ describe("aurora moments", () => {
     });
 
     describe("erase", () => {
-        // Only a player's digit can be erased, and those are the primary
+        // Only a player's digit can be erased, and off the selected cell those are the primary
         it("should draw the erased digit in the primary at the player's size, untouchable, unseen without its animation", () => {
             const ghost = declarationsOf(AURORA_CSS, GHOST);
 
@@ -125,6 +126,24 @@ describe("aurora moments", () => {
             expect(ghost.get("font-size")).toBe("calc(22px * var(--entry-scale, 1))");
             expect(ghost.get("pointer-events")).toBe("none");
             expect(ghost.get("opacity")).toBe("0");
+        });
+
+        // An undo on the selected cell takes its digit away while the cell stays the solid primary: a primary ghost
+        // would vanish into it, so a selected cell's is on-primary, as its digit was. Both rules weigh the same, so the
+        // selected one wins only by coming later.
+        it("should draw a selected cell's erased digit in on-primary, laid after the generic ghost", () => {
+            expect(declarationsOf(AURORA_CSS, SELECTED_GHOST).get("color")).toBe("var(--color-on-primary)");
+            expect(indexOfRule(GHOST)).toBeGreaterThanOrEqual(0);
+            expect(indexOfRule(SELECTED_GHOST)).toBeGreaterThan(indexOfRule(GHOST));
+        });
+
+        it("should never draw a selected cell's ghost in the selected cell's own ground", () => {
+            const winning = [GHOST, SELECTED_GHOST]
+                .filter(selector => declarationsOf(AURORA_CSS, selector).has("color"))
+                .sort((first, second) => indexOfRule(second) - indexOfRule(first))[0];
+            const selectedGround = declarationsOf(AURORA_CSS, `${BOARD} [data-variant="selected"]`).get("--aurora-cell-ground");
+
+            expect(declarationsOf(AURORA_CSS, winning).get("color")).not.toBe(selectedGround);
         });
 
         it("should shrink it to 60% and fade it over 500ms ease-in, ending before the cell settles on its own", () => {

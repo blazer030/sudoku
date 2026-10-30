@@ -918,9 +918,10 @@
 }
 
 /* An erased digit shrinks and fades as the canvas's fadeA, without its blur: the digit that left (the cell's
-   data-leaving-value) on the cell's ::before, in the primary (only a player's digit, which is the primary, can be
-   erased) at the player's size and weight, goes to 60% and
-   nothing over 500ms. Its animationend settles leaving; unseen without its animation, so no ghost stays. */
+   data-leaving-value) on the cell's ::before, at the player's size and weight, goes to 60% and nothing over 500ms.
+   Only a player's digit leaves, so it is drawn as one: in the primary, or in on-primary on the selected cell (an undo
+   there), whose solid primary would hide it. Its animationend settles leaving; unseen without its animation, so no
+   ghost stays. */
 @keyframes aurora-leave {
     0% { opacity: 1; transform: none; }
     100% { opacity: 0; transform: scale(0.6); }
@@ -943,6 +944,11 @@
     color: var(--color-primary);
     opacity: 0;
     animation: aurora-leave 500ms ease-in;
+}
+
+/* Laid after the ghost above, which weighs as much */
+[data-style="aurora"] [data-skin~="board"] [data-variant="selected"].value-leave::before {
+    color: var(--color-on-primary);
 }
 
 /* Completing a group (only with motion allowed), from GroupAurora without its blur and the cells' glow shadow (spec
