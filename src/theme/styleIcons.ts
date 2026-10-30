@@ -357,6 +357,51 @@ const cyberArtwork = (palette: Palette, idSuffix: string): string[] => {
     ];
 };
 
+// Aurora Glass: three lights drifting behind one pane of frosted glass, a dot on each corner, side and the centre
+// (the primary on the sides, the sheen in the middle). Ported from the style-research canvas (PickerC's aiw). The
+// glass is the card's glass laid on the ground colour, and its edge is as bright as the mode's skin draws it.
+// The lights' gradients are referenced by id, so a suffix keeps copies on one page apart.
+const AURORA_LIGHTS = [[20, 18, 56], [96, 44, 58], [38, 104, 54]] as const;
+const AURORA_GLASS = { origin: 26, size: 56, radius: 16 };
+const AURORA_CARD_DENSITY = 0.8;
+const AURORA_EDGE_OPACITY = { dark: 0.12, light: 0.85 } as const;
+const AURORA_CORNER_DOTS = [[41, 41], [67, 41], [41, 67], [67, 67]] as const;
+const AURORA_SIDE_DOTS = [[54, 41], [41, 54], [67, 54], [54, 67]] as const;
+
+const auroraIds = (idSuffix: string): string[] => {
+    const tail = idSuffix === "" ? "" : `-${idSuffix}`;
+    return AURORA_LIGHTS.map((_, index) => `aurora-light-${index + 1}${tail}`);
+};
+
+const auroraGlass = (attributes: string): string =>
+    `<rect x="${AURORA_GLASS.origin}" y="${AURORA_GLASS.origin}" width="${AURORA_GLASS.size}" height="${AURORA_GLASS.size}" rx="${AURORA_GLASS.radius}" ${attributes}/>`;
+
+const auroraDots = (corner: string, side: string, centre: string, cornerOpacity: string): string[] => [
+    ...AURORA_CORNER_DOTS.map(([x, y]) => `<circle cx="${x}" cy="${y}" r="4.5" fill="${corner}"${cornerOpacity}/>`),
+    ...AURORA_SIDE_DOTS.map(([x, y]) => `<circle cx="${x}" cy="${y}" r="4.5" fill="${side}"/>`),
+    `<circle cx="54" cy="54" r="6" fill="${centre}"/>`,
+];
+
+const auroraArtwork = (palette: Palette, idSuffix: string): string[] => {
+    const ids = auroraIds(idSuffix);
+    const lights = [palette["aurora-1"], palette["aurora-2"], palette["aurora-3"]] as const;
+    const sheen = palette["glass-sheen"] ?? MONOCHROME_COLOR;
+    const isDark = contrastRatio(palette.background, "#000000") < contrastRatio(palette.background, "#FFFFFF");
+    const glass = mixColors(palette.glass ?? sheen, AURORA_CARD_DENSITY, palette.background);
+    return [
+        `<defs>${ids.map((id, index) => `<radialGradient id="${id}"><stop offset="0" stop-color="${lights[index]}"/><stop offset="1" stop-color="${lights[index]}" stop-opacity="0"/></radialGradient>`).join("")}</defs>`,
+        ...AURORA_LIGHTS.map(([x, y, radius], index) => `<circle cx="${x}" cy="${y}" r="${radius}" fill="url(#${ids[index]})"/>`),
+        auroraGlass(`fill="${glass}" stroke="${sheen}" stroke-opacity="${AURORA_EDGE_OPACITY[isDark ? "dark" : "light"]}" stroke-width="1.2"`),
+        ...auroraDots(palette.foreground, palette.primary, sheen, ` fill-opacity="0.3"`),
+    ];
+};
+
+// The glass outline and the nine dots, the corner ones fainter
+const auroraMonochrome = (color: string): string[] => [
+    auroraGlass(`fill="none" stroke="${color}" stroke-width="1.6"`),
+    ...auroraDots(color, color, color, ` fill-opacity="0.45"`),
+];
+
 // Ink and washi: one brushed 圓相 (an enso) round a faint nine-cell grid on washi, a pale ink wash at the foot, and a
 // vermilion seal stamped with 獨 at the bottom right. Ported from the style-research canvas (Ink.dc.html). The
 // brush roughening is a filter referenced by id, so an icon given a suffix keeps it apart from other copies.
@@ -565,8 +610,7 @@ const artworkOf = (style: StyleId, palette: Palette, bleed = 0, idSuffix = ""): 
         case "ink": return inkArtwork(palette, bleed, idSuffix);
         case "chalkboard": return chalkboardArtwork(palette, idSuffix);
         case "blueprint": return blueprintArtwork(palette, bleed);
-        // Only the ground colour for now: the art is drawn in a later task
-        case "aurora": return [];
+        case "aurora": return auroraArtwork(palette, idSuffix);
     }
 };
 
@@ -621,8 +665,8 @@ const monochromeArtwork = (style: StyleId): string[] => {
         case "chalkboard": return chalkboardWriting({ writing: color, ring: color, stub: color });
         // The ink's lines, the arrowheads, 9×9 and the dashed box, without the graph paper or the leader
         case "blueprint": return blueprintDrawing(color, color);
-        // Nothing drawn yet
-        case "aurora": return [];
+        // The pane's outline and the nine dots, without the lights
+        case "aurora": return auroraMonochrome(color);
     }
 };
 

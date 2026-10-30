@@ -60,7 +60,7 @@ const svgOf = (style: StyleId, palette: Palette, idSuffix = "") => {
 // The icon the settings should have drawn. A card's ids carry its own suffix, so the expected icon takes it from the rendered one.
 const iconSvgFor = (style: StyleId, rendered: string) => {
     const settingsStore = useSettingsStore();
-    const idSuffix = /id="(?:cyber-edge|ink-rough|chalk-grain)-([^"]+)"/.exec(rendered)?.[1];
+    const idSuffix = /id="(?:cyber-edge|aurora-light-1|ink-rough|chalk-grain)-([^"]+)"/.exec(rendered)?.[1];
     return svgOf(style, getPalette(style, rememberedThemeFor(style, settingsStore.colorThemeByStyle), rememberedAppearanceFor(style, settingsStore.appearanceByStyle)), idSuffix);
 };
 
