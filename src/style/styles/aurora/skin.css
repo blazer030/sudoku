@@ -680,9 +680,12 @@
     box-shadow: none;
 }
 
+/* The grid is a stacking context of its own, so 夜空's group light can lie under the cells' glass and still over the
+   page and its lights */
 [data-style="aurora"] [data-skin~="board-grid"] {
     --board-line: transparent;
     --board-box-line: transparent;
+    isolation: isolate;
     background-color: transparent;
     border-color: transparent;
     box-shadow: none;
@@ -949,8 +952,8 @@
    aurora-2: no primary, so a player's digit never sits on its own hue) sweeps out along a completed row or down a
    completed column from the entered cell, its long edges faded by a gradient mask where the canvas blurred them; a
    completed box sends one ring of the primary out from its centre, lit by a still glow of aurora-1
-   (AuroraGroupOverlay). Both lie at 0 over the glass, under every digit (2) and the selected and answer cells (1)
-   (ruling 4), and are unseen without their animations, so a stopped effect leaves no still cue. */
+   (AuroraGroupOverlay). In 晨光 both lie at 0 over the glass, under every digit (2) and the selected and answer
+   cells (1) (ruling 4); in 夜空 under the glass (below), and are unseen without their animations, so a stopped effect leaves no still cue. */
 [data-style="aurora"] [data-skin~="board"] [data-group]:not(.animate-hint-reveal-glow) {
     --group-ripple-step: 45ms;
     animation: aurora-group-glow 600ms ease-out calc(100ms + var(--group-delay));
@@ -1000,6 +1003,14 @@
     box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--color-primary) 80%, transparent), 0 0 24px color-mix(in srgb, var(--color-aurora-1) 60%, transparent);
     opacity: 0;
     animation: aurora-group-ring 760ms ease-out 120ms;
+}
+
+/* In 夜空 the light is bright under light digits, so it passes under the glass instead: it lights the gaps between
+   the cells and shows only faintly through the 88% glass, and every digit sits on glass, not on the light. Under
+   every cell, over the page and its lights, inside the grid's own stacking context. */
+:root.dark[data-style="aurora"] .aurora-group-ribbon,
+:root.dark[data-style="aurora"] .aurora-group-ring {
+    z-index: -1;
 }
 
 @keyframes aurora-group-ring {

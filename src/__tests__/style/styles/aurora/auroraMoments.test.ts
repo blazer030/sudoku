@@ -3,7 +3,7 @@ import { ARRIVAL_SETTLE_MS } from "@/presentation/components/board-cell/useArriv
 import { STYLE_MOMENTS } from "@/presentation/components/style-moments/styleMoments";
 import { GROUP_RIPPLE_STEP_MS } from "@/presentation/pages/game/useGroupEffect";
 import { animationTimingOf, declarationsOf, reducedMotionDeclarationsOf } from "../../styleSheetRules";
-import { AURORA_CSS, AURORA_SCOPE } from "./auroraSheet";
+import { AURORA_CSS, AURORA_DARK, AURORA_SCOPE } from "./auroraSheet";
 
 const BOARD = `${AURORA_SCOPE} [data-skin~="board"]`;
 const ARRIVING_DIGIT = `${BOARD} [data-variant] > .value-arrive`;
@@ -272,13 +272,22 @@ describe("aurora moments", () => {
             }
         });
 
-        // Review Focus 3: over the glass, under every digit (2) and the selected and answer cells (1)
+        // Review Focus 3: 晨光 over the glass, under every digit (2) and the selected and answer cells (1)
         it("should lay the streaks and the ring at 0, unseen without their animations", () => {
             for (const selector of [RIBBON, RING]) {
                 const piece = declarationsOf(AURORA_CSS, selector);
                 expect(piece.get("z-index"), selector).toBe("0");
                 expect(piece.get("opacity"), selector).toBe("0");
             }
+        });
+
+        // 夜空's light is bright under light digits, so it passes under every cell's glass (88%), lighting the gaps; the
+        // grid's own stacking context keeps it over the page and its lights
+        it("should lay 夜空's streaks and ring under the cells' glass, inside the grid's own stacking context", () => {
+            for (const piece of [".aurora-group-ribbon", ".aurora-group-ring"]) {
+                expect(declarationsOf(AURORA_CSS, `${AURORA_DARK} ${piece}`).get("z-index"), piece).toBe("-1");
+            }
+            expect(declarationsOf(AURORA_CSS, `${AURORA_SCOPE} [data-skin~="board-grid"]`).get("isolation")).toBe("isolate");
         });
 
         it("should end each piece within the group effect", () => {
