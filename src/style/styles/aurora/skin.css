@@ -13,8 +13,10 @@
    inside its edge; the pane sheen the sheen's share at the top left of the sheen laid over each pane (which the
    contrast model composites into the words on it); the gloss the chosen segment's; the shadow the share of the
    shadow colour beneath it. The glow peak (not a palette density) is the share of the primary a completed group
-   or the solved board lights a cell with, the highest that keeps every theme's primary digit 3:1 over a cell's, a
-   peer's or the same digit's ground. 晨光 (light) first, 夜空 (dark) over it. */
+   or the solved board lights a cell with, keeping every theme's primary digit 3:1 over a cell's, a peer's or the
+   same digit's ground; the streak and surge peaks are the opacity a completed row's streak and the solved board's
+   surge reach, dimmed in 夜空, where they show through the cells' thin glass, so a digit stays 2.9:1 with either lit
+   beneath the glow at once. 晨光 (light) first, 夜空 (dark) over it. */
 :root[data-style="aurora"] {
     --aurora-strength: 0.85;
     --aurora-ribbon-strength: 0.68;
@@ -33,6 +35,8 @@
     --aurora-error-wash: 5%;
     --aurora-error-stripe: 8%;
     --aurora-glow-peak: 24%;
+    --aurora-streak-peak: 0.9;
+    --aurora-surge-peak: 0.9;
 }
 
 :root.dark[data-style="aurora"] {
@@ -52,7 +56,9 @@
     --aurora-tint-same: 22%;
     --aurora-error-wash: 5%;
     --aurora-error-stripe: 8%;
-    --aurora-glow-peak: 24%;
+    --aurora-glow-peak: 16%;
+    --aurora-streak-peak: 0.22;
+    --aurora-surge-peak: 0.4;
 }
 
 /* 夜空's pink and orange cross the sky with a streak of their own colours, a little stronger */
@@ -1056,13 +1062,13 @@
 
 @keyframes aurora-group-sweep-x {
     0% { opacity: 0; transform: scaleX(0.1); }
-    35% { opacity: 0.9; }
+    35% { opacity: var(--aurora-streak-peak); }
     100% { opacity: 0; transform: scaleX(1.1); }
 }
 
 @keyframes aurora-group-sweep-y {
     0% { opacity: 0; transform: scaleY(0.1); }
-    35% { opacity: 0.9; }
+    35% { opacity: var(--aurora-streak-peak); }
     100% { opacity: 0; transform: scaleY(1.1); }
 }
 
@@ -1099,8 +1105,8 @@
    135% of it, at -1: over the page and its lights, behind the grid and every cell's glass, so they show through the
    gaps and faintly through the glass. Each light fades out within the box (closest-side), as the canvas's ran past it
    and were blurred: aurora-1 ends where the canvas's did, aurora-2 and aurora-4 at the box's nearest edge. While
-   playing they swell from 60% and nothing to 0.9 and settle at 110% and 0.4, which they hold behind the scrim; still,
-   they stand there from the start. */
+   playing they swell from 60% and nothing to the surge peak (0.9, 夜空 0.4) and settle at 110% and 0.4, which they
+   hold behind the scrim; still, they stand there from the start. */
 [data-style="aurora"] [data-skin~="board"][data-celebration] {
     position: relative;
     isolation: isolate;
@@ -1130,7 +1136,7 @@
 
 @keyframes aurora-surge {
     0% { opacity: 0; transform: scale(0.6); }
-    40% { opacity: 0.9; }
+    40% { opacity: var(--aurora-surge-peak); }
     100% { opacity: 0.4; transform: scale(1.1); }
 }
 

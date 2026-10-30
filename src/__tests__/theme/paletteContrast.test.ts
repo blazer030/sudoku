@@ -3,6 +3,7 @@ import postcss, { type Rule } from "postcss";
 import { THEME_IDS_BY_STYLE, STYLE_IDS, STYLE_COLOR_MODES, type ColorMode, type ColorThemeId, type StyleId } from "@/theme/themeIds";
 import { contrastRatio, mixColors } from "@/theme/contrast";
 import { STYLES, getPalette, type Palette, type PaletteToken, type StyleOwnToken } from "@/theme/palettes";
+import { auroraProperty } from "../style/styles/aurora/auroraSheet";
 import { auroraNumber, auroraSkyGrounds, contrastOf, layOver, rgbOf, type AuroraSkyColours, type AuroraSkyGrounds, type Rgb } from "../style/styles/aurora/auroraSky";
 
 const TEXT = 4.5;
@@ -642,6 +643,7 @@ const auroraCellCases = (palette: Palette, mode: ColorMode, themeId: ColorThemeI
                 onBoard(`clue (foreground) on the celebration glow's peak over ${groundName}`, palette.foreground, peak, LARGE_OR_ICON),
             ];
         }),
+        ...auroraTransientCases(palette, mode, themeId, onBoard),
         onBoard("same digit (primary) on its tint", palette.primary, panes.sameDigit),
         onBoard("note on cell glass", palette.note, panes.cell),
         onBoard("note on peer glass", palette.note, panes.peer),
@@ -665,6 +667,46 @@ const auroraCellCases = (palette: Palette, mode: ColorMode, themeId: ColorThemeI
         onBoard("struck candidate (error) on the answer tint", palette.error, panes.answer, LARGE_OR_ICON),
         onBoard("struck candidate (error) on peer glass", palette.error, panes.peer, LARGE_OR_ICON),
     ];
+};
+
+// A transient light's colours and their shares, from a gradient's colour stops, listed from the top down as CSS paints
+const auroraLightShares = (selector: string): readonly (readonly [StyleOwnToken, number])[] =>
+    [...auroraProperty(selector, "background-image").matchAll(/var\(--color-(aurora-\d)\) (\d+)%/g)]
+        .map(([, token, share]) => [token as StyleOwnToken, Number(share) / 100] as const);
+
+// Transient lights over the board, at their peaks and at the glow's peak at once (the conservative case; each lasts
+// a few hundred ms), held to 2.9:1: a completed row's or column's streak, which in 夜空 lies under the cells' glass and
+// in 晨光 over it, at any one of its colours at full share; and the solved board's surge, all three of its lights
+// stacked under the cells' glass
+const TRANSIENT = 2.9;
+const STREAK = '[data-style="aurora"] .aurora-group-ribbon[data-kind="row"]';
+const SURGE = '[data-style="aurora"] [data-skin~="board"][data-celebration]::before';
+
+const auroraTransientCases = (palette: Palette, mode: ColorMode, themeId: ColorThemeId, onBoard: AuroraDrawn): AuroraBoardCase[] => {
+    const panes = auroraPanes(palette, mode, themeId);
+    const primary = rgbOf(palette.primary);
+    const glowPeak = auroraNumber(mode, themeId, "--aurora-glow-peak");
+    const streakPeak = auroraNumber(mode, themeId, "--aurora-streak-peak");
+    const surgePeak = auroraNumber(mode, themeId, "--aurora-surge-peak");
+    const streakUnderGlass = auroraProperty(`${mode === "dark" ? ':root.dark' : ':root'}[data-style="aurora"] .aurora-group-ribbon`, "z-index") === "-1";
+    const glowing = (pane: (ground: Rgb) => Rgb) => (ground: Rgb): Rgb => layOver(primary, glowPeak, pane(ground));
+    const surge = (ground: Rgb): Rgb => [...auroraLightShares(SURGE)].reverse()
+        .reduce((under, [token, share]) => layOver(rgbOf(auroraToken(palette, token)), share * surgePeak, under), ground);
+    const paneGrounds: [string, (ground: Rgb) => Rgb][] = [["cell glass", panes.cell], ["peer glass", panes.peer], ["the same digit's tint", panes.sameDigit]];
+    return paneGrounds.flatMap(([paneName, pane]) => [
+        ...auroraLightShares(STREAK).flatMap(([token, share]) => {
+            const light = rgbOf(auroraToken(palette, token));
+            const surface = streakUnderGlass
+                ? (ground: Rgb): Rgb => glowing(pane)(layOver(light, share * streakPeak, ground))
+                : (ground: Rgb): Rgb => layOver(light, share * streakPeak, glowing(pane)(ground));
+            return [
+                onBoard(`player's digit (primary) on ${paneName} at the group glow's peak with the streak's ${token}`, palette.primary, surface, TRANSIENT),
+                onBoard(`clue (foreground) on ${paneName} at the group glow's peak with the streak's ${token}`, palette.foreground, surface, TRANSIENT),
+            ];
+        }),
+        onBoard(`player's digit (primary) on ${paneName} at the celebration glow's peak over the surge`, palette.primary, ground => glowing(pane)(surge(ground)), TRANSIENT),
+        onBoard(`clue (foreground) on ${paneName} at the celebration glow's peak over the surge`, palette.foreground, ground => glowing(pane)(surge(ground)), TRANSIENT),
+    ]);
 };
 
 // Aurora's board and glass: the ink actually drawn on the glass actually drawn, over the sky actually under it. The

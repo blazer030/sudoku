@@ -239,11 +239,20 @@ describe("aurora moments", () => {
             expect(propertiesOf("aurora-group-glow").every(property => property === "background-color")).toBe(true);
         });
 
-        // The peak is the highest share that keeps every theme's primary digit 3:1 on the glass, a peer's glass and
-        // the same digit's tint (paletteContrast); 夜空's light digits lose contrast sooner than 晨光's dark ones
-        it("should peak the group and celebration glows at 24% of the primary in both modes", () => {
+        // The peak keeps every theme's primary digit 3:1 on the glass, a peer's glass and the same digit's tint, and
+        // 2.9:1 with 夜空's streak or surge lit beneath it at once (paletteContrast); 夜空's thin glass shows those
+        // lights through, so its glow is fainter
+        it("should peak the group and celebration glows at 24% of the primary in 晨光 and 16% in 夜空", () => {
             expect(auroraProperty(AURORA_LIGHT, "--aurora-glow-peak")).toBe("24%");
-            expect(auroraProperty(AURORA_DARK, "--aurora-glow-peak")).toBe("24%");
+            expect(auroraProperty(AURORA_DARK, "--aurora-glow-peak")).toBe("16%");
+        });
+
+        // 夜空's streak and surge lie under cells of 7% glass, so they are dimmed there to keep the digits readable
+        it("should peak the streak at 0.9 in 晨光 and 0.22 in 夜空, and the surge at 0.9 and 0.4", () => {
+            expect(auroraProperty(AURORA_LIGHT, "--aurora-streak-peak")).toBe("0.9");
+            expect(auroraProperty(AURORA_DARK, "--aurora-streak-peak")).toBe("0.22");
+            expect(auroraProperty(AURORA_LIGHT, "--aurora-surge-peak")).toBe("0.9");
+            expect(auroraProperty(AURORA_DARK, "--aurora-surge-peak")).toBe("0.4");
         });
 
         it("should ripple the glow out from the entered cell 45ms a step, each cell's 600ms from 100ms past its delay", () => {
@@ -290,7 +299,7 @@ describe("aurora moments", () => {
             for (const [name, axis] of [["aurora-group-sweep-x", "X"], ["aurora-group-sweep-y", "Y"]] as const) {
                 const frames = framesOf(name);
                 expect(frames.get("0%"), name).toEqual(new Map([["opacity", "0"], ["transform", `scale${axis}(0.1)`]]));
-                expect(frames.get("35%"), name).toEqual(new Map([["opacity", "0.9"]]));
+                expect(frames.get("35%"), name).toEqual(new Map([["opacity", "var(--aurora-streak-peak)"]]));
                 expect(frames.get("100%"), name).toEqual(new Map([["opacity", "0"], ["transform", `scale${axis}(1.1)`]]));
             }
         });
@@ -518,13 +527,13 @@ describe("aurora moments", () => {
             expect(declarationsOf(AURORA_CSS, `${AURORA_SCOPE} [data-skin~="page-scroller"]`).get("overflow-x")).toBe("hidden");
         });
 
-        it("should swell the surge from 60% and nothing to 0.9 at 40% and to 110% at 0.4, over 1.8s from the start", () => {
+        it("should swell the surge from 60% and nothing to its peak at 40% and to 110% at 0.4, over 1.8s from the start", () => {
             const frames = framesOf("aurora-surge");
 
             expect(animationTimingOf(animationOf(`${CELEBRATING}::before`), "aurora-surge")).toEqual({ durationMs: 1800, fixedDelayMs: 0 });
             expect(animationOf(`${CELEBRATING}::before`)).toContain(" both");
             expect(frames.get("0%")).toEqual(new Map([["opacity", "0"], ["transform", "scale(0.6)"]]));
-            expect(frames.get("40%")).toEqual(new Map([["opacity", "0.9"]]));
+            expect(frames.get("40%")).toEqual(new Map([["opacity", "var(--aurora-surge-peak)"]]));
             expect(frames.get("100%")).toEqual(new Map([["opacity", "0.4"], ["transform", "scale(1.1)"]]));
         });
 
