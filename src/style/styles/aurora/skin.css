@@ -1018,19 +1018,20 @@
     100% { opacity: 0; transform: scale(1.12); }
 }
 
+/* The surge runs past the board's sides, and on a narrow screen past the page's: the page scroller clips it there
+   rather than let the page scroll sideways (the lights have faded out by the box's edge). The page only ever scrolls
+   up and down. */
+[data-style="aurora"] [data-skin~="page-scroller"] {
+    overflow-x: hidden;
+}
+
 /* The solved board, from MomentsAurora's .surge / au-glow without their blur (spec rulings 18, 19). The board becomes a
    stacking context of its own, and its ::before lays three lights of the aurora (aurora-1, aurora-2, aurora-4) out to
    135% of it, at -1: over the page and its lights, behind the grid and every cell's glass, so they show through the
    gaps and faintly through the glass. Each light fades out within the box (closest-side), as the canvas's ran past it
-   and were blurred: aurora-1 ends where the canvas's did, aurora-2 and aurora-4 at the box's nearest edge. While playing they swell from 60% and nothing to 0.9 and settle at 110% and 0.4,
-   which they hold behind the scrim; still, they stand there from the start. */
-/* The surge runs past the board's sides, and on a narrow screen past the page's: the page scroller clips it there
-   rather than let the page scroll sideways (the lights have faded out by the box's edge). The page only ever scrolls
-   up and down. */
-[data-style="aurora"] [data-testid="page-scroller"] {
-    overflow-x: hidden;
-}
-
+   and were blurred: aurora-1 ends where the canvas's did, aurora-2 and aurora-4 at the box's nearest edge. While
+   playing they swell from 60% and nothing to 0.9 and settle at 110% and 0.4, which they hold behind the scrim; still,
+   they stand there from the start. */
 [data-style="aurora"] [data-skin~="board"][data-celebration] {
     position: relative;
     isolation: isolate;

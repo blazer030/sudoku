@@ -475,7 +475,7 @@ describe("aurora moments", () => {
 
         // Review Focus 4: past the board's sides the surge would let the page scroll sideways on a narrow screen
         it("should keep the page from scrolling sideways when the surge runs past the screen's sides", () => {
-            expect(declarationsOf(AURORA_CSS, `${AURORA_SCOPE} [data-testid="page-scroller"]`).get("overflow-x")).toBe("hidden");
+            expect(declarationsOf(AURORA_CSS, `${AURORA_SCOPE} [data-skin~="page-scroller"]`).get("overflow-x")).toBe("hidden");
         });
 
         it("should swell the surge from 60% and nothing to 0.9 at 40% and to 110% at 0.4, over 1.8s from the start", () => {
@@ -497,7 +497,6 @@ describe("aurora moments", () => {
             expect(animationTimingOf(animation, "aurora-celebration-glow")?.durationMs).toBe(900);
             expect(animation).toContain(`calc(${DISTANCE} * 85ms)`);
             expect(animation).not.toMatch(/abs\(|mod\(/);
-            expect(4 * 85 + 900).toBe(1240);
             expect(frames.get("0%")).toEqual(new Map([["background-color", GROUND]]));
             expect(frames.get("30%")).toEqual(new Map([["background-color", `color-mix(in srgb, var(--color-primary) 30%, ${GROUND})`]]));
             expect(frames.get("100%")).toEqual(new Map([["background-color", GROUND]]));
