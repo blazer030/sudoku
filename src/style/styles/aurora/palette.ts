@@ -5,16 +5,17 @@ import type { ColorMode, ColorThemeId } from "../../../theme/themeIds";
 
 // Aurora Glass: four lights drifting behind panes of frosted glass, from the style-research canvas (Aurora.dc.html).
 // 夜空 (dark) is a deep night sky with pale text; 晨光 (light) is a dawn with dark text and softer lights. A theme
-// changes only the colour chosen with (primary, selection, the player's digits); the sky, the lights and the glass
-// are the same in all four. Every glass pane is laid over the page's brightest point, "the ground", as the skin
+// changes only the colour chosen with (primary, selection, the player's digits) and, where the sky's red would pass
+// for that colour, the error's; the sky, the lights and the glass are the same in all four. Every glass pane is laid over the page's brightest point, "the ground", as the skin
 // lays them, so each board colour here is the colour the skin finally paints.
 
-interface AuroraSky {
+/** The error colour and its hover, which a danger button darkens to in 晨光 and lightens to in 夜空 */
+interface AuroraError { error: string; errorHover: string }
+
+interface AuroraSky extends AuroraError {
     background: string;
     foreground: string;
     foregroundSecondary: string;
-    error: string;
-    errorHover: string;
     onDanger: string;
     lights: readonly [string, string, string, string];
     glass: string;
@@ -111,7 +112,7 @@ const auroraSurfaces = (mode: ColorMode): AuroraSurfaces => {
     };
 };
 
-const auroraNeutrals = (mode: ColorMode): Neutrals<LightThemeColors> & Neutrals<DarkThemeColors> => {
+const auroraNeutrals = (mode: ColorMode, { error, errorHover }: AuroraError): Neutrals<LightThemeColors> & Neutrals<DarkThemeColors> => {
     const sky = AURORA_SKIES[mode];
     const { card, cellGlass, dialog } = auroraSurfaces(mode);
     return {
@@ -122,10 +123,10 @@ const auroraNeutrals = (mode: ColorMode): Neutrals<LightThemeColors> & Neutrals<
         "foreground-secondary": sky.foregroundSecondary,
         "foreground-muted": mixColors(sky.foregroundSecondary, 0.85, card),
         "cell-clue": cellGlass,
-        "danger": sky.error,
-        "danger-hover": sky.errorHover,
-        "error": sky.error,
-        "error-surface": mixColors(sky.error, AURORA_DENSITIES[mode].errorStripe, mixColors(sky.error, AURORA_DENSITIES[mode].errorWash, cellGlass)),
+        "danger": error,
+        "danger-hover": errorHover,
+        "error": error,
+        "error-surface": mixColors(error, AURORA_DENSITIES[mode].errorStripe, mixColors(error, AURORA_DENSITIES[mode].errorWash, cellGlass)),
         "shadow": mode === "dark" ? sky.background : sky.foreground,
         "on-primary": "#FFFFFF",
         "on-danger": sky.onDanger,
@@ -136,8 +137,9 @@ const auroraNeutrals = (mode: ColorMode): Neutrals<LightThemeColors> & Neutrals<
     };
 };
 
-// What a theme changes: the colour chosen with and the text on it, per mode
-interface AuroraAccent { primary: string; primaryHover: string; onPrimary: string }
+// What a theme changes: the colour chosen with and the text on it, per mode, and the error where the sky's red lies
+// too near that colour in hue
+interface AuroraAccent { primary: string; primaryHover: string; onPrimary: string; error?: AuroraError }
 
 const AURORA_ACCENTS: Readonly<Record<"purple" | "teal" | "pink" | "orange", Record<ColorMode, AuroraAccent>>> = {
     purple: {
@@ -148,13 +150,15 @@ const AURORA_ACCENTS: Readonly<Record<"purple" | "teal" | "pink" | "orange", Rec
         dark: { primary: "#4FE3C1", primaryHover: "#74EBD0", onPrimary: "#052A22" },
         light: { primary: "#0A6F61", primaryHover: "#085C51", onPrimary: "#FFFFFF" },
     },
+    // A red-orange, as the sky's red reads as the same red as the pink
     pink: {
-        dark: { primary: "#FF8CC6", primaryHover: "#FFA8D4", onPrimary: "#3A0820" },
-        light: { primary: "#C2185B", primaryHover: "#A21349", onPrimary: "#FFFFFF" },
+        dark: { primary: "#FF8CC6", primaryHover: "#FFA8D4", onPrimary: "#3A0820", error: { error: "#FF8F5A", errorHover: "#FFA57B" } },
+        light: { primary: "#C2185B", primaryHover: "#A21349", onPrimary: "#FFFFFF", error: { error: "#A34400", errorHover: "#893900" } },
     },
+    // A crimson-rose, as the sky's red lies close to the orange
     orange: {
-        dark: { primary: "#FFB86B", primaryHover: "#FFC98C", onPrimary: "#3A1E00" },
-        light: { primary: "#A84808", primaryHover: "#8F3D06", onPrimary: "#FFFFFF" },
+        dark: { primary: "#FFB86B", primaryHover: "#FFC98C", onPrimary: "#3A1E00", error: { error: "#FF8FAB", errorHover: "#FFA5BC" } },
+        light: { primary: "#A84808", primaryHover: "#8F3D06", onPrimary: "#FFFFFF", error: { error: "#A3165E", errorHover: "#89124F" } },
     },
 };
 
@@ -192,8 +196,8 @@ const auroraTheme = (id: ColorThemeId, accents: Record<ColorMode, AuroraAccent>)
         "highlight": extras.highlight,
     });
     return themeBuilder(
-        { ...auroraNeutrals("light"), "on-primary": accents.light.onPrimary },
-        { ...auroraNeutrals("dark"), "on-primary": accents.dark.onPrimary },
+        { ...auroraNeutrals("light", accents.light.error ?? AURORA_SKIES.light), "on-primary": accents.light.onPrimary },
+        { ...auroraNeutrals("dark", accents.dark.error ?? AURORA_SKIES.dark), "on-primary": accents.dark.onPrimary },
         lightExtras,
         darkExtras,
     )(id, colors("light", lightExtras), colors("dark", darkExtras));
