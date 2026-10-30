@@ -219,7 +219,8 @@ describe("Appearance.vue colour-theme swatches", () => {
             const { fill, mark } = swatchColors(settingsStore.style, mode, palette);
             expect((swatch.element as HTMLElement).style.backgroundColor, label).toBe(cssColor(fill));
             // One solid colour: no second half in the accent (blueprint's accent is its ink and aurora's is its primary, so it may be the fill or the mark)
-            if (palette.accent !== fill && palette.accent !== mark) expect(swatch.html(), label).not.toContain(cssColor(palette.accent));
+            const accentMayBeDrawn = ["blueprint", "aurora"].includes(settingsStore.style) && (palette.accent === fill || palette.accent === mark);
+            if (!accentMayBeDrawn) expect(swatch.html(), label).not.toContain(cssColor(palette.accent));
             expect(swatch.findAll("[style*='background']"), label).toHaveLength(0);
         }
         const check = wrapper.get("[data-testid='color-theme-check']");
