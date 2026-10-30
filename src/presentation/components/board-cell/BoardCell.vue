@@ -9,6 +9,7 @@
         ]"
         :data-leaving-value="leaving ? lastDigit : undefined"
         :data-arriving="arriving && value !== 0 ? '' : undefined"
+        :data-box-corner="boxCornerOf(row, column)"
         :data-group="inGroupEffect ? groupKinds.join(' ') : undefined"
         :data-selected="selected ? '' : undefined"
         :data-value-kind="value !== 0 ? valueKind : undefined"
@@ -116,6 +117,17 @@ const props = withDefaults(defineProps<{
     valueKind: "given",
     selected: false,
 });
+
+type BoxCorner = "top-left" | "top-right" | "bottom-left" | "bottom-right";
+
+/** Which corner of its 3x3 box a cell sits in (row and column are 0-based); undefined for the other five cells. */
+const boxCornerOf = (row: number, column: number): BoxCorner | undefined => {
+    const rowInBox = row % BOX_SIZE;
+    const columnInBox = column % BOX_SIZE;
+    const vertical = rowInBox === 0 ? "top" : rowInBox === BOX_SIZE - 1 ? "bottom" : undefined;
+    const horizontal = columnInBox === 0 ? "left" : columnInBox === BOX_SIZE - 1 ? "right" : undefined;
+    return vertical && horizontal ? `${vertical}-${horizontal}` : undefined;
+};
 
 const VARIANT_BACKGROUNDS: Record<CellVariant, string> = {
     default: "bg-card",
