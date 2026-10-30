@@ -530,6 +530,70 @@ describe("aurora's glass", () => {
         });
     });
 
+    describe("keys and controls", () => {
+        const KEY = skin("key");
+        const CONTROL = skin("control");
+        const LIT_CONTROL = `${AURORA_SCOPE} [aria-pressed="true"] > [data-skin~="control"]`;
+
+        it("should round a key into a circle of card glass, written at 500", () => {
+            const key = declarationsOf(AURORA_CSS, KEY);
+
+            expect(key.get("border-radius")).toBe("50%");
+            expect(key.get("background-color")).toBe("var(--aurora-glass-card-fill)");
+            expect(key.get("box-shadow")).toBe("var(--aurora-glass-frame)");
+            expect(key.get("font-weight")).toBe("500");
+        });
+
+        it("should light the key of the same digit, or erase, in the primary with a 22px glow", () => {
+            const key = declarationsOf(AURORA_CSS, `${KEY}[aria-pressed="true"]`);
+
+            expect(key.get("background-color")).toBe("var(--color-primary)");
+            expect(key.get("color")).toBe("var(--color-on-primary)");
+            expect(key.get("box-shadow")).toBe(glow("22px", "60%"));
+        });
+
+        it("should fade a used-up key to 35%", () => {
+            expect(declarationsOf(AURORA_CSS, `${KEY}:disabled`).get("opacity")).toBe("0.35");
+        });
+
+        it("should make a badge a full circle of the primary, written in on-primary, ringed in the page colour", () => {
+            const badge = declarationsOf(AURORA_CSS, skin("badge"));
+
+            expect(badge.get("border-radius")).toBe("50%");
+            expect(badge.get("background-color")).toBe("var(--color-primary)");
+            expect(badge.get("color")).toBe("var(--color-on-primary)");
+            expect(badge.get("box-shadow")).toBe("0 0 0 2px var(--color-background)");
+        });
+
+        it("should write a control in the text colour on no ground", () => {
+            const control = declarationsOf(AURORA_CSS, CONTROL);
+
+            expect(control.get("background-color")).toBe("transparent");
+            expect(control.get("box-shadow")).toBe("none");
+            expect(control.get("color")).toBe("var(--color-foreground)");
+        });
+
+        it("should lay a control that is on as the soft tint of the primary over card glass, written in the primary", () => {
+            const control = declarationsOf(AURORA_CSS, LIT_CONTROL);
+
+            expect(control.get("background-color")).toBe(
+                "color-mix(in srgb, var(--color-primary) var(--aurora-tint-soft), var(--aurora-glass-card-fill))",
+            );
+            expect(control.get("box-shadow")).toBe("var(--aurora-glass-frame)");
+            expect(control.get("color")).toBe("var(--color-primary)");
+        });
+
+        it.each([KEY, CONTROL])("should animate only the transform of a pressed %s", (selector) => {
+            expect(declarationsOf(AURORA_CSS, selector).get("transition-property")).toBe("transform");
+        });
+
+        it("should leave a key's and a control's press scale to the shared rule, which reduced motion stops", () => {
+            for (const selector of [KEY, CONTROL, LIT_CONTROL]) expect(declarationsOf(AURORA_CSS, selector).has("transform")).toBe(false);
+            for (const selector of [KEY, CONTROL]) expect(reducedMotionDeclarationsOf(AURORA_CSS, selector).get("transition")).toBe("none");
+            expect(reducedMotionDeclarationsOf(AURORA_CSS, `${AURORA_SCOPE} [data-press-motion][data-pressed]`).get("transform")).toBe("none");
+        });
+    });
+
     describe("the board", () => {
         const BOARD = skin("board");
         const cell = (variant: string): string => `${BOARD} [data-variant="${variant}"]`;

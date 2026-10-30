@@ -677,6 +677,12 @@ const AURORA_BOARD_CASES: AuroraBoardCase[] = STYLES.aurora.themes.flatMap(theme
         drawn("foreground on the soft tint over dialog glass", palette.foreground, softTint(dialog)),
         drawn("on-primary on primary (main buttons, hint pill, solid tags)", palette["on-primary"], palette.primary),
         drawn("on-danger on error (danger button)", palette["on-danger"], palette.error),
+        // The keypad: a control's icon is the text colour on the ground itself, one that is on is the primary on the soft
+        // tint over card glass, a badge's count and the lit key's digit are on-primary on the primary
+        drawn("control (foreground) on the ground", palette.foreground, auroraGround(palette, mode)),
+        drawn("control that is on (primary) on the soft tint over card glass", palette.primary, softTint(card)),
+        drawn("badge count (on-primary) on its primary disc", palette["on-primary"], palette.primary),
+        drawn("key digit (foreground) on card glass", palette.foreground, card),
         drawn("toast text (on-toast) on dialog glass", palette["on-toast"], dialog),
         // Home: the continue button's chips are drawn in 16% of the text colour over the primary in 晨光 and of on-primary
         // in 夜空, written in on-primary; a tile's icon is the primary on card glass (the 3:1 of an icon)

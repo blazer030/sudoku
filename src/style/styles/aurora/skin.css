@@ -833,6 +833,49 @@
     transition: transform 180ms ease-out;
 }
 
+/* The keypad, as the canvas's .key / .badge / .ctl. A key is a round pane of card glass; the one of the same digit
+   (or erase, while it is on) is the solid primary lit by a 22px glow of it, and a used-up key fades. A badge is a
+   full circle of the primary ringed in the page colour. A control is only its icon in the text colour; one that is
+   on lies in the soft tint of the primary over card glass and is written in the primary. A pressed piece scales
+   (the shared rule) and moves nothing else, so only its transform animates. */
+[data-style="aurora"] [data-skin~="key"] {
+    border-radius: 50%;
+    background-color: var(--aurora-glass-card-fill);
+    box-shadow: var(--aurora-glass-frame);
+    font-weight: 500;
+    transition-property: transform;
+}
+
+[data-style="aurora"] [data-skin~="key"][aria-pressed="true"] {
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+    box-shadow: 0 0 22px color-mix(in srgb, var(--color-primary) 60%, transparent);
+}
+
+[data-style="aurora"] [data-skin~="key"]:disabled {
+    opacity: 0.35;
+}
+
+[data-style="aurora"] [data-skin~="badge"] {
+    border-radius: 50%;
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+    box-shadow: 0 0 0 2px var(--color-background);
+}
+
+[data-style="aurora"] [data-skin~="control"] {
+    background-color: transparent;
+    box-shadow: none;
+    color: var(--color-foreground);
+    transition-property: transform;
+}
+
+[data-style="aurora"] [aria-pressed="true"] > [data-skin~="control"] {
+    background-color: color-mix(in srgb, var(--color-primary) var(--aurora-tint-soft), var(--aurora-glass-card-fill));
+    box-shadow: var(--aurora-glass-frame);
+    color: var(--color-primary);
+}
+
 /* Reduced motion: no scaling or sliding; the press wash stays. The lights and the ribbon hold still where they
    start, the ribbon at its resting tilt. */
 @media (prefers-reduced-motion: reduce) {
@@ -843,6 +886,8 @@
     }
 
     [data-style="aurora"] .segmented-indicator-motion,
+    [data-style="aurora"] [data-skin~="key"],
+    [data-style="aurora"] [data-skin~="control"],
     [data-style="aurora"] [data-skin~="check"]::after {
         transition: none;
     }
