@@ -97,8 +97,9 @@ const BLUEPRINT_DARK_UNDRAWN: ReadonlySet<string> = new Set([
     "error on card", "error on primary-light", "error on highlight", "error on cell-focus", "error on cell-scope", "error on cell-pattern",
     "error on cell-selected", "error on cell-peer",
 ]);
-// Aurora's selected cell is the solid theme colour with on-primary written on it, so no ink but on-primary is ever on
-// that surface; AURORA_BOARD_CASES checks on-primary there. An error cell wears the error colour (a wash and stripes of
+// Aurora's selected cell is the solid theme colour with on-primary written on it, its digit and its notes alike (a
+// highlighted note is an on-primary disc), so no ink but on-primary is ever on that surface; AURORA_BOARD_CASES checks
+// on-primary there. A selected error keeps its error variant and hatching, so the error colour never lands on it. An error cell wears the error colour (a wash and stripes of
 // it on the glass), so the theme colour is never written on the error surface.
 const AURORA_UNDRAWN: ReadonlySet<string> = new Set([
     "foreground on cell-selected", "primary on cell-selected", "error on cell-selected", "note on cell-selected", "primary on error-surface",
@@ -599,6 +600,49 @@ const auroraGlass = (palette: Palette, mode: ColorMode, layer: AuroraLayer): str
     return layer === "cell" ? cell : mixColors(sheen, auroraDensity(mode, "--aurora-sheen-peer"), cell);
 };
 
+// Aurora's cell tints, each laid by the skin over the cell's glass: the same digit and a step's pattern in the primary,
+// the answer cell in its soft tint, and the error cell's wash, then its stripes at their deepest
+interface AuroraCellGrounds { cell: string; peer: string; sameDigit: string; answer: string; errorDeepest: string }
+
+const auroraCellGrounds = (palette: Palette, mode: ColorMode): AuroraCellGrounds => {
+    const cell = auroraGlass(palette, mode, "cell");
+    const errorWash = mixColors(palette.error, auroraDensity(mode, "--aurora-error-wash"), cell);
+    return {
+        cell,
+        peer: auroraGlass(palette, mode, "peer"),
+        sameDigit: mixColors(palette.primary, auroraDensity(mode, "--aurora-tint-same"), cell),
+        answer: mixColors(palette.primary, auroraDensity(mode, "--aurora-tint-soft"), cell),
+        errorDeepest: mixColors(palette.error, auroraDensity(mode, "--aurora-error-stripe"), errorWash),
+    };
+};
+
+type AuroraDrawn = (name: string, foreground: string, background: string, minimum?: number) => AuroraBoardCase;
+
+// The board: the ink each cell is written in, on the glass the skin lays under it. The selected cell is the solid
+// primary, which must stand 3:1 off the glass around it; a selected error keeps its hatching and is marked by a 2px
+// ring of the solid primary alone (ruling 2), which must too. A step's struck-out candidate is a mark, held to 3:1.
+const auroraCellCases = (palette: Palette, mode: ColorMode, drawn: AuroraDrawn): AuroraBoardCase[] => {
+    const grounds = auroraCellGrounds(palette, mode);
+    return [
+        drawn("clue (foreground) on cell glass", palette.foreground, grounds.cell),
+        drawn("clue (foreground) on peer glass", palette.foreground, grounds.peer),
+        drawn("player's digit (primary) on cell glass", palette.primary, grounds.cell),
+        drawn("same digit (primary) on its tint", palette.primary, grounds.sameDigit),
+        drawn("note on cell glass", palette.note, grounds.cell),
+        drawn("note on peer glass", palette.note, grounds.peer),
+        drawn("selected cell's note (on-primary) on primary", palette["on-primary"], palette.primary),
+        drawn("selected cell's highlighted note (primary) on its on-primary disc", palette.primary, palette["on-primary"]),
+        drawn("selected cell's highlighted-note disc (on-primary) on primary", palette["on-primary"], palette.primary, LARGE_OR_ICON),
+        drawn("selected cell (solid primary) against cell glass", palette.primary, grounds.cell, LARGE_OR_ICON),
+        drawn("selected error's ring (primary) against cell glass", palette.primary, grounds.cell, LARGE_OR_ICON),
+        drawn("error digit on the error cell's deepest stripe", palette.error, grounds.errorDeepest),
+        drawn("step candidate (primary) on the answer tint", palette.primary, grounds.answer),
+        drawn("emphasised candidate (on-primary) on primary", palette["on-primary"], palette.primary),
+        drawn("struck candidate (error) on the answer tint", palette.error, grounds.answer, LARGE_OR_ICON),
+        drawn("struck candidate (error) on peer glass", palette.error, grounds.peer, LARGE_OR_ICON),
+    ];
+};
+
 // Aurora's board and glass: the ink actually drawn on the glass actually drawn. The selected cell is the solid theme
 // colour under on-primary; a peer or scope cell is the cell's glass under the sheen, on which every theme's primary
 // (the player's digit) reads 4.5:1. Cards, dialogs and the toast carry their words on the glass; the page's own
@@ -644,6 +688,7 @@ const AURORA_BOARD_CASES: AuroraBoardCase[] = STYLES.aurora.themes.flatMap(theme
         drawn("given-up chip icon (error) on its 12% tint over card glass", palette.error,
             mixColors(palette.error, 0.12, card), LARGE_OR_ICON),
         drawn("current step dot (primary) on card glass", palette.primary, card, LARGE_OR_ICON),
+        ...auroraCellCases(palette, mode, drawn),
     ];
 }));
 
@@ -790,6 +835,19 @@ describe("palette contrast", () => {
             expect(palette["cell-clue"]).toBe(auroraGlass(palette, mode, "cell"));
             expect(palette["cell-peer"]).toBe(auroraGlass(palette, mode, "peer"));
             expect(palette.toast).toBe(auroraGlass(palette, mode, "dialog"));
+        },
+    );
+
+    it.each(STYLES.aurora.themes.flatMap(theme => STYLE_COLOR_MODES.aurora.map(mode => [theme.id, mode] as const)))(
+        "should give aurora's %s %s palette the cell tints its skin lays",
+        (themeId, mode) => {
+            const palette = getPalette("aurora", themeId, mode);
+            const grounds = auroraCellGrounds(palette, mode);
+
+            expect(palette.highlight).toBe(grounds.sameDigit);
+            expect(palette["cell-pattern"]).toBe(grounds.sameDigit);
+            expect(palette["cell-focus"]).toBe(grounds.answer);
+            expect(palette["error-surface"]).toBe(grounds.errorDeepest);
         },
     );
 

@@ -158,6 +158,11 @@ const REQUIRED_SELECTORS: Record<StyleId, readonly string[]> = {
         '[data-skin~="pill"]',
         '[data-skin~="toast"]',
         '[data-skin~="dialog-scrim"]',
+        '[data-skin~="board"]',
+        "[data-box-corner",
+        "[data-selected]",
+        "[data-value-kind]",
+        "[data-note-highlight]",
     ],
 };
 

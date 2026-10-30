@@ -596,6 +596,202 @@
     box-shadow: 0 0 10px var(--color-primary);
 }
 
+/* The board, as the canvas's .board / .cell: nine panes of glass with the lights showing between them. The board and
+   its grid lay nothing of their own; the cells' lines are cleared and each cell paints its glass inside its padding
+   box alone, so the 1px lines and 3px box lines become gaps (spec ruling 5). A cell's glass is the glass colour at
+   the cell's density under the cell's sheen. */
+[data-style="aurora"] {
+    --aurora-glass-cell-fill: color-mix(in srgb, var(--color-glass-sheen) var(--aurora-sheen-cell), color-mix(in srgb, var(--color-glass) var(--aurora-glass-cell), transparent));
+}
+
+[data-style="aurora"] [data-skin~="board"] {
+    background-color: transparent;
+    box-shadow: none;
+}
+
+[data-style="aurora"] [data-skin~="board-grid"] {
+    --board-line: transparent;
+    --board-box-line: transparent;
+    background-color: transparent;
+    border-color: transparent;
+    box-shadow: none;
+}
+
+/* Every cell paints the ground its variant sets (ruling 7), which the group and celebration glows also start and end
+   on. Cells are rounded 5px and a box's four outer corners 14px; the shared ring is dropped, the selected and answer
+   cells draw their own. A cell's ::before is the arrival's pulse. */
+[data-style="aurora"] [data-skin~="board"] [data-variant] {
+    position: relative;
+    background-clip: padding-box;
+    background-color: var(--aurora-cell-ground);
+    border-radius: 5px;
+    box-shadow: none;
+}
+
+[data-style="aurora"] [data-skin~="board"] [data-box-corner="top-left"] {
+    border-top-left-radius: 14px;
+}
+
+[data-style="aurora"] [data-skin~="board"] [data-box-corner="top-right"] {
+    border-top-right-radius: 14px;
+}
+
+[data-style="aurora"] [data-skin~="board"] [data-box-corner="bottom-left"] {
+    border-bottom-left-radius: 14px;
+}
+
+[data-style="aurora"] [data-skin~="board"] [data-box-corner="bottom-right"] {
+    border-bottom-right-radius: 14px;
+}
+
+/* Digits and notes lie above every glow: the selected and answer cells (1) and the pulse and group glows (0), so a
+   neighbour's light never covers them (ruling 4) */
+[data-style="aurora"] [data-skin~="board"] [data-variant] > div {
+    position: relative;
+    z-index: 2;
+}
+
+/* Clues in the text colour at 500, the player's digits in the primary at 600 */
+[data-style="aurora"] [data-skin~="board"] [data-value-kind="given"] > div {
+    color: var(--color-foreground);
+    font-weight: 500;
+}
+
+[data-style="aurora"] [data-skin~="board"] [data-value-kind="entered"] > div {
+    color: var(--color-primary);
+    font-weight: 600;
+}
+
+/* Plain cells and clues are the cell's glass; an unused focus cell takes the soft tint, as its token */
+[data-style="aurora"] [data-skin~="board"] [data-variant="default"],
+[data-style="aurora"] [data-skin~="board"] [data-variant="clue"] {
+    --aurora-cell-ground: var(--aurora-glass-cell-fill);
+}
+
+[data-style="aurora"] [data-skin~="board"] [data-variant="focus"] {
+    --aurora-cell-ground: color-mix(in srgb, var(--color-primary) var(--aurora-tint-soft), var(--aurora-glass-cell-fill));
+}
+
+/* The selected cell's row, column and box, and a step's scope, lay the peer sheen over the glass (晨光: 95% of the sheen in all) */
+[data-style="aurora"] [data-skin~="board"] [data-variant="peer"],
+[data-style="aurora"] [data-skin~="board"] [data-variant="scope"] {
+    --aurora-cell-ground: color-mix(in srgb, var(--color-glass-sheen) var(--aurora-sheen-peer), var(--aurora-glass-cell-fill));
+}
+
+/* The same digit, and a step's pattern, take a flat tint of the primary and are written in it */
+[data-style="aurora"] [data-skin~="board"] [data-variant="same-digit"],
+[data-style="aurora"] [data-skin~="board"] [data-variant="pattern"] {
+    --aurora-cell-ground: color-mix(in srgb, var(--color-primary) var(--aurora-tint-same), var(--aurora-glass-cell-fill));
+}
+
+[data-style="aurora"] [data-skin~="board"] [data-variant="same-digit"][data-value-kind] > div,
+[data-style="aurora"] [data-skin~="board"] [data-variant="pattern"][data-value-kind] > div {
+    color: var(--color-primary);
+}
+
+/* The selected cell is a lit pane of the solid primary, ringed in 2px of 40% of it and glowing 10px of 35% (spec
+   ruling 9: the canvas's 22px / 70% hid the neighbours' digits), written in on-primary, its notes too; the selected
+   digit's note is an on-primary disc, as the primary would vanish into the cell. It lies above its neighbours'
+   glass (1), below every digit. */
+[data-style="aurora"] [data-skin~="board"] [data-variant="selected"] {
+    --aurora-cell-ground: var(--color-primary);
+    position: relative;
+    z-index: 1;
+    box-shadow:
+        0 0 0 2px color-mix(in srgb, var(--color-primary) 40%, transparent),
+        0 0 10px color-mix(in srgb, var(--color-primary) 35%, transparent);
+}
+
+[data-style="aurora"] [data-skin~="board"] [data-variant="selected"][data-value-kind] > div {
+    color: var(--color-on-primary);
+}
+
+[data-style="aurora"] [data-skin~="board"] [data-variant="selected"] .font-note.text-note {
+    color: var(--color-on-primary);
+}
+
+[data-style="aurora"] [data-skin~="board"] [data-variant="selected"] [data-note-highlight] {
+    background-color: var(--color-on-primary);
+    color: var(--color-primary);
+}
+
+/* A step's answer cell, on every board that shows a step: the primary's soft tint, a 2px inner line of it and the
+   selected cell's glow, above its neighbours' glass */
+[data-style="aurora"] [data-skin~="board"] [data-variant="answer"] {
+    --aurora-cell-ground: color-mix(in srgb, var(--color-primary) var(--aurora-tint-soft), var(--aurora-glass-cell-fill));
+    position: relative;
+    z-index: 1;
+    box-shadow:
+        inset 0 0 0 2px var(--color-primary),
+        0 0 10px color-mix(in srgb, var(--color-primary) 35%, transparent);
+}
+
+/* An error cell, and a step's wrong cell, take a wash of the error colour hatched at 45° in 2px lines of it 6px apart
+   (spec ruling 8, plan ruling 1), written in it: told from the selected cell (solid) and the same digit (flat) by
+   its pattern as well as its red. Laid after those cells' rules. A step's wrong cell keeps the markup's inner line of
+   the error colour; pressed, the press wash lies over the hatching. */
+[data-style="aurora"] [data-skin~="board"] [data-variant="error"],
+[data-style="aurora"] [data-skin~="board"] [data-variant="wrong"] {
+    --aurora-cell-ground: color-mix(in srgb, var(--color-error) var(--aurora-error-wash), var(--aurora-glass-cell-fill));
+    background-image: repeating-linear-gradient(45deg, color-mix(in srgb, var(--color-error) var(--aurora-error-stripe), transparent) 0 2px, transparent 2px 6px);
+}
+
+[data-style="aurora"] [data-skin~="board"] [data-variant="wrong"] {
+    box-shadow: inset 0 0 0 2px var(--color-error);
+}
+
+[data-style="aurora"] [data-skin~="board"] [data-variant="error"][data-pressed],
+[data-style="aurora"] [data-skin~="board"] [data-variant="wrong"][data-pressed] {
+    background-image:
+        linear-gradient(var(--press-overlay), var(--press-overlay)),
+        repeating-linear-gradient(45deg, color-mix(in srgb, var(--color-error) var(--aurora-error-stripe), transparent) 0 2px, transparent 2px 6px);
+}
+
+[data-style="aurora"] [data-skin~="board"] [data-variant="error"][data-value-kind="entered"] > div,
+[data-style="aurora"] [data-skin~="board"] [data-variant="wrong"][data-value-kind="entered"] > div {
+    color: var(--color-error);
+}
+
+/* A selected error keeps its hatching and its red digit; the selection is a 2px ring of the solid primary, its only
+   mark, so it is full strength (plan ruling 2: 40% of it reads 1.81–2.55 on the glass) */
+[data-style="aurora"] [data-skin~="board"] [data-variant="error"][data-selected] {
+    position: relative;
+    z-index: 1;
+    box-shadow: 0 0 0 2px var(--color-primary);
+}
+
+/* Notes at 500 in the note colour; the selected digit's note in the primary at 700, without the shared disc. A step's
+   candidates are the primary at 700, its emphasised one (only answer and pattern cells carry one) a primary disc
+   under on-primary, and its struck-out ones the error colour under a 1.5px strike, on every board that shows a step. */
+[data-style="aurora"] [data-skin~="board"] .font-note.text-note {
+    color: var(--color-note);
+    font-weight: 500;
+}
+
+[data-style="aurora"] [data-skin~="board"] [data-note-highlight] {
+    background-color: transparent;
+    color: var(--color-primary);
+    font-weight: 700;
+}
+
+[data-style="aurora"] [data-skin~="board"] .font-note.text-primary {
+    color: var(--color-primary);
+    font-weight: 700;
+}
+
+[data-style="aurora"] [data-skin~="board"] :is([data-variant="answer"], [data-variant="pattern"]) [data-note-highlight] {
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+}
+
+[data-style="aurora"] [data-skin~="board"] .font-note.strike-diagonal {
+    color: var(--color-error);
+}
+
+[data-style="aurora"] [data-skin~="board"] .font-note.strike-diagonal::after {
+    background-image: linear-gradient(to top right, transparent calc(50% - 0.75px), currentColor calc(50% - 0.75px), currentColor calc(50% + 0.75px), transparent calc(50% + 0.75px));
+}
+
 /* Press feedback: a faint wash of the text colour. It is a colour change, so it stays on under reduced motion. */
 [data-style="aurora"] [data-pressed] {
     --press-overlay: color-mix(in srgb, var(--color-foreground) 8%, transparent);

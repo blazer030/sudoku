@@ -98,7 +98,7 @@ const ruleOrder = (selector: string): number => {
     let position = 0;
     postcss.parse(AURORA_CSS).walkRules((rule: Rule) => {
         position += 1;
-        if (rule.selector === selector) order = position;
+        if (rule.selectors.map(item => item.replace(/\s+/g, " ").trim()).join(", ") === selector) order = position;
     });
     return order;
 };
@@ -527,6 +527,191 @@ describe("aurora's glass", () => {
             expect(declarationsOf(AURORA_CSS, `${skin("swatch")}[aria-pressed="true"]`).get("box-shadow")).toBe(
                 `0 0 0 3px var(--color-background), 0 0 0 5px var(--color-primary), ${glow("16px", "60%")}`,
             );
+        });
+    });
+
+    describe("the board", () => {
+        const BOARD = skin("board");
+        const cell = (variant: string): string => `${BOARD} [data-variant="${variant}"]`;
+        const groundOf = (variant: string): string => declarationsOf(AURORA_CSS, cell(variant)).get("--aurora-cell-ground") ?? "";
+        const CELL_GLASS = "var(--aurora-glass-cell-fill)";
+        const over = (token: string, amount: string, base: string): string => `color-mix(in srgb, var(--color-${token}) ${amount}, ${base})`;
+        const SELECTION_GLOW = `0 0 10px ${soft("primary", "35%")}`;
+        const ERROR_STRIPES = `repeating-linear-gradient(45deg, ${soft("error", "var(--aurora-error-stripe)")} 0 2px, transparent 2px 6px)`;
+
+        it("should lay no ground or shadow under the board and its grid, and clear the grid's frame and lines", () => {
+            const board = declarationsOf(AURORA_CSS, BOARD);
+            const grid = declarationsOf(AURORA_CSS, skin("board-grid"));
+
+            expect(board.get("background-color")).toBe("transparent");
+            expect(board.get("box-shadow")).toBe("none");
+            expect(grid.get("background-color")).toBe("transparent");
+            expect(grid.get("box-shadow")).toBe("none");
+            expect(grid.get("border-color")).toBe("transparent");
+            expect(grid.get("--board-line")).toBe("transparent");
+            expect(grid.get("--board-box-line")).toBe("transparent");
+        });
+
+        it("should make the cell's glass a tint of the glass colour at the cell's density under the cell's sheen", () => {
+            expect(auroraProperty(AURORA_SCOPE, "--aurora-glass-cell-fill")).toBe(
+                `color-mix(in srgb, var(--color-glass-sheen) var(--aurora-sheen-cell), ${soft("glass", "var(--aurora-glass-cell)")})`,
+            );
+        });
+
+        it("should paint each cell its own ground inside its padding box, rounded 5px, so the lines become gaps", () => {
+            const cells = declarationsOf(AURORA_CSS, `${BOARD} [data-variant]`);
+
+            expect(cells.get("background-clip")).toBe("padding-box");
+            expect(cells.get("background-color")).toBe("var(--aurora-cell-ground)");
+            expect(cells.get("border-radius")).toBe("5px");
+            expect(cells.get("box-shadow")).toBe("none");
+        });
+
+        it.each([
+            ["top-left", "border-top-left-radius"],
+            ["top-right", "border-top-right-radius"],
+            ["bottom-left", "border-bottom-left-radius"],
+            ["bottom-right", "border-bottom-right-radius"],
+        ])("should round a box's %s corner 14px and that corner alone", (corner, property) => {
+            const declarations = declarationsOf(AURORA_CSS, `${BOARD} [data-box-corner="${corner}"]`);
+
+            expect([...declarations]).toEqual([[property, "14px"]]);
+        });
+
+        it("should lay plain cells and clues on the cell's glass, and peers and a step's scope under the peer sheen", () => {
+            expect(groundOf("default")).toBe(CELL_GLASS);
+            expect(groundOf("clue")).toBe(CELL_GLASS);
+            expect(groundOf("peer")).toBe(over("glass-sheen", "var(--aurora-sheen-peer)", CELL_GLASS));
+            expect(groundOf("scope")).toBe(over("glass-sheen", "var(--aurora-sheen-peer)", CELL_GLASS));
+        });
+
+        it("should tint the same digit and a step's pattern with the primary, written in it", () => {
+            expect(groundOf("same-digit")).toBe(over("primary", "var(--aurora-tint-same)", CELL_GLASS));
+            expect(groundOf("pattern")).toBe(over("primary", "var(--aurora-tint-same)", CELL_GLASS));
+            expect(declarationsOf(AURORA_CSS, `${cell("same-digit")}[data-value-kind] > div`).get("color")).toBe("var(--color-primary)");
+            expect(declarationsOf(AURORA_CSS, `${cell("pattern")}[data-value-kind] > div`).get("color")).toBe("var(--color-primary)");
+        });
+
+        it("should write clues in the text colour at 500 and the player's digits in the primary at 600", () => {
+            const given = declarationsOf(AURORA_CSS, `${BOARD} [data-value-kind="given"] > div`);
+            const entered = declarationsOf(AURORA_CSS, `${BOARD} [data-value-kind="entered"] > div`);
+
+            expect(given.get("color")).toBe("var(--color-foreground)");
+            expect(given.get("font-weight")).toBe("500");
+            expect(entered.get("color")).toBe("var(--color-primary)");
+            expect(entered.get("font-weight")).toBe("600");
+        });
+
+        it("should lay every digit above the glows, the selected and answer cells (ruling 4)", () => {
+            const digits = declarationsOf(AURORA_CSS, `${BOARD} [data-variant] > div`);
+
+            expect(digits.get("position")).toBe("relative");
+            expect(digits.get("z-index")).toBe("2");
+        });
+
+        it("should light the selected cell with the solid primary, a 40% ring and a 10px glow, written in on-primary", () => {
+            const selected = declarationsOf(AURORA_CSS, cell("selected"));
+
+            expect(groundOf("selected")).toBe("var(--color-primary)");
+            expect(selected.get("position")).toBe("relative");
+            expect(selected.get("z-index")).toBe("1");
+            expect(selected.get("box-shadow")).toBe(`0 0 0 2px ${soft("primary", "40%")}, ${SELECTION_GLOW}`);
+            expect(selected.has("background-image")).toBe(false);
+            expect(declarationsOf(AURORA_CSS, cell("same-digit")).has("background-image")).toBe(false);
+            expect(declarationsOf(AURORA_CSS, `${cell("selected")}[data-value-kind] > div`).get("color")).toBe("var(--color-on-primary)");
+        });
+
+        it("should write the selected cell's notes in on-primary and its highlighted note as an on-primary disc", () => {
+            const highlighted = declarationsOf(AURORA_CSS, `${cell("selected")} [data-note-highlight]`);
+
+            expect(declarationsOf(AURORA_CSS, `${cell("selected")} .font-note.text-note`).get("color")).toBe("var(--color-on-primary)");
+            expect(highlighted.get("background-color")).toBe("var(--color-on-primary)");
+            expect(highlighted.get("color")).toBe("var(--color-primary)");
+        });
+
+        it.each(["error", "wrong"])("should wash an %s cell in the error colour and hatch it, written in it", (variant) => {
+            expect(groundOf(variant)).toBe(over("error", "var(--aurora-error-wash)", CELL_GLASS));
+            expect(declarationsOf(AURORA_CSS, cell(variant)).get("background-image")).toBe(ERROR_STRIPES);
+            expect(declarationsOf(AURORA_CSS, `${cell(variant)}[data-value-kind="entered"] > div`).get("color")).toBe("var(--color-error)");
+        });
+
+        it("should lay the error rules after the selected, same-digit and peer cells'", () => {
+            const errors = ruleOrder(`${cell("error")}, ${cell("wrong")}`);
+
+            expect(errors).toBeGreaterThan(ruleOrder(cell("selected")));
+            expect(errors).toBeGreaterThan(ruleOrder(`${cell("same-digit")}, ${cell("pattern")}`));
+            expect(errors).toBeGreaterThan(ruleOrder(`${cell("peer")}, ${cell("scope")}`));
+        });
+
+        it("should keep the hatching when pressed, under the press wash", () => {
+            expect(declarationsOf(AURORA_CSS, `${cell("error")}[data-pressed]`).get("background-image")).toBe(
+                `linear-gradient(var(--press-overlay), var(--press-overlay)), ${ERROR_STRIPES}`,
+            );
+        });
+
+        it("should mark a selected error by a ring of the solid primary alone, keeping its hatching (ruling 2)", () => {
+            const selectedError = declarationsOf(AURORA_CSS, `${cell("error")}[data-selected]`);
+
+            expect(selectedError.get("box-shadow")).toBe("0 0 0 2px var(--color-primary)");
+            expect(selectedError.get("z-index")).toBe("1");
+            expect(selectedError.has("background-image")).toBe(false);
+            expect(selectedError.has("--aurora-cell-ground")).toBe(false);
+        });
+
+        it("should mark a step's answer cell, on every board, by the soft tint, a 2px inner line and the selection's glow", () => {
+            const answer = declarationsOf(AURORA_CSS, cell("answer"));
+
+            expect(groundOf("answer")).toBe(over("primary", "var(--aurora-tint-soft)", CELL_GLASS));
+            expect(answer.get("box-shadow")).toBe(`inset 0 0 0 2px var(--color-primary), ${SELECTION_GLOW}`);
+            expect(answer.get("position")).toBe("relative");
+            expect(answer.get("z-index")).toBe("1");
+        });
+
+        it("should write notes at 500 in the note colour and the selected digit's in the primary at 700", () => {
+            const notes = declarationsOf(AURORA_CSS, `${BOARD} .font-note.text-note`);
+            const highlighted = declarationsOf(AURORA_CSS, `${BOARD} [data-note-highlight]`);
+
+            expect(notes.get("color")).toBe("var(--color-note)");
+            expect(notes.get("font-weight")).toBe("500");
+            expect(highlighted.get("background-color")).toBe("transparent");
+            expect(highlighted.get("color")).toBe("var(--color-primary)");
+            expect(highlighted.get("font-weight")).toBe("700");
+        });
+
+        it("should write a step's candidates in the primary at 700, its emphasised one a primary disc, on every board", () => {
+            const candidates = declarationsOf(AURORA_CSS, `${BOARD} .font-note.text-primary`);
+            const emphasised = declarationsOf(AURORA_CSS, `${BOARD} :is([data-variant="answer"], [data-variant="pattern"]) [data-note-highlight]`);
+
+            expect(candidates.get("color")).toBe("var(--color-primary)");
+            expect(candidates.get("font-weight")).toBe("700");
+            expect(emphasised.get("background-color")).toBe("var(--color-primary)");
+            expect(emphasised.get("color")).toBe("var(--color-on-primary)");
+        });
+
+        it("should strike a step's eliminated candidates in the error colour with a 1.5px line, on every board", () => {
+            expect(declarationsOf(AURORA_CSS, `${BOARD} .font-note.strike-diagonal`).get("color")).toBe("var(--color-error)");
+            expect(declarationsOf(AURORA_CSS, `${BOARD} .font-note.strike-diagonal::after`).get("background-image")).toBe(
+                "linear-gradient(to top right, transparent calc(50% - 0.75px), currentColor calc(50% - 0.75px), "
+                + "currentColor calc(50% + 0.75px), transparent calc(50% + 0.75px))",
+            );
+        });
+
+        it("should leave every board rule free of hint mode, so Game Review and the Walkthrough match", () => {
+            const hintModeRules: string[] = [];
+            postcss.parse(AURORA_CSS).walkRules((rule: Rule) => {
+                if (rule.selector.includes("data-hint-mode")) hintModeRules.push(rule.selector);
+            });
+
+            expect(hintModeRules).toEqual([]);
+        });
+
+        it("should leave the cells' ::before to the arrival's pulse", () => {
+            const cellBefores: string[] = [];
+            postcss.parse(AURORA_CSS).walkRules((rule: Rule) => {
+                if (/\[data-variant[^\]]*\][^ ]*::before/.test(rule.selector)) cellBefores.push(rule.selector);
+            });
+
+            expect(cellBefores).toEqual([]);
         });
     });
 
