@@ -255,8 +255,9 @@ const ribbonPainter = (ribbon: Ribbon, colours: readonly [Rgb, Rgb], strength: n
     };
 };
 
-// The model reads the sky's numbers from top-level rules only, so none may be set again inside a media query
-const AT_RULE_SKY = /^--aurora-(?:strength|ribbon-|light-fade|blob-size|a\d-|drift-|overscan|glass-)/;
+// The model reads the sky's and the board's numbers from top-level rules only, so none may be set again inside a
+// media query
+const AT_RULE_SKY = /^--aurora-(?:strength|ribbon-|light-fade|blob-size|a\d-|drift-|overscan|glass-|tint-|glow-|streak-|surge-|pane-sheen|error-)/;
 const assertSkyUnconditional = (): void => {
     const hits: string[] = [];
     postcss.parse(AURORA_CSS).walkDecls((declaration) => {
