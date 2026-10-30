@@ -13,7 +13,15 @@ const RIBBON = `${AURORA_SCOPE} .app-safe-area::before`;
 const LAYERS = [FIRST_LIGHTS, SECOND_LIGHTS, RIBBON];
 const skin = (token: string): string => `${AURORA_SCOPE} [data-skin~="${token}"]`;
 
-const blob = (light: number): string => `radial-gradient(circle, var(--color-aurora-${light}) 0, transparent 66%)`;
+// Each light eases out like a blur, without a filter: its full colour at the core, then these shares of it at these
+// points of its fade, then nothing (a Gaussian's 100, 75, 40 and 13 per cent), so it has no cone's hard tip
+const FALLOFF: readonly (readonly [share: number, at: number])[] = [[75, 16], [40, 30], [13, 45]];
+const FADE_END = 66;
+const fading = (colour: string, scale: number): string => FALLOFF
+    .map(([share, at]) => `color-mix(in srgb, ${colour} ${share}%, transparent) ${Math.round(at * scale)}%`).join(", ");
+const blob = (light: number): string => `radial-gradient(circle, var(--color-aurora-${light}) 0, ${fading(`var(--color-aurora-${light})`, 1)}, transparent ${FADE_END}%)`;
+// The ribbon's ellipses fade over their whole size, so the same falloff is stretched from 66 to 100
+const ribbonLight = (at: string, colour: string): string => `radial-gradient(ellipse 24% 50% at ${at}, ${colour} 0, ${fading(colour, 100 / FADE_END)}, transparent 100%)`;
 const fromOverscan = (property: string): string => `calc(var(--aurora-overscan) + var(${property}))`;
 
 // The keyframes called `name`: each step's selector and its declarations
@@ -908,16 +916,24 @@ describe("aurora skin", () => {
             const ribbon = declarationsOf(AURORA_CSS, RIBBON);
             const image = ribbon.get("background-image") ?? "";
 
-            expect(image.match(/radial-gradient\(ellipse /g)).toHaveLength(2);
-            expect(image.indexOf("color-mix(in srgb, var(--color-aurora-1) var(--aurora-ribbon-first), transparent)"))
-                .toBeLessThan(image.indexOf("color-mix(in srgb, var(--color-aurora-2) var(--aurora-ribbon-second), transparent)"));
-            expect(image).not.toContain("linear-gradient");
+            expect(ribbon.get("--aurora-ribbon-first-light")).toBe("color-mix(in srgb, var(--color-aurora-1) var(--aurora-ribbon-first), transparent)");
+            expect(ribbon.get("--aurora-ribbon-second-light")).toBe("color-mix(in srgb, var(--color-aurora-2) var(--aurora-ribbon-second), transparent)");
+            expect(image).toBe(`${ribbonLight("33% 50%", "var(--aurora-ribbon-first-light)")}, ${ribbonLight("64% 50%", "var(--aurora-ribbon-second-light)")}`);
             expect(ribbon.get("transform")).toBe("rotate(-12deg)");
+        });
+
+        // auroraGround takes a light's core at its full colour: the falloff starts there and only ever fades
+        it("should ease every light out from its full colour at the core, never brighter further out", () => {
+            const shares = [100, ...FALLOFF.map(([share]) => share), 0];
+            const points = [0, ...FALLOFF.map(([, at]) => at), FADE_END];
+
+            expect(shares.every((share, index) => index === 0 || share < shares[index - 1])).toBe(true);
+            expect(points.every((point, index) => index === 0 || point > points[index - 1])).toBe(true);
         });
 
         // The contrast model takes the brightest point as one light's core: no two cores ever meet
         it.each(VIEWPORTS)("should keep every two lights' cores a fade radius apart in a %ix%i window", (width, height) => {
-            const fadeRadius = 0.66 * geometry("--aurora-blob-size") * Math.SQRT2 / 2;
+            const fadeRadius = FADE_END / 100 * geometry("--aurora-blob-size") * Math.SQRT2 / 2;
             const centres = centresIn(width, height);
             const drifts = driftOf(1) + driftOf(2);
 

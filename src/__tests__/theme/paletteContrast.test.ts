@@ -831,11 +831,11 @@ describe("palette contrast", () => {
             STYLES.aurora.themes.flatMap(theme => STYLE_COLOR_MODES.aurora.map(mode => `aurora/${theme.id}/${mode}`))));
     });
 
-    // The spec's brightest points: 夜空 #107E5F, 晨光 #BDACFE
+    // The brightest points, the spec's lights made fainter (夜空 0.3, 晨光 0.62): 夜空 #0D604C, 晨光 #C7BAFD
     it.each(STYLES.aurora.themes.flatMap(theme => STYLE_COLOR_MODES.aurora.map(mode => [theme.id, mode] as const)))(
-        "should model aurora's %s %s ground at the spec's brightest point",
+        "should model aurora's %s %s ground at its brightest point",
         (themeId, mode) => {
-            const expected = { dark: "#107E5F", light: "#BDACFE" }[mode];
+            const expected = { dark: "#0D604C", light: "#C7BAFD" }[mode];
             const channels = (hex: string): number[] => [1, 3, 5].map(start => Number.parseInt(hex.slice(start, start + 2), 16));
             const ground = channels(auroraGround(getPalette("aurora", themeId, mode), mode));
 
