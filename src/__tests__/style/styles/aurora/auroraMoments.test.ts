@@ -32,6 +32,17 @@ const animationOf = (selector: string): string => declarationsOf(AURORA_CSS, sel
 
 const propertiesOf = (name: string): string[] => [...framesOf(name).values()].flatMap(frame => [...frame.keys()]);
 
+// The top-level rules in source order, by their collapsed selectors
+const ruleOrder = (): string[][] => {
+    const order: string[][] = [];
+    postcss.parse(AURORA_CSS).walkRules((rule) => {
+        if (rule.parent?.type === "atrule") return;
+        order.push(rule.selectors.map(collapse));
+    });
+    return order;
+};
+const indexOfRule = (selector: string): number => ruleOrder().findIndex(selectors => selectors.includes(selector));
+
 describe("aurora moments", () => {
     // From Aurora.dc's softA / pulseA / fadeA, without their blur (spec ruling 11) and with the pulse kept to the
     // cell and its gaps (spec ruling 9)
@@ -427,16 +438,6 @@ describe("aurora moments", () => {
         const GROUND = "var(--aurora-cell-ground)";
         const DISTANCE = "max(var(--cell-row) - 4, 4 - var(--cell-row), var(--cell-column) - 4, 4 - var(--cell-column))";
 
-        // The top-level rules in source order, by their collapsed selectors
-        const ruleOrder = (): string[][] => {
-            const order: string[][] = [];
-            postcss.parse(AURORA_CSS).walkRules((rule) => {
-                if (rule.parent?.type === "atrule") return;
-                order.push(rule.selectors.map(collapse));
-            });
-            return order;
-        };
-        const indexOfRule = (selector: string): number => ruleOrder().findIndex(selectors => selectors.includes(selector));
 
         // Attributes, classes and pseudo-classes: an :is() counts as its first argument (all of these weigh the same),
         // a :not() as its argument
