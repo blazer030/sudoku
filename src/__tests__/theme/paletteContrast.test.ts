@@ -3,6 +3,8 @@ import postcss, { type Rule } from "postcss";
 import { THEME_IDS_BY_STYLE, STYLE_IDS, STYLE_COLOR_MODES, type ColorMode, type ColorThemeId, type StyleId } from "@/theme/themeIds";
 import { contrastRatio, mixColors } from "@/theme/contrast";
 import { STYLES, getPalette, type Palette, type PaletteToken, type StyleOwnToken } from "@/theme/palettes";
+import { auroraProperty } from "../style/styles/aurora/auroraSheet";
+import { auroraNumber, auroraSkyGrounds, contrastOf, layOver, rgbOf, type AuroraSkyColours, type AuroraSkyGrounds, type Rgb } from "../style/styles/aurora/auroraSky";
 
 const TEXT = 4.5;
 const LARGE_OR_ICON = 3;
@@ -96,6 +98,13 @@ const BLUEPRINT_DARK_UNDRAWN: ReadonlySet<string> = new Set([
     "error on card", "error on primary-light", "error on highlight", "error on cell-focus", "error on cell-scope", "error on cell-pattern",
     "error on cell-selected", "error on cell-peer",
 ]);
+// Aurora's selected cell is the solid theme colour with on-primary written on it, its digit and its notes alike (a
+// highlighted note is an on-primary disc), so no ink but on-primary is ever on that surface; AURORA_BOARD_CASES checks
+// on-primary there. A selected error keeps its error variant and hatching, so the error colour never lands on it. An error cell wears the error colour (a wash and stripes of
+// it on the glass), so the theme colour is never written on the error surface.
+const AURORA_UNDRAWN: ReadonlySet<string> = new Set([
+    "foreground on cell-selected", "primary on cell-selected", "error on cell-selected", "note on cell-selected", "primary on error-surface",
+]);
 const BOARD_PAIRS: readonly ContrastPair[] = BOARD_SURFACES.flatMap(surface => BOARD_INKS.map((ink) => {
     const boardPair = pair(ink, surface);
     const inChalkboardModel = CHALKBOARD_DARK_UNDRAWN.has(boardPair.name) || CHALKBOARD_DARK_STRUCK_OUT.has(boardPair.name);
@@ -103,6 +112,7 @@ const BOARD_PAIRS: readonly ContrastPair[] = BOARD_SURFACES.flatMap(surface => B
         "pixel",
         ...(inChalkboardModel ? ["chalkboard/dark" as const] : []),
         ...(BLUEPRINT_DARK_UNDRAWN.has(boardPair.name) ? ["blueprint/dark" as const] : []),
+        ...(AURORA_UNDRAWN.has(boardPair.name) ? ["aurora" as const] : []),
     ];
     return { ...boardPair, exceptIn };
 }));
@@ -120,25 +130,34 @@ const BOARD_PAIRS: readonly ContrastPair[] = BOARD_SURFACES.flatMap(surface => B
 // yellow or orange digit; CHALKBOARD_BOARD_CASES checks the ink drawn on each wash. Blueprint's board is laid on the
 // page's paper colour too: clues sit on the paper, a peer cell is told apart by its hatching and a same-digit cell by
 // its amber or red digit, not by a wash darker than the rest; BLUEPRINT_BOARD_CASES checks the ink drawn on each.
+// Aurora's clues share a pane of glass with every other cell and are told apart by their ink, a same-digit cell by a
+// faint wash of the theme colour.
 const SURFACE_PAIRS: readonly ContrastPair[] = [
-    { ...pair("cell-clue", "card", 1.25), exceptIn: ["pixel", "cyber", "ink", "chalkboard", "blueprint"] },
-    { ...pair("highlight", "cell-clue", 1.25), exceptIn: ["pixel", "cyber", "ink", "chalkboard", "blueprint"] },
-    { ...pair("highlight", "card", 1.25), exceptIn: ["pixel", "cyber", "chalkboard", "blueprint"] },
-    { ...pair("highlight", "cell-peer", 1.25), exceptIn: ["pixel", "cyber", "ink", "chalkboard", "blueprint"] },
-    { ...pair("cell-peer", "card", 1.08), exceptIn: ["pixel", "cyber"] },
+    { ...pair("cell-clue", "card", 1.25), exceptIn: ["pixel", "cyber", "ink", "chalkboard", "blueprint", "aurora"] },
+    { ...pair("highlight", "cell-clue", 1.25), exceptIn: ["pixel", "cyber", "ink", "chalkboard", "blueprint", "aurora"] },
+    { ...pair("highlight", "card", 1.25), exceptIn: ["pixel", "cyber", "chalkboard", "blueprint", "aurora"] },
+    { ...pair("highlight", "cell-peer", 1.25), exceptIn: ["pixel", "cyber", "ink", "chalkboard", "blueprint", "aurora"] },
+    // 晨光's peer glass is the full sheen beside a cell's 56%, 1.05 to 1.12:1 apart over the lights, measured against
+    // the cell's glass over every ground instead (AURORA_PEER_FLOORS)
+    { ...pair("cell-peer", "card", 1.08), exceptIn: ["pixel", "cyber", "aurora/light"] },
     // The selection outline is a UI component, so 3:1 applies
-    { ...pair("primary", "cell-selected", LARGE_OR_ICON), exceptIn: ["pixel"] },
+    // (aurora's selected cell is the solid primary, which its on-primary digit marks; AURORA_BOARD_CASES)
+    { ...pair("primary", "cell-selected", LARGE_OR_ICON), exceptIn: ["pixel", "aurora"] },
 ];
 
 const TINTED_PAIRS: readonly ContrastPair[] = [
-    tinted("accent", "accent", 0.1, "card", TEXT),
+    // Aurora's card is measured where the page is darkest, under the brightest light; in 晨光 the pink and the orange
+    // read 4.4 there and more everywhere else on the page
+    { ...tinted("accent", "accent", 0.1, "card", TEXT), exceptIn: ["aurora/light"] },
     tinted("accent", "accent", 0.15, "card", LARGE_OR_ICON),
     tinted("danger", "danger", 0.1, "card", LARGE_OR_ICON),
     // The hint panel's digit chip
     tinted("on-primary", "on-primary", 0.1, "primary", TEXT),
     // The continue card's chips. 8-bit's skin draws them without the tint, as a transparent tag in a
     // 2px frame (the canvas's chip), and no four-green tint passes in 掌機; PIXEL_BOARD_CASES checks the drawn pair.
-    { ...tinted("on-featured", "on-featured", 0.2, "featured", TEXT), exceptIn: ["pixel/light"] },
+    // Aurora draws its chips in its own tint, 16% of the text colour over the primary in 晨光 and of on-primary in 夜空,
+    // not this 20% of on-featured; AURORA_BOARD_CASES checks the drawn pair in both modes
+    { ...tinted("on-featured", "on-featured", 0.2, "featured", TEXT), exceptIn: ["pixel/light", "aurora"] },
     // Loader text over stacked overlays
     tinted("on-scrim", "scrim", 0.65, "background", TEXT),
 ];
@@ -535,6 +554,265 @@ const BLUEPRINT_BOARD_CASES: BlueprintBoardCase[] = STYLES.blueprint.themes.flat
     ];
 }));
 
+// Aurora's glass is thin, so each pane is checked over the sky the skin paints under it (auroraSky.ts): every light
+// and the ribbon composited in the page's order, sampled over the board and the cards at every drift phase in two
+// phone windows. A case is checked over every distinct ground of its area, so it holds where the lights are
+// brightest under it, however they overlap; the densities, tints and cues are read back from the skin.
+type AuroraArea = "board" | "card";
+
+// One of aurora's own colours (its lights, its ribbon and its glass), which every aurora palette carries
+const auroraToken = (palette: Palette, token: StyleOwnToken): string => {
+    const colour = palette[token];
+    if (colour === undefined) throw new Error(`aurora's palette has no ${token}`);
+    return colour;
+};
+
+const auroraSkyColours = (palette: Palette): AuroraSkyColours => ({
+    background: palette.background,
+    lights: [auroraToken(palette, "aurora-1"), auroraToken(palette, "aurora-2"), auroraToken(palette, "aurora-3"), auroraToken(palette, "aurora-4")],
+    ribbon: [auroraToken(palette, "aurora-ribbon-1"), auroraToken(palette, "aurora-ribbon-2")],
+});
+
+// Each pane the skin lays, as a function of the sky under it: the cards and dialogs the glass colour at their density,
+// a cell and a peer the sheen at theirs, the same digit's tint the primary in place of the glass, the answer cell the
+// primary's soft tint over the cell's glass, and the error cell's wash and its stripes at their deepest
+interface AuroraPanes {
+    card: (ground: Rgb) => Rgb;
+    dialog: (ground: Rgb) => Rgb;
+    cell: (ground: Rgb) => Rgb;
+    peer: (ground: Rgb) => Rgb;
+    sameDigit: (ground: Rgb) => Rgb;
+    answer: (ground: Rgb) => Rgb;
+    errorDeepest: (ground: Rgb) => Rgb;
+}
+
+const auroraPanes = (palette: Palette, mode: ColorMode, themeId: ColorThemeId): AuroraPanes => {
+    const density = (name: string): number => auroraNumber(mode, themeId, name);
+    const glass = rgbOf(auroraToken(palette, "glass"));
+    const sheen = rgbOf(auroraToken(palette, "glass-sheen"));
+    const primary = rgbOf(palette.primary);
+    const error = rgbOf(palette.error);
+    const cell = (ground: Rgb): Rgb => layOver(sheen, density("--aurora-glass-cell"), ground);
+    return {
+        card: ground => layOver(glass, density("--aurora-glass-card"), ground),
+        dialog: ground => layOver(glass, density("--aurora-glass-dialog"), ground),
+        cell,
+        peer: ground => layOver(sheen, density("--aurora-glass-peer"), ground),
+        sameDigit: ground => layOver(primary, density("--aurora-tint-same"), ground),
+        answer: ground => layOver(primary, density("--aurora-tint-soft"), cell(ground)),
+        errorDeepest: ground => layOver(error, density("--aurora-error-stripe"), layOver(error, density("--aurora-error-wash"), cell(ground))),
+    };
+};
+
+// A case: an ink on a surface made from the sky under it, over the grounds of the board or of the cards; a surface
+// that is solid (the primary under on-primary) needs no ground
+interface AuroraBoardCase {
+    label: string;
+    foreground: string;
+    surface: (ground: Rgb) => Rgb;
+    area: AuroraArea | null;
+    minimum: number;
+}
+
+type AuroraDrawn = (name: string, foreground: string, surface: (ground: Rgb) => Rgb, minimum?: number) => AuroraBoardCase;
+
+const SOLID = (colour: string) => (): Rgb => rgbOf(colour);
+
+// The board: the ink each cell is written in, on the pane the skin lays under it. The selected cell is the solid
+// primary, which must stand 3:1 off the glass around it; a selected error keeps its hatching and is marked by a 2px
+// ring of the solid primary alone (ruling 2), which must too. A step's struck-out candidate is a mark, held to 3:1.
+const auroraCellCases = (palette: Palette, mode: ColorMode, themeId: ColorThemeId, onBoard: AuroraDrawn, solid: AuroraDrawn): AuroraBoardCase[] => {
+    const panes = auroraPanes(palette, mode, themeId);
+    return [
+        onBoard("clue (foreground) on cell glass", palette.foreground, panes.cell),
+        onBoard("clue (foreground) on peer glass", palette.foreground, panes.peer),
+        onBoard("clue (foreground) on the same digit's tint", palette.foreground, panes.sameDigit),
+        onBoard("player's digit (primary) on cell glass", palette.primary, panes.cell),
+        onBoard("player's digit (primary) on peer glass", palette.primary, panes.peer),
+        ...auroraStillCases(palette, mode, themeId, onBoard),
+        onBoard("same digit (primary) on its tint", palette.primary, panes.sameDigit),
+        onBoard("note on cell glass", palette.note, panes.cell),
+        onBoard("note on peer glass", palette.note, panes.peer),
+        onBoard("note on the same digit's tint", palette.note, panes.sameDigit),
+        // The highlighted note (the selected digit's, a hint's emphasised candidate) is a primary disc under on-primary,
+        // on every ground an unselected cell has; in the selected cell it is an on-primary disc, checked below
+        solid("highlighted note's digit (on-primary) on its primary disc", palette["on-primary"], SOLID(palette.primary)),
+        onBoard("highlighted note's disc (primary) against cell glass", palette.primary, panes.cell, LARGE_OR_ICON),
+        onBoard("highlighted note's disc (primary) against peer glass", palette.primary, panes.peer, LARGE_OR_ICON),
+        onBoard("highlighted note's disc (primary) against the same digit's tint", palette.primary, panes.sameDigit, LARGE_OR_ICON),
+        onBoard("highlighted note's disc (primary) against the answer tint", palette.primary, panes.answer, LARGE_OR_ICON),
+        solid("selected cell's note (on-primary) on primary", palette["on-primary"], SOLID(palette.primary)),
+        solid("selected cell's highlighted note (primary) on its on-primary disc", palette.primary, SOLID(palette["on-primary"])),
+        solid("selected cell's highlighted-note disc (on-primary) on primary", palette["on-primary"], SOLID(palette.primary), LARGE_OR_ICON),
+        onBoard("selected cell (solid primary) against cell glass", palette.primary, panes.cell, LARGE_OR_ICON),
+        onBoard("selected cell (solid primary) against peer glass", palette.primary, panes.peer, LARGE_OR_ICON),
+        onBoard("selected error's ring (primary) against cell glass", palette.primary, panes.cell, LARGE_OR_ICON),
+        onBoard("error digit on the error cell's deepest stripe", palette.error, panes.errorDeepest),
+        onBoard("step candidate (primary) on the answer tint", palette.primary, panes.answer),
+        solid("emphasised candidate (on-primary) on primary", palette["on-primary"], SOLID(palette.primary)),
+        onBoard("struck candidate (error) on the answer tint", palette.error, panes.answer, LARGE_OR_ICON),
+        onBoard("struck candidate (error) on peer glass", palette.error, panes.peer, LARGE_OR_ICON),
+    ];
+};
+
+// The animations (a completed group's glow, streak and ring, the solved board's glow and surge) follow the canvas and
+// are not held to contrast: a brief dip is the owner's call, and players can turn motion off. Only what stays on
+// screen is held to 4.5:1 and 3:1, and the still celebration, motion off, to 2.9:1.
+const STILL = 2.9;
+const SURGE = '[data-style="aurora"] [data-skin~="board"][data-celebration]::before';
+const STILL_SURGE = '[data-style="aurora"] [data-skin~="board"][data-celebration="still"]::before';
+const STILL_CELLS = '[data-style="aurora"] [data-skin~="board"][data-celebration="still"] [data-variant]';
+
+const expectSkin = (value: string, form: RegExp, what: string): RegExpExecArray => {
+    const match = form.exec(value);
+    if (match === null) throw new Error(`aurora's ${what} is not the form the contrast model reads: "${value}"`);
+    return match;
+};
+
+// A surge light: a circle of its colour at its share, at a point of the surge's box, fading evenly to nothing at a
+// share of the distance to the box's nearest side
+interface SurgeLight { token: StyleOwnToken; share: number; x: number; y: number; fade: number }
+
+const surgeLights = (): SurgeLight[] => {
+    const image = auroraProperty(SURGE, "background-image");
+    const lights = [...image.matchAll(/radial-gradient\(circle closest-side at (\d+)% (\d+)%, color-mix\(in srgb, var\(--color-(aurora-\d)\) (\d+)%, transparent\), transparent(?: (\d+)%)?\)/g)]
+        .map(([, x, y, token, share, fade]) => ({ token: token as StyleOwnToken, share: Number(share) / 100, x: Number(x) / 100, y: Number(y) / 100, fade: Number((fade as string | undefined) ?? 100) / 100 }));
+    if (lights.length !== 3) throw new Error(`aurora's surge is not the form the contrast model reads: "${image}"`);
+    return lights;
+};
+
+// The still celebration: the surge's box, the board grown by its inset each side and scaled about its centre, holds
+// still at its settled opacity under the cells' glass; the centre cell lays its share of the primary, each ring out
+// its step less. Each light is taken at its strongest within each cell of a ring, so the cells' grounds are stacked
+// from those (the brightest the ring can be), over every ground of the sky.
+const auroraStillCases = (palette: Palette, mode: ColorMode, themeId: ColorThemeId, onBoard: AuroraDrawn): AuroraBoardCase[] => {
+    const panes = auroraPanes(palette, mode, themeId);
+    const primary = rgbOf(palette.primary);
+    const inset = -Number(expectSkin(auroraProperty(SURGE, "inset"), /^(-\d*\.?\d+)%$/, "surge's inset")[1]) / 100;
+    const scale = Number(expectSkin(auroraProperty(STILL_SURGE, "transform"), /^scale\((\d*\.?\d+)\)$/, "still surge's scale")[1]);
+    expectSkin(auroraProperty(STILL_SURGE, "opacity"), /^var\(--aurora-surge-still\)$/, "still surge's opacity");
+    const opacity = Number(auroraProperty('[data-style="aurora"]', "--aurora-surge-still"));
+    const [, centreShare, stepShare] = expectSkin(auroraProperty(STILL_CELLS, "background-color"),
+        /^color-mix\(in srgb, var\(--color-primary\) max\(0%, (\d+)% - (\d+)% \* max\(/, "still cells' share").map(Number);
+    const side = (1 + 2 * inset) * scale;
+    const origin = 0.5 - side / 2;
+    const lights = surgeLights().map((light) => {
+        const radius = Math.min(light.x, 1 - light.x, light.y, 1 - light.y) * side * light.fade;
+        return { ...light, centreX: origin + light.x * side, centreY: origin + light.y * side, radius };
+    });
+    // A light's strongest cover anywhere in the cell at row and column (the board's side is 1)
+    const coverIn = (light: typeof lights[number], row: number, column: number): number => {
+        const nearestX = Math.min((column + 1) / 9, Math.max(column / 9, light.centreX));
+        const nearestY = Math.min((row + 1) / 9, Math.max(row / 9, light.centreY));
+        const distance = Math.hypot(nearestX - light.centreX, nearestY - light.centreY);
+        return light.share * opacity * Math.max(0, 1 - distance / light.radius);
+    };
+    const rings = [0, 1, 2, 3, 4].map((ring) => {
+        const cells = Array.from({ length: 81 }, (_, index) => [Math.floor(index / 9), index % 9] as const)
+            .filter(([row, column]) => Math.max(Math.abs(row - 4), Math.abs(column - 4)) === ring);
+        const covers = lights.map(light => Math.max(...cells.map(([row, column]) => coverIn(light, row, column))));
+        return { ring, share: Math.max(0, centreShare - stepShare * ring) / 100, covers };
+    });
+    const paneGrounds: [string, (ground: Rgb) => Rgb][] = [["cell glass", panes.cell], ["peer glass", panes.peer], ["the same digit's tint", panes.sameDigit]];
+    return rings.flatMap(({ ring, share, covers }) => paneGrounds.flatMap(([paneName, pane]) => {
+        // The first light is painted on top
+        const surged = (ground: Rgb): Rgb => [...lights.keys()].reverse()
+            .reduce((under, index) => layOver(rgbOf(auroraToken(palette, lights[index].token)), covers[index], under), ground);
+        const surface = (ground: Rgb): Rgb => layOver(primary, share, pane(surged(ground)));
+        return [
+            onBoard(`player's digit (primary) on ${paneName} in the still celebration's ring ${ring}`, palette.primary, surface, STILL),
+            onBoard(`clue (foreground) on ${paneName} in the still celebration's ring ${ring}`, palette.foreground, surface, STILL),
+        ];
+    }));
+};
+
+// Aurora's board and glass: the ink actually drawn on the glass actually drawn, over the sky actually under it. The
+// selected cell is the solid theme colour under on-primary. Cards, dialogs and the toast carry their words on the
+// glass; the page's own words (the header, the timer) lie on the sky itself.
+const AURORA_BOARD_CASES: AuroraBoardCase[] = STYLES.aurora.themes.flatMap(theme => STYLE_COLOR_MODES.aurora.flatMap((mode) => {
+    const palette = getPalette("aurora", theme.id, mode);
+    const prefix = `aurora/${theme.id}/${mode}`;
+    const drawnOver = (area: AuroraArea | null): AuroraDrawn => (name, foreground, surface, minimum = TEXT) => ({
+        label: `${prefix}: ${name} ≥ ${minimum}`, foreground, surface, area, minimum,
+    });
+    const onBoard = drawnOver("board");
+    const onPage = drawnOver("card");
+    const solid = drawnOver(null);
+    const panes = auroraPanes(palette, mode, theme.id);
+    const sheen = rgbOf(auroraToken(palette, "glass-sheen"));
+    const primary = rgbOf(palette.primary);
+    const softTint = (pane: Rgb): Rgb => layOver(primary, auroraNumber(mode, theme.id, "--aurora-tint-soft"), pane);
+    // Every pane carries a sheen over its top left, which lightens it there: words are checked on the pane and on the
+    // sheen's brightest point over it
+    const underSheen = (pane: Rgb): Rgb => layOver(sheen, auroraNumber(mode, theme.id, "--aurora-pane-sheen"), pane);
+    const sky = (ground: Rgb): Rgb => ground;
+    const onCard = (name: string, foreground: string, surface: (pane: Rgb) => Rgb, minimum = TEXT): AuroraBoardCase[] => [
+        onPage(name, foreground, ground => surface(panes.card(ground)), minimum),
+        onPage(`${name}, under its sheen`, foreground, ground => underSheen(surface(panes.card(ground))), minimum),
+    ];
+    const onGlass = (name: string, foreground: string, minimum = TEXT): AuroraBoardCase[] => [
+        ...onCard(`${name} on card glass`, foreground, pane => pane, minimum),
+        onPage(`${name} on dialog glass`, foreground, panes.dialog, minimum),
+        onPage(`${name} on dialog glass, under its sheen`, foreground, ground => underSheen(panes.dialog(ground)), minimum),
+    ];
+    return [
+        solid("selected digit (on-primary) on cell-selected", palette["on-primary"], SOLID(palette["cell-selected"])),
+        onPage("words on the lights (foreground) on the sky", palette.foreground, sky),
+        ...onGlass("foreground", palette.foreground),
+        ...onGlass("foreground-secondary", palette["foreground-secondary"]),
+        ...onGlass("foreground-muted", palette["foreground-muted"]),
+        ...onGlass("primary", palette.primary),
+        // A danger button that is only its words (give up, clear records)
+        ...onGlass("danger text button (error)", palette.error),
+        ...onCard("primary on the soft tint over card glass", palette.primary, softTint),
+        // The completion card's difficulty tag
+        onPage("foreground on the soft tint over dialog glass", palette.foreground, ground => softTint(panes.dialog(ground))),
+        solid("on-primary on primary (main buttons, hint pill, solid tags)", palette["on-primary"], SOLID(palette.primary)),
+        solid("on-danger on error (danger button)", palette["on-danger"], SOLID(palette.error)),
+        // The keypad: a control's icon is the text colour on the sky itself, one that is on is the primary on the soft
+        // tint over card glass, a badge's count and the lit key's digit are on-primary on the primary
+        onPage("control (foreground) on the sky", palette.foreground, sky),
+        ...onCard("control that is on (primary) on the soft tint over card glass", palette.primary, softTint),
+        solid("badge count (on-primary) on its primary disc", palette["on-primary"], SOLID(palette.primary)),
+        ...onCard("key digit (foreground) on card glass", palette.foreground, pane => pane),
+        onPage("toast text (on-toast) on dialog glass", palette["on-toast"], panes.dialog),
+        // Home: the continue button's chips are drawn in 16% of the text colour over the primary in 晨光 and of on-primary
+        // in 夜空, written in on-primary; a tile's icon is the primary on card glass (the 3:1 of an icon)
+        solid("continue chip (on-primary) on its tint over primary", palette["on-primary"],
+            SOLID(mixColors(mode === "light" ? palette.foreground : palette["on-primary"], 0.16, palette.primary))),
+        ...onCard("home tile icon (primary) on card glass", palette.primary, pane => pane, LARGE_OR_ICON),
+        // Statistics and playback: a given-up game's icon is the error colour on 12% of it over the row's card glass
+        // (its "Gave up" is the error colour on card glass, above); this step's dot is the primary on card glass
+        ...onCard("given-up chip icon (error) on its 12% tint over card glass", palette.error,
+            pane => layOver(rgbOf(palette.error), 0.12, pane), LARGE_OR_ICON),
+        ...onCard("current step dot (primary) on card glass", palette.primary, pane => pane, LARGE_OR_ICON),
+        ...auroraCellCases(palette, mode, theme.id, onBoard, solid),
+    ];
+}));
+
+// Every theme's grounds, sampled once
+const AURORA_GROUNDS: ReadonlyMap<string, AuroraSkyGrounds> = new Map(STYLES.aurora.themes.flatMap(theme => STYLE_COLOR_MODES.aurora.map(mode => [
+    `aurora/${theme.id}/${mode}`,
+    auroraSkyGrounds(mode, theme.id, auroraSkyColours(getPalette("aurora", theme.id, mode))),
+] as const)));
+
+// How far apart the peer's glass and a cell's must stay: 晨光's is faint by design (the canvas's own sheen)
+const AURORA_PEER_FLOORS: Readonly<Record<ColorMode, number>> = { light: 1.048, dark: 1.25 };
+
+/** A case's lowest contrast over every ground of its area, and the ground it falls on */
+const auroraWorst = ({ label, foreground, surface, area }: AuroraBoardCase): { ratio: number; ground: Rgb | null } => {
+    const ink = rgbOf(foreground);
+    if (area === null) return { ratio: contrastOf(ink, surface([0, 0, 0])), ground: null };
+    const grounds = AURORA_GROUNDS.get(label.split(":")[0]);
+    if (grounds === undefined) throw new Error(`no sky sampled for ${label}`);
+    let worst = { ratio: Number.POSITIVE_INFINITY, ground: null as Rgb | null };
+    for (const ground of grounds[area]) {
+        const ratio = contrastOf(ink, surface(ground));
+        if (ratio < worst.ratio) worst = { ratio, ground };
+    }
+    return worst;
+};
+
 const BLUEPRINT_SKIN = readFileSync("src/style/styles/blueprint/skin.css", "utf8");
 
 // A recent game's row rules in skin.css: the one for both modes, then 藍曬圖's own, so the last one read wins
@@ -648,6 +926,60 @@ describe("palette contrast", () => {
     it("should check blueprint's board on every paper in both of its modes", () => {
         expect(new Set(BLUEPRINT_BOARD_CASES.map(boardCase => boardCase.label.split(":")[0]))).toEqual(new Set(
             STYLES.blueprint.themes.flatMap(theme => STYLE_COLOR_MODES.blueprint.map(mode => `blueprint/${theme.id}/${mode}`))));
+    });
+
+    it("should check aurora's board on every theme in both of its modes", () => {
+        expect(new Set(AURORA_BOARD_CASES.map(boardCase => boardCase.label.split(":")[0]))).toEqual(new Set(
+            STYLES.aurora.themes.flatMap(theme => STYLE_COLOR_MODES.aurora.map(mode => `aurora/${theme.id}/${mode}`))));
+    });
+
+    // Each pane over the bare page, as the skin lays it, at the skin's own densities
+    it.each(STYLES.aurora.themes.flatMap(theme => STYLE_COLOR_MODES.aurora.map(mode => [theme.id, mode] as const)))(
+        "should give aurora's %s %s palette the glass its skin lays over the bare page",
+        (themeId, mode) => {
+            const palette = getPalette("aurora", themeId, mode);
+            const panes = auroraPanes(palette, mode, themeId);
+            const page = rgbOf(palette.background);
+            const hex = (colour: Rgb): string => `#${colour.map(channel => Math.round(channel).toString(16).padStart(2, "0")).join("").toUpperCase()}`;
+
+            expect(palette.card).toBe(hex(panes.card(page)));
+            expect(palette["cell-clue"]).toBe(hex(panes.cell(page)));
+            expect(palette["cell-peer"]).toBe(hex(panes.peer(page)));
+            expect(palette.toast).toBe(hex(panes.dialog(page)));
+            expect(palette.highlight).toBe(hex(panes.sameDigit(page)));
+            expect(palette["cell-pattern"]).toBe(hex(panes.sameDigit(page)));
+        },
+    );
+
+    // The sky is sampled over the board and the cards in both windows at every drift phase, so it holds far more
+    // grounds than the page colour alone, and the page colour where no light falls among them
+    it.each(STYLES.aurora.themes.flatMap(theme => STYLE_COLOR_MODES.aurora.map(mode => [theme.id, mode] as const)))(
+        "should sample aurora's %s %s sky under the board and the cards, lights and all",
+        (themeId, mode) => {
+            const grounds = AURORA_GROUNDS.get(`aurora/${themeId}/${mode}`);
+            const page = rgbOf(getPalette("aurora", themeId, mode).background);
+
+            expect(grounds?.board.length).toBeGreaterThan(100);
+            expect(grounds?.card.length).toBeGreaterThan(1000);
+            expect(grounds?.card).toContainEqual(page);
+        },
+    );
+
+    // The selected cell's row, column and box must stay told apart from the other cells' glass, over every ground
+    it.each(STYLES.aurora.themes.flatMap(theme => STYLE_COLOR_MODES.aurora.map(mode => [theme.id, mode] as const)))(
+        "should keep aurora's %s %s peer glass apart from the cell's glass over the whole board",
+        (themeId, mode) => {
+            const palette = getPalette("aurora", themeId, mode);
+            const panes = auroraPanes(palette, mode, themeId);
+            const grounds = AURORA_GROUNDS.get(`aurora/${themeId}/${mode}`)?.board ?? [];
+            const apart = Math.min(...grounds.map(ground => contrastOf(panes.peer(ground), panes.cell(ground))));
+
+            expect(apart).toBeGreaterThanOrEqual(AURORA_PEER_FLOORS[mode]);
+        },
+    );
+
+    it.each(AURORA_BOARD_CASES)("$label", (boardCase) => {
+        expect(auroraWorst(boardCase).ratio).toBeGreaterThanOrEqual(boardCase.minimum);
     });
 
     it.each(BLUEPRINT_BOARD_CASES)("$label", ({ foreground, background, minimum }) => {

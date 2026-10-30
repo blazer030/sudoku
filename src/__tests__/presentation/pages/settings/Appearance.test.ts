@@ -60,7 +60,7 @@ const svgOf = (style: StyleId, palette: Palette, idSuffix = "") => {
 // The icon the settings should have drawn. A card's ids carry its own suffix, so the expected icon takes it from the rendered one.
 const iconSvgFor = (style: StyleId, rendered: string) => {
     const settingsStore = useSettingsStore();
-    const idSuffix = /id="(?:cyber-edge|ink-rough|chalk-grain)-([^"]+)"/.exec(rendered)?.[1];
+    const idSuffix = /id="(?:cyber-edge|aurora-light-1|ink-rough|chalk-grain)-([^"]+)"/.exec(rendered)?.[1];
     return svgOf(style, getPalette(style, rememberedThemeFor(style, settingsStore.colorThemeByStyle), rememberedAppearanceFor(style, settingsStore.appearanceByStyle)), idSuffix);
 };
 
@@ -70,11 +70,11 @@ describe("Appearance.vue style cards", () => {
         vi.mocked(Capacitor.isNativePlatform).mockReturnValue(false);
     });
 
-    it("should list the eight styles, each with its app icon and name", () => {
+    it("should list every style, each with its app icon and name", () => {
         const wrapper = mountAppearance();
         const cards = wrapper.findAll("button[data-testid^='style-option-']");
 
-        expect(cards.map(card => card.attributes("data-testid"))).toEqual(["style-option-minimal", "style-option-tactile", "style-option-paper", "style-option-pixel", "style-option-cyber", "style-option-ink", "style-option-chalkboard", "style-option-blueprint"]);
+        expect(cards.map(card => card.attributes("data-testid"))).toEqual(["style-option-minimal", "style-option-tactile", "style-option-paper", "style-option-pixel", "style-option-cyber", "style-option-ink", "style-option-chalkboard", "style-option-blueprint", "style-option-aurora"]);
         for (const style of STYLE_IDS) {
             const card = wrapper.get(`[data-testid='style-option-${style}']`);
             const rendered = card.get(`[data-testid='style-icon-${style}'] svg`).element.outerHTML;
@@ -218,8 +218,9 @@ describe("Appearance.vue colour-theme swatches", () => {
             const label = `${settingsStore.style} ${theme.id} in ${mode}`;
             const { fill, mark } = swatchColors(settingsStore.style, mode, palette);
             expect((swatch.element as HTMLElement).style.backgroundColor, label).toBe(cssColor(fill));
-            // One solid colour: no second half in the accent (blueprint's accent is its ink, so it may be the fill or the mark)
-            if (settingsStore.style !== "blueprint" || (palette.accent !== fill && palette.accent !== mark)) expect(swatch.html(), label).not.toContain(cssColor(palette.accent));
+            // One solid colour: no second half in the accent (blueprint's accent is its ink and aurora's is its primary, so it may be the fill or the mark)
+            const accentMayBeDrawn = ["blueprint", "aurora"].includes(settingsStore.style) && (palette.accent === fill || palette.accent === mark);
+            if (!accentMayBeDrawn) expect(swatch.html(), label).not.toContain(cssColor(palette.accent));
             expect(swatch.findAll("[style*='background']"), label).toHaveLength(0);
         }
         const check = wrapper.get("[data-testid='color-theme-check']");
@@ -499,12 +500,13 @@ describe("Appearance.vue one-theme style", () => {
         expect(wrapper.find("[data-testid='appearance-mode-label']").exists()).toBe(true);
     });
 
-    it("should leave out the whole colours card for the dark-only, one-theme cyber", async () => {
+    it("should leave out both colour groups for the dark-only, one-theme cyber", async () => {
         const wrapper = mountAppearance();
         useSettingsStore().setStyle("cyber");
         await nextTick();
 
-        expect(wrapper.find("[data-testid='appearance-colours-card']").exists()).toBe(false);
+        expect(wrapper.find("[data-testid='settings-group-colour-theme']").exists()).toBe(false);
+        expect(wrapper.find("[data-testid='settings-group-colour-mode']").exists()).toBe(false);
         expect(wrapper.find("[data-testid='appearance-mode-label']").exists()).toBe(false);
         expect(wrapper.find("[data-testid='appearance-light']").exists()).toBe(false);
         expect(wrapper.find("[data-testid='appearance-dark']").exists()).toBe(false);
@@ -522,16 +524,52 @@ describe("Appearance.vue one-theme style", () => {
         expect(wrapper.find("[data-testid='appearance-theme-label']").exists()).toBe(false);
     });
 
-    it("should put the colour theme and light/dark in a card of their own, apart from the styles", () => {
+    it("should lay the page out as three groups, each heading outside its card with an icon", () => {
+        const wrapper = mountAppearance();
+        const groups = ["style", "colour-theme", "colour-mode"].map(id => wrapper.get(`[data-testid='settings-group-${id}']`));
+
+        for (const group of groups) {
+            const heading = group.get("[data-skin='group-heading']");
+            const card = group.get("[data-skin~='settings-card']");
+            expect(heading.element.parentElement).toBe(group.element);
+            expect(card.element.parentElement).toBe(group.element);
+            expect(card.element.contains(heading.element)).toBe(false);
+            expect(heading.find("svg").exists()).toBe(true);
+            expect(card.attributes("data-skin")?.split(" ")).toContain("card");
+        }
+    });
+
+    it("should put the styles, the colour theme and light/dark in three cards of their own", () => {
         const wrapper = mountAppearance();
         const stylesCard = wrapper.get("[data-testid='appearance-style-card']");
-        const coloursCard = wrapper.get("[data-testid='appearance-colours-card']");
+        const themeCard = wrapper.get("[data-testid='appearance-theme-card']");
+        const modeCard = wrapper.get("[data-testid='appearance-mode-card']");
 
         expect(stylesCard.find("[data-testid='style-option-minimal']").exists()).toBe(true);
-        expect(stylesCard.find("[data-testid='appearance-theme-label']").exists()).toBe(false);
-        expect(coloursCard.find("[data-testid='appearance-theme-label']").exists()).toBe(true);
-        expect(coloursCard.find("[data-testid='appearance-switcher']").exists()).toBe(true);
-        expect(coloursCard.attributes("data-skin")?.split(" ")).toContain("card");
+        expect(stylesCard.find("[data-testid='color-theme-green']").exists()).toBe(false);
+        expect(themeCard.find("[data-testid='color-theme-green']").exists()).toBe(true);
+        expect(themeCard.find("[data-testid='appearance-switcher']").exists()).toBe(false);
+        expect(modeCard.find("[data-testid='appearance-switcher']").exists()).toBe(true);
+        expect(modeCard.find("[data-testid='color-theme-green']").exists()).toBe(false);
+        expect(wrapper.get("[data-testid='appearance-theme-label']").element.parentElement?.contains(themeCard.element)).toBe(true);
+        expect(themeCard.element.contains(wrapper.get("[data-testid='appearance-theme-label']").element)).toBe(false);
+        expect(modeCard.element.contains(wrapper.get("[data-testid='appearance-mode-label']").element)).toBe(false);
+    });
+
+    it("should keep the mode group but drop the theme group for a one-theme style, and both for a light-only one", async () => {
+        const wrapper = mountAppearance();
+        useSettingsStore().setStyle("pixel");
+        await nextTick();
+
+        expect(wrapper.find("[data-testid='settings-group-colour-theme']").exists()).toBe(false);
+        expect(wrapper.find("[data-testid='settings-group-colour-mode']").exists()).toBe(true);
+
+        useSettingsStore().setStyle("ink");
+        await nextTick();
+
+        expect(wrapper.find("[data-testid='settings-group-colour-theme']").exists()).toBe(false);
+        expect(wrapper.find("[data-testid='settings-group-colour-mode']").exists()).toBe(false);
+        expect(wrapper.find("[data-testid='settings-group-style']").exists()).toBe(true);
     });
 
     it("should name the modes in the style's own words, in either language", async () => {
@@ -583,6 +621,30 @@ describe("Appearance.vue one-theme style", () => {
         expect(blueprintChinese).not.toEqual(blueprintEnglish);
         expect(wrapper.findAll("button[data-testid^='color-theme-']").map(swatch => swatch.attributes("data-testid")))
             .toEqual(["color-theme-blue", "color-theme-teal", "color-theme-slate", "color-theme-rust"]);
+    });
+
+    it("should name aurora's modes in its own words, in either language, beside its four colours painted as their primaries", async () => {
+        const wrapper = mountAppearance();
+        const modeTexts = () => ["appearance-light", "appearance-dark"].map(id => wrapper.get(`[data-testid='${id}']`).text());
+        const minimalEnglish = modeTexts();
+        const settingsStore = useSettingsStore();
+        settingsStore.setStyle("aurora");
+        await nextTick();
+        const auroraEnglish = modeTexts();
+        i18n.global.locale.value = "zh-Hant";
+        await nextTick();
+        const auroraChinese = modeTexts();
+
+        expect(auroraEnglish).not.toEqual(minimalEnglish);
+        expect(auroraChinese).not.toEqual(auroraEnglish);
+        expect(wrapper.findAll("button[data-testid^='color-theme-']").map(swatch => swatch.attributes("data-testid")))
+            .toEqual(["color-theme-purple", "color-theme-teal", "color-theme-pink", "color-theme-orange"]);
+        for (const theme of STYLES.aurora.themes) {
+            const swatch = wrapper.get(`[data-testid='color-theme-${theme.id}']`).element as HTMLElement;
+            const probe = document.createElement("div");
+            probe.style.backgroundColor = getPalette("aurora", theme.id, "dark").primary;
+            expect(swatch.style.backgroundColor, theme.id).toBe(probe.style.backgroundColor);
+        }
     });
 
     it("should bring minimal back to the theme last chosen there after a visit to pixel", () => {

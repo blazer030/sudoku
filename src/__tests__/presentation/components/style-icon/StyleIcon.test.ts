@@ -19,7 +19,7 @@ describe("StyleIcon", () => {
         const host = document.createElement("div");
         const rendered = wrapper.get("svg").element.outerHTML;
         // An icon with ids carries this instance's own suffix
-        host.innerHTML = styleIconSvg(styleId, palette, /id="(?:cyber-edge|ink-rough)-([^"]+)"/.exec(rendered)?.[1]);
+        host.innerHTML = styleIconSvg(styleId, palette, /id="(?:cyber-edge|aurora-light-1|ink-rough)-([^"]+)"/.exec(rendered)?.[1]);
         expect(rendered).toBe(host.innerHTML.trim());
     });
 

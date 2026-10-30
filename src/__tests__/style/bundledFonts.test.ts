@@ -79,6 +79,7 @@ describe("bundled fonts", () => {
         ["Blueprint Mono", "600"],
         ["Blueprint Hand", "400"],
         ["Blueprint Sans TC", "300 600"],
+        ["Aurora Sans TC", "300 600"],
     ])("should declare %s %s from a bundled woff2 with swap", (family, weight) => {
         const face = fontFaces().find(candidate => candidate.family === family && candidate.weight === weight);
 
@@ -216,6 +217,20 @@ describe("bundled fonts", () => {
 
         expect(wanted.length).toBeGreaterThan(100);
         expect(wanted.filter(character => !mapped.has(character.codePointAt(0) ?? 0)).join("")).toBe("");
+    });
+
+    it("noto-sans-tc.woff2 maps aurora's name and mode names", () => {
+        const wanted = Array.from("極光玻璃夜空晨", character => character.codePointAt(0) ?? 0);
+        const mapped = mappedCodePoints(readFileSync("src/assets/fonts/noto-sans-tc.woff2"), wanted);
+
+        expect(wanted.filter(codePoint => !mapped.has(codePoint))).toEqual([]);
+    });
+
+    it("Aurora Sans TC shares Blueprint Sans TC's file", () => {
+        const sources = fontFaces().filter(face => face.family === "Aurora Sans TC" || face.family === "Blueprint Sans TC").map(face => face.src);
+
+        expect(sources).toHaveLength(2);
+        expect(sources[0]).toBe(sources[1]);
     });
 
     it("lxgw-wenkai-tc-regular.woff2 maps the Chinese cheer", () => {

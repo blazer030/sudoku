@@ -349,4 +349,62 @@ describe("styleIcons", () => {
         expect(paints.length).toBeGreaterThan(0);
         expect(new Set(paints).size).toBe(1);
     });
+
+    describe("aurora", () => {
+        const nightPurple = getPalette("aurora", "purple", "dark");
+        const circlesOf = (svg: string): string[] => svg.match(/<circle [^>]*\/>/g) ?? [];
+
+        it("should draw the theme's first three lights behind one pane of glass with nine dots on the night sky", () => {
+            const svg = styleIconSvg("aurora", nightPurple, "x");
+
+            for (const color of ["#060914", "#4A039B", "#21238E", "#8B1787", "#A897FF"]) {
+                expect(svg, color).toContain(color);
+            }
+            expect(svg.match(/<radialGradient/g)).toHaveLength(3);
+            for (const [centreX, centreY, radius] of [[20, 18, 56], [96, 44, 58], [38, 104, 54]]) {
+                expect(svg).toContain(`<circle cx="${centreX}" cy="${centreY}" r="${radius}"`);
+            }
+            expect(svg.match(/<rect [^>]*width="56"[^>]*rx="16"[^>]*\/>/g)).toHaveLength(1);
+            const dots = circlesOf(svg).filter(circle => !/ r="5\d"/.test(circle));
+            expect(dots).toHaveLength(9);
+            expect(dots.filter(circle => circle.includes('fill-opacity="0.3"'))).toHaveLength(4);
+            expect(dots.filter(circle => circle.includes(`fill="${nightPurple.primary}"`))).toHaveLength(4);
+            expect(dots.filter(circle => circle.includes(`r="6" fill="${nightPurple["glass-sheen"]}"`))).toHaveLength(1);
+            expect(svg).not.toContain("<filter");
+            expect(svg).not.toContain("<text");
+        });
+
+        it("should draw all eight colour and mode icons apart, the dawn on its pale ground", () => {
+            const svgs = (["purple", "teal", "pink", "orange"] as const).flatMap(themeId =>
+                COLOR_MODES.map(mode => styleIconSvg("aurora", getPalette("aurora", themeId, mode), "x")));
+            const dawn = styleIconSvg("aurora", getPalette("aurora", "purple", "light"), "x");
+
+            expect(new Set(svgs).size).toBe(8);
+            expect(dawn).toContain("#EEF0F7");
+            expect(dawn).toContain("#5B3FE0");
+        });
+
+        it("should keep the ids of two copies apart and leave them bare without a suffix", () => {
+            const idsOf = (svg: string) => [...svg.matchAll(/ id="([^"]+)"/g)].map(([, id]) => id);
+            const first = styleIconSvg("aurora", nightPurple, "a");
+            const second = styleIconSvg("aurora", nightPurple, "b");
+            const bare = styleIconSvg("aurora", nightPurple);
+
+            expect(idsOf(first)).toHaveLength(3);
+            for (const id of idsOf(first)) expect(idsOf(second)).not.toContain(id);
+            for (const svg of [first, second, bare]) {
+                for (const [, id] of svg.matchAll(/url\(#([^)]+)\)/g)) expect(idsOf(svg)).toContain(id);
+            }
+            expect(idsOf(bare).every(id => !id.endsWith("-"))).toBe(true);
+            expect(idsOf(bare)).not.toEqual(idsOf(first));
+        });
+
+        it("should draw the monochrome icon as the glass outline and nine dots without a gradient", () => {
+            const svg = styleIconMonochrome("aurora");
+
+            expect(svg).not.toContain("radialGradient");
+            expect(svg.match(/<rect /g)).toHaveLength(1);
+            expect(svg.match(/<circle /g)).toHaveLength(9);
+        });
+    });
 });

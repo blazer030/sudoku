@@ -10,6 +10,7 @@
 @import "./styles/ink/skin.css";
 @import "./styles/chalkboard/skin.css";
 @import "./styles/blueprint/skin.css";
+@import "./styles/aurora/skin.css";
 
 @variant dark (&:where(.dark, .dark *));
 
@@ -56,6 +57,8 @@
   --font-blueprint-mono: "Blueprint Mono", "Blueprint Sans TC", ui-monospace, monospace;
   --font-blueprint-hand: "Blueprint Hand", "Blueprint Mono", "Blueprint Sans TC", monospace;
   --font-blueprint-sans: "Blueprint Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+  /* Aurora's stack: Outfit (bundled) for Latin and digits, Aurora Sans TC (the bundled Noto Sans TC) for Chinese. */
+  --font-aurora-sans: "Outfit", "Aurora Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
   --font-print: "Times New Roman", "Noto Serif TC", "Songti TC", "PMingLiU", serif;
   /* Board, key and timer faces; a style may point them at its own stacks */
   --font-clue: var(--font-sans);

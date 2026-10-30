@@ -30,13 +30,14 @@ export const zhHant: MessageSchema = {
                 pixel: { light: "掌機", dark: "紅白機" },
                 chalkboard: { light: "白板", dark: "黑板" },
                 blueprint: { light: "製圖紙", dark: "藍曬圖" },
+                aurora: { light: "晨光", dark: "夜空" },
             },
         },
         appearanceSummary: "{mode}・{theme}",
         colorTheme: "色彩主題",
         style: {
             label: "風格",
-            names: { minimal: "極簡動態", tactile: "實體方塊", paper: "紙本筆記", pixel: "8-bit 電玩", cyber: "賽博龐克", ink: "水墨和紙", chalkboard: "黑板粉筆", blueprint: "藍圖工程" },
+            names: { minimal: "極簡動態", tactile: "實體方塊", paper: "紙本筆記", pixel: "8-bit 電玩", cyber: "賽博龐克", ink: "水墨和紙", chalkboard: "黑板粉筆", blueprint: "藍圖工程", aurora: "極光玻璃" },
         },
         colorThemes: {
             green: "綠",

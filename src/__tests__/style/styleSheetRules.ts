@@ -175,8 +175,8 @@ export const reducedMotionDeclarationsOf = (css: string, selector: string): Map<
     return declarations;
 };
 
-// Splits on a separator outside parentheses, so var(), calc() and colour functions stay whole
-const splitTopLevel = (value: string, separator: RegExp): string[] => {
+/** Splits on a separator outside parentheses, so var(), calc() and colour functions stay whole. */
+export const splitTopLevel = (value: string, separator: RegExp): string[] => {
     const parts: string[] = [];
     let depth = 0;
     let current = "";

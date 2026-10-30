@@ -196,3 +196,12 @@
     font-display: swap;
     src: url("../assets/fonts/noto-sans-tc.woff2") format("woff2");
 }
+
+/* Aurora's text in the same Noto Sans TC file under its own family name: one download, no new bytes */
+@font-face {
+    font-family: "Aurora Sans TC";
+    font-style: normal;
+    font-weight: 300 600;
+    font-display: swap;
+    src: url("../assets/fonts/noto-sans-tc.woff2") format("woff2");
+}

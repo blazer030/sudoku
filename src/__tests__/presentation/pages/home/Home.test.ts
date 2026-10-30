@@ -127,6 +127,15 @@ describe("Home", () => {
         expect(stackedHeroes[0]).toContain('data-skin="logo"');
     });
 
+    it("should lay aurora's hero out stacked, with the logo and the title for its skin to dress", () => {
+        const { wrapper } = mountHome({ style: "aurora" });
+        const hero = wrapper.get("[data-testid='home-hero']");
+
+        expect(STYLE_HOME_HEROES.aurora).toBe("stacked");
+        expect(hero.get("[data-testid='home-logo']").attributes("data-skin")).toBe("logo");
+        expect(hero.get("h1").attributes("data-skin")).toBe("title");
+    });
+
     it("should space blueprint's title and subtitle out under the logo, in the player's language", () => {
         const { wrapper } = mountHome({ style: "blueprint" });
         const hero = wrapper.get("[data-testid='home-hero']");
@@ -161,6 +170,12 @@ describe("Home", () => {
             expect(text).toContain(expected[1]);
         }
         i18n.global.locale.value = "en";
+    });
+
+    it.each(["minimal", "chalkboard", "blueprint"] as const)("should mark %s's visible subtitle for the skins", (style) => {
+        const { wrapper } = mountHome({ style });
+
+        expect(wrapper.get("[data-skin~='home-subtitle']").text()).toBe(i18n.global.t("home.subtitle"));
     });
 
     it("should set ink's title as a vertical emblem in Chinese, the same in both languages", async () => {

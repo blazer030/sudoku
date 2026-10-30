@@ -17,4 +17,5 @@ export const CONTINUE_LAYOUTS: Record<StyleId, ContinueLayout> = {
     ink: "chips",
     chalkboard: "chips",
     blueprint: "title-block",
+    aurora: "chips",
 };

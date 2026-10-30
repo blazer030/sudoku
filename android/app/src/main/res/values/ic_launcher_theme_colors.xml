@@ -38,4 +38,12 @@
     <color name="ic_launcher_blueprint_slate_background">#FAFBFC</color>
     <color name="ic_launcher_blueprint_rust_dark_background">#5A3A22</color>
     <color name="ic_launcher_blueprint_rust_background">#FAFBFC</color>
+    <color name="ic_launcher_aurora_purple_dark_background">#060914</color>
+    <color name="ic_launcher_aurora_purple_background">#EEF0F7</color>
+    <color name="ic_launcher_aurora_teal_dark_background">#060914</color>
+    <color name="ic_launcher_aurora_teal_background">#EEF0F7</color>
+    <color name="ic_launcher_aurora_pink_dark_background">#060914</color>
+    <color name="ic_launcher_aurora_pink_background">#EEF0F7</color>
+    <color name="ic_launcher_aurora_orange_dark_background">#060914</color>
+    <color name="ic_launcher_aurora_orange_background">#EEF0F7</color>
 </resources>

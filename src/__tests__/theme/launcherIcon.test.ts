@@ -18,6 +18,7 @@ describe("launcher icons", () => {
         expect(pwaIconKey("ink", "vermilion")).toBe("inkVermilion");
         expect(pwaIconKey("chalkboard", "classic")).toBe("chalkboardClassic");
         expect(pwaIconKey("blueprint", "slate")).toBe("blueprintSlate");
+        expect(pwaIconKey("aurora", "teal")).toBe("auroraTeal");
     });
 
     it("should keep the bare theme id for minimal's light icons, whose aliases existing shortcuts point at", () => {
@@ -40,7 +41,7 @@ describe("launcher icons", () => {
         const iconCount = STYLE_IDS.reduce((sum, style) => sum + STYLES[style].themes.length * STYLE_COLOR_MODES[style].length, 0);
 
         expect(LAUNCHER_ICONS).toHaveLength(iconCount);
-        expect(LAUNCHER_ICONS).toHaveLength(37);
+        expect(LAUNCHER_ICONS).toHaveLength(45);
         expect(new Set(LAUNCHER_ICONS.map(icon => icon.key)).size).toBe(LAUNCHER_ICONS.length);
         for (const icon of LAUNCHER_ICONS) {
             expect(icon.key).toBe(launcherIconKey(icon.style, icon.themeId, icon.mode));
@@ -78,6 +79,17 @@ describe("launcher icons", () => {
         for (const key of [
             "blueprintBlue", "blueprintBlueDark", "blueprintTeal", "blueprintTealDark",
             "blueprintSlate", "blueprintSlateDark", "blueprintRust", "blueprintRustDark",
+        ]) {
+            expect(keys, key).toContain(key);
+        }
+    });
+
+    it("should give aurora a dawn and a night sky icon for each of its four colours", () => {
+        const keys = LAUNCHER_ICONS.map(icon => icon.key);
+
+        for (const key of [
+            "auroraPurple", "auroraPurpleDark", "auroraTeal", "auroraTealDark",
+            "auroraPink", "auroraPinkDark", "auroraOrange", "auroraOrangeDark",
         ]) {
             expect(keys, key).toContain(key);
         }

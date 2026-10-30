@@ -1,6 +1,6 @@
 // The vocabulary of looks: styles, their colour themes and light/dark. Relative imports only:
 // scripts/ import this file through src/theme/palettes.ts.
-export const STYLE_IDS = ["minimal", "tactile", "paper", "pixel", "cyber", "ink", "chalkboard", "blueprint"] as const;
+export const STYLE_IDS = ["minimal", "tactile", "paper", "pixel", "cyber", "ink", "chalkboard", "blueprint", "aurora"] as const;
 export type StyleId = typeof STYLE_IDS[number];
 /** Minimal's themes; their light launcher aliases are named by these bare ids (launcherIcon.ts). */
 export const ICON_THEME_IDS = ["green", "blue", "purple", "orange", "pink", "teal"] as const;
@@ -23,6 +23,8 @@ export const THEME_IDS_BY_STYLE = {
     // Blueprint's four papers: in 藍曬圖 each is a paper colour under the same white lines and amber, on 製圖紙 an
     // ink colour on the same white paper under the same orange pen. Their names are settings.colorThemes' own.
     blueprint: ["blue", "teal", "slate", "rust"],
+    // Aurora's four lights' colours: in both modes a theme changes only the colour chosen with, the sky and the glass stay
+    aurora: ["purple", "teal", "pink", "orange"],
 } as const satisfies Record<StyleId, readonly string[]>;
 export type ColorThemeId = typeof THEME_IDS_BY_STYLE[StyleId][number];
 /** Every style's theme ids together, in first-seen order. */
@@ -41,9 +43,11 @@ export const STYLE_COLOR_MODES: Readonly<Record<StyleId, readonly ColorMode[]>> 
     chalkboard: ["dark", "light"],
     // 藍曬圖 comes first, as the canvas draws it and the picker lists it; 製圖紙 is its light twin
     blueprint: ["dark", "light"],
+    // The night sky comes first, as the canvas draws it; the dawn is its light twin
+    aurora: ["dark", "light"],
 };
 /** Styles that give light and dark their own names (the i18n keys settings.colorMode.styled.<style>.<mode>). */
-export const STYLE_MODE_NAMES: Readonly<Partial<Record<StyleId, true>>> = { pixel: true, chalkboard: true, blueprint: true };
+export const STYLE_MODE_NAMES: Readonly<Partial<Record<StyleId, true>>> = { pixel: true, chalkboard: true, blueprint: true, aurora: true };
 /** The mode a style actually shows for the requested one: the requested mode when the style has it, else the style's first. */
 export const effectiveColorMode = (style: StyleId, mode: ColorMode): ColorMode => {
     const modes = STYLE_COLOR_MODES[style];

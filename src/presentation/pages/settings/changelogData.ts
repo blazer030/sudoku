@@ -31,6 +31,12 @@ export const UNRELEASED_CHANGES: ChangelogChange[] = [
     },
     {
         text: {
+            en: "New style: Aurora Glass",
+            "zh-Hant": "全新風格「極光玻璃」",
+        },
+    },
+    {
+        text: {
             en: "Interface improvements",
             "zh-Hant": "介面優化",
         },

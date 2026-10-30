@@ -3,6 +3,27 @@ import { STYLES, STYLE_OWN_TOKENS, getPalette, rememberedThemeFor, swatchColors,
 import { darkOnlyThemeBuilder } from "@/theme/paletteBuilder";
 import { contrastRatio, mixColors } from "@/theme/contrast";
 
+// A colour's hue in OKLCH (Björn Ottosson's OKLab), in degrees
+const oklchHue = (hex: string): number => {
+    const toLinear = (channel: number): number => {
+        const value = channel / 255;
+        return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
+    };
+    const [red, green, blue] = [1, 3, 5].map(start => toLinear(parseInt(hex.slice(start, start + 2), 16)));
+    const long = Math.cbrt(0.4122214708 * red + 0.5363325363 * green + 0.0514459929 * blue);
+    const medium = Math.cbrt(0.2119034982 * red + 0.6806995451 * green + 0.1073969566 * blue);
+    const short = Math.cbrt(0.0883024619 * red + 0.2817188376 * green + 0.6299787005 * blue);
+    const greenRed = 1.9779984951 * long - 2.4285922050 * medium + 0.4505937099 * short;
+    const blueYellow = 0.0259040371 * long + 0.7827717662 * medium - 0.8086757660 * short;
+    return (Math.atan2(blueYellow, greenRed) * 180 / Math.PI + 360) % 360;
+};
+
+// How far apart two colours' hues lie round the OKLCH wheel, in degrees (0–180)
+const oklchHueDistance = (first: string, second: string): number => {
+    const distance = Math.abs(oklchHue(first) - oklchHue(second));
+    return Math.min(distance, 360 - distance);
+};
+
 describe("palettes", () => {
     it("should define each style's themes in the listed order", () => {
         expect(Object.keys(STYLES)).toEqual([...STYLE_IDS]);
@@ -94,6 +115,7 @@ describe("palettes", () => {
     const OWN_TOKENS_BY_STYLE: Partial<Record<StyleId, readonly StyleOwnToken[]>> = {
         chalkboard: ["tray", "tray-shade", "tray-edge", "duster", "duster-felt", "smudge", "smear", "icon-frame", "doodle"],
         blueprint: ["grid-minor", "grid-major", "hatch", "error-hatch"],
+        aurora: ["aurora-1", "aurora-2", "aurora-3", "aurora-4", "aurora-ribbon-1", "aurora-ribbon-2", "glass", "glass-sheen"],
     };
 
     it("should give chalkboard and blueprint only their own colours, and no other style any", () => {
@@ -109,6 +131,96 @@ describe("palettes", () => {
                         expect(palette[token], `${label} ${token}`).toMatch(/^#[0-9A-F]{6}$/);
                     }
                 }
+            }
+        }
+    });
+
+    it("should give aurora its four colours in the picker's order", () => {
+        expect(STYLES.aurora.themes.map(theme => theme.id)).toEqual(["purple", "teal", "pink", "orange"]);
+    });
+
+    it("should paint the night sky: a deep ground, pale text and the theme's four lights and streak under a dark glass", () => {
+        const palette = getPalette("aurora", "pink", "dark");
+
+        expect(palette.background).toBe("#060914");
+        expect(palette.foreground).toBe("#F2F5FF");
+        expect(palette["foreground-secondary"]).toBe("#B0B9D3");
+        expect(palette.primary).toBe("#FF8CC6");
+        expect(palette["on-primary"]).toBe("#3A0820");
+        expect(palette.accent).toBe("#FF8CC6");
+        expect(palette["cell-selected"]).toBe("#FF8CC6");
+        expect(palette.error).toBe("#FF8F5A");
+        expect(palette["on-danger"]).toBe("#060914");
+        expect([palette["aurora-1"], palette["aurora-2"], palette["aurora-3"], palette["aurora-4"]])
+            .toEqual(["#4F0031", "#02484F", "#9F39B5", "#3769CA"]);
+        expect([palette["aurora-ribbon-1"], palette["aurora-ribbon-2"]]).toEqual(["#913FD5", "#029E72"]);
+        expect(palette.glass).toBe("#141A34");
+        expect(palette["glass-sheen"]).toBe("#FFFFFF");
+    });
+
+    it("should paint the dawn: a pale ground, dark text and the theme's four soft lights and streak under a white glass", () => {
+        const palette = getPalette("aurora", "orange", "light");
+
+        expect(palette.background).toBe("#EEF0F7");
+        expect(palette.foreground).toBe("#151A2D");
+        expect(palette["foreground-secondary"]).toBe("#48506A");
+        expect(palette.primary).toBe("#A84808");
+        expect(palette["on-primary"]).toBe("#FFFFFF");
+        expect(palette.error).toBe("#A3165E");
+        expect(palette["on-danger"]).toBe("#FFFFFF");
+        expect([palette["aurora-1"], palette["aurora-2"], palette["aurora-3"], palette["aurora-4"]])
+            .toEqual(["#B3FFD6", "#FFEDBA", "#D9F2FF", "#FFC49C"]);
+        expect([palette["aurora-ribbon-1"], palette["aurora-ribbon-2"]]).toEqual(["#D2FFDA", "#F5EEFF"]);
+        expect(palette.glass).toBe("#FFFFFF");
+    });
+
+    it("should keep the page and the glass the same in all of aurora's themes, and give each its own lights", () => {
+        for (const mode of ["light", "dark"] as const) {
+            const palettes = STYLES.aurora.themes.map(theme => getPalette("aurora", theme.id, mode));
+            for (const token of ["background", "card", "cell-clue", "cell-peer", "glass", "glass-sheen"] as const) {
+                expect(new Set(palettes.map(palette => palette[token])).size, `${mode} ${token}`).toBe(1);
+            }
+            const lights = palettes.map(palette => [palette["aurora-1"], palette["aurora-2"], palette["aurora-3"], palette["aurora-4"]].join());
+            expect(new Set(lights).size, `${mode} lights`).toBe(4);
+        }
+    });
+
+    // 晨光 crosses every theme's sky with one mint-to-lilac streak; 夜空's purple and teal draw theirs in their first
+    // two lights, its pink and orange in a violet and a green of their own
+    it("should give aurora's ribbon one streak in 晨光 and each 夜空 theme its own", () => {
+        const ribbonOf = (themeId: "purple" | "teal" | "pink" | "orange", mode: "light" | "dark") => {
+            const palette = getPalette("aurora", themeId, mode);
+            return [palette["aurora-ribbon-1"], palette["aurora-ribbon-2"]];
+        };
+
+        for (const themeId of ["purple", "teal", "pink", "orange"] as const) expect(ribbonOf(themeId, "light")).toEqual(["#D2FFDA", "#F5EEFF"]);
+        for (const themeId of ["purple", "teal"] as const) {
+            const palette = getPalette("aurora", themeId, "dark");
+            expect(ribbonOf(themeId, "dark")).toEqual([palette["aurora-1"], palette["aurora-2"]]);
+        }
+        expect(ribbonOf("orange", "dark")).toEqual(["#864AD2", "#019F68"]);
+    });
+
+    // Purple and teal keep the plain red; pink takes a red-orange and orange a crimson-rose, so the error never
+    // passes for the theme's own colour
+    it.each([
+        ["purple", "#B71C1C", "#FF948A"],
+        ["teal", "#B71C1C", "#FF948A"],
+        ["pink", "#A34400", "#FF8F5A"],
+        ["orange", "#A3165E", "#FF8FAB"],
+    ] as const)("should write aurora's %s errors in its own colour", (theme, light, dark) => {
+        expect(getPalette("aurora", theme, "light").error).toBe(light);
+        expect(getPalette("aurora", theme, "dark").error).toBe(dark);
+    });
+
+    // 40° of OKLCH hue: the errors that read as the theme's own colour sat 19° (晨光 orange) and 22° (晨光 pink) from
+    // it, so 40° is about twice that, roughly the step from red to orange or to pink; 晨光's red-orange can go no
+    // further from its crimson primary and still be dark enough to read 4.5:1 on its hatching without turning brown
+    it("should keep each aurora theme's error at least 40° of hue from its own primary", () => {
+        for (const mode of ["light", "dark"] as const) {
+            for (const theme of STYLES.aurora.themes) {
+                const palette = getPalette("aurora", theme.id, mode);
+                expect(oklchHueDistance(palette.error, palette.primary), `${theme.id}/${mode}`).toBeGreaterThanOrEqual(40);
             }
         }
     });
@@ -263,7 +375,7 @@ describe("palettes", () => {
     });
 
     it("should keep paper's lines invisible in other styles", () => {
-        for (const style of [STYLES.minimal, STYLES.tactile, STYLES.pixel, STYLES.cyber, STYLES.ink, STYLES.chalkboard, STYLES.blueprint]) {
+        for (const style of [STYLES.minimal, STYLES.tactile, STYLES.pixel, STYLES.cyber, STYLES.ink, STYLES.chalkboard, STYLES.blueprint, STYLES.aurora]) {
             for (const theme of style.themes) {
                 for (const mode of STYLE_COLOR_MODES[style.id]) {
                     const palette = getPalette(style.id, theme.id, mode);

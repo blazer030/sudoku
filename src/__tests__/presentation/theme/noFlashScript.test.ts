@@ -187,6 +187,22 @@ describe("index.html no-flash script", () => {
         expect(meta.content).toBe(systemBarColor("blueprint", "teal", mode));
     });
 
+    it.each([
+        { systemDark: true, dark: true, mode: "dark", barColor: "#060914" },
+        { systemDark: false, dark: false, mode: "light", barColor: "#C2185B" },
+    ] as const)("should paint aurora's pink dark=$dark on a system dark=$systemDark", ({ systemDark, dark, mode, barColor }) => {
+        stubSystemDark(systemDark);
+        storeSettings({ style: "aurora", colorTheme: "pink" });
+
+        runInlineScript();
+
+        expect(root.dataset.style).toBe("aurora");
+        expect(root.dataset.colorTheme).toBe("pink");
+        expect(root.classList.contains("dark")).toBe(dark);
+        expect(meta.content).toBe(barColor);
+        expect(meta.content).toBe(systemBarColor("aurora", "pink", mode));
+    });
+
     it("should paint paper light for a stored system appearance on a dark system", () => {
         stubSystemDark(true);
         storeSettings({ style: "paper", appearance: "system" });

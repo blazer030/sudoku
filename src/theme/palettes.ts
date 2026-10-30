@@ -1,6 +1,7 @@
 // Every style's colours, gathered from src/style/styles/<id>/palette.ts. src/style/themes.generated.css
 // is rendered from them by `npm run generate:theme-css`. Relative imports only: scripts/ import this file.
 import { STYLE_COLOR_MODES, effectiveColorMode, type ColorMode, type ColorThemeId, type RememberedAppearances, type RememberedThemes, type StyleId } from "./themeIds";
+import { AURORA_STYLE } from "../style/styles/aurora/palette";
 import { BLUEPRINT_STYLE } from "../style/styles/blueprint/palette";
 import { CHALKBOARD_STYLE } from "../style/styles/chalkboard/palette";
 import { CYBER_STYLE } from "../style/styles/cyber/palette";
@@ -22,6 +23,7 @@ export const STYLES: Record<StyleId, StyleDefinition> = {
     ink: INK_STYLE,
     chalkboard: CHALKBOARD_STYLE,
     blueprint: BLUEPRINT_STYLE,
+    aurora: AURORA_STYLE,
 };
 
 export const DEFAULT_STYLE_ID: StyleId = "minimal";

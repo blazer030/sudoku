@@ -53,7 +53,10 @@
                 data-testid="home-title-glyph"
             >{{ glyph }}</span>
         </h1>
-        <p class="mt-7 text-foreground-secondary text-base">
+        <p
+            class="mt-7 text-foreground-secondary text-base"
+            data-skin="home-subtitle"
+        >
             {{ t("home.subtitle") }}
         </p>
     </div>
@@ -89,7 +92,10 @@
                 data-testid="home-title-glyph"
             >{{ glyph }}</span>
         </h1>
-        <p class="text-foreground-secondary text-sm [letter-spacing:.2em]">
+        <p
+            class="text-foreground-secondary text-sm [letter-spacing:.2em]"
+            data-skin="home-subtitle"
+        >
             {{ t("home.subtitle") }}
         </p>
     </div>
@@ -127,7 +133,10 @@
                 data-testid="home-title-glyph"
             >{{ glyph }}</span>
         </h1>
-        <p class="text-foreground-secondary text-sm">
+        <p
+            class="text-foreground-secondary text-sm"
+            data-skin="home-subtitle"
+        >
             {{ t("home.subtitle") }}
         </p>
     </div>
