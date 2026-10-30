@@ -3,6 +3,17 @@
    [data-style="aurora"]; keyframes start with aurora-. No filter, no backdrop-filter, no :has(), no masks by
    reference: the glass is plain translucent fills, so every engine paints it alike. */
 
+/* Chinese in Aurora Sans TC, Latin and digits in Outfit. Repointed only once the face has loaded (fonts.ts beside
+   this sheet marks it), so nothing jumps: only the face differs. Titles stop at 600, the heaviest bundled weight. */
+[data-style="aurora"][data-aurora-fonts="ready"] {
+    --font-sans: var(--font-aurora-sans);
+}
+
+[data-style="aurora"][data-aurora-fonts="ready"] [data-skin~="title"],
+[data-style="aurora"][data-aurora-fonts="ready"] [data-skin~="dialog-title"] {
+    font-weight: 600;
+}
+
 /* Press feedback: a faint wash of the text colour. It is a colour change, so it stays on under reduced motion. */
 [data-style="aurora"] [data-pressed] {
     --press-overlay: color-mix(in srgb, var(--color-foreground) 8%, transparent);

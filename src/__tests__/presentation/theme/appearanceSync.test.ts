@@ -249,6 +249,7 @@ describe("startAppearanceSync", () => {
             delete document.documentElement.dataset.inkFonts;
             delete document.documentElement.dataset.chalkboardFonts;
             delete document.documentElement.dataset.blueprintFonts;
+            delete document.documentElement.dataset.auroraFonts;
         });
 
         it("should mark paper's fonts ready once Caveat's digits have loaded", async () => {
@@ -333,6 +334,18 @@ describe("startAppearanceSync", () => {
             expect(families).toContain("Blueprint Hand");
             expect(families).toContain("Blueprint Sans TC");
             expect(document.documentElement.dataset.blueprintFonts).toBe("ready");
+        });
+
+        it("should mark aurora's fonts ready once Aurora Sans TC has loaded", async () => {
+            const load = stubFontLoading(1);
+            const sources = buildSources("purple", "dark", "aurora");
+            stop = startAppearanceSync(sources, systemBar, appearanceBridge);
+            expect(document.documentElement.dataset.auroraFonts).toBeUndefined();
+
+            await finishLoadingFonts();
+
+            expect(load.mock.calls.map(([font]) => font).join(" ")).toContain("Aurora Sans TC");
+            expect(document.documentElement.dataset.auroraFonts).toBe("ready");
         });
 
         it("should drop pixel's ready mark when leaving pixel", async () => {
