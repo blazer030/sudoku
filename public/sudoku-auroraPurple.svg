@@ -3,7 +3,7 @@
 <g clip-path="url(#icon-shape)">
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 108">
 <rect width="108" height="108" fill="#EEF0F7"/>
-<defs><radialGradient id="aurora-light-1"><stop offset="0" stop-color="#7FE7C9"/><stop offset="1" stop-color="#7FE7C9" stop-opacity="0"/></radialGradient><radialGradient id="aurora-light-2"><stop offset="0" stop-color="#B7A4FF"/><stop offset="1" stop-color="#B7A4FF" stop-opacity="0"/></radialGradient><radialGradient id="aurora-light-3"><stop offset="0" stop-color="#8CCBFF"/><stop offset="1" stop-color="#8CCBFF" stop-opacity="0"/></radialGradient></defs>
+<defs><radialGradient id="aurora-light-1"><stop offset="0" stop-color="#E2DDFF"/><stop offset="1" stop-color="#E2DDFF" stop-opacity="0"/></radialGradient><radialGradient id="aurora-light-2"><stop offset="0" stop-color="#D2E1FE"/><stop offset="1" stop-color="#D2E1FE" stop-opacity="0"/></radialGradient><radialGradient id="aurora-light-3"><stop offset="0" stop-color="#F6BDE2"/><stop offset="1" stop-color="#F6BDE2" stop-opacity="0"/></radialGradient></defs>
 <circle cx="20" cy="18" r="56" fill="url(#aurora-light-1)"/>
 <circle cx="96" cy="44" r="58" fill="url(#aurora-light-2)"/>
 <circle cx="38" cy="104" r="54" fill="url(#aurora-light-3)"/>

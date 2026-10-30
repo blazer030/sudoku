@@ -4,21 +4,23 @@
    reference: the glass is plain translucent fills, so every engine paints it alike. */
 
 /* The lights' strength and the glass's densities per mode, the same numbers as AURORA_DENSITIES in palette.ts,
-   which the contrast model reads: each light's opacity; how much of the glass colour a card, a cell and a dialog
-   lay; the sheen on a cell and over a peer's; the primary's soft tint and same-digit tint; the error wash and
-   stripes. The glass reads as glass by its cues, painted without a filter: the edge, rim and inner are the sheen's
-   share in its faint 1px edge all round, the brighter 1px rim along its top and left and the soft highlight just
+   which the contrast model reads: each light's opacity and the ribbon's (a theme may set its own, below); how much
+   of the glass colour a card and a dialog lay and how much of the sheen a cell and a peer lay, the rest left clear
+   so the lights show through; the primary's soft tint and the same digit's tint, laid straight on the lights; the
+   error wash and stripes. Dialogs, the toast and the completion card stay all but opaque, as the board would ghost
+   through them. The glass reads as glass by its cues, painted without a filter: the edge, rim and inner are the
+   sheen's share in its faint 1px edge all round, the brighter 1px rim along its top and left and the soft highlight just
    inside its edge; the pane sheen the sheen's share at the top left of the sheen laid over each pane (which the
    contrast model composites into the words on it); the gloss the chosen segment's; the shadow the share of the
    shadow colour beneath it. The glow peak (not a palette density) is the share of the primary a completed group
    or the solved board lights a cell with, the highest that keeps every theme's primary digit 3:1 over a cell's, a
    peer's or the same digit's ground. 晨光 (light) first, 夜空 (dark) over it. */
 :root[data-style="aurora"] {
-    --aurora-strength: 0.55;
-    --aurora-glass-card: 68%;
-    --aurora-glass-cell: 74%;
-    --aurora-sheen-cell: 0%;
-    --aurora-sheen-peer: 60%;
+    --aurora-strength: 0.85;
+    --aurora-ribbon-strength: 0.68;
+    --aurora-glass-card: 60%;
+    --aurora-glass-cell: 56%;
+    --aurora-glass-peer: 88%;
     --aurora-glass-dialog: 100%;
     --aurora-edge: 70%;
     --aurora-rim: 100%;
@@ -30,15 +32,15 @@
     --aurora-tint-same: 8%;
     --aurora-error-wash: 5%;
     --aurora-error-stripe: 8%;
-    --aurora-glow-peak: 26%;
+    --aurora-glow-peak: 24%;
 }
 
 :root.dark[data-style="aurora"] {
-    --aurora-strength: 0.28;
-    --aurora-glass-card: 72%;
-    --aurora-glass-cell: 64%;
-    --aurora-sheen-cell: 2%;
-    --aurora-sheen-peer: 5%;
+    --aurora-strength: 0.42;
+    --aurora-ribbon-strength: 0.336;
+    --aurora-glass-card: 55%;
+    --aurora-glass-cell: 7%;
+    --aurora-glass-peer: 15%;
     --aurora-glass-dialog: 97%;
     --aurora-edge: 10%;
     --aurora-rim: 32%;
@@ -47,10 +49,16 @@
     --aurora-gloss: 14%;
     --aurora-shadow: 35%;
     --aurora-tint-soft: 8%;
-    --aurora-tint-same: 8%;
+    --aurora-tint-same: 22%;
     --aurora-error-wash: 5%;
     --aurora-error-stripe: 8%;
     --aurora-glow-peak: 24%;
+}
+
+/* 夜空's pink and orange cross the sky with a streak of their own colours, a little stronger */
+:root.dark[data-style="aurora"][data-color-theme="pink"],
+:root.dark[data-style="aurora"][data-color-theme="orange"] {
+    --aurora-ribbon-strength: 0.4;
 }
 
 /* The glass every pane shares, built from the mode's numbers above: a card's and a dialog's fill (a tint of the
@@ -72,31 +80,35 @@
     --aurora-loader-scrim: 45%;
 }
 
-/* The lights' geometry, from the canvas's 390×844 phone in vmax, so a wider window scales it up. Each light is a
-   square of --aurora-blob-size; its x and y are how far that square sits from the two window edges it is anchored
-   to (negative: past them). The lights only translate, never scale, so auroraSkin.test.ts can check that no two
-   cores ever meet: two lights on one layer sit at least a fade radius (0.66 × size × √2 ⁄ 2) apart, two on
-   different layers that far apart even with both drifts against them. The overscan lets each layer reach past
-   the window by more than either drift, so a drifting layer never shows its edge. The ribbon's two lights and
-   its strength are AURORA_RIBBON's. */
+/* The lights' geometry, the canvas's 390×844 phone in vmax, so a wider window scales it up. Each light is a
+   square of --aurora-blob-size, its colour at the centre fading evenly to nothing at --aurora-light-fade of the
+   way to a corner; its x and y are how far that square sits from the two window edges it is anchored to
+   (negative: past them): a1 the top left, a3 the left from the top, a2 the right from the top, a4 the bottom
+   right. They overlap, as the canvas's do (and the two on one layer do in a wide window), so each carries the
+   mode's strength in its own colour rather than its layer's opacity. The overscan lets each layer reach past the
+   window by more than either drift, so a drifting layer never shows its edge. The ribbon is a band of --aurora-ribbon-band at --aurora-ribbon-top of
+   the window, feathered by --aurora-ribbon-feather above and below; its two colours show at their shares. */
 [data-style="aurora"] {
-    --aurora-blob-size: 48vmax;
-    --aurora-a1-x: -16vmax;
-    --aurora-a1-y: -16vmax;
-    --aurora-a2-x: -24vmax;
-    --aurora-a2-y: 12vmax;
-    --aurora-a3-x: -20vmax;
-    --aurora-a3-y: 0vmax;
-    --aurora-a4-x: -20vmax;
-    --aurora-a4-y: -28vmax;
+    --aurora-blob-size: 54.502vmax;
+    --aurora-light-fade: 66%;
+    --aurora-a1-x: -18.957vmax;
+    --aurora-a1-y: -14.218vmax;
+    --aurora-a2-x: -23.697vmax;
+    --aurora-a2-y: 16.588vmax;
+    --aurora-a3-x: -14.218vmax;
+    --aurora-a3-y: 49.763vmax;
+    --aurora-a4-x: -18.957vmax;
+    --aurora-a4-y: -23.697vmax;
     --aurora-drift-1-x: 6vmax;
     --aurora-drift-1-y: 8vmax;
     --aurora-drift-2-x: -8vmax;
     --aurora-drift-2-y: 6vmax;
     --aurora-overscan: 8vmax;
+    --aurora-ribbon-top: 12%;
+    --aurora-ribbon-band: 26.066vmax;
+    --aurora-ribbon-feather: 9.479vmax;
     --aurora-ribbon-first: 55%;
     --aurora-ribbon-second: 45%;
-    --aurora-ribbon-strength: 0.8;
 }
 
 /* The sky. The body carries the page colour alone, under every screen and across the whole window, so a wide
@@ -122,10 +134,9 @@
 }
 
 /* The four lights, two to a layer fixed to the window, below every content layer and never taking taps: a1 top
-   left and a3 bottom left drift together (::before), a2 top right and a4 bottom right on another path (::after).
-   Each is a radial gradient that eases out like a blur (its full colour at the core, then 75%, 40% and 13% of it at
-   16%, 30% and 45%, gone by 66%, well inside its square), so no filter is needed. They move by
-   transform alone, each layer composited on its own, so the glass above never repaints. */
+   left and a3 lower left drift together (::before), a2 right and a4 bottom right on another path (::after). Each is
+   a radial gradient from its colour at the mode's strength to nothing at the fade, so no filter is needed. They
+   move by transform alone, each layer composited on its own, so the glass above never repaints. */
 [data-style="aurora"] body::before,
 [data-style="aurora"] body::after {
     content: "";
@@ -134,25 +145,24 @@
     z-index: -1;
     pointer-events: none;
     will-change: transform;
-    opacity: var(--aurora-strength);
     background-size: var(--aurora-blob-size) var(--aurora-blob-size);
     background-repeat: no-repeat;
 }
 
 [data-style="aurora"] body::before {
     background-image:
-        radial-gradient(circle, var(--color-aurora-1) 0, color-mix(in srgb, var(--color-aurora-1) 75%, transparent) 16%, color-mix(in srgb, var(--color-aurora-1) 40%, transparent) 30%, color-mix(in srgb, var(--color-aurora-1) 13%, transparent) 45%, transparent 66%),
-        radial-gradient(circle, var(--color-aurora-3) 0, color-mix(in srgb, var(--color-aurora-3) 75%, transparent) 16%, color-mix(in srgb, var(--color-aurora-3) 40%, transparent) 30%, color-mix(in srgb, var(--color-aurora-3) 13%, transparent) 45%, transparent 66%);
+        radial-gradient(circle, color-mix(in srgb, var(--color-aurora-1) calc(var(--aurora-strength) * 100%), transparent) 0, transparent var(--aurora-light-fade)),
+        radial-gradient(circle, color-mix(in srgb, var(--color-aurora-3) calc(var(--aurora-strength) * 100%), transparent) 0, transparent var(--aurora-light-fade));
     background-position:
         left calc(var(--aurora-overscan) + var(--aurora-a1-x)) top calc(var(--aurora-overscan) + var(--aurora-a1-y)),
-        left calc(var(--aurora-overscan) + var(--aurora-a3-x)) bottom calc(var(--aurora-overscan) + var(--aurora-a3-y));
+        left calc(var(--aurora-overscan) + var(--aurora-a3-x)) top calc(var(--aurora-overscan) + var(--aurora-a3-y));
     animation: aurora-drift-first 19s ease-in-out infinite alternate;
 }
 
 [data-style="aurora"] body::after {
     background-image:
-        radial-gradient(circle, var(--color-aurora-2) 0, color-mix(in srgb, var(--color-aurora-2) 75%, transparent) 16%, color-mix(in srgb, var(--color-aurora-2) 40%, transparent) 30%, color-mix(in srgb, var(--color-aurora-2) 13%, transparent) 45%, transparent 66%),
-        radial-gradient(circle, var(--color-aurora-4) 0, color-mix(in srgb, var(--color-aurora-4) 75%, transparent) 16%, color-mix(in srgb, var(--color-aurora-4) 40%, transparent) 30%, color-mix(in srgb, var(--color-aurora-4) 13%, transparent) 45%, transparent 66%);
+        radial-gradient(circle, color-mix(in srgb, var(--color-aurora-2) calc(var(--aurora-strength) * 100%), transparent) 0, transparent var(--aurora-light-fade)),
+        radial-gradient(circle, color-mix(in srgb, var(--color-aurora-4) calc(var(--aurora-strength) * 100%), transparent) 0, transparent var(--aurora-light-fade));
     background-position:
         right calc(var(--aurora-overscan) + var(--aurora-a2-x)) top calc(var(--aurora-overscan) + var(--aurora-a2-y)),
         right calc(var(--aurora-overscan) + var(--aurora-a4-x)) bottom calc(var(--aurora-overscan) + var(--aurora-a4-y));
@@ -167,24 +177,48 @@
     to { transform: translate(var(--aurora-drift-2-x), var(--aurora-drift-2-y)); }
 }
 
-/* The ribbon across the top of the page: two long ellipses side by side, a1 on the left and a2 on the right, each
-   easing out inside the band by the lights' own falloff, stretched to the ellipse, so its tilt never shows an edge. It swings from -12deg to -4deg and back. */
+/* The ribbon across the top of the page, the canvas's streak: a band wider than the window crossed at 100deg by the
+   theme's two ribbon colours at their shares, at the theme's own strength. The canvas blurred it 30px; here the band
+   reaches a feather further above and below and is faded there by a mask of a blurred box's profile, so no filter is
+   needed. It swings from -12deg to -4deg and back. */
 [data-style="aurora"] .app-safe-area::before {
     content: "";
     position: fixed;
     left: -20%;
     right: -20%;
-    top: 12%;
-    height: 26vmax;
+    top: calc(var(--aurora-ribbon-top) - var(--aurora-ribbon-feather));
+    height: calc(var(--aurora-ribbon-band) + 2 * var(--aurora-ribbon-feather));
     z-index: -1;
     pointer-events: none;
     will-change: transform;
-    opacity: calc(var(--aurora-strength) * var(--aurora-ribbon-strength));
-    --aurora-ribbon-first-light: color-mix(in srgb, var(--color-aurora-1) var(--aurora-ribbon-first), transparent);
-    --aurora-ribbon-second-light: color-mix(in srgb, var(--color-aurora-2) var(--aurora-ribbon-second), transparent);
-    background-image:
-        radial-gradient(ellipse 24% 50% at 33% 50%, var(--aurora-ribbon-first-light) 0, color-mix(in srgb, var(--aurora-ribbon-first-light) 75%, transparent) 24%, color-mix(in srgb, var(--aurora-ribbon-first-light) 40%, transparent) 45%, color-mix(in srgb, var(--aurora-ribbon-first-light) 13%, transparent) 68%, transparent 100%),
-        radial-gradient(ellipse 24% 50% at 64% 50%, var(--aurora-ribbon-second-light) 0, color-mix(in srgb, var(--aurora-ribbon-second-light) 75%, transparent) 24%, color-mix(in srgb, var(--aurora-ribbon-second-light) 40%, transparent) 45%, color-mix(in srgb, var(--aurora-ribbon-second-light) 13%, transparent) 68%, transparent 100%);
+    opacity: var(--aurora-ribbon-strength);
+    background-image: linear-gradient(100deg, transparent 10%, color-mix(in srgb, var(--color-aurora-ribbon-1) var(--aurora-ribbon-first), transparent) 35%, color-mix(in srgb, var(--color-aurora-ribbon-2) var(--aurora-ribbon-second), transparent) 60%, transparent 85%);
+    --aurora-ribbon-feathering: linear-gradient(
+        to bottom,
+        color-mix(in srgb, var(--color-foreground) 0.38%, transparent) 0%,
+        color-mix(in srgb, var(--color-foreground) 2.1%, transparent) 5%,
+        color-mix(in srgb, var(--color-foreground) 8.08%, transparent) 10%,
+        color-mix(in srgb, var(--color-foreground) 22.16%, transparent) 15%,
+        color-mix(in srgb, var(--color-foreground) 44.7%, transparent) 20%,
+        color-mix(in srgb, var(--color-foreground) 69.15%, transparent) 25%,
+        color-mix(in srgb, var(--color-foreground) 87.15%, transparent) 30%,
+        color-mix(in srgb, var(--color-foreground) 96.14%, transparent) 35%,
+        color-mix(in srgb, var(--color-foreground) 99.18%, transparent) 40%,
+        color-mix(in srgb, var(--color-foreground) 99.88%, transparent) 45%,
+        color-mix(in srgb, var(--color-foreground) 99.98%, transparent) 50%,
+        color-mix(in srgb, var(--color-foreground) 99.88%, transparent) 55%,
+        color-mix(in srgb, var(--color-foreground) 99.18%, transparent) 60%,
+        color-mix(in srgb, var(--color-foreground) 96.14%, transparent) 65%,
+        color-mix(in srgb, var(--color-foreground) 87.15%, transparent) 70%,
+        color-mix(in srgb, var(--color-foreground) 69.15%, transparent) 75%,
+        color-mix(in srgb, var(--color-foreground) 44.7%, transparent) 80%,
+        color-mix(in srgb, var(--color-foreground) 22.16%, transparent) 85%,
+        color-mix(in srgb, var(--color-foreground) 8.08%, transparent) 90%,
+        color-mix(in srgb, var(--color-foreground) 2.1%, transparent) 95%,
+        color-mix(in srgb, var(--color-foreground) 0.38%, transparent) 100%
+    );
+    -webkit-mask-image: var(--aurora-ribbon-feathering);
+    mask-image: var(--aurora-ribbon-feathering);
     transform: rotate(-12deg);
     animation: aurora-ribbon 16s ease-in-out infinite alternate;
 }
@@ -700,10 +734,11 @@
 
 /* The board, as the canvas's .board / .cell: nine panes of glass with the lights showing between them. The board and
    its grid lay nothing of their own; the cells' lines are cleared and each cell paints its glass inside its padding
-   box alone, so the 1px lines and 3px box lines become gaps (spec ruling 5). A cell's glass is the glass colour at
-   the cell's density under the cell's sheen. */
+   box alone, so the 1px lines and 3px box lines become gaps (spec ruling 5). A cell's glass is the sheen at the
+   cell's density, a peer's at the peer's. */
 [data-style="aurora"] {
-    --aurora-glass-cell-fill: color-mix(in srgb, var(--color-glass-sheen) var(--aurora-sheen-cell), color-mix(in srgb, var(--color-glass) var(--aurora-glass-cell), transparent));
+    --aurora-glass-cell-fill: color-mix(in srgb, var(--color-glass-sheen) var(--aurora-glass-cell), transparent);
+    --aurora-glass-peer-fill: color-mix(in srgb, var(--color-glass-sheen) var(--aurora-glass-peer), transparent);
 }
 
 [data-style="aurora"] [data-skin~="board"] {
@@ -773,16 +808,16 @@
     --aurora-cell-ground: var(--aurora-glass-cell-fill);
 }
 
-/* The selected cell's row, column and box, and a step's scope, lay the peer sheen over the glass (晨光: about 90% of the sheen in all, 1.08:1 apart from a cell) */
+/* The selected cell's row, column and box, and a step's scope, are the peer's brighter glass */
 [data-style="aurora"] [data-skin~="board"] [data-variant="peer"],
 [data-style="aurora"] [data-skin~="board"] [data-variant="scope"] {
-    --aurora-cell-ground: color-mix(in srgb, var(--color-glass-sheen) var(--aurora-sheen-peer), var(--aurora-glass-cell-fill));
+    --aurora-cell-ground: var(--aurora-glass-peer-fill);
 }
 
-/* The same digit, and a step's pattern, take a flat tint of the primary and are written in it */
+/* The same digit, and a step's pattern, take a flat tint of the primary in place of the glass and are written in it */
 [data-style="aurora"] [data-skin~="board"] [data-variant="same-digit"],
 [data-style="aurora"] [data-skin~="board"] [data-variant="pattern"] {
-    --aurora-cell-ground: color-mix(in srgb, var(--color-primary) var(--aurora-tint-same), var(--aurora-glass-cell-fill));
+    --aurora-cell-ground: color-mix(in srgb, var(--color-primary) var(--aurora-tint-same), transparent);
 }
 
 [data-style="aurora"] [data-skin~="board"] [data-variant="same-digit"][data-value-kind] > div,
@@ -1040,8 +1075,8 @@
 }
 
 /* In 夜空 the light is bright under light digits, so it passes under the glass instead: it lights the gaps between
-   the cells and shows only faintly through the 88% glass, and every digit sits on glass, not on the light. Under
-   every cell, over the page and its lights, inside the grid's own stacking context. */
+   the cells and shows through their thin glass as the sky does, below every cell's ground and digit. Under every
+   cell, over the page and its lights, inside the grid's own stacking context. */
 :root.dark[data-style="aurora"] .aurora-group-ribbon,
 :root.dark[data-style="aurora"] .aurora-group-ring {
     z-index: -1;

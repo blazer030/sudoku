@@ -241,8 +241,8 @@ describe("aurora moments", () => {
 
         // The peak is the highest share that keeps every theme's primary digit 3:1 on the glass, a peer's glass and
         // the same digit's tint (paletteContrast); 夜空's light digits lose contrast sooner than 晨光's dark ones
-        it("should peak the group and celebration glows at 26% of the primary in 晨光 and 24% in 夜空", () => {
-            expect(auroraProperty(AURORA_LIGHT, "--aurora-glow-peak")).toBe("26%");
+        it("should peak the group and celebration glows at 24% of the primary in both modes", () => {
+            expect(auroraProperty(AURORA_LIGHT, "--aurora-glow-peak")).toBe("24%");
             expect(auroraProperty(AURORA_DARK, "--aurora-glow-peak")).toBe("24%");
         });
 
@@ -324,7 +324,7 @@ describe("aurora moments", () => {
             }
         });
 
-        // 夜空's light is bright under light digits, so it passes under every cell's glass (88%), lighting the gaps; the
+        // 夜空's light is bright under light digits, so it passes under every cell's glass, lighting the gaps; the
         // grid's own stacking context keeps it over the page and its lights
         it("should lay 夜空's streaks and ring under the cells' glass, inside the grid's own stacking context", () => {
             for (const piece of [".aurora-group-ribbon", ".aurora-group-ring"]) {

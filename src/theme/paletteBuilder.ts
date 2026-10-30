@@ -19,13 +19,13 @@ export type PaletteToken = typeof PALETTE_TOKENS[number];
 // Colours only one style paints: chalkboard's chalk tray (its top, its shaded foot and its lit edge) and the duster
 // lying in it (its back and its felt), its erase smudge and smear, its app icon's frame and the pink chalk it
 // doodles with on a solved board; blueprint's graph paper (its minor and major lines), the hatching it marks a
-// cell's row, column and box with, and the error-coloured hatching of an error cell; aurora's four lights and
-// the glass (with the sheen laid on it) its panes are made of. A palette carries one only when its style sets it,
+// cell's row, column and box with, and the error-coloured hatching of an error cell; aurora's four lights, the
+// two colours of its ribbon and the glass (with the sheen laid on it) its panes are made of. A palette carries one only when its style sets it,
 // so no other style's blocks in themes.generated.css declare it.
 export const STYLE_OWN_TOKENS = [
     "tray", "tray-shade", "tray-edge", "duster", "duster-felt", "smudge", "smear", "icon-frame", "doodle",
     "grid-minor", "grid-major", "hatch", "error-hatch",
-    "aurora-1", "aurora-2", "aurora-3", "aurora-4", "glass", "glass-sheen",
+    "aurora-1", "aurora-2", "aurora-3", "aurora-4", "aurora-ribbon-1", "aurora-ribbon-2", "glass", "glass-sheen",
 ] as const;
 export type StyleOwnToken = typeof STYLE_OWN_TOKENS[number];
 export type Palette = Record<PaletteToken, string> & Partial<Record<StyleOwnToken, string>>;

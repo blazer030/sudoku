@@ -1,6 +1,6 @@
 import { readFileSync } from "fs";
 import postcss, { type Declaration, type Rule } from "postcss";
-import { AURORA_DENSITIES, AURORA_RIBBON, type AuroraDensity } from "@/style/styles/aurora/palette";
+import { AURORA_DENSITIES, type AuroraDensity } from "@/style/styles/aurora/palette";
 import type { ColorMode } from "@/theme/themeIds";
 import { declarationsOf, findLayoutDeclarations, reducedMotionDeclarationsOf } from "../../styleSheetRules";
 import { AURORA_CSS, AURORA_DARK, AURORA_LIGHT, AURORA_SCOPE, auroraProperty, keyframesOf, vmaxOf } from "./auroraSheet";
@@ -13,51 +13,38 @@ const RIBBON = `${AURORA_SCOPE} .app-safe-area::before`;
 const LAYERS = [FIRST_LIGHTS, SECOND_LIGHTS, RIBBON];
 const skin = (token: string): string => `${AURORA_SCOPE} [data-skin~="${token}"]`;
 
-// Each light eases out like a blur, without a filter: its full colour at the core, then these shares of it at these
-// points of its fade, then nothing (a Gaussian's 100, 75, 40 and 13 per cent), so it has no cone's hard tip
-const FALLOFF: readonly (readonly [share: number, at: number])[] = [[75, 16], [40, 30], [13, 45]];
-const FADE_END = 66;
-const fading = (colour: string, scale: number): string => FALLOFF
-    .map(([share, at]) => `color-mix(in srgb, ${colour} ${share}%, transparent) ${Math.round(at * scale)}%`).join(", ");
-const blob = (light: number): string => `radial-gradient(circle, var(--color-aurora-${light}) 0, ${fading(`var(--color-aurora-${light})`, 1)}, transparent ${FADE_END}%)`;
-// The ribbon's ellipses fade over their whole size, so the same falloff is stretched from 66 to 100
-const ribbonLight = (at: string, colour: string): string => `radial-gradient(ellipse 24% 50% at ${at}, ${colour} 0, ${fading(colour, 100 / FADE_END)}, transparent 100%)`;
+// Each light is its colour at the mode's strength at the centre, fading evenly to nothing at the fade (the canvas's 66%)
+const blob = (light: number): string =>
+    `radial-gradient(circle, color-mix(in srgb, var(--color-aurora-${light}) calc(var(--aurora-strength) * 100%), transparent) 0, transparent var(--aurora-light-fade))`;
 const fromOverscan = (property: string): string => `calc(var(--aurora-overscan) + var(${property}))`;
-
-// The six windows the lights must keep apart in, phones to a wide desktop
-const VIEWPORTS: readonly (readonly [number, number])[] = [[360, 640], [360, 800], [390, 844], [768, 1024], [1280, 800], [1920, 1080]];
 
 type Point = readonly [number, number];
 
 const geometry = (name: string): number => vmaxOf(auroraProperty(AURORA_SCOPE, name));
 
-// Each light's centre in vmax, measured from the window's top left: a light's square sits its x and y away from
-// the two edges it is anchored to (a1 top left, a3 bottom left, a2 top right, a4 bottom right)
+// Each light's centre in px, measured from the window's top left: a light's square sits its x and y away from the two
+// edges it is anchored to (a1 top left, a3 left and top, a2 right and top, a4 bottom right)
 const centresIn = (widthPx: number, heightPx: number): Record<"a1" | "a2" | "a3" | "a4", Point> => {
     const vmaxPx = Math.max(widthPx, heightPx) / 100;
-    const width = widthPx / vmaxPx;
-    const height = heightPx / vmaxPx;
-    const half = geometry("--aurora-blob-size") / 2;
-    const x = (light: string): number => geometry(`--aurora-${light}-x`);
-    const y = (light: string): number => geometry(`--aurora-${light}-y`);
+    const half = geometry("--aurora-blob-size") * vmaxPx / 2;
+    const x = (light: string): number => geometry(`--aurora-${light}-x`) * vmaxPx;
+    const y = (light: string): number => geometry(`--aurora-${light}-y`) * vmaxPx;
     return {
         a1: [x("a1") + half, y("a1") + half],
-        a3: [x("a3") + half, height - y("a3") - half],
-        a2: [width - x("a2") - half, y("a2") + half],
-        a4: [width - x("a4") - half, height - y("a4") - half],
+        a3: [x("a3") + half, y("a3") + half],
+        a2: [widthPx - x("a2") - half, y("a2") + half],
+        a4: [widthPx - x("a4") - half, heightPx - y("a4") - half],
     };
 };
 
-const distance = (from: Point, to: Point): number => Math.hypot(from[0] - to[0], from[1] - to[1]);
-
-const driftOf = (layer: 1 | 2): number => Math.hypot(geometry(`--aurora-drift-${layer}-x`), geometry(`--aurora-drift-${layer}-y`));
+const fadeRadiusIn = (widthPx: number, heightPx: number): number =>
+    percentOf(auroraProperty(AURORA_SCOPE, "--aurora-light-fade")) * geometry("--aurora-blob-size") * Math.max(widthPx, heightPx) / 100 * Math.SQRT2 / 2;
 
 // The skin's density properties, each the palette's AURORA_DENSITIES fraction written as a percentage
 const DENSITY_PROPERTIES: readonly (readonly [string, keyof AuroraDensity])[] = [
     ["--aurora-glass-card", "card"],
     ["--aurora-glass-cell", "cell"],
-    ["--aurora-sheen-cell", "sheenCell"],
-    ["--aurora-sheen-peer", "sheenPeer"],
+    ["--aurora-glass-peer", "peer"],
     ["--aurora-glass-dialog", "dialog"],
     ["--aurora-tint-soft", "tintSoft"],
     ["--aurora-tint-same", "tintSame"],
@@ -111,14 +98,15 @@ describe("aurora's glass", () => {
             }
         });
 
-        // The lights at their faintest let the glass thin until the board and cards read as glass, not solid panels;
-        // each density is as thin as paletteContrast.test.ts allows
-        it.each(["light", "dark"] as const)("should leave %s mode's glass thin enough to see the lights through", (mode) => {
-            const density = AURORA_DENSITIES[mode];
+        // The canvas's glass: thin enough that the board and the cards show the lights through
+        it("should lay the canvas's glass: cards at 60% of white in 晨光 and 55% of the night glass in 夜空, cells and peers in the sheen", () => {
+            expect(AURORA_DENSITIES.light).toMatchObject({ card: 0.6, cell: 0.56, peer: 0.88 });
+            expect(AURORA_DENSITIES.dark).toMatchObject({ card: 0.55, cell: 0.07, peer: 0.15 });
+        });
 
-            expect(density.cell + density.sheenCell).toBeLessThanOrEqual(0.75);
-            expect(density.card).toBeLessThanOrEqual(0.72);
-            expect(density.sheenPeer).toBeLessThanOrEqual(0.65);
+        it("should tint the same digit 8% in 晨光 and 22% in 夜空, as the canvas's 22% fails 晨光's pink digit", () => {
+            expect(AURORA_DENSITIES.light.tintSame).toBe(0.08);
+            expect(AURORA_DENSITIES.dark.tintSame).toBe(0.22);
         });
 
         it("should lay 晨光's dialogs fully opaque, so no digit shows through, and leave 夜空's at 97%", () => {
@@ -651,10 +639,9 @@ describe("aurora's glass", () => {
             expect(grid.get("--board-box-line")).toBe("transparent");
         });
 
-        it("should make the cell's glass a tint of the glass colour at the cell's density under the cell's sheen", () => {
-            expect(auroraProperty(AURORA_SCOPE, "--aurora-glass-cell-fill")).toBe(
-                `color-mix(in srgb, var(--color-glass-sheen) var(--aurora-sheen-cell), ${soft("glass", "var(--aurora-glass-cell)")})`,
-            );
+        it("should make a cell's glass the sheen at the cell's density, and a peer's at the peer's", () => {
+            expect(auroraProperty(AURORA_SCOPE, "--aurora-glass-cell-fill")).toBe(soft("glass-sheen", "var(--aurora-glass-cell)"));
+            expect(auroraProperty(AURORA_SCOPE, "--aurora-glass-peer-fill")).toBe(soft("glass-sheen", "var(--aurora-glass-peer)"));
         });
 
         it("should paint each cell its own ground inside its padding box, rounded 5px, so the lines become gaps", () => {
@@ -677,16 +664,16 @@ describe("aurora's glass", () => {
             expect([...declarations]).toEqual([[property, "14px"]]);
         });
 
-        it("should lay plain cells and clues on the cell's glass, and peers and a step's scope under the peer sheen", () => {
+        it("should lay plain cells and clues on the cell's glass, and peers and a step's scope on the peer's", () => {
             expect(groundOf("default")).toBe(CELL_GLASS);
             expect(groundOf("clue")).toBe(CELL_GLASS);
-            expect(groundOf("peer")).toBe(over("glass-sheen", "var(--aurora-sheen-peer)", CELL_GLASS));
-            expect(groundOf("scope")).toBe(over("glass-sheen", "var(--aurora-sheen-peer)", CELL_GLASS));
+            expect(groundOf("peer")).toBe("var(--aurora-glass-peer-fill)");
+            expect(groundOf("scope")).toBe("var(--aurora-glass-peer-fill)");
         });
 
-        it("should tint the same digit and a step's pattern with the primary, written in it", () => {
-            expect(groundOf("same-digit")).toBe(over("primary", "var(--aurora-tint-same)", CELL_GLASS));
-            expect(groundOf("pattern")).toBe(over("primary", "var(--aurora-tint-same)", CELL_GLASS));
+        it("should tint the same digit and a step's pattern with the primary in place of the glass, written in it", () => {
+            expect(groundOf("same-digit")).toBe(soft("primary", "var(--aurora-tint-same)"));
+            expect(groundOf("pattern")).toBe(soft("primary", "var(--aurora-tint-same)"));
             expect(declarationsOf(AURORA_CSS, `${cell("same-digit")}[data-value-kind] > div`).get("color")).toBe("var(--color-primary)");
             expect(declarationsOf(AURORA_CSS, `${cell("pattern")}[data-value-kind] > div`).get("color")).toBe("var(--color-primary)");
         });
@@ -883,19 +870,28 @@ describe("aurora skin", () => {
             expect(declarations.get("will-change")).toBe("transform");
         });
 
-        it("should give each light the mode's strength, the same as the palette's", () => {
-            expect(auroraProperty(AURORA_LIGHT, "--aurora-strength")).toBe(String(AURORA_DENSITIES.light.strength));
-            expect(auroraProperty(AURORA_DARK, "--aurora-strength")).toBe(String(AURORA_DENSITIES.dark.strength));
-            expect(Number.parseFloat(auroraProperty(AURORA_SCOPE, "--aurora-ribbon-first")) / 100).toBeCloseTo(AURORA_RIBBON.first, 6);
-            expect(Number.parseFloat(auroraProperty(AURORA_SCOPE, "--aurora-ribbon-second")) / 100).toBeCloseTo(AURORA_RIBBON.second, 6);
-            expect(auroraProperty(AURORA_SCOPE, "--aurora-ribbon-strength")).toBe(String(AURORA_RIBBON.strength));
+        it("should give each light the canvas's strength, 0.85 in 晨光 and 0.42 in 夜空", () => {
+            expect(auroraProperty(AURORA_LIGHT, "--aurora-strength")).toBe("0.85");
+            expect(auroraProperty(AURORA_DARK, "--aurora-strength")).toBe("0.42");
+            // In its own colour, not its layer's opacity, as lights overlap (the two on one layer too, in a wide window)
             for (const layer of [FIRST_LIGHTS, SECOND_LIGHTS]) {
-                expect(declarationsOf(AURORA_CSS, layer).get("opacity")).toBe("var(--aurora-strength)");
+                expect(declarationsOf(AURORA_CSS, layer).has("opacity")).toBe(false);
             }
-            expect(declarationsOf(AURORA_CSS, RIBBON).get("opacity")).toBe("calc(var(--aurora-strength) * var(--aurora-ribbon-strength))");
         });
 
-        it("should draw a1 at the top left and a3 at the bottom left on the first layer, as soft-edged gradients", () => {
+        // The ribbon's strength is a number, not a colour, so it lies in the skin beside the lights' and the glass's
+        // numbers rather than among the palette's colour tokens; a theme that needs its own sets it on its own root
+        it("should give the ribbon its own strength: 0.68 in 晨光, 0.336 in 夜空 and 0.4 for 夜空's pink and orange", () => {
+            const ribbonStrength = (root: string): string => auroraProperty(root, "--aurora-ribbon-strength");
+
+            expect(ribbonStrength(AURORA_LIGHT)).toBe("0.68");
+            expect(ribbonStrength(AURORA_DARK)).toBe("0.336");
+            expect(ribbonStrength(`${AURORA_DARK}[data-color-theme="pink"]`)).toBe("0.4");
+            expect(ribbonStrength(`${AURORA_DARK}[data-color-theme="orange"]`)).toBe("0.4");
+            expect(declarationsOf(AURORA_CSS, RIBBON).get("opacity")).toBe("var(--aurora-ribbon-strength)");
+        });
+
+        it("should draw a1 at the top left and a3 down the left on the first layer, each fading evenly to the canvas's 66%", () => {
             const layer = declarationsOf(AURORA_CSS, FIRST_LIGHTS);
 
             expect(layer.get("background-image")).toBe(`${blob(1)}, ${blob(3)}`);
@@ -903,11 +899,12 @@ describe("aurora skin", () => {
             expect(layer.get("background-repeat")).toBe("no-repeat");
             expect(layer.get("background-position")).toBe(
                 `left ${fromOverscan("--aurora-a1-x")} top ${fromOverscan("--aurora-a1-y")}, `
-                + `left ${fromOverscan("--aurora-a3-x")} bottom ${fromOverscan("--aurora-a3-y")}`,
+                + `left ${fromOverscan("--aurora-a3-x")} top ${fromOverscan("--aurora-a3-y")}`,
             );
+            expect(auroraProperty(AURORA_SCOPE, "--aurora-light-fade")).toBe("66%");
         });
 
-        it("should draw a2 at the top right and a4 at the bottom right on the second layer", () => {
+        it("should draw a2 down the right and a4 at the bottom right on the second layer", () => {
             const layer = declarationsOf(AURORA_CSS, SECOND_LIGHTS);
 
             expect(layer.get("background-image")).toBe(`${blob(2)}, ${blob(4)}`);
@@ -931,39 +928,58 @@ describe("aurora skin", () => {
             }
         });
 
-        it("should draw the ribbon as two ellipses, a1 on the left and a2 on the right, tilted at rest", () => {
+        it("should cross the ribbon's band with the theme's two ribbon colours at their shares, tilted at rest", () => {
             const ribbon = declarationsOf(AURORA_CSS, RIBBON);
-            const image = ribbon.get("background-image") ?? "";
 
-            expect(ribbon.get("--aurora-ribbon-first-light")).toBe("color-mix(in srgb, var(--color-aurora-1) var(--aurora-ribbon-first), transparent)");
-            expect(ribbon.get("--aurora-ribbon-second-light")).toBe("color-mix(in srgb, var(--color-aurora-2) var(--aurora-ribbon-second), transparent)");
-            expect(image).toBe(`${ribbonLight("33% 50%", "var(--aurora-ribbon-first-light)")}, ${ribbonLight("64% 50%", "var(--aurora-ribbon-second-light)")}`);
+            expect(ribbon.get("background-image")).toBe(
+                "linear-gradient(100deg, transparent 10%, "
+                + `${soft("aurora-ribbon-1", "var(--aurora-ribbon-first)")} 35%, ${soft("aurora-ribbon-2", "var(--aurora-ribbon-second)")} 60%, transparent 85%)`,
+            );
+            expect(auroraProperty(AURORA_SCOPE, "--aurora-ribbon-first")).toBe("55%");
+            expect(auroraProperty(AURORA_SCOPE, "--aurora-ribbon-second")).toBe("45%");
             expect(ribbon.get("transform")).toBe("rotate(-12deg)");
         });
 
-        // auroraGround takes a light's core at its full colour: the falloff starts there and only ever fades
-        it("should ease every light out from its full colour at the core, never brighter further out", () => {
-            const shares = [100, ...FALLOFF.map(([share]) => share), 0];
-            const points = [0, ...FALLOFF.map(([, at]) => at), FADE_END];
+        // The canvas blurred its 220px streak 30px; the band reaches 80px further each way, faded by that blur's profile
+        it("should lay the canvas's 220px band at 12% of the window, feathered 80px above and below", () => {
+            const ribbon = declarationsOf(AURORA_CSS, RIBBON);
+            const canvasPx = (name: string): number => geometry(name) * 8.44;
 
-            expect(shares.every((share, index) => index === 0 || share < shares[index - 1])).toBe(true);
-            expect(points.every((point, index) => index === 0 || point > points[index - 1])).toBe(true);
+            expect(auroraProperty(AURORA_SCOPE, "--aurora-ribbon-top")).toBe("12%");
+            expect(canvasPx("--aurora-ribbon-band")).toBeCloseTo(220, 1);
+            expect(canvasPx("--aurora-ribbon-feather")).toBeCloseTo(80, 1);
+            expect(ribbon.get("top")).toBe("calc(var(--aurora-ribbon-top) - var(--aurora-ribbon-feather))");
+            expect(ribbon.get("height")).toBe("calc(var(--aurora-ribbon-band) + 2 * var(--aurora-ribbon-feather))");
         });
 
-        // The contrast model takes the brightest point as one light's core: no two cores ever meet
-        it.each(VIEWPORTS)("should keep every two lights' cores a fade radius apart in a %ix%i window", (width, height) => {
-            const fadeRadius = FADE_END / 100 * geometry("--aurora-blob-size") * Math.SQRT2 / 2;
-            const centres = centresIn(width, height);
-            const drifts = driftOf(1) + driftOf(2);
+        it("should feather the ribbon by a symmetric mask that rises from nothing to full and back, the same for WebKit", () => {
+            const ribbon = declarationsOf(AURORA_CSS, RIBBON);
+            const mask = ribbon.get("--aurora-ribbon-feathering") ?? "";
+            const shares = [...mask.matchAll(/var\(--color-foreground\) (\d*\.?\d+)%/g)].map(match => Number(match[1]));
 
-            expect(distance(centres.a1, centres.a3)).toBeGreaterThanOrEqual(fadeRadius);
-            expect(distance(centres.a2, centres.a4)).toBeGreaterThanOrEqual(fadeRadius);
-            for (const first of [centres.a1, centres.a3]) {
-                for (const second of [centres.a2, centres.a4]) {
-                    expect(distance(first, second) - drifts).toBeGreaterThanOrEqual(fadeRadius);
-                }
+            expect(ribbon.get("mask-image")).toBe("var(--aurora-ribbon-feathering)");
+            expect(ribbon.get("-webkit-mask-image")).toBe("var(--aurora-ribbon-feathering)");
+            expect(shares).toHaveLength(21);
+            expect(shares).toEqual([...shares].reverse());
+            expect(shares[0]).toBeLessThan(1);
+            expect(shares[10]).toBeGreaterThan(99.9);
+            expect(shares.slice(0, 11).every((share, index) => index === 0 || share > shares[index - 1])).toBe(true);
+        });
+
+        // The canvas's lights at its 390×844 phone: 460px, b1 at (70, 110), b2 at (360, 370), b3 at (110, 650), b4 at
+        // (320, 814), each gone 214.6px out (66% of the way to a corner)
+        it("should place the lights where the canvas does in its 390x844 phone", () => {
+            const centres = centresIn(390, 844);
+            const expected = { a1: [70, 110], a2: [360, 370], a3: [110, 650], a4: [320, 814] } as const;
+
+            expect(geometry("--aurora-blob-size") * 8.44).toBeCloseTo(460, 1);
+            for (const light of ["a1", "a2", "a3", "a4"] as const) {
+                expect(centres[light][0], light).toBeCloseTo(expected[light][0], 0);
+                expect(centres[light][1], light).toBeCloseTo(expected[light][1], 0);
             }
+            expect(fadeRadiusIn(390, 844)).toBeCloseTo(214.66, 1);
         });
+
     });
 
     describe("the drift", () => {

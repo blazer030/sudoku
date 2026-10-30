@@ -11,8 +11,15 @@ export const AURORA_SCOPE = '[data-style="aurora"]';
 export const AURORA_LIGHT = ':root[data-style="aurora"]';
 export const AURORA_DARK = ':root.dark[data-style="aurora"]';
 
+// Each selector's declarations, read once: the contrast model asks for the same few numbers many times over
+const DECLARATIONS = new Map<string, Map<string, string>>();
+
 /** The value the skin's top-level rule for `selector` gives the property `name`, whitespace collapsed; "" when unset. */
-export const auroraProperty = (selector: string, name: string): string => declarationsOf(AURORA_CSS, selector).get(name) ?? "";
+export const auroraProperty = (selector: string, name: string): string => {
+    const declarations = DECLARATIONS.get(selector) ?? declarationsOf(AURORA_CSS, selector);
+    DECLARATIONS.set(selector, declarations);
+    return declarations.get(name) ?? "";
+};
 
 /** The number of a length written in vmax, such as "-16vmax"; throws on any other unit, so the geometry stays in vmax. */
 export const vmaxOf = (value: string): number => {

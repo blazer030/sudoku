@@ -115,7 +115,7 @@ describe("palettes", () => {
     const OWN_TOKENS_BY_STYLE: Partial<Record<StyleId, readonly StyleOwnToken[]>> = {
         chalkboard: ["tray", "tray-shade", "tray-edge", "duster", "duster-felt", "smudge", "smear", "icon-frame", "doodle"],
         blueprint: ["grid-minor", "grid-major", "hatch", "error-hatch"],
-        aurora: ["aurora-1", "aurora-2", "aurora-3", "aurora-4", "glass", "glass-sheen"],
+        aurora: ["aurora-1", "aurora-2", "aurora-3", "aurora-4", "aurora-ribbon-1", "aurora-ribbon-2", "glass", "glass-sheen"],
     };
 
     it("should give chalkboard and blueprint only their own colours, and no other style any", () => {
@@ -139,7 +139,7 @@ describe("palettes", () => {
         expect(STYLES.aurora.themes.map(theme => theme.id)).toEqual(["purple", "teal", "pink", "orange"]);
     });
 
-    it("should paint the night sky: a deep ground, pale text and four lights under a dark glass", () => {
+    it("should paint the night sky: a deep ground, pale text and the theme's four lights and streak under a dark glass", () => {
         const palette = getPalette("aurora", "pink", "dark");
 
         expect(palette.background).toBe("#060914");
@@ -152,12 +152,13 @@ describe("palettes", () => {
         expect(palette.error).toBe("#FF8F5A");
         expect(palette["on-danger"]).toBe("#060914");
         expect([palette["aurora-1"], palette["aurora-2"], palette["aurora-3"], palette["aurora-4"]])
-            .toEqual(["#19E6A3", "#7C4DFF", "#1FB6FF", "#FF6FB5"]);
+            .toEqual(["#4F0031", "#02484F", "#9F39B5", "#3769CA"]);
+        expect([palette["aurora-ribbon-1"], palette["aurora-ribbon-2"]]).toEqual(["#913FD5", "#029E72"]);
         expect(palette.glass).toBe("#141A34");
         expect(palette["glass-sheen"]).toBe("#FFFFFF");
     });
 
-    it("should paint the dawn: a pale ground, dark text and four soft lights under a white glass", () => {
+    it("should paint the dawn: a pale ground, dark text and the theme's four soft lights and streak under a white glass", () => {
         const palette = getPalette("aurora", "orange", "light");
 
         expect(palette.background).toBe("#EEF0F7");
@@ -168,17 +169,36 @@ describe("palettes", () => {
         expect(palette.error).toBe("#A3165E");
         expect(palette["on-danger"]).toBe("#FFFFFF");
         expect([palette["aurora-1"], palette["aurora-2"], palette["aurora-3"], palette["aurora-4"]])
-            .toEqual(["#7FE7C9", "#B7A4FF", "#8CCBFF", "#FFC2A6"]);
+            .toEqual(["#B3FFD6", "#FFEDBA", "#CCEDFE", "#FFC49C"]);
+        expect([palette["aurora-ribbon-1"], palette["aurora-ribbon-2"]]).toEqual(["#D2FFDA", "#F5EEFF"]);
         expect(palette.glass).toBe("#FFFFFF");
     });
 
-    it("should change only the accent colours between aurora's themes, the sky and glass staying the same", () => {
+    it("should keep the page and the glass the same in all of aurora's themes, and give each its own lights", () => {
         for (const mode of ["light", "dark"] as const) {
             const palettes = STYLES.aurora.themes.map(theme => getPalette("aurora", theme.id, mode));
-            for (const token of ["background", "card", "cell-clue", "cell-peer", "aurora-1", "aurora-2", "aurora-3", "aurora-4", "glass"] as const) {
+            for (const token of ["background", "card", "cell-clue", "cell-peer", "glass", "glass-sheen"] as const) {
                 expect(new Set(palettes.map(palette => palette[token])).size, `${mode} ${token}`).toBe(1);
             }
+            const lights = palettes.map(palette => [palette["aurora-1"], palette["aurora-2"], palette["aurora-3"], palette["aurora-4"]].join());
+            expect(new Set(lights).size, `${mode} lights`).toBe(4);
         }
+    });
+
+    // 晨光 crosses every theme's sky with one mint-to-lilac streak; 夜空's purple and teal draw theirs in their first
+    // two lights, its pink and orange in a violet and a green of their own
+    it("should give aurora's ribbon one streak in 晨光 and each 夜空 theme its own", () => {
+        const ribbonOf = (themeId: "purple" | "teal" | "pink" | "orange", mode: "light" | "dark") => {
+            const palette = getPalette("aurora", themeId, mode);
+            return [palette["aurora-ribbon-1"], palette["aurora-ribbon-2"]];
+        };
+
+        for (const themeId of ["purple", "teal", "pink", "orange"] as const) expect(ribbonOf(themeId, "light")).toEqual(["#D2FFDA", "#F5EEFF"]);
+        for (const themeId of ["purple", "teal"] as const) {
+            const palette = getPalette("aurora", themeId, "dark");
+            expect(ribbonOf(themeId, "dark")).toEqual([palette["aurora-1"], palette["aurora-2"]]);
+        }
+        expect(ribbonOf("orange", "dark")).toEqual(["#864AD2", "#019F68"]);
     });
 
     // Purple and teal keep the plain red; pink takes a red-orange and orange a crimson-rose, so the error never
