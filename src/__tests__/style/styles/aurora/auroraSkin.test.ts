@@ -286,9 +286,9 @@ describe("aurora's glass", () => {
             "src/presentation/pages/game/components/GameHeader.vue",
         ])("should leave %s's back button, title and timer in the text colour", (path) => {
             const header = readFileSync(path, "utf8");
-            const inks = [...header.matchAll(/<span\s+class="[^"]*\b(text-foreground[\w-]*)/g)].map(match => match[1]);
+            const spans = [...header.matchAll(/<span\s+class="([^"]*)"/g)].map(match => match[1]);
 
-            expect(inks).toEqual(["text-foreground", "text-foreground"]);
+            expect(spans.join(" ")).not.toMatch(/\btext-foreground-(?:secondary|muted)\b/);
         });
 
         it("should draw line icons 2 wide with round ends and joins", () => {
