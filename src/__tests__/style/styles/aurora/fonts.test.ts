@@ -48,8 +48,10 @@ describe("aurora skin fonts", () => {
         expect(skinDeclarations(FONTS_READY).get("--font-sans")).toBe("var(--font-aurora-sans)");
     });
 
-    it("should set the titles at 600, the heaviest bundled weight", () => {
-        expect(skinDeclarations(`${FONTS_READY} [data-skin~="title"]`).get("font-weight")).toBe("600");
+    // Only the face changes at the gate, never the weight: the heaviest bundled weight is 600
+    it("should set titles at 600 whether or not the faces are ready", () => {
+        expect(skinDeclarations('[data-style="aurora"] [data-skin~="title"]').get("font-weight")).toBe("600");
+        expect(skinDeclarations(`${FONTS_READY} [data-skin~="title"]`).has("font-weight")).toBe(false);
     });
 
     // Only the face changes at the gate, never the weight

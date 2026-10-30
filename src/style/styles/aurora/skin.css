@@ -180,11 +180,8 @@
     --font-sans: var(--font-aurora-sans);
 }
 
-[data-style="aurora"][data-aurora-fonts="ready"] [data-skin~="title"] {
-    font-weight: 600;
-}
-
-/* Dialog titles are 600 in whatever face is showing, so the gate changes only the face */
+/* Titles are 600 in whatever face is showing, so the gate changes only the face */
+[data-style="aurora"] [data-skin~="title"],
 [data-style="aurora"] [data-skin~="dialog-title"] {
     font-weight: 600;
 }
@@ -352,6 +349,83 @@
 
 [data-style="aurora"] [data-skin~="app-tag"] {
     background-color: color-mix(in srgb, var(--color-primary) var(--aurora-tint-soft), transparent);
+    color: var(--color-primary);
+}
+
+/* Home, as the canvas's .home. The logo is a round pane of glass glowing in the primary, its nine squares drawn as
+   dots (the markup sizes them, a dot is a gradient inside each): the odd ones in the primary, the rest faint. The
+   subtitle is written in the text colour, it lies on the lights. */
+[data-style="aurora"] [data-skin~="logo"] {
+    border-radius: 50%;
+    background-color: var(--aurora-glass-card-fill);
+    box-shadow: var(--aurora-glass-frame), 0 0 40px color-mix(in srgb, var(--color-primary) 35%, transparent);
+}
+
+[data-style="aurora"] [data-skin~="logo"] > * > * {
+    background-color: transparent;
+    background-image: radial-gradient(circle, color-mix(in srgb, var(--color-foreground) 25%, transparent) 0, color-mix(in srgb, var(--color-foreground) 25%, transparent) 5px, transparent 5.5px);
+}
+
+[data-style="aurora"] [data-skin~="logo"] > * > :nth-child(odd) {
+    background-image: radial-gradient(circle, var(--color-primary) 0, var(--color-primary) 5px, transparent 5.5px);
+}
+
+[data-style="aurora"] [data-testid="home-hero"] > p {
+    color: var(--color-foreground);
+}
+
+/* The continue button is the primary lit from beneath by a soft glow of it and along its top by the sheen; its chips
+   are Outfit at 500 (the face once the faces are ready), tinted for their mode: 夜空 by on-primary, 晨光 by the text
+   colour over the primary. Both are written in on-primary. */
+[data-style="aurora"] [data-skin~="continue"] {
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+    box-shadow:
+        0 14px 34px -12px color-mix(in srgb, var(--color-primary) 70%, transparent),
+        inset 0 1px 0 color-mix(in srgb, var(--color-glass-sheen) 35%, transparent);
+}
+
+[data-style="aurora"] [data-skin~="chip"] {
+    background-color: color-mix(in srgb, var(--color-foreground) 16%, var(--color-primary));
+    color: var(--color-on-primary);
+    font-weight: 500;
+}
+
+:root.dark[data-style="aurora"] [data-skin~="chip"] {
+    background-color: color-mix(in srgb, var(--color-on-primary) 16%, transparent);
+}
+
+[data-style="aurora"][data-aurora-fonts="ready"] [data-skin~="chip"] {
+    font-family: var(--font-aurora-sans);
+}
+
+/* Segmented controls lie in 7% of the text colour; the chosen segment is a brighter pane of glass (the sheen
+   itself in 晨光) with a soft shadow, and written in the text colour rather than on-primary */
+[data-style="aurora"] [data-skin~="segmented"] {
+    background-color: color-mix(in srgb, var(--color-foreground) 7%, transparent);
+    box-shadow: none;
+}
+
+[data-style="aurora"] [data-skin~="segmented-indicator"] {
+    background-color: var(--color-glass-sheen);
+    box-shadow: 0 2px 8px -2px color-mix(in srgb, var(--color-shadow) var(--aurora-shadow), transparent);
+}
+
+:root.dark[data-style="aurora"] [data-skin~="segmented-indicator"] {
+    background-color: color-mix(in srgb, var(--color-glass-sheen) var(--aurora-gloss), transparent);
+}
+
+[data-style="aurora"] [data-skin~="segment"][aria-pressed="true"] {
+    color: var(--color-foreground);
+}
+
+/* Home's tiles are card glass, their icons in the primary */
+[data-style="aurora"] [data-skin~="home-tile"] {
+    background-color: var(--aurora-glass-card-fill);
+    box-shadow: var(--aurora-glass-frame);
+}
+
+[data-style="aurora"] [data-skin~="home-tile"] > svg {
     color: var(--color-primary);
 }
 

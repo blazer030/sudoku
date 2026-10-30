@@ -151,8 +151,9 @@ const TINTED_PAIRS: readonly ContrastPair[] = [
     tinted("on-primary", "on-primary", 0.1, "primary", TEXT),
     // The continue card's chips. 8-bit's skin draws them without the tint, as a transparent tag in a
     // 2px frame (the canvas's chip), and no four-green tint passes in 掌機; PIXEL_BOARD_CASES checks the drawn pair.
-    // Aurora's chips in 晨光 are drawn at a lighter tint than 20% (the continue button's task checks the drawn pair)
-    { ...tinted("on-featured", "on-featured", 0.2, "featured", TEXT), exceptIn: ["pixel/light", "aurora/light"] },
+    // Aurora draws its chips in its own tint, 16% of the text colour over the primary in 晨光 and of on-primary in 夜空,
+    // not this 20% of on-featured; AURORA_BOARD_CASES checks the drawn pair in both modes
+    { ...tinted("on-featured", "on-featured", 0.2, "featured", TEXT), exceptIn: ["pixel/light", "aurora"] },
     // Loader text over stacked overlays
     tinted("on-scrim", "scrim", 0.65, "background", TEXT),
 ];
@@ -633,6 +634,11 @@ const AURORA_BOARD_CASES: AuroraBoardCase[] = STYLES.aurora.themes.flatMap(theme
         drawn("on-primary on primary (main buttons, hint pill, solid tags)", palette["on-primary"], palette.primary),
         drawn("on-danger on error (danger button)", palette["on-danger"], palette.error),
         drawn("toast text (on-toast) on dialog glass", palette["on-toast"], dialog),
+        // Home: the continue button's chips are drawn in 16% of the text colour over the primary in 晨光 and of on-primary
+        // in 夜空, written in on-primary; a tile's icon is the primary on card glass (the 3:1 of an icon)
+        drawn("continue chip (on-primary) on its tint over primary", palette["on-primary"],
+            mixColors(mode === "light" ? palette.foreground : palette["on-primary"], 0.16, palette.primary)),
+        drawn("home tile icon (primary) on card glass", palette.primary, card, LARGE_OR_ICON),
     ];
 }));
 

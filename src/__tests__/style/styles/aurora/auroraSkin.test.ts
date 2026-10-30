@@ -300,6 +300,76 @@ describe("aurora's glass", () => {
         });
     });
 
+    describe("Home", () => {
+        const DOT = (color: string): string => `radial-gradient(circle, ${color} 0, ${color} 5px, transparent 5.5px)`;
+        const DARK_SKIN = (token: string): string => `${AURORA_DARK} [data-skin~="${token}"]`;
+
+        it("should make the logo a round pane of glass glowing in the primary", () => {
+            const logo = declarationsOf(AURORA_CSS, skin("logo"));
+
+            expect(logo.get("border-radius")).toBe("50%");
+            expect(logo.get("background-color")).toBe("var(--aurora-glass-card-fill)");
+            expect(logo.get("box-shadow")).toBe(`var(--aurora-glass-frame), 0 0 40px ${soft("primary", "35%")}`);
+        });
+
+        it("should draw the logo's nine squares as dots, the odd ones in the primary and the rest faint, sized by the markup alone", () => {
+            const squares = declarationsOf(AURORA_CSS, `${skin("logo")} > * > *`);
+            const odd = declarationsOf(AURORA_CSS, `${skin("logo")} > * > :nth-child(odd)`);
+
+            expect(squares.get("background-color")).toBe("transparent");
+            expect(squares.get("background-image")).toBe(DOT(soft("foreground", "25%")));
+            expect(odd.get("background-image")).toBe(DOT("var(--color-primary)"));
+            expect([...squares.keys(), ...odd.keys()].filter(property => /^(width|height)$/.test(property))).toEqual([]);
+        });
+
+        it("should set the title at 600 whether or not the faces are ready, and the subtitle in the text colour", () => {
+            expect(declarationsOf(AURORA_CSS, skin("title")).get("font-weight")).toBe("600");
+            expect(declarationsOf(AURORA_CSS, `${AURORA_SCOPE}[data-aurora-fonts="ready"] [data-skin~="title"]`).has("font-weight")).toBe(false);
+            expect(declarationsOf(AURORA_CSS, `${AURORA_SCOPE} [data-testid="home-hero"] > p`).get("color")).toBe("var(--color-foreground)");
+        });
+
+        it("should light the continue button from beneath in the primary, written in on-primary, with a gloss along its top", () => {
+            const button = declarationsOf(AURORA_CSS, skin("continue"));
+
+            expect(button.get("background-color")).toBe("var(--color-primary)");
+            expect(button.get("color")).toBe("var(--color-on-primary)");
+            expect(button.get("box-shadow")).toBe(`0 14px 34px -12px ${soft("primary", "70%")}, inset 0 1px 0 ${soft("glass-sheen", "35%")}`);
+        });
+
+        it("should set a chip in Outfit at 500, the face only once the faces are ready", () => {
+            expect(declarationsOf(AURORA_CSS, skin("chip")).get("font-weight")).toBe("500");
+            expect(declarationsOf(AURORA_CSS, `${AURORA_SCOPE}[data-aurora-fonts="ready"] [data-skin~="chip"]`).get("font-family")).toBe("var(--font-aurora-sans)");
+        });
+
+        it("should tint a chip with 16% of the text colour over the primary in 晨光 and of on-primary in 夜空, written in on-primary", () => {
+            expect(declarationsOf(AURORA_CSS, skin("chip")).get("background-color"))
+                .toBe("color-mix(in srgb, var(--color-foreground) 16%, var(--color-primary))");
+            expect(declarationsOf(AURORA_CSS, skin("chip")).get("color")).toBe("var(--color-on-primary)");
+            expect(declarationsOf(AURORA_CSS, DARK_SKIN("chip")).get("background-color")).toBe(soft("on-primary", "16%"));
+        });
+
+        it("should lay the difficulty strip in 7% of the text colour, its chosen segment a brighter pane of glass with a shadow", () => {
+            const strip = declarationsOf(AURORA_CSS, skin("segmented"));
+            const chosen = declarationsOf(AURORA_CSS, skin("segmented-indicator"));
+
+            expect(strip.get("background-color")).toBe(soft("foreground", "7%"));
+            expect(strip.get("box-shadow")).toBe("none");
+            expect(chosen.get("background-color")).toBe("var(--color-glass-sheen)");
+            expect(chosen.get("box-shadow")).toBe(`0 2px 8px -2px ${soft("shadow", "var(--aurora-shadow)")}`);
+            expect(declarationsOf(AURORA_CSS, `${AURORA_DARK} [data-skin~="segmented-indicator"]`).get("background-color"))
+                .toBe(soft("glass-sheen", "var(--aurora-gloss)"));
+            expect(declarationsOf(AURORA_CSS, `${skin("segment")}[aria-pressed="true"]`).get("color")).toBe("var(--color-foreground)");
+        });
+
+        it("should lay Home's tiles as card glass with their icons in the primary", () => {
+            const tile = declarationsOf(AURORA_CSS, skin("home-tile"));
+
+            expect(tile.get("background-color")).toBe("var(--aurora-glass-card-fill)");
+            expect(tile.get("box-shadow")).toBe("var(--aurora-glass-frame)");
+            expect(declarationsOf(AURORA_CSS, `${skin("home-tile")} > svg`).get("color")).toBe("var(--color-primary)");
+        });
+    });
+
     it("should change no layout outside the pseudo-elements", () => {
         expect(findLayoutDeclarations(AURORA_CSS)).toEqual([]);
     });
