@@ -154,6 +154,10 @@ const REQUIRED_SELECTORS: Record<StyleId, readonly string[]> = {
         "body::before",
         "body::after",
         ".app-safe-area::before",
+        '[data-skin~="card"]',
+        '[data-skin~="pill"]',
+        '[data-skin~="toast"]',
+        '[data-skin~="dialog-scrim"]',
     ],
 };
 

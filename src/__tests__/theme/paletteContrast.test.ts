@@ -3,6 +3,7 @@ import postcss, { type Rule } from "postcss";
 import { THEME_IDS_BY_STYLE, STYLE_IDS, STYLE_COLOR_MODES, type ColorMode, type ColorThemeId, type StyleId } from "@/theme/themeIds";
 import { contrastRatio, mixColors } from "@/theme/contrast";
 import { STYLES, getPalette, type Palette, type PaletteToken, type StyleOwnToken } from "@/theme/palettes";
+import { AURORA_DARK, AURORA_LIGHT, AURORA_SCOPE, auroraProperty } from "../style/styles/aurora/auroraSheet";
 
 const TEXT = 4.5;
 const LARGE_OR_ICON = 3;
@@ -548,9 +549,59 @@ const BLUEPRINT_BOARD_CASES: BlueprintBoardCase[] = STYLES.blueprint.themes.flat
     ];
 }));
 
-// Aurora's board: the ink actually drawn on the glass actually drawn (palette.ts). The selected cell is the solid theme
+// Aurora's glass, read back from its skin: each pane is a tint of the glass colour laid over the page where the lights
+// are brightest ("the ground"), so a colour checked on it is the colour the skin finally paints there.
+const AURORA_MODE_ROOTS: Readonly<Record<ColorMode, string>> = { light: AURORA_LIGHT, dark: AURORA_DARK };
+
+const auroraFraction = (selector: string, name: string): number => {
+    const value = auroraProperty(selector, name);
+    const match = /^(\d*\.?\d+)(%?)$/.exec(value);
+    if (match === null) throw new Error(`aurora's skin sets no number for ${name} under ${selector}: "${value}"`);
+    return match[2] === "%" ? Number(match[1]) / 100 : Number(match[1]);
+};
+
+const auroraDensity = (mode: ColorMode, name: string): number => auroraFraction(AURORA_MODE_ROOTS[mode], name);
+
+// 夜空's brightest point is its first light, 晨光's darkest its second (light text, dark text): the light's core at
+// the mode's strength on the page, then the ribbon's share of that same light over it
+const AURORA_GROUND_LIGHT: Readonly<Record<ColorMode, { light: StyleOwnToken; ribbon: string }>> = {
+    dark: { light: "aurora-1", ribbon: "--aurora-ribbon-first" },
+    light: { light: "aurora-2", ribbon: "--aurora-ribbon-second" },
+};
+
+// One of aurora's own colours (its lights and its glass), which every aurora palette carries
+const auroraToken = (palette: Palette, token: StyleOwnToken): string => {
+    const colour = palette[token];
+    if (colour === undefined) throw new Error(`aurora's palette has no ${token}`);
+    return colour;
+};
+
+const auroraGround = (palette: Palette, mode: ColorMode): string => {
+    const { light: lightToken, ribbon } = AURORA_GROUND_LIGHT[mode];
+    const light = auroraToken(palette, lightToken);
+    const strength = auroraDensity(mode, "--aurora-strength");
+    const ribbonCover = strength * auroraFraction(AURORA_SCOPE, ribbon) * auroraFraction(AURORA_SCOPE, "--aurora-ribbon-strength");
+    const blob = mixColors(light, strength, palette.background);
+    return mixColors(light, ribbonCover, blob);
+};
+
+type AuroraLayer = "card" | "cell" | "peer" | "dialog";
+
+const auroraGlass = (palette: Palette, mode: ColorMode, layer: AuroraLayer): string => {
+    const ground = auroraGround(palette, mode);
+    const glass = auroraToken(palette, "glass");
+    const sheen = auroraToken(palette, "glass-sheen");
+    const pane = (density: string): string => mixColors(glass, auroraDensity(mode, density), ground);
+    if (layer === "card") return pane("--aurora-glass-card");
+    if (layer === "dialog") return pane("--aurora-glass-dialog");
+    const cell = mixColors(sheen, auroraDensity(mode, "--aurora-sheen-cell"), pane("--aurora-glass-cell"));
+    return layer === "cell" ? cell : mixColors(sheen, auroraDensity(mode, "--aurora-sheen-peer"), cell);
+};
+
+// Aurora's board and glass: the ink actually drawn on the glass actually drawn. The selected cell is the solid theme
 // colour under on-primary; a peer or scope cell is the cell's glass under the sheen, on which every theme's primary
-// (the player's digit) reads 4.5:1.
+// (the player's digit) reads 4.5:1. Cards, dialogs and the toast carry their words on the glass; the page's own
+// words (the header, the timer) lie on the ground itself.
 interface AuroraBoardCase { label: string; foreground: string; background: string; minimum: number }
 
 const AURORA_BOARD_CASES: AuroraBoardCase[] = STYLES.aurora.themes.flatMap(theme => STYLE_COLOR_MODES.aurora.flatMap((mode) => {
@@ -559,10 +610,29 @@ const AURORA_BOARD_CASES: AuroraBoardCase[] = STYLES.aurora.themes.flatMap(theme
     const drawn = (name: string, foreground: string, background: string, minimum = TEXT): AuroraBoardCase => ({
         label: `${prefix}: ${name} ≥ ${minimum}`, foreground, background, minimum,
     });
+    const card = auroraGlass(palette, mode, "card");
+    const dialog = auroraGlass(palette, mode, "dialog");
+    const softTint = (base: string): string => mixColors(palette.primary, auroraDensity(mode, "--aurora-tint-soft"), base);
+    const onGlass = (name: string, foreground: string, minimum = TEXT): AuroraBoardCase[] => [
+        drawn(`${name} on card glass`, foreground, card, minimum),
+        drawn(`${name} on dialog glass`, foreground, dialog, minimum),
+    ];
     return [
         drawn("selected digit (on-primary) on cell-selected", palette["on-primary"], palette["cell-selected"]),
         drawn("player's digit (primary) on cell-peer", palette.primary, palette["cell-peer"]),
         drawn("player's digit (primary) on cell-scope", palette.primary, palette["cell-scope"]),
+        drawn("words on the lights (foreground) on the ground", palette.foreground, auroraGround(palette, mode)),
+        ...onGlass("foreground", palette.foreground),
+        ...onGlass("foreground-secondary", palette["foreground-secondary"]),
+        ...onGlass("primary", palette.primary),
+        // A danger button that is only its words (give up, clear records)
+        ...onGlass("danger text button (error)", palette.error),
+        drawn("primary on the soft tint over card glass", palette.primary, softTint(card)),
+        // The completion card's difficulty tag
+        drawn("foreground on the soft tint over dialog glass", palette.foreground, softTint(dialog)),
+        drawn("on-primary on primary (main buttons, hint pill, solid tags)", palette["on-primary"], palette.primary),
+        drawn("on-danger on error (danger button)", palette["on-danger"], palette.error),
+        drawn("toast text (on-toast) on dialog glass", palette["on-toast"], dialog),
     ];
 }));
 
@@ -685,6 +755,32 @@ describe("palette contrast", () => {
         expect(new Set(AURORA_BOARD_CASES.map(boardCase => boardCase.label.split(":")[0]))).toEqual(new Set(
             STYLES.aurora.themes.flatMap(theme => STYLE_COLOR_MODES.aurora.map(mode => `aurora/${theme.id}/${mode}`))));
     });
+
+    // The spec's brightest points: 夜空 #107E5F, 晨光 #BDACFE
+    it.each(STYLES.aurora.themes.flatMap(theme => STYLE_COLOR_MODES.aurora.map(mode => [theme.id, mode] as const)))(
+        "should model aurora's %s %s ground at the spec's brightest point",
+        (themeId, mode) => {
+            const expected = { dark: "#107E5F", light: "#BDACFE" }[mode];
+            const channels = (hex: string): number[] => [1, 3, 5].map(start => Number.parseInt(hex.slice(start, start + 2), 16));
+            const ground = channels(auroraGround(getPalette("aurora", themeId, mode), mode));
+
+            channels(expected).forEach((channel, index) => {
+                expect(Math.abs(ground[index] - channel)).toBeLessThanOrEqual(1);
+            });
+        },
+    );
+
+    it.each(STYLES.aurora.themes.flatMap(theme => STYLE_COLOR_MODES.aurora.map(mode => [theme.id, mode] as const)))(
+        "should give aurora's %s %s palette the glass its skin lays",
+        (themeId, mode) => {
+            const palette = getPalette("aurora", themeId, mode);
+
+            expect(palette.card).toBe(auroraGlass(palette, mode, "card"));
+            expect(palette["cell-clue"]).toBe(auroraGlass(palette, mode, "cell"));
+            expect(palette["cell-peer"]).toBe(auroraGlass(palette, mode, "peer"));
+            expect(palette.toast).toBe(auroraGlass(palette, mode, "dialog"));
+        },
+    );
 
     it.each(AURORA_BOARD_CASES)("$label", ({ foreground, background, minimum }) => {
         expect(contrastRatio(foreground, background)).toBeGreaterThanOrEqual(minimum);

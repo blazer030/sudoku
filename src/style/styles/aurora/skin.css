@@ -3,14 +3,56 @@
    [data-style="aurora"]; keyframes start with aurora-. No filter, no backdrop-filter, no :has(), no masks by
    reference: the glass is plain translucent fills, so every engine paints it alike. */
 
-/* The lights' strength per mode: each light's opacity, the same numbers as AURORA_DENSITIES in palette.ts, which
-   the contrast model reads. 晨光 (light) first, 夜空 (dark) over it. */
+/* The lights' strength and the glass's densities per mode, the same numbers as AURORA_DENSITIES in palette.ts,
+   which the contrast model reads: each light's opacity; how much of the glass colour a card, a cell and a dialog
+   lay; the sheen on a cell and over a peer's; the primary's soft tint and same-digit tint; the error wash and
+   stripes. The edge and gloss are the sheen's share in the glass's 1px rim and top line, the shadow the share of
+   the shadow colour beneath it. 晨光 (light) first, 夜空 (dark) over it. */
 :root[data-style="aurora"] {
     --aurora-strength: 0.85;
+    --aurora-glass-card: 80%;
+    --aurora-glass-cell: 80%;
+    --aurora-sheen-cell: 0%;
+    --aurora-sheen-peer: 75%;
+    --aurora-glass-dialog: 92%;
+    --aurora-edge: 85%;
+    --aurora-gloss: 90%;
+    --aurora-shadow: 12%;
+    --aurora-tint-soft: 6%;
+    --aurora-tint-same: 8%;
+    --aurora-error-wash: 5%;
+    --aurora-error-stripe: 8%;
 }
 
 :root.dark[data-style="aurora"] {
     --aurora-strength: 0.42;
+    --aurora-glass-card: 80%;
+    --aurora-glass-cell: 88%;
+    --aurora-sheen-cell: 6%;
+    --aurora-sheen-peer: 5%;
+    --aurora-glass-dialog: 90%;
+    --aurora-edge: 12%;
+    --aurora-gloss: 14%;
+    --aurora-shadow: 35%;
+    --aurora-tint-soft: 8%;
+    --aurora-tint-same: 8%;
+    --aurora-error-wash: 5%;
+    --aurora-error-stripe: 8%;
+}
+
+/* The glass every pane shares, built from the mode's numbers above: a card's and a dialog's fill (a tint of the
+   glass colour, the rest left clear so the lights show through), the 1px rim, and the frame (rim, a 1px gloss along
+   the top and a soft shadow beneath). Dialogs veil the screen behind them in the page colour, unblurred. */
+[data-style="aurora"] {
+    --aurora-glass-card-fill: color-mix(in srgb, var(--color-glass) var(--aurora-glass-card), transparent);
+    --aurora-glass-dialog-fill: color-mix(in srgb, var(--color-glass) var(--aurora-glass-dialog), transparent);
+    --aurora-glass-edge: inset 0 0 0 1px color-mix(in srgb, var(--color-glass-sheen) var(--aurora-edge), transparent);
+    --aurora-glass-frame:
+        var(--aurora-glass-edge),
+        inset 0 1px 0 color-mix(in srgb, var(--color-glass-sheen) var(--aurora-gloss), transparent),
+        0 10px 30px -12px color-mix(in srgb, var(--color-shadow) var(--aurora-shadow), transparent);
+    --aurora-scrim: 62%;
+    --aurora-loader-scrim: 45%;
 }
 
 /* The lights' geometry, from the canvas's 390×844 phone in vmax, so a wider window scales it up. Each light is a
@@ -138,9 +180,179 @@
     --font-sans: var(--font-aurora-sans);
 }
 
-[data-style="aurora"][data-aurora-fonts="ready"] [data-skin~="title"],
-[data-style="aurora"][data-aurora-fonts="ready"] [data-skin~="dialog-title"] {
+[data-style="aurora"][data-aurora-fonts="ready"] [data-skin~="title"] {
     font-weight: 600;
+}
+
+/* Dialog titles are 600 in whatever face is showing, so the gate changes only the face */
+[data-style="aurora"] [data-skin~="dialog-title"] {
+    font-weight: 600;
+}
+
+/* Line icons keep the canvas's pen: 2 wide, round ends and joins */
+[data-style="aurora"] svg.lucide {
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+/* Words with no glass under them lie on the lights, where only the text colour reads (spec ruling 4): the
+   header's back button and title already are; the timer's icon and the changelog's note are repointed */
+[data-style="aurora"] svg.lucide-timer,
+[data-style="aurora"] [data-testid="changelog-app-note"] {
+    color: var(--color-foreground);
+}
+
+/* Cards are frosted glass at the card's density, rounded 22px, as the canvas's .group. The dialogs and the hint
+   menu float over the board, whose digits would show through, so they take the denser dialog glass. */
+[data-style="aurora"] [data-skin~="card"] {
+    border-color: transparent;
+    background-color: var(--aurora-glass-card-fill);
+    box-shadow: var(--aurora-glass-frame);
+    border-radius: 22px;
+}
+
+[data-style="aurora"] [data-skin~="card"]:is(.shadow-modal, .shadow-popup) {
+    background-color: var(--aurora-glass-dialog-fill);
+}
+
+[data-style="aurora"] [data-skin~="dialog-scrim"] {
+    background-color: color-mix(in srgb, var(--color-background) var(--aurora-scrim), transparent);
+}
+
+[data-style="aurora"] [data-skin~="loader-scrim"] {
+    background-color: color-mix(in srgb, var(--color-background) var(--aurora-loader-scrim), transparent);
+}
+
+/* The toast is dialog glass in its rim alone, rounded 16px, in the text colour */
+[data-style="aurora"] [data-skin~="toast"] {
+    background-color: var(--aurora-glass-dialog-fill);
+    box-shadow: var(--aurora-glass-edge);
+    border-radius: 16px;
+    color: var(--color-foreground);
+}
+
+/* The hint menu's options are rounded 14px, their icons in the primary as the canvas's .mopt; Reveal Cell keeps
+   the primary its markup gives its words. Its divider is a faint line of the text colour, the canvas's --line. */
+[data-style="aurora"] [data-skin~="menu-option"] {
+    border-radius: 14px;
+}
+
+[data-style="aurora"] [data-skin~="menu-option"] > svg {
+    color: var(--color-primary);
+}
+
+[data-style="aurora"] [data-skin~="menu-divider"] {
+    background-color: color-mix(in srgb, var(--color-foreground) 12%, transparent);
+}
+
+/* Buttons are rounded 16px. A main one is filled with the primary, lit from beneath by a soft glow of it and along
+   its top by a gloss of the sheen (the canvas's .btn.primary); a secondary one lies in the primary's soft tint and
+   is written in the primary; an outlined one is a pane of glass in a faint line of the text colour (the canvas's
+   --line; the sheen's rim alone vanishes on 晨光's dialog glass); the danger one is filled with the error
+   colour and written in on-danger. A button that is only its words is written in the secondary text colour, as it
+   always lies on glass, unless it is a danger one. */
+[data-style="aurora"] [data-skin~="button"] {
+    border-radius: 16px;
+}
+
+[data-style="aurora"] [data-skin~="button"]:is(.bg-primary, .hint-primary) {
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+    box-shadow:
+        0 8px 24px -8px color-mix(in srgb, var(--color-primary) 75%, transparent),
+        inset 0 1px 0 color-mix(in srgb, var(--color-glass-sheen) 35%, transparent);
+}
+
+[data-style="aurora"] [data-skin~="button"]:is(.bg-primary-light, .hint-secondary) {
+    background-color: color-mix(in srgb, var(--color-primary) var(--aurora-tint-soft), transparent);
+    color: var(--color-primary);
+    box-shadow: none;
+}
+
+[data-style="aurora"] [data-skin~="button"].bg-card {
+    border-color: transparent;
+    background-color: var(--aurora-glass-card-fill);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-foreground) 12%, transparent);
+}
+
+[data-style="aurora"] [data-skin~="button"].bg-danger {
+    background-color: var(--color-error);
+    color: var(--color-on-danger);
+    box-shadow: none;
+}
+
+[data-style="aurora"] [data-skin~="text-button"] {
+    border-radius: 16px;
+}
+
+[data-style="aurora"] [data-skin~="text-button"]:not(.text-danger),
+[data-style="aurora"] [data-skin~="text-button"]:not(.text-danger) > span {
+    color: var(--color-foreground-secondary);
+}
+
+/* Icon tiles lie in the primary's soft tint round an icon in the primary, glowing 30px (the canvas's .dicon); a
+   danger one lies in 14% of the error colour round an icon in it, still in the primary's glow as the canvas's */
+[data-style="aurora"] [data-skin~="icon-tile"] {
+    background-color: color-mix(in srgb, var(--color-primary) var(--aurora-tint-soft), transparent);
+    color: var(--color-primary);
+    box-shadow: 0 0 30px color-mix(in srgb, var(--color-primary) 35%, transparent);
+}
+
+[data-style="aurora"] [data-skin~="icon-tile"] > svg {
+    color: inherit;
+}
+
+[data-style="aurora"] [data-skin~="icon-tile"][data-skin~="danger"] {
+    background-color: color-mix(in srgb, var(--color-error) 14%, transparent);
+    color: var(--color-error);
+}
+
+/* The game header's pill is round glass in the text colour; the hint-mode pill is filled with the primary */
+[data-style="aurora"] [data-skin~="pill"] {
+    background-color: var(--aurora-glass-card-fill);
+    box-shadow: var(--aurora-glass-frame);
+    border-radius: 9999px;
+    color: var(--color-foreground);
+}
+
+[data-style="aurora"] [data-skin~="pill"] > span {
+    color: inherit;
+}
+
+[data-style="aurora"] [data-skin~="pill"][data-skin~="hint"] {
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+}
+
+/* Tags: the completion card's difficulty in the primary's soft tint, in the text colour; a new record filled with
+   the primary and glowing 16px; a step's tag in the soft tint in the primary, a final step's filled and glowing;
+   the changelog's App tag in the soft tint */
+[data-style="aurora"] [data-skin~="tag"] {
+    background-color: color-mix(in srgb, var(--color-primary) var(--aurora-tint-soft), transparent);
+    color: var(--color-foreground);
+}
+
+[data-style="aurora"] [data-skin~="tag"][data-skin~="new-record"] {
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+    box-shadow: 0 0 16px color-mix(in srgb, var(--color-primary) 55%, transparent);
+}
+
+[data-style="aurora"] [data-skin~="tag"][data-skin~="step"] {
+    background-color: color-mix(in srgb, var(--color-primary) var(--aurora-tint-soft), transparent);
+    color: var(--color-primary);
+}
+
+[data-style="aurora"] [data-skin~="tag"][data-skin~="step"][data-skin~="strong"] {
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+    box-shadow: 0 0 16px color-mix(in srgb, var(--color-primary) 50%, transparent);
+}
+
+[data-style="aurora"] [data-skin~="app-tag"] {
+    background-color: color-mix(in srgb, var(--color-primary) var(--aurora-tint-soft), transparent);
+    color: var(--color-primary);
 }
 
 /* Press feedback: a faint wash of the text colour. It is a colour change, so it stays on under reduced motion. */

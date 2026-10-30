@@ -50,7 +50,12 @@ describe("aurora skin fonts", () => {
 
     it("should set the titles at 600, the heaviest bundled weight", () => {
         expect(skinDeclarations(`${FONTS_READY} [data-skin~="title"]`).get("font-weight")).toBe("600");
-        expect(skinDeclarations(`${FONTS_READY} [data-skin~="dialog-title"]`).get("font-weight")).toBe("600");
+    });
+
+    // Only the face changes at the gate, never the weight
+    it("should set dialog titles at 600 whether or not the faces are ready", () => {
+        expect(skinDeclarations('[data-style="aurora"] [data-skin~="dialog-title"]').get("font-weight")).toBe("600");
+        expect(skinDeclarations(`${FONTS_READY} [data-skin~="dialog-title"]`).has("font-weight")).toBe(false);
     });
 });
 

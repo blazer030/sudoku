@@ -1,6 +1,8 @@
+import { readFileSync } from "fs";
 import postcss, { type AtRule, type Declaration, type Rule } from "postcss";
-import { AURORA_DENSITIES, AURORA_RIBBON } from "@/style/styles/aurora/palette";
-import { declarationsOf, reducedMotionDeclarationsOf } from "../../styleSheetRules";
+import { AURORA_DENSITIES, AURORA_RIBBON, type AuroraDensity } from "@/style/styles/aurora/palette";
+import type { ColorMode } from "@/theme/themeIds";
+import { declarationsOf, findLayoutDeclarations, reducedMotionDeclarationsOf } from "../../styleSheetRules";
 import { AURORA_CSS, AURORA_DARK, AURORA_LIGHT, AURORA_SCOPE, auroraProperty, vmaxOf } from "./auroraSheet";
 
 const BODY = `${AURORA_SCOPE} body`;
@@ -57,6 +59,251 @@ const centresIn = (widthPx: number, heightPx: number): Record<"a1" | "a2" | "a3"
 const distance = (from: Point, to: Point): number => Math.hypot(from[0] - to[0], from[1] - to[1]);
 
 const driftOf = (layer: 1 | 2): number => Math.hypot(geometry(`--aurora-drift-${layer}-x`), geometry(`--aurora-drift-${layer}-y`));
+
+// The skin's density properties, each the palette's AURORA_DENSITIES fraction written as a percentage
+const DENSITY_PROPERTIES: readonly (readonly [string, keyof AuroraDensity])[] = [
+    ["--aurora-glass-card", "card"],
+    ["--aurora-glass-cell", "cell"],
+    ["--aurora-sheen-cell", "sheenCell"],
+    ["--aurora-sheen-peer", "sheenPeer"],
+    ["--aurora-glass-dialog", "dialog"],
+    ["--aurora-tint-soft", "tintSoft"],
+    ["--aurora-tint-same", "tintSame"],
+    ["--aurora-error-wash", "errorWash"],
+    ["--aurora-error-stripe", "errorStripe"],
+];
+// The glass's edge and gloss per mode, from the spec's table, and its shadow's strength, the canvas's --shadow
+const EDGES: Readonly<Record<ColorMode, { edge: string; gloss: string; shadow: string }>> = {
+    light: { edge: "85%", gloss: "90%", shadow: "12%" },
+    dark: { edge: "12%", gloss: "14%", shadow: "35%" },
+};
+const MODE_ROOTS: Readonly<Record<ColorMode, string>> = { light: AURORA_LIGHT, dark: AURORA_DARK };
+
+const percentOf = (value: string): number => {
+    const match = /^(\d*\.?\d+)%$/.exec(value);
+    if (match === null) throw new Error(`Not a percentage: "${value}"`);
+    return Number(match[1]) / 100;
+};
+
+const BUTTON = skin("button");
+const PRIMARY_BUTTON = `${BUTTON}:is(.bg-primary, .hint-primary)`;
+const SECONDARY_BUTTON = `${BUTTON}:is(.bg-primary-light, .hint-secondary)`;
+const OUTLINE_BUTTON = `${BUTTON}.bg-card`;
+const DANGER_BUTTON = `${BUTTON}.bg-danger`;
+const FLOATING_CARD = `${skin("card")}:is(.shadow-modal, .shadow-popup)`;
+const soft = (token: string, amount: string): string => `color-mix(in srgb, var(--color-${token}) ${amount}, transparent)`;
+const glow = (size: string, amount: string): string => `0 0 ${size} ${soft("primary", amount)}`;
+
+describe("aurora's glass", () => {
+    describe("its densities", () => {
+        it.each(["light", "dark"] as const)("should give %s mode the palette's densities, edge and gloss", (mode) => {
+            const root = MODE_ROOTS[mode];
+
+            for (const [property, density] of DENSITY_PROPERTIES) {
+                expect(percentOf(auroraProperty(root, property)), property).toBeCloseTo(AURORA_DENSITIES[mode][density], 6);
+            }
+            expect(auroraProperty(root, "--aurora-edge")).toBe(EDGES[mode].edge);
+            expect(auroraProperty(root, "--aurora-gloss")).toBe(EDGES[mode].gloss);
+            expect(auroraProperty(root, "--aurora-shadow")).toBe(EDGES[mode].shadow);
+        });
+
+        it("should veil the screen behind a dialog and the loader in the page colour, the same in both modes", () => {
+            expect(auroraProperty(AURORA_SCOPE, "--aurora-scrim")).toBe("62%");
+            expect(auroraProperty(AURORA_SCOPE, "--aurora-loader-scrim")).toBe("45%");
+        });
+
+        it("should make each pane a tint of the glass colour at its density, framed by an edge, a gloss and a shadow", () => {
+            expect(auroraProperty(AURORA_SCOPE, "--aurora-glass-card-fill")).toBe(soft("glass", "var(--aurora-glass-card)"));
+            expect(auroraProperty(AURORA_SCOPE, "--aurora-glass-dialog-fill")).toBe(soft("glass", "var(--aurora-glass-dialog)"));
+            expect(auroraProperty(AURORA_SCOPE, "--aurora-glass-edge")).toBe(`inset 0 0 0 1px ${soft("glass-sheen", "var(--aurora-edge)")}`);
+            expect(auroraProperty(AURORA_SCOPE, "--aurora-glass-frame")).toBe(
+                `var(--aurora-glass-edge), inset 0 1px 0 ${soft("glass-sheen", "var(--aurora-gloss)")}, `
+                + `0 10px 30px -12px ${soft("shadow", "var(--aurora-shadow)")}`,
+            );
+        });
+    });
+
+    describe("cards, dialogs and the toast", () => {
+        it("should lay every card as glass at the card's density, rounded 22px", () => {
+            const card = declarationsOf(AURORA_CSS, skin("card"));
+
+            expect(card.get("background-color")).toBe("var(--aurora-glass-card-fill)");
+            expect(card.get("box-shadow")).toBe("var(--aurora-glass-frame)");
+            expect(card.get("border-radius")).toBe("22px");
+        });
+
+        it("should lay the dialogs and the hint menu at the denser dialog glass, as the board shows beneath them", () => {
+            expect(declarationsOf(AURORA_CSS, FLOATING_CARD).get("background-color")).toBe("var(--aurora-glass-dialog-fill)");
+        });
+
+        it("should lay the toast as dialog glass, rounded 16px, in the text colour", () => {
+            const toast = declarationsOf(AURORA_CSS, skin("toast"));
+
+            expect(toast.get("background-color")).toBe("var(--aurora-glass-dialog-fill)");
+            expect(toast.get("box-shadow")).toBe("var(--aurora-glass-edge)");
+            expect(toast.get("border-radius")).toBe("16px");
+            expect(toast.get("color")).toBe("var(--color-foreground)");
+        });
+
+        it("should veil the screen behind a dialog and the loader in the page colour, unblurred", () => {
+            const dialogScrim = declarationsOf(AURORA_CSS, skin("dialog-scrim"));
+            const loaderScrim = declarationsOf(AURORA_CSS, skin("loader-scrim"));
+
+            expect(dialogScrim.get("background-color")).toBe(soft("background", "var(--aurora-scrim)"));
+            expect(loaderScrim.get("background-color")).toBe(soft("background", "var(--aurora-loader-scrim)"));
+        });
+
+        it("should set dialog titles at 600 before and after the font loads, so only the face changes", () => {
+            expect(declarationsOf(AURORA_CSS, skin("dialog-title")).get("font-weight")).toBe("600");
+            expect(declarationsOf(AURORA_CSS, `${AURORA_SCOPE}[data-aurora-fonts="ready"] [data-skin~="dialog-title"]`).has("font-weight")).toBe(false);
+        });
+
+        it("should round the hint menu's options 14px, draw their icons in the primary and its divider in a faint line of the text colour", () => {
+            expect(declarationsOf(AURORA_CSS, skin("menu-option")).get("border-radius")).toBe("14px");
+            expect(declarationsOf(AURORA_CSS, `${skin("menu-option")} > svg`).get("color")).toBe("var(--color-primary)");
+            expect(declarationsOf(AURORA_CSS, skin("menu-divider")).get("background-color")).toBe(soft("foreground", "12%"));
+        });
+    });
+
+    describe("buttons", () => {
+        it("should round every button 16px", () => {
+            expect(declarationsOf(AURORA_CSS, BUTTON).get("border-radius")).toBe("16px");
+        });
+
+        it("should fill a main button with the primary, lit by a soft glow of it and a gloss along its top", () => {
+            const button = declarationsOf(AURORA_CSS, PRIMARY_BUTTON);
+
+            expect(button.get("background-color")).toBe("var(--color-primary)");
+            expect(button.get("color")).toBe("var(--color-on-primary)");
+            expect(button.get("box-shadow")).toBe(`0 8px 24px -8px ${soft("primary", "75%")}, inset 0 1px 0 ${soft("glass-sheen", "35%")}`);
+        });
+
+        it("should lay a secondary button in the soft tint of the primary, written in the primary", () => {
+            const button = declarationsOf(AURORA_CSS, SECONDARY_BUTTON);
+
+            expect(button.get("background-color")).toBe(soft("primary", "var(--aurora-tint-soft)"));
+            expect(button.get("color")).toBe("var(--color-primary)");
+            expect(button.get("box-shadow")).toBe("none");
+        });
+
+        // The sheen's rim alone would vanish on 晨光's near-solid dialog glass
+        it("should make an outlined button a pane of glass in a faint line of the text colour", () => {
+            const button = declarationsOf(AURORA_CSS, OUTLINE_BUTTON);
+
+            expect(button.get("background-color")).toBe("var(--aurora-glass-card-fill)");
+            expect(button.get("border-color")).toBe("transparent");
+            expect(button.get("box-shadow")).toBe(`inset 0 0 0 1px ${soft("foreground", "12%")}`);
+        });
+
+        it("should fill the danger button with the error colour, written in on-danger", () => {
+            const button = declarationsOf(AURORA_CSS, DANGER_BUTTON);
+
+            expect(button.get("background-color")).toBe("var(--color-error)");
+            expect(button.get("color")).toBe("var(--color-on-danger)");
+            expect(button.get("box-shadow")).toBe("none");
+        });
+
+        it("should write a button that is only its words in the secondary text colour, unless it is a danger one", () => {
+            const plain = `${skin("text-button")}:not(.text-danger)`;
+
+            for (const selector of [plain, `${plain} > span`]) {
+                expect(declarationsOf(AURORA_CSS, selector).get("color")).toBe("var(--color-foreground-secondary)");
+            }
+            expect(declarationsOf(AURORA_CSS, skin("text-button")).get("border-radius")).toBe("16px");
+        });
+    });
+
+    describe("icon tiles, pills and tags", () => {
+        it("should lay an icon tile in the soft tint under the primary, glowing 30px", () => {
+            const tile = declarationsOf(AURORA_CSS, skin("icon-tile"));
+
+            expect(tile.get("background-color")).toBe(soft("primary", "var(--aurora-tint-soft)"));
+            expect(tile.get("color")).toBe("var(--color-primary)");
+            expect(tile.get("box-shadow")).toBe(glow("30px", "35%"));
+            expect(declarationsOf(AURORA_CSS, `${skin("icon-tile")} > svg`).get("color")).toBe("inherit");
+        });
+
+        it("should lay a danger icon tile in 14% of the error colour under it, keeping the glow", () => {
+            const tile = declarationsOf(AURORA_CSS, `${skin("icon-tile")}[data-skin~="danger"]`);
+
+            expect(tile.get("background-color")).toBe(soft("error", "14%"));
+            expect(tile.get("color")).toBe("var(--color-error)");
+            expect(tile.has("box-shadow")).toBe(false);
+        });
+
+        it("should make the header's pill round glass in the text colour, and the hint pill solid primary", () => {
+            const pill = declarationsOf(AURORA_CSS, skin("pill"));
+            const hint = declarationsOf(AURORA_CSS, `${skin("pill")}[data-skin~="hint"]`);
+
+            expect(pill.get("background-color")).toBe("var(--aurora-glass-card-fill)");
+            expect(pill.get("box-shadow")).toBe("var(--aurora-glass-frame)");
+            expect(pill.get("border-radius")).toBe("9999px");
+            expect(pill.get("color")).toBe("var(--color-foreground)");
+            expect(declarationsOf(AURORA_CSS, `${skin("pill")} > span`).get("color")).toBe("inherit");
+            expect(hint.get("background-color")).toBe("var(--color-primary)");
+            expect(hint.get("color")).toBe("var(--color-on-primary)");
+        });
+
+        it("should lay a tag in the soft tint under the text colour, and stamp a new record solid primary with a 16px glow", () => {
+            const tag = declarationsOf(AURORA_CSS, skin("tag"));
+            const record = declarationsOf(AURORA_CSS, `${skin("tag")}[data-skin~="new-record"]`);
+
+            expect(tag.get("background-color")).toBe(soft("primary", "var(--aurora-tint-soft)"));
+            expect(tag.get("color")).toBe("var(--color-foreground)");
+            expect(record.get("background-color")).toBe("var(--color-primary)");
+            expect(record.get("color")).toBe("var(--color-on-primary)");
+            expect(record.get("box-shadow")).toBe(glow("16px", "55%"));
+        });
+
+        it("should lay a step's tag in the soft tint under the primary, and a final step's solid with a glow", () => {
+            const step = declarationsOf(AURORA_CSS, `${skin("tag")}[data-skin~="step"]`);
+            const strong = declarationsOf(AURORA_CSS, `${skin("tag")}[data-skin~="step"][data-skin~="strong"]`);
+
+            expect(step.get("background-color")).toBe(soft("primary", "var(--aurora-tint-soft)"));
+            expect(step.get("color")).toBe("var(--color-primary)");
+            expect(strong.get("background-color")).toBe("var(--color-primary)");
+            expect(strong.get("color")).toBe("var(--color-on-primary)");
+            expect(strong.get("box-shadow")).toBe(glow("16px", "50%"));
+        });
+
+        it("should lay the changelog's App tag in the soft tint under the primary", () => {
+            const tag = declarationsOf(AURORA_CSS, skin("app-tag"));
+
+            expect(tag.get("background-color")).toBe(soft("primary", "var(--aurora-tint-soft)"));
+            expect(tag.get("color")).toBe("var(--color-primary)");
+        });
+    });
+
+    describe("words on the lights", () => {
+        // Nothing but the text colour reads 4.5:1 where the lights are brightest (spec ruling 4)
+        it("should write the timer's icon and the changelog's note in the text colour", () => {
+            expect(declarationsOf(AURORA_CSS, `${AURORA_SCOPE} svg.lucide-timer`).get("color")).toBe("var(--color-foreground)");
+            expect(declarationsOf(AURORA_CSS, `${AURORA_SCOPE} [data-testid="changelog-app-note"]`).get("color")).toBe("var(--color-foreground)");
+        });
+
+        it.each([
+            "src/presentation/components/page-header/PageHeader.vue",
+            "src/presentation/pages/game/components/GameHeader.vue",
+        ])("should leave %s's back button, title and timer in the text colour", (path) => {
+            const header = readFileSync(path, "utf8");
+            const inks = [...header.matchAll(/<span\s+class="[^"]*\b(text-foreground[\w-]*)/g)].map(match => match[1]);
+
+            expect(inks).toEqual(["text-foreground", "text-foreground"]);
+        });
+
+        it("should draw line icons 2 wide with round ends and joins", () => {
+            const icons = declarationsOf(AURORA_CSS, `${AURORA_SCOPE} svg.lucide`);
+
+            expect(icons.get("stroke-width")).toBe("2");
+            expect(icons.get("stroke-linecap")).toBe("round");
+            expect(icons.get("stroke-linejoin")).toBe("round");
+        });
+    });
+
+    it("should change no layout outside the pseudo-elements", () => {
+        expect(findLayoutDeclarations(AURORA_CSS)).toEqual([]);
+    });
+});
 
 describe("aurora skin", () => {
     describe("the page", () => {
