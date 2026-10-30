@@ -12,12 +12,14 @@ import type { ColorMode, ColorThemeId } from "../../../theme/themeIds";
 /** The error colour and its hover, which a danger button darkens to in 晨光 and lightens to in 夜空 */
 interface AuroraError { error: string; errorHover: string }
 
+/** A theme's four lights, aurora-1 to aurora-4 */
+type AuroraLights = readonly [string, string, string, string];
+
 interface AuroraSky extends AuroraError {
     background: string;
     foreground: string;
     foregroundSecondary: string;
     onDanger: string;
-    lights: readonly [string, string, string, string];
     glass: string;
     sheen: string;
 }
@@ -30,7 +32,6 @@ const AURORA_SKIES: Readonly<Record<ColorMode, AuroraSky>> = {
         error: "#FF948A",
         errorHover: "#FFA9A1",
         onDanger: "#060914",
-        lights: ["#19E6A3", "#7C4DFF", "#1FB6FF", "#FF6FB5"],
         glass: "#141A34",
         sheen: "#FFFFFF",
     },
@@ -41,7 +42,6 @@ const AURORA_SKIES: Readonly<Record<ColorMode, AuroraSky>> = {
         error: "#B71C1C",
         errorHover: "#9A1717",
         onDanger: "#FFFFFF",
-        lights: ["#7FE7C9", "#B7A4FF", "#8CCBFF", "#FFC2A6"],
         glass: "#FFFFFF",
         sheen: "#FFFFFF",
     },
@@ -82,9 +82,9 @@ const GROUND_LIGHT: Readonly<Record<ColorMode, 0 | 1>> = { dark: 0, light: 1 };
 const GROUND_RIBBON: Readonly<Record<ColorMode, number>> = { dark: AURORA_RIBBON.first, light: AURORA_RIBBON.second };
 
 /** The colour of the page where the lights are brightest: the lights' blob under the ribbon's two lights over it. */
-export const auroraGround = (mode: ColorMode): string => {
+export const auroraGround = (mode: ColorMode, lights: AuroraLights): string => {
     const sky = AURORA_SKIES[mode];
-    const light = sky.lights[GROUND_LIGHT[mode]];
+    const light = lights[GROUND_LIGHT[mode]];
     const { strength } = AURORA_DENSITIES[mode];
     const blob = mixColors(light, strength, sky.background);
     return mixColors(light, strength * GROUND_RIBBON[mode] * AURORA_RIBBON.strength, blob);
@@ -98,10 +98,10 @@ interface AuroraSurfaces {
     dialog: string;
 }
 
-const auroraSurfaces = (mode: ColorMode): AuroraSurfaces => {
+const auroraSurfaces = (mode: ColorMode, lights: AuroraLights): AuroraSurfaces => {
     const sky = AURORA_SKIES[mode];
     const density = AURORA_DENSITIES[mode];
-    const ground = auroraGround(mode);
+    const ground = auroraGround(mode, lights);
     const cellGlass = mixColors(sky.sheen, density.sheenCell, mixColors(sky.glass, density.cell, ground));
     return {
         ground,
@@ -112,9 +112,9 @@ const auroraSurfaces = (mode: ColorMode): AuroraSurfaces => {
     };
 };
 
-const auroraNeutrals = (mode: ColorMode, { error, errorHover }: AuroraError): Neutrals<LightThemeColors> & Neutrals<DarkThemeColors> => {
+const auroraNeutrals = (mode: ColorMode, lights: AuroraLights, { error, errorHover }: AuroraError): Neutrals<LightThemeColors> & Neutrals<DarkThemeColors> => {
     const sky = AURORA_SKIES[mode];
-    const { card, cellGlass, dialog } = auroraSurfaces(mode);
+    const { card, cellGlass, dialog } = auroraSurfaces(mode, lights);
     return {
         "background": sky.background,
         "card": card,
@@ -137,36 +137,40 @@ const auroraNeutrals = (mode: ColorMode, { error, errorHover }: AuroraError): Ne
     };
 };
 
+// The lights, the same in every theme for now
+const NIGHT_LIGHTS: AuroraLights = ["#19E6A3", "#7C4DFF", "#1FB6FF", "#FF6FB5"];
+const DAWN_LIGHTS: AuroraLights = ["#7FE7C9", "#B7A4FF", "#8CCBFF", "#FFC2A6"];
+
 // What a theme changes: the colour chosen with and the text on it, per mode, and the error where the sky's red lies
 // too near that colour in hue
-interface AuroraAccent { primary: string; primaryHover: string; onPrimary: string; error?: AuroraError }
+interface AuroraAccent { primary: string; primaryHover: string; onPrimary: string; lights: AuroraLights; error?: AuroraError }
 
 const AURORA_ACCENTS: Readonly<Record<"purple" | "teal" | "pink" | "orange", Record<ColorMode, AuroraAccent>>> = {
     purple: {
-        dark: { primary: "#A897FF", primaryHover: "#BBAEFF", onPrimary: "#120B30" },
-        light: { primary: "#5B3FE0", primaryHover: "#4C33C2", onPrimary: "#FFFFFF" },
+        dark: { primary: "#A897FF", primaryHover: "#BBAEFF", onPrimary: "#120B30", lights: NIGHT_LIGHTS },
+        light: { primary: "#5B3FE0", primaryHover: "#4C33C2", onPrimary: "#FFFFFF", lights: DAWN_LIGHTS },
     },
     teal: {
-        dark: { primary: "#4FE3C1", primaryHover: "#74EBD0", onPrimary: "#052A22" },
-        light: { primary: "#0A6F61", primaryHover: "#085C51", onPrimary: "#FFFFFF" },
+        dark: { primary: "#4FE3C1", primaryHover: "#74EBD0", onPrimary: "#052A22", lights: NIGHT_LIGHTS },
+        light: { primary: "#0A6F61", primaryHover: "#085C51", onPrimary: "#FFFFFF", lights: DAWN_LIGHTS },
     },
     // A red-orange, as the sky's red reads as the same red as the pink
     pink: {
-        dark: { primary: "#FF8CC6", primaryHover: "#FFA8D4", onPrimary: "#3A0820", error: { error: "#FF8F5A", errorHover: "#FFA57B" } },
-        light: { primary: "#C2185B", primaryHover: "#A21349", onPrimary: "#FFFFFF", error: { error: "#A34400", errorHover: "#893900" } },
+        dark: { primary: "#FF8CC6", primaryHover: "#FFA8D4", onPrimary: "#3A0820", lights: NIGHT_LIGHTS, error: { error: "#FF8F5A", errorHover: "#FFA57B" } },
+        light: { primary: "#C2185B", primaryHover: "#A21349", onPrimary: "#FFFFFF", lights: DAWN_LIGHTS, error: { error: "#A34400", errorHover: "#893900" } },
     },
     // A crimson-rose, as the sky's red lies close to the orange
     orange: {
-        dark: { primary: "#FFB86B", primaryHover: "#FFC98C", onPrimary: "#3A1E00", error: { error: "#FF8FAB", errorHover: "#FFA5BC" } },
-        light: { primary: "#A84808", primaryHover: "#8F3D06", onPrimary: "#FFFFFF", error: { error: "#A3165E", errorHover: "#89124F" } },
+        dark: { primary: "#FFB86B", primaryHover: "#FFC98C", onPrimary: "#3A1E00", lights: NIGHT_LIGHTS, error: { error: "#FF8FAB", errorHover: "#FFA5BC" } },
+        light: { primary: "#A84808", primaryHover: "#8F3D06", onPrimary: "#FFFFFF", lights: DAWN_LIGHTS, error: { error: "#A3165E", errorHover: "#89124F" } },
     },
 };
 
 // A mode's board tints, which are the primary laid on the glass; the lights and the glass are its own colours
-const auroraExtras = (mode: ColorMode, primary: string) => {
+const auroraExtras = (mode: ColorMode, { primary, lights }: AuroraAccent) => {
     const sky = AURORA_SKIES[mode];
     const density = AURORA_DENSITIES[mode];
-    const { card, cellGlass, peerGlass } = auroraSurfaces(mode);
+    const { card, cellGlass, peerGlass } = auroraSurfaces(mode, lights);
     const sameDigit = mixColors(primary, density.tintSame, cellGlass);
     return {
         "primary-light": mixColors(primary, density.tintSoft, card),
@@ -176,18 +180,18 @@ const auroraExtras = (mode: ColorMode, primary: string) => {
         "cell-scope": peerGlass,
         "cell-peer": peerGlass,
         "cell-pattern": sameDigit,
-        "aurora-1": sky.lights[0],
-        "aurora-2": sky.lights[1],
-        "aurora-3": sky.lights[2],
-        "aurora-4": sky.lights[3],
+        "aurora-1": lights[0],
+        "aurora-2": lights[1],
+        "aurora-3": lights[2],
+        "aurora-4": lights[3],
         "glass": sky.glass,
         "glass-sheen": sky.sheen,
     };
 };
 
 const auroraTheme = (id: ColorThemeId, accents: Record<ColorMode, AuroraAccent>) => {
-    const lightExtras = auroraExtras("light", accents.light.primary);
-    const darkExtras = auroraExtras("dark", accents.dark.primary);
+    const lightExtras = auroraExtras("light", accents.light);
+    const darkExtras = auroraExtras("dark", accents.dark);
     const colors = (mode: ColorMode, extras: typeof lightExtras) => ({
         "primary": accents[mode].primary,
         "primary-hover": accents[mode].primaryHover,
@@ -196,8 +200,8 @@ const auroraTheme = (id: ColorThemeId, accents: Record<ColorMode, AuroraAccent>)
         "highlight": extras.highlight,
     });
     return themeBuilder(
-        { ...auroraNeutrals("light", accents.light.error ?? AURORA_SKIES.light), "on-primary": accents.light.onPrimary },
-        { ...auroraNeutrals("dark", accents.dark.error ?? AURORA_SKIES.dark), "on-primary": accents.dark.onPrimary },
+        { ...auroraNeutrals("light", accents.light.lights, accents.light.error ?? AURORA_SKIES.light), "on-primary": accents.light.onPrimary },
+        { ...auroraNeutrals("dark", accents.dark.lights, accents.dark.error ?? AURORA_SKIES.dark), "on-primary": accents.dark.onPrimary },
         lightExtras,
         darkExtras,
     )(id, colors("light", lightExtras), colors("dark", darkExtras));
