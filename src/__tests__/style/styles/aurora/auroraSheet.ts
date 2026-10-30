@@ -1,6 +1,7 @@
-// Reading aurora's skin for its tests: the sheet itself, a custom property it sets and the vmax lengths of its
-// lights' geometry
+// Reading aurora's skin for its tests: the sheet itself, a custom property it sets, its keyframes and the vmax
+// lengths of its lights' geometry
 import { readFileSync } from "fs";
+import postcss, { type AtRule, type Rule } from "postcss";
 import { declarationsOf } from "../../styleSheetRules";
 
 export const AURORA_CSS = readFileSync("src/style/styles/aurora/skin.css", "utf8");
@@ -18,4 +19,20 @@ export const vmaxOf = (value: string): number => {
     const match = /^(-?\d*\.?\d+)vmax$/.exec(value.trim());
     if (match === null) throw new Error(`Not a vmax length: "${value}"`);
     return Number(match[1]);
+};
+
+/** The keyframes called `name`: each step's selector and its declarations. */
+export const keyframesOf = (name: string): { step: string; declarations: Map<string, string> }[] => {
+    const steps: { step: string; declarations: Map<string, string> }[] = [];
+    postcss.parse(AURORA_CSS).walkAtRules(/keyframes$/, (atRule: AtRule) => {
+        if (atRule.params.trim() !== name) return;
+        atRule.walkRules((rule: Rule) => {
+            const declarations = new Map<string, string>();
+            rule.walkDecls((declaration) => {
+                declarations.set(declaration.prop, declaration.value.replace(/\s+/g, " ").trim());
+            });
+            steps.push({ step: rule.selector, declarations });
+        });
+    });
+    return steps;
 };

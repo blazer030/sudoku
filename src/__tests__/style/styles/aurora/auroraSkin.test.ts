@@ -1,9 +1,9 @@
 import { readFileSync } from "fs";
-import postcss, { type AtRule, type Declaration, type Rule } from "postcss";
+import postcss, { type Declaration, type Rule } from "postcss";
 import { AURORA_DENSITIES, AURORA_RIBBON, type AuroraDensity } from "@/style/styles/aurora/palette";
 import type { ColorMode } from "@/theme/themeIds";
 import { declarationsOf, findLayoutDeclarations, reducedMotionDeclarationsOf } from "../../styleSheetRules";
-import { AURORA_CSS, AURORA_DARK, AURORA_LIGHT, AURORA_SCOPE, auroraProperty, vmaxOf } from "./auroraSheet";
+import { AURORA_CSS, AURORA_DARK, AURORA_LIGHT, AURORA_SCOPE, auroraProperty, keyframesOf, vmaxOf } from "./auroraSheet";
 
 const BODY = `${AURORA_SCOPE} body`;
 // a1 and a3 drift together on one layer, a2 and a4 on another, and the ribbon on a third
@@ -23,22 +23,6 @@ const blob = (light: number): string => `radial-gradient(circle, var(--color-aur
 // The ribbon's ellipses fade over their whole size, so the same falloff is stretched from 66 to 100
 const ribbonLight = (at: string, colour: string): string => `radial-gradient(ellipse 24% 50% at ${at}, ${colour} 0, ${fading(colour, 100 / FADE_END)}, transparent 100%)`;
 const fromOverscan = (property: string): string => `calc(var(--aurora-overscan) + var(${property}))`;
-
-// The keyframes called `name`: each step's selector and its declarations
-const keyframesOf = (name: string): { step: string; declarations: Map<string, string> }[] => {
-    const steps: { step: string; declarations: Map<string, string> }[] = [];
-    postcss.parse(AURORA_CSS).walkAtRules(/keyframes$/, (atRule: AtRule) => {
-        if (atRule.params.trim() !== name) return;
-        atRule.walkRules((rule: Rule) => {
-            const declarations = new Map<string, string>();
-            rule.walkDecls((declaration) => {
-                declarations.set(declaration.prop, declaration.value.replace(/\s+/g, " ").trim());
-            });
-            steps.push({ step: rule.selector, declarations });
-        });
-    });
-    return steps;
-};
 
 // The six windows the lights must keep apart in, phones to a wide desktop
 const VIEWPORTS: readonly (readonly [number, number])[] = [[360, 640], [360, 800], [390, 844], [768, 1024], [1280, 800], [1920, 1080]];
