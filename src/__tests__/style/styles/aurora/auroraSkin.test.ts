@@ -776,10 +776,15 @@ describe("aurora's glass", () => {
             expect(emphasised.get("color")).toBe("var(--color-on-primary)");
         });
 
-        it("should strike a step's eliminated candidates in the error colour with a 1.5px line, on every board", () => {
+        // Level through the middle, not the canvas's diagonal, which runs along a 1's own stroke, and a little past the
+        // glyph on both sides, as a 1 is hardly wider than its stem
+        it("should strike a step's eliminated candidates in the error colour with a level 1.5px line, on every board", () => {
+            const strike = declarationsOf(AURORA_CSS, `${BOARD} .font-note.strike-diagonal::after`);
+
             expect(declarationsOf(AURORA_CSS, `${BOARD} .font-note.strike-diagonal`).get("color")).toBe("var(--color-error)");
-            expect(declarationsOf(AURORA_CSS, `${BOARD} .font-note.strike-diagonal::after`).get("background-image")).toBe(
-                "linear-gradient(to top right, transparent calc(50% - 0.75px), currentColor calc(50% - 0.75px), "
+            expect(strike.get("inset")).toBe("0 -0.15em");
+            expect(strike.get("background-image")).toBe(
+                "linear-gradient(to bottom, transparent calc(50% - 0.75px), currentColor calc(50% - 0.75px), "
                 + "currentColor calc(50% + 0.75px), transparent calc(50% + 0.75px))",
             );
         });
