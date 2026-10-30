@@ -114,6 +114,12 @@ describe("aurora moments", () => {
             ]);
             expect(declarationsOf(AURORA_CSS, `${BOARD} [data-variant="selected"]::after`).has("animation")).toBe(false);
         });
+
+        // Both pulse rules weigh the same, so the selected cell's on-primary disc wins only by coming later
+        it("should lay the selected cell's pulse after the generic one", () => {
+            expect(indexOfRule(PULSE)).toBeGreaterThanOrEqual(0);
+            expect(indexOfRule(`${BOARD} [data-variant="selected"][data-arriving]::before`)).toBeGreaterThan(indexOfRule(PULSE));
+        });
     });
 
     describe("erase", () => {
