@@ -80,14 +80,14 @@ export const AURORA_RIBBON = { first: 0.55, second: 0.45, strength: 0.8 } as con
 const GROUND_LIGHT: Readonly<Record<ColorMode, 0 | 1>> = { dark: 0, light: 1 };
 // The ribbon's two lights are 夜空's first and 晨光's second, so each ground carries that light's share of it
 const GROUND_RIBBON: Readonly<Record<ColorMode, number>> = { dark: AURORA_RIBBON.first, light: AURORA_RIBBON.second };
-const GROUND_COVER: Readonly<Record<ColorMode, number>> = { dark: 0.42, light: 0.85 };
 
 /** The colour of the page where the lights are brightest: the lights' blob under the ribbon's two lights over it. */
 export const auroraGround = (mode: ColorMode): string => {
     const sky = AURORA_SKIES[mode];
     const light = sky.lights[GROUND_LIGHT[mode]];
-    const blob = mixColors(light, GROUND_COVER[mode], sky.background);
-    return mixColors(light, GROUND_COVER[mode] * GROUND_RIBBON[mode] * AURORA_RIBBON.strength, blob);
+    const { strength } = AURORA_DENSITIES[mode];
+    const blob = mixColors(light, strength, sky.background);
+    return mixColors(light, strength * GROUND_RIBBON[mode] * AURORA_RIBBON.strength, blob);
 };
 
 interface AuroraSurfaces {
