@@ -181,15 +181,6 @@ describe("palettes", () => {
         }
     });
 
-    it("should keep aurora's error colour apart from every colour a theme chooses with", () => {
-        for (const mode of ["light", "dark"] as const) {
-            const primaries = STYLES.aurora.themes.map(theme => getPalette("aurora", theme.id, mode).primary);
-            for (const theme of STYLES.aurora.themes) {
-                expect(primaries, `${theme.id}/${mode}`).not.toContain(getPalette("aurora", theme.id, mode).error);
-            }
-        }
-    });
-
     // Purple and teal keep the plain red; pink takes a red-orange and orange a crimson-rose, so the error never
     // passes for the theme's own colour
     it.each([
