@@ -627,6 +627,8 @@ const auroraCellCases = (palette: Palette, mode: ColorMode, drawn: AuroraDrawn):
         drawn("clue (foreground) on cell glass", palette.foreground, grounds.cell),
         drawn("clue (foreground) on peer glass", palette.foreground, grounds.peer),
         drawn("player's digit (primary) on cell glass", palette.primary, grounds.cell),
+        // A completed group's glow at its peak: 30% of the primary over the cell's glass (a soft light never hides a digit)
+        drawn("player's digit (primary) on the group glow's peak", palette.primary, mixColors(palette.primary, 0.3, grounds.cell), LARGE_OR_ICON),
         drawn("same digit (primary) on its tint", palette.primary, grounds.sameDigit),
         drawn("note on cell glass", palette.note, grounds.cell),
         drawn("note on peer glass", palette.note, grounds.peer),

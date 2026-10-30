@@ -941,15 +941,16 @@
 }
 
 /* Completing a group (only with motion allowed), from GroupAurora without its blur and the cells' glow shadow (spec
-   ruling 15). Light ripples across the group's panes from the cell just filled, 45ms a step: each cell's ground takes
-   45% of the primary and gives it back, starting and ending on its own ground (ruling 7), so a selected or error
-   cell keeps its own pane. The glow is the cell's own background, so the entered cell's pulse (its ::before) and its
-   digit's arrival run on untouched; its name marks it as the group's, so its end never settles the arrival. A streak
-   of the aurora sweeps out along a completed row or down a completed column from the entered cell, its long edges
-   faded by a gradient mask where the canvas blurred them; a completed box sends one ring of the primary out from its
-   centre, lit by a still glow of aurora-1 (AuroraGroupOverlay). Both lie at 0 over the glass, under every digit (2)
-   and the selected and answer cells (1) (ruling 4), and are unseen without their animations, so a stopped effect
-   leaves no still cue. */
+   ruling 15). Light ripples across the group's panes from the cell just filled, 45ms a step: each cell's ground
+   takes 30% of the primary and gives it back (no more, so a digit in the primary still reads 3:1 on it), starting
+   and ending on its own ground (ruling 7), so a selected or error cell keeps its own pane. The glow is the cell's
+   own background, so the entered cell's pulse (its ::before) and its digit's arrival run on untouched; its name
+   marks it as the group's, so its end never settles the arrival. A streak of the aurora (aurora-1, aurora-3,
+   aurora-2: no primary, so a player's digit never sits on its own hue) sweeps out along a completed row or down a
+   completed column from the entered cell, its long edges faded by a gradient mask where the canvas blurred them; a
+   completed box sends one ring of the primary out from its centre, lit by a still glow of aurora-1
+   (AuroraGroupOverlay). Both lie at 0 over the glass, under every digit (2) and the selected and answer cells (1)
+   (ruling 4), and are unseen without their animations, so a stopped effect leaves no still cue. */
 [data-style="aurora"] [data-skin~="board"] [data-group]:not(.animate-hint-reveal-glow) {
     --group-ripple-step: 45ms;
     animation: aurora-group-glow 600ms ease-out calc(100ms + var(--group-delay));
@@ -957,7 +958,7 @@
 
 @keyframes aurora-group-glow {
     0% { background-color: var(--aurora-cell-ground); }
-    35% { background-color: color-mix(in srgb, var(--color-primary) 45%, var(--aurora-cell-ground)); }
+    35% { background-color: color-mix(in srgb, var(--color-primary) 30%, var(--aurora-cell-ground)); }
     100% { background-color: var(--aurora-cell-ground); }
 }
 
@@ -968,14 +969,14 @@
 }
 
 [data-style="aurora"] .aurora-group-ribbon[data-kind="row"] {
-    background-image: linear-gradient(90deg, transparent, color-mix(in srgb, var(--color-aurora-1) 70%, transparent) 30%, color-mix(in srgb, var(--color-primary) 70%, transparent) 50%, color-mix(in srgb, var(--color-aurora-2) 70%, transparent) 70%, transparent);
+    background-image: linear-gradient(90deg, transparent, color-mix(in srgb, var(--color-aurora-1) 70%, transparent) 30%, color-mix(in srgb, var(--color-aurora-3) 70%, transparent) 50%, color-mix(in srgb, var(--color-aurora-2) 70%, transparent) 70%, transparent);
     -webkit-mask-image: linear-gradient(180deg, transparent, var(--color-foreground) 35%, var(--color-foreground) 65%, transparent);
     mask-image: linear-gradient(180deg, transparent, var(--color-foreground) 35%, var(--color-foreground) 65%, transparent);
     animation: aurora-group-sweep-x 760ms ease-out 100ms;
 }
 
 [data-style="aurora"] .aurora-group-ribbon[data-kind="column"] {
-    background-image: linear-gradient(180deg, transparent, color-mix(in srgb, var(--color-aurora-1) 70%, transparent) 30%, color-mix(in srgb, var(--color-primary) 70%, transparent) 50%, color-mix(in srgb, var(--color-aurora-2) 70%, transparent) 70%, transparent);
+    background-image: linear-gradient(180deg, transparent, color-mix(in srgb, var(--color-aurora-1) 70%, transparent) 30%, color-mix(in srgb, var(--color-aurora-3) 70%, transparent) 50%, color-mix(in srgb, var(--color-aurora-2) 70%, transparent) 70%, transparent);
     -webkit-mask-image: linear-gradient(90deg, transparent, var(--color-foreground) 35%, var(--color-foreground) 65%, transparent);
     mask-image: linear-gradient(90deg, transparent, var(--color-foreground) 35%, var(--color-foreground) 65%, transparent);
     animation: aurora-group-sweep-y 760ms ease-out 100ms;

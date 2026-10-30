@@ -169,7 +169,7 @@ describe("aurora moments", () => {
         const GROUND = "var(--aurora-cell-ground)";
         const streakOf = (angle: string): string => `linear-gradient(${angle}, transparent, `
             + "color-mix(in srgb, var(--color-aurora-1) 70%, transparent) 30%, "
-            + "color-mix(in srgb, var(--color-primary) 70%, transparent) 50%, "
+            + "color-mix(in srgb, var(--color-aurora-3) 70%, transparent) 50%, "
             + "color-mix(in srgb, var(--color-aurora-2) 70%, transparent) 70%, transparent)";
 
         const spanOf = (selector: string, name: string): { startMs: number; endMs: number } => {
@@ -194,11 +194,11 @@ describe("aurora moments", () => {
 
         // Review Focus 1: the glow starts and ends on the cell's own ground, so a selected or error cell never flashes
         // back to plain glass
-        it("should light each cell of the group with 45% of the primary from its own ground and back, with no shadow", () => {
+        it("should light each cell of the group with 30% of the primary from its own ground and back, with no shadow", () => {
             const frames = framesOf("aurora-group-glow");
 
             expect(frames.get("0%")).toEqual(new Map([["background-color", GROUND]]));
-            expect(frames.get("35%")).toEqual(new Map([["background-color", `color-mix(in srgb, var(--color-primary) 45%, ${GROUND})`]]));
+            expect(frames.get("35%")).toEqual(new Map([["background-color", `color-mix(in srgb, var(--color-primary) 30%, ${GROUND})`]]));
             expect(frames.get("100%")).toEqual(new Map([["background-color", GROUND]]));
             expect(propertiesOf("aurora-group-glow").every(property => property === "background-color")).toBe(true);
         });
@@ -225,7 +225,7 @@ describe("aurora moments", () => {
             expect(animationOf(PULSE)).toMatch(/^aurora-pulse /);
         });
 
-        it("should lay a streak of aurora-1, the primary and aurora-2 along a row, its top and bottom faded by a gradient mask", () => {
+        it("should lay a streak of aurora-1, aurora-3 and aurora-2 along a row, never the primary a player's digit is written in, its top and bottom faded by a gradient mask", () => {
             const row = declarationsOf(AURORA_CSS, RIBBON_OF.row);
 
             expect(row.get("background-image")).toBe(streakOf("90deg"));
