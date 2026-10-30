@@ -163,6 +163,9 @@ const REQUIRED_SELECTORS: Record<StyleId, readonly string[]> = {
         "[data-selected]",
         "[data-value-kind]",
         "[data-note-highlight]",
+        "[data-arriving]::before",
+        "> .value-arrive",
+        ".value-leave::before",
     ],
 };
 

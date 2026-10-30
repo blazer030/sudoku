@@ -788,13 +788,19 @@ describe("aurora's glass", () => {
             expect(hintModeRules).toEqual([]);
         });
 
-        it("should leave the cells' ::before to the arrival's pulse", () => {
-            const cellBefores: string[] = [];
+        // The selected cell's ring lies on the ::after, so a pulse or an erased digit never takes it away
+        it("should leave the cells' ::before to the arrival's pulse and the erased digit alone", () => {
+            const cellBefores = new Set<string>();
             postcss.parse(AURORA_CSS).walkRules((rule: Rule) => {
-                if (/\[data-variant[^\]]*\][^ ]*::before/.test(rule.selector)) cellBefores.push(rule.selector);
+                for (const selector of rule.selectors.map(item => item.replace(/\s+/g, " ").trim())) {
+                    if (/\[data-variant[^\]]*\][^ ]*::before/.test(selector)) cellBefores.add(selector);
+                }
             });
 
-            expect(cellBefores).toEqual([]);
+            expect([...cellBefores]).toEqual([
+                `${BOARD} [data-variant][data-arriving]::before`,
+                `${BOARD} [data-variant].value-leave::before`,
+            ]);
         });
     });
 
