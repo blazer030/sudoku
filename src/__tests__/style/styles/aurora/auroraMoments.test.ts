@@ -368,6 +368,13 @@ describe("aurora moments", () => {
         const RINGS = ["centre", "edge", "corner"] as const;
         const DELAYS = { centre: "0s", edge: "0.28s", corner: "0.56s" };
 
+        // The cards' 22px weighs as much as the template's rounded-[28px] utility and wins; this rule, laid later,
+        // gives the loader its 28px back
+        it("should round the loader's card 28px, laid after the cards' rule", () => {
+            expect(declarationsOf(AURORA_CSS, LOADER).get("border-radius")).toBe("28px");
+            expect(indexOfRule(LOADER)).toBeGreaterThan(indexOfRule(`${AURORA_SCOPE} [data-skin~="card"]`));
+        });
+
         it("should turn a 150px halo of the four aurora lights in a ring, at 55% opacity, once in 7s", () => {
             const halo = declarationsOf(AURORA_CSS, HALO);
             const lights = halo.get("background-image") ?? "";

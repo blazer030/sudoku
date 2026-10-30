@@ -14,10 +14,12 @@ describe("AuroraLoader", () => {
         expect(STYLE_MOMENTS.aurora.loader).toBe(AuroraLoader);
     });
 
-    it("should be a 28px glass card at the dialogs' density", () => {
+    // The skin lays the dialogs' glass on it (shadow-modal) and keeps its 28px over the cards' 22px
+    it("should be a glass card rounded 28px, at the dialogs' density", () => {
         const card = mount(AuroraLoader).get(".aurora-loader");
 
         expect(card.attributes("data-skin")).toBe("card");
+        expect(card.classes()).toContain("rounded-[28px]");
         expect(card.classes()).toContain("shadow-modal");
     });
 
