@@ -168,6 +168,9 @@ const REQUIRED_SELECTORS: Record<StyleId, readonly string[]> = {
         ".value-leave::before",
         ".aurora-loader-halo",
         ".aurora-loader-dot",
+        "[data-group]",
+        ".aurora-group-ribbon",
+        ".aurora-group-ring",
     ],
 };
 

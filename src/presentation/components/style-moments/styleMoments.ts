@@ -1,6 +1,7 @@
 import { computed, type Component, type ComputedRef } from "vue";
 import type { StyleId } from "@/theme/themeIds";
 import { useSettingsStore } from "@/stores/settingsStore";
+import AuroraGroupOverlay from "@/presentation/components/style-moments/aurora/AuroraGroupOverlay.vue";
 import AuroraLoader from "@/presentation/components/style-moments/aurora/AuroraLoader.vue";
 import MinimalLoader from "@/presentation/components/style-moments/minimal/MinimalLoader.vue";
 import TactileLoader from "@/presentation/components/style-moments/tactile/TactileLoader.vue";
@@ -172,6 +173,9 @@ const CHALKBOARD_MOMENTS: StyleMoments = {
 // nothing is drawn over the scene.
 // While a puzzle loads, a plotter draws a sudoku box on a small drawing sheet, its pen running along the line as it
 // is plotted, and dimensions it in 3 columns (BlueprintLoader).
+// From the boards: each cell of a completed group glows with the primary from 100ms for 600ms, 45ms a step. A line's
+// streak of the aurora sweeps out from 100ms and fades by 860ms; a box's ring goes out from 120ms and fades by 880ms
+// (AuroraGroupOverlay).
 // While a puzzle loads, nine lights breathe outward from the centre under a slowly turning aurora (AuroraLoader).
 // Aurora Glass has no celebration for now; the rest of its moments come in later tasks.
 const AURORA_MOMENTS: StyleMoments = {
@@ -179,6 +183,7 @@ const AURORA_MOMENTS: StyleMoments = {
     celebration: null,
     cardDecoration: null,
     groupEffectMs: 900,
+    groupOverlay: AuroraGroupOverlay,
     celebrationBoardMs: 800,
 };
 
