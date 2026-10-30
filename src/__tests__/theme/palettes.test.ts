@@ -169,7 +169,7 @@ describe("palettes", () => {
         expect(palette.error).toBe("#A3165E");
         expect(palette["on-danger"]).toBe("#FFFFFF");
         expect([palette["aurora-1"], palette["aurora-2"], palette["aurora-3"], palette["aurora-4"]])
-            .toEqual(["#B3FFD6", "#FFEDBA", "#CCEDFE", "#FFC49C"]);
+            .toEqual(["#B3FFD6", "#FFEDBA", "#D9F2FF", "#FFC49C"]);
         expect([palette["aurora-ribbon-1"], palette["aurora-ribbon-2"]]).toEqual(["#D2FFDA", "#F5EEFF"]);
         expect(palette.glass).toBe("#FFFFFF");
     });

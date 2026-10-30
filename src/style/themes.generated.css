@@ -1570,7 +1570,7 @@
     --color-signal-surface: #EFEEFA;
     --color-aurora-1: #E2DDFF;
     --color-aurora-2: #D2E1FE;
-    --color-aurora-3: #F6BDE2;
+    --color-aurora-3: #FFCCEE;
     --color-aurora-4: #9BDBFD;
     --color-aurora-ribbon-1: #D2FFDA;
     --color-aurora-ribbon-2: #F5EEFF;
@@ -1617,7 +1617,7 @@
     --color-signal-surface: #1A1D37;
     --color-aurora-1: #4A039B;
     --color-aurora-2: #21238E;
-    --color-aurora-3: #A93AA4;
+    --color-aurora-3: #8B1787;
     --color-aurora-4: #2572BF;
     --color-aurora-ribbon-1: #4A039B;
     --color-aurora-ribbon-2: #21238E;
@@ -1664,7 +1664,7 @@
     --color-signal-surface: #EAF1F3;
     --color-aurora-1: #ACF8E2;
     --color-aurora-2: #CFECFF;
-    --color-aurora-3: #96E5EF;
+    --color-aurora-3: #A4F3FD;
     --color-aurora-4: #D1C9FE;
     --color-aurora-ribbon-1: #D2FFDA;
     --color-aurora-ribbon-2: #F5EEFF;
@@ -1709,11 +1709,11 @@
     --color-primary-ink: #4FE3C1;
     --color-signal: #16393A;
     --color-signal-surface: #132332;
-    --color-aurora-1: #024B43;
+    --color-aurora-1: #004A42;
     --color-aurora-2: #0E519E;
-    --color-aurora-3: #087E9B;
+    --color-aurora-3: #08748F;
     --color-aurora-4: #7A59C3;
-    --color-aurora-ribbon-1: #024B43;
+    --color-aurora-ribbon-1: #004A42;
     --color-aurora-ribbon-2: #0E519E;
     --color-glass: #141A34;
     --color-glass-sheen: #FFFFFF;
@@ -1756,9 +1756,9 @@
     --color-primary-ink: #C2185B;
     --color-signal: #EADFEB;
     --color-signal-surface: #F5EBF2;
-    --color-aurora-1: #C0FFD9;
+    --color-aurora-1: #C5FFDC;
     --color-aurora-2: #F2EDFF;
-    --color-aurora-3: #BCFCFF;
+    --color-aurora-3: #C1FDFF;
     --color-aurora-4: #FFB7E6;
     --color-aurora-ribbon-1: #D2FFDA;
     --color-aurora-ribbon-2: #F5EEFF;
@@ -1852,7 +1852,7 @@
     --color-signal-surface: #F3EEED;
     --color-aurora-1: #B3FFD6;
     --color-aurora-2: #FFEDBA;
-    --color-aurora-3: #CCEDFE;
+    --color-aurora-3: #D9F2FF;
     --color-aurora-4: #FFC49C;
     --color-aurora-ribbon-1: #D2FFDA;
     --color-aurora-ribbon-2: #F5EEFF;
@@ -1897,9 +1897,9 @@
     --color-primary-ink: #FFB86B;
     --color-signal: #3D3027;
     --color-signal-surface: #211F2C;
-    --color-aurora-1: #511700;
-    --color-aurora-2: #04654E;
-    --color-aurora-3: #7B57C8;
+    --color-aurora-1: #4F1700;
+    --color-aurora-2: #01644D;
+    --color-aurora-3: #7A56C7;
     --color-aurora-4: #9B6406;
     --color-aurora-ribbon-1: #864AD2;
     --color-aurora-ribbon-2: #019F68;

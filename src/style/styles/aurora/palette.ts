@@ -128,22 +128,22 @@ const DAWN_RIBBON: AuroraRibbon = ["#D2FFDA", "#F5EEFF"];
 
 const AURORA_ACCENTS: Readonly<Record<"purple" | "teal" | "pink" | "orange", Record<ColorMode, AuroraAccent>>> = {
     purple: {
-        dark: { primary: "#A897FF", primaryHover: "#BBAEFF", onPrimary: "#120B30", lights: ["#4A039B", "#21238E", "#A93AA4", "#2572BF"], ribbon: ["#4A039B", "#21238E"] },
-        light: { primary: "#5B3FE0", primaryHover: "#4C33C2", onPrimary: "#FFFFFF", lights: ["#E2DDFF", "#D2E1FE", "#F6BDE2", "#9BDBFD"], ribbon: DAWN_RIBBON },
+        dark: { primary: "#A897FF", primaryHover: "#BBAEFF", onPrimary: "#120B30", lights: ["#4A039B", "#21238E", "#8B1787", "#2572BF"], ribbon: ["#4A039B", "#21238E"] },
+        light: { primary: "#5B3FE0", primaryHover: "#4C33C2", onPrimary: "#FFFFFF", lights: ["#E2DDFF", "#D2E1FE", "#FFCCEE", "#9BDBFD"], ribbon: DAWN_RIBBON },
     },
     teal: {
-        dark: { primary: "#4FE3C1", primaryHover: "#74EBD0", onPrimary: "#052A22", lights: ["#024B43", "#0E519E", "#087E9B", "#7A59C3"], ribbon: ["#024B43", "#0E519E"] },
-        light: { primary: "#0A6F61", primaryHover: "#085C51", onPrimary: "#FFFFFF", lights: ["#ACF8E2", "#CFECFF", "#96E5EF", "#D1C9FE"], ribbon: DAWN_RIBBON },
+        dark: { primary: "#4FE3C1", primaryHover: "#74EBD0", onPrimary: "#052A22", lights: ["#004A42", "#0E519E", "#08748F", "#7A59C3"], ribbon: ["#004A42", "#0E519E"] },
+        light: { primary: "#0A6F61", primaryHover: "#085C51", onPrimary: "#FFFFFF", lights: ["#ACF8E2", "#CFECFF", "#A4F3FD", "#D1C9FE"], ribbon: DAWN_RIBBON },
     },
     // A red-orange, as the sky's red reads as the same red as the pink
     pink: {
         dark: { primary: "#FF8CC6", primaryHover: "#FFA8D4", onPrimary: "#3A0820", lights: ["#4F0031", "#02484F", "#9F39B5", "#3769CA"], ribbon: ["#913FD5", "#029E72"], error: { error: "#FF8F5A", errorHover: "#FFA57B" } },
-        light: { primary: "#C2185B", primaryHover: "#A21349", onPrimary: "#FFFFFF", lights: ["#C0FFD9", "#F2EDFF", "#BCFCFF", "#FFB7E6"], ribbon: DAWN_RIBBON, error: { error: "#A34400", errorHover: "#893900" } },
+        light: { primary: "#C2185B", primaryHover: "#A21349", onPrimary: "#FFFFFF", lights: ["#C5FFDC", "#F2EDFF", "#C1FDFF", "#FFB7E6"], ribbon: DAWN_RIBBON, error: { error: "#A34400", errorHover: "#893900" } },
     },
     // A crimson-rose, as the sky's red lies close to the orange
     orange: {
-        dark: { primary: "#FFB86B", primaryHover: "#FFC98C", onPrimary: "#3A1E00", lights: ["#511700", "#04654E", "#7B57C8", "#9B6406"], ribbon: ["#864AD2", "#019F68"], error: { error: "#FF8FAB", errorHover: "#FFA5BC" } },
-        light: { primary: "#A84808", primaryHover: "#8F3D06", onPrimary: "#FFFFFF", lights: ["#B3FFD6", "#FFEDBA", "#CCEDFE", "#FFC49C"], ribbon: DAWN_RIBBON, error: { error: "#A3165E", errorHover: "#89124F" } },
+        dark: { primary: "#FFB86B", primaryHover: "#FFC98C", onPrimary: "#3A1E00", lights: ["#4F1700", "#01644D", "#7A56C7", "#9B6406"], ribbon: ["#864AD2", "#019F68"], error: { error: "#FF8FAB", errorHover: "#FFA5BC" } },
+        light: { primary: "#A84808", primaryHover: "#8F3D06", onPrimary: "#FFFFFF", lights: ["#B3FFD6", "#FFEDBA", "#D9F2FF", "#FFC49C"], ribbon: DAWN_RIBBON, error: { error: "#A3165E", errorHover: "#89124F" } },
     },
 };
 

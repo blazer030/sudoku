@@ -1,8 +1,10 @@
 // Aurora's sky as its skin paints it, for the contrast model. The four lights and the ribbon are composited over the
 // page colour in sRGB, in the order the browser paints them, and every value comes from skin.css: each light's size,
 // place, fade and drift, the ribbon's band, gradient, feathering mask and swing, and the strengths of the mode and the
-// theme. The sky is sampled over a grid of the board and of the page the cards lie on, at every drift phase, in two
-// phone windows, and each point is rounded to 8 bits as the screen shows it.
+// theme. The sky is sampled over a grid of the board and of the page the cards lie on, and at each light's centre and
+// between every two, at every drift phase, in the measured windows of auroraWindows.ts (phones, tablets and a
+// landscape window), and each point is rounded to 8 bits as the screen shows it.
+import postcss from "postcss";
 import { declarationsOf, splitTopLevel } from "../../styleSheetRules";
 import { AURORA_WINDOWS } from "./auroraWindows";
 import { AURORA_CSS, AURORA_DARK, AURORA_LIGHT, AURORA_SCOPE, auroraProperty, keyframesOf, vmaxOf } from "./auroraSheet";
@@ -83,6 +85,9 @@ const DRIFT = /^translate\(var\((--aurora-drift-\d-x)\), var\((--aurora-drift-\d
 const lightLayerOf = (selector: string): LightLayer => {
     const declarations = declarationsOf(AURORA_CSS, selector);
     expectForm(declarations.get("background-size"), /^var\(--aurora-blob-size\) var\(--aurora-blob-size\)$/, `${selector} size`);
+    // The layer is the window grown by the overscan on every side, which the lights' places are measured from
+    expectForm(declarations.get("position"), /^fixed$/, `${selector} position`);
+    expectForm(declarations.get("inset"), /^calc\(-1 \* var\(--aurora-overscan\)\)$/, `${selector} inset`);
     // Each light carries the strength in its own colour, so the layer itself lays no opacity over them
     if (declarations.has("opacity")) throw new Error(`${selector} sets an opacity the contrast model does not lay`);
     const images = splitTopLevel(declarations.get("background-image") ?? "", /,/);
@@ -102,6 +107,8 @@ const lightLayerOf = (selector: string): LightLayer => {
     }).reverse();
     const animation = declarations.get("animation") ?? "";
     const steps = keyframesOf(animation.split(" ")[0]);
+    // From where it rests to one end and back, so the phases between them are every place it passes
+    if (steps.length !== 1 || steps[0].step !== "to") throw new Error(`${selector} drifts by more than one step`);
     const [, driftX, driftY] = expectForm(steps[steps.length - 1]?.declarations.get("transform"), DRIFT, `${selector} drift`);
     return { lights, drift: [geometry(driftX), geometry(driftY)] };
 };
@@ -143,6 +150,7 @@ const ribbonOf = (): Ribbon => {
         return [Number(alpha) / 100, Number(at) / 100];
     });
     const swingSteps = keyframesOf((declarations.get("animation") ?? "").split(" ")[0]);
+    if (swingSteps.map(step => step.step).join() !== "from,to") throw new Error("aurora's ribbon swings by more than its two ends");
     const swing = swingSteps.map(step => Number(expectForm(step.declarations.get("transform"), ROTATION, "ribbon's swing")[1]));
     return {
         overhang: Number(left[1]) / 100,
@@ -157,11 +165,17 @@ const ribbonOf = (): Ribbon => {
     };
 };
 
-// The board is sampled over its cells every 8px; the cards anywhere below the header, every 10px
-const BOARD_STEP = 8;
-const CARD_AREA = { side: 16, top: 90, bottom: 8, step: 10 } as const;
-// The drift phases: each layer at five points of its path, the ribbon at the two ends of its swing and between them
-const DRIFT_POINTS = [0, 0.25, 0.5, 0.75, 1] as const;
+// The board is sampled over its cells every 6px, and the page the cards and the header's words lie on every 10px, at
+// the coarse phases; at the fine phases, where each light's centre falls (or the nearest point of the area to it)
+// and along the line between every two of them, where overlapping cones are brightest
+const BOARD_STEP = 6;
+const CARD_AREA = { side: 16, top: 0, bottom: 8, step: 10 } as const;
+const LINE_POINTS = 24;
+// The drift phases: each layer at five points of its path and the ribbon at three of its swing (coarse), or nine and
+// five (fine)
+const pointsAlong = (count: number): number[] => Array.from({ length: count }, (_, index) => index / (count - 1));
+const COARSE = { drift: pointsAlong(5), swing: pointsAlong(3) } as const;
+const FINE = { drift: pointsAlong(9), swing: pointsAlong(5) } as const;
 
 const gridOf = (left: number, top: number, right: number, bottom: number, step: number): [number, number][] => {
     const points: [number, number][] = [];
@@ -180,8 +194,11 @@ const maskAt = (mask: Ribbon["mask"], fraction: number): number => {
 };
 
 type Painter = (colour: Rgb, x: number, y: number) => Rgb;
+type Point = readonly [number, number];
 
-const lightPainter = (layer: LightLayer, colours: readonly Rgb[], strength: number, width: number, height: number, time: number): Painter[] => {
+interface LitPainter { centre: Point; paint: Painter }
+
+const lightPainter = (layer: LightLayer, colours: readonly Rgb[], strength: number, width: number, height: number, time: number): LitPainter[] => {
     const vmax = Math.max(width, height) / 100;
     const size = geometry("--aurora-blob-size") * vmax;
     const fade = shareOf("--aurora-light-fade") * size * Math.SQRT2 / 2;
@@ -191,9 +208,12 @@ const lightPainter = (layer: LightLayer, colours: readonly Rgb[], strength: numb
         const centreX = (light.horizontal === "left" ? left : width - left) + layer.drift[0] * vmax * time;
         const centreY = (light.vertical === "top" ? top : height - top) + layer.drift[1] * vmax * time;
         const colour = colours[light.index - 1];
-        return (base, x, y) => {
-            const distance = Math.hypot(x - centreX, y - centreY);
-            return distance < fade ? layOver(colour, strength * (1 - distance / fade), base) : base;
+        return {
+            centre: [centreX, centreY],
+            paint: (base, x, y) => {
+                const distance = Math.hypot(x - centreX, y - centreY);
+                return distance < fade ? layOver(colour, strength * (1 - distance / fade), base) : base;
+            },
         };
     });
 };
@@ -235,6 +255,16 @@ const ribbonPainter = (ribbon: Ribbon, colours: readonly [Rgb, Rgb], strength: n
     };
 };
 
+// The model reads the sky's numbers from top-level rules only, so none may be set again inside a media query
+const AT_RULE_SKY = /^--aurora-(?:strength|ribbon-|light-fade|blob-size|a\d-|drift-|overscan|glass-)/;
+const assertSkyUnconditional = (): void => {
+    const hits: string[] = [];
+    postcss.parse(AURORA_CSS).walkDecls((declaration) => {
+        if (AT_RULE_SKY.test(declaration.prop) && declaration.parent?.parent?.type === "atrule") hits.push(declaration.prop);
+    });
+    if (hits.length > 0) throw new Error(`aurora's skin sets its sky's numbers inside an at-rule: ${hits.join(", ")}`);
+};
+
 const keyOf = (colour: Rgb): number => (colour[0] << 16) | (colour[1] << 8) | colour[2];
 
 /**
@@ -248,30 +278,44 @@ export const auroraSkyGrounds = (mode: ColorMode, themeId: string, colours: Auro
     const ribbonColours = [rgbOf(colours.ribbon[0]), rgbOf(colours.ribbon[1])] as const;
     const strength = auroraNumber(mode, themeId, "--aurora-strength");
     const ribbonStrength = auroraNumber(mode, themeId, "--aurora-ribbon-strength");
+    assertSkyUnconditional();
     const firstLayer = lightLayerOf(`${AURORA_SCOPE} body::before`);
     const secondLayer = lightLayerOf(`${AURORA_SCOPE} body::after`);
     const ribbon = ribbonOf();
-    const angles = [ribbon.swing[0], (ribbon.swing[0] + ribbon.swing[1]) / 2, ribbon.swing[1]];
     const board = new Map<number, Rgb>();
     const card = new Map<number, Rgb>();
+    const sample = (grounds: Map<number, Rgb>, painters: readonly Painter[], points: readonly Point[]): void => {
+        for (const [x, y] of points) {
+            let colour: Rgb = background;
+            for (const paint of painters) colour = paint(colour, x, y);
+            const rounded = colour.map(Math.round) as unknown as Rgb;
+            grounds.set(keyOf(rounded), rounded);
+        }
+    };
+    const phasesOf = (points: typeof COARSE | typeof FINE) => points.drift.flatMap(firstTime => points.drift.flatMap(secondTime =>
+        points.swing.map(share => [firstTime, secondTime, ribbon.swing[0] + (ribbon.swing[1] - ribbon.swing[0]) * share] as const)));
     for (const { width, height, board: [left, top, right, bottom] } of AURORA_WINDOWS) {
-        const areas: [Map<number, Rgb>, [number, number][]][] = [
-            [board, gridOf(left, top, right, bottom, BOARD_STEP)],
-            [card, gridOf(CARD_AREA.side, CARD_AREA.top, width - CARD_AREA.side, height - CARD_AREA.bottom, CARD_AREA.step)],
+        const areas: readonly (readonly [Map<number, Rgb>, readonly [number, number, number, number], number])[] = [
+            [board, [left, top, right, bottom], BOARD_STEP],
+            [card, [CARD_AREA.side, CARD_AREA.top, width - CARD_AREA.side, height - CARD_AREA.bottom], CARD_AREA.step],
         ];
-        for (const firstTime of DRIFT_POINTS) for (const secondTime of DRIFT_POINTS) for (const angle of angles) {
-            const painters = [
-                ...lightPainter(firstLayer, lights, strength, width, height, firstTime),
-                ribbonPainter(ribbon, ribbonColours, ribbonStrength, width, height, angle),
-                ...lightPainter(secondLayer, lights, strength, width, height, secondTime),
-            ];
-            for (const [grounds, points] of areas) {
-                for (const [x, y] of points) {
-                    let colour: Rgb = background;
-                    for (const paint of painters) colour = paint(colour, x, y);
-                    const rounded = colour.map(Math.round) as unknown as Rgb;
-                    grounds.set(keyOf(rounded), rounded);
-                }
+        const paintersAt = (firstTime: number, secondTime: number, angle: number) => {
+            const first = lightPainter(firstLayer, lights, strength, width, height, firstTime);
+            const second = lightPainter(secondLayer, lights, strength, width, height, secondTime);
+            const painters = [...first.map(lit => lit.paint), ribbonPainter(ribbon, ribbonColours, ribbonStrength, width, height, angle), ...second.map(lit => lit.paint)];
+            return { painters, centres: [...first, ...second].map(lit => lit.centre) };
+        };
+        for (const [firstTime, secondTime, angle] of phasesOf(COARSE)) {
+            const { painters } = paintersAt(firstTime, secondTime, angle);
+            for (const [grounds, area, step] of areas) sample(grounds, painters, gridOf(...area, step));
+        }
+        for (const [firstTime, secondTime, angle] of phasesOf(FINE)) {
+            const { painters, centres } = paintersAt(firstTime, secondTime, angle);
+            for (const [grounds, [areaLeft, areaTop, areaRight, areaBottom]] of areas) {
+                const inside = centres.map(([x, y]): Point => [Math.min(areaRight, Math.max(areaLeft, x)), Math.min(areaBottom, Math.max(areaTop, y))]);
+                const lines = inside.flatMap((from, index) => inside.slice(index + 1).flatMap(to => pointsAlong(LINE_POINTS).map((share): Point =>
+                    [from[0] + (to[0] - from[0]) * share, from[1] + (to[1] - from[1]) * share])));
+                sample(grounds, painters, lines);
             }
         }
     }

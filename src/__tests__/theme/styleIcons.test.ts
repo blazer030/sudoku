@@ -357,7 +357,7 @@ describe("styleIcons", () => {
         it("should draw the theme's first three lights behind one pane of glass with nine dots on the night sky", () => {
             const svg = styleIconSvg("aurora", nightPurple, "x");
 
-            for (const color of ["#060914", "#4A039B", "#21238E", "#A93AA4", "#A897FF"]) {
+            for (const color of ["#060914", "#4A039B", "#21238E", "#8B1787", "#A897FF"]) {
                 expect(svg, color).toContain(color);
             }
             expect(svg.match(/<radialGradient/g)).toHaveLength(3);
