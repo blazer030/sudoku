@@ -32,13 +32,14 @@ export const en = {
             styled: {
                 pixel: { light: "Handheld", dark: "Console" },
                 chalkboard: { light: "Whiteboard", dark: "Chalkboard" },
+                blueprint: { light: "Drafting Paper", dark: "Blueprint" },
             },
         },
         appearanceSummary: "{mode} · {theme}",
         colorTheme: "Color theme",
         style: {
             label: "Style",
-            names: { minimal: "Minimal Motion", tactile: "Tactile Tiles", paper: "Paper Notebook", pixel: "8-bit", cyber: "Cyberpunk", ink: "Ink & Washi", chalkboard: "Chalkboard" },
+            names: { minimal: "Minimal Motion", tactile: "Tactile Tiles", paper: "Paper Notebook", pixel: "8-bit", cyber: "Cyberpunk", ink: "Ink & Washi", chalkboard: "Chalkboard", blueprint: "Blueprint" },
         },
         colorThemes: {
             green: "Green",
@@ -110,6 +111,11 @@ export const en = {
         newGame: "New Game",
         continueGame: "Continue Game",
         continueProgress: "{percent}% filled",
+        continueCaptions: {
+            difficulty: "Difficulty",
+            time: "Time",
+            progress: "Progress",
+        },
         statistics: "Statistics",
         walkthrough: "Walkthrough",
         entries: {
@@ -128,6 +134,9 @@ export const en = {
         },
     },
     game: {
+        boardFrame: {
+            columns: "{n} cols",
+        },
         hints: {
             title: "Hints",
             remaining: "{count} hint left this game | {count} hints left this game",
@@ -175,6 +184,9 @@ export const en = {
             review: "Review This Game",
             // Paper's rubber stamp on the completion card, written in Caveat
             stamp: "SOLVED",
+            // Blueprint's approval stamp over the completion scene, and its small line, by the app's major.minor
+            approvalStamp: "APPROVED",
+            approvalRevision: "REV {version}",
             // Chalkboard's cheer on the completion card, written in Chalk Digits
             cheer: "Well done!",
         },

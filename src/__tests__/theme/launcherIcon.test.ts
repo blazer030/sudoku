@@ -17,6 +17,7 @@ describe("launcher icons", () => {
         expect(pwaIconKey("cyber", "neon")).toBe("cyberNeonDark");
         expect(pwaIconKey("ink", "vermilion")).toBe("inkVermilion");
         expect(pwaIconKey("chalkboard", "classic")).toBe("chalkboardClassic");
+        expect(pwaIconKey("blueprint", "slate")).toBe("blueprintSlate");
     });
 
     it("should keep the bare theme id for minimal's light icons, whose aliases existing shortcuts point at", () => {
@@ -39,7 +40,7 @@ describe("launcher icons", () => {
         const iconCount = STYLE_IDS.reduce((sum, style) => sum + STYLES[style].themes.length * STYLE_COLOR_MODES[style].length, 0);
 
         expect(LAUNCHER_ICONS).toHaveLength(iconCount);
-        expect(LAUNCHER_ICONS).toHaveLength(29);
+        expect(LAUNCHER_ICONS).toHaveLength(37);
         expect(new Set(LAUNCHER_ICONS.map(icon => icon.key)).size).toBe(LAUNCHER_ICONS.length);
         for (const icon of LAUNCHER_ICONS) {
             expect(icon.key).toBe(launcherIconKey(icon.style, icon.themeId, icon.mode));
@@ -69,6 +70,17 @@ describe("launcher icons", () => {
 
         expect(keys).toContain("chalkboardClassic");
         expect(keys).toContain("chalkboardClassicDark");
+    });
+
+    it("should give blueprint a drafting paper and a blueprint icon for each of its papers", () => {
+        const keys = LAUNCHER_ICONS.map(icon => icon.key);
+
+        for (const key of [
+            "blueprintBlue", "blueprintBlueDark", "blueprintTeal", "blueprintTealDark",
+            "blueprintSlate", "blueprintSlateDark", "blueprintRust", "blueprintRustDark",
+        ]) {
+            expect(keys, key).toContain(key);
+        }
     });
 
     it("should give paper no dark icon now that paper is light only", () => {

@@ -12,7 +12,7 @@
 
             <div
                 class="flex flex-col gap-3 bg-card rounded-2xl shadow-card p-3"
-                data-skin="card"
+                data-skin="card new-game-card"
                 data-testid="new-game-card"
             >
                 <DifficultySwitcher v-model="difficulty" />

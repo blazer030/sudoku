@@ -32,7 +32,7 @@
         <div class="flex items-center gap-3">
             <button
                 v-press
-                data-skin="button"
+                data-skin="button play"
                 :aria-label="playState.isPlaying.value ? t('stepPanel.pause') : t('stepPanel.play')"
                 :aria-pressed="playState.isPlaying.value"
                 :data-testid="`${testIdPrefix}-play`"

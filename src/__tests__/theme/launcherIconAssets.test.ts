@@ -93,6 +93,14 @@ const SAMPLES: Record<StyleId, ArtworkSample[]> = {
         { x: -20, y: 54, token: "icon-frame", foregroundOnly: true },
         { x: 54, y: 14, token: "background" },
     ],
+    // The paper in the middle of a grid cell, the board's outline and the leader (the 0.6-unit grid lines fill no
+    // whole pixel at any density)
+    blueprint: [
+        { x: 9, y: 54, token: "background" },
+        { x: -18, y: 54, token: "background", foregroundOnly: true },
+        { x: 30, y: 58, token: "foreground", fine: true },
+        { x: 76, y: 44, token: "primary", fine: true },
+    ],
 };
 const samplesAt = (style: StyleId, mode: ColorMode, density: string) => SAMPLES[style]
     .filter(sample => (!sample.fine || density === "xxxhdpi") && (!sample.mode || sample.mode === mode));

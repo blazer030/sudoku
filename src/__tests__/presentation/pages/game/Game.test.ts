@@ -19,8 +19,9 @@ import type { PuzzleCell } from "@/domain/board/PuzzleCell";
 import { createMultiStepSudoku } from "@/__tests__/fixtures/multiStepPuzzle";
 import { ANALYTICS_KEY, type AnalyticsService } from "@/application/analytics/AnalyticsService";
 import { expectKeyRowsToShrinkToFit } from "@/__tests__/fixtures/digitKeyRows";
-import { STYLE_MOMENTS } from "@/presentation/components/style-moments/styleMoments";
+import { STYLE_MOMENTS, type GroupEffect } from "@/presentation/components/style-moments/styleMoments";
 import { GROUP_RIPPLE_STEP_MS } from "@/presentation/pages/game/useGroupEffect";
+import { StubBoardFrame, frameMinimalWithStubInEachTest, frameTarget } from "@/__tests__/fixtures/boardFrameStub";
 
 const createTestRouter = () => {
     return createRouter({
@@ -1032,6 +1033,58 @@ describe("Game", () => {
 
             expect(boardOfGame(wrapper).attributes("data-celebration")).toBeUndefined();
             expect(modalOf(wrapper).exists()).toBe(false);
+        });
+    });
+
+    describe("Board frame", () => {
+        frameMinimalWithStubInEachTest();
+
+        it("should frame the game board and point it at the selected cell, and at none before a selection", async () => {
+            const wrapper = mountGame();
+            expect(wrapper.findComponent(StubBoardFrame).find("[data-testid='game-board']").exists()).toBe(true);
+            expect(frameTarget(wrapper)).toBeNull();
+
+            await wrapper.find("[data-testid='cell-3-6']").trigger("click");
+
+            expect(frameTarget(wrapper)).toEqual({ row: 3, column: 6 });
+        });
+
+        it("should point the frame at the hint's answer cell while hint mode is open", async () => {
+            const plan = createKnownSudoku().planRevealHint();
+            if (plan.kind !== "steps") throw new Error(`expected a steps plan, got ${plan.kind}`);
+            const wrapper = mountGame();
+
+            await openRevealCell(wrapper);
+
+            expect(frameTarget(wrapper)).toEqual(plan.target);
+        });
+
+        it("should hand the frame the running group effect", async () => {
+            vi.useFakeTimers();
+            const wrapper = mountGame();
+            // Row 4's gaps and their answers; the last one, (4, 7), completes the row
+            for (const [column, value] of [[1, 2], [2, 6], [4, 5], [6, 7], [7, 9]]) {
+                await wrapper.find(`[data-testid='cell-4-${column}']`).trigger("click");
+                await wrapper.find(`[data-testid='number-${value}']`).trigger("click");
+            }
+
+            const effect = wrapper.findComponent(StubBoardFrame).props("effect") as GroupEffect | null;
+            expect(String(effect?.id)).toBe(wrapper.find("[data-testid='game-board']").attributes("data-group-effect"));
+            expect(effect?.origin).toEqual({ row: 4, column: 7 });
+        });
+
+        it("should point the frame at no cell while the solved board celebrates, though a cell stays selected", async () => {
+            vi.useFakeTimers();
+            vi.spyOn(Sudoku.prototype, "planRevealHint").mockReturnValue({ kind: "noTechnique" });
+            const wrapper = mountGame("easy", nearlySolvedSudoku());
+            await wrapper.find("[data-testid='cell-0-0']").trigger("click");
+
+            // Reveal Cell fills the last cell, leaving the selection
+            await openRevealCell(wrapper);
+
+            expect(wrapper.find("[data-testid='game-board']").attributes("data-selected-cell")).toBe("R1C1");
+            expect(frameTarget(wrapper)).toBeNull();
+            expect(wrapper.findComponent(StubBoardFrame).props("celebration")).toBe("playing");
         });
     });
 

@@ -1,7 +1,7 @@
-import { STYLE_IDS, THEME_IDS_BY_STYLE, STYLE_COLOR_MODES, type ColorThemeId } from "@/theme/themeIds";
-import { STYLES, STYLE_OWN_TOKENS, getPalette, rememberedThemeFor, systemBarColor } from "@/theme/palettes";
+import { STYLE_IDS, THEME_IDS_BY_STYLE, STYLE_COLOR_MODES, type ColorThemeId, type StyleId } from "@/theme/themeIds";
+import { STYLES, STYLE_OWN_TOKENS, getPalette, rememberedThemeFor, swatchColors, systemBarColor, type StyleOwnToken } from "@/theme/palettes";
 import { darkOnlyThemeBuilder } from "@/theme/paletteBuilder";
-import { contrastRatio } from "@/theme/contrast";
+import { contrastRatio, mixColors } from "@/theme/contrast";
 
 describe("palettes", () => {
     it("should define each style's themes in the listed order", () => {
@@ -90,21 +90,78 @@ describe("palettes", () => {
         }
     });
 
-    it("should give chalkboard its own tray, erase and icon frame colours in both modes, and no other style any", () => {
-        for (const mode of STYLE_COLOR_MODES.chalkboard) {
-            const palette = getPalette("chalkboard", "classic", mode);
-            for (const token of STYLE_OWN_TOKENS) {
-                expect(palette[token], `${mode} ${token}`).toMatch(/^#[0-9A-F]{6}$/);
-            }
-        }
-        for (const style of STYLE_IDS.filter(id => id !== "chalkboard")) {
+    // Each style that paints colours of its own carries exactly those, in every theme and mode it has
+    const OWN_TOKENS_BY_STYLE: Partial<Record<StyleId, readonly StyleOwnToken[]>> = {
+        chalkboard: ["tray", "tray-shade", "tray-edge", "duster", "duster-felt", "smudge", "smear", "icon-frame", "doodle"],
+        blueprint: ["grid-minor", "grid-major", "hatch", "error-hatch"],
+    };
+
+    it("should give chalkboard and blueprint only their own colours, and no other style any", () => {
+        expect(new Set(Object.values(OWN_TOKENS_BY_STYLE).flat())).toEqual(new Set(STYLE_OWN_TOKENS));
+        for (const style of STYLE_IDS) {
+            const ownTokens = OWN_TOKENS_BY_STYLE[style] ?? [];
             for (const theme of STYLES[style].themes) {
                 for (const mode of STYLE_COLOR_MODES[style]) {
                     const palette = getPalette(style, theme.id, mode);
-                    expect(STYLE_OWN_TOKENS.filter(token => token in palette), `${style}/${theme.id}/${mode}`).toEqual([]);
+                    const label = `${style}/${theme.id}/${mode}`;
+                    expect(STYLE_OWN_TOKENS.filter(token => token in palette), label).toEqual(ownTokens);
+                    for (const token of ownTokens) {
+                        expect(palette[token], `${label} ${token}`).toMatch(/^#[0-9A-F]{6}$/);
+                    }
                 }
             }
         }
+    });
+
+    it("should give blueprint its four papers in the picker's order", () => {
+        expect(STYLES.blueprint.themes.map(theme => theme.id)).toEqual(["blue", "teal", "slate", "rust"]);
+    });
+
+    it("should change the paper in 藍曬圖: teal under white lines, an amber accent and a lighter error", () => {
+        const palette = getPalette("blueprint", "teal", "dark");
+
+        expect(palette.background).toBe("#0E4D5C");
+        expect(palette["on-primary"]).toBe("#0A3540");
+        expect(palette.primary).toBe("#FFD166");
+        expect(palette.error).toBe("#FFA39B");
+        expect(palette.foreground).toBe("#F2F7FF");
+        expect(palette.accent).toBe(palette.foreground);
+    });
+
+    it("should change the ink on 製圖紙: rust ink under a burnt-orange pen that marks choices, and a crimson one for errors", () => {
+        const palette = getPalette("blueprint", "rust", "light");
+
+        expect(palette.foreground).toBe("#6B3A1E");
+        expect(palette["foreground-secondary"]).toBe("#7A5A44");
+        expect(palette.background).toBe("#FAFBFC");
+        expect(palette.primary).toBe("#B34A00");
+        expect(palette.error).toBe("#B5175F");
+    });
+
+    // A wrong digit must never pass for a chosen one, and a danger button never for the primary
+    it("should mark 製圖紙's errors and danger in their own crimson, apart from every theme's red pen", () => {
+        for (const theme of STYLES.blueprint.themes) {
+            const palette = getPalette("blueprint", theme.id, "light");
+            expect(palette.error, theme.id).not.toBe(palette.primary);
+            expect(palette.danger, theme.id).toBe(palette.error);
+            expect(palette["danger-hover"], theme.id).not.toBe(palette["primary-hover"]);
+        }
+    });
+
+    it("should give 藍曬圖's toast the lines' ink with the paper's colour on it", () => {
+        for (const theme of STYLES.blueprint.themes) {
+            const palette = getPalette("blueprint", theme.id, "dark");
+            expect([palette.toast, palette["on-toast"]], theme.id).toEqual([palette.foreground, palette.background]);
+        }
+    });
+
+    it("should hatch 藍曬圖 in its own white ink and 製圖紙 in one printed blue for every ink", () => {
+        for (const theme of STYLES.blueprint.themes) {
+            const dark = getPalette("blueprint", theme.id, "dark");
+            expect(dark.hatch, theme.id).toBe(mixColors("#F2F7FF", 0.12, dark.background));
+        }
+        const lightHatches = STYLES.blueprint.themes.map(theme => getPalette("blueprint", theme.id, "light").hatch);
+        expect(new Set(lightHatches).size).toBe(1);
     });
 
     it("should let a style set a board tint directly instead of deriving it from the primary", () => {
@@ -206,7 +263,7 @@ describe("palettes", () => {
     });
 
     it("should keep paper's lines invisible in other styles", () => {
-        for (const style of [STYLES.minimal, STYLES.tactile, STYLES.pixel, STYLES.cyber, STYLES.ink, STYLES.chalkboard]) {
+        for (const style of [STYLES.minimal, STYLES.tactile, STYLES.pixel, STYLES.cyber, STYLES.ink, STYLES.chalkboard, STYLES.blueprint]) {
             for (const theme of style.themes) {
                 for (const mode of STYLE_COLOR_MODES[style.id]) {
                     const palette = getPalette(style.id, theme.id, mode);
@@ -224,13 +281,42 @@ describe("palettes", () => {
         }
     });
 
-    it("should keep the dark toast a dark surface rather than a light block", () => {
-        for (const style of Object.values(STYLES)) {
+    // 藍曬圖's toast is the canvas's: a block of the white lines' ink with the paper's colour on it
+    it("should keep the dark toast a dark surface rather than a light block outside blueprint", () => {
+        for (const style of Object.values(STYLES).filter(definition => definition.id !== "blueprint")) {
             for (const theme of style.themes) {
                 if (theme.dark === undefined) continue;
                 const { toast, background, foreground } = theme.dark;
                 expect(contrastRatio(toast, background), `${style.id}/${theme.id}`).toBeLessThan(contrastRatio(toast, foreground));
             }
         }
+    });
+
+    describe("swatchColors", () => {
+        it("should show a style's primary with the colour on it by default", () => {
+            const palette = getPalette("minimal", "blue", "light");
+
+            expect(swatchColors("minimal", "light", palette)).toEqual({ fill: palette.primary, mark: palette["on-primary"] });
+        });
+
+        it("should show blueprint's dark swatches as four different papers", () => {
+            const fills = THEME_IDS_BY_STYLE.blueprint.map(themeId => {
+                const palette = getPalette("blueprint", themeId, "dark");
+                expect(swatchColors("blueprint", "dark", palette), themeId).toEqual({ fill: palette.background, mark: palette.foreground });
+                return swatchColors("blueprint", "dark", palette).fill;
+            });
+
+            expect(new Set(fills).size).toBe(4);
+        });
+
+        it("should show blueprint's light swatches as four different inks", () => {
+            const fills = THEME_IDS_BY_STYLE.blueprint.map(themeId => {
+                const palette = getPalette("blueprint", themeId, "light");
+                expect(swatchColors("blueprint", "light", palette), themeId).toEqual({ fill: palette.foreground, mark: palette.background });
+                return swatchColors("blueprint", "light", palette).fill;
+            });
+
+            expect(new Set(fills).size).toBe(4);
+        });
     });
 });

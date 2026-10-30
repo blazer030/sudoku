@@ -1,8 +1,8 @@
 import { readFileSync } from "fs";
-import postcss from "postcss";
+import postcss, { type Rule } from "postcss";
 import { THEME_IDS_BY_STYLE, STYLE_IDS, STYLE_COLOR_MODES, type ColorMode, type ColorThemeId, type StyleId } from "@/theme/themeIds";
 import { contrastRatio, mixColors } from "@/theme/contrast";
-import { STYLES, getPalette, type Palette, type PaletteToken } from "@/theme/palettes";
+import { STYLES, getPalette, type Palette, type PaletteToken, type StyleOwnToken } from "@/theme/palettes";
 
 const TEXT = 4.5;
 const LARGE_OR_ICON = 3;
@@ -55,9 +55,11 @@ const TEXT_PAIRS: readonly ContrastPair[] = [
     pair("accent", "background"),
     pair("accent", "card"),
     pair("danger", "background"),
-    pair("danger", "card"),
+    // 藍曬圖's cards, dialogs and popovers are drawn in the page colour (its card hook), its card token only fills
+    // the keys, which carry no red; its red reads on the page ("danger on background", "error on background")
+    { ...pair("danger", "card"), exceptIn: ["blueprint/dark"] },
     pair("error", "background"),
-    pair("error", "card"),
+    { ...pair("error", "card"), exceptIn: ["blueprint/dark"] },
     pair("error", "error-surface"),
     // Statistics and review badges, the hint step button
     pair("primary", "primary-light"),
@@ -85,10 +87,23 @@ const BOARD_INKS: readonly PaletteToken[] = ["foreground", "primary", "error", "
 // ever a struck-out note; CHALKBOARD_BOARD_CASES holds it to the mark's 3:1 there.
 const CHALKBOARD_DARK_UNDRAWN: ReadonlySet<string> = new Set(["error on cell-peer", "error on highlight", "error on primary-light"]);
 const CHALKBOARD_DARK_STRUCK_OUT: ReadonlySet<string> = new Set(["error on cell-scope", "error on cell-pattern"]);
+// 藍曬圖's cells sit on the paper, never on the card, and its error cell lays its own error hatching over every wash (an
+// error cell's variant wins over the selected, peer and same-digit ones), so its red digit lies only on the page and
+// the error hatching. On a step's hatched scope cells, its same-digit pattern cells and its answer cell (the selected
+// wash, which the focus and primary-light tokens share) the red is only ever a struck-out note. BLUEPRINT_BOARD_CASES
+// checks where the red does land.
+const BLUEPRINT_DARK_UNDRAWN: ReadonlySet<string> = new Set([
+    "error on card", "error on primary-light", "error on highlight", "error on cell-focus", "error on cell-scope", "error on cell-pattern",
+    "error on cell-selected", "error on cell-peer",
+]);
 const BOARD_PAIRS: readonly ContrastPair[] = BOARD_SURFACES.flatMap(surface => BOARD_INKS.map((ink) => {
     const boardPair = pair(ink, surface);
     const inChalkboardModel = CHALKBOARD_DARK_UNDRAWN.has(boardPair.name) || CHALKBOARD_DARK_STRUCK_OUT.has(boardPair.name);
-    const exceptIn: readonly Exemption[] = inChalkboardModel ? ["pixel", "chalkboard/dark"] : ["pixel"];
+    const exceptIn: readonly Exemption[] = [
+        "pixel",
+        ...(inChalkboardModel ? ["chalkboard/dark" as const] : []),
+        ...(BLUEPRINT_DARK_UNDRAWN.has(boardPair.name) ? ["blueprint/dark" as const] : []),
+    ];
     return { ...boardPair, exceptIn };
 }));
 
@@ -102,12 +117,14 @@ const BOARD_PAIRS: readonly ContrastPair[] = BOARD_SURFACES.flatMap(surface => B
 // and a same-digit cell is told apart by its vermilion digit, not by a wash darker than the clue or peer
 // cells'; its board model (INK_BOARD_CASES) checks the ink drawn on each wash. Chalkboard's board is the same:
 // transparent cells on the page under faint washes of chalk or marker, a same-digit cell told apart by its
-// yellow or orange digit; CHALKBOARD_BOARD_CASES checks the ink drawn on each wash.
+// yellow or orange digit; CHALKBOARD_BOARD_CASES checks the ink drawn on each wash. Blueprint's board is laid on the
+// page's paper colour too: clues sit on the paper, a peer cell is told apart by its hatching and a same-digit cell by
+// its amber or red digit, not by a wash darker than the rest; BLUEPRINT_BOARD_CASES checks the ink drawn on each.
 const SURFACE_PAIRS: readonly ContrastPair[] = [
-    { ...pair("cell-clue", "card", 1.25), exceptIn: ["pixel", "cyber", "ink", "chalkboard"] },
-    { ...pair("highlight", "cell-clue", 1.25), exceptIn: ["pixel", "cyber", "ink", "chalkboard"] },
-    { ...pair("highlight", "card", 1.25), exceptIn: ["pixel", "cyber", "chalkboard"] },
-    { ...pair("highlight", "cell-peer", 1.25), exceptIn: ["pixel", "cyber", "ink", "chalkboard"] },
+    { ...pair("cell-clue", "card", 1.25), exceptIn: ["pixel", "cyber", "ink", "chalkboard", "blueprint"] },
+    { ...pair("highlight", "cell-clue", 1.25), exceptIn: ["pixel", "cyber", "ink", "chalkboard", "blueprint"] },
+    { ...pair("highlight", "card", 1.25), exceptIn: ["pixel", "cyber", "chalkboard", "blueprint"] },
+    { ...pair("highlight", "cell-peer", 1.25), exceptIn: ["pixel", "cyber", "ink", "chalkboard", "blueprint"] },
     { ...pair("cell-peer", "card", 1.08), exceptIn: ["pixel", "cyber"] },
     // The selection outline is a UI component, so 3:1 applies
     { ...pair("primary", "cell-selected", LARGE_OR_ICON), exceptIn: ["pixel"] },
@@ -450,6 +467,126 @@ const CHALKBOARD_BOARD_CASES: ChalkboardBoardCase[] = STYLES.chalkboard.themes.f
     ];
 }));
 
+const BLUEPRINT_FRAME_STYLE = /<style scoped>([\s\S]*?)<\/style>/
+    .exec(readFileSync("src/presentation/components/board-frame/blueprint/BlueprintBoardFrame.vue", "utf8"))?.[1] ?? "";
+
+// What lies under the board frame's labels: their own paper backing if they carry one, else the graph paper, whose
+// major lines are the darkest it puts under a glyph
+const blueprintLabelGround = (palette: Palette): readonly [string, string] => {
+    let backing: string | undefined;
+    postcss.parse(BLUEPRINT_FRAME_STYLE).walkRules((rule) => {
+        if (!rule.selectors.includes(".blueprint-frame-label")) return;
+        rule.walkDecls(/^background(?:-color)?$/, (declaration) => { backing = declaration.value.trim(); });
+    });
+    if (backing === "var(--color-background)") return ["their paper backing", palette.background];
+    const gridMajor = palette["grid-major"];
+    if (gridMajor === undefined) throw new Error("blueprint has no grid-major");
+    return ["the major grid lines", gridMajor];
+};
+
+// Blueprint's board: the ink actually drawn on the surface actually drawn. The grid is laid on the page's paper
+// colour, every cell on the paper or on a wash or hatching mixed over it (palette.ts). A hatching's lines are the
+// darkest a digit or note under them meets, so each is checked at its line colour. Its labels lie outside the board,
+// on the graph paper (blueprintLabelGround).
+interface BlueprintBoardCase { label: string; foreground: string; background: string; minimum: number }
+
+const BLUEPRINT_BOARD_CASES: BlueprintBoardCase[] = STYLES.blueprint.themes.flatMap(theme => STYLE_COLOR_MODES.blueprint.flatMap((mode) => {
+    const palette = getPalette("blueprint", theme.id, mode);
+    const prefix = `blueprint/${theme.id}/${mode}`;
+    const drawn = (name: string, foreground: string, background: string, minimum = TEXT): BlueprintBoardCase => ({
+        label: `${prefix}: ${name} ≥ ${minimum}`, foreground, background, minimum,
+    });
+    const ownToken = (token: StyleOwnToken): string => {
+        const colour = palette[token];
+        if (colour === undefined) throw new Error(`${prefix} has no ${token}`);
+        return colour;
+    };
+    const page = ["the page", palette.background] as const;
+    const hatching = ["the hatching", ownToken("hatch")] as const;
+    // The selected cell's wash, which a step's answer cell takes too
+    const selectedWash = ["the selected wash", palette["cell-selected"]] as const;
+    // The same digit's wash, which a step's pattern cells take too
+    const sameDigitWash = ["the same-digit wash", palette.highlight] as const;
+    const errorHatching = ["the error hatching", ownToken("error-hatch")] as const;
+    const on = (name: string, ink: string, surfaces: readonly (readonly [string, string])[], minimum = TEXT) =>
+        surfaces.map(([surface, background]) => drawn(`${name} on ${surface}`, ink, background, minimum));
+    return [
+        // A clue or the player's digit (both in the ink) on a plain, peer, selected or same-digit cell, and in an error cell
+        ...on("digit (foreground)", palette.foreground, [page, hatching, selectedWash, sameDigitWash, errorHatching]),
+        // The same digit and the selected cell's digit
+        ...on("chosen digit (primary)", palette.primary, [selectedWash, sameDigitWash]),
+        // The player's notes and the selected digit's note, in a plain, peer or selected cell
+        ...on("note", palette.note, [page, hatching, selectedWash]),
+        ...on("highlighted note (primary)", palette.primary, [page, hatching, selectedWash]),
+        // A wrong digit: an error cell's hatching lies over every other wash
+        ...on("error digit (error)", palette.error, [page, errorHatching]),
+        // A step's candidates, in plain, scope, pattern and answer cells
+        ...on("candidate (foreground)", palette.foreground, [page, hatching, sameDigitWash, selectedWash]),
+        drawn("emphasised candidate (on-primary) on primary", palette["on-primary"], palette.primary),
+        // A step's struck-out notes are marks, their strike carrying them, so 3:1 applies
+        ...on("struck-out note (error)", palette.error, [page, hatching, sameDigitWash, selectedWash], LARGE_OR_ICON),
+        // The frame's labels, the target row's lit label and the target cell's tag beside the board
+        ...on("label (foreground-secondary)", palette["foreground-secondary"], [blueprintLabelGround(palette)]),
+        ...on("lit row label (primary)", palette.primary, [blueprintLabelGround(palette)]),
+        drawn("cell tag (on-primary) on primary", palette["on-primary"], palette.primary),
+        // The selected cell's dashed frame and the answer cell's solid one are marks, so 3:1 applies; a selected
+        // error cell keeps its dashed frame over the error hatching
+        ...on("selection frame (primary)", palette.primary, [selectedWash, errorHatching], LARGE_OR_ICON),
+    ];
+}));
+
+const BLUEPRINT_SKIN = readFileSync("src/style/styles/blueprint/skin.css", "utf8");
+
+// A recent game's row rules in skin.css: the one for both modes, then 藍曬圖's own, so the last one read wins
+const blueprintRowRules = (mode: ColorMode): Rule[] => {
+    const row = `[data-style="blueprint"] [data-skin~="recent-row"]`;
+    const selectors = mode === "dark" ? [row, `:root.dark${row}`] : [row];
+    const rules: Rule[] = [];
+    postcss.parse(BLUEPRINT_SKIN).walkRules((rule) => {
+        if (rule.selectors.some(selector => selectors.includes(selector))) rules.push(rule);
+    });
+    return rules.sort((first, second) => selectors.indexOf(first.selector) - selectors.indexOf(second.selector));
+};
+
+const blueprintRowDeclaration = (mode: ColorMode, property: string): string | undefined => {
+    let value: string | undefined;
+    for (const rule of blueprintRowRules(mode)) rule.walkDecls(property, (declaration) => { value = declaration.value.trim(); });
+    return value;
+};
+
+// A recent game's row: a wash of a token over the graph paper, read back as the colour it lays
+const blueprintRowGround = (palette: Palette, mode: ColorMode): string => {
+    const wash = blueprintRowDeclaration(mode, "background-color");
+    const match = /^color-mix\(in srgb, var\(--color-([a-z-]+)\) (\d+(?:\.\d+)?)%, transparent\)$/.exec(wash ?? "");
+    if (match === null) throw new Error(`blueprint's ${mode} recent row lays no wash: ${wash}`);
+    const [, token, percent] = match;
+    return mixColors(palette[token as PaletteToken], Number(percent) / 100, palette.background);
+};
+
+// A token as a recent game's row sees it: the palette's (also when the row inherits it), unless the row points it at
+// another token
+const blueprintRowToken = (palette: Palette, mode: ColorMode, token: PaletteToken): string => {
+    const pointed = /^var\(--color-([a-z-]+)\)$/.exec(blueprintRowDeclaration(mode, `--color-${token}`) ?? "");
+    return pointed === null ? palette[token] : palette[pointed[1] as PaletteToken];
+};
+
+// What a recent game's row writes on its wash: its difficulty and time in the ink, its date and hints muted, "Gave
+// up" in the danger colour, and its chip's 1px line and icon in the ink or the danger colour
+const BLUEPRINT_ROW_CASES = STYLES.blueprint.themes.flatMap(theme => STYLE_COLOR_MODES.blueprint.flatMap((mode) => {
+    const palette = getPalette("blueprint", theme.id, mode);
+    const ground = blueprintRowGround(palette, mode);
+    const drawn = (name: string, foreground: string, minimum = TEXT) => ({
+        label: `blueprint/${theme.id}/${mode}: ${name} on the recent row ≥ ${minimum}`, foreground, background: ground, minimum,
+    });
+    return [
+        drawn("difficulty and time (foreground)", palette.foreground),
+        drawn("date and hints (foreground-muted)", blueprintRowToken(palette, mode, "foreground-muted")),
+        drawn("gave up (danger)", palette.danger),
+        drawn("chip (foreground)", palette.foreground, LARGE_OR_ICON),
+        drawn("gave-up chip (danger)", palette.danger, LARGE_OR_ICON),
+    ];
+}));
+
 describe("palette contrast", () => {
     it("should check every style, theme and the modes the style has", () => {
         const expected = STYLE_IDS.flatMap(style => THEME_IDS_BY_STYLE[style].flatMap(theme =>
@@ -506,6 +643,19 @@ describe("palette contrast", () => {
 
     it("should check chalkboard's board in both of its modes", () => {
         expect(new Set(CHALKBOARD_BOARD_CASES.map(boardCase => boardCase.label.split(":")[0]))).toEqual(new Set(["chalkboard/classic/light", "chalkboard/classic/dark"]));
+    });
+
+    it("should check blueprint's board on every paper in both of its modes", () => {
+        expect(new Set(BLUEPRINT_BOARD_CASES.map(boardCase => boardCase.label.split(":")[0]))).toEqual(new Set(
+            STYLES.blueprint.themes.flatMap(theme => STYLE_COLOR_MODES.blueprint.map(mode => `blueprint/${theme.id}/${mode}`))));
+    });
+
+    it.each(BLUEPRINT_BOARD_CASES)("$label", ({ foreground, background, minimum }) => {
+        expect(contrastRatio(foreground, background)).toBeGreaterThanOrEqual(minimum);
+    });
+
+    it.each(BLUEPRINT_ROW_CASES)("$label", ({ foreground, background, minimum }) => {
+        expect(contrastRatio(foreground, background)).toBeGreaterThanOrEqual(minimum);
     });
 
     it.each(CHALKBOARD_BOARD_CASES)("$label", ({ foreground, background, minimum }) => {

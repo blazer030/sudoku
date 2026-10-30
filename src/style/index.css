@@ -9,6 +9,7 @@
 @import "./styles/cyber/skin.css";
 @import "./styles/ink/skin.css";
 @import "./styles/chalkboard/skin.css";
+@import "./styles/blueprint/skin.css";
 
 @variant dark (&:where(.dark, .dark *));
 
@@ -49,6 +50,12 @@
   --font-chalkboard-digits: "Chalk Digits", "LXGW WenKai TC", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
   /* The English cheer's letters on the same file, a family with no range; Chinese falls to WenKai */
   --font-chalkboard-cheer: "Chalk Cheer", "LXGW WenKai TC", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+  /* Blueprint's stacks, on its bundled faces (fonts.css): Blueprint Mono (IBM Plex Mono) for labels, clues and
+     keys; Blueprint Hand (Architects Daughter, digits only) for the player's digits; Blueprint Sans TC
+     (Noto Sans TC) for all other text. */
+  --font-blueprint-mono: "Blueprint Mono", "Blueprint Sans TC", ui-monospace, monospace;
+  --font-blueprint-hand: "Blueprint Hand", "Blueprint Mono", "Blueprint Sans TC", monospace;
+  --font-blueprint-sans: "Blueprint Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
   --font-print: "Times New Roman", "Noto Serif TC", "Songti TC", "PMingLiU", serif;
   /* Board, key and timer faces; a style may point them at its own stacks */
   --font-clue: var(--font-sans);
@@ -93,9 +100,13 @@
    stay on it, and all three stay the same size. 331px is what the game screen needs besides the
    board (page padding, header, gaps, controls and two rows of 56px keys), measured at 360×640;
    the board is square, so its width is its height. It never goes under 15rem, which still fits a
-   640px phone after its system bars; a shorter window (a phone in landscape, split screen) scrolls. */
+   640px phone after its system bars; a shorter window (a phone in landscape, split screen) scrolls.
+   A style's board frame sets --board-frame-block on its own element to the height it adds round the
+   board, and the board gives that up too. A frame that takes over the board's width (the board then
+   fills it) also carries this utility and sets --board-frame-inline to the width it adds, so the frame
+   grows by its sides and the board inside keeps the size the height allows. */
 @utility max-w-board-fit {
-  max-width: max(15rem, calc(100dvh - 331px - var(--safe-area-inset-top, env(safe-area-inset-top)) - var(--safe-area-inset-bottom, env(safe-area-inset-bottom))));
+  max-width: calc(max(15rem, calc(100dvh - 331px - var(--board-frame-block, 0px) - var(--safe-area-inset-top, env(safe-area-inset-top)) - var(--safe-area-inset-bottom, env(safe-area-inset-bottom)))) + var(--board-frame-inline, 0px));
 }
 
 :root {

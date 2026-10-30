@@ -124,6 +124,31 @@ describe("BoardCell", () => {
             expect(wrapper.get("[data-testid='cell-value']").classes()).not.toContain("value-arrive");
         });
 
+        // A skin can then draw on the cell itself while its digit arrives, without :has()
+        it("should mark the cell while its digit arrives, and drop the mark when it settles", async () => {
+            stubReducedMotion(false);
+            const wrapper = mountCell({ value: 0 });
+            expect(wrapper.attributes("data-arriving")).toBeUndefined();
+
+            await wrapper.setProps({ value: 5 });
+            expect(wrapper.attributes("data-arriving")).toBe("");
+
+            await wrapper.get("[data-testid='cell-value']").trigger("animationend");
+            expect(wrapper.attributes("data-arriving")).toBeUndefined();
+        });
+
+        it("should not mark the cell as arriving under reduced motion, nor while its digit leaves", async () => {
+            stubReducedMotion(true);
+            const still = mountCell({ value: 0 });
+            await still.setProps({ value: 5 });
+            expect(still.attributes("data-arriving")).toBeUndefined();
+
+            stubReducedMotion(false);
+            const leaving = mountCell({ value: 5 });
+            await leaving.setProps({ value: 0 });
+            expect(leaving.attributes("data-arriving")).toBeUndefined();
+        });
+
         it("should drop the arriving mark when the active style has no arrival animation", async () => {
             // Minimal and paper never animate value-arrive, so no animationend ever comes
             vi.useFakeTimers();

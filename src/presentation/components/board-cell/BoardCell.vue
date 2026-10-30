@@ -8,6 +8,7 @@
             leaving ? 'value-leave' : '',
         ]"
         :data-leaving-value="leaving ? lastDigit : undefined"
+        :data-arriving="arriving && value !== 0 ? '' : undefined"
         :data-group="inGroupEffect ? groupKinds.join(' ') : undefined"
         :data-selected="selected ? '' : undefined"
         :data-value-kind="value !== 0 ? valueKind : undefined"

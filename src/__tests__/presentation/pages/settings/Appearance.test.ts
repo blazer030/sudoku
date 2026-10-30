@@ -23,7 +23,7 @@ import { useSettingsStore } from "@/stores/settingsStore";
 import { startAppearanceSync } from "@/presentation/theme/appearanceSync";
 import { startLauncherIconSync } from "@/presentation/theme/launcherIconSync";
 import { handleBackButton } from "@/presentation/composables/backDismissal";
-import { STYLES, getPalette, rememberedAppearanceFor, rememberedThemeFor, type Palette } from "@/theme/palettes";
+import { STYLES, getPalette, rememberedAppearanceFor, rememberedThemeFor, swatchColors, type Palette } from "@/theme/palettes";
 import { styleIconSvg } from "@/theme/styleIcons";
 import { STYLE_IDS, type StyleId } from "@/theme/themeIds";
 import Appearance from "@/presentation/pages/settings/Appearance.vue";
@@ -70,11 +70,11 @@ describe("Appearance.vue style cards", () => {
         vi.mocked(Capacitor.isNativePlatform).mockReturnValue(false);
     });
 
-    it("should list the seven styles, each with its app icon and name", () => {
+    it("should list the eight styles, each with its app icon and name", () => {
         const wrapper = mountAppearance();
         const cards = wrapper.findAll("button[data-testid^='style-option-']");
 
-        expect(cards.map(card => card.attributes("data-testid"))).toEqual(["style-option-minimal", "style-option-tactile", "style-option-paper", "style-option-pixel", "style-option-cyber", "style-option-ink", "style-option-chalkboard"]);
+        expect(cards.map(card => card.attributes("data-testid"))).toEqual(["style-option-minimal", "style-option-tactile", "style-option-paper", "style-option-pixel", "style-option-cyber", "style-option-ink", "style-option-chalkboard", "style-option-blueprint"]);
         for (const style of STYLE_IDS) {
             const card = wrapper.get(`[data-testid='style-option-${style}']`);
             const rendered = card.get(`[data-testid='style-icon-${style}'] svg`).element.outerHTML;
@@ -216,14 +216,15 @@ describe("Appearance.vue colour-theme swatches", () => {
             const palette = getPalette(settingsStore.style, theme.id, mode);
             const swatch = wrapper.get(`[data-testid='color-theme-${theme.id}']`);
             const label = `${settingsStore.style} ${theme.id} in ${mode}`;
-            expect((swatch.element as HTMLElement).style.backgroundColor, label).toBe(cssColor(palette.primary));
-            // One solid colour: no second half in the accent
-            expect(swatch.html(), label).not.toContain(cssColor(palette.accent));
+            const { fill, mark } = swatchColors(settingsStore.style, mode, palette);
+            expect((swatch.element as HTMLElement).style.backgroundColor, label).toBe(cssColor(fill));
+            // One solid colour: no second half in the accent (blueprint's accent is its ink, so it may be the fill or the mark)
+            if (settingsStore.style !== "blueprint" || (palette.accent !== fill && palette.accent !== mark)) expect(swatch.html(), label).not.toContain(cssColor(palette.accent));
             expect(swatch.findAll("[style*='background']"), label).toHaveLength(0);
         }
         const check = wrapper.get("[data-testid='color-theme-check']");
         const selected = getPalette(settingsStore.style, settingsStore.colorTheme, mode);
-        expect((check.element as HTMLElement).style.color).toBe(cssColor(selected["on-primary"]));
+        expect((check.element as HTMLElement).style.color).toBe(cssColor(swatchColors(settingsStore.style, mode, selected).mark));
     };
 
     it("should list the current style's themes with names and state", () => {
@@ -251,6 +252,22 @@ describe("Appearance.vue colour-theme swatches", () => {
             settingsStore.setAppearance("dark");
             await nextTick();
             expectSwatchesIn(wrapper, "dark");
+        }
+    });
+
+    it("should tell blueprint's four swatches apart in both modes", async () => {
+        const wrapper = mountAppearance();
+        const settingsStore = useSettingsStore();
+        settingsStore.setStyle("blueprint");
+
+        for (const mode of ["dark", "light"] as const) {
+            settingsStore.setAppearance(mode);
+            await nextTick();
+            const fills = STYLES.blueprint.themes.map(theme => (wrapper.get(`[data-testid='color-theme-${theme.id}']`).element as HTMLElement).style.backgroundColor);
+            expect(new Set(fills).size, mode).toBe(4);
+        }
+        for (const theme of STYLES.blueprint.themes) {
+            expect(wrapper.get(`[data-testid='color-theme-${theme.id}']`).attributes("data-skin"), theme.id).toBe("swatch");
         }
     });
 
@@ -514,7 +531,7 @@ describe("Appearance.vue one-theme style", () => {
         expect(stylesCard.find("[data-testid='appearance-theme-label']").exists()).toBe(false);
         expect(coloursCard.find("[data-testid='appearance-theme-label']").exists()).toBe(true);
         expect(coloursCard.find("[data-testid='appearance-switcher']").exists()).toBe(true);
-        expect(coloursCard.attributes("data-skin")).toBe("card");
+        expect(coloursCard.attributes("data-skin")?.split(" ")).toContain("card");
     });
 
     it("should name the modes in the style's own words, in either language", async () => {
@@ -548,6 +565,24 @@ describe("Appearance.vue one-theme style", () => {
         expect(chalkboardChinese).not.toEqual(chalkboardEnglish);
         expect(wrapper.find("[data-testid='appearance-theme-label']").exists()).toBe(false);
         expect(wrapper.find("[data-testid='color-theme-classic']").exists()).toBe(false);
+    });
+
+    // Review Focus 1: blueprint's modes read 藍曬圖 and 製圖紙, and its four papers each have a swatch
+    it("should name blueprint's modes in its own words, in either language, beside its four papers", async () => {
+        const wrapper = mountAppearance();
+        const modeTexts = () => ["appearance-light", "appearance-dark"].map(id => wrapper.get(`[data-testid='${id}']`).text());
+        const minimalEnglish = modeTexts();
+        useSettingsStore().setStyle("blueprint");
+        await nextTick();
+        const blueprintEnglish = modeTexts();
+        i18n.global.locale.value = "zh-Hant";
+        await nextTick();
+        const blueprintChinese = modeTexts();
+
+        expect(blueprintEnglish).not.toEqual(minimalEnglish);
+        expect(blueprintChinese).not.toEqual(blueprintEnglish);
+        expect(wrapper.findAll("button[data-testid^='color-theme-']").map(swatch => swatch.attributes("data-testid")))
+            .toEqual(["color-theme-blue", "color-theme-teal", "color-theme-slate", "color-theme-rust"]);
     });
 
     it("should bring minimal back to the theme last chosen there after a visit to pixel", () => {

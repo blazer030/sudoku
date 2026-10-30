@@ -170,6 +170,23 @@ describe("index.html no-flash script", () => {
         expect(meta.content).toBe(systemBarColor("chalkboard", "classic", mode));
     });
 
+    // Review Focus 5: a cold start in blueprint's teal paper follows the system to 藍曬圖 or 製圖紙
+    it.each([
+        { systemDark: true, dark: true, mode: "dark", barColor: "#0E4D5C" },
+        { systemDark: false, dark: false, mode: "light", barColor: systemBarColor("blueprint", "teal", "light") },
+    ] as const)("should paint blueprint's teal dark=$dark on a system dark=$systemDark", ({ systemDark, dark, mode, barColor }) => {
+        stubSystemDark(systemDark);
+        storeSettings({ style: "blueprint", colorTheme: "teal" });
+
+        runInlineScript();
+
+        expect(root.dataset.style).toBe("blueprint");
+        expect(root.dataset.colorTheme).toBe("teal");
+        expect(root.classList.contains("dark")).toBe(dark);
+        expect(meta.content).toBe(barColor);
+        expect(meta.content).toBe(systemBarColor("blueprint", "teal", mode));
+    });
+
     it("should paint paper light for a stored system appearance on a dark system", () => {
         stubSystemDark(true);
         storeSettings({ style: "paper", appearance: "system" });

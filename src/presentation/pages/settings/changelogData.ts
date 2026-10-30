@@ -25,6 +25,12 @@ export const UNRELEASED_CHANGES: ChangelogChange[] = [
     },
     {
         text: {
+            en: "New style: Blueprint",
+            "zh-Hant": "全新風格「藍圖工程」",
+        },
+    },
+    {
+        text: {
             en: "Interface improvements",
             "zh-Hant": "介面優化",
         },

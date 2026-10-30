@@ -20,6 +20,9 @@ import ChalkboardDigitWriter from "@/presentation/components/style-moments/chalk
 import ChalkboardLoader from "@/presentation/components/style-moments/chalkboard/ChalkboardLoader.vue";
 import ChalkboardGroupOverlay from "@/presentation/components/style-moments/chalkboard/ChalkboardGroupOverlay.vue";
 import ChalkboardCardDecoration from "@/presentation/components/style-moments/chalkboard/ChalkboardCardDecoration.vue";
+import BlueprintLoader from "@/presentation/components/style-moments/blueprint/BlueprintLoader.vue";
+import BlueprintGroupOverlay from "@/presentation/components/style-moments/blueprint/BlueprintGroupOverlay.vue";
+import BlueprintCardDecoration from "@/presentation/components/style-moments/blueprint/BlueprintCardDecoration.vue";
 import type { CompletedGroup } from "@/domain/game/Sudoku";
 
 /** A group effect on the board: a new one gets a new id, which starts its drawings afresh. */
@@ -28,6 +31,9 @@ export interface GroupEffect {
     groups: CompletedGroup[];
     origin: { row: number; column: number };
 }
+
+/** The board's part of the celebration: its phase playing, its end state after, or the still end state. */
+export type CelebrationPhase = "playing" | "done" | "still";
 
 export interface StyleMoments {
     loader: Component;
@@ -153,6 +159,27 @@ const CHALKBOARD_MOMENTS: StyleMoments = {
     digitWriter: ChalkboardDigitWriter,
 };
 
+// From the boards: each cell is hatched in the primary from 100ms for 560ms, 45ms a step, and a completed line's
+// margin label lights for 900ms. A line's dimension snaps out from 100ms and fades by 980ms; a box's outline snaps
+// out from 140ms and fades by 1000ms, which a box completed alone from its centre (its farthest cell two steps out,
+// 1020ms) still outlasts (BlueprintGroupOverlay). An entered digit is plotted under crosshairs and inked in by the skin
+// alone, in 840ms. The solved board: two glowing lines of the primary sweep it from the top left in 760ms, each digit
+// flashing as they cross it (42ms a step, 420ms each); from 720ms a dashed lock marches round it and from 1000ms its
+// verdict, R1–R9 · C1–C9 OK, is pulled out on a leader (BlueprintBoardFrame). The dialog opens at 1300ms, as the lock
+// is closing: the card is plotted in from the left from 60ms over 520ms, the trophy's dashed ring is inked in from
+// 580ms and the 核可 stamp pressed on from 700ms, standing on the card's top edge (BlueprintCardDecoration), so
+// nothing is drawn over the scene.
+// While a puzzle loads, a plotter draws a sudoku box on a small drawing sheet, its pen running along the line as it
+// is plotted, and dimensions it in 3 columns (BlueprintLoader).
+const BLUEPRINT_MOMENTS: StyleMoments = {
+    loader: BlueprintLoader,
+    celebration: null,
+    cardDecoration: BlueprintCardDecoration,
+    groupEffectMs: 900,
+    groupOverlay: BlueprintGroupOverlay,
+    celebrationBoardMs: 1300,
+};
+
 // One entry per style, so a style added without its moments is a type error
 export const STYLE_MOMENTS: Record<StyleId, StyleMoments> = {
     minimal: MINIMAL_MOMENTS,
@@ -162,6 +189,7 @@ export const STYLE_MOMENTS: Record<StyleId, StyleMoments> = {
     cyber: CYBER_MOMENTS,
     ink: INK_MOMENTS,
     chalkboard: CHALKBOARD_MOMENTS,
+    blueprint: BLUEPRINT_MOMENTS,
 };
 
 export const useStyleMoments = (): ComputedRef<StyleMoments> => {

@@ -3,6 +3,7 @@
         <div
             v-if="visible"
             class="fixed inset-0 bg-scrim/50 flex items-center justify-center z-50"
+            data-skin="dialog-scrim"
             data-testid="clear-records-dialog"
         >
             <div
@@ -45,6 +46,7 @@
                     <button
                         v-press
                         class="w-full h-[44px] flex items-center justify-center cursor-pointer rounded-button transition-all duration-200 hover:bg-foreground/5"
+                        data-skin="text-button"
                         data-testid="clear-records-cancel-button"
                         @click="close('cancel')"
                     >

@@ -1,6 +1,7 @@
 // Every style's colours, gathered from src/style/styles/<id>/palette.ts. src/style/themes.generated.css
 // is rendered from them by `npm run generate:theme-css`. Relative imports only: scripts/ import this file.
 import { STYLE_COLOR_MODES, effectiveColorMode, type ColorMode, type ColorThemeId, type RememberedAppearances, type RememberedThemes, type StyleId } from "./themeIds";
+import { BLUEPRINT_STYLE } from "../style/styles/blueprint/palette";
 import { CHALKBOARD_STYLE } from "../style/styles/chalkboard/palette";
 import { CYBER_STYLE } from "../style/styles/cyber/palette";
 import { INK_STYLE } from "../style/styles/ink/palette";
@@ -20,6 +21,7 @@ export const STYLES: Record<StyleId, StyleDefinition> = {
     cyber: CYBER_STYLE,
     ink: INK_STYLE,
     chalkboard: CHALKBOARD_STYLE,
+    blueprint: BLUEPRINT_STYLE,
 };
 
 export const DEFAULT_STYLE_ID: StyleId = "minimal";
@@ -57,4 +59,15 @@ export const getPalette = (style: StyleId, themeId: ColorThemeId, mode: ColorMod
 export const systemBarColor = (style: StyleId, themeId: ColorThemeId, mode: ColorMode): string => {
     const palette = getPalette(style, themeId, mode);
     return effectiveColorMode(style, mode) === "light" ? palette.primary : palette.background;
+};
+
+/** The disc a colour-theme swatch is drawn as, and the colour of the check mark on it. */
+export const swatchColors = (style: StyleId, mode: ColorMode, palette: Palette): { fill: string; mark: string } => {
+    // Blueprint's primary is one colour in all four themes: dark swaps the paper, light swaps the ink
+    if (style === "blueprint") {
+        return effectiveColorMode(style, mode) === "dark"
+            ? { fill: palette.background, mark: palette.foreground }
+            : { fill: palette.foreground, mark: palette.background };
+    }
+    return { fill: palette.primary, mark: palette["on-primary"] };
 };

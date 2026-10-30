@@ -124,6 +124,30 @@ const REQUIRED_SELECTORS: Record<StyleId, readonly string[]> = {
         ".chalkboard-cheer-text",
         ".chalkboard-doodle",
     ],
+    // The press hooks, the shared pieces and the board for now; the moments add theirs
+    blueprint: [
+        ...PRESS,
+        '[data-skin~="board"]',
+        '[data-skin~="board-grid"]::after',
+        "[data-selected]::after",
+        "[data-value-kind]",
+        "[data-note-highlight]",
+        ".value-leave::before",
+        "[data-arriving]::before",
+        "> .value-arrive",
+        ".blueprint-loader-plot",
+        ".blueprint-loader-pen",
+        "[data-group]",
+        ".blueprint-group-dimension",
+        '[data-celebration="playing"]',
+        '[data-skin~="celebration"]:not([data-still])',
+        '[data-skin~="trophy"]',
+        ".blueprint-frame-lock",
+        "body::before",
+        '[data-skin~="card"]',
+        '[data-skin~="pill"]',
+        '[data-skin~="toast"]',
+    ],
 };
 
 const selectorsOf = (style: StyleId): string[] => {

@@ -3,6 +3,7 @@
         <div
             v-if="visible && content"
             class="fixed inset-0 bg-scrim/50 flex items-center justify-center z-50"
+            data-skin="dialog-scrim"
             data-testid="walkthrough-dialog"
         >
             <div
@@ -59,6 +60,7 @@
                         v-if="content.cancelKey !== null"
                         v-press
                         class="w-full h-11 flex items-center justify-center cursor-pointer rounded-button text-base font-semibold text-foreground transition-all duration-200 hover:bg-foreground/5"
+                        data-skin="text-button"
                         data-testid="walkthrough-dialog-cancel"
                         @click="close('cancel')"
                     >

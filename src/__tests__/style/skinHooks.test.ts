@@ -62,6 +62,42 @@ describe("skin hooks", () => {
         expect(missing).toEqual([]);
     });
 
+    // A button that is only its words (a dialog's cancel or second action, Settings' Clear Records) has no
+    // surface of its own but a hover wash in the button's rounded shape; it carries a hook so a style can shape it
+    it("should mark every text-only rounded button as a text button", () => {
+        const offenders = VUE_FILES.flatMap(path => openingTags(readFileSync(path, "utf8"), "button")
+            .filter(tag => /\brounded-button\b/.test(tag) && !/[\s"]bg-/.test(tag) && !hasSkinToken(tag, "button") && !hasSkinToken(tag, "text-button"))
+            .map(tag => `${path}: ${(/data-testid="([^"]+)"/.exec(tag)?.[1] ?? tag.replace(/\s+/g, " ").slice(0, 80))}`));
+
+        expect(offenders).toEqual([]);
+    });
+
+    it("should mark the Settings and 外觀 pages' cards as settings cards", () => {
+        const groupCards = openingTags(readFileSync("src/presentation/pages/settings/components/SettingsGroup.vue", "utf8"), "div")
+            .filter(tag => hasSkinToken(tag, "card"));
+        const appearanceCards = openingTags(readFileSync("src/presentation/pages/settings/Appearance.vue", "utf8"), "div")
+            .filter(tag => hasSkinToken(tag, "card"));
+
+        expect(groupCards).toHaveLength(1);
+        expect(appearanceCards).toHaveLength(2);
+        expect([...groupCards, ...appearanceCards].every(tag => hasSkinToken(tag, "settings-card"))).toBe(true);
+    });
+
+    it("should mark Statistics' cards, section headings and figures", () => {
+        const tags = openingTags(readFileSync("src/presentation/pages/statistics/Statistics.vue", "utf8"), "span");
+
+        const cards = openingTags(readFileSync("src/presentation/pages/statistics/Statistics.vue", "utf8"), "div")
+            .filter(tag => hasSkinToken(tag, "card"));
+
+        // The overview's three cards and the By Difficulty card
+        expect(cards).toHaveLength(4);
+        expect(cards.every(tag => hasSkinToken(tag, "stat-card"))).toBe(true);
+        // Overview, By Difficulty and Recent Games
+        expect(tags.filter(tag => hasSkinToken(tag, "stat-heading"))).toHaveLength(3);
+        // The overview's three numbers and each difficulty's best, average and completed
+        expect(tags.filter(tag => hasSkinToken(tag, "stat-value"))).toHaveLength(6);
+    });
+
     it("should mark opaque page roots and sticky headers, so a style's page background reaches them", () => {
         const offenders = VUE_FILES.flatMap(path => openingTags(readFileSync(path, "utf8"), "div")
             .filter(tag => /\bbg-background\b/.test(tag))

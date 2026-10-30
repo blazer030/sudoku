@@ -33,6 +33,18 @@ describe("StepPlaybackPanel", () => {
         expect(wrapper.emitted("goTo")).toEqual([[2]]);
     });
 
+    it("should mark the play button, the arrows and the dots passed and current, so a style can draw them", () => {
+        const wrapper = mountPanel(1, 3);
+        const skinOf = (testId: string): string[] => (wrapper.find(`[data-testid='${testId}']`).attributes("data-skin") ?? "").split(" ");
+
+        expect(skinOf("demo-play")).toEqual(["button", "play"]);
+        expect(skinOf("demo-dot-0")).toEqual(["step-dot", "step-dot-past"]);
+        expect(skinOf("demo-dot-1")).toEqual(["step-dot", "step-dot-current"]);
+        expect(skinOf("demo-dot-2")).toEqual(["step-dot"]);
+        expect(skinOf("demo-previous")).toEqual(["step-arrow"]);
+        expect(skinOf("demo-next")).toEqual(["step-arrow"]);
+    });
+
     it("should disable the arrows at both ends", () => {
         expect(mountPanel(0, 3).find("[data-testid='demo-previous']").attributes("disabled")).toBeDefined();
         expect(mountPanel(2, 3).find("[data-testid='demo-next']").attributes("disabled")).toBeDefined();

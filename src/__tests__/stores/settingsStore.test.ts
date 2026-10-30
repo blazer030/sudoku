@@ -138,6 +138,17 @@ describe("settingsStore", () => {
         expect(store.appearance).toBe("dark");
     });
 
+    it("should start blueprint in 藍曬圖 on its blue paper the first time it is chosen", () => {
+        const store = useSettingsStore();
+        store.setAppearance("light");
+        store.setColorTheme("teal");
+
+        store.setStyle("blueprint");
+
+        expect(store.appearance).toBe("dark");
+        expect(store.colorTheme).toBe("blue");
+    });
+
     it("should keep a light appearance through a visit to the dark-only cyber", () => {
         const store = useSettingsStore();
         store.setAppearance("light");
