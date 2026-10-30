@@ -99,8 +99,9 @@ describe("aurora's glass", () => {
         });
 
         // The canvas's glass: thin enough that the board and the cards show the lights through
+        // 晨光's peer is the full sheen rather than the canvas's 88%, so the selected cell's row, column and box show
         it("should lay the canvas's glass: cards at 60% of white in 晨光 and 55% of the night glass in 夜空, cells and peers in the sheen", () => {
-            expect(AURORA_DENSITIES.light).toMatchObject({ card: 0.6, cell: 0.56, peer: 0.88 });
+            expect(AURORA_DENSITIES.light).toMatchObject({ card: 0.6, cell: 0.56, peer: 1 });
             expect(AURORA_DENSITIES.dark).toMatchObject({ card: 0.55, cell: 0.07, peer: 0.15 });
         });
 

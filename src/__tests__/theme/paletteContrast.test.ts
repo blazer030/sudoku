@@ -137,8 +137,8 @@ const SURFACE_PAIRS: readonly ContrastPair[] = [
     { ...pair("highlight", "cell-clue", 1.25), exceptIn: ["pixel", "cyber", "ink", "chalkboard", "blueprint", "aurora"] },
     { ...pair("highlight", "card", 1.25), exceptIn: ["pixel", "cyber", "chalkboard", "blueprint", "aurora"] },
     { ...pair("highlight", "cell-peer", 1.25), exceptIn: ["pixel", "cyber", "ink", "chalkboard", "blueprint", "aurora"] },
-    // 晨光's peer glass is the canvas's: 88% of white beside a cell's 56%, 1.04 to 1.08:1 apart over the lights, the
-    // owner's call on the approved sample; AURORA_BOARD_CASES checks every ink on it
+    // 晨光's peer glass is the full sheen beside a cell's 56%, 1.05 to 1.12:1 apart over the lights, measured against
+    // the cell's glass over every ground instead (AURORA_PEER_FLOORS)
     { ...pair("cell-peer", "card", 1.08), exceptIn: ["pixel", "cyber", "aurora/light"] },
     // The selection outline is a UI component, so 3:1 applies
     // (aurora's selected cell is the solid primary, which its on-primary digit marks; AURORA_BOARD_CASES)
@@ -779,6 +779,9 @@ const AURORA_GROUNDS: ReadonlyMap<string, AuroraSkyGrounds> = new Map(STYLES.aur
     auroraSkyGrounds(mode, theme.id, auroraSkyColours(getPalette("aurora", theme.id, mode))),
 ] as const)));
 
+// How far apart the peer's glass and a cell's must stay: 晨光's is faint by design (the canvas's own sheen)
+const AURORA_PEER_FLOORS: Readonly<Record<ColorMode, number>> = { light: 1.048, dark: 1.25 };
+
 /** A case's lowest contrast over every ground of its area, and the ground it falls on */
 const auroraWorst = ({ label, foreground, surface, area }: AuroraBoardCase): { ratio: number; ground: Rgb | null } => {
     const ink = rgbOf(foreground);
@@ -942,6 +945,19 @@ describe("palette contrast", () => {
             expect(grounds?.board.length).toBeGreaterThan(100);
             expect(grounds?.card.length).toBeGreaterThan(1000);
             expect(grounds?.card).toContainEqual(page);
+        },
+    );
+
+    // The selected cell's row, column and box must stay told apart from the other cells' glass, over every ground
+    it.each(STYLES.aurora.themes.flatMap(theme => STYLE_COLOR_MODES.aurora.map(mode => [theme.id, mode] as const)))(
+        "should keep aurora's %s %s peer glass apart from the cell's glass over the whole board",
+        (themeId, mode) => {
+            const palette = getPalette("aurora", themeId, mode);
+            const panes = auroraPanes(palette, mode, themeId);
+            const grounds = AURORA_GROUNDS.get(`aurora/${themeId}/${mode}`)?.board ?? [];
+            const apart = Math.min(...grounds.map(ground => contrastOf(panes.peer(ground), panes.cell(ground))));
+
+            expect(apart).toBeGreaterThanOrEqual(AURORA_PEER_FLOORS[mode]);
         },
     );
 

@@ -70,7 +70,7 @@ export interface AuroraDensity {
 }
 
 export const AURORA_DENSITIES: Readonly<Record<ColorMode, AuroraDensity>> = {
-    light: { card: 0.6, cell: 0.56, peer: 0.88, dialog: 1, tintSoft: 0.06, tintSame: 0.08, errorWash: 0.05, errorStripe: 0.08 },
+    light: { card: 0.6, cell: 0.56, peer: 1, dialog: 1, tintSoft: 0.06, tintSame: 0.08, errorWash: 0.05, errorStripe: 0.08 },
     dark: { card: 0.55, cell: 0.07, peer: 0.15, dialog: 0.97, tintSoft: 0.08, tintSame: 0.22, errorWash: 0.05, errorStripe: 0.08 },
 };
 
