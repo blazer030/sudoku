@@ -7,7 +7,9 @@
    which the contrast model reads: each light's opacity; how much of the glass colour a card, a cell and a dialog
    lay; the sheen on a cell and over a peer's; the primary's soft tint and same-digit tint; the error wash and
    stripes. The edge and gloss are the sheen's share in the glass's 1px rim and top line, the shadow the share of
-   the shadow colour beneath it. 晨光 (light) first, 夜空 (dark) over it. */
+   the shadow colour beneath it. The glow peak (not a palette density) is the share of the primary a completed group
+   or the solved board lights a cell with, the highest that keeps every theme's primary digit 3:1 over a cell's, a
+   peer's or the same digit's ground. 晨光 (light) first, 夜空 (dark) over it. */
 :root[data-style="aurora"] {
     --aurora-strength: 0.85;
     --aurora-glass-card: 80%;
@@ -22,6 +24,7 @@
     --aurora-tint-same: 8%;
     --aurora-error-wash: 5%;
     --aurora-error-stripe: 8%;
+    --aurora-glow-peak: 26%;
 }
 
 :root.dark[data-style="aurora"] {
@@ -38,6 +41,7 @@
     --aurora-tint-same: 8%;
     --aurora-error-wash: 5%;
     --aurora-error-stripe: 8%;
+    --aurora-glow-peak: 24%;
 }
 
 /* The glass every pane shares, built from the mode's numbers above: a card's and a dialog's fill (a tint of the
@@ -953,8 +957,8 @@
 
 /* Completing a group (only with motion allowed), from GroupAurora without its blur and the cells' glow shadow (spec
    ruling 15). Light ripples across the group's panes from the cell just filled, 45ms a step: each cell's ground
-   takes 30% of the primary and gives it back (no more, so a digit in the primary still reads 3:1 on it), starting
-   and ending on its own ground (ruling 7), so a selected or error cell keeps its own pane. The glow is the cell's
+   takes the glow peak of the primary and gives it back (no more, so a digit in the primary still reads 3:1 on it),
+   starting and ending on its own ground (ruling 7), so a selected or error cell keeps its own pane. The glow is the cell's
    own background, so the entered cell's pulse (its ::before) and its digit's arrival run on untouched; its name
    marks it as the group's, so its end never settles the arrival. A streak of the aurora (aurora-1, aurora-3,
    aurora-2: no primary, so a player's digit never sits on its own hue) sweeps out along a completed row or down a
@@ -969,7 +973,7 @@
 
 @keyframes aurora-group-glow {
     0% { background-color: var(--aurora-cell-ground); }
-    35% { background-color: color-mix(in srgb, var(--color-primary) 30%, var(--aurora-cell-ground)); }
+    35% { background-color: color-mix(in srgb, var(--color-primary) var(--aurora-glow-peak), var(--aurora-cell-ground)); }
     100% { background-color: var(--aurora-cell-ground); }
 }
 
@@ -1074,8 +1078,8 @@
 }
 
 /* Light rings out through the panes from the centre cell, 85ms a ring by its distance from the centre (max() alone):
-   each cell's ground takes 30% of the primary and gives it back over 900ms (30%, not the canvas's 45%, so a digit in
-   the primary still reads 3:1 on it, as the group glow), starting and ending on its own ground (ruling 7). It runs on
+   each cell's ground takes the glow peak of the primary and gives it back over 900ms (not the canvas's 45%, so a
+   digit in the primary still reads 3:1 on it, as the group glow), starting and ending on its own ground (ruling 7). It runs on
    once the dialog opens (done), the corners last by 1240ms. It comes after the group glow and weighs as much, so a
    group the solving digit completes glows only this once (ruling 8); the entered cell's pulse and its digit's arrival
    are other elements and run on. Still, the centre box keeps a soft light: 22% of the primary at the centre cell, 11%
@@ -1086,7 +1090,7 @@
 
 @keyframes aurora-celebration-glow {
     0% { background-color: var(--aurora-cell-ground); }
-    30% { background-color: color-mix(in srgb, var(--color-primary) 30%, var(--aurora-cell-ground)); }
+    30% { background-color: color-mix(in srgb, var(--color-primary) var(--aurora-glow-peak), var(--aurora-cell-ground)); }
     100% { background-color: var(--aurora-cell-ground); }
 }
 

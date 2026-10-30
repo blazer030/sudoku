@@ -623,16 +623,23 @@ type AuroraDrawn = (name: string, foreground: string, background: string, minimu
 // ring of the solid primary alone (ruling 2), which must too. A step's struck-out candidate is a mark, held to 3:1.
 const auroraCellCases = (palette: Palette, mode: ColorMode, drawn: AuroraDrawn): AuroraBoardCase[] => {
     const grounds = auroraCellGrounds(palette, mode);
+    const glowPeak = auroraDensity(mode, "--aurora-glow-peak");
+    const glowGrounds: [string, string][] = [["cell glass", grounds.cell], ["peer glass", grounds.peer], ["the same digit's tint", grounds.sameDigit]];
     return [
         drawn("clue (foreground) on cell glass", palette.foreground, grounds.cell),
         drawn("clue (foreground) on peer glass", palette.foreground, grounds.peer),
         drawn("player's digit (primary) on cell glass", palette.primary, grounds.cell),
-        // A completed group's glow at its peak: 30% of the primary over the cell's glass (a soft light never hides a digit)
-        drawn("player's digit (primary) on the group glow's peak", palette.primary, mixColors(palette.primary, 0.3, grounds.cell), LARGE_OR_ICON),
-        // The solved board's glow at its peak: the same 30% of the primary (not the canvas's 45%), under clues and
-        // players' digits alike; the still centre's 22% is lighter
-        drawn("player's digit (primary) on the celebration glow's peak", palette.primary, mixColors(palette.primary, 0.3, grounds.cell), LARGE_OR_ICON),
-        drawn("clue (foreground) on the celebration glow's peak", palette.foreground, mixColors(palette.primary, 0.3, grounds.cell), LARGE_OR_ICON),
+        // A completed group's glow and the solved board's at their peak: the mode's share of the primary over the
+        // ground the cell had, its glass or a peer's (the selected cell's row, column and box) or the same digit's
+        // tint, so a soft light never hides a digit; the still centre's 22% is lighter
+        ...glowGrounds.flatMap(([groundName, ground]) => {
+            const peak = mixColors(palette.primary, glowPeak, ground);
+            return [
+                drawn(`player's digit (primary) on the group glow's peak over ${groundName}`, palette.primary, peak, LARGE_OR_ICON),
+                drawn(`player's digit (primary) on the celebration glow's peak over ${groundName}`, palette.primary, peak, LARGE_OR_ICON),
+                drawn(`clue (foreground) on the celebration glow's peak over ${groundName}`, palette.foreground, peak, LARGE_OR_ICON),
+            ];
+        }),
         drawn("same digit (primary) on its tint", palette.primary, grounds.sameDigit),
         drawn("note on cell glass", palette.note, grounds.cell),
         drawn("note on peer glass", palette.note, grounds.peer),

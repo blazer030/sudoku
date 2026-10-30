@@ -3,7 +3,7 @@ import { ARRIVAL_SETTLE_MS } from "@/presentation/components/board-cell/useArriv
 import { STYLE_MOMENTS } from "@/presentation/components/style-moments/styleMoments";
 import { GROUP_RIPPLE_STEP_MS } from "@/presentation/pages/game/useGroupEffect";
 import { animationTimingOf, declarationsOf, reducedMotionDeclarationsOf } from "../../styleSheetRules";
-import { AURORA_CSS, AURORA_DARK, AURORA_SCOPE } from "./auroraSheet";
+import { AURORA_CSS, AURORA_DARK, AURORA_LIGHT, AURORA_SCOPE, auroraProperty } from "./auroraSheet";
 
 const BOARD = `${AURORA_SCOPE} [data-skin~="board"]`;
 const ARRIVING_DIGIT = `${BOARD} [data-variant] > .value-arrive`;
@@ -230,13 +230,20 @@ describe("aurora moments", () => {
 
         // Review Focus 1: the glow starts and ends on the cell's own ground, so a selected or error cell never flashes
         // back to plain glass
-        it("should light each cell of the group with 30% of the primary from its own ground and back, with no shadow", () => {
+        it("should light each cell of the group with the mode's peak of the primary from its own ground and back, with no shadow", () => {
             const frames = framesOf("aurora-group-glow");
 
             expect(frames.get("0%")).toEqual(new Map([["background-color", GROUND]]));
-            expect(frames.get("35%")).toEqual(new Map([["background-color", `color-mix(in srgb, var(--color-primary) 30%, ${GROUND})`]]));
+            expect(frames.get("35%")).toEqual(new Map([["background-color", `color-mix(in srgb, var(--color-primary) var(--aurora-glow-peak), ${GROUND})`]]));
             expect(frames.get("100%")).toEqual(new Map([["background-color", GROUND]]));
             expect(propertiesOf("aurora-group-glow").every(property => property === "background-color")).toBe(true);
+        });
+
+        // The peak is the highest share that keeps every theme's primary digit 3:1 on the glass, a peer's glass and
+        // the same digit's tint (paletteContrast); 夜空's light digits lose contrast sooner than 晨光's dark ones
+        it("should peak the group and celebration glows at 26% of the primary in 晨光 and 24% in 夜空", () => {
+            expect(auroraProperty(AURORA_LIGHT, "--aurora-glow-peak")).toBe("26%");
+            expect(auroraProperty(AURORA_DARK, "--aurora-glow-peak")).toBe("24%");
         });
 
         it("should ripple the glow out from the entered cell 45ms a step, each cell's 600ms from 100ms past its delay", () => {
@@ -515,7 +522,7 @@ describe("aurora moments", () => {
         });
 
         // Spec ruling 19: ring by ring from the centre cell, 85ms a ring, by max() alone; the farthest ends at 1240ms
-        it("should glow each pane with 30% of the primary from its own ground and back over 900ms, 85ms a ring from the centre", () => {
+        it("should glow each pane with the mode's peak of the primary from its own ground and back over 900ms, 85ms a ring from the centre", () => {
             const animation = animationOf(GLOWING_CELL);
             const frames = framesOf("aurora-celebration-glow");
 
@@ -524,7 +531,7 @@ describe("aurora moments", () => {
             expect(animation).toContain(`calc(${DISTANCE} * 85ms)`);
             expect(animation).not.toMatch(/abs\(|mod\(/);
             expect(frames.get("0%")).toEqual(new Map([["background-color", GROUND]]));
-            expect(frames.get("30%")).toEqual(new Map([["background-color", `color-mix(in srgb, var(--color-primary) 30%, ${GROUND})`]]));
+            expect(frames.get("30%")).toEqual(new Map([["background-color", `color-mix(in srgb, var(--color-primary) var(--aurora-glow-peak), ${GROUND})`]]));
             expect(frames.get("100%")).toEqual(new Map([["background-color", GROUND]]));
             expect(propertiesOf("aurora-celebration-glow").every(property => property === "background-color")).toBe(true);
         });
