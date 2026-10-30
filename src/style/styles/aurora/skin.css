@@ -305,6 +305,13 @@
     color: var(--color-error);
 }
 
+/* A given-up game's chip lies in 12% of the error colour round an icon in it. It follows the icon tile's own rule
+   and outranks it, as the recent-game chips in Statistics and Game Review carry both. */
+[data-style="aurora"] [data-skin~="icon-tile"][data-skin~="gave-up"] {
+    background-color: color-mix(in srgb, var(--color-error) 12%, transparent);
+    color: var(--color-error);
+}
+
 /* The game header's pill is round glass in the text colour; the hint-mode pill is filled with the primary */
 [data-style="aurora"] [data-skin~="pill"] {
     background-color: var(--aurora-glass-card-fill);
@@ -524,6 +531,69 @@
         0 0 0 3px var(--color-background),
         0 0 0 5px var(--color-primary),
         0 0 16px color-mix(in srgb, var(--color-primary) 60%, transparent);
+}
+
+/* Statistics, as the canvas's .group. A section's heading is in the text colour at 700 (spec ruling 4); the three
+   overview cards and the By Difficulty card are card glass through `card`. A figure is 700 in the colour the
+   component gives it: the primary for wins, win rate and best time. A recent game's row is its own pane of glass,
+   rounded 16px, its time in the primary and a given-up game's "Gave up" in the error colour. */
+[data-style="aurora"] [data-skin~="stat-heading"] {
+    color: var(--color-foreground);
+    font-weight: 700;
+}
+
+[data-style="aurora"] [data-skin~="stat-value"] {
+    font-weight: 700;
+}
+
+[data-style="aurora"] [data-skin~="recent-row"] {
+    background-color: var(--aurora-glass-card-fill);
+    box-shadow: var(--aurora-glass-frame);
+    border-radius: 16px;
+}
+
+[data-style="aurora"] [data-skin~="game-result"] {
+    color: var(--color-primary);
+}
+
+[data-style="aurora"] [data-skin~="game-result"][data-skin~="gave-up"] {
+    color: var(--color-error);
+}
+
+/* Playback, as the canvas's .prog / .playb / .dots. The track is 10% of the text colour and fully round, the fill
+   runs from a1 to the primary across its own width; both keep the component's height (8px, 12px while held), which
+   a skin may not write. The play button is a primary disc glowing 20px (its 44px is the component's). The step
+   dots are 12% of the text colour, the ones passed 40% of the primary, this step's the primary glowing 10px; the
+   component already makes them 8px high and this step's 20px wide, so no pseudo-element is needed. */
+[data-style="aurora"] [data-skin~="progress-track"] {
+    background-color: color-mix(in srgb, var(--color-foreground) 10%, transparent);
+    border-radius: 9999px;
+}
+
+[data-style="aurora"] [data-skin~="progress-fill"] {
+    background-color: transparent;
+    background-image: linear-gradient(90deg, var(--color-aurora-1), var(--color-primary));
+    border-radius: 9999px;
+}
+
+[data-style="aurora"] [data-skin~="button"][data-skin~="play"] {
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+    border-radius: 9999px;
+    box-shadow: 0 0 20px color-mix(in srgb, var(--color-primary) 50%, transparent);
+}
+
+[data-style="aurora"] [data-skin~="step-dot"] {
+    background-color: color-mix(in srgb, var(--color-foreground) 12%, transparent);
+}
+
+[data-style="aurora"] [data-skin~="step-dot"][data-skin~="step-dot-past"] {
+    background-color: color-mix(in srgb, var(--color-primary) 40%, transparent);
+}
+
+[data-style="aurora"] [data-skin~="step-dot"][data-skin~="step-dot-current"] {
+    background-color: var(--color-primary);
+    box-shadow: 0 0 10px var(--color-primary);
 }
 
 /* Press feedback: a faint wash of the text colour. It is a colour change, so it stays on under reduced motion. */

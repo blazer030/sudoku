@@ -92,6 +92,16 @@ const OUTLINE_BUTTON = `${BUTTON}.bg-card`;
 const DANGER_BUTTON = `${BUTTON}.bg-danger`;
 const FLOATING_CARD = `${skin("card")}:is(.shadow-modal, .shadow-popup)`;
 const soft = (token: string, amount: string): string => `color-mix(in srgb, var(--color-${token}) ${amount}, transparent)`;
+// Where a rule with this exact selector stands in the sheet: the later of two equally specific rules wins
+const ruleOrder = (selector: string): number => {
+    let order = -1;
+    let position = 0;
+    postcss.parse(AURORA_CSS).walkRules((rule: Rule) => {
+        position += 1;
+        if (rule.selector === selector) order = position;
+    });
+    return order;
+};
 const glow = (size: string, amount: string): string => `0 0 ${size} ${soft("primary", amount)}`;
 
 describe("aurora's glass", () => {
@@ -271,6 +281,87 @@ describe("aurora's glass", () => {
 
             expect(tag.get("background-color")).toBe(soft("primary", "var(--aurora-tint-soft)"));
             expect(tag.get("color")).toBe("var(--color-primary)");
+        });
+    });
+
+    describe("statistics and playback", () => {
+        it("should write a section heading in the text colour at 700 and a figure at 700", () => {
+            const heading = declarationsOf(AURORA_CSS, skin("stat-heading"));
+
+            expect(heading.get("color")).toBe("var(--color-foreground)");
+            expect(heading.get("font-weight")).toBe("700");
+            expect(declarationsOf(AURORA_CSS, skin("stat-value")).get("font-weight")).toBe("700");
+            // The figures keep the colour the component gives them (primary for wins, win rate and best time)
+            expect(declarationsOf(AURORA_CSS, skin("stat-value")).has("color")).toBe(false);
+        });
+
+        it("should lay a recent game's row on card glass, rounded 16px", () => {
+            const row = declarationsOf(AURORA_CSS, skin("recent-row"));
+
+            expect(row.get("background-color")).toBe("var(--aurora-glass-card-fill)");
+            expect(row.get("box-shadow")).toBe("var(--aurora-glass-frame)");
+            expect(row.get("border-radius")).toBe("16px");
+        });
+
+        it("should lay a given-up game's icon tile in 12% of the error colour under it, after the rules it must beat", () => {
+            const tile = declarationsOf(AURORA_CSS, `${skin("icon-tile")}[data-skin~="gave-up"]`);
+
+            expect(tile.get("background-color")).toBe(soft("error", "12%"));
+            expect(tile.get("color")).toBe("var(--color-error)");
+            expect(ruleOrder(`${skin("icon-tile")}[data-skin~="gave-up"]`)).toBeGreaterThan(ruleOrder(skin("icon-tile")));
+        });
+
+        it("should write a game's time in the primary and a given-up game's in the error colour", () => {
+            expect(declarationsOf(AURORA_CSS, skin("game-result")).get("color")).toBe("var(--color-primary)");
+            expect(declarationsOf(AURORA_CSS, `${skin("game-result")}[data-skin~="gave-up"]`).get("color")).toBe("var(--color-error)");
+        });
+
+        it("should lay the progress track in 10% of the text colour, fully round, and fill it from a1 to the primary", () => {
+            const track = declarationsOf(AURORA_CSS, skin("progress-track"));
+            const fill = declarationsOf(AURORA_CSS, skin("progress-fill"));
+
+            expect(track.get("background-color")).toBe(soft("foreground", "10%"));
+            expect(track.get("border-radius")).toBe("9999px");
+            expect(fill.get("background-image")).toBe("linear-gradient(90deg, var(--color-aurora-1), var(--color-primary))");
+            expect(fill.get("border-radius")).toBe("9999px");
+        });
+
+        it("should keep the progress bar's size to the component", () => {
+            for (const token of ["progress-track", "progress-fill"]) {
+                const sized = ["height", "width", "min-height"].filter(property => declarationsOf(AURORA_CSS, skin(token)).has(property));
+
+                expect(sized).toEqual([]);
+            }
+        });
+
+        it("should make the play button a primary disc glowing 20px, after the main button it must beat", () => {
+            const selector = `${BUTTON}[data-skin~="play"]`;
+            const play = declarationsOf(AURORA_CSS, selector);
+
+            expect(play.get("background-color")).toBe("var(--color-primary)");
+            expect(play.get("color")).toBe("var(--color-on-primary)");
+            expect(play.get("border-radius")).toBe("9999px");
+            expect(play.get("box-shadow")).toBe(glow("20px", "50%"));
+            expect(ruleOrder(selector)).toBeGreaterThan(ruleOrder(PRIMARY_BUTTON));
+        });
+
+        it("should draw the step dots in 12% of the text colour, the ones passed in 40% of the primary and this step's glowing 10px", () => {
+            const dot = declarationsOf(AURORA_CSS, skin("step-dot"));
+            const past = declarationsOf(AURORA_CSS, `${skin("step-dot")}[data-skin~="step-dot-past"]`);
+            const current = declarationsOf(AURORA_CSS, `${skin("step-dot")}[data-skin~="step-dot-current"]`);
+
+            expect(dot.get("background-color")).toBe(soft("foreground", "12%"));
+            expect(past.get("background-color")).toBe(soft("primary", "40%"));
+            expect(current.get("background-color")).toBe("var(--color-primary)");
+            expect(current.get("box-shadow")).toBe("0 0 10px var(--color-primary)");
+        });
+
+        it("should leave the dots' 8px and the current dot's 20px width to the component", () => {
+            for (const selector of [skin("step-dot"), `${skin("step-dot")}[data-skin~="step-dot-current"]`]) {
+                const sized = ["height", "width"].filter(property => declarationsOf(AURORA_CSS, selector).has(property));
+
+                expect(sized).toEqual([]);
+            }
         });
     });
 

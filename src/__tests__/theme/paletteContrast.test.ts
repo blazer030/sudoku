@@ -639,6 +639,11 @@ const AURORA_BOARD_CASES: AuroraBoardCase[] = STYLES.aurora.themes.flatMap(theme
         drawn("continue chip (on-primary) on its tint over primary", palette["on-primary"],
             mixColors(mode === "light" ? palette.foreground : palette["on-primary"], 0.16, palette.primary)),
         drawn("home tile icon (primary) on card glass", palette.primary, card, LARGE_OR_ICON),
+        // Statistics and playback: a given-up game's icon is the error colour on 12% of it over the row's card glass
+        // (its "Gave up" is the error colour on card glass, above); this step's dot is the primary on card glass
+        drawn("given-up chip icon (error) on its 12% tint over card glass", palette.error,
+            mixColors(palette.error, 0.12, card), LARGE_OR_ICON),
+        drawn("current step dot (primary) on card glass", palette.primary, card, LARGE_OR_ICON),
     ];
 }));
 
