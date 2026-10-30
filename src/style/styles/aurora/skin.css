@@ -14,11 +14,11 @@
    or the solved board lights a cell with, the highest that keeps every theme's primary digit 3:1 over a cell's, a
    peer's or the same digit's ground. 晨光 (light) first, 夜空 (dark) over it. */
 :root[data-style="aurora"] {
-    --aurora-strength: 0.62;
-    --aurora-glass-card: 80%;
-    --aurora-glass-cell: 80%;
+    --aurora-strength: 0.55;
+    --aurora-glass-card: 68%;
+    --aurora-glass-cell: 74%;
     --aurora-sheen-cell: 0%;
-    --aurora-sheen-peer: 75%;
+    --aurora-sheen-peer: 60%;
     --aurora-glass-dialog: 100%;
     --aurora-edge: 70%;
     --aurora-rim: 100%;
@@ -34,10 +34,10 @@
 }
 
 :root.dark[data-style="aurora"] {
-    --aurora-strength: 0.3;
-    --aurora-glass-card: 80%;
-    --aurora-glass-cell: 88%;
-    --aurora-sheen-cell: 6%;
+    --aurora-strength: 0.28;
+    --aurora-glass-card: 72%;
+    --aurora-glass-cell: 64%;
+    --aurora-sheen-cell: 2%;
     --aurora-sheen-peer: 5%;
     --aurora-glass-dialog: 97%;
     --aurora-edge: 10%;
@@ -773,7 +773,7 @@
     --aurora-cell-ground: var(--aurora-glass-cell-fill);
 }
 
-/* The selected cell's row, column and box, and a step's scope, lay the peer sheen over the glass (晨光: 95% of the sheen in all) */
+/* The selected cell's row, column and box, and a step's scope, lay the peer sheen over the glass (晨光: about 90% of the sheen in all, 1.08:1 apart from a cell) */
 [data-style="aurora"] [data-skin~="board"] [data-variant="peer"],
 [data-style="aurora"] [data-skin~="board"] [data-variant="scope"] {
     --aurora-cell-ground: color-mix(in srgb, var(--color-glass-sheen) var(--aurora-sheen-peer), var(--aurora-glass-cell-fill));

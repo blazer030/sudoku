@@ -626,6 +626,8 @@ const auroraCellCases = (palette: Palette, mode: ColorMode, drawn: AuroraDrawn):
     const glowPeak = auroraDensity(mode, "--aurora-glow-peak");
     const glowGrounds: [string, string][] = [["cell glass", grounds.cell], ["peer glass", grounds.peer], ["the same digit's tint", grounds.sameDigit]];
     return [
+        // The selected cell's row, column and box must still read apart from the rest as the glass thins
+        drawn("peer glass apart from cell glass", grounds.peer, grounds.cell, 1.08),
         drawn("clue (foreground) on cell glass", palette.foreground, grounds.cell),
         drawn("clue (foreground) on peer glass", palette.foreground, grounds.peer),
         drawn("player's digit (primary) on cell glass", palette.primary, grounds.cell),
@@ -840,11 +842,11 @@ describe("palette contrast", () => {
             STYLES.aurora.themes.flatMap(theme => STYLE_COLOR_MODES.aurora.map(mode => `aurora/${theme.id}/${mode}`))));
     });
 
-    // The brightest points, the spec's lights made fainter (夜空 0.3, 晨光 0.62): 夜空 #0D604C, 晨光 #C7BAFD
+    // The brightest points, the spec's lights made fainter (夜空 0.28, 晨光 0.55): 夜空 #0D5A49, 晨光 #CBBFFC
     it.each(STYLES.aurora.themes.flatMap(theme => STYLE_COLOR_MODES.aurora.map(mode => [theme.id, mode] as const)))(
         "should model aurora's %s %s ground at its brightest point",
         (themeId, mode) => {
-            const expected = { dark: "#0D604C", light: "#C7BAFD" }[mode];
+            const expected = { dark: "#0D5A49", light: "#CBBFFC" }[mode];
             const channels = (hex: string): number[] => [1, 3, 5].map(start => Number.parseInt(hex.slice(start, start + 2), 16));
             const ground = channels(auroraGround(getPalette("aurora", themeId, mode), mode));
 

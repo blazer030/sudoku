@@ -69,8 +69,8 @@ export interface AuroraDensity {
 }
 
 export const AURORA_DENSITIES: Readonly<Record<ColorMode, AuroraDensity>> = {
-    light: { strength: 0.62, card: 0.8, cell: 0.8, sheenCell: 0, sheenPeer: 0.75, dialog: 1, tintSoft: 0.06, tintSame: 0.08, errorWash: 0.05, errorStripe: 0.08 },
-    dark: { strength: 0.3, card: 0.8, cell: 0.88, sheenCell: 0.06, sheenPeer: 0.05, dialog: 0.97, tintSoft: 0.08, tintSame: 0.08, errorWash: 0.05, errorStripe: 0.08 },
+    light: { strength: 0.55, card: 0.68, cell: 0.74, sheenCell: 0, sheenPeer: 0.6, dialog: 1, tintSoft: 0.06, tintSame: 0.08, errorWash: 0.05, errorStripe: 0.08 },
+    dark: { strength: 0.28, card: 0.72, cell: 0.64, sheenCell: 0.02, sheenPeer: 0.05, dialog: 0.97, tintSoft: 0.08, tintSame: 0.08, errorWash: 0.05, errorStripe: 0.08 },
 };
 
 /** The ribbon that crosses the page: how far each of its two lights shows and how strong it is. */

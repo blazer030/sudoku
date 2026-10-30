@@ -127,6 +127,16 @@ describe("aurora's glass", () => {
             }
         });
 
+        // The lights at their faintest let the glass thin until the board and cards read as glass, not solid panels;
+        // each density is as thin as paletteContrast.test.ts allows
+        it.each(["light", "dark"] as const)("should leave %s mode's glass thin enough to see the lights through", (mode) => {
+            const density = AURORA_DENSITIES[mode];
+
+            expect(density.cell + density.sheenCell).toBeLessThanOrEqual(0.75);
+            expect(density.card).toBeLessThanOrEqual(0.72);
+            expect(density.sheenPeer).toBeLessThanOrEqual(0.65);
+        });
+
         it("should lay 晨光's dialogs fully opaque, so no digit shows through, and leave 夜空's at 97%", () => {
             expect(percentOf(auroraProperty(AURORA_LIGHT, "--aurora-glass-dialog"))).toBe(1);
             expect(percentOf(auroraProperty(AURORA_DARK, "--aurora-glass-dialog"))).toBe(0.97);
