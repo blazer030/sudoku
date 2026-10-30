@@ -671,9 +671,17 @@ const AURORA_BOARD_CASES: AuroraBoardCase[] = STYLES.aurora.themes.flatMap(theme
     const card = auroraGlass(palette, mode, "card");
     const dialog = auroraGlass(palette, mode, "dialog");
     const softTint = (base: string): string => mixColors(palette.primary, auroraDensity(mode, "--aurora-tint-soft"), base);
+    // Every pane carries a sheen over its top left, which lightens it there: words are checked on the pane and on the
+    // sheen's brightest point over it
+    const underSheen = (pane: string): string => mixColors(auroraToken(palette, "glass-sheen"), auroraDensity(mode, "--aurora-pane-sheen"), pane);
+    const onCard = (name: string, foreground: string, ground: (pane: string) => string, minimum = TEXT): AuroraBoardCase[] => [
+        drawn(name, foreground, ground(card), minimum),
+        drawn(`${name}, under its sheen`, foreground, underSheen(ground(card)), minimum),
+    ];
     const onGlass = (name: string, foreground: string, minimum = TEXT): AuroraBoardCase[] => [
-        drawn(`${name} on card glass`, foreground, card, minimum),
+        ...onCard(`${name} on card glass`, foreground, pane => pane, minimum),
         drawn(`${name} on dialog glass`, foreground, dialog, minimum),
+        drawn(`${name} on dialog glass, under its sheen`, foreground, underSheen(dialog), minimum),
     ];
     return [
         drawn("selected digit (on-primary) on cell-selected", palette["on-primary"], palette["cell-selected"]),
@@ -682,10 +690,11 @@ const AURORA_BOARD_CASES: AuroraBoardCase[] = STYLES.aurora.themes.flatMap(theme
         drawn("words on the lights (foreground) on the ground", palette.foreground, auroraGround(palette, mode)),
         ...onGlass("foreground", palette.foreground),
         ...onGlass("foreground-secondary", palette["foreground-secondary"]),
+        ...onGlass("foreground-muted", palette["foreground-muted"]),
         ...onGlass("primary", palette.primary),
         // A danger button that is only its words (give up, clear records)
         ...onGlass("danger text button (error)", palette.error),
-        drawn("primary on the soft tint over card glass", palette.primary, softTint(card)),
+        ...onCard("primary on the soft tint over card glass", palette.primary, softTint),
         // The completion card's difficulty tag
         drawn("foreground on the soft tint over dialog glass", palette.foreground, softTint(dialog)),
         drawn("on-primary on primary (main buttons, hint pill, solid tags)", palette["on-primary"], palette.primary),
@@ -693,20 +702,20 @@ const AURORA_BOARD_CASES: AuroraBoardCase[] = STYLES.aurora.themes.flatMap(theme
         // The keypad: a control's icon is the text colour on the ground itself, one that is on is the primary on the soft
         // tint over card glass, a badge's count and the lit key's digit are on-primary on the primary
         drawn("control (foreground) on the ground", palette.foreground, auroraGround(palette, mode)),
-        drawn("control that is on (primary) on the soft tint over card glass", palette.primary, softTint(card)),
+        ...onCard("control that is on (primary) on the soft tint over card glass", palette.primary, softTint),
         drawn("badge count (on-primary) on its primary disc", palette["on-primary"], palette.primary),
-        drawn("key digit (foreground) on card glass", palette.foreground, card),
+        ...onCard("key digit (foreground) on card glass", palette.foreground, pane => pane),
         drawn("toast text (on-toast) on dialog glass", palette["on-toast"], dialog),
         // Home: the continue button's chips are drawn in 16% of the text colour over the primary in 晨光 and of on-primary
         // in 夜空, written in on-primary; a tile's icon is the primary on card glass (the 3:1 of an icon)
         drawn("continue chip (on-primary) on its tint over primary", palette["on-primary"],
             mixColors(mode === "light" ? palette.foreground : palette["on-primary"], 0.16, palette.primary)),
-        drawn("home tile icon (primary) on card glass", palette.primary, card, LARGE_OR_ICON),
+        ...onCard("home tile icon (primary) on card glass", palette.primary, pane => pane, LARGE_OR_ICON),
         // Statistics and playback: a given-up game's icon is the error colour on 12% of it over the row's card glass
         // (its "Gave up" is the error colour on card glass, above); this step's dot is the primary on card glass
-        drawn("given-up chip icon (error) on its 12% tint over card glass", palette.error,
-            mixColors(palette.error, 0.12, card), LARGE_OR_ICON),
-        drawn("current step dot (primary) on card glass", palette.primary, card, LARGE_OR_ICON),
+        ...onCard("given-up chip icon (error) on its 12% tint over card glass", palette.error,
+            pane => mixColors(palette.error, 0.12, pane), LARGE_OR_ICON),
+        ...onCard("current step dot (primary) on card glass", palette.primary, pane => pane, LARGE_OR_ICON),
         ...auroraCellCases(palette, mode, drawn),
     ];
 }));

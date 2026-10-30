@@ -80,10 +80,12 @@ const DENSITY_PROPERTIES: readonly (readonly [string, keyof AuroraDensity])[] = 
     ["--aurora-error-wash", "errorWash"],
     ["--aurora-error-stripe", "errorStripe"],
 ];
-// The glass's edge and gloss per mode, from the spec's table, and its shadow's strength, the canvas's --shadow
-const EDGES: Readonly<Record<ColorMode, { edge: string; gloss: string; shadow: string }>> = {
-    light: { edge: "85%", gloss: "90%", shadow: "12%" },
-    dark: { edge: "12%", gloss: "14%", shadow: "35%" },
+// The glass's cues per mode: its all-round edge, the brighter rim along its top and left, the gentle highlight just
+// inside its edge and the sheen over its top, the gloss of the chosen segment, and its shadow's strength (the canvas's
+// --shadow). They read as glass without a filter.
+const EDGES: Readonly<Record<ColorMode, Record<"edge" | "rim" | "inner" | "pane-sheen" | "gloss" | "shadow", string>>> = {
+    light: { "edge": "70%", "rim": "100%", "inner": "50%", "pane-sheen": "30%", "gloss": "90%", "shadow": "12%" },
+    dark: { "edge": "10%", "rim": "32%", "inner": "8%", "pane-sheen": "4%", "gloss": "14%", "shadow": "35%" },
 };
 const MODE_ROOTS: Readonly<Record<ColorMode, string>> = { light: AURORA_LIGHT, dark: AURORA_DARK };
 
@@ -114,15 +116,15 @@ const glow = (size: string, amount: string): string => `0 0 ${size} ${soft("prim
 
 describe("aurora's glass", () => {
     describe("its densities", () => {
-        it.each(["light", "dark"] as const)("should give %s mode the palette's densities, edge and gloss", (mode) => {
+        it.each(["light", "dark"] as const)("should give %s mode the palette's densities and the glass's cues", (mode) => {
             const root = MODE_ROOTS[mode];
 
             for (const [property, density] of DENSITY_PROPERTIES) {
                 expect(percentOf(auroraProperty(root, property)), property).toBeCloseTo(AURORA_DENSITIES[mode][density], 6);
             }
-            expect(auroraProperty(root, "--aurora-edge")).toBe(EDGES[mode].edge);
-            expect(auroraProperty(root, "--aurora-gloss")).toBe(EDGES[mode].gloss);
-            expect(auroraProperty(root, "--aurora-shadow")).toBe(EDGES[mode].shadow);
+            for (const [cue, value] of Object.entries(EDGES[mode])) {
+                expect(auroraProperty(root, `--aurora-${cue}`), cue).toBe(value);
+            }
         });
 
         it("should lay 晨光's dialogs fully opaque, so no digit shows through, and leave 夜空's at 97%", () => {
@@ -135,14 +137,40 @@ describe("aurora's glass", () => {
             expect(auroraProperty(AURORA_SCOPE, "--aurora-loader-scrim")).toBe("45%");
         });
 
-        it("should make each pane a tint of the glass colour at its density, framed by an edge, a gloss and a shadow", () => {
+        it("should make each pane a tint of the glass colour at its density, framed by an edge, a rim, a highlight and a shadow", () => {
             expect(auroraProperty(AURORA_SCOPE, "--aurora-glass-card-fill")).toBe(soft("glass", "var(--aurora-glass-card)"));
             expect(auroraProperty(AURORA_SCOPE, "--aurora-glass-dialog-fill")).toBe(soft("glass", "var(--aurora-glass-dialog)"));
             expect(auroraProperty(AURORA_SCOPE, "--aurora-glass-edge")).toBe(`inset 0 0 0 1px ${soft("glass-sheen", "var(--aurora-edge)")}`);
             expect(auroraProperty(AURORA_SCOPE, "--aurora-glass-frame")).toBe(
-                `var(--aurora-glass-edge), inset 0 1px 0 ${soft("glass-sheen", "var(--aurora-gloss)")}, `
+                `var(--aurora-glass-edge), inset 1px 1px 0 ${soft("glass-sheen", "var(--aurora-rim)")}, `
+                + `inset 0 0 20px -8px ${soft("glass-sheen", "var(--aurora-inner)")}, `
                 + `0 10px 30px -12px ${soft("shadow", "var(--aurora-shadow)")}`,
             );
+        });
+
+        // The contrast model checks the words on a pane under this sheen's brightest point too
+        it("should lay a sheen over the top of each pane, from the pane sheen at its top left to nothing by 45%", () => {
+            expect(auroraProperty(AURORA_SCOPE, "--aurora-glass-sheen-fill"))
+                .toBe(`linear-gradient(160deg, ${soft("glass-sheen", "var(--aurora-pane-sheen)")} 0, transparent 45%)`);
+        });
+
+        it.each(["card", "pill", "key", "home-tile", "recent-row", "logo"])("should lay the sheen on a %s's glass", (token) => {
+            expect(declarationsOf(AURORA_CSS, skin(token)).get("background-image")).toBe("var(--aurora-glass-sheen-fill)");
+        });
+
+        it("should lay the sheen on a control that is on, and none on the solid primary of the hint pill or a lit key", () => {
+            expect(declarationsOf(AURORA_CSS, `${AURORA_SCOPE} [aria-pressed="true"] > [data-skin~="control"]`).get("background-image"))
+                .toBe("var(--aurora-glass-sheen-fill)");
+            expect(declarationsOf(AURORA_CSS, `${skin("pill")}[data-skin~="hint"]`).get("background-image")).toBe("none");
+            expect(declarationsOf(AURORA_CSS, `${skin("key")}[aria-pressed="true"]`).get("background-image")).toBe("none");
+        });
+
+        // It lies on the page under its own scrim, with no board beneath to ghost through, so it needs no dialog glass
+        it("should lay the loader's card as card glass, after the dialogs' rule it must beat", () => {
+            const loader = `${AURORA_SCOPE} .aurora-loader[data-skin~="card"]`;
+
+            expect(declarationsOf(AURORA_CSS, loader).get("background-color")).toBe("var(--aurora-glass-card-fill)");
+            expect(ruleOrder(loader)).toBeGreaterThan(ruleOrder(FLOATING_CARD));
         });
     });
 

@@ -6,8 +6,11 @@
 /* The lights' strength and the glass's densities per mode, the same numbers as AURORA_DENSITIES in palette.ts,
    which the contrast model reads: each light's opacity; how much of the glass colour a card, a cell and a dialog
    lay; the sheen on a cell and over a peer's; the primary's soft tint and same-digit tint; the error wash and
-   stripes. The edge and gloss are the sheen's share in the glass's 1px rim and top line, the shadow the share of
-   the shadow colour beneath it. The glow peak (not a palette density) is the share of the primary a completed group
+   stripes. The glass reads as glass by its cues, painted without a filter: the edge, rim and inner are the sheen's
+   share in its faint 1px edge all round, the brighter 1px rim along its top and left and the soft highlight just
+   inside its edge; the pane sheen the sheen's share at the top left of the sheen laid over each pane (which the
+   contrast model composites into the words on it); the gloss the chosen segment's; the shadow the share of the
+   shadow colour beneath it. The glow peak (not a palette density) is the share of the primary a completed group
    or the solved board lights a cell with, the highest that keeps every theme's primary digit 3:1 over a cell's, a
    peer's or the same digit's ground. 晨光 (light) first, 夜空 (dark) over it. */
 :root[data-style="aurora"] {
@@ -17,7 +20,10 @@
     --aurora-sheen-cell: 0%;
     --aurora-sheen-peer: 75%;
     --aurora-glass-dialog: 100%;
-    --aurora-edge: 85%;
+    --aurora-edge: 70%;
+    --aurora-rim: 100%;
+    --aurora-inner: 50%;
+    --aurora-pane-sheen: 30%;
     --aurora-gloss: 90%;
     --aurora-shadow: 12%;
     --aurora-tint-soft: 6%;
@@ -34,7 +40,10 @@
     --aurora-sheen-cell: 6%;
     --aurora-sheen-peer: 5%;
     --aurora-glass-dialog: 97%;
-    --aurora-edge: 12%;
+    --aurora-edge: 10%;
+    --aurora-rim: 32%;
+    --aurora-inner: 8%;
+    --aurora-pane-sheen: 4%;
     --aurora-gloss: 14%;
     --aurora-shadow: 35%;
     --aurora-tint-soft: 8%;
@@ -45,16 +54,20 @@
 }
 
 /* The glass every pane shares, built from the mode's numbers above: a card's and a dialog's fill (a tint of the
-   glass colour, the rest left clear so the lights show through), the 1px rim, and the frame (rim, a 1px gloss along
-   the top and a soft shadow beneath). Dialogs veil the screen behind them in the page colour, unblurred. */
+   glass colour, the rest left clear so the lights show through), the 1px edge, the frame (the edge, a brighter rim
+   along the top and left, a soft highlight inside the edge and a soft shadow beneath) and the sheen, a diagonal of
+   the sheen colour over the pane's top left, gone by 45%. Dialogs veil the screen behind them in the page colour,
+   unblurred. */
 [data-style="aurora"] {
     --aurora-glass-card-fill: color-mix(in srgb, var(--color-glass) var(--aurora-glass-card), transparent);
     --aurora-glass-dialog-fill: color-mix(in srgb, var(--color-glass) var(--aurora-glass-dialog), transparent);
     --aurora-glass-edge: inset 0 0 0 1px color-mix(in srgb, var(--color-glass-sheen) var(--aurora-edge), transparent);
     --aurora-glass-frame:
         var(--aurora-glass-edge),
-        inset 0 1px 0 color-mix(in srgb, var(--color-glass-sheen) var(--aurora-gloss), transparent),
+        inset 1px 1px 0 color-mix(in srgb, var(--color-glass-sheen) var(--aurora-rim), transparent),
+        inset 0 0 20px -8px color-mix(in srgb, var(--color-glass-sheen) var(--aurora-inner), transparent),
         0 10px 30px -12px color-mix(in srgb, var(--color-shadow) var(--aurora-shadow), transparent);
+    --aurora-glass-sheen-fill: linear-gradient(160deg, color-mix(in srgb, var(--color-glass-sheen) var(--aurora-pane-sheen), transparent) 0, transparent 45%);
     --aurora-scrim: 62%;
     --aurora-loader-scrim: 45%;
 }
@@ -212,6 +225,7 @@
 [data-style="aurora"] [data-skin~="card"] {
     border-color: transparent;
     background-color: var(--aurora-glass-card-fill);
+    background-image: var(--aurora-glass-sheen-fill);
     box-shadow: var(--aurora-glass-frame);
     border-radius: 22px;
 }
@@ -228,12 +242,17 @@
     background-color: color-mix(in srgb, var(--color-background) var(--aurora-loader-scrim), transparent);
 }
 
-/* The loader's card is dialog glass rounded 28px (MomentsAurora's .aload). Four soft lights in a ring turn under nine
+/* The loader's card is card glass rounded 28px (MomentsAurora's .aload). Four soft lights in a ring turn under nine
    lights, in place of the canvas's blurred conic halo: the halo moves by transform alone, each light by transform
    alone, and the light's bright primary (::before) and its glow (::after) are drawn once and only fade, in step with
    the breath. Every round starts dark. Loading follows only the system's reduced motion. */
 [data-style="aurora"] .aurora-loader {
     border-radius: 28px;
+}
+
+/* It lies on the home page under its own scrim, with no board beneath to ghost through: card glass, not dialog glass */
+[data-style="aurora"] .aurora-loader[data-skin~="card"] {
+    background-color: var(--aurora-glass-card-fill);
 }
 
 [data-style="aurora"] .aurora-loader-halo {
@@ -393,6 +412,7 @@
 /* The game header's pill is round glass in the text colour; the hint-mode pill is filled with the primary */
 [data-style="aurora"] [data-skin~="pill"] {
     background-color: var(--aurora-glass-card-fill);
+    background-image: var(--aurora-glass-sheen-fill);
     box-shadow: var(--aurora-glass-frame);
     border-radius: 9999px;
     color: var(--color-foreground);
@@ -404,6 +424,7 @@
 
 [data-style="aurora"] [data-skin~="pill"][data-skin~="hint"] {
     background-color: var(--color-primary);
+    background-image: none;
     color: var(--color-on-primary);
 }
 
@@ -443,6 +464,7 @@
 [data-style="aurora"] [data-skin~="logo"] {
     border-radius: 50%;
     background-color: var(--aurora-glass-card-fill);
+    background-image: var(--aurora-glass-sheen-fill);
     box-shadow: var(--aurora-glass-frame), 0 0 40px color-mix(in srgb, var(--color-primary) 35%, transparent);
 }
 
@@ -507,6 +529,7 @@
 /* Home's tiles are card glass, their icons in the primary */
 [data-style="aurora"] [data-skin~="home-tile"] {
     background-color: var(--aurora-glass-card-fill);
+    background-image: var(--aurora-glass-sheen-fill);
     box-shadow: var(--aurora-glass-frame);
 }
 
@@ -626,6 +649,7 @@
 
 [data-style="aurora"] [data-skin~="recent-row"] {
     background-color: var(--aurora-glass-card-fill);
+    background-image: var(--aurora-glass-sheen-fill);
     box-shadow: var(--aurora-glass-frame);
     border-radius: 16px;
 }
@@ -1228,6 +1252,7 @@
 [data-style="aurora"] [data-skin~="key"] {
     border-radius: 50%;
     background-color: var(--aurora-glass-card-fill);
+    background-image: var(--aurora-glass-sheen-fill);
     box-shadow: var(--aurora-glass-frame);
     font-weight: 500;
     transition-property: transform;
@@ -1235,6 +1260,7 @@
 
 [data-style="aurora"] [data-skin~="key"][aria-pressed="true"] {
     background-color: var(--color-primary);
+    background-image: none;
     color: var(--color-on-primary);
     box-shadow: 0 0 22px color-mix(in srgb, var(--color-primary) 60%, transparent);
 }
@@ -1259,6 +1285,7 @@
 
 [data-style="aurora"] [aria-pressed="true"] > [data-skin~="control"] {
     background-color: color-mix(in srgb, var(--color-primary) var(--aurora-tint-soft), var(--aurora-glass-card-fill));
+    background-image: var(--aurora-glass-sheen-fill);
     box-shadow: var(--aurora-glass-frame);
     color: var(--color-primary);
 }
