@@ -205,7 +205,7 @@ describe("aurora moments", () => {
         const GROUND = "var(--aurora-cell-ground)";
         const streakOf = (angle: string): string => `linear-gradient(${angle}, transparent, `
             + "color-mix(in srgb, var(--color-aurora-1) 70%, transparent) 30%, "
-            + "color-mix(in srgb, var(--color-aurora-3) 70%, transparent) 50%, "
+            + "color-mix(in srgb, var(--color-primary) 70%, transparent) 50%, "
             + "color-mix(in srgb, var(--color-aurora-2) 70%, transparent) 70%, transparent)";
 
         const spanOf = (selector: string, name: string): { startMs: number; endMs: number } => {
@@ -239,20 +239,12 @@ describe("aurora moments", () => {
             expect(propertiesOf("aurora-group-glow").every(property => property === "background-color")).toBe(true);
         });
 
-        // The peak keeps every theme's primary digit 3:1 on the glass, a peer's glass and the same digit's tint, and
-        // 2.9:1 with 夜空's streak or surge lit beneath it at once (paletteContrast); 夜空's thin glass shows those
-        // lights through, so its glow is fainter
-        it("should peak the group and celebration glows at 24% of the primary in 晨光 and 16% in 夜空", () => {
-            expect(auroraProperty(AURORA_LIGHT, "--aurora-glow-peak")).toBe("24%");
-            expect(auroraProperty(AURORA_DARK, "--aurora-glow-peak")).toBe("16%");
-        });
-
-        // 夜空's streak and surge lie under cells of 7% glass, so they are dimmed there to keep the digits readable
-        it("should peak the streak at 0.9 in 晨光 and 0.22 in 夜空, and the surge at 0.9 and 0.4", () => {
-            expect(auroraProperty(AURORA_LIGHT, "--aurora-streak-peak")).toBe("0.9");
-            expect(auroraProperty(AURORA_DARK, "--aurora-streak-peak")).toBe("0.22");
-            expect(auroraProperty(AURORA_LIGHT, "--aurora-surge-peak")).toBe("0.9");
-            expect(auroraProperty(AURORA_DARK, "--aurora-surge-peak")).toBe("0.4");
+        // The animations follow the canvas (GroupAurora / MomentsAurora): a brief dip in contrast is the owner's call,
+        // and players can turn motion off
+        it("should peak the group and celebration glows at the canvas's 45% of the primary in both modes", () => {
+            expect(auroraProperty(AURORA_SCOPE, "--aurora-glow-peak")).toBe("45%");
+            expect(auroraProperty(AURORA_LIGHT, "--aurora-glow-peak")).toBe("");
+            expect(auroraProperty(AURORA_DARK, "--aurora-glow-peak")).toBe("");
         });
 
         it("should ripple the glow out from the entered cell 45ms a step, each cell's 600ms from 100ms past its delay", () => {
@@ -277,7 +269,7 @@ describe("aurora moments", () => {
             expect(animationOf(PULSE)).toMatch(/^aurora-pulse /);
         });
 
-        it("should lay a streak of aurora-1, aurora-3 and aurora-2 along a row, never the primary a player's digit is written in, its top and bottom faded by a gradient mask", () => {
+        it("should lay the canvas's streak of aurora-1, the primary and aurora-2 along a row, its top and bottom faded by a gradient mask", () => {
             const row = declarationsOf(AURORA_CSS, RIBBON_OF.row);
 
             expect(row.get("background-image")).toBe(streakOf("90deg"));
@@ -299,7 +291,7 @@ describe("aurora moments", () => {
             for (const [name, axis] of [["aurora-group-sweep-x", "X"], ["aurora-group-sweep-y", "Y"]] as const) {
                 const frames = framesOf(name);
                 expect(frames.get("0%"), name).toEqual(new Map([["opacity", "0"], ["transform", `scale${axis}(0.1)`]]));
-                expect(frames.get("35%"), name).toEqual(new Map([["opacity", "var(--aurora-streak-peak)"]]));
+                expect(frames.get("35%"), name).toEqual(new Map([["opacity", "0.9"]]));
                 expect(frames.get("100%"), name).toEqual(new Map([["opacity", "0"], ["transform", `scale${axis}(1.1)`]]));
             }
         });
@@ -324,7 +316,7 @@ describe("aurora moments", () => {
             }
         });
 
-        // Review Focus 3: 晨光 over the glass, under every digit (2) and the selected and answer cells (1)
+        // Over the glass in both modes, as the canvas's, but under every digit (2) and the selected and answer cells (1)
         it("should lay the streaks and the ring at 0, unseen without their animations", () => {
             for (const selector of [RIBBON, RING]) {
                 const piece = declarationsOf(AURORA_CSS, selector);
@@ -333,13 +325,11 @@ describe("aurora moments", () => {
             }
         });
 
-        // 夜空's light is bright under light digits, so it passes under every cell's glass, lighting the gaps; the
-        // grid's own stacking context keeps it over the page and its lights
-        it("should lay 夜空's streaks and ring under the cells' glass, inside the grid's own stacking context", () => {
+        it("should lay 夜空's streaks and ring over the glass too, with no stacking context of the grid's own", () => {
             for (const piece of [".aurora-group-ribbon", ".aurora-group-ring"]) {
-                expect(declarationsOf(AURORA_CSS, `${AURORA_DARK} ${piece}`).get("z-index"), piece).toBe("-1");
+                expect(declarationsOf(AURORA_CSS, `${AURORA_DARK} ${piece}`).has("z-index"), piece).toBe(false);
             }
-            expect(declarationsOf(AURORA_CSS, `${AURORA_SCOPE} [data-skin~="board-grid"]`).get("isolation")).toBe("isolate");
+            expect(declarationsOf(AURORA_CSS, `${AURORA_SCOPE} [data-skin~="board-grid"]`).has("isolation")).toBe(false);
         });
 
         it("should end each piece within the group effect", () => {
@@ -527,14 +517,16 @@ describe("aurora moments", () => {
             expect(declarationsOf(AURORA_CSS, `${AURORA_SCOPE} [data-skin~="page-scroller"]`).get("overflow-x")).toBe("hidden");
         });
 
-        it("should swell the surge from 60% and nothing to its peak at 40% and to 110% at 0.4, over 1.8s from the start", () => {
+        it("should swell the surge from 60% and nothing to 0.9 at 40% and to 110% at its still 0.4, over 1.8s from the start", () => {
             const frames = framesOf("aurora-surge");
 
             expect(animationTimingOf(animationOf(`${CELEBRATING}::before`), "aurora-surge")).toEqual({ durationMs: 1800, fixedDelayMs: 0 });
             expect(animationOf(`${CELEBRATING}::before`)).toContain(" both");
             expect(frames.get("0%")).toEqual(new Map([["opacity", "0"], ["transform", "scale(0.6)"]]));
-            expect(frames.get("40%")).toEqual(new Map([["opacity", "var(--aurora-surge-peak)"]]));
-            expect(frames.get("100%")).toEqual(new Map([["opacity", "0.4"], ["transform", "scale(1.1)"]]));
+            expect(frames.get("40%")).toEqual(new Map([["opacity", "0.9"]]));
+            expect(frames.get("100%")).toEqual(new Map([["opacity", "var(--aurora-surge-still)"], ["transform", "scale(1.1)"]]));
+            expect(auroraProperty(AURORA_SCOPE, "--aurora-surge-still")).toBe("0.4");
+            expect(declarationsOf(AURORA_CSS, `${AURORA_SCOPE} [data-skin~="board"][data-celebration="still"]::before`).get("opacity")).toBe("var(--aurora-surge-still)");
         });
 
         // Spec ruling 19: ring by ring from the centre cell, 85ms a ring, by max() alone; the farthest ends at 1240ms
@@ -634,7 +626,7 @@ describe("aurora moments", () => {
         it("should hold the surge at 110% and 0.4 when still", () => {
             const surge = declarationsOf(AURORA_CSS, `${STILL_BOARD}::before`);
 
-            expect(surge.get("opacity")).toBe("0.4");
+            expect(surge.get("opacity")).toBe("var(--aurora-surge-still)");
             expect(surge.get("transform")).toBe("scale(1.1)");
             expect(surge.has("animation")).toBe(false);
         });

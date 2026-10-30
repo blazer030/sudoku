@@ -12,11 +12,7 @@
    sheen's share in its faint 1px edge all round, the brighter 1px rim along its top and left and the soft highlight just
    inside its edge; the pane sheen the sheen's share at the top left of the sheen laid over each pane (which the
    contrast model composites into the words on it); the gloss the chosen segment's; the shadow the share of the
-   shadow colour beneath it. The glow peak (not a palette density) is the share of the primary a completed group
-   or the solved board lights a cell with, keeping every theme's primary digit 3:1 over a cell's, a peer's or the
-   same digit's ground; the streak and surge peaks are the opacity a completed row's streak and the solved board's
-   surge reach, dimmed in 夜空, where they show through the cells' thin glass, so a digit stays 2.9:1 with either lit
-   beneath the glow at once. 晨光 (light) first, 夜空 (dark) over it. */
+   shadow colour beneath it. 晨光 (light) first, 夜空 (dark) over it. */
 :root[data-style="aurora"] {
     --aurora-strength: 0.85;
     --aurora-ribbon-strength: 0.68;
@@ -34,9 +30,6 @@
     --aurora-tint-same: 8%;
     --aurora-error-wash: 5%;
     --aurora-error-stripe: 8%;
-    --aurora-glow-peak: 24%;
-    --aurora-streak-peak: 0.9;
-    --aurora-surge-peak: 0.9;
 }
 
 :root.dark[data-style="aurora"] {
@@ -56,9 +49,6 @@
     --aurora-tint-same: 22%;
     --aurora-error-wash: 5%;
     --aurora-error-stripe: 8%;
-    --aurora-glow-peak: 16%;
-    --aurora-streak-peak: 0.22;
-    --aurora-surge-peak: 0.4;
 }
 
 /* 夜空's pink and orange cross the sky with a streak of their own colours, a little stronger */
@@ -84,6 +74,14 @@
     --aurora-glass-sheen-fill: linear-gradient(160deg, color-mix(in srgb, var(--color-glass-sheen) var(--aurora-pane-sheen), transparent) 0, transparent 45%);
     --aurora-scrim: 62%;
     --aurora-loader-scrim: 45%;
+}
+
+/* The moments follow the canvas (GroupAurora, MomentsAurora) in both modes: a completed group's and the solved
+   board's cells peak at 45% of the primary, and the surge settles at 0.4, which a still celebration holds. They are
+   brief, and players can turn motion off, so they are not held to contrast (the owner's ruling). */
+[data-style="aurora"] {
+    --aurora-glow-peak: 45%;
+    --aurora-surge-still: 0.4;
 }
 
 /* The lights' geometry, the canvas's 390×844 phone in vmax, so a wider window scales it up. Each light is a
@@ -752,12 +750,10 @@
     box-shadow: none;
 }
 
-/* The grid is a stacking context of its own, so 夜空's group light can lie under the cells' glass and still over the
-   page and its lights */
+/* The grid lays nothing: its lines are cleared, so the cells' gaps show the lights */
 [data-style="aurora"] [data-skin~="board-grid"] {
     --board-line: transparent;
     --board-box-line: transparent;
-    isolation: isolate;
     background-color: transparent;
     border-color: transparent;
     box-shadow: none;
@@ -1020,15 +1016,14 @@
 
 /* Completing a group (only with motion allowed), from GroupAurora without its blur and the cells' glow shadow (spec
    ruling 15). Light ripples across the group's panes from the cell just filled, 45ms a step: each cell's ground
-   takes the glow peak of the primary and gives it back (no more, so a digit in the primary still reads 3:1 on it),
-   starting and ending on its own ground (ruling 7), so a selected or error cell keeps its own pane. The glow is the cell's
-   own background, so the entered cell's pulse (its ::before) and its digit's arrival run on untouched; its name
-   marks it as the group's, so its end never settles the arrival. A streak of the aurora (aurora-1, aurora-3,
-   aurora-2: no primary, so a player's digit never sits on its own hue) sweeps out along a completed row or down a
-   completed column from the entered cell, its long edges faded by a gradient mask where the canvas blurred them; a
-   completed box sends one ring of the primary out from its centre, lit by a still glow of aurora-1
-   (AuroraGroupOverlay). In 晨光 both lie at 0 over the glass, under every digit (2) and the selected and answer
-   cells (1) (ruling 4); in 夜空 under the glass (below), and are unseen without their animations, so a stopped effect leaves no still cue. */
+   takes the canvas's glow peak of the primary and gives it back, starting and ending on its own ground (ruling 7),
+   so a selected or error cell keeps its own pane. The glow is the cell's own background, so the entered cell's pulse
+   (its ::before) and its digit's arrival run on untouched; its name marks it as the group's, so its end never
+   settles the arrival. The canvas's streak (aurora-1, the primary, aurora-2) sweeps out along a completed row or
+   down a completed column from the entered cell, its long edges faded by a gradient mask where the canvas blurred
+   them; a completed box sends one ring of the primary out from its centre, lit by a still glow of aurora-1
+   (AuroraGroupOverlay). Both lie at 0 over the glass, under every digit (2) and the selected and answer cells (1)
+   (ruling 4), and are unseen without their animations, so a stopped effect leaves no still cue. */
 [data-style="aurora"] [data-skin~="board"] [data-group]:not(.animate-hint-reveal-glow) {
     --group-ripple-step: 45ms;
     animation: aurora-group-glow 600ms ease-out calc(100ms + var(--group-delay));
@@ -1047,14 +1042,14 @@
 }
 
 [data-style="aurora"] .aurora-group-ribbon[data-kind="row"] {
-    background-image: linear-gradient(90deg, transparent, color-mix(in srgb, var(--color-aurora-1) 70%, transparent) 30%, color-mix(in srgb, var(--color-aurora-3) 70%, transparent) 50%, color-mix(in srgb, var(--color-aurora-2) 70%, transparent) 70%, transparent);
+    background-image: linear-gradient(90deg, transparent, color-mix(in srgb, var(--color-aurora-1) 70%, transparent) 30%, color-mix(in srgb, var(--color-primary) 70%, transparent) 50%, color-mix(in srgb, var(--color-aurora-2) 70%, transparent) 70%, transparent);
     -webkit-mask-image: linear-gradient(180deg, transparent, var(--color-foreground) 35%, var(--color-foreground) 65%, transparent);
     mask-image: linear-gradient(180deg, transparent, var(--color-foreground) 35%, var(--color-foreground) 65%, transparent);
     animation: aurora-group-sweep-x 760ms ease-out 100ms;
 }
 
 [data-style="aurora"] .aurora-group-ribbon[data-kind="column"] {
-    background-image: linear-gradient(180deg, transparent, color-mix(in srgb, var(--color-aurora-1) 70%, transparent) 30%, color-mix(in srgb, var(--color-aurora-3) 70%, transparent) 50%, color-mix(in srgb, var(--color-aurora-2) 70%, transparent) 70%, transparent);
+    background-image: linear-gradient(180deg, transparent, color-mix(in srgb, var(--color-aurora-1) 70%, transparent) 30%, color-mix(in srgb, var(--color-primary) 70%, transparent) 50%, color-mix(in srgb, var(--color-aurora-2) 70%, transparent) 70%, transparent);
     -webkit-mask-image: linear-gradient(90deg, transparent, var(--color-foreground) 35%, var(--color-foreground) 65%, transparent);
     mask-image: linear-gradient(90deg, transparent, var(--color-foreground) 35%, var(--color-foreground) 65%, transparent);
     animation: aurora-group-sweep-y 760ms ease-out 100ms;
@@ -1062,13 +1057,13 @@
 
 @keyframes aurora-group-sweep-x {
     0% { opacity: 0; transform: scaleX(0.1); }
-    35% { opacity: var(--aurora-streak-peak); }
+    35% { opacity: 0.9; }
     100% { opacity: 0; transform: scaleX(1.1); }
 }
 
 @keyframes aurora-group-sweep-y {
     0% { opacity: 0; transform: scaleY(0.1); }
-    35% { opacity: var(--aurora-streak-peak); }
+    35% { opacity: 0.9; }
     100% { opacity: 0; transform: scaleY(1.1); }
 }
 
@@ -1078,14 +1073,6 @@
     box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--color-primary) 80%, transparent), 0 0 24px color-mix(in srgb, var(--color-aurora-1) 60%, transparent);
     opacity: 0;
     animation: aurora-group-ring 760ms ease-out 120ms;
-}
-
-/* In 夜空 the light is bright under light digits, so it passes under the glass instead: it lights the gaps between
-   the cells and shows through their thin glass as the sky does, below every cell's ground and digit. Under every
-   cell, over the page and its lights, inside the grid's own stacking context. */
-:root.dark[data-style="aurora"] .aurora-group-ribbon,
-:root.dark[data-style="aurora"] .aurora-group-ring {
-    z-index: -1;
 }
 
 @keyframes aurora-group-ring {
@@ -1105,8 +1092,8 @@
    135% of it, at -1: over the page and its lights, behind the grid and every cell's glass, so they show through the
    gaps and faintly through the glass. Each light fades out within the box (closest-side), as the canvas's ran past it
    and were blurred: aurora-1 ends where the canvas's did, aurora-2 and aurora-4 at the box's nearest edge. While
-   playing they swell from 60% and nothing to the surge peak (0.9, 夜空 0.4) and settle at 110% and 0.4, which they
-   hold behind the scrim; still, they stand there from the start. */
+   playing they swell from 60% and nothing to 0.9 and settle at 110% and 0.4, which they hold behind the scrim;
+   still, they stand there from the start. */
 [data-style="aurora"] [data-skin~="board"][data-celebration] {
     position: relative;
     isolation: isolate;
@@ -1130,20 +1117,19 @@
 }
 
 [data-style="aurora"] [data-skin~="board"][data-celebration="still"]::before {
-    opacity: 0.4;
+    opacity: var(--aurora-surge-still);
     transform: scale(1.1);
 }
 
 @keyframes aurora-surge {
     0% { opacity: 0; transform: scale(0.6); }
-    40% { opacity: var(--aurora-surge-peak); }
-    100% { opacity: 0.4; transform: scale(1.1); }
+    40% { opacity: 0.9; }
+    100% { opacity: var(--aurora-surge-still); transform: scale(1.1); }
 }
 
 /* Light rings out through the panes from the centre cell, 85ms a ring by its distance from the centre (max() alone):
-   each cell's ground takes the glow peak of the primary and gives it back over 900ms (not the canvas's 45%, so a
-   digit in the primary still reads 3:1 on it, as the group glow), starting and ending on its own ground (ruling 7). It runs on
-   once the dialog opens (done), the corners last by 1240ms. It comes after the group glow and weighs as much, so a
+   each cell's ground takes the canvas's glow peak of the primary and gives it back over 900ms, starting and ending
+   on its own ground (ruling 7). It runs on once the dialog opens (done), the corners last by 1240ms. It comes after the group glow and weighs as much, so a
    group the solving digit completes glows only this once (ruling 8); the entered cell's pulse and its digit's arrival
    are other elements and run on. Still, the centre box keeps a soft light: 22% of the primary at the centre cell, 11%
    round it (ruling 9). */

@@ -623,27 +623,13 @@ const SOLID = (colour: string) => (): Rgb => rgbOf(colour);
 // ring of the solid primary alone (ruling 2), which must too. A step's struck-out candidate is a mark, held to 3:1.
 const auroraCellCases = (palette: Palette, mode: ColorMode, themeId: ColorThemeId, onBoard: AuroraDrawn, solid: AuroraDrawn): AuroraBoardCase[] => {
     const panes = auroraPanes(palette, mode, themeId);
-    const primary = rgbOf(palette.primary);
-    const glowPeak = auroraNumber(mode, themeId, "--aurora-glow-peak");
-    const glowGrounds: [string, (ground: Rgb) => Rgb][] = [["cell glass", panes.cell], ["peer glass", panes.peer], ["the same digit's tint", panes.sameDigit]];
     return [
         onBoard("clue (foreground) on cell glass", palette.foreground, panes.cell),
         onBoard("clue (foreground) on peer glass", palette.foreground, panes.peer),
         onBoard("clue (foreground) on the same digit's tint", palette.foreground, panes.sameDigit),
         onBoard("player's digit (primary) on cell glass", palette.primary, panes.cell),
         onBoard("player's digit (primary) on peer glass", palette.primary, panes.peer),
-        // A completed group's glow and the solved board's at their peak: the mode's share of the primary over the
-        // ground the cell had, its glass or a peer's (the selected cell's row, column and box) or the same digit's
-        // tint, so a soft light never hides a digit; the still centre's 22% is lighter
-        ...glowGrounds.flatMap(([groundName, pane]) => {
-            const peak = (ground: Rgb): Rgb => layOver(primary, glowPeak, pane(ground));
-            return [
-                onBoard(`player's digit (primary) on the group glow's peak over ${groundName}`, palette.primary, peak, LARGE_OR_ICON),
-                onBoard(`player's digit (primary) on the celebration glow's peak over ${groundName}`, palette.primary, peak, LARGE_OR_ICON),
-                onBoard(`clue (foreground) on the celebration glow's peak over ${groundName}`, palette.foreground, peak, LARGE_OR_ICON),
-            ];
-        }),
-        ...auroraTransientCases(palette, mode, themeId, onBoard),
+        ...auroraStillCases(palette, mode, themeId, onBoard),
         onBoard("same digit (primary) on its tint", palette.primary, panes.sameDigit),
         onBoard("note on cell glass", palette.note, panes.cell),
         onBoard("note on peer glass", palette.note, panes.peer),
@@ -669,44 +655,75 @@ const auroraCellCases = (palette: Palette, mode: ColorMode, themeId: ColorThemeI
     ];
 };
 
-// A transient light's colours and their shares, from a gradient's colour stops, listed from the top down as CSS paints
-const auroraLightShares = (selector: string): readonly (readonly [StyleOwnToken, number])[] =>
-    [...auroraProperty(selector, "background-image").matchAll(/var\(--color-(aurora-\d)\) (\d+)%/g)]
-        .map(([, token, share]) => [token as StyleOwnToken, Number(share) / 100] as const);
-
-// Transient lights over the board, at their peaks and at the glow's peak at once (the conservative case; each lasts
-// a few hundred ms), held to 2.9:1: a completed row's or column's streak, which in 夜空 lies under the cells' glass and
-// in 晨光 over it, at any one of its colours at full share; and the solved board's surge, all three of its lights
-// stacked under the cells' glass
-const TRANSIENT = 2.9;
-const STREAK = '[data-style="aurora"] .aurora-group-ribbon[data-kind="row"]';
+// The animations (a completed group's glow, streak and ring, the solved board's glow and surge) follow the canvas and
+// are not held to contrast: a brief dip is the owner's call, and players can turn motion off. Only what stays on
+// screen is held to 4.5:1 and 3:1, and the still celebration, motion off, to 2.9:1.
+const STILL = 2.9;
 const SURGE = '[data-style="aurora"] [data-skin~="board"][data-celebration]::before';
+const STILL_SURGE = '[data-style="aurora"] [data-skin~="board"][data-celebration="still"]::before';
+const STILL_CELLS = '[data-style="aurora"] [data-skin~="board"][data-celebration="still"] [data-variant]';
 
-const auroraTransientCases = (palette: Palette, mode: ColorMode, themeId: ColorThemeId, onBoard: AuroraDrawn): AuroraBoardCase[] => {
+const expectSkin = (value: string, form: RegExp, what: string): RegExpExecArray => {
+    const match = form.exec(value);
+    if (match === null) throw new Error(`aurora's ${what} is not the form the contrast model reads: "${value}"`);
+    return match;
+};
+
+// A surge light: a circle of its colour at its share, at a point of the surge's box, fading evenly to nothing at a
+// share of the distance to the box's nearest side
+interface SurgeLight { token: StyleOwnToken; share: number; x: number; y: number; fade: number }
+
+const surgeLights = (): SurgeLight[] => {
+    const image = auroraProperty(SURGE, "background-image");
+    const lights = [...image.matchAll(/radial-gradient\(circle closest-side at (\d+)% (\d+)%, color-mix\(in srgb, var\(--color-(aurora-\d)\) (\d+)%, transparent\), transparent(?: (\d+)%)?\)/g)]
+        .map(([, x, y, token, share, fade]) => ({ token: token as StyleOwnToken, share: Number(share) / 100, x: Number(x) / 100, y: Number(y) / 100, fade: Number((fade as string | undefined) ?? 100) / 100 }));
+    if (lights.length !== 3) throw new Error(`aurora's surge is not the form the contrast model reads: "${image}"`);
+    return lights;
+};
+
+// The still celebration: the surge's box, the board grown by its inset each side and scaled about its centre, holds
+// still at its settled opacity under the cells' glass; the centre cell lays its share of the primary, each ring out
+// its step less. Each light is taken at its strongest within each cell of a ring, so the cells' grounds are stacked
+// from those (the brightest the ring can be), over every ground of the sky.
+const auroraStillCases = (palette: Palette, mode: ColorMode, themeId: ColorThemeId, onBoard: AuroraDrawn): AuroraBoardCase[] => {
     const panes = auroraPanes(palette, mode, themeId);
     const primary = rgbOf(palette.primary);
-    const glowPeak = auroraNumber(mode, themeId, "--aurora-glow-peak");
-    const streakPeak = auroraNumber(mode, themeId, "--aurora-streak-peak");
-    const surgePeak = auroraNumber(mode, themeId, "--aurora-surge-peak");
-    const streakUnderGlass = auroraProperty(`${mode === "dark" ? ':root.dark' : ':root'}[data-style="aurora"] .aurora-group-ribbon`, "z-index") === "-1";
-    const glowing = (pane: (ground: Rgb) => Rgb) => (ground: Rgb): Rgb => layOver(primary, glowPeak, pane(ground));
-    const surge = (ground: Rgb): Rgb => [...auroraLightShares(SURGE)].reverse()
-        .reduce((under, [token, share]) => layOver(rgbOf(auroraToken(palette, token)), share * surgePeak, under), ground);
+    const inset = -Number(expectSkin(auroraProperty(SURGE, "inset"), /^(-\d*\.?\d+)%$/, "surge's inset")[1]) / 100;
+    const scale = Number(expectSkin(auroraProperty(STILL_SURGE, "transform"), /^scale\((\d*\.?\d+)\)$/, "still surge's scale")[1]);
+    expectSkin(auroraProperty(STILL_SURGE, "opacity"), /^var\(--aurora-surge-still\)$/, "still surge's opacity");
+    const opacity = Number(auroraProperty('[data-style="aurora"]', "--aurora-surge-still"));
+    const [, centreShare, stepShare] = expectSkin(auroraProperty(STILL_CELLS, "background-color"),
+        /^color-mix\(in srgb, var\(--color-primary\) max\(0%, (\d+)% - (\d+)% \* max\(/, "still cells' share").map(Number);
+    const side = (1 + 2 * inset) * scale;
+    const origin = 0.5 - side / 2;
+    const lights = surgeLights().map((light) => {
+        const radius = Math.min(light.x, 1 - light.x, light.y, 1 - light.y) * side * light.fade;
+        return { ...light, centreX: origin + light.x * side, centreY: origin + light.y * side, radius };
+    });
+    // A light's strongest cover anywhere in the cell at row and column (the board's side is 1)
+    const coverIn = (light: typeof lights[number], row: number, column: number): number => {
+        const nearestX = Math.min((column + 1) / 9, Math.max(column / 9, light.centreX));
+        const nearestY = Math.min((row + 1) / 9, Math.max(row / 9, light.centreY));
+        const distance = Math.hypot(nearestX - light.centreX, nearestY - light.centreY);
+        return light.share * opacity * Math.max(0, 1 - distance / light.radius);
+    };
+    const rings = [0, 1, 2, 3, 4].map((ring) => {
+        const cells = Array.from({ length: 81 }, (_, index) => [Math.floor(index / 9), index % 9] as const)
+            .filter(([row, column]) => Math.max(Math.abs(row - 4), Math.abs(column - 4)) === ring);
+        const covers = lights.map(light => Math.max(...cells.map(([row, column]) => coverIn(light, row, column))));
+        return { ring, share: Math.max(0, centreShare - stepShare * ring) / 100, covers };
+    });
     const paneGrounds: [string, (ground: Rgb) => Rgb][] = [["cell glass", panes.cell], ["peer glass", panes.peer], ["the same digit's tint", panes.sameDigit]];
-    return paneGrounds.flatMap(([paneName, pane]) => [
-        ...auroraLightShares(STREAK).flatMap(([token, share]) => {
-            const light = rgbOf(auroraToken(palette, token));
-            const surface = streakUnderGlass
-                ? (ground: Rgb): Rgb => glowing(pane)(layOver(light, share * streakPeak, ground))
-                : (ground: Rgb): Rgb => layOver(light, share * streakPeak, glowing(pane)(ground));
-            return [
-                onBoard(`player's digit (primary) on ${paneName} at the group glow's peak with the streak's ${token}`, palette.primary, surface, TRANSIENT),
-                onBoard(`clue (foreground) on ${paneName} at the group glow's peak with the streak's ${token}`, palette.foreground, surface, TRANSIENT),
-            ];
-        }),
-        onBoard(`player's digit (primary) on ${paneName} at the celebration glow's peak over the surge`, palette.primary, ground => glowing(pane)(surge(ground)), TRANSIENT),
-        onBoard(`clue (foreground) on ${paneName} at the celebration glow's peak over the surge`, palette.foreground, ground => glowing(pane)(surge(ground)), TRANSIENT),
-    ]);
+    return rings.flatMap(({ ring, share, covers }) => paneGrounds.flatMap(([paneName, pane]) => {
+        // The first light is painted on top
+        const surged = (ground: Rgb): Rgb => [...lights.keys()].reverse()
+            .reduce((under, index) => layOver(rgbOf(auroraToken(palette, lights[index].token)), covers[index], under), ground);
+        const surface = (ground: Rgb): Rgb => layOver(primary, share, pane(surged(ground)));
+        return [
+            onBoard(`player's digit (primary) on ${paneName} in the still celebration's ring ${ring}`, palette.primary, surface, STILL),
+            onBoard(`clue (foreground) on ${paneName} in the still celebration's ring ${ring}`, palette.foreground, surface, STILL),
+        ];
+    }));
 };
 
 // Aurora's board and glass: the ink actually drawn on the glass actually drawn, over the sky actually under it. The
