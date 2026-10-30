@@ -799,6 +799,7 @@ describe("aurora's glass", () => {
 
             expect([...cellBefores]).toEqual([
                 `${BOARD} [data-variant][data-arriving]::before`,
+                `${BOARD} [data-variant="selected"][data-arriving]::before`,
                 `${BOARD} [data-variant].value-leave::before`,
             ]);
         });

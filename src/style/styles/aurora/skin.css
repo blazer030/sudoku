@@ -807,12 +807,14 @@
    in from 55% and its own colour's 6px glow draws in to nothing (a text-shadow, not a blur), while a soft disc of 55%
    of the primary swells through the cell and fades. The disc is the cell's ::before over the cell and its gaps alone
    (the canvas's spilled 12px and grew 1.9×, over the neighbours' digits), at 0, under every digit; on the selected
-   cell it lies over the cell's own glass, under its ring on the ::after. A cell's pseudo-element settles the arrival
-   when its animation ends, before the timer would. Unseen without its animation, so it never stays. */
+   cell it lies over the cell's own glass, under its ring on the ::after, in on-primary, as the primary would vanish
+   into it. A cell's pseudo-element settles the arrival when its animation ends, before the timer would. The digit's
+   own end settles it too, so its 550ms softA runs on the pulse's 800ms (330ms is 41.25%, 550ms 68.75%) and never
+   cuts the pulse short. Unseen without its animation, so it never stays. */
 @keyframes aurora-arrive {
     0% { opacity: 0; transform: scale(0.55); text-shadow: 0 0 6px currentColor; }
-    60% { opacity: 1; text-shadow: 0 0 0 currentColor; }
-    100% { transform: scale(1); }
+    41.25% { opacity: 1; text-shadow: 0 0 0 currentColor; }
+    68.75%, 100% { transform: scale(1); }
 }
 
 @keyframes aurora-pulse {
@@ -821,7 +823,7 @@
 }
 
 [data-style="aurora"] [data-skin~="board"] [data-variant] > .value-arrive {
-    animation: aurora-arrive 550ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+    animation: aurora-arrive 800ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 
 [data-style="aurora"] [data-skin~="board"] [data-variant][data-arriving]::before {
@@ -835,8 +837,13 @@
     animation: aurora-pulse 800ms ease-out;
 }
 
+[data-style="aurora"] [data-skin~="board"] [data-variant="selected"][data-arriving]::before {
+    background-image: radial-gradient(circle, color-mix(in srgb, var(--color-on-primary) 55%, transparent), transparent 70%);
+}
+
 /* An erased digit shrinks and fades as the canvas's fadeA, without its blur: the digit that left (the cell's
-   data-leaving-value) on the cell's ::before, in the cell's colour at the player's size and weight, goes to 60% and
+   data-leaving-value) on the cell's ::before, in the primary (only a player's digit, which is the primary, can be
+   erased) at the player's size and weight, goes to 60% and
    nothing over 500ms. Its animationend settles leaving; unseen without its animation, so no ghost stays. */
 @keyframes aurora-leave {
     0% { opacity: 1; transform: none; }
@@ -857,7 +864,7 @@
     font-size: calc(22px * var(--entry-scale, 1));
     font-weight: 600;
     line-height: 1;
-    color: currentColor;
+    color: var(--color-primary);
     opacity: 0;
     animation: aurora-leave 500ms ease-in;
 }

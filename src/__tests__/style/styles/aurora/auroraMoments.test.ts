@@ -40,17 +40,29 @@ describe("aurora moments", () => {
             expect(STYLE_MOMENTS.aurora.digitWriter).toBeUndefined();
         });
 
-        it("should grow the digit in from 55% over 550ms, its own colour's 6px glow drawn in to nothing by 60%", () => {
+        // The canvas's 550ms softA, run over the pulse's 800ms so the digit never settles the arrival before the pulse:
+        // 330ms is 41.25% and 550ms 68.75% of 800ms, each segment keeping its length and easing
+        it("should grow the digit in from 55% by 550ms, its own colour's 6px glow drawn in to nothing by 330ms, on an 800ms run", () => {
             const frames = framesOf("aurora-arrive");
 
-            expect(animationTimingOf(animationOf(ARRIVING_DIGIT), "aurora-arrive")).toEqual({ durationMs: 550, fixedDelayMs: 0 });
+            expect(animationTimingOf(animationOf(ARRIVING_DIGIT), "aurora-arrive")).toEqual({ durationMs: 800, fixedDelayMs: 0 });
             expect(frames.get("0%")).toEqual(new Map([
                 ["opacity", "0"],
                 ["transform", "scale(0.55)"],
                 ["text-shadow", "0 0 6px currentColor"],
             ]));
-            expect(frames.get("60%")).toEqual(new Map([["opacity", "1"], ["text-shadow", "0 0 0 currentColor"]]));
-            expect(frames.get("100%")).toEqual(new Map([["transform", "scale(1)"]]));
+            expect(frames.get("41.25%")).toEqual(new Map([["opacity", "1"], ["text-shadow", "0 0 0 currentColor"]]));
+            expect(frames.get("68.75%, 100%")).toEqual(new Map([["transform", "scale(1)"]]));
+        });
+
+        // The digit's animationend settles the arrival too (BoardCell), so ending first would cut the pulse short
+        it("should end the digit's arrival no earlier than the pulse", () => {
+            const endOf = (selector: string, name: string): number => {
+                const timing = animationTimingOf(animationOf(selector), name);
+                return (timing?.durationMs ?? Number.NaN) + (timing?.fixedDelayMs ?? Number.NaN);
+            };
+
+            expect(endOf(ARRIVING_DIGIT, "aurora-arrive")).toBeGreaterThanOrEqual(endOf(PULSE, "aurora-pulse"));
         });
 
         it("should lay a soft disc of 55% of the primary over the cell and its gaps, under every digit, untouchable", () => {
@@ -79,26 +91,25 @@ describe("aurora moments", () => {
             expect(frames.get("100%")).toEqual(new Map([["opacity", "0"], ["transform", "scale(1.15)"]]));
         });
 
-        // The selected cell's ::after holds its ring; its ::before pulses by the same rule as any cell's
-        it("should pulse a selected cell by the same rule, its ring left on the ::after", () => {
-            const selectedPulses: string[] = [];
-            postcss.parse(AURORA_CSS).walkRules((rule) => {
-                if (rule.selectors.some(selector => selector.includes("[data-arriving]") && selector.includes('"selected"'))) {
-                    selectedPulses.push(rule.selector);
-                }
-            });
+        // The selected cell is the solid primary, which a primary pulse would vanish into: its pulse is on-primary, the
+        // same disc and run otherwise, and its ring on the ::after never moves
+        it("should pulse a selected cell in 55% of on-primary, by the same run, its ring left on the ::after", () => {
+            const selectedPulse = declarationsOf(AURORA_CSS, `${BOARD} [data-variant="selected"][data-arriving]::before`);
 
-            expect(selectedPulses).toEqual([]);
+            expect([...selectedPulse]).toEqual([
+                ["background-image", "radial-gradient(circle, color-mix(in srgb, var(--color-on-primary) 55%, transparent), transparent 70%)"],
+            ]);
             expect(declarationsOf(AURORA_CSS, `${BOARD} [data-variant="selected"]::after`).has("animation")).toBe(false);
         });
     });
 
     describe("erase", () => {
-        it("should draw the erased digit in the cell's colour at the player's size, untouchable, unseen without its animation", () => {
+        // Only a player's digit can be erased, and those are the primary
+        it("should draw the erased digit in the primary at the player's size, untouchable, unseen without its animation", () => {
             const ghost = declarationsOf(AURORA_CSS, GHOST);
 
             expect(ghost.get("content")).toBe('attr(data-leaving-value) / ""');
-            expect(ghost.get("color")).toBe("currentColor");
+            expect(ghost.get("color")).toBe("var(--color-primary)");
             expect(ghost.get("font-size")).toBe("calc(22px * var(--entry-scale, 1))");
             expect(ghost.get("pointer-events")).toBe("none");
             expect(ghost.get("opacity")).toBe("0");
