@@ -4,6 +4,7 @@
 // theme. The sky is sampled over a grid of the board and of the page the cards lie on, at every drift phase, in two
 // phone windows, and each point is rounded to 8 bits as the screen shows it.
 import { declarationsOf, splitTopLevel } from "../../styleSheetRules";
+import { AURORA_WINDOWS } from "./auroraWindows";
 import { AURORA_CSS, AURORA_DARK, AURORA_LIGHT, AURORA_SCOPE, auroraProperty, keyframesOf, vmaxOf } from "./auroraSheet";
 import type { ColorMode } from "@/theme/themeIds";
 
@@ -54,11 +55,11 @@ const fractionOf = (value: string, what: string): number => {
     return match[2] === "%" ? Number(match[1]) / 100 : Number(match[1]);
 };
 
-/** A number the skin sets for a mode, or for one theme in it, where the theme's own rule outranks the mode's */
-export const auroraNumber = (mode: ColorMode, name: string, themeId?: string): number => {
-    const themed = themeId === undefined ? "" : auroraProperty(`${MODE_ROOTS[mode]}[data-color-theme="${themeId}"]`, name);
+/** A number the skin sets for a theme in a mode: the theme's own rule outranks the mode's */
+export const auroraNumber = (mode: ColorMode, themeId: string, name: string): number => {
+    const themed = auroraProperty(`${MODE_ROOTS[mode]}[data-color-theme="${themeId}"]`, name);
     const value = themed === "" ? auroraProperty(MODE_ROOTS[mode], name) : themed;
-    return fractionOf(value, `${name} (${mode}${themeId === undefined ? "" : `, ${themeId}`})`);
+    return fractionOf(value, `${name} (${mode}, ${themeId})`);
 };
 
 const geometry = (name: string): number => vmaxOf(auroraProperty(AURORA_SCOPE, name));
@@ -156,13 +157,7 @@ const ribbonOf = (): Ribbon => {
     };
 };
 
-/** Where the board lies in each phone window the sky is sampled in, measured in the app (left, top, right, bottom) */
-export const AURORA_SAMPLE_WINDOWS: readonly { width: number; height: number; board: readonly [number, number, number, number] }[] = [
-    { width: 390, height: 844, board: [8, 138, 382, 512] },
-    { width: 360, height: 640, board: [26, 68, 335, 377] },
-];
-// The board is sampled inside its outer cells' glass, every 8px; the cards anywhere below the header, every 10px
-const BOARD_INSET = 11;
+// The board is sampled over its cells every 8px; the cards anywhere below the header, every 10px
 const BOARD_STEP = 8;
 const CARD_AREA = { side: 16, top: 90, bottom: 8, step: 10 } as const;
 // The drift phases: each layer at five points of its path, the ribbon at the two ends of its swing and between them
@@ -251,17 +246,17 @@ export const auroraSkyGrounds = (mode: ColorMode, themeId: string, colours: Auro
     const background = rgbOf(colours.background);
     const lights = colours.lights.map(rgbOf);
     const ribbonColours = [rgbOf(colours.ribbon[0]), rgbOf(colours.ribbon[1])] as const;
-    const strength = auroraNumber(mode, "--aurora-strength");
-    const ribbonStrength = auroraNumber(mode, "--aurora-ribbon-strength", themeId);
+    const strength = auroraNumber(mode, themeId, "--aurora-strength");
+    const ribbonStrength = auroraNumber(mode, themeId, "--aurora-ribbon-strength");
     const firstLayer = lightLayerOf(`${AURORA_SCOPE} body::before`);
     const secondLayer = lightLayerOf(`${AURORA_SCOPE} body::after`);
     const ribbon = ribbonOf();
     const angles = [ribbon.swing[0], (ribbon.swing[0] + ribbon.swing[1]) / 2, ribbon.swing[1]];
     const board = new Map<number, Rgb>();
     const card = new Map<number, Rgb>();
-    for (const { width, height, board: [left, top, right, bottom] } of AURORA_SAMPLE_WINDOWS) {
+    for (const { width, height, board: [left, top, right, bottom] } of AURORA_WINDOWS) {
         const areas: [Map<number, Rgb>, [number, number][]][] = [
-            [board, gridOf(left + BOARD_INSET, top + BOARD_INSET, right - BOARD_INSET, bottom - BOARD_INSET, BOARD_STEP)],
+            [board, gridOf(left, top, right, bottom, BOARD_STEP)],
             [card, gridOf(CARD_AREA.side, CARD_AREA.top, width - CARD_AREA.side, height - CARD_AREA.bottom, CARD_AREA.step)],
         ];
         for (const firstTime of DRIFT_POINTS) for (const secondTime of DRIFT_POINTS) for (const angle of angles) {

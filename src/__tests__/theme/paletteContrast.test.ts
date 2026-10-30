@@ -585,8 +585,8 @@ interface AuroraPanes {
     errorDeepest: (ground: Rgb) => Rgb;
 }
 
-const auroraPanes = (palette: Palette, mode: ColorMode): AuroraPanes => {
-    const density = (name: string): number => auroraNumber(mode, name);
+const auroraPanes = (palette: Palette, mode: ColorMode, themeId: ColorThemeId): AuroraPanes => {
+    const density = (name: string): number => auroraNumber(mode, themeId, name);
     const glass = rgbOf(auroraToken(palette, "glass"));
     const sheen = rgbOf(auroraToken(palette, "glass-sheen"));
     const primary = rgbOf(palette.primary);
@@ -620,10 +620,10 @@ const SOLID = (colour: string) => (): Rgb => rgbOf(colour);
 // The board: the ink each cell is written in, on the pane the skin lays under it. The selected cell is the solid
 // primary, which must stand 3:1 off the glass around it; a selected error keeps its hatching and is marked by a 2px
 // ring of the solid primary alone (ruling 2), which must too. A step's struck-out candidate is a mark, held to 3:1.
-const auroraCellCases = (palette: Palette, mode: ColorMode, onBoard: AuroraDrawn, solid: AuroraDrawn): AuroraBoardCase[] => {
-    const panes = auroraPanes(palette, mode);
+const auroraCellCases = (palette: Palette, mode: ColorMode, themeId: ColorThemeId, onBoard: AuroraDrawn, solid: AuroraDrawn): AuroraBoardCase[] => {
+    const panes = auroraPanes(palette, mode, themeId);
     const primary = rgbOf(palette.primary);
-    const glowPeak = auroraNumber(mode, "--aurora-glow-peak");
+    const glowPeak = auroraNumber(mode, themeId, "--aurora-glow-peak");
     const glowGrounds: [string, (ground: Rgb) => Rgb][] = [["cell glass", panes.cell], ["peer glass", panes.peer], ["the same digit's tint", panes.sameDigit]];
     return [
         onBoard("clue (foreground) on cell glass", palette.foreground, panes.cell),
@@ -679,13 +679,13 @@ const AURORA_BOARD_CASES: AuroraBoardCase[] = STYLES.aurora.themes.flatMap(theme
     const onBoard = drawnOver("board");
     const onPage = drawnOver("card");
     const solid = drawnOver(null);
-    const panes = auroraPanes(palette, mode);
+    const panes = auroraPanes(palette, mode, theme.id);
     const sheen = rgbOf(auroraToken(palette, "glass-sheen"));
     const primary = rgbOf(palette.primary);
-    const softTint = (pane: Rgb): Rgb => layOver(primary, auroraNumber(mode, "--aurora-tint-soft"), pane);
+    const softTint = (pane: Rgb): Rgb => layOver(primary, auroraNumber(mode, theme.id, "--aurora-tint-soft"), pane);
     // Every pane carries a sheen over its top left, which lightens it there: words are checked on the pane and on the
     // sheen's brightest point over it
-    const underSheen = (pane: Rgb): Rgb => layOver(sheen, auroraNumber(mode, "--aurora-pane-sheen"), pane);
+    const underSheen = (pane: Rgb): Rgb => layOver(sheen, auroraNumber(mode, theme.id, "--aurora-pane-sheen"), pane);
     const sky = (ground: Rgb): Rgb => ground;
     const onCard = (name: string, foreground: string, surface: (pane: Rgb) => Rgb, minimum = TEXT): AuroraBoardCase[] => [
         onPage(name, foreground, ground => surface(panes.card(ground)), minimum),
@@ -727,7 +727,7 @@ const AURORA_BOARD_CASES: AuroraBoardCase[] = STYLES.aurora.themes.flatMap(theme
         ...onCard("given-up chip icon (error) on its 12% tint over card glass", palette.error,
             pane => layOver(rgbOf(palette.error), 0.12, pane), LARGE_OR_ICON),
         ...onCard("current step dot (primary) on card glass", palette.primary, pane => pane, LARGE_OR_ICON),
-        ...auroraCellCases(palette, mode, onBoard, solid),
+        ...auroraCellCases(palette, mode, theme.id, onBoard, solid),
     ];
 }));
 
@@ -876,7 +876,7 @@ describe("palette contrast", () => {
         "should give aurora's %s %s palette the glass its skin lays over the bare page",
         (themeId, mode) => {
             const palette = getPalette("aurora", themeId, mode);
-            const panes = auroraPanes(palette, mode);
+            const panes = auroraPanes(palette, mode, themeId);
             const page = rgbOf(palette.background);
             const hex = (colour: Rgb): string => `#${colour.map(channel => Math.round(channel).toString(16).padStart(2, "0")).join("").toUpperCase()}`;
 
