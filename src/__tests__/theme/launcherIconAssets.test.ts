@@ -93,8 +93,10 @@ const SAMPLES: Record<StyleId, ArtworkSample[]> = {
         { x: -20, y: 54, token: "icon-frame", foregroundOnly: true },
         { x: 54, y: 14, token: "background" },
     ],
-    // The lights cover every edge, so the samples are the side dot and the centre dot
+    // The foreground layer's bottom-right corner, where the ground lies bare (the legacy icon rounds it off and
+    // the lights tint the rest of every edge), the side dot and the centre dot
     aurora: [
+        { x: 104, y: 104, token: "background", foregroundOnly: true },
         { x: 54, y: 41, token: "primary" },
         { x: 54, y: 54, token: "glass-sheen" },
     ],
