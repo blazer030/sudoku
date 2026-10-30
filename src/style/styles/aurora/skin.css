@@ -876,9 +876,9 @@
     box-shadow: 0 0 0 2px var(--color-primary);
 }
 
-/* Notes at 500 in the note colour; the selected digit's note in the primary at 700, without the shared disc. A step's
-   candidates are the primary at 700, its emphasised one (only answer and pattern cells carry one) a primary disc
-   under on-primary, and its struck-out ones the error colour under a level 1.5px strike through the middle, a little past
+/* Notes at 500 in the note colour; the highlighted note (the selected digit's, or a step's emphasised candidate) the
+   shared disc in the primary under on-primary at 700, sized by the markup to the note (the selected cell turns it
+   into an on-primary disc, above). A step's other candidates are the primary at 700, and its struck-out ones the error colour under a level 1.5px strike through the middle, a little past
    the glyph on both sides (the canvas's diagonal ran along a 1's own stroke, so a struck 1 read as a wedge), on every board that shows a step. */
 [data-style="aurora"] [data-skin~="board"] .font-note.text-note {
     color: var(--color-note);
@@ -886,19 +886,14 @@
 }
 
 [data-style="aurora"] [data-skin~="board"] [data-note-highlight] {
-    background-color: transparent;
-    color: var(--color-primary);
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
     font-weight: 700;
 }
 
 [data-style="aurora"] [data-skin~="board"] .font-note.text-primary {
     color: var(--color-primary);
     font-weight: 700;
-}
-
-[data-style="aurora"] [data-skin~="board"] :is([data-variant="answer"], [data-variant="pattern"]) [data-note-highlight] {
-    background-color: var(--color-primary);
-    color: var(--color-on-primary);
 }
 
 [data-style="aurora"] [data-skin~="board"] .font-note.strike-diagonal {

@@ -645,6 +645,13 @@ const auroraCellCases = (palette: Palette, mode: ColorMode, drawn: AuroraDrawn):
         drawn("same digit (primary) on its tint", palette.primary, grounds.sameDigit),
         drawn("note on cell glass", palette.note, grounds.cell),
         drawn("note on peer glass", palette.note, grounds.peer),
+        // The highlighted note (the selected digit's, a hint's emphasised candidate) is a primary disc under on-primary,
+        // on every ground an unselected cell has; in the selected cell it is an on-primary disc, checked below
+        drawn("highlighted note's digit (on-primary) on its primary disc", palette["on-primary"], palette.primary),
+        drawn("highlighted note's disc (primary) against cell glass", palette.primary, grounds.cell, LARGE_OR_ICON),
+        drawn("highlighted note's disc (primary) against peer glass", palette.primary, grounds.peer, LARGE_OR_ICON),
+        drawn("highlighted note's disc (primary) against the same digit's tint", palette.primary, grounds.sameDigit, LARGE_OR_ICON),
+        drawn("highlighted note's disc (primary) against the answer tint", palette.primary, grounds.answer, LARGE_OR_ICON),
         drawn("selected cell's note (on-primary) on primary", palette["on-primary"], palette.primary),
         drawn("selected cell's highlighted note (primary) on its on-primary disc", palette.primary, palette["on-primary"]),
         drawn("selected cell's highlighted-note disc (on-primary) on primary", palette["on-primary"], palette.primary, LARGE_OR_ICON),

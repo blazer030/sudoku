@@ -801,25 +801,22 @@ describe("aurora's glass", () => {
             expect(answer.get("z-index")).toBe("1");
         });
 
-        it("should write notes at 500 in the note colour and the selected digit's in the primary at 700", () => {
+        it("should write notes at 500 in the note colour and the highlighted note as a primary disc under on-primary at 700", () => {
             const notes = declarationsOf(AURORA_CSS, `${BOARD} .font-note.text-note`);
             const highlighted = declarationsOf(AURORA_CSS, `${BOARD} [data-note-highlight]`);
 
             expect(notes.get("color")).toBe("var(--color-note)");
             expect(notes.get("font-weight")).toBe("500");
-            expect(highlighted.get("background-color")).toBe("transparent");
-            expect(highlighted.get("color")).toBe("var(--color-primary)");
+            expect(highlighted.get("background-color")).toBe("var(--color-primary)");
+            expect(highlighted.get("color")).toBe("var(--color-on-primary)");
             expect(highlighted.get("font-weight")).toBe("700");
         });
 
-        it("should write a step's candidates in the primary at 700, its emphasised one a primary disc, on every board", () => {
+        it("should write a step's candidates in the primary at 700, on every board", () => {
             const candidates = declarationsOf(AURORA_CSS, `${BOARD} .font-note.text-primary`);
-            const emphasised = declarationsOf(AURORA_CSS, `${BOARD} :is([data-variant="answer"], [data-variant="pattern"]) [data-note-highlight]`);
 
             expect(candidates.get("color")).toBe("var(--color-primary)");
             expect(candidates.get("font-weight")).toBe("700");
-            expect(emphasised.get("background-color")).toBe("var(--color-primary)");
-            expect(emphasised.get("color")).toBe("var(--color-on-primary)");
         });
 
         // Level through the middle, not the canvas's diagonal, which runs along a 1's own stroke, and a little past the
