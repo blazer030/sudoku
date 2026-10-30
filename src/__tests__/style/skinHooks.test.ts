@@ -75,12 +75,15 @@ describe("skin hooks", () => {
     it("should mark the Settings and 外觀 pages' cards as settings cards", () => {
         const groupCards = openingTags(readFileSync("src/presentation/pages/settings/components/SettingsGroup.vue", "utf8"), "div")
             .filter(tag => hasSkinToken(tag, "card"));
-        const appearanceCards = openingTags(readFileSync("src/presentation/pages/settings/Appearance.vue", "utf8"), "div")
+        const appearanceSource = readFileSync("src/presentation/pages/settings/Appearance.vue", "utf8");
+        const appearanceCards = openingTags(appearanceSource, "div")
             .filter(tag => hasSkinToken(tag, "card"));
 
         expect(groupCards).toHaveLength(1);
-        expect(appearanceCards).toHaveLength(2);
-        expect([...groupCards, ...appearanceCards].every(tag => hasSkinToken(tag, "settings-card"))).toBe(true);
+        expect(groupCards.every(tag => hasSkinToken(tag, "settings-card"))).toBe(true);
+        // 外觀 draws every card through SettingsGroup, so none is written by hand
+        expect(appearanceCards).toHaveLength(0);
+        expect(appearanceSource.match(/<SettingsGroup/g)).toHaveLength(3);
     });
 
     it("should mark Statistics' cards, section headings and figures", () => {
