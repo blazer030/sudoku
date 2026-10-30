@@ -117,6 +117,11 @@ describe("aurora's glass", () => {
             expect(auroraProperty(root, "--aurora-shadow")).toBe(EDGES[mode].shadow);
         });
 
+        it("should lay 晨光's dialogs fully opaque, so no digit shows through, and leave 夜空's at 97%", () => {
+            expect(percentOf(auroraProperty(AURORA_LIGHT, "--aurora-glass-dialog"))).toBe(1);
+            expect(percentOf(auroraProperty(AURORA_DARK, "--aurora-glass-dialog"))).toBe(0.97);
+        });
+
         it("should veil the screen behind a dialog and the loader in the page colour, the same in both modes", () => {
             expect(auroraProperty(AURORA_SCOPE, "--aurora-scrim")).toBe("62%");
             expect(auroraProperty(AURORA_SCOPE, "--aurora-loader-scrim")).toBe("45%");
