@@ -4,7 +4,7 @@
         <div
             ref="pageScroller"
             class="h-full overflow-y-auto overscroll-y-contain"
-            data-skin="page-ruled"
+            data-skin="page-ruled page-scroller"
             data-testid="page-scroller"
         >
             <RouterView />
