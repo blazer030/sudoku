@@ -613,9 +613,11 @@ describe("aurora's glass", () => {
             const selected = declarationsOf(AURORA_CSS, cell("selected"));
 
             expect(groundOf("selected")).toBe("var(--color-primary)");
-            expect(selected.get("position")).toBe("relative");
             expect(selected.get("z-index")).toBe("1");
-            expect(selected.get("box-shadow")).toBe(`0 0 0 2px ${soft("primary", "40%")}, ${SELECTION_GLOW}`);
+            expect(selected.has("box-shadow")).toBe(false);
+            expect(declarationsOf(AURORA_CSS, `${cell("selected")}::after`).get("box-shadow")).toBe(
+                `0 0 0 2px ${soft("primary", "40%")}, ${SELECTION_GLOW}`,
+            );
             expect(selected.has("background-image")).toBe(false);
             expect(declarationsOf(AURORA_CSS, cell("same-digit")).has("background-image")).toBe(false);
             expect(declarationsOf(AURORA_CSS, `${cell("selected")}[data-value-kind] > div`).get("color")).toBe("var(--color-on-primary)");
@@ -652,10 +654,28 @@ describe("aurora's glass", () => {
         it("should mark a selected error by a ring of the solid primary alone, keeping its hatching (ruling 2)", () => {
             const selectedError = declarationsOf(AURORA_CSS, `${cell("error")}[data-selected]`);
 
-            expect(selectedError.get("box-shadow")).toBe("0 0 0 2px var(--color-primary)");
             expect(selectedError.get("z-index")).toBe("1");
+            expect(selectedError.has("box-shadow")).toBe(false);
+            expect(declarationsOf(AURORA_CSS, `${cell("error")}[data-selected]::after`).get("box-shadow")).toBe("0 0 0 2px var(--color-primary)");
             expect(selectedError.has("background-image")).toBe(false);
             expect(selectedError.has("--aurora-cell-ground")).toBe(false);
+        });
+
+        it("should draw the selection's ring on the cell's ::after over its glass alone, so it hugs all four sides", () => {
+            const rings = [`${cell("selected")}::after`, `${cell("error")}[data-selected]::after`];
+
+            for (const ring of rings) {
+                const declarations = declarationsOf(AURORA_CSS, ring);
+                expect(declarations.get("content"), ring).toBe('""');
+                expect(declarations.get("position"), ring).toBe("absolute");
+                expect(declarations.get("inset"), ring).toBe("0");
+                expect(declarations.get("border-radius"), ring).toBe("inherit");
+                expect(declarations.get("pointer-events"), ring).toBe("none");
+            }
+        });
+
+        it("should line a step's wrong cell with 2px of the error colour inside it", () => {
+            expect(declarationsOf(AURORA_CSS, cell("wrong")).get("box-shadow")).toBe("inset 0 0 0 2px var(--color-error)");
         });
 
         it("should mark a step's answer cell, on every board, by the soft tint, a 2px inner line and the selection's glow", () => {
@@ -663,7 +683,6 @@ describe("aurora's glass", () => {
 
             expect(groundOf("answer")).toBe(over("primary", "var(--aurora-tint-soft)", CELL_GLASS));
             expect(answer.get("box-shadow")).toBe(`inset 0 0 0 2px var(--color-primary), ${SELECTION_GLOW}`);
-            expect(answer.get("position")).toBe("relative");
             expect(answer.get("z-index")).toBe("1");
         });
 

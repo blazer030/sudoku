@@ -662,14 +662,10 @@
     font-weight: 600;
 }
 
-/* Plain cells and clues are the cell's glass; an unused focus cell takes the soft tint, as its token */
+/* Plain cells and clues are the cell's glass */
 [data-style="aurora"] [data-skin~="board"] [data-variant="default"],
 [data-style="aurora"] [data-skin~="board"] [data-variant="clue"] {
     --aurora-cell-ground: var(--aurora-glass-cell-fill);
-}
-
-[data-style="aurora"] [data-skin~="board"] [data-variant="focus"] {
-    --aurora-cell-ground: color-mix(in srgb, var(--color-primary) var(--aurora-tint-soft), var(--aurora-glass-cell-fill));
 }
 
 /* The selected cell's row, column and box, and a step's scope, lay the peer sheen over the glass (晨光: 95% of the sheen in all) */
@@ -692,14 +688,10 @@
 /* The selected cell is a lit pane of the solid primary, ringed in 2px of 40% of it and glowing 10px of 35% (spec
    ruling 9: the canvas's 22px / 70% hid the neighbours' digits), written in on-primary, its notes too; the selected
    digit's note is an on-primary disc, as the primary would vanish into the cell. It lies above its neighbours'
-   glass (1), below every digit. */
+   glass (1), below every digit. Its ring and glow lie on its ::after, below. */
 [data-style="aurora"] [data-skin~="board"] [data-variant="selected"] {
     --aurora-cell-ground: var(--color-primary);
-    position: relative;
     z-index: 1;
-    box-shadow:
-        0 0 0 2px color-mix(in srgb, var(--color-primary) 40%, transparent),
-        0 0 10px color-mix(in srgb, var(--color-primary) 35%, transparent);
 }
 
 [data-style="aurora"] [data-skin~="board"] [data-variant="selected"][data-value-kind] > div {
@@ -719,7 +711,6 @@
    selected cell's glow, above its neighbours' glass */
 [data-style="aurora"] [data-skin~="board"] [data-variant="answer"] {
     --aurora-cell-ground: color-mix(in srgb, var(--color-primary) var(--aurora-tint-soft), var(--aurora-glass-cell-fill));
-    position: relative;
     z-index: 1;
     box-shadow:
         inset 0 0 0 2px var(--color-primary),
@@ -755,8 +746,28 @@
 /* A selected error keeps its hatching and its red digit; the selection is a 2px ring of the solid primary, its only
    mark, so it is full strength (plan ruling 2: 40% of it reads 1.81–2.55 on the glass) */
 [data-style="aurora"] [data-skin~="board"] [data-variant="error"][data-selected] {
-    position: relative;
     z-index: 1;
+}
+
+/* The selection's ring lies on the cell's ::after over its padding box, the glass alone, so it hugs the glass on all
+   four sides (the cell's own box would leave it off the glass by the gap on its right and bottom). It paints in the
+   cell's own layer (1), below every digit (2); it never animates, and the ::before stays the arrival's pulse. */
+[data-style="aurora"] [data-skin~="board"] [data-variant="selected"]::after,
+[data-style="aurora"] [data-skin~="board"] [data-variant="error"][data-selected]::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+}
+
+[data-style="aurora"] [data-skin~="board"] [data-variant="selected"]::after {
+    box-shadow:
+        0 0 0 2px color-mix(in srgb, var(--color-primary) 40%, transparent),
+        0 0 10px color-mix(in srgb, var(--color-primary) 35%, transparent);
+}
+
+[data-style="aurora"] [data-skin~="board"] [data-variant="error"][data-selected]::after {
     box-shadow: 0 0 0 2px var(--color-primary);
 }
 
