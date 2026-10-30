@@ -429,6 +429,103 @@
     color: var(--color-primary);
 }
 
+/* Settings and 外觀, as the canvas's .group / .opt / .tg / .ind / .sw. A group's heading is in the text colour.
+   Option, toggle and style-card tiles lie in 1px of the text colour, rounded 16px, on a 3% wash; a chosen style
+   card is ringed in 2px of the primary, and a toggle that is on (the markup fills it) is lined in 50% of the
+   primary on the soft tint, its icon in the primary and its words in the inks. */
+[data-style="aurora"] [data-skin~="group-heading"] {
+    color: var(--color-foreground);
+}
+
+[data-style="aurora"] [data-skin~="tile"][aria-pressed] {
+    border-color: transparent;
+    background-color: color-mix(in srgb, var(--color-foreground) 3%, transparent);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-foreground) 12%, transparent);
+    border-radius: 16px;
+    color: var(--color-foreground);
+}
+
+[data-style="aurora"] [data-skin~="tile"][aria-pressed="true"].bg-card.border-primary {
+    box-shadow: inset 0 0 0 2px var(--color-primary);
+}
+
+[data-style="aurora"] [data-skin~="tile"][aria-pressed="true"].bg-primary {
+    background-color: color-mix(in srgb, var(--color-primary) var(--aurora-tint-soft), transparent);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-primary) 50%, transparent);
+    color: var(--color-foreground);
+}
+
+[data-style="aurora"] [data-skin~="tile"][aria-pressed="true"].bg-primary > .text-on-primary {
+    color: var(--color-primary);
+}
+
+[data-style="aurora"] [data-skin~="tile"][aria-pressed="true"].bg-primary span .text-on-primary {
+    color: var(--color-foreground-secondary);
+}
+
+/* A toggle's mark is a real switch: its own ring and check are hidden, a 34×20 track lies on its ::before and a
+   16px sheen knob on its ::after (the only places a size is set). The mark is 20px square, so the track hangs
+   from its right edge; the knob sits 2px in from the track's left and slides 14px when on. */
+[data-style="aurora"] [data-skin~="check"]:not(.absolute) {
+    position: relative;
+}
+
+[data-style="aurora"] [data-skin~="check"] {
+    border-color: transparent;
+    background-color: transparent;
+}
+
+[data-style="aurora"] [data-skin~="check"] > svg {
+    visibility: hidden;
+}
+
+[data-style="aurora"] [data-skin~="check"]::before,
+[data-style="aurora"] [data-skin~="check"]::after {
+    content: "";
+    position: absolute;
+}
+
+[data-style="aurora"] [data-skin~="check"]::before {
+    top: 0;
+    right: 0;
+    width: 34px;
+    height: 20px;
+    border-radius: 10px;
+    background-color: color-mix(in srgb, var(--color-foreground) 20%, transparent);
+}
+
+[data-style="aurora"] [data-skin~="check"]::after {
+    top: 2px;
+    right: 16px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background-color: var(--color-glass-sheen);
+    box-shadow: 0 1px 3px color-mix(in srgb, var(--color-shadow) var(--aurora-shadow), transparent);
+    transition: transform 200ms ease;
+}
+
+[data-style="aurora"] [data-skin~="tile"][aria-pressed="true"].bg-primary [data-skin~="check"] {
+    background-color: transparent;
+    color: var(--color-primary);
+}
+
+[data-style="aurora"] [data-skin~="tile"][aria-pressed="true"].bg-primary [data-skin~="check"]::before {
+    background-color: var(--color-primary);
+}
+
+[data-style="aurora"] [data-skin~="tile"][aria-pressed="true"].bg-primary [data-skin~="check"]::after {
+    transform: translateX(14px);
+}
+
+/* The chosen swatch is ringed twice, in the page colour and the primary, and glows 16px */
+[data-style="aurora"] [data-skin~="swatch"][aria-pressed="true"] {
+    box-shadow:
+        0 0 0 3px var(--color-background),
+        0 0 0 5px var(--color-primary),
+        0 0 16px color-mix(in srgb, var(--color-primary) 60%, transparent);
+}
+
 /* Press feedback: a faint wash of the text colour. It is a colour change, so it stays on under reduced motion. */
 [data-style="aurora"] [data-pressed] {
     --press-overlay: color-mix(in srgb, var(--color-foreground) 8%, transparent);
@@ -468,7 +565,8 @@
         animation: none;
     }
 
-    [data-style="aurora"] .segmented-indicator-motion {
+    [data-style="aurora"] .segmented-indicator-motion,
+    [data-style="aurora"] [data-skin~="check"]::after {
         transition: none;
     }
 

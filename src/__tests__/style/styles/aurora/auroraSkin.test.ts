@@ -370,6 +370,75 @@ describe("aurora's glass", () => {
         });
     });
 
+    describe("Settings and 外觀", () => {
+        const TILE = `${skin("tile")}[aria-pressed]`;
+        // A toggle that is on is filled by the markup (bg-primary); a chosen style card stays on the card (bg-card)
+        const TOGGLE_ON = `${skin("tile")}[aria-pressed="true"].bg-primary`;
+        const CHOSEN_CARD = `${skin("tile")}[aria-pressed="true"].bg-card`;
+        const CHECK = skin("check");
+        const CHECK_ON = `${TOGGLE_ON} [data-skin~="check"]`;
+
+        it("should set each settings group's heading in the text colour (the group itself is a card)", () => {
+            expect(declarationsOf(AURORA_CSS, skin("group-heading")).get("color")).toBe("var(--color-foreground)");
+        });
+
+        it("should line option and toggle tiles in 1px of the text colour, rounded 16px, on a 3% wash", () => {
+            const tile = declarationsOf(AURORA_CSS, TILE);
+
+            expect(tile.get("box-shadow")).toBe(`inset 0 0 0 1px ${soft("foreground", "12%")}`);
+            expect(tile.get("border-radius")).toBe("16px");
+            expect(tile.get("background-color")).toBe(soft("foreground", "3%"));
+        });
+
+        it("should line a toggle that is on in 50% of the primary on the soft tint", () => {
+            const tile = declarationsOf(AURORA_CSS, TOGGLE_ON);
+
+            expect(tile.get("box-shadow")).toBe(`inset 0 0 0 1px ${soft("primary", "50%")}`);
+            expect(tile.get("background-color")).toBe(soft("primary", "var(--aurora-tint-soft)"));
+        });
+
+        it("should ring a style card that is chosen in 2px of the primary", () => {
+            expect(declarationsOf(AURORA_CSS, `${CHOSEN_CARD}.border-primary`).get("box-shadow")).toBe("inset 0 0 0 2px var(--color-primary)");
+        });
+
+        it("should draw a toggle's mark as a 34×20 pill track, in 20% of the text colour off and the primary on", () => {
+            const track = declarationsOf(AURORA_CSS, `${CHECK}::before`);
+
+            expect(track.get("width")).toBe("34px");
+            expect(track.get("height")).toBe("20px");
+            expect(track.get("border-radius")).toBe("10px");
+            expect(track.get("background-color")).toBe(soft("foreground", "20%"));
+            expect(declarationsOf(AURORA_CSS, `${CHECK_ON}::before`).get("background-color")).toBe("var(--color-primary)");
+        });
+
+        it("should hide the mark's own ring and check, and draw a 16px sheen knob that slides 14px when on", () => {
+            const knob = declarationsOf(AURORA_CSS, `${CHECK}::after`);
+
+            expect(declarationsOf(AURORA_CSS, CHECK).get("background-color")).toBe("transparent");
+            expect(declarationsOf(AURORA_CSS, `${CHECK} > svg`).get("visibility")).toBe("hidden");
+            expect(knob.get("width")).toBe("16px");
+            expect(knob.get("height")).toBe("16px");
+            expect(knob.get("border-radius")).toBe("50%");
+            expect(knob.get("background-color")).toBe("var(--color-glass-sheen)");
+            expect(declarationsOf(AURORA_CSS, `${CHECK_ON}::after`).get("transform")).toBe("translateX(14px)");
+        });
+
+        it("should stop the knob's slide under reduced motion", () => {
+            expect(reducedMotionDeclarationsOf(AURORA_CSS, `${CHECK}::after`).get("transition")).toBe("none");
+        });
+
+        it("should lay segmented controls in 7% of the text colour with a brighter pane for the chosen segment", () => {
+            expect(declarationsOf(AURORA_CSS, skin("segmented")).get("background-color")).toBe(soft("foreground", "7%"));
+            expect(declarationsOf(AURORA_CSS, skin("segmented-indicator")).get("background-color")).toBe("var(--color-glass-sheen)");
+        });
+
+        it("should ring a chosen swatch in the page colour, the primary and a 16px glow", () => {
+            expect(declarationsOf(AURORA_CSS, `${skin("swatch")}[aria-pressed="true"]`).get("box-shadow")).toBe(
+                `0 0 0 3px var(--color-background), 0 0 0 5px var(--color-primary), ${glow("16px", "60%")}`,
+            );
+        });
+    });
+
     it("should change no layout outside the pseudo-elements", () => {
         expect(findLayoutDeclarations(AURORA_CSS)).toEqual([]);
     });
