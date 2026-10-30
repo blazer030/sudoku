@@ -171,6 +171,10 @@ const REQUIRED_SELECTORS: Record<StyleId, readonly string[]> = {
         "[data-group]",
         ".aurora-group-ribbon",
         ".aurora-group-ring",
+        '[data-celebration="playing"]',
+        '[data-skin~="celebration"]:not([data-still])',
+        '[data-skin~="trophy"]',
+        ".aurora-celebration-ring",
     ],
 };
 

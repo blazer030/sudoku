@@ -407,4 +407,212 @@ describe("aurora moments", () => {
             expect(loaderSelectors.some(selector => /data-(?:motion|still)|\.no-motion/.test(selector))).toBe(false);
         });
     });
+
+    // From MomentsAurora.dc's .surge / au-glow / .ring / .mote / au-frost, without any blur (spec rulings 11, 18–20):
+    // the lights surge behind the solved board, the panes glow ring by ring from the centre, and behind the card rings
+    // go out and sparks rise (AuroraCelebration)
+    describe("celebration", () => {
+        const CELEBRATING = `${BOARD}:is([data-celebration="playing"], [data-celebration="done"])`;
+        const STILL_BOARD = `${BOARD}[data-celebration="still"]`;
+        const SURGE = `${BOARD}[data-celebration]::before`;
+        const GLOWING_CELL = `${CELEBRATING} [data-variant]`;
+        const GROUP_CELL = `${BOARD} [data-group]:not(.animate-hint-reveal-glow)`;
+        const CARD = `${AURORA_SCOPE} [data-skin~="card"][data-skin~="celebration"]:not([data-still])`;
+        const TROPHY = `${AURORA_SCOPE} [data-skin~="trophy"]`;
+        const SCENE = `${AURORA_SCOPE} .aurora-celebration`;
+        const RING = `${SCENE}-ring`;
+        const MOVING_RING = `${SCENE}:not([data-still]) .aurora-celebration-ring`;
+        const STILL_RING = `${SCENE}[data-still] .aurora-celebration-ring`;
+        const SPARK = `${SCENE}-spark`;
+        const GROUND = "var(--aurora-cell-ground)";
+        const DISTANCE = "max(var(--cell-row) - 4, 4 - var(--cell-row), var(--cell-column) - 4, 4 - var(--cell-column))";
+
+        // The top-level rules in source order, by their collapsed selectors
+        const ruleOrder = (): string[][] => {
+            const order: string[][] = [];
+            postcss.parse(AURORA_CSS).walkRules((rule) => {
+                if (rule.parent?.type === "atrule") return;
+                order.push(rule.selectors.map(collapse));
+            });
+            return order;
+        };
+        const indexOfRule = (selector: string): number => ruleOrder().findIndex(selectors => selectors.includes(selector));
+
+        // Attributes, classes and pseudo-classes: an :is() counts as its first argument (all of these weigh the same),
+        // a :not() as its argument
+        const weightOf = (selector: string): number => selector
+            .replace(/:is\(([^,()]*)(?:,[^()]*)?\)/g, "$1")
+            .replace(/:not\(([^()]*)\)/g, "$1")
+            .match(/\[[^\]]*\]|\.[\w-]+|(?<!:):[\w-]+/g)?.length ?? 0;
+
+        it("should lift the solved board into a stacking context of its own, so the surge lies behind its glass", () => {
+            const board = declarationsOf(AURORA_CSS, `${BOARD}[data-celebration]`);
+
+            expect(board.get("position")).toBe("relative");
+            expect(board.get("isolation")).toBe("isolate");
+        });
+
+        it("should surge three lights of aurora-1, aurora-2 and aurora-4 out to 135% of the board, behind its glass, with no filter", () => {
+            const surge = declarationsOf(AURORA_CSS, SURGE);
+            const lights = surge.get("background-image") ?? "";
+
+            expect(surge.get("content")).toBe('""');
+            expect(surge.get("position")).toBe("absolute");
+            expect(surge.get("inset")).toBe("-17.5%");
+            expect(surge.get("z-index")).toBe("-1");
+            expect(surge.get("pointer-events")).toBe("none");
+            expect(surge.get("opacity")).toBe("0");
+            expect(lights.match(/radial-gradient\(/g)).toHaveLength(3);
+            // Each fades out within the box, so its edge never cuts a light off (the canvas blurred that away)
+            expect(lights.match(/radial-gradient\(circle closest-side at /g)).toHaveLength(3);
+            for (const light of ["aurora-1", "aurora-2", "aurora-4"]) {
+                expect(lights, light).toContain(`var(--color-${light})`);
+            }
+            for (const selector of [SURGE, `${CELEBRATING}::before`, `${STILL_BOARD}::before`]) {
+                expect([...declarationsOf(AURORA_CSS, selector).keys()].some(property => property.includes("filter")), selector).toBe(false);
+            }
+        });
+
+        // Review Focus 4: past the board's sides the surge would let the page scroll sideways on a narrow screen
+        it("should keep the page from scrolling sideways when the surge runs past the screen's sides", () => {
+            expect(declarationsOf(AURORA_CSS, `${AURORA_SCOPE} [data-testid="page-scroller"]`).get("overflow-x")).toBe("hidden");
+        });
+
+        it("should swell the surge from 60% and nothing to 0.9 at 40% and to 110% at 0.4, over 1.8s from the start", () => {
+            const frames = framesOf("aurora-surge");
+
+            expect(animationTimingOf(animationOf(`${CELEBRATING}::before`), "aurora-surge")).toEqual({ durationMs: 1800, fixedDelayMs: 0 });
+            expect(animationOf(`${CELEBRATING}::before`)).toContain(" both");
+            expect(frames.get("0%")).toEqual(new Map([["opacity", "0"], ["transform", "scale(0.6)"]]));
+            expect(frames.get("40%")).toEqual(new Map([["opacity", "0.9"]]));
+            expect(frames.get("100%")).toEqual(new Map([["opacity", "0.4"], ["transform", "scale(1.1)"]]));
+        });
+
+        // Spec ruling 19: ring by ring from the centre cell, 85ms a ring, by max() alone; the farthest ends at 1240ms
+        it("should glow each pane with 30% of the primary from its own ground and back over 900ms, 85ms a ring from the centre", () => {
+            const animation = animationOf(GLOWING_CELL);
+            const frames = framesOf("aurora-celebration-glow");
+
+            // The delay is all ring steps, no fixed part (the helper would read its 85ms step as one)
+            expect(animationTimingOf(animation, "aurora-celebration-glow")?.durationMs).toBe(900);
+            expect(animation).toContain(`calc(${DISTANCE} * 85ms)`);
+            expect(animation).not.toMatch(/abs\(|mod\(/);
+            expect(4 * 85 + 900).toBe(1240);
+            expect(frames.get("0%")).toEqual(new Map([["background-color", GROUND]]));
+            expect(frames.get("30%")).toEqual(new Map([["background-color", `color-mix(in srgb, var(--color-primary) 30%, ${GROUND})`]]));
+            expect(frames.get("100%")).toEqual(new Map([["background-color", GROUND]]));
+            expect(propertiesOf("aurora-celebration-glow").every(property => property === "background-color")).toBe(true);
+        });
+
+        // Plan ruling 8, Review Focus 2: the last digit may complete a group as it solves the board; only the
+        // celebration's glow plays on the cells then
+        it("should come after the group glow and weigh no less, so a group completed by the solving digit glows only once", () => {
+            expect(indexOfRule(GROUP_CELL)).toBeGreaterThanOrEqual(0);
+            expect(indexOfRule(GLOWING_CELL)).toBeGreaterThan(indexOfRule(GROUP_CELL));
+            expect(weightOf(GLOWING_CELL)).toBeGreaterThanOrEqual(weightOf(GROUP_CELL));
+        });
+
+        // The glow is the cell's own background: the entered cell's pulse (::before) and its digit's arrival run on
+        it("should leave the arriving digit and the pulse to their own rules", () => {
+            const celebrationSelectors = ruleOrder().flat().filter(selector => selector.includes("data-celebration"));
+
+            expect(celebrationSelectors.some(selector => /\[data-variant\][^ ]*(?:::before|::after| > )/.test(selector))).toBe(false);
+            expect(animationOf(`${BOARD} [data-variant] > .value-arrive`)).toContain("aurora-arrive");
+            expect(animationOf(`${BOARD} [data-variant][data-arriving]::before`)).toContain("aurora-pulse");
+        });
+
+        it("should focus the card in from 104% and nothing over 640ms from 100ms, with no blur", () => {
+            const frames = framesOf("aurora-card-focus");
+
+            expect(animationTimingOf(animationOf(CARD), "aurora-card-focus")).toEqual({ durationMs: 640, fixedDelayMs: 100 });
+            expect(frames.get("0%")).toEqual(new Map([["opacity", "0"], ["transform", "scale(1.04)"]]));
+            expect(frames.get("100%")).toEqual(new Map([["opacity", "1"], ["transform", "none"]]));
+        });
+
+        it("should set the trophy in the solid primary, its cup in on-primary, under a still 40px glow", () => {
+            const trophy = declarationsOf(AURORA_CSS, TROPHY);
+
+            expect(trophy.get("background-color")).toBe("var(--color-primary)");
+            expect(trophy.get("box-shadow")).toBe("0 0 40px color-mix(in srgb, var(--color-primary) 60%, transparent)");
+            expect(trophy.has("animation")).toBe(false);
+            expect(declarationsOf(AURORA_CSS, `${TROPHY} > svg`).get("color")).toBe("var(--color-on-primary)");
+        });
+
+        it("should send each ring out from 60% to 260% and fade it every 2.4s, 0.1s, 0.9s and 1.7s in, under a still glow of aurora-1", () => {
+            const ring = declarationsOf(AURORA_CSS, RING);
+            const frames = framesOf("aurora-celebration-ring");
+
+            expect(ring.get("box-shadow")).toBe("0 0 30px color-mix(in srgb, var(--color-aurora-1) 50%, transparent)");
+            expect(ring.get("opacity")).toBe("0");
+            expect(animationTimingOf(animationOf(MOVING_RING), "aurora-celebration-ring")?.durationMs).toBe(2400);
+            expect(animationOf(MOVING_RING)).toContain("infinite");
+            expect(animationOf(MOVING_RING)).toContain("var(--aurora-ring-delay)");
+            expect(["0", "1", "2"].map(index => declarationsOf(AURORA_CSS, `${RING}[data-index="${index}"]`).get("--aurora-ring-delay")))
+                .toEqual(["0.1s", "0.9s", "1.7s"]);
+            expect(frames.get("0%")).toEqual(new Map([["opacity", "0.9"], ["transform", "scale(0.6)"]]));
+            expect(frames.get("100%")).toEqual(new Map([["opacity", "0"], ["transform", "scale(2.6)"]]));
+        });
+
+        it("should draw each ring in 70% of its light", () => {
+            for (const light of ["primary", "aurora-2", "aurora-1"]) {
+                expect(declarationsOf(AURORA_CSS, `${RING}[data-light="${light}"]`).get("border-color"), light)
+                    .toBe(`color-mix(in srgb, var(--color-${light}) 70%, transparent)`);
+            }
+        });
+
+        it("should float each spark up 640px over 5.5s, moving only its transform and opacity", () => {
+            const frames = framesOf("aurora-celebration-rise");
+
+            expect(animationTimingOf(animationOf(SPARK), "aurora-celebration-rise")?.durationMs).toBe(5500);
+            expect(animationOf(SPARK)).toContain("linear");
+            expect(animationOf(SPARK)).toContain("var(--aurora-spark-delay)");
+            expect(animationOf(SPARK)).toContain("infinite");
+            expect(declarationsOf(AURORA_CSS, SPARK).get("opacity")).toBe("0");
+            for (const light of ["aurora-1", "aurora-2"]) {
+                expect(declarationsOf(AURORA_CSS, `${SPARK}[data-light="${light}"]`).get("background-color"), light).toBe(`var(--color-${light})`);
+            }
+            expect(frames.get("0%")).toEqual(new Map([["opacity", "0"], ["transform", "translateY(0)"]]));
+            expect(frames.get("15%")).toEqual(new Map([["opacity", "0.9"]]));
+            expect(frames.get("100%")).toEqual(new Map([["opacity", "0"], ["transform", "translate(24px, -640px)"]]));
+        });
+
+        it("should move the surge, rings, sparks and card by transform and opacity alone", () => {
+            for (const name of ["aurora-surge", "aurora-celebration-ring", "aurora-celebration-rise", "aurora-card-focus"]) {
+                expect([...new Set(propertiesOf(name))].sort(), name).toEqual(["opacity", "transform"]);
+            }
+        });
+
+        // Spec's still celebration and plan ruling 9
+        it("should hold the surge at 110% and 0.4 when still", () => {
+            const surge = declarationsOf(AURORA_CSS, `${STILL_BOARD}::before`);
+
+            expect(surge.get("opacity")).toBe("0.4");
+            expect(surge.get("transform")).toBe("scale(1.1)");
+            expect(surge.has("animation")).toBe(false);
+        });
+
+        it("should leave a soft still light of the primary on the centre box when still: 22% at the centre, 11% round it", () => {
+            const cell = declarationsOf(AURORA_CSS, `${STILL_BOARD} [data-variant]`);
+
+            expect(cell.get("background-color")).toBe(`color-mix(in srgb, var(--color-primary) max(0%, 22% - 11% * ${DISTANCE}), ${GROUND})`);
+            expect(cell.has("animation")).toBe(false);
+        });
+
+        it("should hold one ring at 150% and 0.6 when still", () => {
+            const ring = declarationsOf(AURORA_CSS, STILL_RING);
+
+            expect(ring.get("opacity")).toBe("0.6");
+            expect(ring.get("transform")).toBe("scale(1.5)");
+        });
+
+        it("should stop every part under reduced motion", () => {
+            for (const selector of [`${CELEBRATING}::before`, GLOWING_CELL, CARD, MOVING_RING, SPARK]) {
+                expect(reducedMotionDeclarationsOf(AURORA_CSS, selector).get("animation"), selector).toBe("none");
+            }
+        });
+
+        it("should open the dialog 800ms in, while the outer panes are still glowing", () => {
+            expect(STYLE_MOMENTS.aurora.celebrationBoardMs).toBe(800);
+        });
+    });
 });

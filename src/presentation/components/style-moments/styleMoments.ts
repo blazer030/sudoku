@@ -1,6 +1,7 @@
 import { computed, type Component, type ComputedRef } from "vue";
 import type { StyleId } from "@/theme/themeIds";
 import { useSettingsStore } from "@/stores/settingsStore";
+import AuroraCelebration from "@/presentation/components/style-moments/aurora/AuroraCelebration.vue";
 import AuroraGroupOverlay from "@/presentation/components/style-moments/aurora/AuroraGroupOverlay.vue";
 import AuroraLoader from "@/presentation/components/style-moments/aurora/AuroraLoader.vue";
 import MinimalLoader from "@/presentation/components/style-moments/minimal/MinimalLoader.vue";
@@ -176,11 +177,14 @@ const CHALKBOARD_MOMENTS: StyleMoments = {
 // From the boards: each cell of a completed group glows with the primary from 100ms for 600ms, 45ms a step. A line's
 // streak of the aurora sweeps out from 100ms and fades by 860ms; a box's ring goes out from 120ms and fades by 880ms
 // (AuroraGroupOverlay).
+// The solved board: the aurora surges behind it from 0ms over 1.8s, showing through its gaps and glass, while light rings
+// out through its panes from the centre cell (900ms each, 85ms a ring, the corners last by 1240ms). The dialog opens at
+// 800ms, as the outer panes are still glowing: the card focuses in from 100ms over 640ms, and behind it three rings go out
+// from its centre, 2.4s a round, while six sparks rise (AuroraCelebration).
 // While a puzzle loads, nine lights breathe outward from the centre under a slowly turning aurora (AuroraLoader).
-// Aurora Glass has no celebration for now; the rest of its moments come in later tasks.
 const AURORA_MOMENTS: StyleMoments = {
     loader: AuroraLoader,
-    celebration: null,
+    celebration: AuroraCelebration,
     cardDecoration: null,
     groupEffectMs: 900,
     groupOverlay: AuroraGroupOverlay,
