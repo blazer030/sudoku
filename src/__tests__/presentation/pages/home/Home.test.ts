@@ -172,6 +172,12 @@ describe("Home", () => {
         i18n.global.locale.value = "en";
     });
 
+    it.each(["minimal", "chalkboard", "blueprint"] as const)("should mark %s's visible subtitle for the skins", (style) => {
+        const { wrapper } = mountHome({ style });
+
+        expect(wrapper.get("[data-skin~='home-subtitle']").text()).toBe(i18n.global.t("home.subtitle"));
+    });
+
     it("should set ink's title as a vertical emblem in Chinese, the same in both languages", async () => {
         const { wrapper } = mountHome({ style: "ink" });
         const emblemText = async (locale: "en" | "zh-Hant") => {

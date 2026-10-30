@@ -10,6 +10,7 @@
 
         <p
             class="text-xs text-foreground-secondary px-1"
+            data-skin="app-note"
             data-testid="changelog-app-note"
         >
             {{ t("changelog.appNote") }}

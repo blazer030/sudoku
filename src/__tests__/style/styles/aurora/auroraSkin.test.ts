@@ -374,7 +374,7 @@ describe("aurora's glass", () => {
         // Nothing but the text colour reads 4.5:1 where the lights are brightest (spec ruling 4)
         it("should write the timer's icon and the changelog's note in the text colour", () => {
             expect(declarationsOf(AURORA_CSS, `${AURORA_SCOPE} svg.lucide-timer`).get("color")).toBe("var(--color-foreground)");
-            expect(declarationsOf(AURORA_CSS, `${AURORA_SCOPE} [data-testid="changelog-app-note"]`).get("color")).toBe("var(--color-foreground)");
+            expect(declarationsOf(AURORA_CSS, `${AURORA_SCOPE} [data-skin~="app-note"]`).get("color")).toBe("var(--color-foreground)");
         });
 
         it.each([
@@ -421,7 +421,7 @@ describe("aurora's glass", () => {
         it("should set the title at 600 whether or not the faces are ready, and the subtitle in the text colour", () => {
             expect(declarationsOf(AURORA_CSS, skin("title")).get("font-weight")).toBe("600");
             expect(declarationsOf(AURORA_CSS, `${AURORA_SCOPE}[data-aurora-fonts="ready"] [data-skin~="title"]`).has("font-weight")).toBe(false);
-            expect(declarationsOf(AURORA_CSS, `${AURORA_SCOPE} [data-testid="home-hero"] > p`).get("color")).toBe("var(--color-foreground)");
+            expect(declarationsOf(AURORA_CSS, `${AURORA_SCOPE} [data-skin~="home-subtitle"]`).get("color")).toBe("var(--color-foreground)");
         });
 
         it("should light the continue button from beneath in the primary, written in on-primary, with a gloss along its top", () => {
