@@ -24,6 +24,8 @@ public class MainActivity extends BridgeActivity {
             AppCompatDelegate.setDefaultNightMode(AppearanceStore.appCompatNightMode(AppearanceStore.loadMode(this)));
         }
         super.onCreate(savedInstanceState);
+        // After super.onCreate, where BridgeActivity sets the app theme that makes both bars transparent
+        SystemBarPainter.drawEdgeToEdge(getWindow());
 
         // Repaint the bars from last time until the page sets them again, unless the system theme
         // changed while the app was closed and they would be the wrong way round
@@ -31,7 +33,7 @@ public class MainActivity extends BridgeActivity {
         int nightFlag = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
         boolean isNight = nightFlag == Configuration.UI_MODE_NIGHT_YES;
         if (systemBarColors != null && systemBarColors.darkIcons() != isNight) {
-            SystemBarPainter.paint(this, systemBarColors);
+            SystemBarPainter.paint(getWindow(), bridge != null ? bridge.getWebView() : null, systemBarColors);
         }
     }
 

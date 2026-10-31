@@ -56,7 +56,7 @@ public class AppearanceBridgePlugin extends Plugin {
 
         AppearanceStore.saveSystemBarColors(getContext(), colors);
         getBridge().executeOnMainThread(() -> {
-            SystemBarPainter.paint(getActivity(), colors);
+            SystemBarPainter.paint(getActivity().getWindow(), getBridge().getWebView(), colors);
             call.resolve();
         });
     }

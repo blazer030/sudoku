@@ -1,0 +1,66 @@
+import { readdirSync, readFileSync, statSync } from "fs";
+import { join } from "path";
+
+// The app draws edge to edge on every API level: both system bars are transparent over the page, which
+// keeps content clear of them by the safe-area insets. Google Play flags the bar-colour calls Android 15
+// deprecated, so the bars take their colours from the theme, and the page's background is painted on
+// the WebView's frame, which shows under the bars wherever Capacitor pads it (older WebViews).
+
+const MAIN_PATH = "android/app/src/main";
+const JAVA_PATH = join(MAIN_PATH, "java/io/github/blazer030/sudoku");
+
+const collectFiles = (directory: string): string[] =>
+    readdirSync(directory).flatMap((name) => {
+        const path = join(directory, name);
+        return statSync(path).isDirectory() ? collectFiles(path) : [path];
+    });
+
+const styleBody = (path: string, name: string): string =>
+    new RegExp(`<style name="${name.replace(".", "\\.")}"[^>]*>([\\s\\S]*?)</style>`).exec(readFileSync(path, "utf8"))?.[1] ?? "";
+
+const colorValue = (path: string, name: string): string | undefined =>
+    new RegExp(`<color name="${name}">([^<]*)</color>`).exec(readFileSync(path, "utf8"))?.[1];
+
+const onCreateBody = (): string => {
+    const source = readFileSync(join(JAVA_PATH, "MainActivity.java"), "utf8");
+    const start = source.indexOf("public void onCreate(");
+    return source.slice(start, source.indexOf("\n    }\n", start));
+};
+
+describe("Android system bars", () => {
+    it("should not colour the bars through the APIs Android 15 deprecated", () => {
+        const offenders = collectFiles(MAIN_PATH)
+            .filter(path => /set(?:StatusBar|NavigationBar|NavigationBarDivider)Color\b/.test(readFileSync(path, "utf8")));
+
+        expect(offenders).toEqual([]);
+    });
+
+    it("should lay the window out edge to edge once the activity has set its theme", () => {
+        const onCreate = onCreateBody();
+
+        // BridgeActivity sets the app theme in super.onCreate, before the window's decor is built
+        expect(onCreate).toContain("SystemBarPainter.drawEdgeToEdge(getWindow());");
+        expect(onCreate.indexOf("SystemBarPainter.drawEdgeToEdge(")).toBeGreaterThan(onCreate.indexOf("super.onCreate("));
+    });
+
+    it("should keep both bars transparent in the app theme", () => {
+        const theme = styleBody(join(MAIN_PATH, "res/values/styles.xml"), "AppTheme.NoActionBar");
+
+        expect(theme).toContain('<item name="android:statusBarColor">@android:color/transparent</item>');
+        expect(theme).toContain('<item name="android:navigationBarColor">@color/navigation_bar</item>');
+        expect(colorValue(join(MAIN_PATH, "res/values-v26/colors.xml"), "navigation_bar")).toBe("@android:color/transparent");
+    });
+
+    it("should dim the navigation bar where its icons cannot turn dark", () => {
+        // Dark navigation bar icons arrived in API 26; before that its white icons need a dark scrim on a light page
+        expect(colorValue(join(MAIN_PATH, "res/values/colors.xml"), "navigation_bar")).toMatch(/^#[0-9a-f]{2}1b1b1b$/i);
+    });
+
+    it("should paint the page background on the WebView's frame, which Capacitor's SystemBars leaves alone", () => {
+        // SystemBars repaints the decor view whenever the page sets the bar style; it pads the WebView's
+        // parent by the bars on WebViews before 140, so that frame is what shows under them
+        const painter = readFileSync(join(JAVA_PATH, "SystemBarPainter.java"), "utf8");
+
+        expect(painter).toMatch(/\(\(View\) webView\.getParent\(\)\)\.setBackgroundColor\(colors\.background\(\)\)/);
+    });
+});
