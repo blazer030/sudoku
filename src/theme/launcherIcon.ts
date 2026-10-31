@@ -36,6 +36,13 @@ export const launcherIconKey = (style: StyleId, themeId: ColorThemeId, mode: Col
 export const pwaIconKey = (style: StyleId, themeId: ColorThemeId): LauncherIconKey =>
     launcherIconKey(style, themeId, effectiveColorMode(style, "light"));
 
+/** The PNGs an icon has on the web only: an installed web app's two sizes and iOS's home-screen icon. */
+export const pwaIconFiles = (icon: LauncherIconKey): { small: string; large: string; appleTouch: string } => ({
+    small: `pwa-192x192-${icon}.png`,
+    large: `pwa-512x512-${icon}.png`,
+    appleTouch: `apple-touch-icon-${icon}.png`,
+});
+
 export const LAUNCHER_ICONS: readonly LauncherIcon[] = STYLE_IDS.flatMap(style =>
     STYLES[style].themes.flatMap(theme => STYLE_COLOR_MODES[style].map(mode => ({
         key: launcherIconKey(style, theme.id, mode),
