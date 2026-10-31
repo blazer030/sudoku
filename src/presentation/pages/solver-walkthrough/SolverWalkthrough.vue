@@ -67,15 +67,17 @@
                 </div>
             </BoardFrame>
 
-            <!-- The playback panel covers the inputs in place, so the board never moves. -->
+            <!-- The playback panel covers the inputs in place, so the board never moves. The guide is stacked in the
+                 inputs' place in the grid, so a guide taller than them takes its height in the page: the room
+                 above the board gives way first, then the page scrolls, and the guide never covers the board. -->
             <div
                 ref="inputArea"
-                class="relative w-full"
+                class="relative w-full grid"
             >
                 <div
                     :class="overlayShown ? 'opacity-0 pointer-events-none' : 'opacity-100 delay-100'"
                     :inert="overlayShown || checking || undefined"
-                    class="flex flex-col items-center gap-6 transition-opacity duration-200"
+                    class="col-start-1 row-start-1 flex flex-col items-center gap-6 transition-opacity duration-200"
                     data-testid="walkthrough-inputs"
                 >
                     <DigitPad
@@ -115,16 +117,12 @@
                 <Transition name="walkthrough-overlay">
                     <div
                         v-if="introOpen && !inPlayback"
-                        ref="introPosition"
-                        :style="{ top: `${-introLift}px` }"
-                        class="absolute inset-x-0 z-10"
+                        class="col-start-1 row-start-1 self-start relative z-10"
                         data-testid="walkthrough-intro-position"
                     >
-                        <!-- On short screens the guide rises over the empty board, so its actions stay on screen. -->
                         <section
                             :aria-label="t('home.walkthrough')"
-                            :style="introMaxHeight === null ? undefined : { maxHeight: `${introMaxHeight}px` }"
-                            class="bg-card rounded-2xl shadow-card-lg p-4 w-full flex flex-col gap-4 overflow-y-auto"
+                            class="bg-card rounded-2xl shadow-card-lg p-4 w-full flex flex-col gap-4"
                             data-testid="walkthrough-intro"
                             data-skin="card"
                         >
@@ -225,7 +223,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, inject, nextTick, onBeforeUnmount, ref, useTemplateRef, watch, type Component } from "vue";
+import { computed, inject, onBeforeUnmount, ref, useTemplateRef, watch, type Component } from "vue";
 import { onBeforeRouteLeave, useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { ChevronLeft, Info, ListFilter, Pencil, PencilLine, RotateCcw, Trophy, Wand2 } from "lucide-vue-next";
@@ -247,7 +245,6 @@ import StepPlaybackPanel from "@/presentation/components/step-presentation/StepP
 import StepTag from "@/presentation/components/step-presentation/StepTag.vue";
 import { useHintExplanation } from "@/presentation/components/step-presentation/useHintExplanation";
 import { useRoomBelow } from "@/presentation/composables/useRoomBelow";
-import { panelLift } from "@/presentation/components/step-presentation/panelLift";
 import { useWalkthroughInput } from "@/presentation/pages/solver-walkthrough/useWalkthroughInput";
 import { useWalkthroughPlayback } from "@/presentation/pages/solver-walkthrough/useWalkthroughPlayback";
 import { provideWalkthroughDialog } from "@/presentation/pages/solver-walkthrough/useWalkthroughDialog";
@@ -351,22 +348,6 @@ const { room: roomBelowInputArea, measure: measureRoomBelowInputArea } = useRoom
 watch(inPlayback, (playing) => {
     if (playing) measureRoomBelowInputArea();
 });
-
-const introPosition = useTemplateRef<HTMLElement>("introPosition");
-const introLift = ref(0);
-const introMaxHeight = computed(() =>
-    roomBelowInputArea.value === null ? null : roomBelowInputArea.value + introLift.value);
-
-const measureIntroLift = () => {
-    const intro = introPosition.value?.querySelector<HTMLElement>("[data-testid='walkthrough-intro']");
-    if (!intro || roomBelowInputArea.value === null) {
-        introLift.value = 0;
-        return;
-    }
-    introLift.value = panelLift(roomBelowInputArea.value, intro.scrollHeight);
-};
-
-watch([introOpen, inPlayback, roomBelowInputArea], () => { void nextTick(measureIntroLift); }, { immediate: true });
 
 const loadSample = (puzzle: number[][]) => {
     clearSelection();

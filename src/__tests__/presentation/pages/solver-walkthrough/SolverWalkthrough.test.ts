@@ -149,7 +149,9 @@ describe("SolverWalkthrough", () => {
             expect(wrapper.find("[data-testid='walkthrough-inputs']").attributes("inert")).toBeDefined();
         });
 
-        it("should lift the guide over the board when it would not fit below", async () => {
+        // A guide taller than the inputs takes its own height in the page, stacked in the inputs' place: the room above
+        // the board gives way first, then the page scrolls, so the guide never covers the board in any style or language
+        it("should stack the guide in the inputs' place in the page, never lifted over the board", async () => {
             // The input area starts 120px above the bottom edge, leaving 96px under the 24px gap,
             // and the guide is 300px tall
             vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockReturnValue({ top: window.innerHeight - 120 } as DOMRect);
@@ -161,9 +163,17 @@ describe("SolverWalkthrough", () => {
                 const { wrapper } = mountWalkthrough();
                 await flushPromises();
 
-                const intro = wrapper.find<HTMLElement>("[data-testid='walkthrough-intro']");
-                expect(intro.element.style.maxHeight).toBe("300px");
-                expect(wrapper.find<HTMLElement>("[data-testid='walkthrough-intro-position']").element.style.top).toBe("-204px");
+                const position = wrapper.find<HTMLElement>("[data-testid='walkthrough-intro-position']");
+                const inputs = wrapper.find<HTMLElement>("[data-testid='walkthrough-inputs']");
+                const inputArea = inputs.element.parentElement;
+                expect(inputArea?.classList.contains("grid")).toBe(true);
+                expect(position.element.closest(".grid")).toBe(inputArea);
+                expect(position.classes()).not.toContain("absolute");
+                expect(position.element.style.top).toBe("");
+                for (const cell of [position, inputs]) {
+                    expect(cell.classes()).toEqual(expect.arrayContaining(["col-start-1", "row-start-1"]));
+                }
+                expect(wrapper.find<HTMLElement>("[data-testid='walkthrough-intro']").element.style.maxHeight).toBe("");
             } finally {
                 Reflect.deleteProperty(HTMLElement.prototype, "scrollHeight");
                 vi.restoreAllMocks();
