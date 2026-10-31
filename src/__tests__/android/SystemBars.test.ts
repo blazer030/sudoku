@@ -4,7 +4,9 @@ import { join } from "path";
 // The app draws edge to edge on every API level: both system bars are transparent over the page, which
 // keeps content clear of them by the safe-area insets. Google Play flags the bar-colour calls Android 15
 // deprecated, so the bars take their colours from the theme, and the page's background is painted on
-// the WebView's frame, which shows under the bars wherever Capacitor pads it (older WebViews).
+// the window's content frame, which shows under the bars wherever the page does not reach: where
+// Capacitor pads the WebView's frame (older WebViews), and under a button navigation bar, which the page
+// keeps clear of so its keys never cover what a style draws at the page's edge.
 
 const MAIN_PATH = "android/app/src/main";
 const JAVA_PATH = join(MAIN_PATH, "java/io/github/blazer030/sudoku");
@@ -56,11 +58,30 @@ describe("Android system bars", () => {
         expect(colorValue(join(MAIN_PATH, "res/values/colors.xml"), "navigation_bar")).toMatch(/^#[0-9a-f]{2}1b1b1b$/i);
     });
 
-    it("should paint the page background on the WebView's frame, which Capacitor's SystemBars leaves alone", () => {
-        // SystemBars repaints the decor view whenever the page sets the bar style; it pads the WebView's
-        // parent by the bars on WebViews before 140, so that frame is what shows under them
+    it("should paint the page background on the window's content frame, which Capacitor's SystemBars leaves alone", () => {
+        // SystemBars repaints the decor view whenever the page sets the bar style. The content frame holds
+        // Capacitor's frame, which it pads by the bars on WebViews before 140, and is itself padded by a
+        // button navigation bar, so its background is what shows under the bars.
         const painter = readFileSync(join(JAVA_PATH, "SystemBarPainter.java"), "utf8");
 
-        expect(painter).toMatch(/\(\(View\) webView\.getParent\(\)\)\.setBackgroundColor\(colors\.background\(\)\)/);
+        expect(painter).toMatch(/window\.findViewById\(android\.R\.id\.content\)\.setBackgroundColor\(colors\.background\(\)\)/);
+    });
+
+    it("should keep the page clear of a button navigation bar from the moment the activity has its views", () => {
+        const onCreate = onCreateBody();
+
+        // Capacitor's frame exists once super.onCreate has set up the bridge
+        expect(onCreate).toContain("SystemBarPainter.keepClearOfButtonNavigationBar(getWindow());");
+        expect(onCreate.indexOf("SystemBarPainter.keepClearOfButtonNavigationBar(")).toBeGreaterThan(onCreate.indexOf("super.onCreate("));
+    });
+
+    it("should take the button navigation bar out of the insets before Capacitor's SystemBars reads them", () => {
+        // SystemBars listens on the WebView's frame; the content frame round it sees the insets first, so
+        // the bar is neither padded twice nor passed to the page as a safe-area inset
+        const painter = readFileSync(join(JAVA_PATH, "SystemBarPainter.java"), "utf8");
+
+        expect(painter).toMatch(/ViewCompat\.setOnApplyWindowInsetsListener\(window\.findViewById\(android\.R\.id\.content\)/);
+        expect(painter).toContain("WindowInsetsCompat.Type.tappableElement()");
+        expect(painter).toMatch(/return insets\.inset\(reserved\.left\(\), 0, reserved\.right\(\), reserved\.bottom\(\)\)/);
     });
 });
