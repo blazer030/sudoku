@@ -669,6 +669,17 @@ describe("aurora's glass", () => {
             expect([...declarations]).toEqual([[property, "14px"]]);
         });
 
+        // A box's corner cell kept its one 14px corner under an outline, which then read as a tab; an outlined cell is
+        // one clean pane, rounded 5px all round, wherever it lies in its box
+        it("should round every outlined cell 5px all round, a box's corner cell too", () => {
+            const outlinedCells = [cell("selected"), cell("answer"), cell("wrong"), `${cell("error")}[data-selected]`];
+
+            for (const outlined of outlinedCells) expect(declarationsOf(AURORA_CSS, outlined).get("border-radius"), outlined).toBe("5px");
+            for (const corner of ["top-left", "top-right", "bottom-left", "bottom-right"]) {
+                expect(ruleOrder(outlinedCells.join(", "))).toBeGreaterThan(ruleOrder(`${BOARD} [data-box-corner="${corner}"]`));
+            }
+        });
+
         it("should lay plain cells and clues on the cell's glass, and peers and a step's scope on the peer's", () => {
             expect(groundOf("default")).toBe(CELL_GLASS);
             expect(groundOf("clue")).toBe(CELL_GLASS);

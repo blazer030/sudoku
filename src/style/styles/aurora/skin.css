@@ -786,6 +786,16 @@
     border-bottom-right-radius: 14px;
 }
 
+/* A cell outlined on its own (the selected cell, a step's answer and wrong cells, a selected error) is one clean pane,
+   rounded 5px all round wherever it lies in its box: a box's corner cell would keep its one 14px corner under the
+   outline and read as a tab. Laid after the corners, which weigh as much. */
+[data-style="aurora"] [data-skin~="board"] [data-variant="selected"],
+[data-style="aurora"] [data-skin~="board"] [data-variant="answer"],
+[data-style="aurora"] [data-skin~="board"] [data-variant="wrong"],
+[data-style="aurora"] [data-skin~="board"] [data-variant="error"][data-selected] {
+    border-radius: 5px;
+}
+
 /* Digits and notes lie above every glow: the selected and answer cells (1) and the pulse and group glows (0), so a
    neighbour's light never covers them (ruling 4) */
 [data-style="aurora"] [data-skin~="board"] [data-variant] > div {
