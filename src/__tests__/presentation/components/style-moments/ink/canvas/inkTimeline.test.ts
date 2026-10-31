@@ -62,6 +62,11 @@ describe("inkTimeline", () => {
             expect(second.delayMs + second.durationMs).toBeGreaterThan(boardMs);
         });
 
+        // The first drop's wash reaches past the board's middle, its pale tail fading out towards the edges
+        it("should spread the first wash over more than half the board", () => {
+            expect(INK_CELEBRATION_WASH[0].radius).toBeGreaterThan(0.5);
+        });
+
         // The second drop lands on the first one's wash, so it carries more ink to keep the overlap deep
         it("should give the second drop more ink than the first", () => {
             const [first, second] = INK_CELEBRATION_WASH;

@@ -1,12 +1,20 @@
-// The paper's noise, baked once into a texture that repeats seamlessly, so the shader reads noise by texture
+// The water's noise, baked once into a texture that repeats seamlessly, so the shader reads noise by texture
 // lookups rather than hashing (fract(sin()) breaks into blocks at the mediump many phones run fragments at).
+// Ink in water has no grain, so every channel is smooth gradient noise: two broad ones that drift and bend the
+// washes, and a finer cloud for the density inside them.
 
 /** The texture's side in texels: a power of two, so WebGL1 can repeat it. */
 export const INK_NOISE_SIZE = 256;
 
-const SEED = 0x1d4b5e;
+/** Red and green: the drift across and down; blue: the cloud. */
+export const INK_NOISE_CHANNELS = 3;
 
-// mulberry32: a small seeded generator, so every engine bakes the same paper
+const SEED = 0x51ab7e;
+
+// Lattice cells across the texture for the broadest octave
+const BASE_CELLS = 3;
+
+// mulberry32: a small seeded generator, so every engine bakes the same water
 const seededRandom = (seed: number): (() => number) => {
     let state = seed >>> 0;
     return () => {
@@ -18,29 +26,43 @@ const seededRandom = (seed: number): (() => number) => {
     };
 };
 
-const smoothstep = (fraction: number): number => fraction * fraction * (3 - 2 * fraction);
+const quintic = (fraction: number): number => fraction * fraction * fraction * (fraction * (fraction * 6 - 15) + 10);
 
-// Value noise on a lattice of `cells` × `cells` that wraps round, sampled at every texel of a `size` square
-const latticeNoise = (size: number, cells: number, random: () => number): Float32Array => {
-    const lattice = Array.from({ length: cells * cells }, random);
-    const latticeAt = (column: number, row: number): number => lattice[(row % cells) * cells + (column % cells)] ?? 0;
+// Gradient noise on a lattice of `cells` × `cells` that wraps round, sampled at every texel of a `size` square
+const gradientNoise = (size: number, cells: number, random: () => number): Float32Array => {
+    const angles = Array.from({ length: cells * cells }, () => random() * Math.PI * 2);
+    const angleAt = (column: number, row: number): number => angles[(row % cells) * cells + (column % cells)] ?? 0;
     const cellSize = size / cells;
     const values = new Float32Array(size * size);
     for (let row = 0; row < size; row++) {
         const cellRow = Math.floor(row / cellSize);
-        const across = smoothstep(row / cellSize - cellRow);
+        const down = row / cellSize - cellRow;
         for (let column = 0; column < size; column++) {
             const cellColumn = Math.floor(column / cellSize);
-            const along = smoothstep(column / cellSize - cellColumn);
-            const top = latticeAt(cellColumn, cellRow) * (1 - along) + latticeAt(cellColumn + 1, cellRow) * along;
-            const bottom = latticeAt(cellColumn, cellRow + 1) * (1 - along) + latticeAt(cellColumn + 1, cellRow + 1) * along;
-            values[row * size + column] = top * (1 - across) + bottom * across;
+            const across = column / cellSize - cellColumn;
+            const corner = (offsetColumn: number, offsetRow: number): number => {
+                const angle = angleAt(cellColumn + offsetColumn, cellRow + offsetRow);
+                return Math.cos(angle) * (across - offsetColumn) + Math.sin(angle) * (down - offsetRow);
+            };
+            const along = quintic(across);
+            const top = corner(0, 0) * (1 - along) + corner(1, 0) * along;
+            const bottom = corner(0, 1) * (1 - along) + corner(1, 1) * along;
+            values[row * size + column] = top + (bottom - top) * quintic(down);
         }
     }
     return values;
 };
 
-const whiteNoise = (size: number, random: () => number): Float32Array => Float32Array.from({ length: size * size }, random);
+// Octaves of gradient noise, each twice as fine and half as strong as the last
+const fractalNoise = (size: number, octaves: number, random: () => number): Float32Array => {
+    const values = new Float32Array(size * size);
+    for (let octave = 0; octave < octaves; octave++) {
+        const layer = gradientNoise(size, BASE_CELLS << octave, random);
+        const amplitude = 0.5 ** octave;
+        layer.forEach((value, texel) => { values[texel] = (values[texel] ?? 0) + value * amplitude; });
+    }
+    return values;
+};
 
 // Stretches a channel to the full 0–255, so every channel's contrast is the same whatever the seed gave it
 const toBytes = (values: Float32Array): Uint8Array => {
@@ -55,20 +77,15 @@ const toBytes = (values: Float32Array): Uint8Array => {
 };
 
 /**
- * An RGBA texture of four noises: red smooth (a cell every 8 texels), green fine (every 4, the paper's fibres),
- * blue per texel (the paper's tooth, where pigment granulates) and alpha coarse (every 16, the wash's body).
+ * An RGB texture of three smooth noises: red and green broad (two octaves), the drift that bends and carries the
+ * washes; blue finer (four octaves), the cloud in their body.
  */
 export const bakeInkNoise = (size: number = INK_NOISE_SIZE): Uint8Array => {
     const random = seededRandom(SEED);
-    const channels = [
-        latticeNoise(size, size / 8, random),
-        latticeNoise(size, size / 4, random),
-        whiteNoise(size, random),
-        latticeNoise(size, size / 16, random),
-    ].map(toBytes);
-    const texels = new Uint8Array(size * size * 4);
+    const channels = [fractalNoise(size, 2, random), fractalNoise(size, 2, random), fractalNoise(size, 4, random)].map(toBytes);
+    const texels = new Uint8Array(size * size * INK_NOISE_CHANNELS);
     channels.forEach((channel, channelIndex) => {
-        channel.forEach((value, texel) => { texels[texel * 4 + channelIndex] = value; });
+        channel.forEach((value, texel) => { texels[texel * INK_NOISE_CHANNELS + channelIndex] = value; });
     });
     return texels;
 };

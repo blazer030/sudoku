@@ -31,9 +31,9 @@ const BLOOM_SLOT_SIZE = 4;
 // The solved board: two washes bloom over 1400ms, the second 200ms later and off centre, where the skin's two
 // washes stood; the dialog opens as the first settles, while the second is still spreading under the scrim
 export const INK_CELEBRATION_WASH: readonly InkBloom[] = [
-    { kind: "bloom", centre: { x: 0.5, y: 0.5 }, radius: 0.46, ink: 1, delayMs: 0, durationMs: 1400 },
+    { kind: "bloom", centre: { x: 0.5, y: 0.5 }, radius: 0.547, ink: 1, delayMs: 0, durationMs: 1400 },
     // it lands on the first one's wash, so it carries more ink to keep the overlap deep
-    { kind: "bloom", centre: { x: 0.7, y: 0.62 }, radius: 0.34, ink: 1.32, delayMs: 200, durationMs: 1400 },
+    { kind: "bloom", centre: { x: 0.7, y: 0.62 }, radius: 0.405, ink: 1.32, delayMs: 200, durationMs: 1400 },
 ];
 
 /** The slow drift that carries the washes eases to a stop this long after the first effect is scheduled. */
