@@ -1,6 +1,11 @@
 import { existsSync, readdirSync, readFileSync } from "fs";
 import { STYLE_IDS, type StyleId } from "@/theme/themeIds";
-import { animationTimingOf, findLayoutDeclarations, findScalesOutOfRange, findUnguardedMotion, findUnscopedSelectors, reducedMotionDeclarationsOf } from "./styleSheetRules";
+import { animationTimingOf, findCrossEngineHazards, findLayoutDeclarations, findScalesOutOfRange, findUnguardedMotion, findUnscopedSelectors, reducedMotionDeclarationsOf } from "./styleSheetRules";
+
+// The styles held to the cross-engine rules so far. paper, pixel and cyber still find a cell by :has(),
+// cyber's arrival and loader carry a drop-shadow while they animate, chalkboard's erase smear animates a
+// blur and blueprint's loader pen rides an offset-path; each joins the list once it is brought in line.
+const CROSS_ENGINE_STYLES: readonly StyleId[] = ["ink"];
 
 const sheetOf = (style: StyleId): string => readFileSync(`src/style/styles/${style}/skin.css`, "utf8");
 
@@ -53,6 +58,25 @@ describe("style sheet rules", () => {
             @media (prefers-reduced-motion: reduce) { [data-style="paper"] .x { animation: none } }`;
 
         expect(reducedMotionDeclarationsOf(css, '[data-style="paper"] .x').get("animation")).toBe("none");
+    });
+
+    it("should flag what draws differently from engine to engine", () => {
+        expect(findCrossEngineHazards('[data-style="ink"] [data-variant]:has(> .value-arrive)::before { opacity: 0 }')).toHaveLength(1);
+        expect(findCrossEngineHazards('[data-style="ink"] [data-variant][data-arriving]::before { opacity: 0 }')).toHaveLength(0);
+        expect(findCrossEngineHazards("@keyframes ink-a { to { filter: blur(2px) } }")).toHaveLength(1);
+        expect(findCrossEngineHazards("@keyframes ink-a { to { backdrop-filter: blur(2px) } }")).toHaveLength(1);
+        expect(findCrossEngineHazards('[data-style="ink"] .x { filter: drop-shadow(0 0 2px red); animation: ink-a 1s }')).toHaveLength(1);
+        expect(findCrossEngineHazards(`[data-style="ink"] .x { animation: ink-a 1s }
+            [data-style="ink"] .x { filter: blur(1px) }`)).toHaveLength(1);
+        expect(findCrossEngineHazards('[data-style="ink"] .x { filter: blur(1px) }')).toHaveLength(0);
+        expect(findCrossEngineHazards('[data-style="ink"] .x { filter: none; animation: ink-a 1s }')).toHaveLength(0);
+        expect(findCrossEngineHazards('[data-style="ink"] .x { -webkit-mask-image: url(#pen) }')).toHaveLength(1);
+        expect(findCrossEngineHazards('[data-style="ink"] .x { mask-image: url("@/style/styles/ink/a.svg") }')).toHaveLength(0);
+        expect(findCrossEngineHazards('[data-style="ink"] .x { offset-path: path("M0 0") }')).toHaveLength(1);
+    });
+
+    it.each(CROSS_ENGINE_STYLES)("%s.css draws alike in every engine: no :has(), no mask by url(#…), no offset-path, no animated filter", (style) => {
+        expect(findCrossEngineHazards(sheetOf(style))).toEqual([]);
     });
 
     it.each(STYLE_IDS)("%s.css has no layout declarations", (style) => {

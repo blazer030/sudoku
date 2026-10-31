@@ -222,3 +222,42 @@ export const animationTimingOf = (value: string, name: string): AnimationTiming 
     }
     return null;
 };
+
+const FILTER_PROPERTIES = new Set(["filter", "backdrop-filter", "-webkit-backdrop-filter"]);
+const MASK_PROPERTIES = new Set(["mask", "mask-image", "-webkit-mask", "-webkit-mask-image"]);
+
+/**
+ * What draws differently from engine to engine: a :has() selector, an SVG mask by reference (url(#…)),
+ * offset-path, and a filter that animates or sits on an animated rule. "selector → what" for each.
+ */
+export const findCrossEngineHazards = (css: string): string[] => {
+    const root = postcss.parse(css);
+    const animated = new Set<string>();
+    root.walkRules((rule) => {
+        if (isInReducedMotion(rule) || isInKeyframes(rule)) return;
+        if (ownDeclarations(rule).some(declaration => movementOf(declaration) === "animation")) {
+            for (const selector of selectorsOf(rule)) animated.add(selector);
+        }
+    });
+    const hits: string[] = [];
+    root.walkRules((rule) => {
+        const inKeyframes = isInKeyframes(rule);
+        const selectors = inKeyframes ? [] : selectorsOf(rule);
+        for (const selector of selectors) {
+            if (selector.includes(":has(")) hits.push(`${selector} → :has()`);
+        }
+        const where = inKeyframes ? `@keyframes ${(ancestorAtRules(rule).find(atRule => atRule.name.endsWith("keyframes")))?.params ?? ""}` : selectors.join(", ");
+        for (const declaration of ownDeclarations(rule)) {
+            const property = declaration.prop.toLowerCase();
+            const value = declaration.value.trim().toLowerCase();
+            if (property === "offset-path") hits.push(`${where} → offset-path`);
+            if (MASK_PROPERTIES.has(property) && /url\(\s*["']?#/.test(value)) hits.push(`${where} → ${property} by url(#…)`);
+            if (!FILTER_PROPERTIES.has(property) || value === "none") continue;
+            if (inKeyframes) hits.push(`${where} → ${property}`);
+            for (const selector of selectors) {
+                if (animated.has(selector)) hits.push(`${selector} → ${property} on an animated rule`);
+            }
+        }
+    });
+    return hits;
+};
