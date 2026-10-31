@@ -1,6 +1,6 @@
 import { readFileSync } from "fs";
 import postcss, { type AtRule } from "postcss";
-import { animationTimingOf, declarationsOf, reducedMotionDeclarationsOf } from "../../styleSheetRules";
+import { animationTimingOf, declarationsOf, reducedMotionDeclarationsOf, splitTopLevel } from "../../styleSheetRules";
 import { ARRIVAL_SETTLE_MS } from "@/presentation/components/board-cell/useArrivalMotion";
 
 const INK_CSS = readFileSync("src/style/styles/ink/skin.css", "utf8");
@@ -578,27 +578,86 @@ describe("ink skin", () => {
         const animatedPropertiesOf = (name: string): Set<string> =>
             new Set([...keyframesOf(name).values()].flatMap(frame => [...frame.keys()]));
         const opacityOf = (frame: Map<string, string> | undefined): number => Number(frame?.get("opacity"));
-        // A frame's blur radius in px (0 for blur(0)), and its scale (1 without one)
-        const blurOf = (frame: Map<string, string> | undefined): number => Number.parseFloat(/blur\(([\d.]+)/.exec(frame?.get("filter") ?? "")?.[1] ?? "NaN");
+        // A frame's soft mask's size in % (both prefixes alike), and its scale (1 without one)
+        const maskSizeOf = (frame: Map<string, string> | undefined): number => {
+            const size = frame?.get("mask-size") ?? "";
+            expect(frame?.get("-webkit-mask-size")).toBe(size);
+            return Number.parseFloat(size);
+        };
         const scaleOf = (frame: Map<string, string> | undefined): number => Number(/scale\(([\d.]+)\)/.exec(frame?.get("transform") ?? "")?.[1] ?? "1");
         const durationOf = (selector: string, name: string): number =>
             animationTimingOf(declarationsOf(INK_CSS, selector).get("animation") ?? "", name)?.durationMs ?? Number.NaN;
 
-        it("should bleed an entered digit in from a blur, a size up, to the sharp digit", () => {
+        // No live blur: every engine draws a soft-edged mask alike, where WebKit drew a blurred digit sharp
+        it("should soften the digit's edge by a radial mask, centred and drawn once", () => {
+            const digit = declarationsOf(INK_CSS, DIGIT);
+
+            for (const prefix of ["", "-webkit-"]) {
+                expect(digit.get(`${prefix}mask-image`), prefix).toMatch(/^radial-gradient\(closest-side, var\(--color-foreground\) [\d.]+%, transparent\)$/);
+                expect(digit.get(`${prefix}mask-position`), prefix).toBe("center");
+                expect(digit.get(`${prefix}mask-repeat`), prefix).toBe("no-repeat");
+            }
+        });
+
+        it("should soak an entered digit in, a size up with its edge soft, to the sharp digit", () => {
             const frames = keyframesOf("ink-bleed");
 
             expect(opacityOf(frames.get("0%"))).toBe(0);
-            expect(blurOf(frames.get("0%"))).toBeGreaterThan(0);
             expect(scaleOf(frames.get("0%"))).toBeGreaterThan(1);
             expect(opacityOf(frames.get("100%"))).toBe(1);
-            expect(blurOf(frames.get("100%"))).toBe(0);
             expect(scaleOf(frames.get("100%"))).toBe(1);
+            // The mask opens from a soft core round the digit's middle until it covers the whole digit
+            expect(maskSizeOf(frames.get("0%"))).toBeLessThan(maskSizeOf(frames.get("100%")));
+            expect(maskSizeOf(frames.get("100%"))).toBeGreaterThanOrEqual(400);
             // Hidden until it starts, and held sharp once done
             expect(declarationsOf(INK_CSS, DIGIT).get("animation")).toMatch(/ both$/);
         });
 
-        it("should animate the bleeding digit only by opacity, filter and transform", () => {
-            expect([...animatedPropertiesOf("ink-bleed")].sort()).toEqual(["filter", "opacity", "transform"]);
+        it("should animate the soaking digit only by opacity, transform, its mask's size and its soak", () => {
+            expect([...animatedPropertiesOf("ink-bleed")].sort()).toEqual(["--ink-soak-copies", "--ink-soak-fill", "--ink-soak-spread", "-webkit-mask-size", "mask-size", "opacity", "transform"]);
+        });
+
+        // Chromium steps a colour built on currentColor instead of easing it, so the shadows and the fill are
+        // built from registered numbers, and only the numbers animate
+        it("should register the soak's measures, settled by default, so every engine eases them alike", () => {
+            const registered = new Map<string, Map<string, string>>();
+            postcss.parse(INK_CSS).walkAtRules("property", (atRule) => {
+                const descriptors = new Map<string, string>();
+                atRule.walkDecls((declaration) => {
+                    descriptors.set(declaration.prop, collapse(declaration.value));
+                });
+                registered.set(atRule.params.trim(), descriptors);
+            });
+
+            expect(Object.fromEntries([...registered].map(([name, descriptors]) => [name, [descriptors.get("syntax"), descriptors.get("inherits"), descriptors.get("initial-value")]]))).toEqual({
+                "--ink-soak-spread": ['"<length>"', "false", "0px"],
+                "--ink-soak-copies": ['"<percentage>"', "false", "0%"],
+                "--ink-soak-fill": ['"<percentage>"', "false", "100%"],
+            });
+        });
+
+        it("should soak the digit in from a thin fill among spread copies to its own ink", () => {
+            const frames = keyframesOf("ink-bleed");
+            const first = frames.get("0%");
+            const last = frames.get("100%");
+
+            expect(Number.parseFloat(first?.get("--ink-soak-spread") ?? "")).toBeGreaterThan(0);
+            expect(Number.parseFloat(first?.get("--ink-soak-copies") ?? "")).toBeGreaterThan(0);
+            expect(Number.parseFloat(first?.get("--ink-soak-fill") ?? "")).toBeLessThan(100);
+            expect([last?.get("--ink-soak-spread"), last?.get("--ink-soak-copies"), last?.get("--ink-soak-fill")]).toEqual(["0px", "0%", "100%"]);
+        });
+
+        // Each shadow is an offset copy with no blur radius: two lengths and the colour
+        it("should soften the digit by faint offset copies of itself, never a blur", () => {
+            const digit = declarationsOf(INK_CSS, DIGIT);
+            const copies = splitTopLevel(digit.get("text-shadow") ?? "", /,/);
+
+            expect(copies.length).toBeGreaterThanOrEqual(8);
+            for (const copy of copies) {
+                expect(splitTopLevel(copy, /\s/), copy).toEqual([expect.any(String), expect.any(String), "color-mix(in srgb, currentColor var(--ink-soak-copies), transparent)"]);
+            }
+            expect(copies.every(copy => !copy.startsWith("0px 0px"))).toBe(true);
+            expect(digit.get("-webkit-text-fill-color")).toBe("color-mix(in srgb, currentColor var(--ink-soak-fill), transparent)");
         });
 
         it("should spread an ink halo from under the arriving digit, without taking taps", () => {
@@ -640,16 +699,31 @@ describe("ink skin", () => {
             expect(ghost.get("color")).toBe(entered.get("color"));
             expect(ghost.get("font-style")).toBe(entered.get("font-style"));
             expect(ghost.get("font-weight")).toBe(entered.get("font-weight"));
-            // It leaves as the digit showed it, then blurs, sinks and swells away
+            // It leaves as the digit showed it, then its edge dissolves as it sinks and swells away
             expect(opacityOf(frames.get("0%"))).toBe(1);
             expect(opacityOf(frames.get("100%"))).toBe(0);
-            expect(blurOf(frames.get("100%"))).toBeGreaterThan(blurOf(frames.get("0%")));
+            expect(maskSizeOf(frames.get("100%"))).toBeLessThan(maskSizeOf(frames.get("0%")));
             expect(frames.get("100%")?.get("transform")).toMatch(/translateY\([\d.]+px\)/);
             expect(scaleOf(frames.get("100%"))).toBeGreaterThan(1);
+            for (const prefix of ["", "-webkit-"]) {
+                expect(ghost.get(`${prefix}mask-image`), prefix).toBe(declarationsOf(INK_CSS, DIGIT).get(`${prefix}mask-image`));
+            }
+            expect([...animatedPropertiesOf("ink-wash")].sort()).toEqual(["--ink-soak-copies", "--ink-soak-fill", "--ink-soak-spread", "-webkit-mask-size", "mask-size", "opacity", "transform"]);
+            expect(ghost.get("text-shadow")).toBe(declarationsOf(INK_CSS, DIGIT).get("text-shadow"));
+            expect(ghost.get("-webkit-text-fill-color")).toBe(declarationsOf(INK_CSS, DIGIT).get("-webkit-text-fill-color"));
+            const last = frames.get("100%");
+            expect(Number.parseFloat(last?.get("--ink-soak-spread") ?? "")).toBeGreaterThan(0);
+            expect(Number.parseFloat(last?.get("--ink-soak-fill") ?? "")).toBeLessThan(100);
         });
 
-        it("should isolate the board, so WebKit still draws the blur under the washi fibres fixed to the screen", () => {
+        it("should keep the board its own stacking context, so its washes, digits and lines layer among themselves", () => {
             expect(declarationsOf(INK_CSS, BOARD).get("isolation")).toBe("isolate");
+        });
+
+        it("should animate no filter on a digit, its halo or its ghost", () => {
+            for (const name of ["ink-bleed", "ink-halo", "ink-wash"]) {
+                expect(animatedPropertiesOf(name).has("filter"), name).toBe(false);
+            }
         });
 
         it.each([["halo", HALO], ["ghost", GHOST]])("should show no %s when its animation does not run", (_name, selector) => {
