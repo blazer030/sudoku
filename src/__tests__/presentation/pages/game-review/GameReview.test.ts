@@ -333,3 +333,39 @@ describe("GameReview", () => {
         expect(wrapper.findAll("[data-testid^='review-cell-'][role='button']")).toHaveLength(0);
     });
 });
+
+describe("GameReview with an index that names no game", () => {
+    const mountAt = async (index: string) => {
+        setActivePinia(createPinia());
+        useStatisticsStore().recordGame({
+            difficulty: "easy",
+            elapsedSeconds: 60,
+            completed: true,
+            replay: { initialBoard: emptyBoard(), steps: [fillStep] },
+        });
+        const router = createRouter({
+            history: createMemoryHistory(),
+            routes: [
+                { path: "/", component: { template: "<div />" } },
+                { path: "/statistics", component: { template: "<div />" } },
+                { path: "/game-review/:index", component: { template: "<div />" } },
+            ],
+        });
+        await router.push(`/game-review/${index}`);
+        const pinia = getActivePinia();
+        if (pinia === undefined) throw new Error("pinia not active");
+        const wrapper = mount(GameReview, {
+            props: { index },
+            global: { plugins: [router, pinia] },
+        });
+        await flushPromises();
+        return { wrapper, router };
+    };
+
+    it.each(["1", "99", "-1", "abc", "1.5", ""])("should send the player back to Statistics for index %j", async (index) => {
+        const { wrapper, router } = await mountAt(index);
+
+        expect(router.currentRoute.value.path).toBe("/statistics");
+        expect(wrapper.find("[data-testid='review-board']").exists()).toBe(false);
+    });
+});
