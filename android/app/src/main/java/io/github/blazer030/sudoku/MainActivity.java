@@ -18,6 +18,7 @@ public class MainActivity extends BridgeActivity {
             AppCompatDelegate.setDefaultNightMode(AppearanceStore.appCompatNightMode(AppearanceStore.loadMode(this)));
         }
         super.onCreate(savedInstanceState);
+        followScreenSize(getResources().getConfiguration());
 
         // Repaint the bars from last time until the page sets them again, unless the system theme
         // changed while the app was closed and they would be the wrong way round
@@ -27,5 +28,19 @@ public class MainActivity extends BridgeActivity {
         if (systemBarColors != null && systemBarColors.darkIcons() != isNight) {
             SystemBarPainter.paint(this, systemBarColors);
         }
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        // A foldable unfolding or folding changes the smallest width without recreating the activity
+        followScreenSize(newConfig);
+    }
+
+    // Phones stay in portrait; large screens turn freely. Set here, not in the manifest, so the lock
+    // follows the window's size (Android 16 ignores it on large screens anyway).
+    private void followScreenSize(Configuration configuration) {
+        int orientation = OrientationPolicy.requestedOrientation(configuration.smallestScreenWidthDp);
+        if (getRequestedOrientation() != orientation) setRequestedOrientation(orientation);
     }
 }
