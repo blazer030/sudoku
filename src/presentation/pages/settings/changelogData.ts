@@ -20,7 +20,7 @@ export const UNRELEASED_CHANGES: ChangelogChange[] = [];
 
 export const CHANGELOG: ChangelogEntry[] = [
     {
-        version: "2.4.0",
+        version: "2.4.1",
         date: "2026-10-31",
         changes: [
             {
