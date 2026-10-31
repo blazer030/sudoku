@@ -60,7 +60,7 @@ export interface AuroraDensity {
     /** The sheen a cell lays, and a cell in the selected cell's row, column or box */
     cell: number;
     peer: number;
-    /** The glass colour a dialog, the toast and the completion card lay */
+    /** The glass colour a dialog, the hint menu, the toast and the completion card lay */
     dialog: number;
     /** The primary's soft tint, laid on the glass, and the same digit's, laid in place of it */
     tintSoft: number;
@@ -71,7 +71,7 @@ export interface AuroraDensity {
 
 export const AURORA_DENSITIES: Readonly<Record<ColorMode, AuroraDensity>> = {
     light: { card: 0.6, cell: 0.56, peer: 1, dialog: 1, tintSoft: 0.06, tintSame: 0.08, errorWash: 0.05, errorStripe: 0.08 },
-    dark: { card: 0.55, cell: 0.07, peer: 0.15, dialog: 0.97, tintSoft: 0.08, tintSame: 0.22, errorWash: 0.05, errorStripe: 0.08 },
+    dark: { card: 0.55, cell: 0.07, peer: 0.15, dialog: 1, tintSoft: 0.08, tintSame: 0.22, errorWash: 0.05, errorStripe: 0.08 },
 };
 
 interface AuroraSurfaces {
