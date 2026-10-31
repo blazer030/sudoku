@@ -51,6 +51,10 @@ export const LAUNCHER_ICONS: readonly LauncherIcon[] = STYLE_IDS.flatMap(style =
         mode,
     }))));
 
+/** Whether a file is one of the web-only PWA icons, which the Android build leaves out of the app. */
+export const isPwaIconFile = (fileName: string): boolean =>
+    LAUNCHER_ICONS.some(icon => Object.values(pwaIconFiles(icon.key)).includes(fileName));
+
 /** A launcher alias kept for users already on it, drawing another icon. */
 export interface LegacyLauncherAlias {
     key: string;
