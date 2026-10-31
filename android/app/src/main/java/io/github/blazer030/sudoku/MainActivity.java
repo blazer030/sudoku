@@ -10,6 +10,10 @@ public class MainActivity extends BridgeActivity {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        // First, before the window and the WebView are set up, so a phone held sideways at launch turns
+        // to portrait at once rather than after the page has loaded. The splash window the system shows
+        // before the app runs follows how the device is held; no code of the app's runs early enough.
+        followScreenSize(getResources().getConfiguration());
         registerPlugin(AppearanceBridgePlugin.class);
         // Before the window is set up, so its background follows the app's appearance, not the system's.
         // From API 31 the system keeps the per-app night mode itself (see AppearanceBridgePlugin), and
@@ -18,7 +22,6 @@ public class MainActivity extends BridgeActivity {
             AppCompatDelegate.setDefaultNightMode(AppearanceStore.appCompatNightMode(AppearanceStore.loadMode(this)));
         }
         super.onCreate(savedInstanceState);
-        followScreenSize(getResources().getConfiguration());
 
         // Repaint the bars from last time until the page sets them again, unless the system theme
         // changed while the app was closed and they would be the wrong way round
