@@ -249,7 +249,7 @@ describe("ink moments", () => {
             expect(zIndexOf(`${SCOPE} [data-skin~="board-grid"]::after`)).toBeGreaterThan(zIndexOf(`${BOARD} [data-variant] > div`));
             expect(zIndexOf(`${BOARD}:not([data-hint-mode]) [data-selected]::after`)).toBeGreaterThan(zIndexOf(`${SCOPE} [data-skin~="board-grid"]::after`));
             // Level with the entered digit's halo: the overlay follows the cells, so the brush lies over it
-            expect(zIndexOf(`${BOARD} [data-variant]:has(> .value-arrive)::before`)).toBe(brush);
+            expect(zIndexOf(`${BOARD} [data-variant][data-arriving]::before`)).toBe(brush);
         });
 
         // Reveal Cell can complete a group: its digit keeps the hint pop, which a group rule would replace

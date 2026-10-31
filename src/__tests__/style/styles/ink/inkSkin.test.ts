@@ -556,7 +556,7 @@ describe("ink skin", () => {
 
     describe("fill and erase", () => {
         const DIGIT = `${BOARD} .value-arrive`;
-        const HALO = `${BOARD} [data-variant]:has(> .value-arrive)::before`;
+        const HALO = `${BOARD} [data-variant][data-arriving]::before`;
         const GHOST = `${BOARD} [data-variant].value-leave::before`;
         const CELL_ANIMATIONS: [string, string][] = [[DIGIT, "ink-bleed"], [HALO, "ink-halo"], [GHOST, "ink-wash"]];
 
@@ -617,6 +617,11 @@ describe("ink skin", () => {
             expect(scaleOf(frames.get("100%"))).toBeGreaterThan(1);
             expect(opacityOf(frames.get("100%"))).toBe(0);
             expect([...animatedPropertiesOf("ink-halo")].every(property => ["opacity", "transform"].includes(property))).toBe(true);
+        });
+
+        // Every engine reads the cell's data-arriving, so the halo needs no :has()
+        it("should find the arriving digit's cell by its data-arriving hook", () => {
+            expect(allRules().flatMap(rule => rule.selectors).filter(selector => selector.includes(":has("))).toEqual([]);
         });
 
         it("should leave the cell's ::after to the 圓相 while a digit arrives or leaves", () => {
