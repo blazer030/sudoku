@@ -1,6 +1,8 @@
 package io.github.blazer030.sudoku;
 
 import android.content.res.Configuration;
+import android.graphics.Point;
+import android.graphics.Rect;
 import android.os.Build;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatDelegate;
@@ -13,7 +15,7 @@ public class MainActivity extends BridgeActivity {
         // First, before the window and the WebView are set up, so a phone held sideways at launch turns
         // to portrait at once rather than after the page has loaded. The splash window the system shows
         // before the app runs follows how the device is held; no code of the app's runs early enough.
-        followScreenSize(getResources().getConfiguration());
+        followDisplaySize();
         registerPlugin(AppearanceBridgePlugin.class);
         // Before the window is set up, so its background follows the app's appearance, not the system's.
         // From API 31 the system keeps the per-app night mode itself (see AppearanceBridgePlugin), and
@@ -36,14 +38,28 @@ public class MainActivity extends BridgeActivity {
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        // A foldable unfolding or folding changes the smallest width without recreating the activity
-        followScreenSize(newConfig);
+        // A foldable unfolding or folding changes the display without recreating the activity
+        followDisplaySize();
     }
 
-    // Phones stay in portrait; large screens turn freely. Set here, not in the manifest, so the lock
-    // follows the window's size (Android 16 ignores it on large screens anyway).
-    private void followScreenSize(Configuration configuration) {
-        int orientation = OrientationPolicy.requestedOrientation(configuration.smallestScreenWidthDp);
+    // Phones and a foldable's outer screen stay in portrait; large screens turn freely. Set here, not in
+    // the manifest, so the lock follows the display in use (Android 16 ignores it on large screens anyway).
+    // Judged by the display, not the window: once letterboxed, the app's own window is narrow and would
+    // keep the lock on after an unfold, or in a stacked split on a tablet.
+    private void followDisplaySize() {
+        int orientation = OrientationPolicy.requestedOrientation(displaySmallestWidthDp());
         if (getRequestedOrientation() != orientation) setRequestedOrientation(orientation);
+    }
+
+    @SuppressWarnings("deprecation")
+    private int displaySmallestWidthDp() {
+        float density = getResources().getDisplayMetrics().density;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            Rect bounds = getWindowManager().getMaximumWindowMetrics().getBounds();
+            return OrientationPolicy.smallestWidthDp(bounds.width(), bounds.height(), density);
+        }
+        Point realSize = new Point();
+        getWindowManager().getDefaultDisplay().getRealSize(realSize);
+        return OrientationPolicy.smallestWidthDp(realSize.x, realSize.y, density);
     }
 }
