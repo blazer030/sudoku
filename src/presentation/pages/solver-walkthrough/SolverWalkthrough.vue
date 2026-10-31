@@ -23,43 +23,49 @@
         </div>
         <div class="flex-1" />
         <div class="flex flex-col items-center gap-6">
-            <div
-                :data-selected-cell="selectedCellName"
-                data-skin="board"
-                :class="boardEditable ? '' : 'pointer-events-none'"
-                class="bg-card rounded-2xl shadow-card-lg p-2 self-center w-[calc(100%+1.5rem)] max-w-board-fit"
-                data-testid="walkthrough-board"
+            <BoardFrame
+                :celebration="null"
+                :effect="null"
+                :target="frameTarget"
             >
                 <div
-                    class="relative flex flex-col border-3 border-foreground/20 rounded-xl"
-                    data-skin="board-grid"
+                    :data-selected-cell="selectedCellName"
+                    data-skin="board"
+                    :class="boardEditable ? '' : 'pointer-events-none'"
+                    class="bg-card rounded-2xl shadow-card-lg p-2 self-center w-[calc(100%+1.5rem)] max-w-board-fit"
+                    data-testid="walkthrough-board"
                 >
                     <div
-                        v-for="(row, rowIndex) in puzzleCells"
-                        :key="`row-${rowIndex}`"
-                        :data-testid="`solver-row-${rowIndex}`"
-                        class="grid grid-cols-9"
+                        class="relative flex flex-col border-3 border-foreground/20 rounded-xl"
+                        data-skin="board-grid"
                     >
-                        <Cell
-                            v-for="(puzzleCell, columnIndex) in row"
-                            :key="`cell-${rowIndex}-${columnIndex}`"
-                            :column="columnIndex"
-                            :data-testid="`solver-cell-${rowIndex}-${columnIndex}`"
-                            :hint="cellViews?.[rowIndex][columnIndex] ?? null"
-                            :interactive="boardEditable"
-                            :puzzle-cell="puzzleCell"
-                            :row="rowIndex"
-                            :selected="boardEditable && isSelectedCell(rowIndex, columnIndex)"
-                            :selected-digit="boardEditable ? selectedDigit : null"
-                            @click="selectCell(rowIndex, columnIndex)"
+                        <div
+                            v-for="(row, rowIndex) in puzzleCells"
+                            :key="`row-${rowIndex}`"
+                            :data-testid="`solver-row-${rowIndex}`"
+                            class="grid grid-cols-9"
+                        >
+                            <Cell
+                                v-for="(puzzleCell, columnIndex) in row"
+                                :key="`cell-${rowIndex}-${columnIndex}`"
+                                :column="columnIndex"
+                                :data-testid="`solver-cell-${rowIndex}-${columnIndex}`"
+                                :hint="cellViews?.[rowIndex][columnIndex] ?? null"
+                                :interactive="boardEditable"
+                                :puzzle-cell="puzzleCell"
+                                :row="rowIndex"
+                                :selected="boardEditable && isSelectedCell(rowIndex, columnIndex)"
+                                :selected-digit="boardEditable ? selectedDigit : null"
+                                @click="selectCell(rowIndex, columnIndex)"
+                            />
+                        </div>
+                        <StepLinkOverlay
+                            v-if="inPlayback"
+                            :links="links"
                         />
                     </div>
-                    <StepLinkOverlay
-                        v-if="inPlayback"
-                        :links="links"
-                    />
                 </div>
-            </div>
+            </BoardFrame>
 
             <!-- The playback panel covers the inputs in place, so the board never moves. -->
             <div
@@ -123,7 +129,10 @@
                             data-skin="card"
                         >
                             <div class="flex items-start gap-3">
-                                <span class="w-10 h-10 rounded-xl bg-primary-light text-primary flex items-center justify-center shrink-0">
+                                <span
+                                    class="w-10 h-10 rounded-xl bg-primary-light text-primary flex items-center justify-center shrink-0"
+                                    data-skin="icon-tile"
+                                >
                                     <Wand2 :size="20" />
                                 </span>
                                 <p class="text-[15px] leading-snug text-foreground">
@@ -230,6 +239,7 @@ import PuzzleLoader from "@/presentation/components/puzzle-loader/PuzzleLoader.v
 import { usePuzzleLoader } from "@/presentation/components/puzzle-loader/usePuzzleLoader";
 import { useTechniqueLabel } from "@/presentation/i18n/techniqueLabels";
 import Cell from "@/presentation/components/board-cell/Cell.vue";
+import BoardFrame from "@/presentation/components/board-frame/BoardFrame.vue";
 import { cellName } from "@/presentation/components/board-cell/cellName";
 import DigitPad from "@/presentation/components/digit-pad/DigitPad.vue";
 import StepLinkOverlay from "@/presentation/components/step-presentation/StepLinkOverlay.vue";
@@ -245,6 +255,7 @@ import WalkthroughDialog from "@/presentation/pages/solver-walkthrough/Walkthrou
 import { vPress } from "@/presentation/directives/press";
 import { SAMPLE_PUZZLES, isSamplePuzzle } from "@/presentation/pages/solver-walkthrough/samplePuzzles";
 import { useDifficultyLabel } from "@/presentation/i18n/difficultyLabels";
+import type { CellReference } from "@/domain/solver/SolveStep";
 
 const props = defineProps<{
     /** A puzzle to start from, such as one from the game history; the guide stays closed. */
@@ -310,6 +321,14 @@ const {
 } = useWalkthroughInput(userValues, boardEditable);
 
 const selectedCellName = computed(() => boardEditable.value && selectedCell.value !== null ? cellName(selectedCell.value.row, selectedCell.value.column) : undefined);
+
+// The cell a style's board frame points at: the selected one while entering a puzzle, a playing step's first
+// assigned cell, and none on a step that only removes candidates, on the solved board or under the guide
+const frameTarget = computed((): CellReference | null => {
+    if (boardEditable.value) return selectedCell.value;
+    if (inPlayback.value) return currentStep.value?.step.assignments[0]?.cell ?? null;
+    return null;
+});
 
 // A solver step names its technique; the solved board, which ends a path that solves, gets a stage tag
 const tag = computed((): { label: string; icon: Component; strong: boolean; testId: string } | null => {

@@ -115,3 +115,54 @@ export const nameStrings = (font: Buffer): Map<number, string> => {
     }
     return strings;
 };
+
+const glyphForFormat12 = (table: Buffer, codePoint: number): number => {
+    const groupCount = table.readUInt32BE(12);
+    for (let group = 0; group < groupCount; group++) {
+        const base = 16 + group * 12;
+        const first = table.readUInt32BE(base);
+        if (codePoint >= first && codePoint <= table.readUInt32BE(base + 4)) return table.readUInt32BE(base + 8) + codePoint - first;
+    }
+    return 0;
+};
+
+/** The glyph a font draws for a code point, from its cmap (format 12, else format 4); 0 when none. */
+const glyphOf = (tables: Map<string, Buffer>, codePoint: number): number => {
+    const cmap = tables.get("cmap");
+    if (cmap === undefined) throw new Error("No cmap table");
+    const subtableCount = cmap.readUInt16BE(2);
+    const subtables = Array.from({ length: subtableCount }, (_, index) => cmap.subarray(cmap.readUInt32BE(4 + index * 8 + 4)));
+    const format12 = subtables.find(subtable => subtable.readUInt16BE(0) === 12);
+    if (format12 !== undefined) return glyphForFormat12(format12, codePoint);
+    const format4 = subtables.find(subtable => subtable.readUInt16BE(0) === 4);
+    if (format4 === undefined) throw new Error("No format 4 or 12 cmap subtable");
+    return glyphForFormat4(format4, codePoint);
+};
+
+/** A character's advance in ems, from the font's own (untransformed) hmtx, at its default instance. */
+export const advanceInEm = (font: Buffer, character: string): number => {
+    const tables = woff2Tables(font);
+    const head = tables.get("head");
+    const hhea = tables.get("hhea");
+    const hmtx = tables.get("hmtx");
+    if (head === undefined || hhea === undefined || hmtx === undefined) throw new Error("No head, hhea or hmtx table");
+    const unitsPerEm = head.readUInt16BE(18);
+    const metricCount = hhea.readUInt16BE(34);
+    const glyph = Math.min(glyphOf(tables, character.codePointAt(0) ?? 0), metricCount - 1);
+    return hmtx.readUInt16BE(glyph * 4) / unitsPerEm;
+};
+
+/**
+ * Where the baseline falls in a one-em line box (line-height 1), in ems from its top: the line box centres
+ * the font's ascent plus descent (hhea, which equals OS/2's typo metrics in the bundled faces).
+ */
+export const baselineInOneEmLine = (font: Buffer): number => {
+    const tables = woff2Tables(font);
+    const head = tables.get("head");
+    const hhea = tables.get("hhea");
+    if (head === undefined || hhea === undefined) throw new Error("No head or hhea table");
+    const unitsPerEm = head.readUInt16BE(18);
+    const ascent = hhea.readInt16BE(4) / unitsPerEm;
+    const descent = -hhea.readInt16BE(6) / unitsPerEm;
+    return (1 - ascent - descent) / 2 + ascent;
+};

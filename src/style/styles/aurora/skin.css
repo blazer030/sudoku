@@ -1,0 +1,1390 @@
+/* Aurora Glass: four lights drifting behind panes of frosted glass, in a night sky (夜空, dark) and a dawn
+   (晨光, light). For now: the lights, the press hooks and a reduced-motion block. Every rule is scoped by
+   [data-style="aurora"]; keyframes start with aurora-. No filter, no backdrop-filter, no :has(), no masks by
+   reference: the glass is plain translucent fills, so every engine paints it alike. */
+
+/* The lights' strength and the glass's densities per mode, the same numbers as AURORA_DENSITIES in palette.ts,
+   which the contrast model reads: each light's opacity and the ribbon's (a theme may set its own, below); how much
+   of the glass colour a card and a dialog lay and how much of the sheen a cell and a peer lay, the rest left clear
+   so the lights show through; the primary's soft tint and the same digit's tint, laid straight on the lights; the
+   error wash and stripes. Dialogs, the hint menu, the toast and the completion card are opaque in both modes, as the
+   board and the keypad would ghost through them. The glass reads as glass by its cues, painted without a filter: the edge, rim and inner are the
+   sheen's share in its faint 1px edge all round, the brighter 1px rim along its top and left and the soft highlight just
+   inside its edge; the pane sheen the sheen's share at the top left of the sheen laid over each pane (which the
+   contrast model composites into the words on it); the gloss the chosen segment's; the shadow the share of the
+   shadow colour beneath it. 晨光 (light) first, 夜空 (dark) over it. */
+:root[data-style="aurora"] {
+    --aurora-strength: 0.85;
+    --aurora-ribbon-strength: 0.68;
+    --aurora-glass-card: 60%;
+    --aurora-glass-cell: 56%;
+    --aurora-glass-peer: 100%;
+    --aurora-glass-dialog: 100%;
+    --aurora-edge: 70%;
+    --aurora-rim: 100%;
+    --aurora-inner: 50%;
+    --aurora-pane-sheen: 30%;
+    --aurora-gloss: 90%;
+    --aurora-shadow: 12%;
+    --aurora-tint-soft: 6%;
+    --aurora-tint-same: 8%;
+    --aurora-error-wash: 5%;
+    --aurora-error-stripe: 8%;
+}
+
+:root.dark[data-style="aurora"] {
+    --aurora-strength: 0.42;
+    --aurora-ribbon-strength: 0.336;
+    --aurora-glass-card: 55%;
+    --aurora-glass-cell: 7%;
+    --aurora-glass-peer: 15%;
+    --aurora-glass-dialog: 100%;
+    --aurora-edge: 10%;
+    --aurora-rim: 32%;
+    --aurora-inner: 8%;
+    --aurora-pane-sheen: 4%;
+    --aurora-gloss: 14%;
+    --aurora-shadow: 35%;
+    --aurora-tint-soft: 8%;
+    --aurora-tint-same: 22%;
+    --aurora-error-wash: 5%;
+    --aurora-error-stripe: 8%;
+}
+
+/* 夜空's pink and orange cross the sky with a streak of their own colours, a little stronger */
+:root.dark[data-style="aurora"][data-color-theme="pink"],
+:root.dark[data-style="aurora"][data-color-theme="orange"] {
+    --aurora-ribbon-strength: 0.4;
+}
+
+/* The glass every pane shares, built from the mode's numbers above: a card's and a dialog's fill (a tint of the
+   glass colour, the rest left clear so the lights show through), the 1px edge, the frame (the edge, a brighter rim
+   along the top and left, a soft highlight inside the edge and a soft shadow beneath) and the sheen, a diagonal of
+   the sheen colour over the pane's top left, gone by 45%. Dialogs veil the screen behind them in the page colour,
+   unblurred. */
+[data-style="aurora"] {
+    --aurora-glass-card-fill: color-mix(in srgb, var(--color-glass) var(--aurora-glass-card), transparent);
+    --aurora-glass-dialog-fill: color-mix(in srgb, var(--color-glass) var(--aurora-glass-dialog), transparent);
+    --aurora-glass-edge: inset 0 0 0 1px color-mix(in srgb, var(--color-glass-sheen) var(--aurora-edge), transparent);
+    --aurora-glass-frame:
+        var(--aurora-glass-edge),
+        inset 1px 1px 0 color-mix(in srgb, var(--color-glass-sheen) var(--aurora-rim), transparent),
+        inset 0 0 20px -8px color-mix(in srgb, var(--color-glass-sheen) var(--aurora-inner), transparent),
+        0 10px 30px -12px color-mix(in srgb, var(--color-shadow) var(--aurora-shadow), transparent);
+    --aurora-glass-sheen-fill: linear-gradient(160deg, color-mix(in srgb, var(--color-glass-sheen) var(--aurora-pane-sheen), transparent) 0, transparent 45%);
+    --aurora-scrim: 62%;
+    --aurora-loader-scrim: 45%;
+}
+
+/* The moments follow the canvas (GroupAurora, MomentsAurora) in both modes: a completed group's and the solved
+   board's cells peak at 45% of the primary, and the surge settles at 0.4, which a still celebration holds. They are
+   brief, and players can turn motion off, so they are not held to contrast (the owner's ruling). */
+[data-style="aurora"] {
+    --aurora-glow-peak: 45%;
+    --aurora-surge-still: 0.4;
+}
+
+/* The lights' geometry, the canvas's 390×844 phone in vmax, so a wider window scales it up. Each light is a
+   square of --aurora-blob-size, its colour at the centre fading evenly to nothing at --aurora-light-fade of the
+   way to a corner; its x and y are how far that square sits from the two window edges it is anchored to
+   (negative: past them): a1 the top left, a3 the left from the top, a2 the right from the top, a4 the bottom
+   right. They overlap, as the canvas's do (and the two on one layer do in a wide window), so each carries the
+   mode's strength in its own colour rather than its layer's opacity. The overscan lets each layer reach past the
+   window by more than either drift, so a drifting layer never shows its edge. The ribbon is a band of --aurora-ribbon-band at --aurora-ribbon-top of
+   the window, feathered by --aurora-ribbon-feather above and below; its two colours show at their shares. */
+[data-style="aurora"] {
+    --aurora-blob-size: 54.502vmax;
+    --aurora-light-fade: 66%;
+    --aurora-a1-x: -18.957vmax;
+    --aurora-a1-y: -14.218vmax;
+    --aurora-a2-x: -23.697vmax;
+    --aurora-a2-y: 16.588vmax;
+    --aurora-a3-x: -14.218vmax;
+    --aurora-a3-y: 49.763vmax;
+    --aurora-a4-x: -18.957vmax;
+    --aurora-a4-y: -23.697vmax;
+    --aurora-drift-1-x: 6vmax;
+    --aurora-drift-1-y: 8vmax;
+    --aurora-drift-2-x: -8vmax;
+    --aurora-drift-2-y: 6vmax;
+    --aurora-overscan: 8vmax;
+    --aurora-ribbon-top: 12%;
+    --aurora-ribbon-band: 26.066vmax;
+    --aurora-ribbon-feather: 9.479vmax;
+    --aurora-ribbon-first: 55%;
+    --aurora-ribbon-second: 45%;
+}
+
+/* The sky. The body carries the page colour alone, under every screen and across the whole window, so a wide
+   screen shows no strip beside the app's column; the app's page scroller, the pages and their headers are clear,
+   so the lights show through them all. */
+[data-style="aurora"] body {
+    background-color: var(--color-background);
+}
+
+[data-style="aurora"] [data-skin~="page-ruled"],
+[data-style="aurora"] [data-skin~="page"],
+[data-style="aurora"] [data-skin~="page-header"] {
+    background-color: transparent;
+}
+
+/* A sticky header is clear at rest. Once its page has scrolled it is laid over with the page colour, fading in
+   over the first 64px of scroll (--header-scroll, 0 to 1) and tapering out over its empty bottom padding, so the
+   content scrolls out of sight under its title. No frosting: the lights behind it are soft already. */
+[data-style="aurora"] [data-skin~="page-header"][data-scrolled] {
+    background-color: color-mix(in srgb, var(--color-background) calc(88% * var(--header-scroll, 0)), transparent);
+    -webkit-mask-image: linear-gradient(to bottom, var(--color-foreground) calc(100% - 12px), transparent);
+    mask-image: linear-gradient(to bottom, var(--color-foreground) calc(100% - 12px), transparent);
+}
+
+/* The four lights, two to a layer fixed to the window, below every content layer and never taking taps: a1 top
+   left and a3 lower left drift together (::before), a2 right and a4 bottom right on another path (::after). Each is
+   a radial gradient from its colour at the mode's strength to nothing at the fade, so no filter is needed. They
+   move by transform alone, each layer composited on its own, so the glass above never repaints. */
+[data-style="aurora"] body::before,
+[data-style="aurora"] body::after {
+    content: "";
+    position: fixed;
+    inset: calc(-1 * var(--aurora-overscan));
+    z-index: -1;
+    pointer-events: none;
+    will-change: transform;
+    background-size: var(--aurora-blob-size) var(--aurora-blob-size);
+    background-repeat: no-repeat;
+}
+
+[data-style="aurora"] body::before {
+    background-image:
+        radial-gradient(circle, color-mix(in srgb, var(--color-aurora-1) calc(var(--aurora-strength) * 100%), transparent) 0, transparent var(--aurora-light-fade)),
+        radial-gradient(circle, color-mix(in srgb, var(--color-aurora-3) calc(var(--aurora-strength) * 100%), transparent) 0, transparent var(--aurora-light-fade));
+    background-position:
+        left calc(var(--aurora-overscan) + var(--aurora-a1-x)) top calc(var(--aurora-overscan) + var(--aurora-a1-y)),
+        left calc(var(--aurora-overscan) + var(--aurora-a3-x)) top calc(var(--aurora-overscan) + var(--aurora-a3-y));
+    animation: aurora-drift-first 19s ease-in-out infinite alternate;
+}
+
+[data-style="aurora"] body::after {
+    background-image:
+        radial-gradient(circle, color-mix(in srgb, var(--color-aurora-2) calc(var(--aurora-strength) * 100%), transparent) 0, transparent var(--aurora-light-fade)),
+        radial-gradient(circle, color-mix(in srgb, var(--color-aurora-4) calc(var(--aurora-strength) * 100%), transparent) 0, transparent var(--aurora-light-fade));
+    background-position:
+        right calc(var(--aurora-overscan) + var(--aurora-a2-x)) top calc(var(--aurora-overscan) + var(--aurora-a2-y)),
+        right calc(var(--aurora-overscan) + var(--aurora-a4-x)) bottom calc(var(--aurora-overscan) + var(--aurora-a4-y));
+    animation: aurora-drift-second 23s ease-in-out infinite alternate-reverse;
+}
+
+@keyframes aurora-drift-first {
+    to { transform: translate(var(--aurora-drift-1-x), var(--aurora-drift-1-y)); }
+}
+
+@keyframes aurora-drift-second {
+    to { transform: translate(var(--aurora-drift-2-x), var(--aurora-drift-2-y)); }
+}
+
+/* The ribbon across the top of the page, the canvas's streak: a band wider than the window crossed at 100deg by the
+   theme's two ribbon colours at their shares, at the theme's own strength. The canvas blurred it 30px; here the band
+   reaches a feather further above and below and is faded there by a mask of a blurred box's profile, so no filter is
+   needed. It swings from -12deg to -4deg and back. */
+[data-style="aurora"] .app-safe-area::before {
+    content: "";
+    position: fixed;
+    left: -20%;
+    right: -20%;
+    top: calc(var(--aurora-ribbon-top) - var(--aurora-ribbon-feather));
+    height: calc(var(--aurora-ribbon-band) + 2 * var(--aurora-ribbon-feather));
+    z-index: -1;
+    pointer-events: none;
+    will-change: transform;
+    opacity: var(--aurora-ribbon-strength);
+    background-image: linear-gradient(100deg, transparent 10%, color-mix(in srgb, var(--color-aurora-ribbon-1) var(--aurora-ribbon-first), transparent) 35%, color-mix(in srgb, var(--color-aurora-ribbon-2) var(--aurora-ribbon-second), transparent) 60%, transparent 85%);
+    --aurora-ribbon-feathering: linear-gradient(
+        to bottom,
+        color-mix(in srgb, var(--color-foreground) 0.38%, transparent) 0%,
+        color-mix(in srgb, var(--color-foreground) 2.1%, transparent) 5%,
+        color-mix(in srgb, var(--color-foreground) 8.08%, transparent) 10%,
+        color-mix(in srgb, var(--color-foreground) 22.16%, transparent) 15%,
+        color-mix(in srgb, var(--color-foreground) 44.7%, transparent) 20%,
+        color-mix(in srgb, var(--color-foreground) 69.15%, transparent) 25%,
+        color-mix(in srgb, var(--color-foreground) 87.15%, transparent) 30%,
+        color-mix(in srgb, var(--color-foreground) 96.14%, transparent) 35%,
+        color-mix(in srgb, var(--color-foreground) 99.18%, transparent) 40%,
+        color-mix(in srgb, var(--color-foreground) 99.88%, transparent) 45%,
+        color-mix(in srgb, var(--color-foreground) 99.98%, transparent) 50%,
+        color-mix(in srgb, var(--color-foreground) 99.88%, transparent) 55%,
+        color-mix(in srgb, var(--color-foreground) 99.18%, transparent) 60%,
+        color-mix(in srgb, var(--color-foreground) 96.14%, transparent) 65%,
+        color-mix(in srgb, var(--color-foreground) 87.15%, transparent) 70%,
+        color-mix(in srgb, var(--color-foreground) 69.15%, transparent) 75%,
+        color-mix(in srgb, var(--color-foreground) 44.7%, transparent) 80%,
+        color-mix(in srgb, var(--color-foreground) 22.16%, transparent) 85%,
+        color-mix(in srgb, var(--color-foreground) 8.08%, transparent) 90%,
+        color-mix(in srgb, var(--color-foreground) 2.1%, transparent) 95%,
+        color-mix(in srgb, var(--color-foreground) 0.38%, transparent) 100%
+    );
+    -webkit-mask-image: var(--aurora-ribbon-feathering);
+    mask-image: var(--aurora-ribbon-feathering);
+    transform: rotate(-12deg);
+    animation: aurora-ribbon 16s ease-in-out infinite alternate;
+}
+
+@keyframes aurora-ribbon {
+    from { transform: rotate(-12deg); }
+    to { transform: rotate(-4deg); }
+}
+
+/* Chinese in Aurora Sans TC, Latin and digits in Outfit. Repointed only once the face has loaded (fonts.ts beside
+   this sheet marks it), so nothing jumps: only the face differs. Titles stop at 600, the heaviest bundled weight. */
+[data-style="aurora"][data-aurora-fonts="ready"] {
+    --font-sans: var(--font-aurora-sans);
+}
+
+/* Titles are 600 in whatever face is showing, so the gate changes only the face */
+[data-style="aurora"] [data-skin~="title"],
+[data-style="aurora"] [data-skin~="dialog-title"] {
+    font-weight: 600;
+}
+
+/* Line icons keep the canvas's pen: 2 wide, round ends and joins */
+[data-style="aurora"] svg.lucide {
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+/* Words with no glass under them lie on the lights, where only the text colour reads (spec ruling 4): the
+   header's back button and title already are; the timer's icon and the changelog's note are repointed */
+[data-style="aurora"] svg.lucide-timer,
+[data-style="aurora"] [data-skin~="app-note"] {
+    color: var(--color-foreground);
+}
+
+/* Cards are frosted glass at the card's density, rounded 22px, as the canvas's .group. The dialogs and the hint
+   menu float over the board, whose digits would show through, so they take the denser dialog glass. */
+[data-style="aurora"] [data-skin~="card"] {
+    border-color: transparent;
+    background-color: var(--aurora-glass-card-fill);
+    background-image: var(--aurora-glass-sheen-fill);
+    box-shadow: var(--aurora-glass-frame);
+    border-radius: 22px;
+}
+
+[data-style="aurora"] [data-skin~="card"]:is(.shadow-modal, .shadow-popup) {
+    background-color: var(--aurora-glass-dialog-fill);
+}
+
+[data-style="aurora"] [data-skin~="dialog-scrim"] {
+    background-color: color-mix(in srgb, var(--color-background) var(--aurora-scrim), transparent);
+}
+
+[data-style="aurora"] [data-skin~="loader-scrim"] {
+    background-color: color-mix(in srgb, var(--color-background) var(--aurora-loader-scrim), transparent);
+}
+
+/* The loader's card is card glass rounded 28px (MomentsAurora's .aload). Four soft lights in a ring turn under nine
+   lights, in place of the canvas's blurred conic halo: the halo moves by transform alone, each light by transform
+   alone, and the light's bright primary (::before) and its glow (::after) are drawn once and only fade, in step with
+   the breath. Every round starts dark. Loading follows only the system's reduced motion. */
+[data-style="aurora"] .aurora-loader {
+    border-radius: 28px;
+}
+
+/* It lies on the home page under its own scrim, with no board beneath to ghost through: card glass, not dialog glass */
+[data-style="aurora"] .aurora-loader[data-skin~="card"] {
+    background-color: var(--aurora-glass-card-fill);
+}
+
+[data-style="aurora"] .aurora-loader-halo {
+    background-image:
+        radial-gradient(circle 40px at 75px 39px, var(--color-aurora-1) 0, transparent),
+        radial-gradient(circle 40px at 111px 75px, var(--color-aurora-2) 0, transparent),
+        radial-gradient(circle 40px at 75px 111px, var(--color-aurora-3) 0, transparent),
+        radial-gradient(circle 40px at 39px 75px, var(--color-aurora-4) 0, transparent);
+    opacity: 0.55;
+    animation: aurora-loader-spin 7s linear infinite;
+}
+
+@keyframes aurora-loader-spin {
+    100% { transform: rotate(360deg); }
+}
+
+[data-style="aurora"] .aurora-loader-dot {
+    background-color: color-mix(in srgb, var(--color-foreground) 18%, transparent);
+    animation: aurora-loader-breathe 2.4s ease-in-out var(--aurora-loader-delay) infinite;
+}
+
+[data-style="aurora"] .aurora-loader-dot[data-ring="centre"] {
+    --aurora-loader-delay: 0s;
+}
+
+[data-style="aurora"] .aurora-loader-dot[data-ring="edge"] {
+    --aurora-loader-delay: 0.28s;
+}
+
+[data-style="aurora"] .aurora-loader-dot[data-ring="corner"] {
+    --aurora-loader-delay: 0.56s;
+}
+
+@keyframes aurora-loader-breathe {
+    0%, 100% { transform: scale(0.7); }
+    30% { transform: scale(1.2); }
+    60% { transform: scale(1); }
+}
+
+[data-style="aurora"] .aurora-loader-dot::before,
+[data-style="aurora"] .aurora-loader-dot::after {
+    content: "";
+    position: absolute;
+    border-radius: 50%;
+    opacity: 0;
+    animation: aurora-loader-glow 2.4s ease-in-out var(--aurora-loader-delay) infinite;
+}
+
+[data-style="aurora"] .aurora-loader-dot::before {
+    inset: 0;
+    background-color: var(--color-primary);
+}
+
+[data-style="aurora"] .aurora-loader-dot::after {
+    inset: -12px;
+    background-image: radial-gradient(circle, color-mix(in srgb, var(--color-primary) 70%, transparent) 0, transparent 70%);
+}
+
+@keyframes aurora-loader-glow {
+    0% { opacity: 0; }
+    30% { opacity: 1; }
+    60% { opacity: 0; }
+    100% { opacity: 0; }
+}
+
+/* The toast is dialog glass in its rim alone, rounded 16px, in the text colour */
+[data-style="aurora"] [data-skin~="toast"] {
+    background-color: var(--aurora-glass-dialog-fill);
+    box-shadow: var(--aurora-glass-edge);
+    border-radius: 16px;
+    color: var(--color-foreground);
+}
+
+/* The hint menu's options are rounded 14px, their icons in the primary as the canvas's .mopt; Reveal Cell keeps
+   the primary its markup gives its words. Its divider is a faint line of the text colour, the canvas's --line. */
+[data-style="aurora"] [data-skin~="menu-option"] {
+    border-radius: 14px;
+}
+
+[data-style="aurora"] [data-skin~="menu-option"] > svg {
+    color: var(--color-primary);
+}
+
+[data-style="aurora"] [data-skin~="menu-divider"] {
+    background-color: color-mix(in srgb, var(--color-foreground) 12%, transparent);
+}
+
+/* Buttons are rounded 16px. A main one is filled with the primary, lit from beneath by a soft glow of it and along
+   its top by a gloss of the sheen (the canvas's .btn.primary); a secondary one lies in the primary's soft tint and
+   is written in the primary; an outlined one is a pane of glass in a faint line of the text colour (the canvas's
+   --line; the sheen's rim alone vanishes on 晨光's dialog glass); the danger one is filled with the error
+   colour and written in on-danger. A button that is only its words is written in the secondary text colour, as it
+   always lies on glass, unless it is a danger one. */
+[data-style="aurora"] [data-skin~="button"] {
+    border-radius: 16px;
+}
+
+[data-style="aurora"] [data-skin~="button"]:is(.bg-primary, .hint-primary) {
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+    box-shadow:
+        0 8px 24px -8px color-mix(in srgb, var(--color-primary) 75%, transparent),
+        inset 0 1px 0 color-mix(in srgb, var(--color-glass-sheen) 35%, transparent);
+}
+
+[data-style="aurora"] [data-skin~="button"]:is(.bg-primary-light, .hint-secondary) {
+    background-color: color-mix(in srgb, var(--color-primary) var(--aurora-tint-soft), transparent);
+    color: var(--color-primary);
+    box-shadow: none;
+}
+
+[data-style="aurora"] [data-skin~="button"].bg-card {
+    border-color: transparent;
+    background-color: var(--aurora-glass-card-fill);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-foreground) 12%, transparent);
+}
+
+[data-style="aurora"] [data-skin~="button"].bg-danger {
+    background-color: var(--color-error);
+    color: var(--color-on-danger);
+    box-shadow: none;
+}
+
+[data-style="aurora"] [data-skin~="text-button"] {
+    border-radius: 16px;
+}
+
+[data-style="aurora"] [data-skin~="text-button"]:not(.text-danger),
+[data-style="aurora"] [data-skin~="text-button"]:not(.text-danger) > span {
+    color: var(--color-foreground-secondary);
+}
+
+/* Icon tiles lie in the primary's soft tint round an icon in the primary, glowing 30px (the canvas's .dicon); a
+   danger one lies in 14% of the error colour round an icon in it, still in the primary's glow as the canvas's */
+[data-style="aurora"] [data-skin~="icon-tile"] {
+    background-color: color-mix(in srgb, var(--color-primary) var(--aurora-tint-soft), transparent);
+    color: var(--color-primary);
+    box-shadow: 0 0 30px color-mix(in srgb, var(--color-primary) 35%, transparent);
+}
+
+[data-style="aurora"] [data-skin~="icon-tile"] > svg {
+    color: inherit;
+}
+
+[data-style="aurora"] [data-skin~="icon-tile"][data-skin~="danger"] {
+    background-color: color-mix(in srgb, var(--color-error) 14%, transparent);
+    color: var(--color-error);
+}
+
+/* A given-up game's chip lies in 12% of the error colour round an icon in it. It follows the icon tile's own rule
+   and outranks it, as the recent-game chips in Statistics and Game Review carry both. */
+[data-style="aurora"] [data-skin~="icon-tile"][data-skin~="gave-up"] {
+    background-color: color-mix(in srgb, var(--color-error) 12%, transparent);
+    color: var(--color-error);
+}
+
+/* The game header's pill is round glass in the text colour; the hint-mode pill is filled with the primary */
+[data-style="aurora"] [data-skin~="pill"] {
+    background-color: var(--aurora-glass-card-fill);
+    background-image: var(--aurora-glass-sheen-fill);
+    box-shadow: var(--aurora-glass-frame);
+    border-radius: 9999px;
+    color: var(--color-foreground);
+}
+
+[data-style="aurora"] [data-skin~="pill"] > span {
+    color: inherit;
+}
+
+[data-style="aurora"] [data-skin~="pill"][data-skin~="hint"] {
+    background-color: var(--color-primary);
+    background-image: none;
+    color: var(--color-on-primary);
+}
+
+/* Tags: the completion card's difficulty in the primary's soft tint, in the text colour; a new record filled with
+   the primary and glowing 16px; a step's tag in the soft tint in the primary, a final step's filled and glowing;
+   the changelog's App tag in the soft tint */
+[data-style="aurora"] [data-skin~="tag"] {
+    background-color: color-mix(in srgb, var(--color-primary) var(--aurora-tint-soft), transparent);
+    color: var(--color-foreground);
+}
+
+[data-style="aurora"] [data-skin~="tag"][data-skin~="new-record"] {
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+    box-shadow: 0 0 16px color-mix(in srgb, var(--color-primary) 55%, transparent);
+}
+
+[data-style="aurora"] [data-skin~="tag"][data-skin~="step"] {
+    background-color: color-mix(in srgb, var(--color-primary) var(--aurora-tint-soft), transparent);
+    color: var(--color-primary);
+}
+
+[data-style="aurora"] [data-skin~="tag"][data-skin~="step"][data-skin~="strong"] {
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+    box-shadow: 0 0 16px color-mix(in srgb, var(--color-primary) 50%, transparent);
+}
+
+[data-style="aurora"] [data-skin~="app-tag"] {
+    background-color: color-mix(in srgb, var(--color-primary) var(--aurora-tint-soft), transparent);
+    color: var(--color-primary);
+}
+
+/* Home, as the canvas's .home. The logo is a round pane of glass glowing in the primary, its nine squares drawn as
+   dots (the markup sizes them, a dot is a gradient inside each): the odd ones in the primary, the rest faint. The
+   subtitle is written in the text colour, it lies on the lights. */
+[data-style="aurora"] [data-skin~="logo"] {
+    border-radius: 50%;
+    background-color: var(--aurora-glass-card-fill);
+    background-image: var(--aurora-glass-sheen-fill);
+    box-shadow: var(--aurora-glass-frame), 0 0 40px color-mix(in srgb, var(--color-primary) 35%, transparent);
+}
+
+[data-style="aurora"] [data-skin~="logo"] > * > * {
+    background-color: transparent;
+    background-image: radial-gradient(circle, color-mix(in srgb, var(--color-foreground) 25%, transparent) 0, color-mix(in srgb, var(--color-foreground) 25%, transparent) 5px, transparent 5.5px);
+}
+
+[data-style="aurora"] [data-skin~="logo"] > * > :nth-child(odd) {
+    background-image: radial-gradient(circle, var(--color-primary) 0, var(--color-primary) 5px, transparent 5.5px);
+}
+
+[data-style="aurora"] [data-skin~="home-subtitle"] {
+    color: var(--color-foreground);
+}
+
+/* The continue button is the primary lit from beneath by a soft glow of it and along its top by the sheen; its chips
+   are Outfit at 500 (the face once the faces are ready), tinted for their mode: 夜空 by on-primary, 晨光 by the text
+   colour over the primary. Both are written in on-primary. */
+[data-style="aurora"] [data-skin~="continue"] {
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+    box-shadow:
+        0 14px 34px -12px color-mix(in srgb, var(--color-primary) 70%, transparent),
+        inset 0 1px 0 color-mix(in srgb, var(--color-glass-sheen) 35%, transparent);
+}
+
+[data-style="aurora"] [data-skin~="chip"] {
+    background-color: color-mix(in srgb, var(--color-foreground) 16%, var(--color-primary));
+    color: var(--color-on-primary);
+    font-weight: 500;
+}
+
+:root.dark[data-style="aurora"] [data-skin~="chip"] {
+    background-color: color-mix(in srgb, var(--color-on-primary) 16%, transparent);
+}
+
+[data-style="aurora"][data-aurora-fonts="ready"] [data-skin~="chip"] {
+    font-family: var(--font-aurora-sans);
+}
+
+/* Segmented controls lie in 7% of the text colour; the chosen segment is a brighter pane of glass (the sheen
+   itself in 晨光) with a soft shadow, and written in the text colour rather than on-primary */
+[data-style="aurora"] [data-skin~="segmented"] {
+    background-color: color-mix(in srgb, var(--color-foreground) 7%, transparent);
+    box-shadow: none;
+}
+
+[data-style="aurora"] [data-skin~="segmented-indicator"] {
+    background-color: var(--color-glass-sheen);
+    box-shadow: 0 2px 8px -2px color-mix(in srgb, var(--color-shadow) var(--aurora-shadow), transparent);
+}
+
+:root.dark[data-style="aurora"] [data-skin~="segmented-indicator"] {
+    background-color: color-mix(in srgb, var(--color-glass-sheen) var(--aurora-gloss), transparent);
+}
+
+[data-style="aurora"] [data-skin~="segment"][aria-pressed="true"] {
+    color: var(--color-foreground);
+}
+
+/* Home's tiles are card glass, their icons in the primary */
+[data-style="aurora"] [data-skin~="home-tile"] {
+    background-color: var(--aurora-glass-card-fill);
+    background-image: var(--aurora-glass-sheen-fill);
+    box-shadow: var(--aurora-glass-frame);
+}
+
+[data-style="aurora"] [data-skin~="home-tile"] > svg {
+    color: var(--color-primary);
+}
+
+/* Settings and 外觀, as the canvas's .group / .opt / .tg / .ind / .sw. A group's heading is in the text colour.
+   Option, toggle and style-card tiles lie in 1px of the text colour, rounded 16px, on a 3% wash; a chosen style
+   card is ringed in 2px of the primary, and a toggle that is on (the markup fills it) is lined in 50% of the
+   primary on the soft tint, its icon in the primary and its words in the inks. */
+[data-style="aurora"] [data-skin~="group-heading"] {
+    color: var(--color-foreground);
+}
+
+[data-style="aurora"] [data-skin~="tile"][aria-pressed] {
+    border-color: transparent;
+    background-color: color-mix(in srgb, var(--color-foreground) 3%, transparent);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-foreground) 12%, transparent);
+    border-radius: 16px;
+    color: var(--color-foreground);
+}
+
+[data-style="aurora"] [data-skin~="tile"][aria-pressed="true"].bg-card.border-primary {
+    box-shadow: inset 0 0 0 2px var(--color-primary);
+}
+
+[data-style="aurora"] [data-skin~="tile"][aria-pressed="true"].bg-primary {
+    background-color: color-mix(in srgb, var(--color-primary) var(--aurora-tint-soft), transparent);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-primary) 50%, transparent);
+    color: var(--color-foreground);
+}
+
+[data-style="aurora"] [data-skin~="tile"][aria-pressed="true"].bg-primary > .text-on-primary {
+    color: var(--color-primary);
+}
+
+[data-style="aurora"] [data-skin~="tile"][aria-pressed="true"].bg-primary span .text-on-primary {
+    color: var(--color-foreground-secondary);
+}
+
+/* A toggle's mark is a real switch: its own ring and check are hidden, a 34×20 track lies on its ::before and a
+   16px sheen knob on its ::after (the only places a size is set). The mark is 20px square, so the track hangs
+   from its right edge; the knob sits 2px in from the track's left and slides 14px when on. */
+[data-style="aurora"] [data-skin~="check"]:not(.absolute) {
+    position: relative;
+}
+
+[data-style="aurora"] [data-skin~="check"] {
+    border-color: transparent;
+    background-color: transparent;
+}
+
+[data-style="aurora"] [data-skin~="check"] > svg {
+    visibility: hidden;
+}
+
+[data-style="aurora"] [data-skin~="check"]::before,
+[data-style="aurora"] [data-skin~="check"]::after {
+    content: "";
+    position: absolute;
+}
+
+[data-style="aurora"] [data-skin~="check"]::before {
+    top: 0;
+    right: 0;
+    width: 34px;
+    height: 20px;
+    border-radius: 10px;
+    background-color: color-mix(in srgb, var(--color-foreground) 20%, transparent);
+}
+
+[data-style="aurora"] [data-skin~="check"]::after {
+    top: 2px;
+    right: 16px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background-color: var(--color-glass-sheen);
+    box-shadow: 0 1px 3px color-mix(in srgb, var(--color-shadow) var(--aurora-shadow), transparent);
+    transition: transform 200ms ease;
+}
+
+[data-style="aurora"] [data-skin~="tile"][aria-pressed="true"].bg-primary [data-skin~="check"] {
+    background-color: transparent;
+    color: var(--color-primary);
+}
+
+[data-style="aurora"] [data-skin~="tile"][aria-pressed="true"].bg-primary [data-skin~="check"]::before {
+    background-color: var(--color-primary);
+}
+
+[data-style="aurora"] [data-skin~="tile"][aria-pressed="true"].bg-primary [data-skin~="check"]::after {
+    transform: translateX(14px);
+}
+
+/* The chosen swatch is ringed twice, in the page colour and the primary, and glows 16px */
+[data-style="aurora"] [data-skin~="swatch"][aria-pressed="true"] {
+    box-shadow:
+        0 0 0 3px var(--color-background),
+        0 0 0 5px var(--color-primary),
+        0 0 16px color-mix(in srgb, var(--color-primary) 60%, transparent);
+}
+
+/* Statistics, as the canvas's .group. A section's heading is in the text colour at 700 (spec ruling 4); the three
+   overview cards and the By Difficulty card are card glass through `card`. A figure is 700 in the colour the
+   component gives it: the primary for wins, win rate and best time. A recent game's row is its own pane of glass,
+   rounded 16px, its time in the primary and a given-up game's "Gave up" in the error colour. */
+[data-style="aurora"] [data-skin~="stat-heading"] {
+    color: var(--color-foreground);
+    font-weight: 700;
+}
+
+[data-style="aurora"] [data-skin~="stat-value"] {
+    font-weight: 700;
+}
+
+[data-style="aurora"] [data-skin~="recent-row"] {
+    background-color: var(--aurora-glass-card-fill);
+    background-image: var(--aurora-glass-sheen-fill);
+    box-shadow: var(--aurora-glass-frame);
+    border-radius: 16px;
+}
+
+[data-style="aurora"] [data-skin~="game-result"] {
+    color: var(--color-primary);
+}
+
+[data-style="aurora"] [data-skin~="game-result"][data-skin~="gave-up"] {
+    color: var(--color-error);
+}
+
+/* Playback, as the canvas's .prog / .playb / .dots. The track is 10% of the text colour and fully round, the fill
+   runs from a1 to the primary across its own width; both keep the component's height (8px, 12px while held), which
+   a skin may not write. The play button is a primary disc glowing 20px (its 44px is the component's). The step
+   dots are 12% of the text colour, the ones passed 40% of the primary, this step's the primary glowing 10px; the
+   component already makes them 8px high and this step's 20px wide, so no pseudo-element is needed. */
+[data-style="aurora"] [data-skin~="progress-track"] {
+    background-color: color-mix(in srgb, var(--color-foreground) 10%, transparent);
+    border-radius: 9999px;
+}
+
+[data-style="aurora"] [data-skin~="progress-fill"] {
+    background-color: transparent;
+    background-image: linear-gradient(90deg, var(--color-aurora-1), var(--color-primary));
+    border-radius: 9999px;
+}
+
+[data-style="aurora"] [data-skin~="button"][data-skin~="play"] {
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+    border-radius: 9999px;
+    box-shadow: 0 0 20px color-mix(in srgb, var(--color-primary) 50%, transparent);
+}
+
+[data-style="aurora"] [data-skin~="step-dot"] {
+    background-color: color-mix(in srgb, var(--color-foreground) 12%, transparent);
+}
+
+[data-style="aurora"] [data-skin~="step-dot"][data-skin~="step-dot-past"] {
+    background-color: color-mix(in srgb, var(--color-primary) 40%, transparent);
+}
+
+[data-style="aurora"] [data-skin~="step-dot"][data-skin~="step-dot-current"] {
+    background-color: var(--color-primary);
+    box-shadow: 0 0 10px var(--color-primary);
+}
+
+/* The board, as the canvas's .board / .cell: nine panes of glass with the lights showing between them. The board and
+   its grid lay nothing of their own; the cells' lines are cleared and each cell paints its glass inside its padding
+   box alone, so the 1px lines and 3px box lines become gaps (spec ruling 5). A cell's glass is the sheen at the
+   cell's density, a peer's at the peer's. */
+[data-style="aurora"] {
+    --aurora-glass-cell-fill: color-mix(in srgb, var(--color-glass-sheen) var(--aurora-glass-cell), transparent);
+    --aurora-glass-peer-fill: color-mix(in srgb, var(--color-glass-sheen) var(--aurora-glass-peer), transparent);
+}
+
+[data-style="aurora"] [data-skin~="board"] {
+    background-color: transparent;
+    box-shadow: none;
+}
+
+/* The grid lays nothing: its lines are cleared, so the cells' gaps show the lights */
+[data-style="aurora"] [data-skin~="board-grid"] {
+    --board-line: transparent;
+    --board-box-line: transparent;
+    background-color: transparent;
+    border-color: transparent;
+    box-shadow: none;
+}
+
+/* Every cell paints the ground its variant sets (ruling 7), which the group and celebration glows also start and end
+   on. Cells are rounded 5px and a box's four outer corners 14px; the shared ring is dropped, the selected and answer
+   cells draw their own. A cell's ::before is the arrival's pulse. */
+[data-style="aurora"] [data-skin~="board"] [data-variant] {
+    position: relative;
+    background-clip: padding-box;
+    background-color: var(--aurora-cell-ground);
+    border-radius: 5px;
+    box-shadow: none;
+}
+
+[data-style="aurora"] [data-skin~="board"] [data-box-corner="top-left"] {
+    border-top-left-radius: 14px;
+}
+
+[data-style="aurora"] [data-skin~="board"] [data-box-corner="top-right"] {
+    border-top-right-radius: 14px;
+}
+
+[data-style="aurora"] [data-skin~="board"] [data-box-corner="bottom-left"] {
+    border-bottom-left-radius: 14px;
+}
+
+[data-style="aurora"] [data-skin~="board"] [data-box-corner="bottom-right"] {
+    border-bottom-right-radius: 14px;
+}
+
+/* A cell outlined on its own (the selected cell, a step's answer and wrong cells, a selected error) is one clean pane,
+   rounded 5px all round wherever it lies in its box: a box's corner cell would keep its one 14px corner under the
+   outline and read as a tab. Laid after the corners, which weigh as much. */
+[data-style="aurora"] [data-skin~="board"] [data-variant="selected"],
+[data-style="aurora"] [data-skin~="board"] [data-variant="answer"],
+[data-style="aurora"] [data-skin~="board"] [data-variant="wrong"],
+[data-style="aurora"] [data-skin~="board"] [data-variant="error"][data-selected] {
+    border-radius: 5px;
+}
+
+/* Digits and notes lie above every glow: the selected and answer cells (1) and the pulse and group glows (0), so a
+   neighbour's light never covers them (ruling 4) */
+[data-style="aurora"] [data-skin~="board"] [data-variant] > div {
+    position: relative;
+    z-index: 2;
+}
+
+/* Clues in the text colour at 500, the player's digits in the primary at 600 */
+[data-style="aurora"] [data-skin~="board"] [data-value-kind="given"] > div {
+    color: var(--color-foreground);
+    font-weight: 500;
+}
+
+[data-style="aurora"] [data-skin~="board"] [data-value-kind="entered"] > div {
+    color: var(--color-primary);
+    font-weight: 600;
+}
+
+/* Plain cells and clues are the cell's glass */
+[data-style="aurora"] [data-skin~="board"] [data-variant="default"],
+[data-style="aurora"] [data-skin~="board"] [data-variant="clue"] {
+    --aurora-cell-ground: var(--aurora-glass-cell-fill);
+}
+
+/* The selected cell's row, column and box, and a step's scope, are the peer's brighter glass */
+[data-style="aurora"] [data-skin~="board"] [data-variant="peer"],
+[data-style="aurora"] [data-skin~="board"] [data-variant="scope"] {
+    --aurora-cell-ground: var(--aurora-glass-peer-fill);
+}
+
+/* The same digit, and a step's pattern, take a flat tint of the primary in place of the glass and are written in it */
+[data-style="aurora"] [data-skin~="board"] [data-variant="same-digit"],
+[data-style="aurora"] [data-skin~="board"] [data-variant="pattern"] {
+    --aurora-cell-ground: color-mix(in srgb, var(--color-primary) var(--aurora-tint-same), transparent);
+}
+
+[data-style="aurora"] [data-skin~="board"] [data-variant="same-digit"][data-value-kind] > div,
+[data-style="aurora"] [data-skin~="board"] [data-variant="pattern"][data-value-kind] > div {
+    color: var(--color-primary);
+}
+
+/* The selected cell is a lit pane of the solid primary, ringed in 2px of 40% of it and glowing 10px of 35% (spec
+   ruling 9: the canvas's 22px / 70% hid the neighbours' digits), written in on-primary, its notes too; the selected
+   digit's note is an on-primary disc, as the primary would vanish into the cell. It lies above its neighbours'
+   glass (1), below every digit. Its ring and glow lie on its ::after, below. */
+[data-style="aurora"] [data-skin~="board"] [data-variant="selected"] {
+    --aurora-cell-ground: var(--color-primary);
+    z-index: 1;
+}
+
+[data-style="aurora"] [data-skin~="board"] [data-variant="selected"][data-value-kind] > div {
+    color: var(--color-on-primary);
+}
+
+[data-style="aurora"] [data-skin~="board"] [data-variant="selected"] .font-note.text-note {
+    color: var(--color-on-primary);
+}
+
+[data-style="aurora"] [data-skin~="board"] [data-variant="selected"] [data-note-highlight] {
+    background-color: var(--color-on-primary);
+    color: var(--color-primary);
+}
+
+/* A step's answer cell, on every board that shows a step: the primary's soft tint, a 2px inner line of it and the
+   selected cell's glow, above its neighbours' glass */
+[data-style="aurora"] [data-skin~="board"] [data-variant="answer"] {
+    --aurora-cell-ground: color-mix(in srgb, var(--color-primary) var(--aurora-tint-soft), var(--aurora-glass-cell-fill));
+    z-index: 1;
+    box-shadow:
+        inset 0 0 0 2px var(--color-primary),
+        0 0 10px color-mix(in srgb, var(--color-primary) 35%, transparent);
+}
+
+/* An error cell, and a step's wrong cell, take a wash of the error colour hatched at 45° in 2px lines of it 6px apart
+   (spec ruling 8, plan ruling 1), written in it: told from the selected cell (solid) and the same digit (flat) by
+   its pattern as well as its red. Laid after those cells' rules. A step's wrong cell keeps the markup's inner line of
+   the error colour; pressed, the press wash lies over the hatching. */
+[data-style="aurora"] [data-skin~="board"] [data-variant="error"],
+[data-style="aurora"] [data-skin~="board"] [data-variant="wrong"] {
+    --aurora-cell-ground: color-mix(in srgb, var(--color-error) var(--aurora-error-wash), var(--aurora-glass-cell-fill));
+    background-image: repeating-linear-gradient(45deg, color-mix(in srgb, var(--color-error) var(--aurora-error-stripe), transparent) 0 2px, transparent 2px 6px);
+}
+
+[data-style="aurora"] [data-skin~="board"] [data-variant="wrong"] {
+    box-shadow: inset 0 0 0 2px var(--color-error);
+}
+
+[data-style="aurora"] [data-skin~="board"] [data-variant="error"][data-pressed],
+[data-style="aurora"] [data-skin~="board"] [data-variant="wrong"][data-pressed] {
+    background-image:
+        linear-gradient(var(--press-overlay), var(--press-overlay)),
+        repeating-linear-gradient(45deg, color-mix(in srgb, var(--color-error) var(--aurora-error-stripe), transparent) 0 2px, transparent 2px 6px);
+}
+
+[data-style="aurora"] [data-skin~="board"] [data-variant="error"][data-value-kind="entered"] > div,
+[data-style="aurora"] [data-skin~="board"] [data-variant="wrong"][data-value-kind="entered"] > div {
+    color: var(--color-error);
+}
+
+/* A selected error keeps its hatching and its red digit; the selection is a 2px ring of the solid primary, its only
+   mark, so it is full strength (plan ruling 2: 40% of it reads 1.81–2.55 on the glass) */
+[data-style="aurora"] [data-skin~="board"] [data-variant="error"][data-selected] {
+    z-index: 1;
+}
+
+/* The selection's ring lies on the cell's ::after over its padding box, the glass alone, so it hugs the glass on all
+   four sides (the cell's own box would leave it off the glass by the gap on its right and bottom). It paints in the
+   cell's own layer (1), below every digit (2); it never animates, and the ::before stays the arrival's pulse. */
+[data-style="aurora"] [data-skin~="board"] [data-variant="selected"]::after,
+[data-style="aurora"] [data-skin~="board"] [data-variant="error"][data-selected]::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+}
+
+[data-style="aurora"] [data-skin~="board"] [data-variant="selected"]::after {
+    box-shadow:
+        0 0 0 2px color-mix(in srgb, var(--color-primary) 40%, transparent),
+        0 0 10px color-mix(in srgb, var(--color-primary) 35%, transparent);
+}
+
+[data-style="aurora"] [data-skin~="board"] [data-variant="error"][data-selected]::after {
+    box-shadow: 0 0 0 2px var(--color-primary);
+}
+
+/* Notes at 500 in the note colour; the highlighted note (the selected digit's, or a step's emphasised candidate) the
+   shared disc in the primary under on-primary at 700, sized by the markup to the note (the selected cell turns it
+   into an on-primary disc, above). A step's other candidates are the primary at 700, and its struck-out ones the error colour under a level 1.5px strike through the middle, a little past
+   the glyph on both sides (the canvas's diagonal ran along a 1's own stroke, so a struck 1 read as a wedge), on every board that shows a step. */
+[data-style="aurora"] [data-skin~="board"] .font-note.text-note {
+    color: var(--color-note);
+    font-weight: 500;
+}
+
+[data-style="aurora"] [data-skin~="board"] [data-note-highlight] {
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+    font-weight: 700;
+}
+
+[data-style="aurora"] [data-skin~="board"] .font-note.text-primary {
+    color: var(--color-primary);
+    font-weight: 700;
+}
+
+[data-style="aurora"] [data-skin~="board"] .font-note.strike-diagonal {
+    color: var(--color-error);
+}
+
+[data-style="aurora"] [data-skin~="board"] .font-note.strike-diagonal::after {
+    inset: 0 -0.15em;
+    background-image: linear-gradient(to bottom, transparent calc(50% - 0.75px), currentColor calc(50% - 0.75px), currentColor calc(50% + 0.75px), transparent calc(50% + 0.75px));
+}
+
+/* A digit entered settles as Aurora.dc's softA / pulseA (spec rulings 9, 11), only with motion allowed: the digit grows
+   in from 55% and its own colour's 6px glow draws in to nothing (a text-shadow, not a blur), while a soft disc of 55%
+   of the primary swells through the cell and fades. The disc is the cell's ::before over the cell and its gaps alone
+   (the canvas's spilled 12px and grew 1.9×, over the neighbours' digits), at 0, under every digit; on the selected
+   cell it lies over the cell's own glass, under its ring on the ::after, in on-primary, as the primary would vanish
+   into it. A cell's pseudo-element settles the arrival when its animation ends, before the timer would. The digit's
+   own end settles it too, so its 550ms softA runs on the pulse's 800ms (330ms is 41.25%, 550ms 68.75%) and never
+   cuts the pulse short. Unseen without its animation, so it never stays. */
+@keyframes aurora-arrive {
+    0% { opacity: 0; transform: scale(0.55); text-shadow: 0 0 6px currentColor; }
+    41.25% { opacity: 1; text-shadow: 0 0 0 currentColor; }
+    68.75%, 100% { transform: scale(1); }
+}
+
+@keyframes aurora-pulse {
+    0% { opacity: 0.95; transform: scale(0.4); }
+    100% { opacity: 0; transform: scale(1.15); }
+}
+
+[data-style="aurora"] [data-skin~="board"] [data-variant] > .value-arrive {
+    animation: aurora-arrive 800ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+[data-style="aurora"] [data-skin~="board"] [data-variant][data-arriving]::before {
+    content: "";
+    position: absolute;
+    inset: -2px;
+    z-index: 0;
+    pointer-events: none;
+    background-image: radial-gradient(circle, color-mix(in srgb, var(--color-primary) 55%, transparent), transparent 70%);
+    opacity: 0;
+    animation: aurora-pulse 800ms ease-out;
+}
+
+[data-style="aurora"] [data-skin~="board"] [data-variant="selected"][data-arriving]::before {
+    background-image: radial-gradient(circle, color-mix(in srgb, var(--color-on-primary) 55%, transparent), transparent 70%);
+}
+
+/* An erased digit shrinks and fades as the canvas's fadeA, without its blur: the digit that left (the cell's
+   data-leaving-value) on the cell's ::before, at the player's size and weight, goes to 60% and nothing over 500ms.
+   Only a player's digit leaves, so it is drawn as one: in the primary, or in on-primary on the selected cell (an undo
+   there), whose solid primary would hide it. Its animationend settles leaving; unseen without its animation, so no
+   ghost stays. */
+@keyframes aurora-leave {
+    0% { opacity: 1; transform: none; }
+    100% { opacity: 0; transform: scale(0.6); }
+}
+
+[data-style="aurora"] [data-skin~="board"] [data-variant].value-leave::before {
+    content: attr(data-leaving-value);
+    content: attr(data-leaving-value) / "";
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    font-family: var(--font-entry);
+    font-size: calc(22px * var(--entry-scale, 1));
+    font-weight: 600;
+    line-height: 1;
+    color: var(--color-primary);
+    opacity: 0;
+    animation: aurora-leave 500ms ease-in;
+}
+
+/* Laid after the ghost above, which weighs as much */
+[data-style="aurora"] [data-skin~="board"] [data-variant="selected"].value-leave::before {
+    color: var(--color-on-primary);
+}
+
+/* Completing a group (only with motion allowed), from GroupAurora without its blur and the cells' glow shadow (spec
+   ruling 15). Light ripples across the group's panes from the cell just filled, 45ms a step: each cell's ground
+   takes the canvas's glow peak of the primary and gives it back, starting and ending on its own ground (ruling 7),
+   so a selected or error cell keeps its own pane. The glow is the cell's own background, so the entered cell's pulse
+   (its ::before) and its digit's arrival run on untouched; its name marks it as the group's, so its end never
+   settles the arrival. The canvas's streak (aurora-1, the primary, aurora-2) sweeps out along a completed row or
+   down a completed column from the entered cell, its long edges faded by a gradient mask where the canvas blurred
+   them; a completed box sends one ring of the primary out from its centre, lit by a still glow of aurora-1
+   (AuroraGroupOverlay). Both lie at 0 over the glass, under every digit (2) and the selected and answer cells (1)
+   (ruling 4), and are unseen without their animations, so a stopped effect leaves no still cue. */
+[data-style="aurora"] [data-skin~="board"] [data-group]:not(.animate-hint-reveal-glow) {
+    --group-ripple-step: 45ms;
+    animation: aurora-group-glow 600ms ease-out calc(100ms + var(--group-delay));
+}
+
+@keyframes aurora-group-glow {
+    0% { background-color: var(--aurora-cell-ground); }
+    35% { background-color: color-mix(in srgb, var(--color-primary) var(--aurora-glow-peak), var(--aurora-cell-ground)); }
+    100% { background-color: var(--aurora-cell-ground); }
+}
+
+[data-style="aurora"] .aurora-group-ribbon {
+    z-index: 0;
+    border-radius: 20px;
+    opacity: 0;
+}
+
+[data-style="aurora"] .aurora-group-ribbon[data-kind="row"] {
+    background-image: linear-gradient(90deg, transparent, color-mix(in srgb, var(--color-aurora-1) 70%, transparent) 30%, color-mix(in srgb, var(--color-primary) 70%, transparent) 50%, color-mix(in srgb, var(--color-aurora-2) 70%, transparent) 70%, transparent);
+    -webkit-mask-image: linear-gradient(180deg, transparent, var(--color-foreground) 35%, var(--color-foreground) 65%, transparent);
+    mask-image: linear-gradient(180deg, transparent, var(--color-foreground) 35%, var(--color-foreground) 65%, transparent);
+    animation: aurora-group-sweep-x 760ms ease-out 100ms;
+}
+
+[data-style="aurora"] .aurora-group-ribbon[data-kind="column"] {
+    background-image: linear-gradient(180deg, transparent, color-mix(in srgb, var(--color-aurora-1) 70%, transparent) 30%, color-mix(in srgb, var(--color-primary) 70%, transparent) 50%, color-mix(in srgb, var(--color-aurora-2) 70%, transparent) 70%, transparent);
+    -webkit-mask-image: linear-gradient(90deg, transparent, var(--color-foreground) 35%, var(--color-foreground) 65%, transparent);
+    mask-image: linear-gradient(90deg, transparent, var(--color-foreground) 35%, var(--color-foreground) 65%, transparent);
+    animation: aurora-group-sweep-y 760ms ease-out 100ms;
+}
+
+@keyframes aurora-group-sweep-x {
+    0% { opacity: 0; transform: scaleX(0.1); }
+    35% { opacity: 0.9; }
+    100% { opacity: 0; transform: scaleX(1.1); }
+}
+
+@keyframes aurora-group-sweep-y {
+    0% { opacity: 0; transform: scaleY(0.1); }
+    35% { opacity: 0.9; }
+    100% { opacity: 0; transform: scaleY(1.1); }
+}
+
+[data-style="aurora"] .aurora-group-ring {
+    z-index: 0;
+    border-radius: 14px;
+    box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--color-primary) 80%, transparent), 0 0 24px color-mix(in srgb, var(--color-aurora-1) 60%, transparent);
+    opacity: 0;
+    animation: aurora-group-ring 760ms ease-out 120ms;
+}
+
+@keyframes aurora-group-ring {
+    0% { opacity: 0.9; transform: scale(0.35); }
+    100% { opacity: 0; transform: scale(1.12); }
+}
+
+/* The surge runs past the board's sides, and on a narrow screen past the page's: the page scroller clips it there
+   rather than let the page scroll sideways (the lights have faded out by the box's edge). The page only ever scrolls
+   up and down. */
+[data-style="aurora"] [data-skin~="page-scroller"] {
+    overflow-x: hidden;
+}
+
+/* The solved board, from MomentsAurora's .surge / au-glow without their blur (spec rulings 18, 19). The board becomes a
+   stacking context of its own, and its ::before lays three lights of the aurora (aurora-1, aurora-2, aurora-4) out to
+   135% of it, at -1: over the page and its lights, behind the grid and every cell's glass, so they show through the
+   gaps and faintly through the glass. Each light fades out within the box (closest-side), as the canvas's ran past it
+   and were blurred: aurora-1 ends where the canvas's did, aurora-2 and aurora-4 at the box's nearest edge. While
+   playing they swell from 60% and nothing to 0.9 and settle at 110% and 0.4, which they hold behind the scrim;
+   still, they stand there from the start. */
+[data-style="aurora"] [data-skin~="board"][data-celebration] {
+    position: relative;
+    isolation: isolate;
+}
+
+[data-style="aurora"] [data-skin~="board"][data-celebration]::before {
+    content: "";
+    position: absolute;
+    inset: -17.5%;
+    z-index: -1;
+    pointer-events: none;
+    background-image:
+        radial-gradient(circle closest-side at 50% 38%, color-mix(in srgb, var(--color-aurora-1) 60%, transparent), transparent 88%),
+        radial-gradient(circle closest-side at 34% 62%, color-mix(in srgb, var(--color-aurora-2) 55%, transparent), transparent),
+        radial-gradient(circle closest-side at 70% 70%, color-mix(in srgb, var(--color-aurora-4) 45%, transparent), transparent);
+    opacity: 0;
+}
+
+[data-style="aurora"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"])::before {
+    animation: aurora-surge 1.8s ease-out both;
+}
+
+[data-style="aurora"] [data-skin~="board"][data-celebration="still"]::before {
+    opacity: var(--aurora-surge-still);
+    transform: scale(1.1);
+}
+
+@keyframes aurora-surge {
+    0% { opacity: 0; transform: scale(0.6); }
+    40% { opacity: 0.9; }
+    100% { opacity: var(--aurora-surge-still); transform: scale(1.1); }
+}
+
+/* Light rings out through the panes from the centre cell, 85ms a ring by its distance from the centre (max() alone):
+   each cell's ground takes the canvas's glow peak of the primary and gives it back over 900ms, starting and ending
+   on its own ground (ruling 7). It runs on once the dialog opens (done), the corners last by 1240ms. It comes after the group glow and weighs as much, so a
+   group the solving digit completes glows only this once (ruling 8); the entered cell's pulse and its digit's arrival
+   are other elements and run on. Still, the centre box keeps a soft light: 22% of the primary at the centre cell, 11%
+   round it (ruling 9). */
+[data-style="aurora"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"]) [data-variant] {
+    animation: aurora-celebration-glow 900ms ease-out calc(max(var(--cell-row) - 4, 4 - var(--cell-row), var(--cell-column) - 4, 4 - var(--cell-column)) * 85ms);
+}
+
+@keyframes aurora-celebration-glow {
+    0% { background-color: var(--aurora-cell-ground); }
+    30% { background-color: color-mix(in srgb, var(--color-primary) var(--aurora-glow-peak), var(--aurora-cell-ground)); }
+    100% { background-color: var(--aurora-cell-ground); }
+}
+
+[data-style="aurora"] [data-skin~="board"][data-celebration="still"] [data-variant] {
+    background-color: color-mix(in srgb, var(--color-primary) max(0%, 22% - 11% * max(var(--cell-row) - 4, 4 - var(--cell-row), var(--cell-column) - 4, 4 - var(--cell-column))), var(--aurora-cell-ground));
+}
+
+/* The completion card focuses in from 104% and nothing, from 100ms over 640ms, without the canvas's blur (ruling 11);
+   still, it only fades in, as every style's. Its trophy is the solid primary, the cup on-primary, under a still 40px
+   glow of the primary. */
+[data-style="aurora"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) {
+    animation: aurora-card-focus 640ms ease-out 100ms both;
+}
+
+@keyframes aurora-card-focus {
+    0% { opacity: 0; transform: scale(1.04); }
+    100% { opacity: 1; transform: none; }
+}
+
+[data-style="aurora"] [data-skin~="trophy"] {
+    background-color: var(--color-primary);
+    box-shadow: 0 0 40px color-mix(in srgb, var(--color-primary) 60%, transparent);
+}
+
+[data-style="aurora"] [data-skin~="trophy"] > svg {
+    color: var(--color-on-primary);
+}
+
+/* Behind the card, on the scrim (AuroraCelebration): three rings go out from the card's centre, from 60% to 260% as
+   they fade, 2.4s a round, 0.1s, 0.9s and 1.7s in (the canvas's 0.9, 1.7 and 2.5s less the 800ms before the dialog),
+   each 2px in 70% of its light under a still glow of aurora-1, unseen before its turn; six sparks of aurora-1 and
+   aurora-2 rise 640px and drift 24px aside, 5.5s a round. Still, one ring stands at 150% and 0.6 and no spark rises. */
+[data-style="aurora"] .aurora-celebration-ring {
+    box-shadow: 0 0 30px color-mix(in srgb, var(--color-aurora-1) 50%, transparent);
+    opacity: 0;
+}
+
+[data-style="aurora"] .aurora-celebration-ring[data-index="0"] {
+    --aurora-ring-delay: 0.1s;
+}
+
+[data-style="aurora"] .aurora-celebration-ring[data-index="1"] {
+    --aurora-ring-delay: 0.9s;
+}
+
+[data-style="aurora"] .aurora-celebration-ring[data-index="2"] {
+    --aurora-ring-delay: 1.7s;
+}
+
+[data-style="aurora"] .aurora-celebration-ring[data-light="primary"] {
+    border-color: color-mix(in srgb, var(--color-primary) 70%, transparent);
+}
+
+[data-style="aurora"] .aurora-celebration-ring[data-light="aurora-2"] {
+    border-color: color-mix(in srgb, var(--color-aurora-2) 70%, transparent);
+}
+
+[data-style="aurora"] .aurora-celebration-ring[data-light="aurora-1"] {
+    border-color: color-mix(in srgb, var(--color-aurora-1) 70%, transparent);
+}
+
+[data-style="aurora"] .aurora-celebration:not([data-still]) .aurora-celebration-ring {
+    animation: aurora-celebration-ring 2.4s ease-out var(--aurora-ring-delay) infinite;
+}
+
+[data-style="aurora"] .aurora-celebration[data-still] .aurora-celebration-ring {
+    opacity: 0.6;
+    transform: scale(1.5);
+}
+
+@keyframes aurora-celebration-ring {
+    0% { opacity: 0.9; transform: scale(0.6); }
+    100% { opacity: 0; transform: scale(2.6); }
+}
+
+[data-style="aurora"] .aurora-celebration-spark {
+    opacity: 0;
+    animation: aurora-celebration-rise 5.5s linear var(--aurora-spark-delay) infinite;
+}
+
+[data-style="aurora"] .aurora-celebration-spark[data-light="aurora-1"] {
+    background-color: var(--color-aurora-1);
+    box-shadow: 0 0 10px 2px color-mix(in srgb, var(--color-aurora-1) 70%, transparent);
+}
+
+[data-style="aurora"] .aurora-celebration-spark[data-light="aurora-2"] {
+    background-color: var(--color-aurora-2);
+    box-shadow: 0 0 10px 2px color-mix(in srgb, var(--color-aurora-2) 70%, transparent);
+}
+
+@keyframes aurora-celebration-rise {
+    0% { opacity: 0; transform: translateY(0); }
+    15% { opacity: 0.9; }
+    100% { opacity: 0; transform: translate(24px, -640px); }
+}
+
+/* Press feedback: a faint wash of the text colour. It is a colour change, so it stays on under reduced motion. */
+[data-style="aurora"] [data-pressed] {
+    --press-overlay: color-mix(in srgb, var(--color-foreground) 8%, transparent);
+    background-image: linear-gradient(var(--press-overlay), var(--press-overlay));
+}
+
+[data-style="aurora"] [data-press-motion] {
+    transition-property: transform, background-color, color, box-shadow, opacity;
+    transition-duration: 160ms;
+    transition-timing-function: ease-out;
+}
+
+[data-style="aurora"] [data-press-motion][data-pressed] {
+    transform: scale(0.97);
+    transition-duration: 60ms;
+}
+
+@keyframes aurora-press-bounce {
+    0% { transform: scale(0.97); }
+    100% { transform: scale(1); }
+}
+
+[data-style="aurora"] [data-press-bounce] {
+    animation: aurora-press-bounce 200ms ease-out;
+}
+
+[data-style="aurora"] .segmented-indicator-motion {
+    transition: transform 180ms ease-out;
+}
+
+/* The keypad, as the canvas's .key / .badge / .ctl. A key is a round pane of card glass; the one of the same digit
+   (or erase, while it is on) is the solid primary lit by a 22px glow of it, and a used-up key fades. A badge is a
+   full circle of the primary ringed in the page colour. A control is only its icon in the text colour; one that is
+   on lies in the soft tint of the primary over card glass and is written in the primary. A pressed piece scales
+   (the shared rule) and moves nothing else, so only its transform animates. */
+[data-style="aurora"] [data-skin~="key"] {
+    border-radius: 50%;
+    background-color: var(--aurora-glass-card-fill);
+    background-image: var(--aurora-glass-sheen-fill);
+    box-shadow: var(--aurora-glass-frame);
+    font-weight: 500;
+    transition-property: transform;
+}
+
+[data-style="aurora"] [data-skin~="key"][aria-pressed="true"] {
+    background-color: var(--color-primary);
+    background-image: none;
+    color: var(--color-on-primary);
+    box-shadow: 0 0 22px color-mix(in srgb, var(--color-primary) 60%, transparent);
+}
+
+[data-style="aurora"] [data-skin~="key"]:disabled {
+    opacity: 0.35;
+}
+
+[data-style="aurora"] [data-skin~="badge"] {
+    border-radius: 50%;
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+    box-shadow: 0 0 0 2px var(--color-background);
+}
+
+[data-style="aurora"] [data-skin~="control"] {
+    background-color: transparent;
+    box-shadow: none;
+    color: var(--color-foreground);
+    transition-property: transform;
+}
+
+[data-style="aurora"] [aria-pressed="true"] > [data-skin~="control"] {
+    background-color: color-mix(in srgb, var(--color-primary) var(--aurora-tint-soft), var(--aurora-glass-card-fill));
+    background-image: var(--aurora-glass-sheen-fill);
+    box-shadow: var(--aurora-glass-frame);
+    color: var(--color-primary);
+}
+
+/* Reduced motion: no scaling or sliding; the press wash stays. The lights and the ribbon hold still where they
+   start, the ribbon at its resting tilt. */
+@media (prefers-reduced-motion: reduce) {
+    [data-style="aurora"] body::before,
+    [data-style="aurora"] body::after,
+    [data-style="aurora"] .app-safe-area::before {
+        animation: none;
+    }
+
+    [data-style="aurora"] .segmented-indicator-motion,
+    [data-style="aurora"] [data-skin~="key"],
+    [data-style="aurora"] [data-skin~="control"],
+    [data-style="aurora"] [data-skin~="check"]::after {
+        transition: none;
+    }
+
+    [data-style="aurora"] [data-pressed],
+    [data-style="aurora"] [data-press-motion],
+    [data-style="aurora"] [data-press-motion][data-pressed],
+    [data-style="aurora"] [data-press-bounce] {
+        transform: none;
+        animation: none;
+    }
+
+    [data-style="aurora"] [data-skin~="board"] [data-variant] > .value-arrive,
+    [data-style="aurora"] [data-skin~="board"] [data-variant][data-arriving]::before,
+    [data-style="aurora"] [data-skin~="board"] [data-variant].value-leave::before {
+        animation: none;
+    }
+
+    /* A completed group shows nothing: no glow, streak or ring */
+    [data-style="aurora"] [data-skin~="board"] [data-group]:not(.animate-hint-reveal-glow),
+    [data-style="aurora"] .aurora-group-ribbon[data-kind="row"],
+    [data-style="aurora"] .aurora-group-ribbon[data-kind="column"],
+    [data-style="aurora"] .aurora-group-ring {
+        animation: none;
+    }
+
+    /* The solved board's surge stands where it would end, the panes keep their grounds, the card only fades in, and
+       the rings and sparks behind it stop (a still celebration draws its own end state) */
+    [data-style="aurora"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"])::before,
+    [data-style="aurora"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"]) [data-variant],
+    [data-style="aurora"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]),
+    [data-style="aurora"] .aurora-celebration:not([data-still]) .aurora-celebration-ring,
+    [data-style="aurora"] .aurora-celebration-spark {
+        animation: none;
+    }
+
+    /* The loader holds still with only its centre light lit */
+    [data-style="aurora"] .aurora-loader-halo,
+    [data-style="aurora"] .aurora-loader-dot,
+    [data-style="aurora"] .aurora-loader-dot::before,
+    [data-style="aurora"] .aurora-loader-dot::after {
+        animation: none;
+    }
+
+    [data-style="aurora"] .aurora-loader-dot[data-ring="centre"]::before,
+    [data-style="aurora"] .aurora-loader-dot[data-ring="centre"]::after {
+        opacity: 1;
+    }
+
+    [data-style="aurora"] .aurora-loader-dot:not([data-ring="centre"])::before,
+    [data-style="aurora"] .aurora-loader-dot:not([data-ring="centre"])::after {
+        opacity: 0;
+    }
+}

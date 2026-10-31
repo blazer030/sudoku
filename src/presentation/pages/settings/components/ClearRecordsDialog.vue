@@ -2,14 +2,18 @@
     <Transition name="modal">
         <div
             v-if="visible"
-            class="fixed inset-0 bg-scrim/50 flex items-center justify-center z-50"
+            class="fixed inset-0 bg-scrim/50 flex items-center-safe justify-center overflow-y-auto py-safe-larger z-50"
+            data-skin="dialog-scrim"
             data-testid="clear-records-dialog"
         >
             <div
                 class="bg-card rounded-3xl p-8 mx-6 w-full max-w-[354px] flex flex-col items-center gap-6 shadow-modal"
                 data-skin="card"
             >
-                <div class="w-16 h-16 rounded-2xl bg-danger/10 flex items-center justify-center">
+                <div
+                    class="w-16 h-16 rounded-2xl bg-danger/10 flex items-center justify-center"
+                    data-skin="icon-tile danger"
+                >
                     <Trash2
                         :size="32"
                         class="text-danger"
@@ -42,6 +46,7 @@
                     <button
                         v-press
                         class="w-full h-[44px] flex items-center justify-center cursor-pointer rounded-button transition-all duration-200 hover:bg-foreground/5"
+                        data-skin="text-button"
                         data-testid="clear-records-cancel-button"
                         @click="close('cancel')"
                     >

@@ -16,6 +16,7 @@ import { PUZZLE_LOADER_MINIMUM_MS } from "@/presentation/components/puzzle-loade
 import { handleBackButton } from "@/presentation/composables/backDismissal";
 import { ANALYTICS_KEY, type AnalyticsEvent } from "@/application/analytics/AnalyticsService";
 import { createAnalyticsSpy } from "@/__tests__/fixtures/analyticsSpy";
+import { StubBoardFrame, frameMinimalWithStubInEachTest, frameTarget } from "@/__tests__/fixtures/boardFrameStub";
 
 const samplePuzzle = (id: string): number[][] => {
     const sample = SAMPLE_PUZZLES.find((candidate) => candidate.id === id);
@@ -639,6 +640,56 @@ describe("SolverWalkthrough", () => {
             await solve(wrapper);
 
             expect(wrapper.find("[data-testid='walkthrough-step-counter']").text()).toBe(`1 / ${singlesPositionCount}`);
+        });
+    });
+
+    describe("board frame", () => {
+        frameMinimalWithStubInEachTest();
+
+        it("should frame the walkthrough board and point it at the selected cell while entering a puzzle", async () => {
+            const { wrapper } = await mountEntering();
+            expect(wrapper.findComponent(StubBoardFrame).find("[data-testid='walkthrough-board']").exists()).toBe(true);
+            expect(frameTarget(wrapper)).toBeNull();
+
+            await cellAt(wrapper, 3, 6).trigger("click");
+
+            expect(frameTarget(wrapper)).toEqual({ row: 3, column: 6 });
+        });
+
+        it("should point the frame at a playing step's first assigned cell", async () => {
+            const { wrapper } = mountWalkthrough({ initialPuzzle: singlesPuzzle });
+
+            await solve(wrapper);
+
+            expect(frameTarget(wrapper)).toEqual(firstSinglesStep().assignments[0].cell);
+        });
+
+        it("should point the frame at no cell on a step that only removes candidates", async () => {
+            const { wrapper } = mountWalkthrough({ initialPuzzle: hardPuzzle });
+            const index = buildSolvePath(hardPuzzle).findIndex((entry) => entry.step.assignments.length === 0);
+            if (index === -1) throw new Error("expected an elimination step");
+
+            await solve(wrapper);
+            await clickNext(wrapper, index);
+
+            expect(frameTarget(wrapper)).toBeNull();
+        });
+
+        it("should point the frame at no cell on the solved board", async () => {
+            const { wrapper } = mountWalkthrough({ initialPuzzle: singlesPuzzle });
+
+            await solve(wrapper);
+            await clickNext(wrapper, singlesStepCount);
+
+            expect(wrapper.find("[data-testid='walkthrough-stage']").exists()).toBe(true);
+            expect(frameTarget(wrapper)).toBeNull();
+        });
+
+        it("should hand the frame no group effect or celebration", async () => {
+            const { wrapper } = await mountEntering();
+
+            const frame = wrapper.findComponent(StubBoardFrame);
+            expect([frame.props("effect"), frame.props("celebration")]).toEqual([null, null]);
         });
     });
 

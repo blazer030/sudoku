@@ -1,5 +1,7 @@
+import { readdirSync } from "fs";
 import {
     ALL_LAUNCHER_ALIASES,
+    isPwaIconFile,
     LAUNCHER_ICONS,
     LEGACY_LAUNCHER_ALIASES,
     launcherIconKey,
@@ -16,6 +18,9 @@ describe("launcher icons", () => {
         expect(pwaIconKey("pixel", "classic")).toBe("pixelClassic");
         expect(pwaIconKey("cyber", "neon")).toBe("cyberNeonDark");
         expect(pwaIconKey("ink", "vermilion")).toBe("inkVermilion");
+        expect(pwaIconKey("chalkboard", "classic")).toBe("chalkboardClassic");
+        expect(pwaIconKey("blueprint", "slate")).toBe("blueprintSlate");
+        expect(pwaIconKey("aurora", "teal")).toBe("auroraTeal");
     });
 
     it("should keep the bare theme id for minimal's light icons, whose aliases existing shortcuts point at", () => {
@@ -38,7 +43,7 @@ describe("launcher icons", () => {
         const iconCount = STYLE_IDS.reduce((sum, style) => sum + STYLES[style].themes.length * STYLE_COLOR_MODES[style].length, 0);
 
         expect(LAUNCHER_ICONS).toHaveLength(iconCount);
-        expect(LAUNCHER_ICONS).toHaveLength(27);
+        expect(LAUNCHER_ICONS).toHaveLength(45);
         expect(new Set(LAUNCHER_ICONS.map(icon => icon.key)).size).toBe(LAUNCHER_ICONS.length);
         for (const icon of LAUNCHER_ICONS) {
             expect(icon.key).toBe(launcherIconKey(icon.style, icon.themeId, icon.mode));
@@ -61,6 +66,35 @@ describe("launcher icons", () => {
 
         expect(keys).toContain("inkVermilion");
         expect(keys).not.toContain("inkVermilionDark");
+    });
+
+    it("should give chalkboard a whiteboard and a chalkboard icon", () => {
+        const keys = LAUNCHER_ICONS.map(icon => icon.key);
+
+        expect(keys).toContain("chalkboardClassic");
+        expect(keys).toContain("chalkboardClassicDark");
+    });
+
+    it("should give blueprint a drafting paper and a blueprint icon for each of its papers", () => {
+        const keys = LAUNCHER_ICONS.map(icon => icon.key);
+
+        for (const key of [
+            "blueprintBlue", "blueprintBlueDark", "blueprintTeal", "blueprintTealDark",
+            "blueprintSlate", "blueprintSlateDark", "blueprintRust", "blueprintRustDark",
+        ]) {
+            expect(keys, key).toContain(key);
+        }
+    });
+
+    it("should give aurora a dawn and a night sky icon for each of its four colours", () => {
+        const keys = LAUNCHER_ICONS.map(icon => icon.key);
+
+        for (const key of [
+            "auroraPurple", "auroraPurpleDark", "auroraTeal", "auroraTealDark",
+            "auroraPink", "auroraPinkDark", "auroraOrange", "auroraOrangeDark",
+        ]) {
+            expect(keys, key).toContain(key);
+        }
     });
 
     it("should give paper no dark icon now that paper is light only", () => {
@@ -92,5 +126,16 @@ describe("launcher icons", () => {
         expect(launcherResourceName("green")).toBe("ic_launcher_green");
         expect(launcherResourceName("paperBlueInk")).toBe("ic_launcher_paper_blue_ink");
         expect(launcherResourceName("tactileRustDark")).toBe("ic_launcher_tactile_rust_dark");
+    });
+
+    // The Android build leaves these out of the app; everything else in public ships in both builds
+    it("should tell the web-only PWA icons in public from the files both builds ship", () => {
+        const publicFiles = readdirSync("public");
+
+        expect(publicFiles.filter(isPwaIconFile).sort()).toEqual(publicFiles.filter(file => /^(pwa-\d+x\d+|apple-touch-icon)-\w+\.png$/.test(file)).sort());
+        expect(publicFiles.filter(isPwaIconFile)).toHaveLength(LAUNCHER_ICONS.filter(icon => icon.key === pwaIconKey(icon.style, icon.themeId)).length * 3);
+        expect(isPwaIconFile("sudoku-green.svg")).toBe(false);
+        expect(isPwaIconFile("manifest-green.webmanifest")).toBe(false);
+        expect(isPwaIconFile("theme-classic.png")).toBe(false);
     });
 });

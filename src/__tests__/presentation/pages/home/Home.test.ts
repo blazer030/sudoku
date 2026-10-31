@@ -112,6 +112,12 @@ describe("Home", () => {
         expect(wrapper.get("[data-testid='home-logo']").attributes("data-skin")).toBe("logo");
     });
 
+    it("should mark the new game card for styles to frame apart from other cards", () => {
+        const { wrapper } = mountHome();
+
+        expect(wrapper.get("[data-testid='new-game-card']").attributes("data-skin")).toBe("card new-game-card");
+    });
+
     it("should give every stacked style the same hero", () => {
         const stackedHeroes = STYLE_IDS.filter(style => STYLE_HOME_HEROES[style] === "stacked")
             .map(style => mountHome({ style }).wrapper.get("[data-testid='home-hero']").html());
@@ -119,6 +125,57 @@ describe("Home", () => {
         expect(stackedHeroes.length).toBeGreaterThan(0);
         expect(new Set(stackedHeroes).size).toBe(1);
         expect(stackedHeroes[0]).toContain('data-skin="logo"');
+    });
+
+    it("should lay aurora's hero out stacked, with the logo and the title for its skin to dress", () => {
+        const { wrapper } = mountHome({ style: "aurora" });
+        const hero = wrapper.get("[data-testid='home-hero']");
+
+        expect(STYLE_HOME_HEROES.aurora).toBe("stacked");
+        expect(hero.get("[data-testid='home-logo']").attributes("data-skin")).toBe("logo");
+        expect(hero.get("h1").attributes("data-skin")).toBe("title");
+    });
+
+    it("should space blueprint's title and subtitle out under the logo, in the player's language", () => {
+        const { wrapper } = mountHome({ style: "blueprint" });
+        const hero = wrapper.get("[data-testid='home-hero']");
+        const title = hero.get("h1");
+
+        expect(STYLE_HOME_HEROES.blueprint).toBe("spaced");
+        expect(hero.get("[data-testid='home-logo']").attributes("data-skin")).toBe("logo");
+        expect(title.attributes("data-skin")).toBe("title");
+        expect(title.text()).toBe(i18n.global.t("home.title"));
+        expect(title.classes()).toEqual(expect.arrayContaining(["text-[44px]", "font-light", "[letter-spacing:.5em]", "mr-[-.5em]"]));
+        expect(hero.get("p").classes()).toContain("[letter-spacing:.2em]");
+    });
+
+    it("should write chalkboard's title as a headline with no logo, in the player's language", async () => {
+        const { wrapper } = mountHome({ style: "chalkboard" });
+        const heading = async (locale: "en" | "zh-Hant") => {
+            i18n.global.locale.value = locale;
+            await nextTick();
+            return { title: wrapper.get("h1").text(), text: wrapper.get("[data-testid='home-hero']").text(), expected: [i18n.global.t("home.title"), i18n.global.t("home.subtitle")] };
+        };
+
+        const english = await heading("en");
+        const chinese = await heading("zh-Hant");
+
+        expect(wrapper.find("[data-testid='home-logo']").exists()).toBe(false);
+        expect(wrapper.get("[data-testid='home-hero']").attributes("data-skin")).toBe("hero-headline");
+        expect(wrapper.get("h1").attributes("data-skin")).toBe("title");
+        expect(wrapper.findAll("[data-testid='home-title-glyph']").length).toBeGreaterThan(0);
+        expect(english.title).not.toBe(chinese.title);
+        for (const { title, text, expected } of [english, chinese]) {
+            expect(title).toBe(expected[0]);
+            expect(text).toContain(expected[1]);
+        }
+        i18n.global.locale.value = "en";
+    });
+
+    it.each(["minimal", "chalkboard", "blueprint"] as const)("should mark %s's visible subtitle for the skins", (style) => {
+        const { wrapper } = mountHome({ style });
+
+        expect(wrapper.get("[data-skin~='home-subtitle']").text()).toBe(i18n.global.t("home.subtitle"));
     });
 
     it("should set ink's title as a vertical emblem in Chinese, the same in both languages", async () => {

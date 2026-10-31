@@ -247,6 +247,9 @@ describe("startAppearanceSync", () => {
             delete document.documentElement.dataset.pixelFonts;
             delete document.documentElement.dataset.cyberFonts;
             delete document.documentElement.dataset.inkFonts;
+            delete document.documentElement.dataset.chalkboardFonts;
+            delete document.documentElement.dataset.blueprintFonts;
+            delete document.documentElement.dataset.auroraFonts;
         });
 
         it("should mark paper's fonts ready once Caveat's digits have loaded", async () => {
@@ -304,6 +307,45 @@ describe("startAppearanceSync", () => {
             expect(families).toContain("Ink Serif TC");
             expect(families).toContain("Ink Garamond");
             expect(document.documentElement.dataset.inkFonts).toBe("ready");
+        });
+
+        it("should mark chalkboard's fonts ready once Chalk Digits has loaded", async () => {
+            const load = stubFontLoading(1);
+            const sources = buildSources("classic", "dark", "chalkboard");
+            stop = startAppearanceSync(sources, systemBar, appearanceBridge);
+            expect(document.documentElement.dataset.chalkboardFonts).toBeUndefined();
+
+            await finishLoadingFonts();
+
+            expect(load.mock.calls.map(([font]) => font).join(" ")).toContain("Chalk Digits");
+            expect(document.documentElement.dataset.chalkboardFonts).toBe("ready");
+        });
+
+        it("should mark blueprint's fonts ready once Blueprint Mono, Hand and Sans TC have loaded", async () => {
+            const load = stubFontLoading(1);
+            const sources = buildSources("blue", "dark", "blueprint");
+            stop = startAppearanceSync(sources, systemBar, appearanceBridge);
+            expect(document.documentElement.dataset.blueprintFonts).toBeUndefined();
+
+            await finishLoadingFonts();
+
+            const families = load.mock.calls.map(([font]) => font).join(" ");
+            expect(families).toContain("Blueprint Mono");
+            expect(families).toContain("Blueprint Hand");
+            expect(families).toContain("Blueprint Sans TC");
+            expect(document.documentElement.dataset.blueprintFonts).toBe("ready");
+        });
+
+        it("should mark aurora's fonts ready once Aurora Sans TC has loaded", async () => {
+            const load = stubFontLoading(1);
+            const sources = buildSources("purple", "dark", "aurora");
+            stop = startAppearanceSync(sources, systemBar, appearanceBridge);
+            expect(document.documentElement.dataset.auroraFonts).toBeUndefined();
+
+            await finishLoadingFonts();
+
+            expect(load.mock.calls.map(([font]) => font).join(" ")).toContain("Aurora Sans TC");
+            expect(document.documentElement.dataset.auroraFonts).toBe("ready");
         });
 
         it("should drop pixel's ready mark when leaving pixel", async () => {

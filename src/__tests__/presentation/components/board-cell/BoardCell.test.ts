@@ -50,6 +50,33 @@ describe("BoardCell", () => {
         expect(mountCell({}).attributes("data-variant")).toBe("default");
     });
 
+    it.each([
+        [0, 0, "top-left"],
+        [0, 2, "top-right"],
+        [2, 0, "bottom-left"],
+        [2, 2, "bottom-right"],
+        [3, 5, "top-right"],
+        [8, 6, "bottom-left"],
+    ])("should mark cell (%i,%i) as its box's %s corner", (row, column, corner) => {
+        expect(mountCell({ row, column }).attributes("data-box-corner")).toBe(corner);
+    });
+
+    it("should leave a cell that is not a box corner unmarked", () => {
+        for (const [row, column] of [[4, 4], [1, 0], [0, 1]]) {
+            expect(mountCell({ row, column }).attributes("data-box-corner")).toBeUndefined();
+        }
+    });
+
+    it("should mark 36 cells of a board as box corners", () => {
+        let marked = 0;
+        for (let row = 0; row < 9; row++) {
+            for (let column = 0; column < 9; column++) {
+                if (mountCell({ row, column }).attributes("data-box-corner") !== undefined) marked++;
+            }
+        }
+        expect(marked).toBe(36);
+    });
+
     it("should mark the selected cell for style sheets, whatever its variant", () => {
         expect(mountCell({ variant: "error", selected: true }).attributes("data-selected")).toBe("");
         expect(mountCell({ variant: "selected" }).attributes("data-selected")).toBeUndefined();
@@ -108,6 +135,45 @@ describe("BoardCell", () => {
 
             await value.trigger("animationend");
             expect(wrapper.get("[data-testid='cell-value']").classes()).not.toContain("value-arrive");
+        });
+
+        // The entered digit lies in its own completed group: the group's animation on it runs on the group
+        // effect's clock, and settling there would cut a writer still drawing (chalk's dust)
+        it("should keep a digit arriving when only its group's animation ends on it", async () => {
+            stubReducedMotion(false);
+            const wrapper = mountCell({ value: 0 });
+            await wrapper.setProps({ value: 5 });
+
+            await wrapper.get("[data-testid='cell-value']").trigger("animationend", { animationName: "chalkboard-group-flash" });
+            expect(wrapper.get("[data-testid='cell-value']").classes()).toContain("value-arrive");
+
+            await wrapper.get("[data-testid='cell-value']").trigger("animationend", { animationName: "tactile-drop" });
+            expect(wrapper.get("[data-testid='cell-value']").classes()).not.toContain("value-arrive");
+        });
+
+        // A skin can then draw on the cell itself while its digit arrives, without :has()
+        it("should mark the cell while its digit arrives, and drop the mark when it settles", async () => {
+            stubReducedMotion(false);
+            const wrapper = mountCell({ value: 0 });
+            expect(wrapper.attributes("data-arriving")).toBeUndefined();
+
+            await wrapper.setProps({ value: 5 });
+            expect(wrapper.attributes("data-arriving")).toBe("");
+
+            await wrapper.get("[data-testid='cell-value']").trigger("animationend");
+            expect(wrapper.attributes("data-arriving")).toBeUndefined();
+        });
+
+        it("should not mark the cell as arriving under reduced motion, nor while its digit leaves", async () => {
+            stubReducedMotion(true);
+            const still = mountCell({ value: 0 });
+            await still.setProps({ value: 5 });
+            expect(still.attributes("data-arriving")).toBeUndefined();
+
+            stubReducedMotion(false);
+            const leaving = mountCell({ value: 5 });
+            await leaving.setProps({ value: 0 });
+            expect(leaving.attributes("data-arriving")).toBeUndefined();
         });
 
         it("should drop the arriving mark when the active style has no arrival animation", async () => {

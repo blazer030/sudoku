@@ -11,6 +11,9 @@ import { styleIconBackground, styleIconSvg } from "@/theme/styleIcons";
 // Every icon is a favicon; installed PWAs only use the light ones
 const icons = LAUNCHER_ICONS.map(icon => ({ ...icon, palette: getPalette(icon.style, icon.themeId, icon.mode) }));
 const lightIcons = icons.filter(icon => icon.mode === "light");
+// Aurora's lights cover its edges, so its PWA icons have no bare background to sample
+const bareIcons = lightIcons.filter(icon => icon.style !== "aurora");
+const auroraIcons = lightIcons.filter(icon => icon.style === "aurora");
 
 const hexOf = (red: number, green: number, blue: number): string =>
     `#${[red, green, blue].map(channel => channel.toString(16).padStart(2, "0")).join("")}`.toUpperCase();
@@ -41,7 +44,7 @@ describe("icon assets", () => {
         expect(manifest.background_color).toBe(palette.background);
     });
 
-    it.each(lightIcons)("should render the $key PWA icons on the colour behind their artwork", async ({ key, style, palette }) => {
+    it.each(bareIcons)("should render the $key PWA icons on the colour behind their artwork", async ({ key, style, palette }) => {
         const paths = [
             `public/pwa-192x192-${key}.png`,
             `public/pwa-512x512-${key}.png`,
@@ -50,6 +53,15 @@ describe("icon assets", () => {
 
         for (const path of paths) {
             expect(await backgroundPixel(path), path).toBe(styleIconBackground(style, palette).toUpperCase());
+        }
+    });
+
+    it.each(auroraIcons)("should render the $key PWA icons with the glass sheen at the centre", async ({ key, palette }) => {
+        for (const path of [`public/pwa-192x192-${key}.png`, `public/pwa-512x512-${key}.png`, `public/apple-touch-icon-${key}.png`]) {
+            const { data, info } = await sharp(path).raw().toBuffer({ resolveWithObject: true });
+            const offset = (Math.floor(info.height / 2) * info.width + Math.floor(info.width / 2)) * info.channels;
+
+            expect(hexOf(data[offset], data[offset + 1], data[offset + 2]), path).toBe(palette["glass-sheen"]?.toUpperCase());
         }
     });
 });

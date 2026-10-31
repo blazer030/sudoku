@@ -357,6 +357,51 @@ const cyberArtwork = (palette: Palette, idSuffix: string): string[] => {
     ];
 };
 
+// Aurora Glass: three lights drifting behind one pane of frosted glass, a dot on each corner, side and the centre
+// (the primary on the sides, the sheen in the middle). Ported from the style-research canvas (PickerC's aiw). The
+// glass is the card's glass laid on the ground colour, and its edge is as bright as the mode's skin draws it.
+// The lights' gradients are referenced by id, so a suffix keeps copies on one page apart.
+const AURORA_LIGHTS = [[20, 18, 56], [96, 44, 58], [38, 104, 54]] as const;
+const AURORA_GLASS = { origin: 26, size: 56, radius: 16 };
+const AURORA_CARD_DENSITY = 0.8;
+const AURORA_EDGE_OPACITY = { dark: 0.12, light: 0.85 } as const;
+const AURORA_CORNER_DOTS = [[41, 41], [67, 41], [41, 67], [67, 67]] as const;
+const AURORA_SIDE_DOTS = [[54, 41], [41, 54], [67, 54], [54, 67]] as const;
+
+const auroraIds = (idSuffix: string): string[] => {
+    const tail = idSuffix === "" ? "" : `-${idSuffix}`;
+    return AURORA_LIGHTS.map((_, index) => `aurora-light-${index + 1}${tail}`);
+};
+
+const auroraGlass = (attributes: string): string =>
+    `<rect x="${AURORA_GLASS.origin}" y="${AURORA_GLASS.origin}" width="${AURORA_GLASS.size}" height="${AURORA_GLASS.size}" rx="${AURORA_GLASS.radius}" ${attributes}/>`;
+
+const auroraDots = (corner: string, side: string, centre: string, cornerOpacity: string): string[] => [
+    ...AURORA_CORNER_DOTS.map(([x, y]) => `<circle cx="${x}" cy="${y}" r="4.5" fill="${corner}"${cornerOpacity}/>`),
+    ...AURORA_SIDE_DOTS.map(([x, y]) => `<circle cx="${x}" cy="${y}" r="4.5" fill="${side}"/>`),
+    `<circle cx="54" cy="54" r="6" fill="${centre}"/>`,
+];
+
+const auroraArtwork = (palette: Palette, idSuffix: string): string[] => {
+    const ids = auroraIds(idSuffix);
+    const lights = [palette["aurora-1"], palette["aurora-2"], palette["aurora-3"]] as const;
+    const sheen = palette["glass-sheen"] ?? MONOCHROME_COLOR;
+    const isDark = contrastRatio(palette.background, "#000000") < contrastRatio(palette.background, "#FFFFFF");
+    const glass = mixColors(palette.glass ?? sheen, AURORA_CARD_DENSITY, palette.background);
+    return [
+        `<defs>${ids.map((id, index) => `<radialGradient id="${id}"><stop offset="0" stop-color="${lights[index]}"/><stop offset="1" stop-color="${lights[index]}" stop-opacity="0"/></radialGradient>`).join("")}</defs>`,
+        ...AURORA_LIGHTS.map(([x, y, radius], index) => `<circle cx="${x}" cy="${y}" r="${radius}" fill="url(#${ids[index]})"/>`),
+        auroraGlass(`fill="${glass}" stroke="${sheen}" stroke-opacity="${AURORA_EDGE_OPACITY[isDark ? "dark" : "light"]}" stroke-width="1.2"`),
+        ...auroraDots(palette.foreground, palette.primary, sheen, ` fill-opacity="0.3"`),
+    ];
+};
+
+// The glass outline and the nine dots, the corner ones fainter
+const auroraMonochrome = (color: string): string[] => [
+    auroraGlass(`fill="none" stroke="${color}" stroke-width="1.6"`),
+    ...auroraDots(color, color, color, ` fill-opacity="0.45"`),
+];
+
 // Ink and washi: one brushed 圓相 (an enso) round a faint nine-cell grid on washi, a pale ink wash at the foot, and a
 // vermilion seal stamped with 獨 at the bottom right. Ported from the style-research canvas (Ink.dc.html). The
 // brush roughening is a filter referenced by id, so an icon given a suffix keeps it apart from other copies.
@@ -418,6 +463,140 @@ const inkMonochrome = (color: string): string[] => [
     `<path d="${inkSealOutlineInGlyphUnits()}${INK_SEAL_GLYPH_PATH}" transform="${INK_GLYPH_PLACEMENT}" fill="${color}" fill-rule="evenodd"/>`,
 ];
 
+// Chalkboard: a board in its frame (the wooden tray's wood round the 黑板, grey round the 白板), a hand-drawn grid in
+// the chalk or marker, a ring round the top-left cell, a 7 at the bottom right, and two stubs along the board's foot.
+// Ported from the style-research canvas (Chalk.dc.html). The 黑板's chalk (grid, ring and 7, not the stubs) is
+// roughened by the canvas's chalk filter, baked into the launcher PNGs and drawn live on the 外觀 card and the
+// favicon; the 白板's marker and the monochrome silhouette stay plain.
+const CHALKBOARD_BOARD = { inset: 8, size: 92, radius: 4 };
+const CHALKBOARD_GRID = "M44 24 Q43 54 45 84 M65 23 Q66 54 64 85 M24 44 Q54 42 84 45 M23 65 Q54 66 85 63";
+const CHALKBOARD_RING = "M45 38 Q34 36 33 46 Q34 57 46 56 Q56 54 55 45 Q53 37 44 39";
+// Caveat Brush's 7 (ofl/caveatbrush/CaveatBrush-Regular.ttf, google/fonts at the commit scripts/generate-fonts.ts
+// pins) at 22 units, centred on x 74 with its baseline at y 83 as the canvas sets it, outlined once with harfbuzzjs
+const CHALKBOARD_SEVEN = "M71.1 80Q71.1 79.6 71.2 79Q71.4 78.3 71.5 78.1Q71.6 77.9 71.6 77.7Q71.6 77.6 71.8 77.2Q72 76.8 72 76.8Q72.1 76.7 72.1 76.5Q72.2 76.4 72.3 75.9Q72.4 75.9 72.6 75.5Q72.6 75.2 72.7 75.1Q72.7 75.1 72.8 75Q72.8 75 72.9 74.6Q73.1 74.2 73.1 74.2Q73.1 74.2 73.1 74.1Q73.3 73.7 73.4 73.6Q73.5 73.1 73.6 72.8Q73.8 72.4 73.8 72.2Q73.9 71.9 73.9 71.8Q73.8 71.7 73 71.8Q72.2 71.9 71.3 71.7Q71 71.7 70.8 71.5Q70.6 71.2 70.5 71.1Q70.1 71 69.8 70.3Q69.6 69.9 69.6 69.5Q69.6 69.2 70 68.8Q70.2 68.8 70.3 68.9Q70.7 68.9 71.5 69Q72.1 69 72.3 68.9Q72.5 68.9 72.6 68.9L72.9 68.9Q73.1 68.8 73.4 68.7Q73.6 68.7 73.7 68.6Q73.9 68.5 74 68.5Q74.2 68.5 75 68.6Q75.2 68.5 75.3 68.5Q75.5 68.5 76.5 68.6Q76.6 68.6 76.8 68.8Q77 69 77.1 69.3Q77.2 69.6 77.1 69.7Q77.1 69.8 77.1 69.8Q77.2 69.9 77.5 70Q77.8 70.4 78.2 70.6Q78.2 70.6 78.2 70.7Q78.3 70.8 78.3 70.8Q78.4 70.9 78.4 71Q78.7 71.2 78.1 71.3Q77.7 71.4 76.8 72.8Q76 74.3 75.1 76.2Q74.6 77.1 74 79Q73.5 80.9 73.6 82.4Q73.5 82.7 73.4 82.9Q73.2 83.1 73.1 83Q72.9 82.8 72.5 82.9Q72.2 83 72 83Q71.8 83 71.4 82.5Q70.9 82 71.1 80Z";
+const CHALKBOARD_STUBS = { chalk: { x: 16, width: 22 }, coloured: { x: 42, width: 14 }, y: 92, height: 5, radius: 2 };
+
+interface ChalkboardColors {
+    board: string;
+    writing: string;
+    ring: string;
+    stub: string;
+}
+
+// The ring is the canvas's hot colour: the yellow chalk on the 黑板, the blue marker on the 白板. The coloured stub
+// is the primary in both, the yellow chalk or the orange marker.
+const chalkboardColors = (palette: Palette): ChalkboardColors => ({
+    board: palette.background,
+    writing: palette.foreground,
+    ring: isDark(palette) ? palette.primary : palette.accent,
+    stub: palette.primary,
+});
+
+const chalkboardStub = (stub: { x: number; width: number }, color: string): string => {
+    const { y, height, radius } = CHALKBOARD_STUBS;
+    return `<rect x="${stub.x}" y="${y}" width="${stub.width}" height="${height}" rx="${radius}" fill="${color}"/>`;
+};
+
+const chalkFilterId = (idSuffix: string): string => idSuffix === "" ? "chalk-grain" : `chalk-grain-${idSuffix}`;
+
+const chalkGrainFilter = (id: string): string =>
+    `<defs><filter id="${id}" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence type="fractalNoise" baseFrequency="1.25" numOctaves="2" seed="7" result="noise"/><feColorMatrix in="noise" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -4 2.9" result="mask"/><feComposite in="SourceGraphic" in2="mask" operator="in" result="grain"/><feDisplacementMap in="grain" in2="noise" scale="1.4"/></filter></defs>`;
+
+// `filterId` roughens the grid, the ring and the 7 when given
+const chalkboardWriting = (colors: Omit<ChalkboardColors, "board">, filterId?: string): string[] => {
+    const grain = filterId === undefined ? "" : ` filter="url(#${filterId})"`;
+    return [
+        `<path d="${CHALKBOARD_GRID}" fill="none" stroke="${colors.writing}" stroke-width="3.4" stroke-linecap="round"${grain}/>`,
+        `<path d="${CHALKBOARD_RING}" fill="none" stroke="${colors.ring}" stroke-width="3" stroke-linecap="round"${grain}/>`,
+        `<path d="${CHALKBOARD_SEVEN}" fill="${colors.writing}"${grain}/>`,
+        chalkboardStub(CHALKBOARD_STUBS.chalk, colors.writing),
+        chalkboardStub(CHALKBOARD_STUBS.coloured, colors.stub),
+    ];
+};
+
+const chalkboardArtwork = (palette: Palette, idSuffix: string): string[] => {
+    const { inset, size, radius } = CHALKBOARD_BOARD;
+    const colors = chalkboardColors(palette);
+    const filterId = isDark(palette) ? chalkFilterId(idSuffix) : undefined;
+    return [
+        ...(filterId === undefined ? [] : [chalkGrainFilter(filterId)]),
+        `<rect x="${inset}" y="${inset}" width="${size}" height="${size}" rx="${radius}" fill="${colors.board}"/>`,
+        ...chalkboardWriting(colors, filterId),
+    ];
+};
+
+// Blueprint: a drawing on graph paper. A 3×3 board with dimension lines and arrowheads above it and to its right, the
+// centre cell framed in a dashed box with a leader running up to the right, and 9×9 lettered below. Ported from the
+// style-research canvas (PickerC.dc.html and PickerFlow.dc.html). The paper, the ink and the accent follow the paper
+// and the mode, so each of the four papers draws its own icon in 藍曬圖 and in 製圖紙.
+const BLUEPRINT_GRID_STEP = 9;
+// The canvas's 9-unit grid, moved half a cell so no line crosses the point the icon assets sample the background at
+// (5% across, halfway down); the grid then sits even about the icon's centre
+const BLUEPRINT_GRID_OFFSET = 4.5;
+const BLUEPRINT_BOARD = { x: 30, y: 34, size: 48 };
+const BLUEPRINT_BOARD_LINES = "M46 34 V82 M62 34 V82 M30 50 H78 M30 66 H78";
+const BLUEPRINT_DIMENSIONS = "M30 28 V20 M78 28 V20 M30 24 H78 M84 34 H92 M84 82 H92 M88 34 V82";
+const BLUEPRINT_ARROWHEADS = "M30 24 l5 -2 v4z M78 24 l-5 -2 v4z M88 34 l-2 5 h4z M88 82 l-2 -5 h4z";
+const BLUEPRINT_LEADER = "M58 54 L70 44 H82";
+// "9×9" in IBM Plex Mono Regular (ofl/ibmplexmono/IBMPlexMono-Regular.ttf, google/fonts at the commit
+// scripts/generate-fonts.ts pins) at 8 units with 1 unit between the glyphs, centred on x 54 with its baseline at
+// y 96 as the canvas sets it, outlined once with harfbuzzjs (hb.shape, then font.glyphToPath per glyph, scaled by
+// 8/1000 and flipped onto the baseline, rounded to 0.01)
+const BLUEPRINT_NINE_BY_NINE = "M50.09 92.46Q50.09 93.09 49.9 93.64Q49.71 94.18 49.42 94.64Q49.12 95.09 48.76 95.44Q48.41 95.78 48.06 96L47.2 96Q47.66 95.67 48.01 95.36Q48.37 95.05 48.64 94.71Q48.91 94.37 49.1 93.98Q49.28 93.59 49.4 93.1L49.36 93.09Q49.15 93.43 48.83 93.66Q48.5 93.89 47.98 93.89Q47.62 93.89 47.31 93.77Q47 93.65 46.78 93.42Q46.56 93.2 46.44 92.88Q46.31 92.57 46.31 92.17Q46.31 91.76 46.44 91.42Q46.58 91.08 46.82 90.84Q47.07 90.59 47.42 90.46Q47.77 90.32 48.19 90.32Q48.63 90.32 48.98 90.47Q49.34 90.62 49.58 90.89Q49.82 91.17 49.96 91.57Q50.09 91.97 50.09 92.46ZM48.2 93.34Q48.78 93.34 49.09 93.02Q49.41 92.71 49.41 92.14L49.41 92.08Q49.41 91.51 49.09 91.2Q48.78 90.89 48.2 90.89Q47.62 90.89 47.31 91.2Q46.99 91.51 46.99 92.08L46.99 92.14Q46.99 92.71 47.31 93.02Q47.62 93.34 48.2 93.34ZM54 93.95L52.7 95.26L52.3 94.86L53.61 93.56L52.3 92.26L52.7 91.86L54 93.17L55.3 91.86L55.7 92.26L54.39 93.56L55.7 94.86L55.3 95.26L54 93.95ZM61.69 92.46Q61.69 93.09 61.5 93.64Q61.31 94.18 61.02 94.64Q60.72 95.09 60.36 95.44Q60.01 95.78 59.66 96L58.8 96Q59.26 95.67 59.61 95.36Q59.97 95.05 60.24 94.71Q60.51 94.37 60.7 93.98Q60.88 93.59 61 93.1L60.96 93.09Q60.75 93.43 60.43 93.66Q60.1 93.89 59.58 93.89Q59.22 93.89 58.91 93.77Q58.6 93.65 58.38 93.42Q58.16 93.2 58.04 92.88Q57.91 92.57 57.91 92.17Q57.91 91.76 58.04 91.42Q58.18 91.08 58.42 90.84Q58.67 90.59 59.02 90.46Q59.37 90.32 59.79 90.32Q60.23 90.32 60.58 90.47Q60.94 90.62 61.18 90.89Q61.42 91.17 61.56 91.57Q61.69 91.97 61.69 92.46ZM59.8 93.34Q60.38 93.34 60.69 93.02Q61.01 92.71 61.01 92.14L61.01 92.08Q61.01 91.51 60.69 91.2Q60.38 90.89 59.8 90.89Q59.22 90.89 58.91 91.2Q58.59 91.51 58.59 92.08L58.59 92.14Q58.59 92.71 58.91 93.02Q59.22 93.34 59.8 93.34Z";
+
+interface BlueprintColors {
+    paper: string;
+    ink: string;
+    grid: string;
+    hot: string;
+}
+
+// The canvas's --ai-bg, --ai-ink, --ai-minor and --ai-hot: the paper, the lines, the major grid lines and the accent
+const blueprintColors = (palette: Palette): BlueprintColors => ({
+    paper: palette.background,
+    ink: palette.foreground,
+    grid: palette["grid-major"] ?? palette.border,
+    hot: palette.primary,
+});
+
+// The grid runs `bleed` units past each edge of the artwork, so a foreground layer has no seam
+const blueprintGrid = (color: string, bleed: number): string => {
+    const lines: number[] = [];
+    const first = BLUEPRINT_GRID_OFFSET - BLUEPRINT_GRID_STEP * Math.floor((BLUEPRINT_GRID_OFFSET + bleed) / BLUEPRINT_GRID_STEP);
+    for (let line = first; line <= ICON_SIZE + bleed; line += BLUEPRINT_GRID_STEP) lines.push(line);
+    const start = -bleed;
+    const end = ICON_SIZE + bleed;
+    const path = [
+        ...lines.map(line => `M${line} ${start}V${end}`),
+        ...lines.map(line => `M${start} ${line}H${end}`),
+    ].join("");
+    return `<path d="${path}" fill="none" stroke="${color}" stroke-width=".6"/>`;
+};
+
+// The ink's lines and lettering and the dashed box; the colourful icon adds the leader
+const blueprintDrawing = (ink: string, hot: string): string[] => {
+    const { x, y, size } = BLUEPRINT_BOARD;
+    return [
+        `<g fill="none" stroke="${ink}">`,
+        `<rect x="${x}" y="${y}" width="${size}" height="${size}" stroke-width="2.2"/>`,
+        `<path d="${BLUEPRINT_BOARD_LINES}" stroke-width="1"/>`,
+        `<path d="${BLUEPRINT_DIMENSIONS}" stroke-width="1"/>`,
+        "</g>",
+        `<path d="${BLUEPRINT_ARROWHEADS}" fill="${ink}"/>`,
+        `<path d="${BLUEPRINT_NINE_BY_NINE}" fill="${ink}"/>`,
+        `<rect x="49" y="53" width="10" height="10" fill="none" stroke="${hot}" stroke-width="1.6" stroke-dasharray="3 2"/>`,
+    ];
+};
+
+const blueprintArtwork = (palette: Palette, bleed: number): string[] => {
+    const colors = blueprintColors(palette);
+    return [
+        blueprintGrid(colors.grid, bleed),
+        ...blueprintDrawing(colors.ink, colors.hot),
+        `<path d="${BLUEPRINT_LEADER}" fill="none" stroke="${colors.hot}" stroke-width="1.4"/>`,
+    ];
+};
+
 const artworkOf = (style: StyleId, palette: Palette, bleed = 0, idSuffix = ""): string[] => {
     switch (style) {
         case "minimal": return minimalTiles(palette["on-primary"]);
@@ -429,16 +608,23 @@ const artworkOf = (style: StyleId, palette: Palette, bleed = 0, idSuffix = ""): 
         case "pixel": return pixelArtwork(pixelColors(palette));
         case "cyber": return cyberArtwork(palette, idSuffix);
         case "ink": return inkArtwork(palette, bleed, idSuffix);
+        case "chalkboard": return chalkboardArtwork(palette, idSuffix);
+        case "blueprint": return blueprintArtwork(palette, bleed);
+        case "aurora": return auroraArtwork(palette, idSuffix);
     }
 };
 
 /** The colour behind a style's artwork: the adaptive icon's background layer. */
-export const styleIconBackground = (style: StyleId, palette: Palette): string =>
-    style === "minimal" ? palette.primary : palette.background;
+export const styleIconBackground = (style: StyleId, palette: Palette): string => {
+    if (style === "minimal") return palette.primary;
+    // The frame round the board, so it carries on past the foreground's viewport
+    if (style === "chalkboard" && palette["icon-frame"]) return palette["icon-frame"];
+    return palette.background;
+};
 
 /**
  * A style's icon as a full 108-unit square SVG in the palette's colours, unrounded. An icon that uses
- * ids (cyberpunk's gradient and glow, ink's brush filter) takes `idSuffix` into them, so copies on one page do not share.
+ * ids (cyberpunk's gradient and glow, ink's brush filter, the 黑板's chalk grain) takes `idSuffix` into them, so copies on one page do not share.
  */
 export const styleIconSvg = (style: StyleId, palette: Palette, idSuffix = ""): string =>
     svgOf(fillSquare(styleIconBackground(style, palette)), ...artworkOf(style, palette, 0, idSuffix));
@@ -475,6 +661,12 @@ const monochromeArtwork = (style: StyleId): string[] => {
         ];
         // The 圓相, the grid and the seal with 獨 cut out of it
         case "ink": return inkMonochrome(color);
+        // The writing without the board and its frame: the grid, the ring, the 7 and the stubs
+        case "chalkboard": return chalkboardWriting({ writing: color, ring: color, stub: color });
+        // The ink's lines, the arrowheads, 9×9 and the dashed box, without the graph paper or the leader
+        case "blueprint": return blueprintDrawing(color, color);
+        // The pane's outline and the nine dots, without the lights
+        case "aurora": return auroraMonochrome(color);
     }
 };
 

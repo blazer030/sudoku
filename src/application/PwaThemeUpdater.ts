@@ -1,4 +1,4 @@
-import type { LauncherIconKey } from "@/theme/launcherIcon";
+import { pwaIconFiles, type LauncherIconKey } from "@/theme/launcherIcon";
 
 export const updateMetaThemeColor = (color: string): void => {
     const meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
@@ -18,5 +18,5 @@ export const updateManifestLink = (icon: LauncherIconKey): void => {
 
 export const updateAppleTouchIcon = (icon: LauncherIconKey): void => {
     const link = document.querySelector<HTMLLinkElement>('link[rel="apple-touch-icon"]');
-    if (link) link.href = `${import.meta.env.BASE_URL}apple-touch-icon-${icon}.png`;
+    if (link) link.href = `${import.meta.env.BASE_URL}${pwaIconFiles(icon).appleTouch}`;
 };

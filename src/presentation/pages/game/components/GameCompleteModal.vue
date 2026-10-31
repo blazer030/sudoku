@@ -2,7 +2,9 @@
     <Transition name="modal">
         <div
             v-if="visible"
-            class="fixed inset-0 bg-scrim/60 flex items-center justify-center z-50"
+            ref="scrim"
+            class="fixed inset-0 bg-scrim/60 flex items-center-safe justify-center overflow-y-auto py-safe-larger z-50"
+            data-skin="dialog-scrim"
             data-testid="game-complete-modal"
         >
             <component
@@ -10,8 +12,13 @@
                 v-if="moments.celebration !== null"
                 :still="params?.still ?? false"
             />
+            <!-- Room above and below for a style's stamp, rod or seal past the card's edge, which the scrim
+                 could not scroll back to. Only when what the card holds does not fit the window anyway: on a
+                 phone it does, even one that cuts into the card's padding, and the card stays as it was. -->
             <div
+                ref="card"
                 class="bg-card rounded-3xl p-8 mx-6 w-full max-w-[354px] flex flex-col items-center gap-6 shadow-modal relative z-[52]"
+                :class="{ 'my-16': contentTallerThanRoom }"
                 :data-still="params?.still ? '' : undefined"
                 data-skin="card celebration"
                 data-testid="complete-card"
@@ -106,6 +113,7 @@
                     <button
                         v-press
                         class="w-full h-11 rounded-button text-foreground-secondary text-[15px] font-medium flex items-center justify-center cursor-pointer transition-all duration-200 hover:bg-foreground/5"
+                        data-skin="text-button"
                         data-testid="back-to-home-button"
                         @click="close('home')"
                     >
@@ -121,15 +129,17 @@
 import { History, RotateCcw, Trophy } from "lucide-vue-next";
 import { formatTime } from "@/utils/formatTime";
 import { useDifficultyLabel } from "@/presentation/i18n/difficultyLabels";
-import { computed } from "vue";
+import { computed, useTemplateRef } from "vue";
 import { useI18n } from "vue-i18n";
 import { useGameCompleteModal } from "@/presentation/pages/game/components/useGameCompleteModal";
 import { useStyleMoments } from "@/presentation/components/style-moments/styleMoments";
 import { vPress } from "@/presentation/directives/press";
+import { useContentTallerThanRoom } from "@/presentation/composables/useContentTallerThanRoom";
 
 const { t } = useI18n();
 const moments = useStyleMoments();
 const { visible, params, close } = useGameCompleteModal();
+const { contentTallerThanRoom } = useContentTallerThanRoom(useTemplateRef<HTMLElement>("scrim"), useTemplateRef<HTMLElement>("card"));
 
 const difficultyText = useDifficultyLabel();
 const difficultyLabel = computed(() => difficultyText(params.value?.difficulty ?? "easy"));

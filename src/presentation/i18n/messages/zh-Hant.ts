@@ -28,13 +28,16 @@ export const zhHant: MessageSchema = {
             dark: "深色",
             styled: {
                 pixel: { light: "掌機", dark: "紅白機" },
+                chalkboard: { light: "白板", dark: "黑板" },
+                blueprint: { light: "製圖紙", dark: "藍曬圖" },
+                aurora: { light: "晨光", dark: "夜空" },
             },
         },
         appearanceSummary: "{mode}・{theme}",
         colorTheme: "色彩主題",
         style: {
             label: "風格",
-            names: { minimal: "極簡動態", tactile: "實體方塊", paper: "紙本筆記", pixel: "8-bit 電玩", cyber: "賽博龐克", ink: "水墨和紙" },
+            names: { minimal: "極簡動態", tactile: "實體方塊", paper: "紙本筆記", pixel: "8-bit 電玩", cyber: "賽博龐克", ink: "水墨和紙", chalkboard: "黑板粉筆", blueprint: "藍圖工程", aurora: "極光玻璃" },
         },
         colorThemes: {
             green: "綠",
@@ -106,6 +109,11 @@ export const zhHant: MessageSchema = {
         newGame: "新遊戲",
         continueGame: "繼續遊戲",
         continueProgress: "已填 {percent}%",
+        continueCaptions: {
+            difficulty: "難度",
+            time: "時間",
+            progress: "進度",
+        },
         statistics: "統計",
         walkthrough: "解題演示",
         entries: {
@@ -124,6 +132,9 @@ export const zhHant: MessageSchema = {
         },
     },
     game: {
+        boardFrame: {
+            columns: "{n} 欄",
+        },
         hints: {
             title: "提示",
             remaining: "本局還剩 {count} 次提示",
@@ -169,7 +180,10 @@ export const zhHant: MessageSchema = {
             newRecord: "新紀錄！",
             playAgain: "再玩一局",
             review: "看這局回顧",
+            cheer: "好棒！",
             stamp: "完成",
+            approvalStamp: "核可",
+            approvalRevision: "APPROVED · REV {version}",
         },
     },
     walkthrough: {

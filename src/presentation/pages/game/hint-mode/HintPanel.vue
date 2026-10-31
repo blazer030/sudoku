@@ -11,7 +11,10 @@
     >
         <template v-if="phase === 'wrongEntry' && wrongCell">
             <div class="flex items-center gap-2.5">
-                <span class="w-8 h-8 rounded-full bg-error-surface flex items-center justify-center shrink-0">
+                <span
+                    class="w-8 h-8 rounded-full bg-error-surface flex items-center justify-center shrink-0"
+                    data-skin="icon-tile danger"
+                >
                     <CircleAlert
                         :size="18"
                         class="text-error"

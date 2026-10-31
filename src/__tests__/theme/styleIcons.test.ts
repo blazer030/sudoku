@@ -11,6 +11,8 @@ const pixelHandheld = getPalette("pixel", "classic", "light");
 const pixelConsole = getPalette("pixel", "classic", "dark");
 const cyberNeon = getPalette("cyber", "neon", "dark");
 const inkVermilion = getPalette("ink", "vermilion", "light");
+const chalkboard = getPalette("chalkboard", "classic", "dark");
+const whiteboard = getPalette("chalkboard", "classic", "light");
 const firstPalette = (style: StyleId) => getPalette(style, THEME_IDS_BY_STYLE[style][0], "light");
 
 // Every colour the markup paints with, fills and strokes alike
@@ -168,6 +170,133 @@ describe("styleIcons", () => {
         expect(monochrome).toMatch(new RegExp(`<path d="[^"]*${INK_SEAL_GLYPH_PATH.slice(0, 20)}[^"]*"[^>]*fill-rule="evenodd"`));
     });
 
+    it("should draw chalkboard's 黑板 icon in white and yellow chalk on the green board", () => {
+        const svg = styleIconSvg("chalkboard", chalkboard);
+
+        for (const color of ["#2E4B3C", "#F4F1E8", "#F7C873"]) expect(paintsOf(svg), color).toContain(color);
+        expect(svg).not.toContain("<text");
+    });
+
+    it("should draw chalkboard's 白板 icon in black, orange and blue markers on the whiteboard", () => {
+        const svg = styleIconSvg("chalkboard", whiteboard);
+
+        for (const color of ["#F5F6F3", "#1F2328", "#B04A00", "#1D5FC2"]) expect(paintsOf(svg), color).toContain(color);
+        expect(svg).not.toContain("<text");
+        expect(svg).not.toBe(styleIconSvg("chalkboard", chalkboard));
+    });
+
+    it("should frame chalkboard's board in wood and the whiteboard in grey, from each palette's icon frame", () => {
+        const frameOf = (svg: string) => fillOf(svg, `width="108" height="108"`);
+        const dark = frameOf(styleIconSvg("chalkboard", chalkboard));
+        const light = frameOf(styleIconSvg("chalkboard", whiteboard));
+
+        expect(dark).toBe(chalkboard["icon-frame"]);
+        expect(light).toBe(whiteboard["icon-frame"]);
+        expect(dark).not.toBe(light);
+        expect(styleIconBackground("chalkboard", chalkboard)).toBe(dark);
+        expect(fillOf(styleIconSvg("chalkboard", chalkboard), `x="8" y="8" width="92" height="92" rx="4"`)).toBe(chalkboard.background);
+    });
+
+    it("should draw chalkboard's monochrome as the grid, the ring and the 7, not a placeholder", () => {
+        const monochrome = styleIconMonochrome("chalkboard");
+
+        expect(monochrome).toContain(`<path d="M44 24 Q43 54 45 84`);
+        expect(monochrome).toContain(`<path d="M45 38 Q34 36 33 46`);
+        expect(monochrome).toMatch(/<path d="M71\.1 80Q/);
+        expect(monochrome).not.toContain(`<rect x="34" y="34" width="40" height="40"`);
+    });
+
+    describe("chalkboard's chalk grain", () => {
+        const filterIdOf = (svg: string) => /<filter id="([^"]+)"/.exec(svg)?.[1];
+        const elementStarting = (svg: string, start: string): string =>
+            (svg.match(/<(?:path|rect) [^>]*\/>/g) ?? []).find(element => element.includes(start)) ?? "";
+
+        it("should roughen the 黑板's grid, ring and 7 with the canvas's chalk filter but not its stubs", () => {
+            const svg = styleIconSvg("chalkboard", chalkboard);
+            const id = filterIdOf(svg);
+
+            expect(id).toBeDefined();
+            expect(svg).toContain(`baseFrequency="1.25" numOctaves="2" seed="7"`);
+            expect(svg).toContain(`values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -4 2.9"`);
+            expect(svg).toContain(`<feDisplacementMap in="grain" in2="noise" scale="1.4"/>`);
+            expect(elementStarting(svg, `d="M44 24 Q43 54`)).toContain(`filter="url(#${id})"`);
+            expect(elementStarting(svg, `d="M45 38 Q34 36`)).toContain(`filter="url(#${id})"`);
+            expect(elementStarting(svg, `d="M71.1 80Q`)).toContain(`filter="url(#${id})"`);
+            expect(elementStarting(svg, `y="92"`)).not.toContain("filter");
+            expect(elementStarting(svg, `x="8" y="8"`)).not.toContain("filter");
+            expect(svg.match(/filter="/g)).toHaveLength(3);
+        });
+
+        it("should roughen the adaptive foreground of the 黑板 too", () => {
+            expect(styleIconForeground("chalkboard", chalkboard)).toContain(`filter="url(#`);
+        });
+
+        it("should leave the 白板 plain", () => {
+            expect(styleIconSvg("chalkboard", whiteboard)).not.toMatch(/filter/i);
+            expect(styleIconForeground("chalkboard", whiteboard)).not.toMatch(/filter/i);
+        });
+
+        it("should give each 黑板 icon copy its own filter id when given a suffix", () => {
+            const first = filterIdOf(styleIconSvg("chalkboard", chalkboard, "a"));
+            const second = filterIdOf(styleIconSvg("chalkboard", chalkboard, "b"));
+
+            expect(first).toBeDefined();
+            expect(first).not.toBe(second);
+        });
+
+        it("should keep the monochrome silhouette free of grain", () => {
+            expect(styleIconMonochrome("chalkboard")).not.toMatch(/filter/i);
+        });
+    });
+
+    describe("blueprint", () => {
+        const blueprintBlue = getPalette("blueprint", "blue", "dark");
+        const draftingTeal = getPalette("blueprint", "teal", "light");
+
+        it("should draw the 藍曬圖 icon in white lines and amber on the blue paper's graph grid", () => {
+            const svg = styleIconSvg("blueprint", blueprintBlue);
+
+            for (const color of ["#123F78", "#F2F7FF", "#FFD166", blueprintBlue["grid-major"] ?? ""]) expect(paintsOf(svg), color).toContain(color);
+            expect(svg).not.toContain("<text");
+        });
+
+        it("should draw the 製圖紙 icon in the theme's ink and the orange pen on the white paper", () => {
+            const svg = styleIconSvg("blueprint", draftingTeal);
+
+            for (const color of ["#FAFBFC", "#0B5563", "#B34A00"]) expect(paintsOf(svg), color).toContain(color);
+        });
+
+        it("should draw a different icon for each paper in each mode", () => {
+            const icons = THEME_IDS_BY_STYLE.blueprint.flatMap(themeId =>
+                COLOR_MODES.map(mode => styleIconSvg("blueprint", getPalette("blueprint", themeId, mode))));
+
+            expect(icons).toHaveLength(8);
+            expect(new Set(icons).size).toBe(8);
+        });
+
+        it("should frame the centre cell in a dashed box and draw 9×9 as a path", () => {
+            const svg = styleIconSvg("blueprint", blueprintBlue);
+
+            expect(svg).toMatch(/<rect x="49" y="53" width="10" height="10" [^>]*stroke-dasharray="3 2"/);
+            expect(svg).toMatch(/<path d="M50\.09 92\.46Q/);
+        });
+
+        it("should keep only the ink lines and the dashed box in the monochrome layer, without the graph paper", () => {
+            const monochrome = styleIconMonochrome("blueprint");
+
+            expect(monochrome).toContain(`<rect x="30" y="34" width="48" height="48"`);
+            expect(monochrome).toContain(`stroke-dasharray="3 2"`);
+            expect(monochrome).toMatch(/<path d="M50\.09 92\.46Q/);
+            expect(monochrome).not.toContain(`stroke-width=".6"`);
+            expect(monochrome).not.toContain(`<rect x="34" y="34" width="40" height="40"`);
+        });
+
+        it("should run the graph paper to the edges of the foreground layer", () => {
+            expect(styleIconForeground("blueprint", blueprintBlue)).toContain("M-22.5 -27V135");
+            expect(styleIconForeground("blueprint", blueprintBlue)).toContain("M-27 130.5H135");
+        });
+    });
+
     it.each(STYLE_IDS)("should draw the %s icon as a plain 108 square with no text", (style) => {
         const svg = styleIconSvg(style, firstPalette(style));
 
@@ -219,5 +348,63 @@ describe("styleIcons", () => {
 
         expect(paints.length).toBeGreaterThan(0);
         expect(new Set(paints).size).toBe(1);
+    });
+
+    describe("aurora", () => {
+        const nightPurple = getPalette("aurora", "purple", "dark");
+        const circlesOf = (svg: string): string[] => svg.match(/<circle [^>]*\/>/g) ?? [];
+
+        it("should draw the theme's first three lights behind one pane of glass with nine dots on the night sky", () => {
+            const svg = styleIconSvg("aurora", nightPurple, "x");
+
+            for (const color of ["#060914", "#4A039B", "#21238E", "#8B1787", "#A897FF"]) {
+                expect(svg, color).toContain(color);
+            }
+            expect(svg.match(/<radialGradient/g)).toHaveLength(3);
+            for (const [centreX, centreY, radius] of [[20, 18, 56], [96, 44, 58], [38, 104, 54]]) {
+                expect(svg).toContain(`<circle cx="${centreX}" cy="${centreY}" r="${radius}"`);
+            }
+            expect(svg.match(/<rect [^>]*width="56"[^>]*rx="16"[^>]*\/>/g)).toHaveLength(1);
+            const dots = circlesOf(svg).filter(circle => !/ r="5\d"/.test(circle));
+            expect(dots).toHaveLength(9);
+            expect(dots.filter(circle => circle.includes('fill-opacity="0.3"'))).toHaveLength(4);
+            expect(dots.filter(circle => circle.includes(`fill="${nightPurple.primary}"`))).toHaveLength(4);
+            expect(dots.filter(circle => circle.includes(`r="6" fill="${nightPurple["glass-sheen"]}"`))).toHaveLength(1);
+            expect(svg).not.toContain("<filter");
+            expect(svg).not.toContain("<text");
+        });
+
+        it("should draw all eight colour and mode icons apart, the dawn on its pale ground", () => {
+            const svgs = (["purple", "teal", "pink", "orange"] as const).flatMap(themeId =>
+                COLOR_MODES.map(mode => styleIconSvg("aurora", getPalette("aurora", themeId, mode), "x")));
+            const dawn = styleIconSvg("aurora", getPalette("aurora", "purple", "light"), "x");
+
+            expect(new Set(svgs).size).toBe(8);
+            expect(dawn).toContain("#EEF0F7");
+            expect(dawn).toContain("#5B3FE0");
+        });
+
+        it("should keep the ids of two copies apart and leave them bare without a suffix", () => {
+            const idsOf = (svg: string) => [...svg.matchAll(/ id="([^"]+)"/g)].map(([, id]) => id);
+            const first = styleIconSvg("aurora", nightPurple, "a");
+            const second = styleIconSvg("aurora", nightPurple, "b");
+            const bare = styleIconSvg("aurora", nightPurple);
+
+            expect(idsOf(first)).toHaveLength(3);
+            for (const id of idsOf(first)) expect(idsOf(second)).not.toContain(id);
+            for (const svg of [first, second, bare]) {
+                for (const [, id] of svg.matchAll(/url\(#([^)]+)\)/g)) expect(idsOf(svg)).toContain(id);
+            }
+            expect(idsOf(bare).every(id => !id.endsWith("-"))).toBe(true);
+            expect(idsOf(bare)).not.toEqual(idsOf(first));
+        });
+
+        it("should draw the monochrome icon as the glass outline and nine dots without a gradient", () => {
+            const svg = styleIconMonochrome("aurora");
+
+            expect(svg).not.toContain("radialGradient");
+            expect(svg.match(/<rect /g)).toHaveLength(1);
+            expect(svg.match(/<circle /g)).toHaveLength(9);
+        });
     });
 });

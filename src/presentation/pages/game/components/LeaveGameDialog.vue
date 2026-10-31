@@ -2,14 +2,18 @@
     <Transition name="modal">
         <div
             v-if="visible"
-            class="fixed inset-0 bg-scrim/50 flex items-center justify-center z-50"
+            class="fixed inset-0 bg-scrim/50 flex items-center-safe justify-center overflow-y-auto py-safe-larger z-50"
+            data-skin="dialog-scrim"
             data-testid="leave-game-dialog"
         >
             <div
                 class="bg-card rounded-3xl p-8 mx-6 w-full max-w-[354px] flex flex-col items-center gap-6 shadow-modal"
                 data-skin="card"
             >
-                <div class="w-16 h-16 rounded-2xl bg-primary-light flex items-center justify-center">
+                <div
+                    class="w-16 h-16 rounded-2xl bg-primary-light flex items-center justify-center"
+                    data-skin="icon-tile"
+                >
                     <Save
                         :size="32"
                         class="text-primary"
@@ -48,6 +52,7 @@
                         <button
                             v-press
                             class="flex-1 h-11 px-3 whitespace-nowrap flex items-center justify-center cursor-pointer rounded-button text-foreground text-[15px] font-semibold transition-all duration-200 hover:bg-foreground/5"
+                            data-skin="text-button"
                             data-testid="leave-cancel-button"
                             @click="close('cancel')"
                         >
@@ -56,6 +61,7 @@
                         <button
                             v-press
                             class="flex-1 h-11 px-3 whitespace-nowrap flex items-center justify-center cursor-pointer rounded-button text-danger text-[15px] font-semibold transition-all duration-200 hover:bg-foreground/5"
+                            data-skin="text-button"
                             data-testid="give-up-and-leave-button"
                             @click="close('giveUp')"
                         >

@@ -35,6 +35,70 @@
             >{{ EMBLEM.title }}</span>
         </div>
     </div>
+    <!-- The title written large with no logo above it, its letters spaced apart; a style draws under it -->
+    <div
+        v-else-if="layout === 'headline'"
+        class="flex flex-col items-center"
+        data-skin="hero-headline"
+        data-testid="home-hero"
+    >
+        <h1
+            class="text-foreground text-[66px] leading-[1.1] font-bold [letter-spacing:.08em] mr-[-.08em]"
+            data-skin="title"
+        >
+            <span
+                v-for="(glyph, glyphIndex) in titleGlyphs(t('home.title'))"
+                :key="glyphIndex"
+                data-skin="title-glyph"
+                data-testid="home-title-glyph"
+            >{{ glyph }}</span>
+        </h1>
+        <p
+            class="mt-7 text-foreground-secondary text-base"
+            data-skin="home-subtitle"
+        >
+            {{ t("home.subtitle") }}
+        </p>
+    </div>
+    <!-- The stacked logo over a light, large title and the subtitle, both spaced out by letter-spacing properties
+         as the emblem above; the title gives its trailing space back, so it stays centred -->
+    <div
+        v-else-if="layout === 'spaced'"
+        class="flex flex-col items-center gap-2"
+        data-testid="home-hero"
+    >
+        <div
+            class="w-20 h-20 bg-primary rounded-popup flex items-center justify-center shadow-primary-lg"
+            data-skin="logo"
+            data-testid="home-logo"
+        >
+            <div class="grid grid-cols-3 gap-1 w-12 h-12">
+                <div
+                    v-for="square in 9"
+                    :key="square"
+                    :class="square % 2 === 0 ? 'bg-on-primary' : 'bg-on-primary/40'"
+                    class="rounded-sm"
+                />
+            </div>
+        </div>
+        <h1
+            class="text-foreground text-[44px] font-light [letter-spacing:.5em] mr-[-.5em]"
+            data-skin="title"
+        >
+            <span
+                v-for="(glyph, glyphIndex) in titleGlyphs(t('home.title'))"
+                :key="glyphIndex"
+                data-skin="title-glyph"
+                data-testid="home-title-glyph"
+            >{{ glyph }}</span>
+        </h1>
+        <p
+            class="text-foreground-secondary text-sm [letter-spacing:.2em]"
+            data-skin="home-subtitle"
+        >
+            {{ t("home.subtitle") }}
+        </p>
+    </div>
     <div
         v-else
         class="flex flex-col items-center gap-2"
@@ -69,7 +133,10 @@
                 data-testid="home-title-glyph"
             >{{ glyph }}</span>
         </h1>
-        <p class="text-foreground-secondary text-sm">
+        <p
+            class="text-foreground-secondary text-sm"
+            data-skin="home-subtitle"
+        >
             {{ t("home.subtitle") }}
         </p>
     </div>

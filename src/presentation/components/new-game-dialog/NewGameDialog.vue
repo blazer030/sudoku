@@ -2,7 +2,8 @@
     <Transition name="modal">
         <div
             v-if="visible"
-            class="fixed inset-0 bg-scrim/50 flex items-center justify-center z-50"
+            class="fixed inset-0 bg-scrim/50 flex items-center-safe justify-center overflow-y-auto py-safe-larger z-50"
+            data-skin="dialog-scrim"
             data-testid="new-game-confirm-dialog"
             @click.self="close('stay')"
         >
@@ -10,7 +11,10 @@
                 class="bg-card rounded-3xl p-8 mx-6 w-full max-w-[354px] flex flex-col items-center gap-6 shadow-modal"
                 data-skin="card"
             >
-                <div class="w-16 h-16 rounded-2xl bg-danger/10 flex items-center justify-center">
+                <div
+                    class="w-16 h-16 rounded-2xl bg-danger/10 flex items-center justify-center"
+                    data-skin="icon-tile danger"
+                >
                     <TriangleAlert
                         :size="32"
                         class="text-danger"
@@ -53,6 +57,7 @@
                     <button
                         v-press
                         class="w-full h-11 flex items-center justify-center cursor-pointer rounded-button text-danger text-[15px] font-semibold transition-all duration-200 hover:bg-foreground/5"
+                        data-skin="text-button"
                         data-testid="give-up-and-start-new-button"
                         @click="close('giveUp')"
                     >
@@ -62,6 +67,7 @@
                     <button
                         v-press
                         class="w-full h-11 flex items-center justify-center cursor-pointer rounded-button text-foreground-secondary text-[15px] font-medium transition-all duration-200 hover:bg-foreground/5"
+                        data-skin="text-button"
                         data-testid="new-game-stay-button"
                         @click="close('stay')"
                     >

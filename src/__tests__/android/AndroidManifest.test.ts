@@ -1,8 +1,8 @@
 import { readFileSync } from "fs";
 import { ALL_LAUNCHER_ALIASES } from "@/theme/launcherIcon";
 
-// The layout is designed for portrait only: in landscape the board and the digit row
-// cannot both fit above the navigation bar.
+// Phones are kept in portrait by MainActivity (OrientationPolicy), not the manifest, so large
+// screens and split windows can turn and resize as Google Play asks.
 
 const MANIFEST_PATH = "android/app/src/main/AndroidManifest.xml";
 
@@ -10,9 +10,18 @@ const mainActivityTag = (): string =>
     /<activity\b[^>]*android:name="\.MainActivity"[^>]*>/.exec(readFileSync(MANIFEST_PATH, "utf8"))?.[0] ?? "";
 
 describe("Android manifest", () => {
-    it("should lock the main activity to portrait", () => {
-        expect(mainActivityTag()).toContain('android:screenOrientation="portrait"');
+    it("should leave the main activity's orientation to MainActivity", () => {
+        expect(mainActivityTag()).not.toContain("android:screenOrientation");
     });
+
+    it.each(["orientation", "screenSize", "smallestScreenSize", "screenLayout"])(
+        "should keep the WebView when the window's %s changes (turning, split screen, a foldable)",
+        (change) => {
+            const configChanges = /android:configChanges="([^"]*)"/.exec(mainActivityTag())?.[1].split("|") ?? [];
+
+            expect(configChanges).toContain(change);
+        },
+    );
 
     it("should launch every theme icon alias into the main activity", () => {
         // An activity-alias has no orientation of its own; it opens its target activity

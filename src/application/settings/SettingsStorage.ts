@@ -1,6 +1,7 @@
 import {
-    COLOR_MODES, STYLE_IDS, THEME_IDS_BY_STYLE,
-    type ColorMode, type ColorThemeId, type RememberedThemes, type StyleId,
+    COLOR_MODES, STYLE_COLOR_MODES, effectiveColorMode, STYLE_IDS, THEME_IDS_BY_STYLE,
+    type ColorMode, type ColorThemeId, type RememberedAppearances, type RememberedThemes,
+    type StyleId,
 } from "@/theme/themeIds";
 
 export const APP_LOCALES = ["en", "zh-Hant"] as const;
@@ -21,6 +22,8 @@ export interface Settings {
     highlightScope: boolean;
     // The colour theme last chosen under each style, so switching styles comes back to it
     colorThemeByStyle: RememberedThemes;
+    // The light or dark mode last chosen under each style; `appearance` is the current style's entry
+    appearanceByStyle: RememberedAppearances;
 }
 
 // index.html's inline script reads these fields too (style, colorTheme, appearance) before first paint
@@ -38,6 +41,7 @@ const DEFAULT_SETTINGS: Settings = {
     style: "minimal",
     highlightScope: true,
     colorThemeByStyle: { minimal: "green" },
+    appearanceByStyle: { minimal: "light" },
 };
 
 const isPlainObject = (value: unknown): value is Record<string, unknown> =>
@@ -53,6 +57,17 @@ const usableRememberedThemes = (stored: unknown): RememberedThemes => {
     for (const style of STYLE_IDS) {
         const theme = stored[style];
         if (isThemeOf(style, theme)) remembered[style] = theme;
+    }
+    return remembered;
+};
+
+// Keeps only known style keys mapped to one of that style's own modes; anything else is dropped
+const usableRememberedAppearances = (stored: unknown): RememberedAppearances => {
+    const remembered: RememberedAppearances = {};
+    if (!isPlainObject(stored)) return remembered;
+    for (const style of STYLE_IDS) {
+        const mode = stored[style];
+        if ((STYLE_COLOR_MODES[style] as readonly unknown[]).includes(mode)) remembered[style] = mode as ColorMode;
     }
     return remembered;
 };
@@ -77,7 +92,7 @@ const readStoredSettings = (): Partial<Settings> => {
 export const loadSettings = (): Settings => {
     const parsed = readStoredSettings();
     // A fresh map every load, so a change to one result never leaks into the defaults
-    const settings: Settings = { ...DEFAULT_SETTINGS, colorThemeByStyle: { ...DEFAULT_SETTINGS.colorThemeByStyle }, ...parsed };
+    const settings: Settings = { ...DEFAULT_SETTINGS, colorThemeByStyle: { ...DEFAULT_SETTINGS.colorThemeByStyle }, appearanceByStyle: {}, ...parsed };
     // A missing, retired "system" or unknown appearance becomes the system's current mode once, then is saved
     const appearanceChosen = (COLOR_MODES as readonly unknown[]).includes(parsed.appearance);
     if (!appearanceChosen) settings.appearance = systemColorMode();
@@ -99,6 +114,17 @@ export const loadSettings = (): Settings => {
     }
     // The current theme is the truth for the current style, which also seeds settings saved before the map existed
     settings.colorThemeByStyle = { ...remembered, [settings.style]: settings.colorTheme };
+    // Before the map, one appearance served every style, kept even through a style with one mode only: each style
+    // the player had already chosen keeps it, and a style they never chose starts on its first mode
+    const savedBeforeTheMap = !("appearanceByStyle" in parsed);
+    const carriedOver: RememberedAppearances = savedBeforeTheMap
+        ? Object.fromEntries(STYLE_IDS.filter(style => style in remembered).map(style => [style, effectiveColorMode(style, settings.appearance)]))
+        : usableRememberedAppearances(settings.appearanceByStyle);
+    // Likewise the current appearance is the truth for the current style (a style with one mode only holds that mode)
+    settings.appearanceByStyle = {
+        ...carriedOver,
+        [settings.style]: effectiveColorMode(settings.style, settings.appearance),
+    };
     if (!appearanceChosen) {
         // A failed save (quota, private mode) must not block startup; the migration just retries next launch
         try {

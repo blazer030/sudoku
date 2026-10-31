@@ -93,6 +93,73 @@ describe("settingsStore", () => {
         expect(store.style).toBe("minimal");
     });
 
+    it("should remember light or dark separately for each style", () => {
+        const store = useSettingsStore();
+        const stored = () => JSON.parse(localStorage.getItem("sudoku-settings") ?? "{}") as Record<string, unknown>;
+        store.setAppearance("dark");
+
+        store.setStyle("chalkboard");
+        expect(store.appearance).toBe("dark");
+        expect(stored().appearance).toBe("dark");
+
+        store.setStyle("minimal");
+        expect(store.appearance).toBe("dark");
+
+        store.setStyle("chalkboard");
+        store.setAppearance("light");
+        expect(stored().appearanceByStyle).toEqual({ minimal: "dark", chalkboard: "light" });
+
+        store.setStyle("pixel");
+        expect(store.appearance).toBe("light");
+
+        store.setStyle("chalkboard");
+        expect(store.appearance).toBe("light");
+        store.setStyle("paper");
+        expect(store.appearance).toBe("light");
+        store.setStyle("cyber");
+        expect(store.appearance).toBe("dark");
+        expect(stored().appearance).toBe("dark");
+
+        setActivePinia(createPinia());
+        const reloaded = useSettingsStore();
+        expect(reloaded.appearance).toBe("dark");
+        reloaded.setStyle("chalkboard");
+        expect(reloaded.appearance).toBe("light");
+        reloaded.setStyle("minimal");
+        expect(reloaded.appearance).toBe("dark");
+    });
+
+    it("should start a style never chosen before in its first mode", () => {
+        const store = useSettingsStore();
+        store.setAppearance("light");
+
+        store.setStyle("chalkboard");
+
+        expect(store.appearance).toBe("dark");
+    });
+
+    it("should start blueprint in 藍曬圖 on its blue paper the first time it is chosen", () => {
+        const store = useSettingsStore();
+        store.setAppearance("light");
+        store.setColorTheme("teal");
+
+        store.setStyle("blueprint");
+
+        expect(store.appearance).toBe("dark");
+        expect(store.colorTheme).toBe("blue");
+    });
+
+    it("should start aurora in the night sky on its purple the first time it is chosen", () => {
+        const store = useSettingsStore();
+        store.setAppearance("light");
+        store.setColorTheme("teal");
+
+        store.setStyle("aurora");
+
+        expect(store.appearance).toBe("dark");
+        expect(store.colorTheme).toBe("purple");
+    });
+
     it("should keep a light appearance through a visit to the dark-only cyber", () => {
         const store = useSettingsStore();
         store.setAppearance("light");

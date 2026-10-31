@@ -15,12 +15,9 @@ import { useHintActions } from "@/presentation/pages/game/useHintActions";
 import { useGameToast } from "@/presentation/pages/game/useGameToast";
 import { useMotionAllowed } from "@/presentation/composables/useMotionAllowed";
 import { useGroupEffect } from "@/presentation/pages/game/useGroupEffect";
-import { useStyleMoments } from "@/presentation/components/style-moments/styleMoments";
+import { useStyleMoments, type CelebrationPhase } from "@/presentation/components/style-moments/styleMoments";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { ANALYTICS_KEY } from "@/application/analytics/AnalyticsService";
-
-/** The board's part of the celebration: its phase playing, its end state after, or the still end state. */
-export type CelebrationPhase = "playing" | "done" | "still";
 
 interface GameSessionOptions {
     /** The player chose Play Again on the completion modal. */

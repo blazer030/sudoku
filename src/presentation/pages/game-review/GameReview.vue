@@ -36,6 +36,7 @@
                     :class="game.completed
                         ? 'bg-primary-light text-primary'
                         : 'bg-accent/10 text-accent'"
+                    :data-skin="game.completed ? 'icon-tile' : 'icon-tile gave-up'"
                     class="w-9 h-9 rounded-icon flex items-center justify-center"
                 >
                     <Trophy
@@ -59,6 +60,7 @@
             <div class="flex flex-col items-end gap-0.5">
                 <span
                     :class="game.completed ? 'text-primary' : 'text-accent'"
+                    :data-skin="game.completed ? 'game-result' : 'game-result gave-up'"
                     class="text-base font-semibold font-mono"
                 >
                     {{ game.completed ? formatTime(game.elapsedSeconds) : t("statistics.gaveUp") }}
@@ -74,36 +76,42 @@
         <!-- The board reaches into the page gutter from inside this wrapper: as a direct child it would
              count the page's end padding past it as sideways overflow -->
         <div class="flex flex-col gap-6">
-            <div
-                :data-selected-cell="changedCellName"
-                data-skin="board"
-                class="bg-card rounded-2xl shadow-card-lg p-2 self-center w-[calc(100%+1.5rem)] max-w-board-fit pointer-events-none"
-                data-testid="review-board"
+            <BoardFrame
+                :celebration="null"
+                :effect="null"
+                :target="changedCell"
             >
                 <div
-                    ref="boardGrid"
-                    class="flex flex-col border-3 border-foreground/20 rounded-xl"
-                    data-skin="board-grid"
+                    :data-selected-cell="changedCellName"
+                    data-skin="board"
+                    class="bg-card rounded-2xl shadow-card-lg p-2 self-center w-[calc(100%+1.5rem)] max-w-board-fit pointer-events-none"
+                    data-testid="review-board"
                 >
                     <div
-                        v-for="(row, rowIndex) in board"
-                        :key="rowIndex"
-                        class="grid grid-cols-9"
+                        ref="boardGrid"
+                        class="flex flex-col border-3 border-foreground/20 rounded-xl"
+                        data-skin="board-grid"
                     >
-                        <Cell
-                            v-for="(puzzleCell, columnIndex) in row"
-                            :key="`cell-${rowIndex}-${columnIndex}`"
-                            :column="columnIndex"
-                            :data-testid="`review-cell-${rowIndex}-${columnIndex}`"
-                            :highlight-same-digit="false"
-                            :interactive="false"
-                            :puzzle-cell="puzzleCell"
-                            :row="rowIndex"
-                            :selected="isChanged(rowIndex, columnIndex)"
-                        />
+                        <div
+                            v-for="(row, rowIndex) in board"
+                            :key="rowIndex"
+                            class="grid grid-cols-9"
+                        >
+                            <Cell
+                                v-for="(puzzleCell, columnIndex) in row"
+                                :key="`cell-${rowIndex}-${columnIndex}`"
+                                :column="columnIndex"
+                                :data-testid="`review-cell-${rowIndex}-${columnIndex}`"
+                                :highlight-same-digit="false"
+                                :interactive="false"
+                                :puzzle-cell="puzzleCell"
+                                :row="rowIndex"
+                                :selected="isChanged(rowIndex, columnIndex)"
+                            />
+                        </div>
                     </div>
                 </div>
-            </div>
+            </BoardFrame>
             <StepPlaybackPanel
                 :label="t('review.title')"
                 :play-state="playState"
@@ -160,6 +168,7 @@ import { useAppLocale } from "@/presentation/i18n/useAppLocale";
 import { formatDate } from "@/presentation/i18n/formatDate";
 import { useDifficultyLabel } from "@/presentation/i18n/difficultyLabels";
 import Cell from "@/presentation/components/board-cell/Cell.vue";
+import BoardFrame from "@/presentation/components/board-frame/BoardFrame.vue";
 import { cellName } from "@/presentation/components/board-cell/cellName";
 import StepPlaybackPanel from "@/presentation/components/step-presentation/StepPlaybackPanel.vue";
 import StepTag from "@/presentation/components/step-presentation/StepTag.vue";

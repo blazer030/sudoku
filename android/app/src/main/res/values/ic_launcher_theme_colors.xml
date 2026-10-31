@@ -28,4 +28,22 @@
     <color name="ic_launcher_pixel_classic_dark_background">#000000</color>
     <color name="ic_launcher_cyber_neon_dark_background">#07070D</color>
     <color name="ic_launcher_ink_vermilion_background">#F2ECDF</color>
+    <color name="ic_launcher_chalkboard_classic_dark_background">#8A5A34</color>
+    <color name="ic_launcher_chalkboard_classic_background">#C9CDD3</color>
+    <color name="ic_launcher_blueprint_blue_dark_background">#123F78</color>
+    <color name="ic_launcher_blueprint_blue_background">#FAFBFC</color>
+    <color name="ic_launcher_blueprint_teal_dark_background">#0E4D5C</color>
+    <color name="ic_launcher_blueprint_teal_background">#FAFBFC</color>
+    <color name="ic_launcher_blueprint_slate_dark_background">#2B3A4E</color>
+    <color name="ic_launcher_blueprint_slate_background">#FAFBFC</color>
+    <color name="ic_launcher_blueprint_rust_dark_background">#5A3A22</color>
+    <color name="ic_launcher_blueprint_rust_background">#FAFBFC</color>
+    <color name="ic_launcher_aurora_purple_dark_background">#060914</color>
+    <color name="ic_launcher_aurora_purple_background">#EEF0F7</color>
+    <color name="ic_launcher_aurora_teal_dark_background">#060914</color>
+    <color name="ic_launcher_aurora_teal_background">#EEF0F7</color>
+    <color name="ic_launcher_aurora_pink_dark_background">#060914</color>
+    <color name="ic_launcher_aurora_pink_background">#EEF0F7</color>
+    <color name="ic_launcher_aurora_orange_dark_background">#060914</color>
+    <color name="ic_launcher_aurora_orange_background">#EEF0F7</color>
 </resources>

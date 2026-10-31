@@ -1,7 +1,28 @@
-import { STYLE_IDS, THEME_IDS_BY_STYLE, STYLE_COLOR_MODES, type ColorThemeId } from "@/theme/themeIds";
-import { STYLES, getPalette, rememberedThemeFor, systemBarColor } from "@/theme/palettes";
+import { STYLE_IDS, THEME_IDS_BY_STYLE, STYLE_COLOR_MODES, type ColorThemeId, type StyleId } from "@/theme/themeIds";
+import { STYLES, STYLE_OWN_TOKENS, getPalette, rememberedThemeFor, swatchColors, systemBarColor, type StyleOwnToken } from "@/theme/palettes";
 import { darkOnlyThemeBuilder } from "@/theme/paletteBuilder";
-import { contrastRatio } from "@/theme/contrast";
+import { contrastRatio, mixColors } from "@/theme/contrast";
+
+// A colour's hue in OKLCH (Björn Ottosson's OKLab), in degrees
+const oklchHue = (hex: string): number => {
+    const toLinear = (channel: number): number => {
+        const value = channel / 255;
+        return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
+    };
+    const [red, green, blue] = [1, 3, 5].map(start => toLinear(parseInt(hex.slice(start, start + 2), 16)));
+    const long = Math.cbrt(0.4122214708 * red + 0.5363325363 * green + 0.0514459929 * blue);
+    const medium = Math.cbrt(0.2119034982 * red + 0.6806995451 * green + 0.1073969566 * blue);
+    const short = Math.cbrt(0.0883024619 * red + 0.2817188376 * green + 0.6299787005 * blue);
+    const greenRed = 1.9779984951 * long - 2.4285922050 * medium + 0.4505937099 * short;
+    const blueYellow = 0.0259040371 * long + 0.7827717662 * medium - 0.8086757660 * short;
+    return (Math.atan2(blueYellow, greenRed) * 180 / Math.PI + 360) % 360;
+};
+
+// How far apart two colours' hues lie round the OKLCH wheel, in degrees (0–180)
+const oklchHueDistance = (first: string, second: string): number => {
+    const distance = Math.abs(oklchHue(first) - oklchHue(second));
+    return Math.min(distance, 360 - distance);
+};
 
 describe("palettes", () => {
     it("should define each style's themes in the listed order", () => {
@@ -15,7 +36,7 @@ describe("palettes", () => {
         for (const style of STYLE_IDS) {
             for (const theme of STYLES[style].themes) {
                 const modes = (["light", "dark"] as const).filter(mode => theme[mode] !== undefined);
-                expect(modes, `${style}/${theme.id}`).toEqual([...STYLE_COLOR_MODES[style]]);
+                expect(new Set(modes), `${style}/${theme.id}`).toEqual(new Set(STYLE_COLOR_MODES[style]));
             }
         }
     });
@@ -57,6 +78,202 @@ describe("palettes", () => {
         expect(palette.background).toBe("#F2ECDF");
         expect(palette.primary).toBe("#B3261E");
         expect(palette.accent).toBe("#2C3E5C");
+    });
+
+    it("should give chalkboard one classic theme: yellow chalk on the green board, orange marker on the whiteboard", () => {
+        const chalkboard = getPalette("chalkboard", "classic", "dark");
+        const whiteboard = getPalette("chalkboard", "classic", "light");
+
+        expect(STYLES.chalkboard.themes.map(theme => theme.id)).toEqual(["classic"]);
+        expect(chalkboard.background).toBe("#2E4B3C");
+        expect(chalkboard.primary).toBe("#F7C873");
+        expect(chalkboard.accent).toBe("#A6D8F2");
+        expect(whiteboard.background).toBe("#F5F6F3");
+        expect(whiteboard.primary).toBe("#B04A00");
+        expect(whiteboard.accent).toBe("#1D5FC2");
+    });
+
+    it("should lay chalkboard's hint scope cells in the peer wash and its pattern cells in the same-digit wash, as the canvas does", () => {
+        for (const mode of STYLE_COLOR_MODES.chalkboard) {
+            const palette = getPalette("chalkboard", "classic", mode);
+
+            expect(palette["cell-scope"], mode).toBe(palette["cell-peer"]);
+            expect(palette["cell-pattern"], mode).toBe(palette.highlight);
+        }
+    });
+
+    it("should colour chalkboard's tray and duster as the canvas paints them: wood on 黑板, grey plastic on 白板", () => {
+        for (const [mode, tray, trayShade, trayEdge] of [["dark", "#8A5A34", "#5E3B20", "#A06C42"], ["light", "#D7DADF", "#B5BAC2", "#E6E8EB"]] as const) {
+            const palette = getPalette("chalkboard", "classic", mode);
+
+            expect([palette.tray, palette["tray-shade"], palette["tray-edge"]], mode).toEqual([tray, trayShade, trayEdge]);
+            expect([palette.duster, palette["duster-felt"]], mode).toEqual(["#5B5F66", "#C9B79C"]);
+        }
+    });
+
+    // Each style that paints colours of its own carries exactly those, in every theme and mode it has
+    const OWN_TOKENS_BY_STYLE: Partial<Record<StyleId, readonly StyleOwnToken[]>> = {
+        chalkboard: ["tray", "tray-shade", "tray-edge", "duster", "duster-felt", "smudge", "smear", "icon-frame", "doodle"],
+        blueprint: ["grid-minor", "grid-major", "hatch", "error-hatch"],
+        aurora: ["aurora-1", "aurora-2", "aurora-3", "aurora-4", "aurora-ribbon-1", "aurora-ribbon-2", "glass", "glass-sheen"],
+    };
+
+    it("should give chalkboard and blueprint only their own colours, and no other style any", () => {
+        expect(new Set(Object.values(OWN_TOKENS_BY_STYLE).flat())).toEqual(new Set(STYLE_OWN_TOKENS));
+        for (const style of STYLE_IDS) {
+            const ownTokens = OWN_TOKENS_BY_STYLE[style] ?? [];
+            for (const theme of STYLES[style].themes) {
+                for (const mode of STYLE_COLOR_MODES[style]) {
+                    const palette = getPalette(style, theme.id, mode);
+                    const label = `${style}/${theme.id}/${mode}`;
+                    expect(STYLE_OWN_TOKENS.filter(token => token in palette), label).toEqual(ownTokens);
+                    for (const token of ownTokens) {
+                        expect(palette[token], `${label} ${token}`).toMatch(/^#[0-9A-F]{6}$/);
+                    }
+                }
+            }
+        }
+    });
+
+    it("should give aurora its four colours in the picker's order", () => {
+        expect(STYLES.aurora.themes.map(theme => theme.id)).toEqual(["purple", "teal", "pink", "orange"]);
+    });
+
+    it("should paint the night sky: a deep ground, pale text and the theme's four lights and streak under a dark glass", () => {
+        const palette = getPalette("aurora", "pink", "dark");
+
+        expect(palette.background).toBe("#060914");
+        expect(palette.foreground).toBe("#F2F5FF");
+        expect(palette["foreground-secondary"]).toBe("#B0B9D3");
+        expect(palette.primary).toBe("#FF8CC6");
+        expect(palette["on-primary"]).toBe("#3A0820");
+        expect(palette.accent).toBe("#FF8CC6");
+        expect(palette["cell-selected"]).toBe("#FF8CC6");
+        expect(palette.error).toBe("#FF8F5A");
+        expect(palette["on-danger"]).toBe("#060914");
+        expect([palette["aurora-1"], palette["aurora-2"], palette["aurora-3"], palette["aurora-4"]])
+            .toEqual(["#4F0031", "#02484F", "#9F39B5", "#3769CA"]);
+        expect([palette["aurora-ribbon-1"], palette["aurora-ribbon-2"]]).toEqual(["#913FD5", "#029E72"]);
+        expect(palette.glass).toBe("#141A34");
+        expect(palette["glass-sheen"]).toBe("#FFFFFF");
+    });
+
+    it("should paint the dawn: a pale ground, dark text and the theme's four soft lights and streak under a white glass", () => {
+        const palette = getPalette("aurora", "orange", "light");
+
+        expect(palette.background).toBe("#EEF0F7");
+        expect(palette.foreground).toBe("#151A2D");
+        expect(palette["foreground-secondary"]).toBe("#48506A");
+        expect(palette.primary).toBe("#A84808");
+        expect(palette["on-primary"]).toBe("#FFFFFF");
+        expect(palette.error).toBe("#A3165E");
+        expect(palette["on-danger"]).toBe("#FFFFFF");
+        expect([palette["aurora-1"], palette["aurora-2"], palette["aurora-3"], palette["aurora-4"]])
+            .toEqual(["#B3FFD6", "#FFEDBA", "#D9F2FF", "#FFC49C"]);
+        expect([palette["aurora-ribbon-1"], palette["aurora-ribbon-2"]]).toEqual(["#D2FFDA", "#F5EEFF"]);
+        expect(palette.glass).toBe("#FFFFFF");
+    });
+
+    it("should keep the page and the glass the same in all of aurora's themes, and give each its own lights", () => {
+        for (const mode of ["light", "dark"] as const) {
+            const palettes = STYLES.aurora.themes.map(theme => getPalette("aurora", theme.id, mode));
+            for (const token of ["background", "card", "cell-clue", "cell-peer", "glass", "glass-sheen"] as const) {
+                expect(new Set(palettes.map(palette => palette[token])).size, `${mode} ${token}`).toBe(1);
+            }
+            const lights = palettes.map(palette => [palette["aurora-1"], palette["aurora-2"], palette["aurora-3"], palette["aurora-4"]].join());
+            expect(new Set(lights).size, `${mode} lights`).toBe(4);
+        }
+    });
+
+    // 晨光 crosses every theme's sky with one mint-to-lilac streak; 夜空's purple and teal draw theirs in their first
+    // two lights, its pink and orange in a violet and a green of their own
+    it("should give aurora's ribbon one streak in 晨光 and each 夜空 theme its own", () => {
+        const ribbonOf = (themeId: "purple" | "teal" | "pink" | "orange", mode: "light" | "dark") => {
+            const palette = getPalette("aurora", themeId, mode);
+            return [palette["aurora-ribbon-1"], palette["aurora-ribbon-2"]];
+        };
+
+        for (const themeId of ["purple", "teal", "pink", "orange"] as const) expect(ribbonOf(themeId, "light")).toEqual(["#D2FFDA", "#F5EEFF"]);
+        for (const themeId of ["purple", "teal"] as const) {
+            const palette = getPalette("aurora", themeId, "dark");
+            expect(ribbonOf(themeId, "dark")).toEqual([palette["aurora-1"], palette["aurora-2"]]);
+        }
+        expect(ribbonOf("orange", "dark")).toEqual(["#864AD2", "#019F68"]);
+    });
+
+    // Purple and teal keep the plain red; pink takes a red-orange and orange a crimson-rose, so the error never
+    // passes for the theme's own colour
+    it.each([
+        ["purple", "#B71C1C", "#FF948A"],
+        ["teal", "#B71C1C", "#FF948A"],
+        ["pink", "#A34400", "#FF8F5A"],
+        ["orange", "#A3165E", "#FF8FAB"],
+    ] as const)("should write aurora's %s errors in its own colour", (theme, light, dark) => {
+        expect(getPalette("aurora", theme, "light").error).toBe(light);
+        expect(getPalette("aurora", theme, "dark").error).toBe(dark);
+    });
+
+    // 40° of OKLCH hue: the errors that read as the theme's own colour sat 19° (晨光 orange) and 22° (晨光 pink) from
+    // it, so 40° is about twice that, roughly the step from red to orange or to pink; 晨光's red-orange can go no
+    // further from its crimson primary and still be dark enough to read 4.5:1 on its hatching without turning brown
+    it("should keep each aurora theme's error at least 40° of hue from its own primary", () => {
+        for (const mode of ["light", "dark"] as const) {
+            for (const theme of STYLES.aurora.themes) {
+                const palette = getPalette("aurora", theme.id, mode);
+                expect(oklchHueDistance(palette.error, palette.primary), `${theme.id}/${mode}`).toBeGreaterThanOrEqual(40);
+            }
+        }
+    });
+
+    it("should give blueprint its four papers in the picker's order", () => {
+        expect(STYLES.blueprint.themes.map(theme => theme.id)).toEqual(["blue", "teal", "slate", "rust"]);
+    });
+
+    it("should change the paper in 藍曬圖: teal under white lines, an amber accent and a lighter error", () => {
+        const palette = getPalette("blueprint", "teal", "dark");
+
+        expect(palette.background).toBe("#0E4D5C");
+        expect(palette["on-primary"]).toBe("#0A3540");
+        expect(palette.primary).toBe("#FFD166");
+        expect(palette.error).toBe("#FFA39B");
+        expect(palette.foreground).toBe("#F2F7FF");
+        expect(palette.accent).toBe(palette.foreground);
+    });
+
+    it("should change the ink on 製圖紙: rust ink under a burnt-orange pen that marks choices, and a crimson one for errors", () => {
+        const palette = getPalette("blueprint", "rust", "light");
+
+        expect(palette.foreground).toBe("#6B3A1E");
+        expect(palette["foreground-secondary"]).toBe("#7A5A44");
+        expect(palette.background).toBe("#FAFBFC");
+        expect(palette.primary).toBe("#B34A00");
+        expect(palette.error).toBe("#B5175F");
+    });
+
+    // A wrong digit must never pass for a chosen one, and a danger button never for the primary
+    it("should mark 製圖紙's errors and danger in their own crimson, apart from every theme's red pen", () => {
+        for (const theme of STYLES.blueprint.themes) {
+            const palette = getPalette("blueprint", theme.id, "light");
+            expect(palette.error, theme.id).not.toBe(palette.primary);
+            expect(palette.danger, theme.id).toBe(palette.error);
+            expect(palette["danger-hover"], theme.id).not.toBe(palette["primary-hover"]);
+        }
+    });
+
+    it("should give 藍曬圖's toast the lines' ink with the paper's colour on it", () => {
+        for (const theme of STYLES.blueprint.themes) {
+            const palette = getPalette("blueprint", theme.id, "dark");
+            expect([palette.toast, palette["on-toast"]], theme.id).toEqual([palette.foreground, palette.background]);
+        }
+    });
+
+    it("should hatch 藍曬圖 in its own white ink and 製圖紙 in one printed blue for every ink", () => {
+        for (const theme of STYLES.blueprint.themes) {
+            const dark = getPalette("blueprint", theme.id, "dark");
+            expect(dark.hatch, theme.id).toBe(mixColors("#F2F7FF", 0.12, dark.background));
+        }
+        const lightHatches = STYLES.blueprint.themes.map(theme => getPalette("blueprint", theme.id, "light").hatch);
+        expect(new Set(lightHatches).size).toBe(1);
     });
 
     it("should let a style set a board tint directly instead of deriving it from the primary", () => {
@@ -158,7 +375,7 @@ describe("palettes", () => {
     });
 
     it("should keep paper's lines invisible in other styles", () => {
-        for (const style of [STYLES.minimal, STYLES.tactile, STYLES.pixel, STYLES.cyber, STYLES.ink]) {
+        for (const style of [STYLES.minimal, STYLES.tactile, STYLES.pixel, STYLES.cyber, STYLES.ink, STYLES.chalkboard, STYLES.blueprint, STYLES.aurora]) {
             for (const theme of style.themes) {
                 for (const mode of STYLE_COLOR_MODES[style.id]) {
                     const palette = getPalette(style.id, theme.id, mode);
@@ -176,13 +393,42 @@ describe("palettes", () => {
         }
     });
 
-    it("should keep the dark toast a dark surface rather than a light block", () => {
-        for (const style of Object.values(STYLES)) {
+    // 藍曬圖's toast is the canvas's: a block of the white lines' ink with the paper's colour on it
+    it("should keep the dark toast a dark surface rather than a light block outside blueprint", () => {
+        for (const style of Object.values(STYLES).filter(definition => definition.id !== "blueprint")) {
             for (const theme of style.themes) {
                 if (theme.dark === undefined) continue;
                 const { toast, background, foreground } = theme.dark;
                 expect(contrastRatio(toast, background), `${style.id}/${theme.id}`).toBeLessThan(contrastRatio(toast, foreground));
             }
         }
+    });
+
+    describe("swatchColors", () => {
+        it("should show a style's primary with the colour on it by default", () => {
+            const palette = getPalette("minimal", "blue", "light");
+
+            expect(swatchColors("minimal", "light", palette)).toEqual({ fill: palette.primary, mark: palette["on-primary"] });
+        });
+
+        it("should show blueprint's dark swatches as four different papers", () => {
+            const fills = THEME_IDS_BY_STYLE.blueprint.map(themeId => {
+                const palette = getPalette("blueprint", themeId, "dark");
+                expect(swatchColors("blueprint", "dark", palette), themeId).toEqual({ fill: palette.background, mark: palette.foreground });
+                return swatchColors("blueprint", "dark", palette).fill;
+            });
+
+            expect(new Set(fills).size).toBe(4);
+        });
+
+        it("should show blueprint's light swatches as four different inks", () => {
+            const fills = THEME_IDS_BY_STYLE.blueprint.map(themeId => {
+                const palette = getPalette("blueprint", themeId, "light");
+                expect(swatchColors("blueprint", "light", palette), themeId).toEqual({ fill: palette.foreground, mark: palette.background });
+                return swatchColors("blueprint", "light", palette).fill;
+            });
+
+            expect(new Set(fills).size).toBe(4);
+        });
     });
 });

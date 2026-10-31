@@ -8,6 +8,8 @@
             leaving ? 'value-leave' : '',
         ]"
         :data-leaving-value="leaving ? lastDigit : undefined"
+        :data-arriving="arriving && value !== 0 ? '' : undefined"
+        :data-box-corner="boxCornerOf(row, column)"
         :data-group="inGroupEffect ? groupKinds.join(' ') : undefined"
         :data-selected="selected ? '' : undefined"
         :data-value-kind="value !== 0 ? valueKind : undefined"
@@ -28,7 +30,7 @@
             ]"
             :style="digitWriter ? { '--digit-writer-mask': `url(#${writerMaskId})` } : undefined"
             data-testid="cell-value"
-            @animationend="settle"
+            @animationend="settleFromDigit"
         >
             {{ value }}
         </div>
@@ -116,6 +118,17 @@ const props = withDefaults(defineProps<{
     selected: false,
 });
 
+type BoxCorner = "top-left" | "top-right" | "bottom-left" | "bottom-right";
+
+/** Which corner of its 3x3 box a cell sits in (row and column are 0-based); undefined for the other five cells. */
+const boxCornerOf = (row: number, column: number): BoxCorner | undefined => {
+    const rowInBox = row % BOX_SIZE;
+    const columnInBox = column % BOX_SIZE;
+    const vertical = rowInBox === 0 ? "top" : rowInBox === BOX_SIZE - 1 ? "bottom" : undefined;
+    const horizontal = columnInBox === 0 ? "left" : columnInBox === BOX_SIZE - 1 ? "right" : undefined;
+    return vertical && horizontal ? `${vertical}-${horizontal}` : undefined;
+};
+
 const VARIANT_BACKGROUNDS: Record<CellVariant, string> = {
     default: "bg-card",
     clue: "bg-cell-clue",
@@ -182,6 +195,14 @@ watch(() => props.value, (current) => {
 const moments = useStyleMoments();
 const writerMaskId = `digit-writer-${useId()}`;
 const digitWriter = computed(() => (arriving.value && props.value !== 0 && canMaskByReference() ? moments.value.digitWriter ?? null : null));
+
+// The entered digit lies in its own completed group; the group's animation on it (named <style>-group-…)
+// runs on the group effect's clock, so it never settles the arrival
+const settleFromDigit = (event: AnimationEvent) => {
+    // jsdom's plain events carry no name
+    const name = event.animationName as string | undefined;
+    if (!(name ?? "").includes("-group-")) settle();
+};
 
 const settleFromCell = (event: AnimationEvent) => {
     if (event.pseudoElement) settle();

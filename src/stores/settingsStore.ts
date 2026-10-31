@@ -1,8 +1,8 @@
 import { ref } from "vue";
 import { defineStore } from "pinia";
-import type { ColorMode, ColorThemeId, RememberedThemes, StyleId } from "@/theme/themeIds";
+import type { ColorMode, ColorThemeId, RememberedAppearances, RememberedThemes, StyleId } from "@/theme/themeIds";
 import { loadSettings, saveSettings, type LanguagePreference } from "@/application/settings/SettingsStorage";
-import { rememberedThemeFor } from "@/theme/palettes";
+import { rememberedAppearanceFor, rememberedThemeFor } from "@/theme/palettes";
 import { pwaIconKey } from "@/theme/launcherIcon";
 import { updateManifestLink, updateAppleTouchIcon } from "@/application/PwaThemeUpdater";
 
@@ -19,6 +19,7 @@ export const useSettingsStore = defineStore("settings", () => {
     const style = ref<StyleId>(settings.style);
     const highlightScope = ref(settings.highlightScope);
     const colorThemeByStyle = ref<RememberedThemes>(settings.colorThemeByStyle);
+    const appearanceByStyle = ref<RememberedAppearances>(settings.appearanceByStyle);
 
     // Installed web apps keep the light icon; the favicon also follows light or dark, so appearanceSync keeps it
     const applyColorTheme = () => {
@@ -40,6 +41,7 @@ export const useSettingsStore = defineStore("settings", () => {
             style: style.value,
             highlightScope: highlightScope.value,
             colorThemeByStyle: { ...colorThemeByStyle.value },
+            appearanceByStyle: { ...appearanceByStyle.value },
         });
     };
 
@@ -53,6 +55,7 @@ export const useSettingsStore = defineStore("settings", () => {
     // Goes through setColorTheme so the manifest and storage follow (launcherIconSync watches the result)
     const setStyle = (id: StyleId) => {
         style.value = id;
+        appearance.value = rememberedAppearanceFor(id, appearanceByStyle.value);
         setColorTheme(rememberedThemeFor(id, colorThemeByStyle.value));
     };
 
@@ -88,6 +91,7 @@ export const useSettingsStore = defineStore("settings", () => {
 
     const setAppearance = (value: ColorMode) => {
         appearance.value = value;
+        appearanceByStyle.value = { ...appearanceByStyle.value, [style.value]: value };
         persistAll();
     };
 
@@ -110,6 +114,7 @@ export const useSettingsStore = defineStore("settings", () => {
         style,
         highlightScope,
         colorThemeByStyle,
+        appearanceByStyle,
         setColorTheme,
         setStyle,
         setHighlightSameDigit,

@@ -12,7 +12,7 @@
 
             <div
                 class="flex flex-col gap-3 bg-card rounded-2xl shadow-card p-3"
-                data-skin="card"
+                data-skin="card new-game-card"
                 data-testid="new-game-card"
             >
                 <DifficultySwitcher v-model="difficulty" />
@@ -46,7 +46,7 @@
                 v-for="entry in entries"
                 :key="entry.id"
                 v-press
-                data-skin="tile"
+                data-skin="tile home-tile"
                 :data-testid="`${entry.id}-button`"
                 class="flex flex-col items-center gap-1 min-h-22 bg-card rounded-2xl shadow-card px-2 py-3 cursor-pointer"
                 type="button"

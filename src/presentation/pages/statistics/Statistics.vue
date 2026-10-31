@@ -11,40 +11,55 @@
 
         <template v-if="hasRecords">
             <div class="flex flex-col gap-2 mt-2">
-                <span class="text-foreground-muted text-xs font-semibold tracking-wider uppercase px-1">{{ t("statistics.overview") }}</span>
+                <span
+                    class="text-foreground-muted text-xs font-semibold tracking-wider uppercase px-1"
+                    data-skin="stat-heading"
+                >{{ t("statistics.overview") }}</span>
                 <div class="flex gap-3">
                     <div
                         class="flex-1 flex flex-col items-center gap-1 bg-card rounded-2xl px-2 py-4 shadow-card"
                         data-testid="games-won"
-                        data-skin="card"
+                        data-skin="card stat-card"
                     >
-                        <span class="text-3xl font-bold text-primary font-mono">{{ stats.overall.gamesWon }}</span>
+                        <span
+                            class="text-3xl font-bold text-primary font-mono"
+                            data-skin="stat-value"
+                        >{{ stats.overall.gamesWon }}</span>
                         <span class="text-xs font-medium text-foreground-secondary">{{ t("statistics.gamesWon") }}</span>
                     </div>
                     <div
                         class="flex-1 flex flex-col items-center gap-1 bg-card rounded-2xl px-2 py-4 shadow-card"
                         data-testid="win-rate"
-                        data-skin="card"
+                        data-skin="card stat-card"
                     >
-                        <span class="text-3xl font-bold text-primary font-mono">{{ winRateDisplay }}</span>
+                        <span
+                            class="text-3xl font-bold text-primary font-mono"
+                            data-skin="stat-value"
+                        >{{ winRateDisplay }}</span>
                         <span class="text-xs font-medium text-foreground-secondary">{{ t("statistics.winRate") }}</span>
                     </div>
                     <div
                         class="flex-1 flex flex-col items-center gap-1 bg-card rounded-2xl px-2 py-4 shadow-card"
                         data-testid="day-streak"
-                        data-skin="card"
+                        data-skin="card stat-card"
                     >
-                        <span class="text-3xl font-bold text-foreground font-mono">{{ dayStreak }}</span>
+                        <span
+                            class="text-3xl font-bold text-foreground font-mono"
+                            data-skin="stat-value"
+                        >{{ dayStreak }}</span>
                         <span class="text-xs font-medium text-foreground-secondary text-center">{{ t("statistics.dayStreak") }}</span>
                     </div>
                 </div>
             </div>
 
             <div class="flex flex-col gap-2 mt-5">
-                <span class="text-foreground-muted text-xs font-semibold tracking-wider uppercase px-1">{{ t("statistics.byDifficulty") }}</span>
+                <span
+                    class="text-foreground-muted text-xs font-semibold tracking-wider uppercase px-1"
+                    data-skin="stat-heading"
+                >{{ t("statistics.byDifficulty") }}</span>
                 <div
                     class="bg-card rounded-2xl p-4 shadow-card flex flex-col divide-y divide-border"
-                    data-skin="card"
+                    data-skin="card stat-card"
                 >
                     <div
                         v-for="difficulty in DIFFICULTIES"
@@ -61,21 +76,30 @@
                                 :data-testid="`difficulty-best-${difficulty}`"
                                 class="flex flex-col items-center"
                             >
-                                <span class="text-base font-semibold font-mono text-primary">{{ formatOptionalTime(stats[difficulty].bestTime) }}</span>
+                                <span
+                                    class="text-base font-semibold font-mono text-primary"
+                                    data-skin="stat-value"
+                                >{{ formatOptionalTime(stats[difficulty].bestTime) }}</span>
                                 <span class="text-[11px] text-foreground-secondary">{{ t("statistics.best") }}</span>
                             </div>
                             <div
                                 :data-testid="`difficulty-average-${difficulty}`"
                                 class="flex flex-col items-center"
                             >
-                                <span class="text-base font-semibold font-mono text-foreground">{{ formatOptionalTime(stats[difficulty].averageTime) }}</span>
+                                <span
+                                    class="text-base font-semibold font-mono text-foreground"
+                                    data-skin="stat-value"
+                                >{{ formatOptionalTime(stats[difficulty].averageTime) }}</span>
                                 <span class="text-[11px] text-foreground-secondary">{{ t("statistics.average") }}</span>
                             </div>
                             <div
                                 :data-testid="`difficulty-completed-${difficulty}`"
                                 class="flex flex-col items-center"
                             >
-                                <span class="text-base font-semibold font-mono text-foreground">{{ `${stats[difficulty].gamesWon}/${stats[difficulty].gamesPlayed}` }}</span>
+                                <span
+                                    class="text-base font-semibold font-mono text-foreground"
+                                    data-skin="stat-value"
+                                >{{ `${stats[difficulty].gamesWon}/${stats[difficulty].gamesPlayed}` }}</span>
                                 <span class="text-[11px] text-foreground-secondary">{{ t("statistics.completed") }}</span>
                             </div>
                         </div>
@@ -88,7 +112,10 @@
             </div>
 
             <div class="flex flex-col gap-2 mt-5">
-                <span class="text-foreground-muted text-xs font-semibold tracking-wider uppercase px-1">{{ t("statistics.recentGames") }}</span>
+                <span
+                    class="text-foreground-muted text-xs font-semibold tracking-wider uppercase px-1"
+                    data-skin="stat-heading"
+                >{{ t("statistics.recentGames") }}</span>
                 <SegmentedControl
                     v-model="recentGamesFilter"
                     :options="recentGamesFilterOptions"
@@ -101,6 +128,7 @@
                         :key="historyIndex"
                         :class="game.replay ? 'cursor-pointer' : 'cursor-default'"
                         class="flex items-center justify-between bg-card rounded-xl py-3 px-4 shadow-card-sm text-left"
+                        data-skin="recent-row"
                         data-testid="recent-game"
                         @click="openReview(game, historyIndex)"
                     >
@@ -109,6 +137,7 @@
                                 :class="game.completed
                                     ? 'bg-primary-light text-primary'
                                     : 'bg-accent/10 text-accent'"
+                                :data-skin="game.completed ? 'icon-tile' : 'icon-tile gave-up'"
                                 class="w-9 h-9 rounded-icon flex items-center justify-center"
                             >
                                 <Trophy
@@ -133,6 +162,7 @@
                             <div class="flex flex-col items-end gap-0.5">
                                 <span
                                     :class="game.completed ? 'text-primary' : 'text-accent'"
+                                    :data-skin="game.completed ? 'game-result' : 'game-result gave-up'"
                                     class="text-base font-semibold font-mono"
                                 >
                                     {{ game.completed ? formatTime(game.elapsedSeconds) : t("statistics.gaveUp") }}

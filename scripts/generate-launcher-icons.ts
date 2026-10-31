@@ -94,22 +94,23 @@ const writeManifestAliases = () => {
     writeFileSync(MANIFEST_PATH, `${manifest.slice(0, start + ALIASES_BEGIN.length)}\n${aliases}\n        ${manifest.slice(end)}`);
 };
 
+// Lossless WebP: the same pixels as a PNG in about half the bytes, and fine from API 18 on
+const writeIcon = async (svg: string, size: number, outDir: string, name: string) => {
+    mkdirSync(outDir, { recursive: true });
+    await sharp(Buffer.from(svg)).resize(size, size).webp({ lossless: true, effort: 6 }).toFile(resolve(outDir, `${name}.webp`));
+};
+
 // Renders one adaptive layer (108dp) at every density
 const writeAdaptiveLayer = async (name: string, svg: string) => {
     for (const density of DENSITIES) {
-        const size = Math.round(density.size * FOREGROUND_SCALE);
-        const outDir = resolve(RES_ROOT, `mipmap-${density.name}`);
-        mkdirSync(outDir, { recursive: true });
-        await sharp(Buffer.from(svg)).resize(size, size).png().toFile(resolve(outDir, `${name}.png`));
+        await writeIcon(svg, Math.round(density.size * FOREGROUND_SCALE), resolve(RES_ROOT, `mipmap-${density.name}`), name);
     }
 };
 
 // Renders one legacy (pre-adaptive) icon at every density
 const writeLegacyIcon = async (name: string, svg: string) => {
     for (const density of DENSITIES) {
-        const outDir = resolve(RES_ROOT, `mipmap-${density.name}`);
-        mkdirSync(outDir, { recursive: true });
-        await sharp(Buffer.from(svg)).resize(density.size, density.size).png().toFile(resolve(outDir, `${name}.png`));
+        await writeIcon(svg, density.size, resolve(RES_ROOT, `mipmap-${density.name}`), name);
     }
 };
 

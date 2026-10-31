@@ -18,6 +18,13 @@ const LAYOUT_PREFIXES = ["min-", "max-", "padding", "margin", "inset", "flex", "
 // The title plates are inline-block with a little space between them; nothing else may be set
 const TITLE_GLYPH_ALLOWED: Readonly<Record<string, string>> = { "display": "inline-block", "margin-inline": "0.12em" };
 
+// Chalk's board and key digits take room for Caveat Brush's overhang and give it back, so nothing moves
+const CHALKBOARD_DIGIT_ROOM_SELECTORS: ReadonlySet<string> = new Set([
+    '[data-style="chalkboard"] [data-skin~="board"] [data-variant] > :is(.font-clue, .font-entry)',
+    '[data-style="chalkboard"] [data-skin~="key"].font-key > span',
+]);
+const CHALKBOARD_DIGIT_ROOM_ALLOWED: Readonly<Record<string, string>> = { "padding-inline": "0.1em", "margin-inline": "-0.1em" };
+
 const isLayoutProperty = (property: string): boolean =>
     LAYOUT_PROPERTIES.has(property)
     || /^border-(?:[a-z]+-)*width$/.test(property)
@@ -50,10 +57,12 @@ export const findLayoutDeclarations = (css: string): string[] => {
         // Absolutely placed decorations do not take part in layout
         if (selectors.every(selector => /::(?:before|after)$/.test(selector))) return;
         const isTitleGlyph = selectors.every(selector => selector.endsWith('[data-skin~="title-glyph"]'));
+        const isChalkboardDigitRoom = selectors.every(selector => CHALKBOARD_DIGIT_ROOM_SELECTORS.has(selector));
         for (const declaration of ownDeclarations(rule)) {
             const property = declaration.prop.toLowerCase();
             if (property.startsWith("--")) continue;
             if (isTitleGlyph && TITLE_GLYPH_ALLOWED[property] === declaration.value.trim()) continue;
+            if (isChalkboardDigitRoom && CHALKBOARD_DIGIT_ROOM_ALLOWED[property] === declaration.value.trim()) continue;
             const layout = property === "position" ? declaration.value.trim() !== "relative" : isLayoutProperty(property);
             if (layout) hits.push(`${selectors.join(", ")} → ${property}`);
         }
@@ -166,8 +175,8 @@ export const reducedMotionDeclarationsOf = (css: string, selector: string): Map<
     return declarations;
 };
 
-// Splits on a separator outside parentheses, so var(), calc() and colour functions stay whole
-const splitTopLevel = (value: string, separator: RegExp): string[] => {
+/** Splits on a separator outside parentheses, so var(), calc() and colour functions stay whole. */
+export const splitTopLevel = (value: string, separator: RegExp): string[] => {
     const parts: string[] = [];
     let depth = 0;
     let current = "";

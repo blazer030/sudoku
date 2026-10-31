@@ -5,6 +5,7 @@
     >
         <h2
             class="flex items-center gap-1.5 px-1 text-foreground-secondary text-[13px] font-semibold"
+            :data-testid="headingTestId"
             data-skin="group-heading"
         >
             <component
@@ -16,7 +17,8 @@
         </h2>
         <div
             class="flex flex-col bg-card rounded-2xl shadow-card-sm p-3"
-            data-skin="card"
+            :data-testid="cardTestId"
+            data-skin="card settings-card"
         >
             <slot />
         </div>
@@ -30,5 +32,7 @@ defineProps<{
     id: string;
     title: string;
     icon: Component;
+    headingTestId?: string;
+    cardTestId?: string;
 }>();
 </script>

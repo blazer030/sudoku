@@ -321,15 +321,37 @@ describe("Settings.vue appearance row", () => {
         expect(settingsStore.appearance).toBe("dark");
     });
 
-    it("should show only the mode, in the style's own name, for a one-theme style", async () => {
+    it.each(["pixel", "chalkboard"] as const)("should show only the mode, in the style's own name, for the one-theme %s", async (style) => {
         const wrapper = mountSettings();
         const settingsStore = useSettingsStore();
-        settingsStore.setStyle("pixel");
+        settingsStore.setStyle(style);
         settingsStore.setAppearance("dark");
         await nextTick();
 
-        expect(summaryOf(wrapper)).toBe(t("settings.colorMode.styled.pixel.dark"));
+        expect(summaryOf(wrapper)).toBe(t(`settings.colorMode.styled.${style}.dark`));
         expect(summaryOf(wrapper)).not.toContain(t("settings.colorThemes.classic"));
+    });
+
+    it("should summarise blueprint's mode in its own name beside its paper", async () => {
+        const wrapper = mountSettings();
+        const settingsStore = useSettingsStore();
+        settingsStore.setStyle("blueprint");
+        await nextTick();
+
+        expect(summaryOf(wrapper)).toContain(t("settings.colorMode.styled.blueprint.dark"));
+        expect(summaryOf(wrapper)).toContain(t("settings.colorThemes.blue"));
+        expect(summaryOf(wrapper)).not.toContain(t("settings.colorMode.dark"));
+    });
+
+    it("should summarise aurora's mode in its own name beside its colour", async () => {
+        const wrapper = mountSettings();
+        const settingsStore = useSettingsStore();
+        settingsStore.setStyle("aurora");
+        await nextTick();
+
+        expect(summaryOf(wrapper)).toContain(t("settings.colorMode.styled.aurora.dark"));
+        expect(summaryOf(wrapper)).toContain(t("settings.colorThemes.purple"));
+        expect(summaryOf(wrapper)).not.toContain(t("settings.colorMode.dark"));
     });
 
     it.each([

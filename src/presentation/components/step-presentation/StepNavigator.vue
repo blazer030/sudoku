@@ -6,6 +6,7 @@
             :data-testid="`${testIdPrefix}-previous`"
             :disabled="stepIndex <= 0"
             class="step-arrow"
+            data-skin="step-arrow"
             @click="emit('previous')"
         >
             <ChevronLeft :size="20" />
@@ -36,6 +37,7 @@
                 :aria-label="t('stepPanel.stepCounter', { current: index, total: totalSteps })"
                 :class="dotClass(index - 1)"
                 :data-testid="`${testIdPrefix}-dot-${index - 1}`"
+                :data-skin="index - 1 === stepIndex ? 'step-dot step-dot-current' : index - 1 < stepIndex ? 'step-dot step-dot-past' : 'step-dot'"
                 class="h-2 rounded-full transition-all duration-300 cursor-pointer"
                 @click="emit('goTo', index - 1)"
             />
@@ -46,6 +48,7 @@
             :data-testid="`${testIdPrefix}-next`"
             :disabled="stepIndex >= totalSteps - 1"
             class="step-arrow"
+            data-skin="step-arrow"
             @click="emit('next')"
         >
             <ChevronRight :size="20" />

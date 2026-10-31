@@ -178,6 +178,10 @@ describe("Changelog", () => {
         expect(wrapper.find("[data-testid='changelog-app-note']").text()).toBe("Items marked App apply to the Android app only.");
     });
 
+    it("should mark the App note for the skins", () => {
+        expect(mountChangelog().get("[data-testid='changelog-app-note']").attributes("data-skin")).toBe("app-note");
+    });
+
     it("should describe changes in players' words", () => {
         const technicalWords = /\b(PWA|manifest|launcher|gridlines?|modal|popup|toggles?|sticky|bug|solver)\b/i;
         for (const changes of ALL_CHANGE_LISTS) {

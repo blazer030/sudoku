@@ -1,6 +1,9 @@
 import { computed, type Component, type ComputedRef } from "vue";
 import type { StyleId } from "@/theme/themeIds";
 import { useSettingsStore } from "@/stores/settingsStore";
+import AuroraCelebration from "@/presentation/components/style-moments/aurora/AuroraCelebration.vue";
+import AuroraGroupOverlay from "@/presentation/components/style-moments/aurora/AuroraGroupOverlay.vue";
+import AuroraLoader from "@/presentation/components/style-moments/aurora/AuroraLoader.vue";
 import MinimalLoader from "@/presentation/components/style-moments/minimal/MinimalLoader.vue";
 import TactileLoader from "@/presentation/components/style-moments/tactile/TactileLoader.vue";
 import PaperLoader from "@/presentation/components/style-moments/paper/PaperLoader.vue";
@@ -16,6 +19,13 @@ import CyberGroupOverlay from "@/presentation/components/style-moments/cyber/Cyb
 import InkLoader from "@/presentation/components/style-moments/ink/InkLoader.vue";
 import InkGroupOverlay from "@/presentation/components/style-moments/ink/InkGroupOverlay.vue";
 import InkCardDecoration from "@/presentation/components/style-moments/ink/InkCardDecoration.vue";
+import ChalkboardDigitWriter from "@/presentation/components/style-moments/chalkboard/ChalkboardDigitWriter.vue";
+import ChalkboardLoader from "@/presentation/components/style-moments/chalkboard/ChalkboardLoader.vue";
+import ChalkboardGroupOverlay from "@/presentation/components/style-moments/chalkboard/ChalkboardGroupOverlay.vue";
+import ChalkboardCardDecoration from "@/presentation/components/style-moments/chalkboard/ChalkboardCardDecoration.vue";
+import BlueprintLoader from "@/presentation/components/style-moments/blueprint/BlueprintLoader.vue";
+import BlueprintGroupOverlay from "@/presentation/components/style-moments/blueprint/BlueprintGroupOverlay.vue";
+import BlueprintCardDecoration from "@/presentation/components/style-moments/blueprint/BlueprintCardDecoration.vue";
 import type { CompletedGroup } from "@/domain/game/Sudoku";
 
 /** A group effect on the board: a new one gets a new id, which starts its drawings afresh. */
@@ -24,6 +34,9 @@ export interface GroupEffect {
     groups: CompletedGroup[];
     origin: { row: number; column: number };
 }
+
+/** The board's part of the celebration: its phase playing, its end state after, or the still end state. */
+export type CelebrationPhase = "playing" | "done" | "still";
 
 export interface StyleMoments {
     loader: Component;
@@ -49,7 +62,8 @@ export interface StyleMoments {
     /**
      * Writes an entered digit in while it arrives (only when motion is allowed), given `{ digit, maskId }`:
      * it renders an SVG `<mask>` with that id, which the arriving digit carries as `--digit-writer-mask` for
-     * the skin to mask it by, and emits `written` once the digit shows whole, which settles the arrival.
+     * the skin to mask it by, and emits `written` once the digit shows whole (and anything else it draws, such as
+     * chalk's dust, has finished), which settles the arrival.
      * None when the skin's `.value-arrive` carries it all.
      */
     digitWriter?: Component | null;
@@ -127,6 +141,65 @@ const INK_MOMENTS: StyleMoments = {
     celebrationBoardMs: 1450,
 };
 
+// From the boards: each cell's digits flash yellow from 100ms for 520ms, 45ms a step. A line's chalk is
+// dragged on from 100ms and fades by 960ms; a box's ring starts 180ms in and fades by 1080ms, and the
+// last dust (黑板) falls by 1000ms. A box completed alone from its centre (its farthest cell two steps out,
+// 1120ms) still outlasts its ring by the frames the overlay takes to start. The solved board: the teacher
+// rings it in yellow chalk from 60ms for 900ms, and the dialog opens as the board's scrim comes in, while the
+// loop is closing; the card then lands like a note stuck on the board, the cheer is written on it with dust
+// falling off it and stars, a wave and rays are doodled round it and the trophy (ChalkboardCardDecoration), so
+// nothing is drawn behind the card.
+// While a puzzle loads, chalk draws a sudoku box on a small board, rings and writes four cells in turn and a
+// duster wipes it (ChalkboardLoader). An entered digit is written in stroke by stroke, in 420–560ms, a little
+// chalk dust falling as each stroke ends (黑板 only).
+const CHALKBOARD_MOMENTS: StyleMoments = {
+    loader: ChalkboardLoader,
+    celebration: null,
+    cardDecoration: ChalkboardCardDecoration,
+    groupEffectMs: 1000,
+    groupOverlay: ChalkboardGroupOverlay,
+    celebrationBoardMs: 920,
+    digitWriter: ChalkboardDigitWriter,
+};
+
+// From the boards: each cell is hatched in the primary from 100ms for 560ms, 45ms a step, and a completed line's
+// margin label lights for 900ms. A line's dimension snaps out from 100ms and fades by 980ms; a box's outline snaps
+// out from 140ms and fades by 1000ms, which a box completed alone from its centre (its farthest cell two steps out,
+// 1020ms) still outlasts (BlueprintGroupOverlay). An entered digit is plotted under crosshairs and inked in by the skin
+// alone, in 840ms. The solved board: two glowing lines of the primary sweep it from the top left in 760ms, each digit
+// flashing as they cross it (42ms a step, 420ms each); from 720ms a dashed lock marches round it and from 1000ms its
+// verdict, R1–R9 · C1–C9 OK, is pulled out on a leader (BlueprintBoardFrame). The dialog opens at 1300ms, as the lock
+// is closing: the card is plotted in from the left from 60ms over 520ms, the trophy's dashed ring is inked in from
+// 580ms and the 核可 stamp pressed on from 700ms, standing on the card's top edge (BlueprintCardDecoration), so
+// nothing is drawn over the scene.
+// While a puzzle loads, a plotter draws a sudoku box on a small drawing sheet, its pen running along the line as it
+// is plotted, and dimensions it in 3 columns (BlueprintLoader).
+// From the boards: each cell of a completed group glows with the primary from 100ms for 600ms, 45ms a step. A line's
+// streak of the aurora sweeps out from 100ms and fades by 860ms; a box's ring goes out from 120ms and fades by 880ms
+// (AuroraGroupOverlay).
+// The solved board: the aurora surges behind it from 0ms over 1.8s, showing through its gaps and glass, while light rings
+// out through its panes from the centre cell (900ms each, 85ms a ring, the corners last by 1240ms). The dialog opens at
+// 800ms, as the outer panes are still glowing: the card focuses in from 100ms over 640ms, and behind it three rings go out
+// from its centre, 2.4s a round, while six sparks rise (AuroraCelebration).
+// While a puzzle loads, nine lights breathe outward from the centre under a slowly turning aurora (AuroraLoader).
+const AURORA_MOMENTS: StyleMoments = {
+    loader: AuroraLoader,
+    celebration: AuroraCelebration,
+    cardDecoration: null,
+    groupEffectMs: 900,
+    groupOverlay: AuroraGroupOverlay,
+    celebrationBoardMs: 800,
+};
+
+const BLUEPRINT_MOMENTS: StyleMoments = {
+    loader: BlueprintLoader,
+    celebration: null,
+    cardDecoration: BlueprintCardDecoration,
+    groupEffectMs: 900,
+    groupOverlay: BlueprintGroupOverlay,
+    celebrationBoardMs: 1300,
+};
+
 // One entry per style, so a style added without its moments is a type error
 export const STYLE_MOMENTS: Record<StyleId, StyleMoments> = {
     minimal: MINIMAL_MOMENTS,
@@ -135,6 +208,9 @@ export const STYLE_MOMENTS: Record<StyleId, StyleMoments> = {
     pixel: PIXEL_MOMENTS,
     cyber: CYBER_MOMENTS,
     ink: INK_MOMENTS,
+    chalkboard: CHALKBOARD_MOMENTS,
+    blueprint: BLUEPRINT_MOMENTS,
+    aurora: AURORA_MOMENTS,
 };
 
 export const useStyleMoments = (): ComputedRef<StyleMoments> => {

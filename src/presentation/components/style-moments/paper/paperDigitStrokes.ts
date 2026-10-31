@@ -5,27 +5,7 @@
  * real glyph shows through, 11 units wide, so they only need to cover its ink, not match it.
  */
 
-export interface PenStroke {
-    path: string;
-    /** The path's length, in the board's units: each stroke draws itself on along it. */
-    length: number;
-    delayMs: number;
-    durationMs: number;
-    /** The pen's pace; the board's default when none. */
-    easing?: string;
-    /**
-     * Where a later stroke crosses this one, as closed shapes: this stroke is cut there, so the crossing
-     * shows only when the pen gets to it the second time.
-     */
-    crossings?: string;
-}
-
-export interface DigitStrokes {
-    /** In writing order; a gap between one stroke's end and the next's start is the pen lifting. */
-    strokes: PenStroke[];
-    /** When the whole mask fades in (60ms), filling the specks the strokes miss; it ends with the last stroke. */
-    settleDelayMs: number;
-}
+import type { DigitStrokes, StrokeFace } from "@/presentation/components/style-moments/digitStrokes";
 
 export const PEN_EASING = "cubic-bezier(.35,.1,.45,1)";
 export const PEN_WIDTH = 11;
@@ -167,3 +147,12 @@ export const CAVEAT_DIGIT_ADVANCES: Partial<Record<number, number>> = {
 
 /** Caveat's baseline in a one-em line box (leading-none), in ems from its top. */
 export const CAVEAT_BASELINE_EM = 0.83;
+
+export const PAPER_STROKE_FACE: StrokeFace = {
+    strokes: PAPER_DIGIT_STROKES,
+    penWidth: PEN_WIDTH,
+    easing: PEN_EASING,
+    glyph: BOARD_GLYPH,
+    advances: CAVEAT_DIGIT_ADVANCES,
+    baselineEm: CAVEAT_BASELINE_EM,
+};

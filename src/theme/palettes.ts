@@ -1,6 +1,9 @@
 // Every style's colours, gathered from src/style/styles/<id>/palette.ts. src/style/themes.generated.css
 // is rendered from them by `npm run generate:theme-css`. Relative imports only: scripts/ import this file.
-import { effectiveColorMode, type ColorMode, type ColorThemeId, type RememberedThemes, type StyleId } from "./themeIds";
+import { STYLE_COLOR_MODES, effectiveColorMode, type ColorMode, type ColorThemeId, type RememberedAppearances, type RememberedThemes, type StyleId } from "./themeIds";
+import { AURORA_STYLE } from "../style/styles/aurora/palette";
+import { BLUEPRINT_STYLE } from "../style/styles/blueprint/palette";
+import { CHALKBOARD_STYLE } from "../style/styles/chalkboard/palette";
 import { CYBER_STYLE } from "../style/styles/cyber/palette";
 import { INK_STYLE } from "../style/styles/ink/palette";
 import { MINIMAL_STYLE } from "../style/styles/minimal/palette";
@@ -9,7 +12,7 @@ import { PIXEL_STYLE } from "../style/styles/pixel/palette";
 import { TACTILE_STYLE } from "../style/styles/tactile/palette";
 import type { Palette, StyleDefinition, ThemePalette } from "./paletteBuilder";
 
-export { PALETTE_TOKENS, type Palette, type PaletteToken } from "./paletteBuilder";
+export { PALETTE_TOKENS, STYLE_OWN_TOKENS, type Palette, type PaletteToken, type StyleOwnToken } from "./paletteBuilder";
 
 export const STYLES: Record<StyleId, StyleDefinition> = {
     minimal: MINIMAL_STYLE,
@@ -18,6 +21,9 @@ export const STYLES: Record<StyleId, StyleDefinition> = {
     pixel: PIXEL_STYLE,
     cyber: CYBER_STYLE,
     ink: INK_STYLE,
+    chalkboard: CHALKBOARD_STYLE,
+    blueprint: BLUEPRINT_STYLE,
+    aurora: AURORA_STYLE,
 };
 
 export const DEFAULT_STYLE_ID: StyleId = "minimal";
@@ -31,6 +37,13 @@ const findTheme = (style: StyleId, themeId: ColorThemeId): ThemePalette => {
 export const rememberedThemeFor = (style: StyleId, remembered: RememberedThemes): ColorThemeId => {
     const themes = STYLES[style].themes;
     return themes.find(theme => theme.id === remembered[style])?.id ?? themes[0].id;
+};
+
+/** The mode a style comes back to: the one remembered for it, or the style's first mode. */
+export const rememberedAppearanceFor = (style: StyleId, remembered: RememberedAppearances): ColorMode => {
+    const modes = STYLE_COLOR_MODES[style];
+    const mode = remembered[style];
+    return mode !== undefined && modes.includes(mode) ? mode : modes[0];
 };
 
 /** The palette the style shows for a mode; a style with one mode answers with that mode's palette. */
@@ -48,4 +61,15 @@ export const getPalette = (style: StyleId, themeId: ColorThemeId, mode: ColorMod
 export const systemBarColor = (style: StyleId, themeId: ColorThemeId, mode: ColorMode): string => {
     const palette = getPalette(style, themeId, mode);
     return effectiveColorMode(style, mode) === "light" ? palette.primary : palette.background;
+};
+
+/** The disc a colour-theme swatch is drawn as, and the colour of the check mark on it. */
+export const swatchColors = (style: StyleId, mode: ColorMode, palette: Palette): { fill: string; mark: string } => {
+    // Blueprint's primary is one colour in all four themes: dark swaps the paper, light swaps the ink
+    if (style === "blueprint") {
+        return effectiveColorMode(style, mode) === "dark"
+            ? { fill: palette.background, mark: palette.foreground }
+            : { fill: palette.foreground, mark: palette.background };
+    }
+    return { fill: palette.primary, mark: palette["on-primary"] };
 };

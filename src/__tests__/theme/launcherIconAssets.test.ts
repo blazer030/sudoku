@@ -5,7 +5,7 @@ import { ALL_LAUNCHER_ALIASES, LAUNCHER_ICONS, LEGACY_LAUNCHER_ALIASES, launcher
 import { styleIconBackground } from "@/theme/styleIcons";
 import { BRAND_ICON_BACKGROUND, BRAND_ICON_RESOURCE, brandTileColors } from "@/theme/brandIcon";
 import { ICON_THEME_IDS, type ColorMode, type StyleId } from "@/theme/themeIds";
-import type { Palette, PaletteToken } from "@/theme/palettes";
+import type { Palette, PaletteToken, StyleOwnToken } from "@/theme/palettes";
 
 // The Android launcher icons are generated (npm run generate:launcher-icons); regenerate them
 // whenever a palette or the artwork in styleIcons.ts changes.
@@ -13,6 +13,8 @@ import type { Palette, PaletteToken } from "@/theme/palettes";
 const RES_ROOT = "android/app/src/main/res";
 const MANIFEST = "android/app/src/main/AndroidManifest.xml";
 const DENSITIES = ["mdpi", "hdpi", "xhdpi", "xxhdpi", "xxxhdpi"];
+// Capacitor's own icons, which no alias or adaptive icon of ours draws
+const CAPACITOR_ICONS = ["ic_launcher.png", "ic_launcher_foreground.png", "ic_launcher_round.png"];
 
 const icons = LAUNCHER_ICONS.map((icon) => {
     const palette = getPalette(icon.style, icon.themeId, icon.mode);
@@ -42,7 +44,7 @@ const pixelAt = async (path: string, across: number, down: number): Promise<{ co
 interface ArtworkSample {
     x: number;
     y: number;
-    token: PaletteToken;
+    token: PaletteToken | StyleOwnToken;
     mode?: ColorMode;
     legacyOnly?: boolean;
     foregroundOnly?: boolean;
@@ -87,6 +89,27 @@ const SAMPLES: Record<StyleId, ArtworkSample[]> = {
         { x: 5.4, y: 54, token: "background" },
         { x: -20, y: 54, token: "background", foregroundOnly: true },
     ],
+    // The frame round the board, and the bare board above the grid
+    chalkboard: [
+        { x: 4, y: 54, token: "icon-frame" },
+        { x: -20, y: 54, token: "icon-frame", foregroundOnly: true },
+        { x: 54, y: 14, token: "background" },
+    ],
+    // The foreground layer's bottom-right corner, where the ground lies bare (the legacy icon rounds it off and
+    // the lights tint the rest of every edge), the side dot and the centre dot
+    aurora: [
+        { x: 104, y: 104, token: "background", foregroundOnly: true },
+        { x: 54, y: 41, token: "primary" },
+        { x: 54, y: 54, token: "glass-sheen" },
+    ],
+    // The paper in the middle of a grid cell, the board's outline and the leader (the 0.6-unit grid lines fill no
+    // whole pixel at any density)
+    blueprint: [
+        { x: 9, y: 54, token: "background" },
+        { x: -18, y: 54, token: "background", foregroundOnly: true },
+        { x: 30, y: 58, token: "foreground", fine: true },
+        { x: 76, y: 44, token: "primary", fine: true },
+    ],
 };
 const samplesAt = (style: StyleId, mode: ColorMode, density: string) => SAMPLES[style]
     .filter(sample => (!sample.fine || density === "xxxhdpi") && (!sample.mode || sample.mode === mode));
@@ -117,7 +140,7 @@ describe("the app's own launcher icon", () => {
 
     it("should draw the legacy icon's ground and first box at every density", async () => {
         for (const density of DENSITIES) {
-            const path = `${RES_ROOT}/mipmap-${density}/${BRAND_ICON_RESOURCE}.png`;
+            const path = `${RES_ROOT}/mipmap-${density}/${BRAND_ICON_RESOURCE}.webp`;
 
             expect(await pixelAt(path, BRAND_GROUND.x / 108, BRAND_GROUND.y / 108), path).toEqual({ color: BRAND_ICON_BACKGROUND, alpha: 255 });
             expect(await pixelAt(path, BRAND_CENTRE_TILE.x / 108, BRAND_CENTRE_TILE.y / 108), path).toEqual({ color: brandTileColors(1, 1).top, alpha: 255 });
@@ -126,11 +149,11 @@ describe("the app's own launcher icon", () => {
 
     it("should draw the first box in the foreground's viewport and leave its ground to the background layer", async () => {
         for (const density of DENSITIES) {
-            const path = `${RES_ROOT}/mipmap-${density}/${BRAND_ICON_RESOURCE}_foreground.png`;
+            const path = `${RES_ROOT}/mipmap-${density}/${BRAND_ICON_RESOURCE}_foreground.webp`;
 
             expect((await pixelAt(path, inForeground(BRAND_GROUND.x), inForeground(BRAND_GROUND.y))).alpha, path).toBe(0);
             expect(await pixelAt(path, inForeground(BRAND_CENTRE_TILE.x), inForeground(BRAND_CENTRE_TILE.y)), path).toEqual({ color: brandTileColors(1, 1).top, alpha: 255 });
-            expect(readdirSync(`${RES_ROOT}/mipmap-${density}`), density).toContain(`${BRAND_ICON_RESOURCE}_monochrome.png`);
+            expect(readdirSync(`${RES_ROOT}/mipmap-${density}`), density).toContain(`${BRAND_ICON_RESOURCE}_monochrome.webp`);
         }
     });
 });
@@ -157,11 +180,11 @@ describe("launcher icon assets", () => {
     it("should draw each foreground's artwork in its palette at every density", async () => {
         for (const icon of icons) {
             for (const density of DENSITIES) {
-                const path = `${RES_ROOT}/mipmap-${density}/${foregroundName(icon)}.png`;
+                const path = `${RES_ROOT}/mipmap-${density}/${foregroundName(icon)}.webp`;
 
                 for (const { x, y, token } of samplesAt(icon.style, icon.mode, density).filter(sample => !sample.legacyOnly)) {
                     expect(await pixelAt(path, inForeground(x), inForeground(y)), `${path} ${token}`)
-                        .toEqual({ color: icon.palette[token].toUpperCase(), alpha: 255 });
+                        .toEqual({ color: icon.palette[token]?.toUpperCase(), alpha: 255 });
                 }
             }
         }
@@ -170,11 +193,11 @@ describe("launcher icon assets", () => {
     it("should render each legacy icon as its style's artwork in its palette at every density", async () => {
         for (const icon of icons) {
             for (const density of DENSITIES) {
-                const path = `${RES_ROOT}/mipmap-${density}/${icon.name}.png`;
+                const path = `${RES_ROOT}/mipmap-${density}/${icon.name}.webp`;
 
                 for (const { x, y, token } of samplesAt(icon.style, icon.mode, density).filter(sample => !sample.foregroundOnly)) {
                     expect(await pixelAt(path, x / 108, y / 108), `${path} ${token}`)
-                        .toEqual({ color: icon.palette[token].toUpperCase(), alpha: 255 });
+                        .toEqual({ color: icon.palette[token]?.toUpperCase(), alpha: 255 });
                 }
             }
         }
@@ -183,7 +206,7 @@ describe("launcher icon assets", () => {
     it("should keep each style's monochrome layer at every density", () => {
         for (const style of new Set(icons.map(icon => icon.style))) {
             for (const density of DENSITIES) {
-                expect(readdirSync(`${RES_ROOT}/mipmap-${density}`), density).toContain(`${monochromeName(style)}.png`);
+                expect(readdirSync(`${RES_ROOT}/mipmap-${density}`), density).toContain(`${monochromeName(style)}.webp`);
             }
         }
     });
@@ -223,11 +246,23 @@ describe("launcher icon assets", () => {
         const xmlDirectory = `${RES_ROOT}/mipmap-anydpi-v26`;
         const usedLayers = new Set(readdirSync(xmlDirectory)
             .flatMap(file => [...readFileSync(`${xmlDirectory}/${file}`, "utf8").matchAll(/@mipmap\/(\w+)/g)])
-            .map(([, layer]) => `${layer}.png`));
+            .map(([, layer]) => `${layer}.webp`));
         for (const density of DENSITIES) {
-            const layers = readdirSync(`${RES_ROOT}/mipmap-${density}`).filter(file => /_(foreground|monochrome)\.png$/.test(file));
+            const layers = readdirSync(`${RES_ROOT}/mipmap-${density}`).filter(file => /_(foreground|monochrome)\.webp$/.test(file));
 
             expect(layers.filter(file => !usedLayers.has(file)), density).toEqual([]);
+        }
+    });
+
+    // Lossless WebP: a fraction of the PNGs' size in the app, pixel for pixel the same
+    it("should keep the launcher icons as WebP, leaving no PNG twin for Android to reject as a duplicate", async () => {
+        for (const density of DENSITIES) {
+            const files = readdirSync(`${RES_ROOT}/mipmap-${density}`);
+
+            expect(files.filter(file => file.endsWith(".png") && !CAPACITOR_ICONS.includes(file)), density).toEqual([]);
+            for (const { name } of icons) {
+                expect((await sharp(`${RES_ROOT}/mipmap-${density}/${name}.webp`).metadata()).format, `${density} ${name}`).toBe("webp");
+            }
         }
     });
 
