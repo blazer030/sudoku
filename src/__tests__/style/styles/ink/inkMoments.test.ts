@@ -23,8 +23,11 @@ const REVEAL_OF = { row: `${BRUSH_OF.row} .ink-group-reveal`, column: `${BRUSH_O
 const KINDS = ["row", "column", "box"] as const;
 const CELEBRATING = `${BOARD}:is([data-celebration="playing"], [data-celebration="done"])`;
 const STILL_BOARD = `${BOARD}[data-celebration="still"]`;
-const FIRST_WASH = `${CELEBRATING}::before`;
-const SECOND_WASH = `${CELEBRATING}::after`;
+// The skin's washes, while the board's ink canvas does not draw the celebration in their place
+const SKIN_CELEBRATING = `${CELEBRATING}:not([data-board-canvas~="celebration"])`;
+const FIRST_WASH = `${SKIN_CELEBRATING}::before`;
+const SECOND_WASH = `${SKIN_CELEBRATING}::after`;
+const INK_CANVAS = `${BOARD} > .ink-canvas`;
 const STILL_WASH = `${STILL_BOARD}::before`;
 const TAKING_DIGIT = `${CELEBRATING} [data-variant] > div:not(.value-arrive):not(.animate-hint-reveal-pop)`;
 const CARD = `${SCOPE} [data-skin~="card"][data-skin~="celebration"]`;
@@ -290,7 +293,7 @@ describe("ink moments", () => {
         });
 
         it("should wash the board in ink by gradients, moving only by opacity and transform, with no filter", () => {
-            const washes = declarationsOf(INK_CSS, `${CELEBRATING}::before`);
+            const washes = declarationsOf(INK_CSS, FIRST_WASH);
 
             expect(washes.get("background-image")).toMatch(/^radial-gradient\(/);
             expect(washes.get("background-image")).toContain("var(--color-foreground)");
@@ -299,7 +302,7 @@ describe("ink moments", () => {
                 expect(declarationsOf(INK_CSS, selector).has("filter"), selector).toBe(false);
             }
             // Under the digits, inside the board's own stacking context
-            expect(zIndexOf(`${CELEBRATING}::before`)).toBeLessThan(zIndexOf(`${BOARD} [data-variant] > div`));
+            expect(zIndexOf(FIRST_WASH)).toBeLessThan(zIndexOf(`${BOARD} [data-variant] > div`));
             expect(declarationsOf(INK_CSS, BOARD).get("isolation")).toBe("isolate");
             expect(declarationsOf(INK_CSS, BOARD).get("position")).toBe("relative");
         });
@@ -313,6 +316,29 @@ describe("ink moments", () => {
 
             expect(scaledBeyond).toBe(true);
             expect(declarationsOf(INK_CSS, CELEBRATING).get("overflow")).toBe("clip");
+        });
+
+        // The canvas draws the washes by WebGL where it can, so the skin's stand down; the still one is always the skin's
+        it("should leave the washes to the board's ink canvas while it draws the celebration", () => {
+            const boardWashSelectors: string[] = [];
+            postcss.parse(INK_CSS).walkRules((rule) => {
+                boardWashSelectors.push(...rule.selectors.map(collapse).filter(selector =>
+                    selector.startsWith(CELEBRATING) && /::(before|after)$/.test(selector) && !selector.includes("[data-variant]")));
+            });
+
+            expect(boardWashSelectors.length).toBeGreaterThanOrEqual(4);
+            for (const selector of boardWashSelectors) {
+                expect(selector).toMatch(/^.*:not\(\[data-board-canvas~="celebration"\]\)::(before|after)$/);
+            }
+        });
+
+        it("should lay the ink canvas over the whole board, level with the washes under the digits, its ink multiplied into the paper", () => {
+            const canvas = declarationsOf(INK_CSS, INK_CANVAS);
+
+            expect(canvas.get("mix-blend-mode")).toBe("multiply");
+            expect(canvas.has("filter")).toBe(false);
+            expect(zIndexOf(INK_CANVAS)).toBe(zIndexOf(FIRST_WASH));
+            expect(zIndexOf(INK_CANVAS)).toBeLessThan(zIndexOf(`${BOARD} [data-variant] > div`));
         });
 
         it("should let the digits take the ink from the centre outward, all before the dialog opens", () => {
@@ -344,7 +370,7 @@ describe("ink moments", () => {
 
             expect(opacity).toBeGreaterThan(0);
             expect(opacity).toBeLessThan(1);
-            expect(wash.get("background-image")).toBe(declarationsOf(INK_CSS, `${CELEBRATING}::before`).get("background-image"));
+            expect(wash.get("background-image")).toBe(declarationsOf(INK_CSS, FIRST_WASH).get("background-image"));
             expect(wash.has("animation")).toBe(false);
             expect(declarationsOf(INK_CSS, `${STILL_BOARD}::after`).size).toBe(0);
             const stillRules: string[] = [];

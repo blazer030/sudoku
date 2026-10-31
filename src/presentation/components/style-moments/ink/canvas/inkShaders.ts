@@ -55,19 +55,26 @@ float bloom(vec2 point, vec4 slot) {
     if (progress <= 0.0) return 0.0;
     vec2 centre = vec2(slot.x * u_aspect, slot.y);
     float distanceOut = length((point - centre) * vec2(1.0, 1.08));
-    float edge = distanceOut + (fractal(point * 7.0 + centre * 3.0) - 0.5) * (0.02 + 0.2 * front) + (fibre(point) - 0.5) * 0.03;
-    float inside = 1.0 - smoothstep(front - 0.012, front + 0.004, edge);
-    float pooled = smoothstep(front - 0.07, front - 0.004, edge) * inside;
-    float body = 0.30 + 0.25 * fractal(point * 4.0 + centre) * (0.7 + 0.6 * texture2D(u_noise, point / 4.0).a);
-    float dried = mix(1.0, 0.6, smoothstep(0.3, 1.0, progress));
-    return inside * (body * dried + pooled * 0.38);
+    float fibres = fibre(point);
+    float edge = distanceOut + (fractal(point * 6.0 + centre * 3.0) - 0.5) * (0.02 + 0.16 * front) + (fibres - 0.5) * 0.025;
+    // A soft margin that the fibres feather, rather than a cut edge
+    float inside = 1.0 - smoothstep(front - 0.02, front + 0.004, edge);
+    // Water carries the pigment out to the front and leaves it there as it stops: a darker rim, a paler heart
+    float reach = clamp(distanceOut / max(front, 0.001), 0.0, 1.0);
+    float pooled = smoothstep(front - 0.08, front - 0.008, edge) * inside;
+    // Past the front, ink creeps a little way along the fibres
+    float creep = (1.0 - smoothstep(front, front + 0.035, edge)) * (1.0 - inside) * smoothstep(0.55, 0.85, fibres);
+    float mottling = fractal(point * 3.0 + centre) * (0.6 + 0.8 * texture2D(u_noise, point / 3.0 + centre).a);
+    float body = (0.2 + 0.12 * reach) * (0.45 + 1.1 * mottling);
+    float dried = mix(1.0, 0.5, smoothstep(0.25, 1.0, progress));
+    return inside * (body * dried + pooled * 0.34) + creep * 0.15;
 }
 
 void main() {
     vec2 point = vec2(v_position.x * u_aspect, v_position.y);
     float ink = 0.0;
     for (int slot = 0; slot < ${MAX_BLOOMS}; slot++) ink += bloom(point, u_blooms[slot]);
-    ink = 1.0 - exp(-ink * 1.25);
+    ink = 1.0 - exp(-ink * 1.4);
     ink *= 0.8 + 0.2 * tooth(point * 1.3);
     gl_FragColor = vec4(u_ink * ink, ink);
 }`;

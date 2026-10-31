@@ -304,9 +304,10 @@
 }
 
 /* The solved board (only with motion allowed): two deep ink washes bloom across it, the second a beat
-   later and off centre, on the board's own ::before and ::after (inside its stacking context, under the
-   digits). They are soft by their gradients alone, with no filter, and move only by opacity and
-   transform. The digits take the ink from the centre outward, dipping and swelling, and keep a halo of
+   later and off centre. Where WebGL runs, the board's ink canvas (InkCanvas) draws them as ink spreading
+   through washi and the board carries data-board-canvas="celebration"; elsewhere they are the board's own
+   ::before and ::after (inside its stacking context, under the digits), soft by their gradients alone, with
+   no filter, moving only by opacity and transform. The digits take the ink from the centre outward, dipping and swelling, and keep a halo of
    paper so they read on it. Both stay under the dialog. An entered digit still bleeding in, or a revealed
    one popping, takes the ink once it has settled. Without motion one faint wash is simply there. */
 @keyframes ink-board-wash {
@@ -314,6 +315,15 @@
     40% { opacity: 1; transform: scale(1.2); }
     70% { opacity: 1; transform: scale(1.3); }
     100% { opacity: 0.55; transform: scale(1.35); }
+}
+
+/* The board's ink canvas (placed over the whole board by InkCanvas) lies level with the washes, under the
+   digits; its ink is multiplied into whatever lies under it on the board, the page showing through where
+   nothing does */
+[data-style="ink"] [data-skin~="board"] > .ink-canvas {
+    z-index: 1;
+    border-radius: inherit;
+    mix-blend-mode: multiply;
 }
 
 @keyframes ink-take {
@@ -329,8 +339,8 @@
     overflow: clip;
 }
 
-[data-style="ink"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"])::before,
-[data-style="ink"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"])::after,
+[data-style="ink"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"]):not([data-board-canvas~="celebration"])::before,
+[data-style="ink"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"]):not([data-board-canvas~="celebration"])::after,
 [data-style="ink"] [data-skin~="board"][data-celebration="still"]::before {
     content: "";
     position: absolute;
@@ -340,21 +350,21 @@
     background-image: radial-gradient(circle, color-mix(in srgb, var(--color-foreground) 44%, transparent) 0, color-mix(in srgb, var(--color-foreground) 32%, transparent) 42%, transparent 70%);
 }
 
-[data-style="ink"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"])::before,
+[data-style="ink"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"]):not([data-board-canvas~="celebration"])::before,
 [data-style="ink"] [data-skin~="board"][data-celebration="still"]::before {
     inset: 11%;
 }
 
-[data-style="ink"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"])::after {
+[data-style="ink"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"]):not([data-board-canvas~="celebration"])::after {
     inset: 34% 0 9% 43%;
 }
 
-[data-style="ink"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"])::before {
+[data-style="ink"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"]):not([data-board-canvas~="celebration"])::before {
     opacity: 0;
     animation: ink-board-wash 1400ms ease-out both;
 }
 
-[data-style="ink"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"])::after {
+[data-style="ink"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"]):not([data-board-canvas~="celebration"])::after {
     opacity: 0;
     animation: ink-board-wash 1400ms ease-out 200ms both;
 }
@@ -1035,8 +1045,8 @@
     }
 
     /* The celebration never starts without motion, so it is only stopped */
-    [data-style="ink"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"])::before,
-    [data-style="ink"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"])::after,
+    [data-style="ink"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"]):not([data-board-canvas~="celebration"])::before,
+    [data-style="ink"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"]):not([data-board-canvas~="celebration"])::after,
     [data-style="ink"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"]) [data-variant] > div:not(.value-arrive):not(.animate-hint-reveal-pop),
     [data-style="ink"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]),
     [data-style="ink"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) .ink-rod-track,
