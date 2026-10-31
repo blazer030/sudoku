@@ -1,5 +1,5 @@
 // The ink canvas's WebGL1 renderer, loaded only when the ink style plays with motion: one context, one program,
-// one baked noise texture and one triangle. It draws a frame from the timeline's bloom slots and nothing else.
+// one baked noise texture and one triangle. It draws a frame from the timeline's frame data and nothing else.
 import type { InkFrameRenderer } from "@/presentation/components/style-moments/ink/canvas/inkPlayer";
 import { INK_NOISE_SIZE, bakeInkNoise } from "@/presentation/components/style-moments/ink/canvas/inkNoise";
 import { INK_FRAGMENT_SHADER, INK_VERTEX_SHADER } from "@/presentation/components/style-moments/ink/canvas/inkShaders";
@@ -84,6 +84,8 @@ export const createInkRenderer = (
     context.uniform1i(context.getUniformLocation(program, "u_noise"), 0);
     context.uniform3f(context.getUniformLocation(program, "u_ink"), ...ink);
     const bloomsLocation = context.getUniformLocation(program, "u_blooms");
+    const inksLocation = context.getUniformLocation(program, "u_inks");
+    const timeLocation = context.getUniformLocation(program, "u_time");
     const aspectLocation = context.getUniformLocation(program, "u_aspect");
     context.uniform1f(aspectLocation, 1);
     context.clearColor(0, 0, 0, 0);
@@ -92,8 +94,10 @@ export const createInkRenderer = (
     canvas.addEventListener("webglcontextlost", handleLost);
 
     return {
-        draw: (blooms) => {
+        draw: ({ blooms, inks, seconds }) => {
             context.uniform4fv(bloomsLocation, blooms);
+            context.uniform1fv(inksLocation, inks);
+            context.uniform1f(timeLocation, seconds);
             context.clear(context.COLOR_BUFFER_BIT);
             context.drawArrays(context.TRIANGLES, 0, 3);
         },

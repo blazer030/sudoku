@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
 import { createInkPlayer, type FrameClock, type InkFrameRenderer } from "@/presentation/components/style-moments/ink/canvas/inkPlayer";
-import { bloomUniforms, scheduleEffects, type InkBloom } from "@/presentation/components/style-moments/ink/canvas/inkTimeline";
+import { INK_DRIFT_SETTLE_MS, inkFrame, scheduleEffects, type InkBloom } from "@/presentation/components/style-moments/ink/canvas/inkTimeline";
 
-const BLOOM: InkBloom = { kind: "bloom", centre: { x: 0.5, y: 0.5 }, radius: 0.4, delayMs: 0, durationMs: 1000 };
+const BLOOM: InkBloom = { kind: "bloom", centre: { x: 0.5, y: 0.5 }, radius: 0.4, ink: 1, delayMs: 0, durationMs: 1000 };
 
 // A clock whose frames run only when the test steps them
 const fakeClock = () => {
@@ -33,7 +33,7 @@ const fakeRenderer = (): InkFrameRenderer & { draw: ReturnType<typeof vi.fn>; cl
 });
 
 describe("createInkPlayer", () => {
-    it("should draw a frame of the scheduled blooms each animation frame while they run", () => {
+    it("should draw a frame of the scheduled effects each animation frame while they run", () => {
         const { clock, step } = fakeClock();
         const renderer = fakeRenderer();
         const player = createInkPlayer(renderer, clock);
@@ -42,7 +42,7 @@ describe("createInkPlayer", () => {
         step(250);
 
         expect(renderer.draw).toHaveBeenCalledTimes(1);
-        expect(renderer.draw).toHaveBeenLastCalledWith(bloomUniforms(scheduleEffects([], [BLOOM], 0), 250));
+        expect(renderer.draw).toHaveBeenLastCalledWith(inkFrame(scheduleEffects([], [BLOOM], 0), 250));
     });
 
     // The last frame stands on the canvas; no frame is asked for once nothing changes
@@ -54,7 +54,7 @@ describe("createInkPlayer", () => {
         player.play([BLOOM]);
         step(500);
         expect(pendingCount()).toBe(1);
-        step(1000);
+        step(INK_DRIFT_SETTLE_MS);
 
         expect(renderer.draw).toHaveBeenCalledTimes(2);
         expect(pendingCount()).toBe(0);
@@ -81,7 +81,7 @@ describe("createInkPlayer", () => {
         player.play([BLOOM]);
         step(2250);
 
-        expect(renderer.draw).toHaveBeenLastCalledWith(bloomUniforms(scheduleEffects([], [BLOOM], 2000), 2250));
+        expect(renderer.draw).toHaveBeenLastCalledWith(inkFrame(scheduleEffects([], [BLOOM], 2000), 2250));
     });
 
     it("should wipe the canvas and forget the effects when cleared", () => {

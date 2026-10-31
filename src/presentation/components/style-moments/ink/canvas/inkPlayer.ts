@@ -1,8 +1,8 @@
-import { bloomUniforms, isRunning, scheduleEffects, type InkEffect, type ScheduledInkEffect } from "@/presentation/components/style-moments/ink/canvas/inkTimeline";
+import { inkFrame, isRunning, scheduleEffects, type InkEffect, type InkFrame, type ScheduledInkEffect } from "@/presentation/components/style-moments/ink/canvas/inkTimeline";
 
-/** What the player draws through: one frame of bloom slots, or a wiped canvas. */
+/** What the player draws through: one frame of the effects, or a wiped canvas. */
 export interface InkFrameRenderer {
-    draw: (blooms: Float32Array) => void;
+    draw: (frame: InkFrame) => void;
     clear: () => void;
 }
 
@@ -44,7 +44,7 @@ export const createInkPlayer = (renderer: InkFrameRenderer, clock: FrameClock): 
 
     const drawFrame = (nowMs: number) => {
         pendingFrame = null;
-        renderer.draw(bloomUniforms(scheduled, nowMs));
+        renderer.draw(inkFrame(scheduled, nowMs));
         if (isRunning(scheduled, nowMs)) pendingFrame = clock.request(drawFrame);
     };
 

@@ -1,17 +1,19 @@
 import { describe, expect, it } from "vitest";
 import {
     INK_CELEBRATION_WASH,
+    INK_DRIFT_SETTLE_MS,
     MAX_BLOOMS,
     bloomProgress,
     bloomUniforms,
     frontRadius,
+    inkFrame,
     isRunning,
     scheduleEffects,
     type InkBloom,
 } from "@/presentation/components/style-moments/ink/canvas/inkTimeline";
 import { STYLE_MOMENTS } from "@/presentation/components/style-moments/styleMoments";
 
-const BLOOM: InkBloom = { kind: "bloom", centre: { x: 0.5, y: 0.5 }, radius: 0.4, delayMs: 200, durationMs: 1000 };
+const BLOOM: InkBloom = { kind: "bloom", centre: { x: 0.5, y: 0.5 }, radius: 0.4, ink: 1, delayMs: 200, durationMs: 1000 };
 
 describe("inkTimeline", () => {
     describe("bloomProgress", () => {
@@ -60,21 +62,39 @@ describe("inkTimeline", () => {
             expect(second.delayMs + second.durationMs).toBeGreaterThan(boardMs);
         });
 
+        // The second drop lands on the first one's wash, so it carries more ink to keep the overlap deep
+        it("should give the second drop more ink than the first", () => {
+            const [first, second] = INK_CELEBRATION_WASH;
+
+            expect(first.ink).toBe(1);
+            expect(second.ink).toBeGreaterThan(first.ink);
+        });
+
         it("should fit the shader's bloom slots", () => {
             expect(INK_CELEBRATION_WASH.length).toBeLessThanOrEqual(MAX_BLOOMS);
         });
     });
 
     describe("scheduling", () => {
-        it("should run until the last effect scheduled has played", () => {
+        it("should run until the last effect scheduled has played and the water has settled", () => {
             const scheduled = scheduleEffects([], INK_CELEBRATION_WASH, 1000);
-            const endMs = 1000 + Math.max(...INK_CELEBRATION_WASH.map(bloom => bloom.delayMs + bloom.durationMs));
+            const spreadMs = Math.max(...INK_CELEBRATION_WASH.map(bloom => bloom.delayMs + bloom.durationMs));
+            const endMs = 1000 + Math.max(spreadMs, INK_DRIFT_SETTLE_MS);
 
             expect(scheduled).toHaveLength(2);
             expect(isRunning(scheduled, 1000)).toBe(true);
             expect(isRunning(scheduled, endMs - 1)).toBe(true);
             expect(isRunning(scheduled, endMs)).toBe(false);
             expect(isRunning([], 0)).toBe(false);
+        });
+
+        // The slow drift that carries the washes eases to a stop after the blooms have spread
+        it("should keep running while the water still drifts, after a bloom has spread", () => {
+            const scheduled = scheduleEffects([], [{ ...BLOOM, delayMs: 0 }], 0);
+
+            expect(INK_DRIFT_SETTLE_MS).toBeGreaterThan(1000);
+            expect(isRunning(scheduled, 1000)).toBe(true);
+            expect(isRunning(scheduled, INK_DRIFT_SETTLE_MS)).toBe(false);
         });
 
         it("should add effects to the ones already scheduled, each from its own moment", () => {
@@ -84,7 +104,7 @@ describe("inkTimeline", () => {
             expect(both.map(effect => effect.scheduledAtMs)).toEqual([0, 5000]);
             expect(isRunning(first, 3000)).toBe(false);
             expect(isRunning(both, 5500)).toBe(true);
-            expect(isRunning(both, 6200)).toBe(false);
+            expect(isRunning(both, 5000 + INK_DRIFT_SETTLE_MS)).toBe(false);
         });
 
         // The shader has a fixed number of slots; the oldest blooms make room for new ones
@@ -115,6 +135,22 @@ describe("inkTimeline", () => {
 
             expect(uniforms[2]).toBe(0);
             expect(uniforms[3]).toBe(0);
+        });
+    });
+
+    describe("inkFrame", () => {
+        it("should carry the blooms' slots, each bloom's ink and the time since the first was scheduled", () => {
+            const scheduled = scheduleEffects([], [BLOOM, { ...BLOOM, ink: 1.5 }], 1000);
+            const frame = inkFrame(scheduled, 1450);
+
+            expect(frame.blooms).toEqual(bloomUniforms(scheduled, 1450));
+            expect(frame.inks).toHaveLength(MAX_BLOOMS);
+            expect([...frame.inks]).toEqual([1, 1.5, 0, 0]);
+            expect(frame.seconds).toBeCloseTo(0.45);
+        });
+
+        it("should count no time before anything is scheduled", () => {
+            expect(inkFrame([], 500).seconds).toBe(0);
         });
     });
 });

@@ -8,6 +8,8 @@ export interface InkBloom {
     centre: { x: number; y: number };
     /** How far the front has spread once the bloom has run, in board widths. */
     radius: number;
+    /** How much ink the drop carries, a lone drop's being 1. */
+    ink: number;
     delayMs: number;
     durationMs: number;
 }
@@ -29,9 +31,13 @@ const BLOOM_SLOT_SIZE = 4;
 // The solved board: two washes bloom over 1400ms, the second 200ms later and off centre, where the skin's two
 // washes stood; the dialog opens as the first settles, while the second is still spreading under the scrim
 export const INK_CELEBRATION_WASH: readonly InkBloom[] = [
-    { kind: "bloom", centre: { x: 0.5, y: 0.5 }, radius: 0.46, delayMs: 0, durationMs: 1400 },
-    { kind: "bloom", centre: { x: 0.7, y: 0.62 }, radius: 0.34, delayMs: 200, durationMs: 1400 },
+    { kind: "bloom", centre: { x: 0.5, y: 0.5 }, radius: 0.46, ink: 1, delayMs: 0, durationMs: 1400 },
+    // it lands on the first one's wash, so it carries more ink to keep the overlap deep
+    { kind: "bloom", centre: { x: 0.7, y: 0.62 }, radius: 0.34, ink: 1.32, delayMs: 200, durationMs: 1400 },
 ];
+
+/** The slow drift that carries the washes eases to a stop this long after the first effect is scheduled. */
+export const INK_DRIFT_SETTLE_MS = 1700;
 
 /** How far a bloom has run at `nowMs`: 0 before it starts, 1 once it has, evenly between. */
 export const bloomProgress = (bloom: InkBloom, scheduledAtMs: number, nowMs: number): number => {
@@ -42,7 +48,9 @@ export const bloomProgress = (bloom: InkBloom, scheduledAtMs: number, nowMs: num
 /** The wet front spreads by diffusion, its radius growing with the square root of time. */
 export const frontRadius = (progress: number, radius: number): number => radius * Math.sqrt(progress);
 
-const endOf = ({ effect, scheduledAtMs }: ScheduledInkEffect): number => scheduledAtMs + effect.delayMs + effect.durationMs;
+// An effect has run once it has played and the water carrying it has settled
+const endOf = ({ effect, scheduledAtMs }: ScheduledInkEffect): number =>
+    scheduledAtMs + Math.max(effect.delayMs + effect.durationMs, INK_DRIFT_SETTLE_MS);
 
 /** Adds effects from `nowMs` to the ones scheduled, keeping no more blooms than the shader has slots for. */
 export const scheduleEffects = (
@@ -67,4 +75,26 @@ export const bloomUniforms = (scheduled: readonly ScheduledInkEffect[], nowMs: n
         uniforms.set([effect.centre.x, effect.centre.y, frontRadius(progress, effect.radius), progress], slot * BLOOM_SLOT_SIZE);
     });
     return uniforms;
+};
+
+/** What the shader draws one frame from. */
+export interface InkFrame {
+    /** Each bloom slot's centre, front radius and progress. */
+    blooms: Float32Array;
+    /** Each bloom slot's ink, 0 for an empty slot. */
+    inks: Float32Array;
+    /** Seconds since the first effect was scheduled, which times the water's drift. */
+    seconds: number;
+}
+
+/** The frame at `nowMs`: the blooms' slots, their ink, and the time the water has drifted for. */
+export const inkFrame = (scheduled: readonly ScheduledInkEffect[], nowMs: number): InkFrame => {
+    const inks = new Float32Array(MAX_BLOOMS);
+    scheduled.slice(0, MAX_BLOOMS).forEach(({ effect }, slot) => { inks[slot] = effect.ink; });
+    const firstMs = Math.min(...scheduled.map(effect => effect.scheduledAtMs));
+    return {
+        blooms: bloomUniforms(scheduled, nowMs),
+        inks,
+        seconds: scheduled.length === 0 ? 0 : Math.max(nowMs - firstMs, 0) / 1000,
+    };
 };
