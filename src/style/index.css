@@ -99,6 +99,12 @@
   bottom: calc(6rem + var(--safe-area-inset-bottom, env(safe-area-inset-bottom)));
 }
 
+/* A dialog's scrim runs under the system bars. It keeps its card clear of both by the larger inset on
+   each side, so a centred card stays exactly where it was and one taller than that room scrolls instead. */
+@utility py-safe-larger {
+  padding-block: max(var(--safe-area-inset-top, env(safe-area-inset-top)), var(--safe-area-inset-bottom, env(safe-area-inset-bottom)));
+}
+
 /* The boards (game, review, walkthrough) give up width on a short screen so the game's digit keys
    stay on it, and all three stay the same size. 331px is what the game screen needs besides the
    board (page padding, header, gaps, controls and two rows of 56px keys), measured at 360×640;

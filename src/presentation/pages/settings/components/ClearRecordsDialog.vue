@@ -2,7 +2,7 @@
     <Transition name="modal">
         <div
             v-if="visible"
-            class="fixed inset-0 bg-scrim/50 flex items-center justify-center z-50"
+            class="fixed inset-0 bg-scrim/50 flex items-center-safe justify-center overflow-y-auto py-safe-larger z-50"
             data-skin="dialog-scrim"
             data-testid="clear-records-dialog"
         >

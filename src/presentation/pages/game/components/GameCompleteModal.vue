@@ -2,7 +2,7 @@
     <Transition name="modal">
         <div
             v-if="visible"
-            class="fixed inset-0 bg-scrim/60 flex items-center justify-center z-50"
+            class="fixed inset-0 bg-scrim/60 flex items-center-safe justify-center overflow-y-auto py-safe-larger z-50"
             data-skin="dialog-scrim"
             data-testid="game-complete-modal"
         >
@@ -12,7 +12,7 @@
                 :still="params?.still ?? false"
             />
             <div
-                class="bg-card rounded-3xl p-8 mx-6 w-full max-w-[354px] flex flex-col items-center gap-6 shadow-modal relative z-[52]"
+                class="bg-card rounded-3xl p-8 mx-6 [@media(max-height:600px)]:my-16 w-full max-w-[354px] flex flex-col items-center gap-6 shadow-modal relative z-[52]"
                 :data-still="params?.still ? '' : undefined"
                 data-skin="card celebration"
                 data-testid="complete-card"
