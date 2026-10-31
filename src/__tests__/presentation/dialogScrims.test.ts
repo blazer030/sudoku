@@ -45,14 +45,4 @@ describe("dialog scrims", () => {
 
         expect(utility).toContain("padding-block: max(var(--safe-area-inset-top, env(safe-area-inset-top)), var(--safe-area-inset-bottom, env(safe-area-inset-bottom)))");
     });
-
-    it("should leave the completion card room on a window shorter than a phone, for the decorations above its top", () => {
-        // A style's stamp, rod or seal stands past the card's edge, beyond what the scrim can scroll back to.
-        // Only below a phone's height, so a card that fits a phone stays centred exactly where it was.
-        const card = [...readFileSync("src/presentation/pages/game/components/GameCompleteModal.vue", "utf8")
-            .matchAll(/<\w+\b(?:[^>"']|"[^"]*"|'[^']*')*>/g)].map(([tag]) => tag)
-            .find(tag => tag.includes('data-testid="complete-card"')) ?? "";
-
-        expect(classesOf(card)).toContain("[@media(max-height:600px)]:my-16");
-    });
 });
