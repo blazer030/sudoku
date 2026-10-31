@@ -110,9 +110,13 @@ describe("aurora's glass", () => {
             expect(AURORA_DENSITIES.dark.tintSame).toBe(0.22);
         });
 
-        it("should lay 晨光's dialogs fully opaque, so no digit shows through, and leave 夜空's at 97%", () => {
+        // At 97% 夜空's keypad and digits still ghosted through the hint menu, and the dialogs, the toast and the
+        // completion card lay the same glass over the same board
+        it("should lay the dialogs, the hint menu, the toast and the completion card fully opaque in both modes, so no key or digit shows through", () => {
             expect(percentOf(auroraProperty(AURORA_LIGHT, "--aurora-glass-dialog"))).toBe(1);
-            expect(percentOf(auroraProperty(AURORA_DARK, "--aurora-glass-dialog"))).toBe(0.97);
+            expect(percentOf(auroraProperty(AURORA_DARK, "--aurora-glass-dialog"))).toBe(1);
+            expect(AURORA_DENSITIES.light.dialog).toBe(1);
+            expect(AURORA_DENSITIES.dark.dialog).toBe(1);
         });
 
         it("should veil the screen behind a dialog and the loader in the page colour, the same in both modes", () => {
@@ -663,6 +667,17 @@ describe("aurora's glass", () => {
             const declarations = declarationsOf(AURORA_CSS, `${BOARD} [data-box-corner="${corner}"]`);
 
             expect([...declarations]).toEqual([[property, "14px"]]);
+        });
+
+        // A box's corner cell kept its one 14px corner under an outline, which then read as a tab; an outlined cell is
+        // one clean pane, rounded 5px all round, wherever it lies in its box
+        it("should round every outlined cell 5px all round, a box's corner cell too", () => {
+            const outlinedCells = [cell("selected"), cell("answer"), cell("wrong"), `${cell("error")}[data-selected]`];
+
+            for (const outlined of outlinedCells) expect(declarationsOf(AURORA_CSS, outlined).get("border-radius"), outlined).toBe("5px");
+            for (const corner of ["top-left", "top-right", "bottom-left", "bottom-right"]) {
+                expect(ruleOrder(outlinedCells.join(", "))).toBeGreaterThan(ruleOrder(`${BOARD} [data-box-corner="${corner}"]`));
+            }
         });
 
         it("should lay plain cells and clues on the cell's glass, and peers and a step's scope on the peer's", () => {

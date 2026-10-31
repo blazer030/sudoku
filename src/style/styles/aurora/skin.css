@@ -7,8 +7,8 @@
    which the contrast model reads: each light's opacity and the ribbon's (a theme may set its own, below); how much
    of the glass colour a card and a dialog lay and how much of the sheen a cell and a peer lay, the rest left clear
    so the lights show through; the primary's soft tint and the same digit's tint, laid straight on the lights; the
-   error wash and stripes. Dialogs, the toast and the completion card stay all but opaque, as the board would ghost
-   through them. The glass reads as glass by its cues, painted without a filter: the edge, rim and inner are the
+   error wash and stripes. Dialogs, the hint menu, the toast and the completion card are opaque in both modes, as the
+   board and the keypad would ghost through them. The glass reads as glass by its cues, painted without a filter: the edge, rim and inner are the
    sheen's share in its faint 1px edge all round, the brighter 1px rim along its top and left and the soft highlight just
    inside its edge; the pane sheen the sheen's share at the top left of the sheen laid over each pane (which the
    contrast model composites into the words on it); the gloss the chosen segment's; the shadow the share of the
@@ -38,7 +38,7 @@
     --aurora-glass-card: 55%;
     --aurora-glass-cell: 7%;
     --aurora-glass-peer: 15%;
-    --aurora-glass-dialog: 97%;
+    --aurora-glass-dialog: 100%;
     --aurora-edge: 10%;
     --aurora-rim: 32%;
     --aurora-inner: 8%;
@@ -784,6 +784,16 @@
 
 [data-style="aurora"] [data-skin~="board"] [data-box-corner="bottom-right"] {
     border-bottom-right-radius: 14px;
+}
+
+/* A cell outlined on its own (the selected cell, a step's answer and wrong cells, a selected error) is one clean pane,
+   rounded 5px all round wherever it lies in its box: a box's corner cell would keep its one 14px corner under the
+   outline and read as a tab. Laid after the corners, which weigh as much. */
+[data-style="aurora"] [data-skin~="board"] [data-variant="selected"],
+[data-style="aurora"] [data-skin~="board"] [data-variant="answer"],
+[data-style="aurora"] [data-skin~="board"] [data-variant="wrong"],
+[data-style="aurora"] [data-skin~="board"] [data-variant="error"][data-selected] {
+    border-radius: 5px;
 }
 
 /* Digits and notes lie above every glow: the selected and answer cells (1) and the pulse and group glows (0), so a

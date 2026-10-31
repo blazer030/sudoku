@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { flushPromises, mount } from "@vue/test-utils";
 import { createPinia, setActivePinia, type Pinia } from "pinia";
 import { useSettingsStore } from "@/stores/settingsStore";
@@ -135,6 +135,69 @@ describe("GameCompleteModal", () => {
 
         expect(card(true).attributes("data-still")).toBe("");
         expect(card(false).attributes("data-still")).toBeUndefined();
+    });
+
+    describe("room for decorations past the card's edge", () => {
+        // The card as it stands on a phone: 565px tall, 32px of its own padding above and below
+        const CARD_HEIGHT = 565;
+        const CARD_PADDING = "32px";
+        let scrimHeight = 640;
+
+        beforeEach(() => {
+            // The scrim's room for the card is the window, as the scrim fills it
+            vi.spyOn(HTMLElement.prototype, "offsetHeight", "get").mockImplementation(function (this: HTMLElement) {
+                return this.dataset.testid === "complete-card" ? CARD_HEIGHT : 0;
+            });
+            vi.spyOn(HTMLElement.prototype, "clientHeight", "get").mockImplementation(function (this: HTMLElement) {
+                return this.dataset.testid === "game-complete-modal" ? scrimHeight : 0;
+            });
+        });
+
+        afterEach(() => {
+            vi.restoreAllMocks();
+            document.body.innerHTML = "";
+        });
+
+        const mountAt = async (height: number) => {
+            scrimHeight = height;
+            const wrapper = mountModal();
+            // In the document, so the card's padding is part of its computed style
+            document.body.appendChild(wrapper.element);
+            const card = wrapper.get<HTMLElement>("[data-testid='complete-card']").element;
+            card.style.paddingTop = CARD_PADDING;
+            card.style.paddingBottom = CARD_PADDING;
+            window.dispatchEvent(new Event("resize"));
+            await nextTick();
+            return wrapper;
+        };
+
+        const resizeTo = async (height: number) => {
+            scrimHeight = height;
+            window.dispatchEvent(new Event("resize"));
+            await nextTick();
+        };
+
+        const cardClasses = (wrapper: Awaited<ReturnType<typeof mountAt>>) => wrapper.get("[data-testid='complete-card']").classes();
+
+        // 360×568 is a 640dp Android phone with three-button navigation, 375×553 an iPhone SE in Safari:
+        // the card's content fits both, as it did before, so it stays where it was
+        it.each([844, 640, 568, 553])("should leave a card whose content fits a %ipx window as it is on a phone", async (height) => {
+            expect(cardClasses(await mountAt(height))).not.toContain("my-16");
+        });
+
+        it("should give a card whose content is taller than the window room above and below, so a style's stamp or seal scrolls into view", async () => {
+            expect(cardClasses(await mountAt(496))).toContain("my-16");
+        });
+
+        it("should follow the window as it shrinks under the card and grows back", async () => {
+            const wrapper = await mountAt(640);
+
+            await resizeTo(480);
+            expect(cardClasses(wrapper)).toContain("my-16");
+
+            await resizeTo(640);
+            expect(cardClasses(wrapper)).not.toContain("my-16");
+        });
     });
 
     it("should not show the record badge otherwise", () => {

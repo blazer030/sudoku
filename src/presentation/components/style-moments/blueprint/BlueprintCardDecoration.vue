@@ -1,10 +1,11 @@
 <template>
     <!-- Drawn on the completion card, so it stands on the card's top edge however tall the screen is: the amber
-         核可 approval stamp is pressed on just above the card's right end, its foot a few px clear of the card
-         through its tilt, in a double line of the primary on a ground of the paper, with the drawing's revision
-         below. skin.css presses it; on a still card it is simply there. -->
+         核可 approval stamp is pressed on just above the card's left end, clear of the board frame's verdict tag
+         above its right end, in a double line of the primary on a ground of the paper, with the drawing's revision
+         below. It turns and is pressed about its foot, the bottom left corner, so that corner stays 4px above the
+         edge whatever the stamp's width. skin.css presses it; on a still card it is simply there. -->
     <span
-        class="blueprint-stamp pointer-events-none absolute right-4 bottom-full mb-5 flex flex-col items-center border-3 border-double border-primary px-3 py-1.5 text-primary"
+        class="blueprint-stamp pointer-events-none absolute left-4 bottom-full mb-1 origin-bottom-left flex flex-col items-center border-3 border-double border-primary px-3 py-1.5 text-primary"
         aria-hidden="true"
     >
         <!-- Spaced out inline, as Chinese drops the tracking classes: two characters wide apart, a word a little -->

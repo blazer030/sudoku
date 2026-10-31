@@ -30,6 +30,17 @@ describe("BlueprintCardDecoration", () => {
         expect(stamp.find(".blueprint-stamp-revision").exists()).toBe(true);
     });
 
+    // The board frame's verdict tag peeks out above the card's right end, so the stamp stands at its left end; it turns
+    // and is pressed about its foot, the bottom left corner, so that corner stays 4px above the edge whatever its width
+    it("should stand the stamp on its foot at the card's left end, 4px above the edge, clear of the verdict tag", () => {
+        const stamp = mountDecoration().get(".blueprint-stamp");
+
+        expect(stamp.classes()).toContain("left-4");
+        expect(stamp.classes().some(name => name.startsWith("right-"))).toBe(false);
+        expect(stamp.classes()).toContain("origin-bottom-left");
+        expect(stamp.classes()).toContain("mb-1");
+    });
+
     it("should write the stamp's word and revision line in the current language", async () => {
         const wrapper = mountDecoration();
         const word = wrapper.get(".blueprint-stamp-word");
