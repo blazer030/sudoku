@@ -1,5 +1,7 @@
+import { readdirSync } from "fs";
 import {
     ALL_LAUNCHER_ALIASES,
+    isPwaIconFile,
     LAUNCHER_ICONS,
     LEGACY_LAUNCHER_ALIASES,
     launcherIconKey,
@@ -124,5 +126,16 @@ describe("launcher icons", () => {
         expect(launcherResourceName("green")).toBe("ic_launcher_green");
         expect(launcherResourceName("paperBlueInk")).toBe("ic_launcher_paper_blue_ink");
         expect(launcherResourceName("tactileRustDark")).toBe("ic_launcher_tactile_rust_dark");
+    });
+
+    // The Android build leaves these out of the app; everything else in public ships in both builds
+    it("should tell the web-only PWA icons in public from the files both builds ship", () => {
+        const publicFiles = readdirSync("public");
+
+        expect(publicFiles.filter(isPwaIconFile).sort()).toEqual(publicFiles.filter(file => /^(pwa-\d+x\d+|apple-touch-icon)-\w+\.png$/.test(file)).sort());
+        expect(publicFiles.filter(isPwaIconFile)).toHaveLength(LAUNCHER_ICONS.filter(icon => icon.key === pwaIconKey(icon.style, icon.themeId)).length * 3);
+        expect(isPwaIconFile("sudoku-green.svg")).toBe(false);
+        expect(isPwaIconFile("manifest-green.webmanifest")).toBe(false);
+        expect(isPwaIconFile("theme-classic.png")).toBe(false);
     });
 });

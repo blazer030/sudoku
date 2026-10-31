@@ -1,11 +1,29 @@
-import { readFileSync } from "fs";
-import { loadEnv } from "vite";
+import { readdirSync, readFileSync, rmSync } from "fs";
+import { loadEnv, type Plugin } from "vite";
 import vue from "@vitejs/plugin-vue";
 import { VitePWA } from "vite-plugin-pwa";
 import path from "path";
 import { defineConfig } from "vitest/config";
+import { isPwaIconFile } from "./src/theme/launcherIcon";
 
 const { version } = JSON.parse(readFileSync("./package.json", "utf-8")) as { version: string };
+
+// The Android app has its own launcher icons, so the PWA icons copied from public stay out of it
+const dropPwaIcons = (): Plugin => {
+    let outDir = "";
+    return {
+        name: "drop-pwa-icons",
+        apply: "build",
+        configResolved: (config) => {
+            outDir = path.resolve(config.root, config.build.outDir);
+        },
+        closeBundle: () => {
+            for (const file of readdirSync(outDir).filter(isPwaIconFile)) {
+                rmSync(path.join(outDir, file));
+            }
+        },
+    };
+};
 
 // https://vitejs.dev/config/
 export default ({ mode }: { mode: string }) => {
@@ -23,7 +41,7 @@ export default ({ mode }: { mode: string }) => {
         },
         plugins: [
             vue(),
-            ...(isCapacitorBuild ? [] : [
+            ...(isCapacitorBuild ? [dropPwaIcons()] : [
                 VitePWA({
                     registerType: "autoUpdate",
                     workbox: {
