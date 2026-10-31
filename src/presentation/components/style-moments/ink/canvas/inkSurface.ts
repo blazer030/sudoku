@@ -10,8 +10,14 @@ export const MAX_CANVAS_PIXELS = 1024;
 const PIXEL_RATIO_SCALE = 0.75;
 
 
-export const canvasPixelSize = (cssPixels: number, devicePixelRatio: number): number =>
-    Math.min(Math.max(Math.round(cssPixels * devicePixelRatio * PIXEL_RATIO_SCALE), 1), MAX_CANVAS_PIXELS);
+/** The drawing buffer's size for a canvas of `cssWidth` × `cssHeight`, its longer side within the budget. */
+export const canvasPixelSize = (cssWidth: number, cssHeight: number, devicePixelRatio: number): { width: number; height: number } => {
+    const scale = Math.min(devicePixelRatio * PIXEL_RATIO_SCALE, MAX_CANVAS_PIXELS / Math.max(cssWidth, cssHeight, 1));
+    return {
+        width: Math.max(Math.round(cssWidth * scale), 1),
+        height: Math.max(Math.round(cssHeight * scale), 1),
+    };
+};
 
 type InkColour = readonly [number, number, number];
 

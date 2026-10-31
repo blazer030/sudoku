@@ -11,14 +11,17 @@ describe("inkSurface", () => {
     describe("canvasPixelSize", () => {
         // Ink is soft: three quarters of the screen's pixels are plenty, and cheaper to shade
         it("should render at three quarters of the device's pixel ratio", () => {
-            expect(canvasPixelSize(360, 2)).toBe(540);
-            expect(canvasPixelSize(360, 3)).toBe(810);
-            expect(canvasPixelSize(400, 1)).toBe(300);
+            expect(canvasPixelSize(360, 352, 2)).toEqual({ width: 540, height: 528 });
+            expect(canvasPixelSize(360, 360, 3)).toEqual({ width: 810, height: 810 });
+            expect(canvasPixelSize(400, 400, 1)).toEqual({ width: 300, height: 300 });
         });
 
-        it("should keep a tablet's board within the pixel budget, and never vanish", () => {
-            expect(canvasPixelSize(900, 3)).toBe(MAX_CANVAS_PIXELS);
-            expect(canvasPixelSize(0, 2)).toBe(1);
+        it("should keep a tablet's board within the pixel budget, in its own proportions", () => {
+            expect(canvasPixelSize(900, 450, 3)).toEqual({ width: MAX_CANVAS_PIXELS, height: MAX_CANVAS_PIXELS / 2 });
+        });
+
+        it("should never size the canvas to nothing", () => {
+            expect(canvasPixelSize(0, 0, 2)).toEqual({ width: 1, height: 1 });
         });
     });
 
