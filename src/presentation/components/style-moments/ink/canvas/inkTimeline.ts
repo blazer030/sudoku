@@ -81,6 +81,17 @@ export const INK_CELEBRATION_WASH: readonly InkBloom[] = [
 /** The slow drift that carries the washes eases to a stop this long after the first effect is scheduled. */
 export const INK_DRIFT_SETTLE_MS = 1700;
 
+// A seed from 0 to 7 by the golden ratio, so neighbouring numbers give far-apart seeds
+const seedOf = (number: number): number => ((number * 0.6180339) % 1) * 7;
+
+/** The drop under a digit entered in `cell` at `nowMs`, shaped by its cell and its moment. */
+export const inkFillAt = (cell: { row: number; column: number }, nowMs: number): InkFill =>
+    ({ kind: "fill", cell, seed: seedOf(cell.row * BOARD_CELLS + cell.column + nowMs) });
+
+/** The marks of completed groups, each shaped by its kind and index. */
+export const inkGroupMarks = (groups: readonly CompletedGroup[]): InkGroupMark[] =>
+    groups.map(group => ({ kind: "group", group, seed: seedOf(group.index * 3 + GROUP_KIND_CODES[group.kind]) }));
+
 /** How far a bloom has run at `nowMs`: 0 before it starts, 1 once it has, evenly between. */
 export const bloomProgress = (bloom: InkBloom, scheduledAtMs: number, nowMs: number): number => {
     const elapsedMs = nowMs - scheduledAtMs - bloom.delayMs;

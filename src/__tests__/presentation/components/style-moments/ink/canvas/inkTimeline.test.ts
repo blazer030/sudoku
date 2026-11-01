@@ -12,6 +12,8 @@ import {
     fillUniforms,
     frontRadius,
     groupUniforms,
+    inkFillAt,
+    inkGroupMarks,
     inkFrame,
     isRunning,
     scheduleEffects,
@@ -218,6 +220,29 @@ describe("inkTimeline", () => {
             expect(scheduled.filter(({ effect }) => effect.kind === "group")).toHaveLength(MAX_GROUPS);
             expect(groupUniforms(scheduled, 0)[1]).toBe(1);
             expect(scheduled.filter(({ effect }) => effect.kind === "fill")).toHaveLength(1);
+        });
+    });
+
+    describe("making effects", () => {
+        it("should drop a fill in the entered cell, each drop shaped by its own seed", () => {
+            const first = inkFillAt({ row: 4, column: 2 }, 1000);
+            const later = inkFillAt({ row: 4, column: 2 }, 1350);
+
+            expect(first).toMatchObject({ kind: "fill", cell: { row: 4, column: 2 } });
+            expect(first.seed).not.toBe(later.seed);
+            for (const seed of [first.seed, later.seed]) {
+                expect(seed).toBeGreaterThanOrEqual(0);
+                expect(seed).toBeLessThan(7);
+            }
+        });
+
+        // A row, a column and a box of the same index are brushed differently
+        it("should mark each completed group, each with its own seed", () => {
+            const marks = inkGroupMarks([{ kind: "row", index: 3 }, { kind: "column", index: 3 }, { kind: "box", index: 3 }]);
+
+            expect(marks.map(mark => mark.group.kind)).toEqual(["row", "column", "box"]);
+            expect(new Set(marks.map(mark => mark.seed)).size).toBe(3);
+            expect(marks.every(mark => mark.kind === "group" && mark.seed >= 0 && mark.seed < 7)).toBe(true);
         });
     });
 
