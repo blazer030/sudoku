@@ -14,7 +14,7 @@ import { onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from "vue";
 import type { CelebrationPhase, GroupEffect } from "@/presentation/components/style-moments/styleMoments";
 import { useMotionAllowed } from "@/presentation/composables/useMotionAllowed";
 import { browserFrameClock, createInkPlayer, type InkPlayer } from "@/presentation/components/style-moments/ink/canvas/inkPlayer";
-import { INK_CELEBRATION_WASH, inkGroupMarks, type InkEffect } from "@/presentation/components/style-moments/ink/canvas/inkTimeline";
+import { INK_CELEBRATION_WASH, inkFillAt, inkGroupMarks, type InkEffect } from "@/presentation/components/style-moments/ink/canvas/inkTimeline";
 import { DEFAULT_SEAL_COLOUR, canvasPixelSize, gridPlacement, inkCanvasForcedOff, parseInkColour } from "@/presentation/components/style-moments/ink/canvas/inkSurface";
 import type { InkRenderer } from "@/presentation/components/style-moments/ink/canvas/inkRenderer";
 
@@ -34,6 +34,7 @@ const unavailable = ref(!motionAllowed() || inkCanvasForcedOff(window.location.s
 
 let renderer: InkRenderer | null = null;
 let player: InkPlayer | null = null;
+let arrivals: MutationObserver | null = null;
 let unmounted = false;
 
 // The digits' drops and the groups' marks are the canvas's while it can draw; the celebration only once it has
@@ -49,6 +50,8 @@ watch([drawing, celebrating], () => {
 });
 
 const release = () => {
+    arrivals?.disconnect();
+    arrivals = null;
     player?.stop();
     renderer?.dispose();
     player = null;
@@ -77,6 +80,7 @@ onMounted(async () => {
         return;
     }
     player = createInkPlayer(renderer, browserFrameClock);
+    if (canvas.parentElement !== null) watchArrivals(canvas.parentElement);
     drawing.value = true;
 });
 
@@ -99,6 +103,24 @@ const play = (effects: readonly InkEffect[]): boolean => {
     fit(canvas, renderer);
     player.play(effects);
     return true;
+};
+
+// A digit arriving in a cell (its data-arriving set, by BoardCell) drops ink under it; the digit's own bleed
+// still settles the arrival
+const dropUnderArrivingDigits = (records: MutationRecord[]) => {
+    const effects = records
+        .filter(record => record.oldValue === null && record.target instanceof HTMLElement && record.target.hasAttribute("data-arriving"))
+        .map((record) => {
+            const cell = (record.target as HTMLElement).style;
+            const place = { row: Number(cell.getPropertyValue("--cell-row")), column: Number(cell.getPropertyValue("--cell-column")) };
+            return inkFillAt(place, performance.now());
+        });
+    if (effects.length > 0) play(effects);
+};
+
+const watchArrivals = (board: HTMLElement) => {
+    arrivals = new MutationObserver(dropUnderArrivingDigits);
+    arrivals.observe(board, { subtree: true, attributeFilter: ["data-arriving"], attributeOldValue: true });
 };
 
 // Each new group effect brushes its groups; one ending starts nothing, as the marks fade on their own clock

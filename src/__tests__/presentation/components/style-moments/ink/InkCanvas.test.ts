@@ -63,6 +63,47 @@ describe("InkCanvas", () => {
         expect(window.requestAnimationFrame).not.toHaveBeenCalled();
     });
 
+    // A cell beside the canvas on the board, as BoardCell places it
+    const addCell = (wrapper: Awaited<ReturnType<typeof mountCanvas>>, row: number, column: number): HTMLElement => {
+        const cell = document.createElement("div");
+        cell.setAttribute("data-variant", "default");
+        cell.style.setProperty("--cell-row", String(row));
+        cell.style.setProperty("--cell-column", String(column));
+        wrapper.find("[data-testid='ink-canvas']").element.parentElement?.append(cell);
+        return cell;
+    };
+
+    it("should drop ink under a digit as it arrives in its cell", async () => {
+        const wrapper = await mountCanvas();
+        const cell = addCell(wrapper, 4, 2);
+
+        cell.setAttribute("data-arriving", "");
+        await flushPromises();
+        const frame = runFrames(renderer);
+
+        expect(frame?.fills[0]).toBeCloseTo(2.5 / 9);
+        expect(frame?.fills[1]).toBeCloseTo(4.5 / 9);
+        expect(frame?.fills[2]).toBeGreaterThanOrEqual(0);
+        wrapper.unmount();
+    });
+
+    it("should drop nothing as a digit settles or a cell changes otherwise", async () => {
+        const wrapper = await mountCanvas();
+        const cell = addCell(wrapper, 4, 2);
+        cell.setAttribute("data-arriving", "");
+        await flushPromises();
+
+        cell.removeAttribute("data-arriving");
+        cell.setAttribute("data-variant", "selected");
+        await flushPromises();
+        const frame = runFrames(renderer);
+
+        // The one drop that arrived, and no other
+        expect(frame?.fills[2]).toBeGreaterThanOrEqual(0);
+        expect(frame?.fills[6]).toBeLessThan(0);
+        wrapper.unmount();
+    });
+
     it("should brush each group a new group effect completes, placed by the grid's cells", async () => {
         const wrapper = await mountCanvas();
 
