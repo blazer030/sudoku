@@ -3,22 +3,27 @@ import {
     INK_CELEBRATION_WASH,
     INK_DRIFT_SETTLE_MS,
     INK_FILL_MS,
+    INK_GROUP_MS,
     MAX_BLOOMS,
     MAX_FILLS,
+    MAX_GROUPS,
     bloomProgress,
     bloomUniforms,
     fillUniforms,
     frontRadius,
+    groupUniforms,
     inkFrame,
     isRunning,
     scheduleEffects,
     type InkBloom,
     type InkFill,
+    type InkGroupMark,
 } from "@/presentation/components/style-moments/ink/canvas/inkTimeline";
 import { STYLE_MOMENTS } from "@/presentation/components/style-moments/styleMoments";
 
 const BLOOM: InkBloom = { kind: "bloom", centre: { x: 0.5, y: 0.5 }, radius: 0.4, ink: 1, delayMs: 200, durationMs: 1000 };
 const FILL: InkFill = { kind: "fill", cell: { row: 4, column: 2 }, seed: 3.5 };
+const BOX: InkGroupMark = { kind: "group", group: { kind: "box", index: 4 }, seed: 1.25 };
 
 describe("inkTimeline", () => {
     describe("bloomProgress", () => {
@@ -177,6 +182,42 @@ describe("inkTimeline", () => {
             expect(scheduled.filter(({ effect }) => effect.kind === "fill")).toHaveLength(MAX_FILLS);
             expect(scheduled.filter(({ effect }) => effect.kind === "bloom")).toHaveLength(1);
             expect(fillUniforms(scheduled, 200)[3]).toBe(2);
+        });
+    });
+
+    describe("groups", () => {
+        // A line's stroke is drawn on, held and faded by 1080ms; a box's 圓相 starts later and ends by 1220ms
+        it("should run a line's stroke and a box's 圓相 each for as long as it shows", () => {
+            const row = scheduleEffects([], [{ ...BOX, group: { kind: "row", index: 2 } }], 0);
+            const box = scheduleEffects([], [BOX], 0);
+
+            expect(INK_GROUP_MS.row).toBe(1080);
+            expect(INK_GROUP_MS.column).toBe(1080);
+            expect(INK_GROUP_MS.box).toBe(1220);
+            expect(isRunning(row, 1079)).toBe(true);
+            expect(isRunning(row, 1080)).toBe(false);
+            expect(isRunning(box, 1219)).toBe(true);
+            expect(isRunning(box, 1220)).toBe(false);
+        });
+
+        it("should give each slot its group's kind (0 row, 1 column, 2 box), index, age in seconds and seed, and mark the rest empty", () => {
+            const uniforms = groupUniforms(scheduleEffects([], [{ ...BOX, group: { kind: "column", index: 7 } }, BOX], 1000), 1550);
+
+            expect(uniforms).toHaveLength(MAX_GROUPS * 4);
+            expect([...uniforms.slice(0, 2)]).toEqual([1, 7]);
+            expect(uniforms[2]).toBeCloseTo(0.55);
+            expect(uniforms[3]).toBeCloseTo(1.25);
+            expect([...uniforms.slice(4, 6)]).toEqual([2, 4]);
+            for (let slot = 2; slot < MAX_GROUPS; slot++) expect(uniforms[slot * 4]).toBeLessThan(0);
+        });
+
+        it("should keep no more groups than the shader's slots, dropping the oldest", () => {
+            const groups = Array.from({ length: MAX_GROUPS + 1 }, (_, index): InkGroupMark => ({ ...BOX, group: { kind: "row", index } }));
+            const scheduled = scheduleEffects(scheduleEffects([], [FILL], 0), groups, 0);
+
+            expect(scheduled.filter(({ effect }) => effect.kind === "group")).toHaveLength(MAX_GROUPS);
+            expect(groupUniforms(scheduled, 0)[1]).toBe(1);
+            expect(scheduled.filter(({ effect }) => effect.kind === "fill")).toHaveLength(1);
         });
     });
 

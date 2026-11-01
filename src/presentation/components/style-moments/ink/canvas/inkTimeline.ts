@@ -1,6 +1,7 @@
 // What the ink canvas draws and when, free of WebGL so it can be tested: each effect is placed on the board in
-// board fractions (0–1 from the top left) and timed from the moment it is scheduled. The renderer only turns a
-// frame's uniforms into pixels.
+// board fractions (0–1 from the top left; a fill or a group mark by its cells) and timed from the moment it is
+// scheduled. The renderer only turns a frame's uniforms into pixels.
+import type { CompletedGroup, GroupKind } from "@/domain/game/Sudoku";
 
 /** A wash of ink dropped on wet paper: its front runs out from the centre, fast and then slow, and dries. */
 export interface InkBloom {
@@ -23,8 +24,16 @@ export interface InkFill {
     seed: number;
 }
 
+/** A completed group's mark: a wet brush stroke along a row or a column, or a vermilion 圓相 round a box. */
+export interface InkGroupMark {
+    kind: "group";
+    group: CompletedGroup;
+    /** Shapes the stroke's wobble and edge. */
+    seed: number;
+}
+
 /** Every effect the ink canvas can play. */
-export type InkEffect = InkBloom | InkFill;
+export type InkEffect = InkBloom | InkFill | InkGroupMark;
 
 export interface ScheduledInkEffect {
     effect: InkEffect;
@@ -45,6 +54,18 @@ const FILL_SLOT_SIZE = 4;
 
 /** How long a fill's drop shows: it lands, soaks out and has faded as the digit settles. */
 export const INK_FILL_MS = 1000;
+
+/** How many group marks the shader draws at once; each takes one vec4 slot. */
+export const MAX_GROUPS = 4;
+
+/** The values one group slot carries: its kind's code (negative for none), its index, its age in seconds and its seed. */
+const GROUP_SLOT_SIZE = 4;
+
+/** How long each kind's mark shows: a line's stroke from 80ms, a box's 圓相 from 160ms, each drawn on, held and faded. */
+export const INK_GROUP_MS: Readonly<Record<GroupKind, number>> = { row: 1080, column: 1080, box: 1220 };
+
+/** The shader's code for each kind of group. */
+const GROUP_KIND_CODES: Readonly<Record<GroupKind, number>> = { row: 0, column: 1, box: 2 };
 
 /** The cells a row, column or box spans. */
 const BOARD_CELLS = 9;
@@ -69,13 +90,16 @@ export const bloomProgress = (bloom: InkBloom, scheduledAtMs: number, nowMs: num
 /** The wet front spreads by diffusion, its radius growing with the square root of time. */
 export const frontRadius = (progress: number, radius: number): number => radius * Math.sqrt(progress);
 
-// A bloom has run once it has played and the water carrying it has settled; a fill once its drop has faded
-const runMsOf = (effect: InkEffect): number =>
-    effect.kind === "bloom" ? Math.max(effect.delayMs + effect.durationMs, INK_DRIFT_SETTLE_MS) : INK_FILL_MS;
+// A bloom has run once it has played and the water carrying it has settled; a fill or a mark once it has faded
+const runMsOf = (effect: InkEffect): number => {
+    if (effect.kind === "bloom") return Math.max(effect.delayMs + effect.durationMs, INK_DRIFT_SETTLE_MS);
+    if (effect.kind === "fill") return INK_FILL_MS;
+    return INK_GROUP_MS[effect.group.kind];
+};
 
 const endOf = ({ effect, scheduledAtMs }: ScheduledInkEffect): number => scheduledAtMs + runMsOf(effect);
 
-const SLOTS: Record<InkEffect["kind"], number> = { bloom: MAX_BLOOMS, fill: MAX_FILLS };
+const SLOTS: Record<InkEffect["kind"], number> = { bloom: MAX_BLOOMS, fill: MAX_FILLS, group: MAX_GROUPS };
 
 interface Scheduled<Kind extends InkEffect["kind"]> {
     effect: Extract<InkEffect, { kind: Kind }>;
@@ -131,6 +155,23 @@ export const fillUniforms = (scheduled: readonly ScheduledInkEffect[], nowMs: nu
             (nowMs - scheduledAtMs) / 1000,
             effect.seed,
         ], slot * FILL_SLOT_SIZE);
+    });
+    return uniforms;
+};
+
+/**
+ * The group marks' slots for the shader at `nowMs`: their kind's code (0 row, 1 column, 2 box), their index,
+ * their age in seconds and their seed; an empty slot is all -1.
+ */
+export const groupUniforms = (scheduled: readonly ScheduledInkEffect[], nowMs: number): Float32Array => {
+    const uniforms = new Float32Array(MAX_GROUPS * GROUP_SLOT_SIZE).fill(-1);
+    scheduledOf(scheduled, "group").forEach(({ effect, scheduledAtMs }, slot) => {
+        uniforms.set([
+            GROUP_KIND_CODES[effect.group.kind],
+            effect.group.index,
+            (nowMs - scheduledAtMs) / 1000,
+            effect.seed,
+        ], slot * GROUP_SLOT_SIZE);
     });
     return uniforms;
 };
