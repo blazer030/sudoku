@@ -213,6 +213,13 @@
     animation: ink-halo 900ms ease-out forwards;
 }
 
+/* Where WebGL runs, the board's ink canvas (InkCanvas) drops the ink under an arriving digit, soaking a little
+   into its neighbours, and the board carries data-board-canvas~="digit": the halo stands down, while the digit
+   still bleeds in and settles its arrival */
+[data-style="ink"] [data-skin~="board"][data-board-canvas~="digit"] [data-variant]:has(> .value-arrive)::before {
+    content: none;
+}
+
 [data-style="ink"] [data-skin~="board"] [data-variant].value-leave::before {
     content: attr(data-leaving-value);
     position: absolute;
@@ -301,6 +308,12 @@
 
 [data-style="ink"] .ink-group-brush[data-kind="box"] .ink-group-reveal {
     animation: ink-brush-reveal 540ms cubic-bezier(0.45, 0, 0.35, 1) 160ms both;
+}
+
+/* Where WebGL runs, the board's ink canvas brushes the stroke and the 圓相 instead (data-board-canvas~="group");
+   the digits keep their halo of paper */
+[data-style="ink"] [data-skin~="board"][data-board-canvas~="group"] .ink-group-brush {
+    visibility: hidden;
 }
 
 /* The solved board (only with motion allowed): two deep ink washes bloom across it, the second a beat

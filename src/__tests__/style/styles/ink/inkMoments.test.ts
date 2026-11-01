@@ -275,6 +275,38 @@ describe("ink moments", () => {
         });
     });
 
+    // Where WebGL runs, the board's ink canvas draws a digit's drop and a group's stroke or 圓相 in the skin's place
+    describe("the ink canvas's drops and marks", () => {
+        const HALO = `${BOARD} [data-variant]:has(> .value-arrive)::before`;
+        const CANVAS_HALO = `${BOARD}[data-board-canvas~="digit"] [data-variant]:has(> .value-arrive)::before`;
+        const CANVAS_BRUSH = `${BOARD}[data-board-canvas~="group"] .ink-group-brush`;
+
+        // Every rule in the sheet that names the canvas's tokens
+        const canvasSelectors = (): string[] => {
+            const selectors: string[] = [];
+            postcss.parse(INK_CSS).walkRules((rule) => {
+                selectors.push(...rule.selectors.map(collapse).filter(selector => /data-board-canvas~="(digit|group)"/.test(selector)));
+            });
+            return selectors;
+        };
+
+        it("should leave the drop under an arriving digit to the canvas, the digit still bleeding in", () => {
+            expect(declarationsOf(INK_CSS, CANVAS_HALO).get("content")).toBe("none");
+            // The skin's own halo is untouched where there is no canvas
+            expect(declarationsOf(INK_CSS, HALO).get("content")).toBe('""');
+            expect(canvasSelectors().some(selector => selector.includes(".value-arrive") && !selector.endsWith("::before"))).toBe(false);
+        });
+
+        it("should leave a group's stroke and 圓相 to the canvas, the digits' paper halo staying", () => {
+            expect(declarationsOf(INK_CSS, CANVAS_BRUSH).get("visibility")).toBe("hidden");
+            expect(canvasSelectors().some(selector => selector.includes("[data-group]"))).toBe(false);
+        });
+
+        it("should stand nothing else down for them", () => {
+            expect(canvasSelectors().sort()).toEqual([CANVAS_BRUSH, CANVAS_HALO].sort());
+        });
+    });
+
     describe("celebration", () => {
         it("should bloom two ink washes on the board's own layers, the second a beat later, and keep them under the dialog", () => {
             const first = spanOf(FIRST_WASH, "ink-board-wash");
