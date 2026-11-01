@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
     DEFAULT_INK_COLOUR,
+    DEFAULT_SEAL_COLOUR,
     MAX_CANVAS_PIXELS,
     canvasPixelSize,
     inkCanvasForcedOff,
@@ -41,6 +42,15 @@ describe("inkSurface", () => {
         it("should fall back to the washi ink for anything else", () => {
             expect(parseInkColour("oklch(0.2 0.01 80)")).toEqual(DEFAULT_INK_COLOUR);
             expect(parseInkColour("")).toEqual(DEFAULT_INK_COLOUR);
+        });
+
+        // A box's 圓相 is in the seal's vermilion, the theme's primary
+        it("should fall back to the colour it is given, such as the washi seal", () => {
+            const [red, green, blue] = DEFAULT_SEAL_COLOUR;
+
+            expect(parseInkColour("", DEFAULT_SEAL_COLOUR)).toEqual(DEFAULT_SEAL_COLOUR);
+            expect(red).toBeGreaterThan(green + 0.3);
+            expect(red).toBeGreaterThan(blue + 0.3);
         });
     });
 

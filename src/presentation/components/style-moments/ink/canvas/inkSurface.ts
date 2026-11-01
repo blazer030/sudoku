@@ -32,8 +32,14 @@ const parseHex = (colour: string): InkColour | null => {
 /** The washi palette's ink, for a foreground the canvas cannot read. */
 export const DEFAULT_INK_COLOUR: InkColour = parseHex(getPalette("ink", "vermilion", "light").foreground) ?? [0, 0, 0];
 
-/** Reads `--color-foreground` (a hex colour, as the theme sheet writes it) into the shader's 0–1 channels. */
-export const parseInkColour = (colour: string): InkColour => parseHex(colour) ?? DEFAULT_INK_COLOUR;
+/** The washi palette's seal, the vermilion of a box's 圓相, for a primary the canvas cannot read. */
+export const DEFAULT_SEAL_COLOUR: InkColour = parseHex(getPalette("ink", "vermilion", "light").primary) ?? [0.7, 0.15, 0.12];
+
+/**
+ * Reads a theme colour such as `--color-foreground` (a hex colour, as the theme sheet writes it) into the
+ * shader's 0–1 channels, or gives `fallback` for one it cannot read.
+ */
+export const parseInkColour = (colour: string, fallback: InkColour = DEFAULT_INK_COLOUR): InkColour => parseHex(colour) ?? fallback;
 
 /** `?inkCanvas=off` leaves the skin's washes in the canvas's place, in development only. */
 export const inkCanvasForcedOff = (search: string, isDevelopment: boolean): boolean =>
