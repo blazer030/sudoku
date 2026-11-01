@@ -4,6 +4,11 @@ import type { InkFrameRenderer } from "@/presentation/components/style-moments/i
 import { INK_NOISE_SIZE, bakeInkNoise } from "@/presentation/components/style-moments/ink/canvas/inkNoise";
 import { INK_FRAGMENT_SHADER, INK_VERTEX_SHADER } from "@/presentation/components/style-moments/ink/canvas/inkShaders";
 
+/** The colours the canvas draws in, each as the shader's 0–1 channels. */
+export interface InkColours {
+    ink: readonly [number, number, number];
+}
+
 export interface InkRenderer extends InkFrameRenderer {
     /** Sets the drawing buffer's size in pixels (which wipes it) and keeps the washes round on it. */
     resize: (pixelWidth: number, pixelHeight: number) => void;
@@ -54,12 +59,12 @@ const uploadTriangle = (context: WebGLRenderingContext) => {
 };
 
 /**
- * A renderer on `canvas` drawing in `ink`, or null where WebGL is missing or its shaders fail, so the skin's
+ * A renderer on `canvas` drawing in `colours`, or null where WebGL is missing or its shaders fail, so the skin's
  * washes stay. `onLost` is told if the browser takes the context away later.
  */
 export const createInkRenderer = (
     canvas: HTMLCanvasElement,
-    ink: readonly [number, number, number],
+    colours: InkColours,
     onLost: () => void,
 ): InkRenderer | null => {
     const context = canvas.getContext("webgl", {
@@ -82,7 +87,7 @@ export const createInkRenderer = (
     uploadNoise(context);
     uploadTriangle(context);
     context.uniform1i(context.getUniformLocation(program, "u_noise"), 0);
-    context.uniform3f(context.getUniformLocation(program, "u_ink"), ...ink);
+    context.uniform3f(context.getUniformLocation(program, "u_ink"), ...colours.ink);
     const bloomsLocation = context.getUniformLocation(program, "u_blooms");
     const inksLocation = context.getUniformLocation(program, "u_inks");
     const timeLocation = context.getUniformLocation(program, "u_time");

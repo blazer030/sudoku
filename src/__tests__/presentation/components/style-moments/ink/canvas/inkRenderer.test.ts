@@ -19,6 +19,8 @@ const fakeContext = (overrides: Record<string, unknown> = {}) => {
     return { context, loseContext, calls };
 };
 
+const COLOURS = { ink: DEFAULT_INK_COLOUR };
+
 const canvasWith = (context: unknown): HTMLCanvasElement => {
     const canvas = document.createElement("canvas");
     vi.spyOn(canvas, "getContext").mockReturnValue(context as RenderingContext);
@@ -31,19 +33,19 @@ describe("createInkRenderer", () => {
     });
 
     it("should give no renderer where the browser has no WebGL", () => {
-        expect(createInkRenderer(canvasWith(null), DEFAULT_INK_COLOUR, vi.fn())).toBeNull();
+        expect(createInkRenderer(canvasWith(null), COLOURS, vi.fn())).toBeNull();
     });
 
     it("should give no renderer, and let the context go, when its shaders do not compile", () => {
         const { context, loseContext } = fakeContext({ getShaderParameter: () => false });
 
-        expect(createInkRenderer(canvasWith(context), DEFAULT_INK_COLOUR, vi.fn())).toBeNull();
+        expect(createInkRenderer(canvasWith(context), COLOURS, vi.fn())).toBeNull();
         expect(loseContext).toHaveBeenCalled();
     });
 
     it("should draw a frame by one triangle over the canvas", () => {
         const { context, calls } = fakeContext();
-        const renderer = createInkRenderer(canvasWith(context), DEFAULT_INK_COLOUR, vi.fn());
+        const renderer = createInkRenderer(canvasWith(context), COLOURS, vi.fn());
 
         renderer?.draw({
             blooms: new Float32Array(MAX_BLOOMS * 4),
@@ -63,7 +65,7 @@ describe("createInkRenderer", () => {
         const { context } = fakeContext();
         const canvas = canvasWith(context);
         const lost = vi.fn();
-        createInkRenderer(canvas, DEFAULT_INK_COLOUR, lost);
+        createInkRenderer(canvas, COLOURS, lost);
 
         canvas.dispatchEvent(new Event("webglcontextlost"));
 
@@ -75,7 +77,7 @@ describe("createInkRenderer", () => {
         const { context, loseContext } = fakeContext();
         const canvas = canvasWith(context);
         const lost = vi.fn();
-        const renderer = createInkRenderer(canvas, DEFAULT_INK_COLOUR, lost);
+        const renderer = createInkRenderer(canvas, COLOURS, lost);
 
         renderer?.dispose();
         canvas.dispatchEvent(new Event("webglcontextlost"));

@@ -54,7 +54,7 @@ onMounted(async () => {
     const canvas = canvasElement.value;
     if (unmounted || canvas === null) return;
     const ink = parseInkColour(getComputedStyle(canvas).getPropertyValue("--color-foreground"));
-    renderer = createInkRenderer(canvas, ink, standDown);
+    renderer = createInkRenderer(canvas, { ink }, standDown);
     if (renderer === null) {
         standDown();
         return;
