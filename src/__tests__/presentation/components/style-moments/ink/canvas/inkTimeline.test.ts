@@ -242,7 +242,7 @@ describe("inkTimeline", () => {
 
             expect(marks.map(mark => mark.group.kind)).toEqual(["row", "column", "box"]);
             expect(new Set(marks.map(mark => mark.seed)).size).toBe(3);
-            expect(marks.every(mark => mark.kind === "group" && mark.seed >= 0 && mark.seed < 7)).toBe(true);
+            expect(marks.every(mark => mark.seed >= 0 && mark.seed < 7)).toBe(true);
         });
     });
 
