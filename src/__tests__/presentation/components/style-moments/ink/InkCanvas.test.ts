@@ -47,12 +47,20 @@ describe("InkCanvas", () => {
         vi.mocked(prefersReducedMotion).mockReturnValue(false);
     });
 
+    // Taken from the start, so the skin never starts a drop or a stroke the canvas then draws again
+    it("should take the digits' drops and the groups' marks from the skin as soon as it can draw them", async () => {
+        const wrapper = await mountCanvas();
+
+        expect(takesOf(wrapper)).toBe("digit group");
+        expect(window.requestAnimationFrame).not.toHaveBeenCalled();
+    });
+
     it("should take the celebration's washes from the skin and play them on its canvas", async () => {
         const wrapper = await mountCanvas();
 
         await wrapper.setProps({ celebration: "playing" });
 
-        expect(takesOf(wrapper)).toBe("celebration");
+        expect(takesOf(wrapper)).toBe("digit group celebration");
         expect(renderer.resize).toHaveBeenCalled();
         expect(window.requestAnimationFrame).toHaveBeenCalled();
         expect(wrapper.find("[data-testid='ink-canvas']").attributes("aria-hidden")).toBe("true");
@@ -65,10 +73,10 @@ describe("InkCanvas", () => {
         await wrapper.setProps({ celebration: "playing" });
 
         await wrapper.setProps({ celebration: "done" });
-        expect(takesOf(wrapper)).toBe("celebration");
+        expect(takesOf(wrapper)).toBe("digit group celebration");
 
         await wrapper.setProps({ celebration: null });
-        expect(takesOf(wrapper)).toBeUndefined();
+        expect(takesOf(wrapper)).toBe("digit group");
         expect(renderer.clear).toHaveBeenCalled();
     });
 
@@ -77,7 +85,7 @@ describe("InkCanvas", () => {
 
         await wrapper.setProps({ celebration: "still" });
 
-        expect(takesOf(wrapper)).toBeUndefined();
+        expect(takesOf(wrapper)).toBe("digit group");
         expect(window.requestAnimationFrame).not.toHaveBeenCalled();
     });
 
@@ -126,10 +134,9 @@ describe("InkCanvas", () => {
 
     // A celebration started before the module has loaded stays the skin's, rather than switching halfway
     it("should leave a celebration already playing when it became ready to the skin", async () => {
-        const wrapper = mount(InkCanvas, { props: { celebration: "playing", takes: undefined } });
-        await flushPromises();
+        const wrapper = await mountCanvas("playing");
 
-        expect(wrapper.emitted("update:takes")).toBeUndefined();
+        expect(takesOf(wrapper)).toBe("digit group");
     });
 
     it("should let the context go when the board leaves", async () => {

@@ -34,6 +34,18 @@ let renderer: InkRenderer | null = null;
 let player: InkPlayer | null = null;
 let unmounted = false;
 
+// The digits' drops and the groups' marks are the canvas's while it can draw; the celebration only once it has
+// started one
+const drawing = ref(false);
+const celebrating = ref(false);
+watch([drawing, celebrating], () => {
+    if (!drawing.value) {
+        takes.value = undefined;
+        return;
+    }
+    takes.value = celebrating.value ? "digit group celebration" : "digit group";
+});
+
 const release = () => {
     player?.stop();
     renderer?.dispose();
@@ -45,7 +57,8 @@ const release = () => {
 const standDown = () => {
     release();
     unavailable.value = true;
-    takes.value = undefined;
+    drawing.value = false;
+    celebrating.value = false;
 };
 
 onMounted(async () => {
@@ -62,6 +75,7 @@ onMounted(async () => {
         return;
     }
     player = createInkPlayer(renderer, browserFrameClock);
+    drawing.value = true;
 });
 
 // Taken only as the celebration starts, so one already playing when the canvas became ready stays the skin's
@@ -71,12 +85,12 @@ watch(() => props.celebration, (phase) => {
         const { width, height } = canvasPixelSize(canvas.clientWidth, canvas.clientHeight, window.devicePixelRatio);
         renderer.resize(width, height);
         player.play(INK_CELEBRATION_WASH);
-        takes.value = "celebration";
+        celebrating.value = true;
         return;
     }
-    if (phase === null && takes.value !== undefined) {
+    if (phase === null && celebrating.value) {
         player?.clear();
-        takes.value = undefined;
+        celebrating.value = false;
     }
 });
 
