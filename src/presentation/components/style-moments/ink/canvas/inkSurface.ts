@@ -29,6 +29,25 @@ export interface GridPlacement {
     height: number;
 }
 
+/** A box on the screen, in CSS pixels. */
+export interface ScreenBox {
+    left: number;
+    top: number;
+    width: number;
+    height: number;
+}
+
+/** Where `cells` lie on `canvas`; the whole canvas while either has no size yet. */
+export const gridPlacement = (canvas: ScreenBox, cells: ScreenBox): GridPlacement => {
+    if (canvas.width <= 0 || canvas.height <= 0 || cells.width <= 0 || cells.height <= 0) return { x: 0, y: 0, width: 1, height: 1 };
+    return {
+        x: (cells.left - canvas.left) / canvas.width,
+        y: (cells.top - canvas.top) / canvas.height,
+        width: cells.width / canvas.width,
+        height: cells.height / canvas.height,
+    };
+};
+
 const parseHex = (colour: string): InkColour | null => {
     const hex = /^#([\da-f]{3}|[\da-f]{6})$/i.exec(colour.trim())?.[1];
     if (hex === undefined) return null;

@@ -4,6 +4,7 @@ import {
     DEFAULT_SEAL_COLOUR,
     MAX_CANVAS_PIXELS,
     canvasPixelSize,
+    gridPlacement,
     inkCanvasForcedOff,
     parseInkColour,
 } from "@/presentation/components/style-moments/ink/canvas/inkSurface";
@@ -51,6 +52,27 @@ describe("inkSurface", () => {
             expect(parseInkColour("", DEFAULT_SEAL_COLOUR)).toEqual(DEFAULT_SEAL_COLOUR);
             expect(red).toBeGreaterThan(green + 0.3);
             expect(red).toBeGreaterThan(blue + 0.3);
+        });
+    });
+
+    // The canvas covers the whole board; its cells lie inside the board's padding and the grid's border
+    describe("gridPlacement", () => {
+        it("should place the grid's cells on the canvas in canvas fractions", () => {
+            const canvas = { left: 100, top: 200, width: 400, height: 380 };
+            const cells = { left: 111, top: 211, width: 378, height: 358 };
+
+            const placement = gridPlacement(canvas, cells);
+
+            expect(placement.x).toBeCloseTo(11 / 400);
+            expect(placement.y).toBeCloseTo(11 / 380);
+            expect(placement.width).toBeCloseTo(378 / 400);
+            expect(placement.height).toBeCloseTo(358 / 380);
+        });
+
+        // A canvas not yet laid out places the grid over all of it, never dividing by nothing
+        it("should place the grid over the whole canvas while the canvas has no size", () => {
+            expect(gridPlacement({ left: 0, top: 0, width: 0, height: 0 }, { left: 0, top: 0, width: 0, height: 0 }))
+                .toEqual({ x: 0, y: 0, width: 1, height: 1 });
         });
     });
 
