@@ -14,8 +14,17 @@ export interface InkBloom {
     durationMs: number;
 }
 
-/** Every effect the ink canvas can play; later ones (a group's stroke, a digit's bleed) join this union. */
-export type InkEffect = InkBloom;
+/** A drop of ink landing under a digit as it is entered, soaking out and fading as the digit settles. */
+export interface InkFill {
+    kind: "fill";
+    /** The cell the digit was entered in, counted from 0. */
+    cell: { row: number; column: number };
+    /** Shapes the drop's outline, so no two drops are alike. */
+    seed: number;
+}
+
+/** Every effect the ink canvas can play. */
+export type InkEffect = InkBloom | InkFill;
 
 export interface ScheduledInkEffect {
     effect: InkEffect;
@@ -27,6 +36,18 @@ export const MAX_BLOOMS = 4;
 
 /** The values one bloom slot carries: its centre, its front's radius and its progress. */
 const BLOOM_SLOT_SIZE = 4;
+
+/** How many fills the shader draws at once; each takes one vec4 slot. */
+export const MAX_FILLS = 8;
+
+/** The values one fill slot carries: its centre, its age in seconds (negative for none) and its seed. */
+const FILL_SLOT_SIZE = 4;
+
+/** How long a fill's drop shows: it lands, soaks out and has faded as the digit settles. */
+export const INK_FILL_MS = 1000;
+
+/** The cells a row, column or box spans. */
+const BOARD_CELLS = 9;
 
 // The solved board: two washes bloom over 1400ms, the second 200ms later and off centre, where the skin's two
 // washes stood; the dialog opens as the first settles, while the second is still spreading under the scrim
@@ -48,18 +69,37 @@ export const bloomProgress = (bloom: InkBloom, scheduledAtMs: number, nowMs: num
 /** The wet front spreads by diffusion, its radius growing with the square root of time. */
 export const frontRadius = (progress: number, radius: number): number => radius * Math.sqrt(progress);
 
-// An effect has run once it has played and the water carrying it has settled
-const endOf = ({ effect, scheduledAtMs }: ScheduledInkEffect): number =>
-    scheduledAtMs + Math.max(effect.delayMs + effect.durationMs, INK_DRIFT_SETTLE_MS);
+// A bloom has run once it has played and the water carrying it has settled; a fill once its drop has faded
+const runMsOf = (effect: InkEffect): number =>
+    effect.kind === "bloom" ? Math.max(effect.delayMs + effect.durationMs, INK_DRIFT_SETTLE_MS) : INK_FILL_MS;
 
-/** Adds effects from `nowMs` to the ones scheduled, keeping no more blooms than the shader has slots for. */
+const endOf = ({ effect, scheduledAtMs }: ScheduledInkEffect): number => scheduledAtMs + runMsOf(effect);
+
+const SLOTS: Record<InkEffect["kind"], number> = { bloom: MAX_BLOOMS, fill: MAX_FILLS };
+
+interface Scheduled<Kind extends InkEffect["kind"]> {
+    effect: Extract<InkEffect, { kind: Kind }>;
+    scheduledAtMs: number;
+}
+
+const scheduledOf = <Kind extends InkEffect["kind"]>(scheduled: readonly ScheduledInkEffect[], kind: Kind): Scheduled<Kind>[] =>
+    scheduled.filter((entry): entry is Scheduled<Kind> => entry.effect.kind === kind);
+
+/**
+ * Adds effects from `nowMs` to the ones scheduled, keeping of each kind no more than the shader has slots
+ * for: the oldest of that kind make room.
+ */
 export const scheduleEffects = (
     scheduled: readonly ScheduledInkEffect[],
     effects: readonly InkEffect[],
     nowMs: number,
 ): ScheduledInkEffect[] => {
     const all = [...scheduled, ...effects.map(effect => ({ effect, scheduledAtMs: nowMs }))];
-    return all.slice(Math.max(all.length - MAX_BLOOMS, 0));
+    const kept = new Set((Object.keys(SLOTS) as InkEffect["kind"][]).flatMap((kind) => {
+        const ofKind = all.filter(entry => entry.effect.kind === kind);
+        return ofKind.slice(Math.max(ofKind.length - SLOTS[kind], 0));
+    }));
+    return all.filter(entry => kept.has(entry));
 };
 
 /** Whether any effect is still changing at `nowMs`; once none is, the last frame stands and no frame is drawn. */
@@ -69,10 +109,28 @@ export const isRunning = (scheduled: readonly ScheduledInkEffect[], nowMs: numbe
 /** The blooms' slots for the shader at `nowMs`: centre x, centre y, front radius and progress each; empty ones all 0. */
 export const bloomUniforms = (scheduled: readonly ScheduledInkEffect[], nowMs: number): Float32Array => {
     const uniforms = new Float32Array(MAX_BLOOMS * BLOOM_SLOT_SIZE);
-    scheduled.slice(0, MAX_BLOOMS).forEach(({ effect, scheduledAtMs }, slot) => {
+    scheduledOf(scheduled, "bloom").forEach(({ effect, scheduledAtMs }, slot) => {
         const progress = bloomProgress(effect, scheduledAtMs, nowMs);
         if (progress === 0) return;
         uniforms.set([effect.centre.x, effect.centre.y, frontRadius(progress, effect.radius), progress], slot * BLOOM_SLOT_SIZE);
+    });
+    return uniforms;
+};
+
+/**
+ * The fills' slots for the shader at `nowMs`: their cell's centre in grid fractions (0–1 from the top left),
+ * their age in seconds and their seed; an empty slot's age is -1.
+ */
+export const fillUniforms = (scheduled: readonly ScheduledInkEffect[], nowMs: number): Float32Array => {
+    const uniforms = new Float32Array(MAX_FILLS * FILL_SLOT_SIZE);
+    for (let slot = 0; slot < MAX_FILLS; slot++) uniforms[slot * FILL_SLOT_SIZE + 2] = -1;
+    scheduledOf(scheduled, "fill").forEach(({ effect, scheduledAtMs }, slot) => {
+        uniforms.set([
+            (effect.cell.column + 0.5) / BOARD_CELLS,
+            (effect.cell.row + 0.5) / BOARD_CELLS,
+            (nowMs - scheduledAtMs) / 1000,
+            effect.seed,
+        ], slot * FILL_SLOT_SIZE);
     });
     return uniforms;
 };
@@ -90,7 +148,7 @@ export interface InkFrame {
 /** The frame at `nowMs`: the blooms' slots, their ink, and the time the water has drifted for. */
 export const inkFrame = (scheduled: readonly ScheduledInkEffect[], nowMs: number): InkFrame => {
     const inks = new Float32Array(MAX_BLOOMS);
-    scheduled.slice(0, MAX_BLOOMS).forEach(({ effect }, slot) => { inks[slot] = effect.ink; });
+    scheduledOf(scheduled, "bloom").forEach(({ effect }, slot) => { inks[slot] = effect.ink; });
     const firstMs = Math.min(...scheduled.map(effect => effect.scheduledAtMs));
     return {
         blooms: bloomUniforms(scheduled, nowMs),

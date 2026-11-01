@@ -2,18 +2,23 @@ import { describe, expect, it } from "vitest";
 import {
     INK_CELEBRATION_WASH,
     INK_DRIFT_SETTLE_MS,
+    INK_FILL_MS,
     MAX_BLOOMS,
+    MAX_FILLS,
     bloomProgress,
     bloomUniforms,
+    fillUniforms,
     frontRadius,
     inkFrame,
     isRunning,
     scheduleEffects,
     type InkBloom,
+    type InkFill,
 } from "@/presentation/components/style-moments/ink/canvas/inkTimeline";
 import { STYLE_MOMENTS } from "@/presentation/components/style-moments/styleMoments";
 
 const BLOOM: InkBloom = { kind: "bloom", centre: { x: 0.5, y: 0.5 }, radius: 0.4, ink: 1, delayMs: 200, durationMs: 1000 };
+const FILL: InkFill = { kind: "fill", cell: { row: 4, column: 2 }, seed: 3.5 };
 
 describe("inkTimeline", () => {
     describe("bloomProgress", () => {
@@ -118,7 +123,7 @@ describe("inkTimeline", () => {
             const scheduled = scheduleEffects([], many, 0);
 
             expect(scheduled).toHaveLength(MAX_BLOOMS);
-            expect(scheduled[0]?.effect.radius).toBe(0.2);
+            expect(scheduled[0]?.effect).toMatchObject({ radius: 0.2 });
         });
     });
 
@@ -140,6 +145,38 @@ describe("inkTimeline", () => {
 
             expect(uniforms[2]).toBe(0);
             expect(uniforms[3]).toBe(0);
+        });
+    });
+
+    describe("fills", () => {
+        // A drop lands under the digit as it is entered, soaks out and has faded by the time the digit settles
+        it("should run a fill for as long as its drop, with no wait for the water's drift", () => {
+            const scheduled = scheduleEffects([], [FILL], 1000);
+
+            expect(INK_FILL_MS).toBeLessThan(INK_DRIFT_SETTLE_MS);
+            expect(isRunning(scheduled, 1000 + INK_FILL_MS - 1)).toBe(true);
+            expect(isRunning(scheduled, 1000 + INK_FILL_MS)).toBe(false);
+        });
+
+        it("should give each slot its cell's centre in grid fractions, its age in seconds and its seed, and mark the rest empty", () => {
+            const uniforms = fillUniforms(scheduleEffects([], [FILL], 1000), 1300);
+
+            expect(uniforms).toHaveLength(MAX_FILLS * 4);
+            expect(uniforms[0]).toBeCloseTo(2.5 / 9);
+            expect(uniforms[1]).toBeCloseTo(4.5 / 9);
+            expect(uniforms[2]).toBeCloseTo(0.3);
+            expect(uniforms[3]).toBeCloseTo(3.5);
+            for (let slot = 1; slot < MAX_FILLS; slot++) expect(uniforms[slot * 4 + 2]).toBeLessThan(0);
+        });
+
+        // Quick fills keep their own slots; the oldest make room, and the celebration's blooms keep theirs
+        it("should keep no more fills than the shader's slots, dropping the oldest and keeping every bloom", () => {
+            const fills = Array.from({ length: MAX_FILLS + 2 }, (_, index): InkFill => ({ ...FILL, seed: index }));
+            const scheduled = scheduleEffects(scheduleEffects([], [BLOOM], 0), fills, 100);
+
+            expect(scheduled.filter(({ effect }) => effect.kind === "fill")).toHaveLength(MAX_FILLS);
+            expect(scheduled.filter(({ effect }) => effect.kind === "bloom")).toHaveLength(1);
+            expect(fillUniforms(scheduled, 200)[3]).toBe(2);
         });
     });
 
