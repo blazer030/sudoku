@@ -15,7 +15,7 @@ import type { CelebrationPhase } from "@/presentation/components/style-moments/s
 import { useMotionAllowed } from "@/presentation/composables/useMotionAllowed";
 import { browserFrameClock, createInkPlayer, type InkPlayer } from "@/presentation/components/style-moments/ink/canvas/inkPlayer";
 import { INK_CELEBRATION_WASH } from "@/presentation/components/style-moments/ink/canvas/inkTimeline";
-import { canvasPixelSize, inkCanvasForcedOff, parseInkColour } from "@/presentation/components/style-moments/ink/canvas/inkSurface";
+import { DEFAULT_SEAL_COLOUR, canvasPixelSize, inkCanvasForcedOff, parseInkColour } from "@/presentation/components/style-moments/ink/canvas/inkSurface";
 import type { InkRenderer } from "@/presentation/components/style-moments/ink/canvas/inkRenderer";
 
 const props = defineProps<{
@@ -53,8 +53,10 @@ onMounted(async () => {
     const { createInkRenderer } = await import("@/presentation/components/style-moments/ink/canvas/inkRenderer");
     const canvas = canvasElement.value;
     if (unmounted || canvas === null) return;
-    const ink = parseInkColour(getComputedStyle(canvas).getPropertyValue("--color-foreground"));
-    renderer = createInkRenderer(canvas, { ink }, standDown);
+    const theme = getComputedStyle(canvas);
+    const ink = parseInkColour(theme.getPropertyValue("--color-foreground"));
+    const seal = parseInkColour(theme.getPropertyValue("--color-primary"), DEFAULT_SEAL_COLOUR);
+    renderer = createInkRenderer(canvas, { ink, seal }, standDown);
     if (renderer === null) {
         standDown();
         return;

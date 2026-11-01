@@ -1,5 +1,6 @@
 // The ink canvas's WebGL1 renderer, loaded only when the ink style plays with motion: one context, one program,
 // one baked noise texture and one triangle. It draws a frame from the timeline's frame data and nothing else.
+import type { GridPlacement } from "@/presentation/components/style-moments/ink/canvas/inkSurface";
 import type { InkFrameRenderer } from "@/presentation/components/style-moments/ink/canvas/inkPlayer";
 import { INK_NOISE_SIZE, bakeInkNoise } from "@/presentation/components/style-moments/ink/canvas/inkNoise";
 import { INK_FRAGMENT_SHADER, INK_VERTEX_SHADER } from "@/presentation/components/style-moments/ink/canvas/inkShaders";
@@ -7,11 +8,15 @@ import { INK_FRAGMENT_SHADER, INK_VERTEX_SHADER } from "@/presentation/component
 /** The colours the canvas draws in, each as the shader's 0–1 channels. */
 export interface InkColours {
     ink: readonly [number, number, number];
+    /** The seal's vermilion, for a box's 圓相. */
+    seal: readonly [number, number, number];
 }
 
 export interface InkRenderer extends InkFrameRenderer {
     /** Sets the drawing buffer's size in pixels (which wipes it) and keeps the washes round on it. */
     resize: (pixelWidth: number, pixelHeight: number) => void;
+    /** Places the grid's cells on the canvas, for the fills and the group marks; the whole canvas until placed. */
+    placeGrid: (grid: GridPlacement) => void;
     /** Lets the context go at once, rather than when the page is collected. */
     dispose: () => void;
 }
@@ -88,8 +93,13 @@ export const createInkRenderer = (
     uploadTriangle(context);
     context.uniform1i(context.getUniformLocation(program, "u_noise"), 0);
     context.uniform3f(context.getUniformLocation(program, "u_ink"), ...colours.ink);
+    context.uniform3f(context.getUniformLocation(program, "u_seal"), ...colours.seal);
     const bloomsLocation = context.getUniformLocation(program, "u_blooms");
     const inksLocation = context.getUniformLocation(program, "u_inks");
+    const fillsLocation = context.getUniformLocation(program, "u_fills");
+    const groupsLocation = context.getUniformLocation(program, "u_groups");
+    const gridLocation = context.getUniformLocation(program, "u_grid");
+    context.uniform4f(gridLocation, 0, 0, 1, 1);
     const timeLocation = context.getUniformLocation(program, "u_time");
     const aspectLocation = context.getUniformLocation(program, "u_aspect");
     context.uniform1f(aspectLocation, 1);
@@ -99,9 +109,11 @@ export const createInkRenderer = (
     canvas.addEventListener("webglcontextlost", handleLost);
 
     return {
-        draw: ({ blooms, inks, seconds }) => {
+        draw: ({ blooms, inks, fills, groups, seconds }) => {
             context.uniform4fv(bloomsLocation, blooms);
             context.uniform1fv(inksLocation, inks);
+            context.uniform4fv(fillsLocation, fills);
+            context.uniform4fv(groupsLocation, groups);
             context.uniform1f(timeLocation, seconds);
             context.clear(context.COLOR_BUFFER_BIT);
             context.drawArrays(context.TRIANGLES, 0, 3);
@@ -114,6 +126,9 @@ export const createInkRenderer = (
             canvas.height = pixelHeight;
             context.viewport(0, 0, pixelWidth, pixelHeight);
             context.uniform1f(aspectLocation, pixelWidth / pixelHeight);
+        },
+        placeGrid: ({ x, y, width, height }) => {
+            context.uniform4f(gridLocation, x, y, width, height);
         },
         dispose: () => {
             canvas.removeEventListener("webglcontextlost", handleLost);

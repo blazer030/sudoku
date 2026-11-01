@@ -21,6 +21,14 @@ export const canvasPixelSize = (cssWidth: number, cssHeight: number, devicePixel
 
 type InkColour = readonly [number, number, number];
 
+/** Where the grid's cells lie on the canvas, in canvas fractions from its top left. */
+export interface GridPlacement {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+}
+
 const parseHex = (colour: string): InkColour | null => {
     const hex = /^#([\da-f]{3}|[\da-f]{6})$/i.exec(colour.trim())?.[1];
     if (hex === undefined) return null;

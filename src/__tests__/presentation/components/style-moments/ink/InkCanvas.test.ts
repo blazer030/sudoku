@@ -10,7 +10,7 @@ import InkCanvas from "@/presentation/components/style-moments/ink/InkCanvas.vue
 vi.mock("@/presentation/composables/prefersReducedMotion", () => ({ prefersReducedMotion: vi.fn(() => false) }));
 vi.mock("@/presentation/components/style-moments/ink/canvas/inkRenderer", () => ({ createInkRenderer: vi.fn() }));
 
-const fakeRenderer = (): InkRenderer => ({ draw: vi.fn(), clear: vi.fn(), resize: vi.fn(), dispose: vi.fn() });
+const fakeRenderer = (): InkRenderer => ({ draw: vi.fn(), clear: vi.fn(), resize: vi.fn(), placeGrid: vi.fn(), dispose: vi.fn() });
 
 const mountCanvas = async (celebration: CelebrationPhase | null = null) => {
     const wrapper = mount(InkCanvas, {
