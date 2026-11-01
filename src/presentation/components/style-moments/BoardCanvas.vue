@@ -5,15 +5,17 @@
         v-if="canvas"
         v-model:takes="takes"
         :celebration="celebration"
+        :effect="effect"
     />
 </template>
 
 <script lang="ts" setup>
 import { computed } from "vue";
-import { useStyleMoments, type CelebrationPhase } from "@/presentation/components/style-moments/styleMoments";
+import { useStyleMoments, type CelebrationPhase, type GroupEffect } from "@/presentation/components/style-moments/styleMoments";
 
 defineProps<{
     celebration: CelebrationPhase | null;
+    effect: GroupEffect | null;
 }>();
 
 /** The moments the canvas draws in the skin's place, for the board's `data-board-canvas`. */

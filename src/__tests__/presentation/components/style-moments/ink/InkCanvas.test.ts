@@ -4,7 +4,8 @@ import { createPinia, setActivePinia } from "pinia";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { prefersReducedMotion } from "@/presentation/composables/prefersReducedMotion";
 import { createInkRenderer, type InkRenderer } from "@/presentation/components/style-moments/ink/canvas/inkRenderer";
-import type { CelebrationPhase } from "@/presentation/components/style-moments/styleMoments";
+import type { CelebrationPhase, GroupEffect } from "@/presentation/components/style-moments/styleMoments";
+import type { InkFrame } from "@/presentation/components/style-moments/ink/canvas/inkTimeline";
 import InkCanvas from "@/presentation/components/style-moments/ink/InkCanvas.vue";
 
 vi.mock("@/presentation/composables/prefersReducedMotion", () => ({ prefersReducedMotion: vi.fn(() => false) }));
@@ -16,12 +17,19 @@ const mountCanvas = async (celebration: CelebrationPhase | null = null) => {
     const wrapper = mount(InkCanvas, {
         props: {
             celebration,
+            effect: null as GroupEffect | null,
             takes: undefined,
             "onUpdate:takes": (takes: string | undefined) => { void wrapper.setProps({ takes }); },
         },
     });
     await flushPromises();
     return wrapper;
+};
+
+// Runs the frames the canvas has asked for, and gives the last frame it drew
+const runFrames = (renderer: InkRenderer): InkFrame | undefined => {
+    for (const [callback] of vi.mocked(window.requestAnimationFrame).mock.calls) callback(performance.now() + 100);
+    return vi.mocked(renderer.draw).mock.lastCall?.[0];
 };
 
 // What the canvas has taken from the skin, as the board would carry it
@@ -52,6 +60,28 @@ describe("InkCanvas", () => {
         const wrapper = await mountCanvas();
 
         expect(takesOf(wrapper)).toBe("digit group");
+        expect(window.requestAnimationFrame).not.toHaveBeenCalled();
+    });
+
+    it("should brush each group a new group effect completes, placed by the grid's cells", async () => {
+        const wrapper = await mountCanvas();
+
+        await wrapper.setProps({ effect: { id: 1, groups: [{ kind: "row", index: 2 }, { kind: "box", index: 4 }], origin: { row: 2, column: 4 } } });
+        const frame = runFrames(renderer);
+
+        expect(renderer.placeGrid).toHaveBeenCalled();
+        expect([...(frame?.groups.slice(0, 2) ?? [])]).toEqual([0, 2]);
+        expect([...(frame?.groups.slice(4, 6) ?? [])]).toEqual([2, 4]);
+    });
+
+    // The effect ending (or none at all) starts nothing; its marks fade on their own clock
+    it("should brush nothing as a group effect ends", async () => {
+        const wrapper = await mountCanvas();
+        await wrapper.setProps({ effect: { id: 1, groups: [{ kind: "row", index: 2 }], origin: { row: 2, column: 4 } } });
+        vi.mocked(window.requestAnimationFrame).mockClear();
+
+        await wrapper.setProps({ effect: null });
+
         expect(window.requestAnimationFrame).not.toHaveBeenCalled();
     });
 

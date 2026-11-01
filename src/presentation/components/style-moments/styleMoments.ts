@@ -70,7 +70,7 @@ export interface StyleMoments {
     digitWriter?: Component | null;
     /**
      * One canvas over the whole board, kept for the board's life, that draws moments in the skin's place, given
-     * `{ celebration }`. It reports the moments it has taken through `v-model:takes` (space-separated, such as
+     * `{ celebration, effect }`. It reports the moments it has taken through `v-model:takes` (space-separated, such as
      * `celebration`), which the board carries as `data-board-canvas` so the skin stands its own down; it takes
      * none where it cannot draw, and the skin's stay. None when the skin draws every moment.
      */

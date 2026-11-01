@@ -2,14 +2,14 @@ import { afterEach, describe, expect, it } from "vitest";
 import { defineComponent, h, onMounted } from "vue";
 import { mount } from "@vue/test-utils";
 import { createPinia, setActivePinia } from "pinia";
-import { STYLE_MOMENTS, type CelebrationPhase } from "@/presentation/components/style-moments/styleMoments";
+import { STYLE_MOMENTS, type CelebrationPhase, type GroupEffect } from "@/presentation/components/style-moments/styleMoments";
 import { useSettingsStore } from "@/stores/settingsStore";
 import BoardCanvas from "@/presentation/components/style-moments/BoardCanvas.vue";
 import InkCanvas from "@/presentation/components/style-moments/ink/InkCanvas.vue";
 
 // A style's canvas that takes the celebration as soon as it mounts
 const TakingCanvas = defineComponent({
-    props: { celebration: { type: String, default: null }, takes: { type: String, default: undefined } },
+    props: { celebration: { type: String, default: null }, effect: { type: Object, default: null }, takes: { type: String, default: undefined } },
     emits: ["update:takes"],
     setup: (_, { emit }) => {
         onMounted(() => { emit("update:takes", "celebration"); });
@@ -17,11 +17,11 @@ const TakingCanvas = defineComponent({
     },
 });
 
-const mountBoardCanvas = (celebration: CelebrationPhase | null) => {
+const mountBoardCanvas = (celebration: CelebrationPhase | null, effect: GroupEffect | null = null) => {
     const pinia = createPinia();
     setActivePinia(pinia);
     useSettingsStore().setStyle("minimal");
-    return mount(BoardCanvas, { props: { celebration }, global: { plugins: [pinia] } });
+    return mount(BoardCanvas, { props: { celebration, effect }, global: { plugins: [pinia] } });
 };
 
 describe("BoardCanvas", () => {
@@ -43,6 +43,15 @@ describe("BoardCanvas", () => {
         expect(wrapper.findComponent(TakingCanvas).props("celebration")).toBe("playing");
         const emitted = wrapper.emitted<[string | undefined]>("update:takes") ?? [];
         expect(emitted[emitted.length - 1]).toEqual(["celebration"]);
+    });
+
+    it("should give the style's canvas the game's group effect", () => {
+        STYLE_MOMENTS.minimal = { ...minimal, boardCanvas: TakingCanvas };
+        const effect: GroupEffect = { id: 3, groups: [{ kind: "column", index: 5 }], origin: { row: 0, column: 5 } };
+
+        const wrapper = mountBoardCanvas(null, effect);
+
+        expect(wrapper.findComponent(TakingCanvas).props("effect")).toEqual(effect);
     });
 
     it("should give ink its canvas", () => {

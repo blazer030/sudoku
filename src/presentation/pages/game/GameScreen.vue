@@ -29,6 +29,7 @@
                     <BoardCanvas
                         v-model:takes="boardCanvasTakes"
                         :celebration="celebration"
+                        :effect="groupEffect"
                     />
                     <div
                         class="relative flex flex-col border-3 border-foreground/20 rounded-xl"
