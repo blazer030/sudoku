@@ -182,18 +182,25 @@ export interface InkFrame {
     blooms: Float32Array;
     /** Each bloom slot's ink, 0 for an empty slot. */
     inks: Float32Array;
-    /** Seconds since the first effect was scheduled, which times the water's drift. */
+    /** Each fill slot's centre, age and seed. */
+    fills: Float32Array;
+    /** Each group slot's kind, index, age and seed. */
+    groups: Float32Array;
+    /** Seconds since the first bloom was scheduled, which times the water's drift. */
     seconds: number;
 }
 
-/** The frame at `nowMs`: the blooms' slots, their ink, and the time the water has drifted for. */
+/** The frame at `nowMs`: every effect's slots, the blooms' ink, and the time the water has drifted for. */
 export const inkFrame = (scheduled: readonly ScheduledInkEffect[], nowMs: number): InkFrame => {
+    const blooms = scheduledOf(scheduled, "bloom");
     const inks = new Float32Array(MAX_BLOOMS);
-    scheduledOf(scheduled, "bloom").forEach(({ effect }, slot) => { inks[slot] = effect.ink; });
-    const firstMs = Math.min(...scheduled.map(effect => effect.scheduledAtMs));
+    blooms.forEach(({ effect }, slot) => { inks[slot] = effect.ink; });
+    const firstMs = Math.min(...blooms.map(bloom => bloom.scheduledAtMs));
     return {
         blooms: bloomUniforms(scheduled, nowMs),
         inks,
-        seconds: scheduled.length === 0 ? 0 : Math.max(nowMs - firstMs, 0) / 1000,
+        fills: fillUniforms(scheduled, nowMs),
+        groups: groupUniforms(scheduled, nowMs),
+        seconds: blooms.length === 0 ? 0 : Math.max(nowMs - firstMs, 0) / 1000,
     };
 };

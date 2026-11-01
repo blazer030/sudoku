@@ -232,6 +232,23 @@ describe("inkTimeline", () => {
             expect(frame.seconds).toBeCloseTo(0.45);
         });
 
+        it("should carry the fills' and the group marks' slots", () => {
+            const scheduled = scheduleEffects([], [FILL, BOX], 1000);
+            const frame = inkFrame(scheduled, 1200);
+
+            expect(frame.fills).toEqual(fillUniforms(scheduled, 1200));
+            expect(frame.groups).toEqual(groupUniforms(scheduled, 1200));
+        });
+
+        // The water's drift carries the celebration's washes; the fills before it do not start its clock
+        it("should time the water's drift from the first bloom, not from a fill before it", () => {
+            const filled = scheduleEffects([], [FILL], 1000);
+            const frame = inkFrame(scheduleEffects(filled, [BLOOM], 1300), 1800);
+
+            expect(frame.seconds).toBeCloseTo(0.5);
+            expect(inkFrame(filled, 1500).seconds).toBe(0);
+        });
+
         it("should count no time before anything is scheduled", () => {
             expect(inkFrame([], 500).seconds).toBe(0);
         });

@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createInkRenderer } from "@/presentation/components/style-moments/ink/canvas/inkRenderer";
 import { DEFAULT_INK_COLOUR } from "@/presentation/components/style-moments/ink/canvas/inkSurface";
-import { MAX_BLOOMS } from "@/presentation/components/style-moments/ink/canvas/inkTimeline";
+import { MAX_BLOOMS, MAX_FILLS, MAX_GROUPS } from "@/presentation/components/style-moments/ink/canvas/inkTimeline";
 
 // A stand-in WebGL context: every call succeeds unless a test says otherwise; jsdom has no WebGL of its own
 const fakeContext = (overrides: Record<string, unknown> = {}) => {
@@ -45,7 +45,13 @@ describe("createInkRenderer", () => {
         const { context, calls } = fakeContext();
         const renderer = createInkRenderer(canvasWith(context), DEFAULT_INK_COLOUR, vi.fn());
 
-        renderer?.draw({ blooms: new Float32Array(MAX_BLOOMS * 4), inks: new Float32Array(MAX_BLOOMS), seconds: 0.5 });
+        renderer?.draw({
+            blooms: new Float32Array(MAX_BLOOMS * 4),
+            inks: new Float32Array(MAX_BLOOMS),
+            fills: new Float32Array(MAX_FILLS * 4),
+            groups: new Float32Array(MAX_GROUPS * 4),
+            seconds: 0.5,
+        });
 
         expect(renderer).not.toBeNull();
         expect(calls).toContain("uniform4fv");
