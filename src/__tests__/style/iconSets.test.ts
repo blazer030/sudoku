@@ -13,8 +13,8 @@ const loadSet = (style: StyleId): Promise<IconSet> => {
 const markupOf = (set: IconSet): string => `${set.defs ?? ""}${Object.values(set.drawings).join("")}`;
 
 describe("style icon sets", () => {
-    it("should have sets to check", () => {
-        expect(stylesWithSets.length).toBeGreaterThan(0);
+    it("should give every style but minimal, which keeps lucide's, a set of its own", () => {
+        expect(STYLE_IDS.filter(style => STYLE_ICON_SETS[style] === null)).toEqual(["minimal"]);
     });
 
     describe.each(stylesWithSets)("%s", (style) => {
