@@ -9,6 +9,13 @@ void main() {
     gl_Position = vec4(a_corner, 0.0, 1.0);
 }`;
 
+// A row's or a column's stroke, in fractions of the grid: it lands just inside one edge and lifts just inside the
+// other, so the brush's round ends stay within the board's frame. Its width wavers up to INK_STROKE_WIDEST times.
+export const INK_STROKE_START = 0.03;
+export const INK_STROKE_LENGTH = 0.94;
+export const INK_STROKE_WIDTH = 0.3 / 9;
+export const INK_STROKE_WIDEST = 1.315;
+
 // Drops of ink spreading in wet washi. Each bloom's front runs out as the square root of time (the timeline gives
 // its radius). A drop is densest where it landed: a deep core over a long, gentle tail, so the wash reaches far
 // and pales evenly towards a soft edge, with no ring and no band. The core thins slowly as the drop spreads and
@@ -125,20 +132,20 @@ float stroke(float s, float across, float head, float age, float seed, float wid
     return body * load;
 }
 
-// A row or a column: the stroke runs from just inside the board to past its far edge, bowing a little.
+// A row or a column: the stroke runs from just inside the board to just inside its far edge, bowing a little.
 // Slot: kind (0 row, 1 column, 2 box, negative: none); index; age; seed.
 float lineStroke(vec2 point, vec4 slot, float strength) {
     float age = slot.z - 0.08;
     if (age < 0.0) return 0.0;
-    float head = smoothstep(0.0, 0.44, age) * 1.08;
+    float head = smoothstep(0.0, 0.44, age);
     float life = 1.0 - smoothstep(0.62, 1.0, age);
     float line = (slot.y + 0.5) * CELL;
     bool row = slot.x < 0.5;
     float along = row ? point.x : point.y;
     float across = row ? point.y - line : point.x - line;
     across -= (water(vec2(along * 0.8 + slot.w, slot.w)).r - 0.5) * 0.25 * CELL;
-    float s = (along - 0.03) / 0.99;
-    return strength * stroke(s, across, head, age, slot.w, 0.3 * CELL, 0.99) * life;
+    float s = (along - ${INK_STROKE_START.toFixed(3)}) / ${INK_STROKE_LENGTH.toFixed(3)};
+    return strength * stroke(s, across, head, age, slot.w, 0.3 * CELL, ${INK_STROKE_LENGTH.toFixed(3)}) * life;
 }
 
 // A box: the 圓相, drawn clockwise from the upper left and left open where it closes
