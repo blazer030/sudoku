@@ -10,6 +10,7 @@ import { storeToRefs } from "pinia";
 import { i18n } from "@/presentation/i18n";
 import { startLocaleSync } from "@/presentation/i18n/localeSync";
 import { startAppearanceSync } from "@/presentation/theme/appearanceSync";
+import { selectIconStyle } from "@/presentation/components/icon/activeIconSet";
 import { startLauncherIconSync } from "@/presentation/theme/launcherIconSync";
 import { useGameStore } from "@/stores/gameStore";
 import { useDonateStore } from "@/stores/donateStore";
@@ -116,5 +117,7 @@ statisticsStore.setRepository(statisticsRepository);
 await Promise.all([
     statisticsStore.loadFromRepository(),
     gameStore.loadFromRepository(),
+    // So the first screen doesn't flash lucide's icons before the style's own
+    selectIconStyle(useSettingsStore().style),
 ]);
 app.mount("#root");
