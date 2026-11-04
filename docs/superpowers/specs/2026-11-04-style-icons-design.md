@@ -133,7 +133,7 @@ pixel skin 既有的 `[data-skin~="caret"]` 規則（`fill: currentColor; stroke
 做法：
 
 - 漸層寫在每個 Icon 的 `<svg>` 內，stop 用 `var(--aurora-icon-start)`、`var(--aurora-icon-middle)`、`var(--aurora-icon-end)`，並留 `stop-color="currentColor"` 當後備。殘光和玻璃填色用同一組顏色。
-- skin 預設把這三個變數設為漸層色；在單色位置把三個都設成 `currentColor`（未註冊的 custom property 會留到使用時才解析成該處的文字色），不用 `color-mix`，三個引擎行為一致。
+- 亮青和亮粉是新的 palette token（`aurora-icon-start`、`aurora-icon-end`，依模式設定），因為專案不准 skin 寫色值。skin 預設把這三個變數設為漸層色；在單色位置把三個都設成 `currentColor`（未註冊的 custom property 會留到使用時才解析成該處的文字色），不用 `color-mix`，三個引擎行為一致。
 - 夜空：亮青 `#4FE3C1`、該主題的 primary、亮粉 `#FF8CC6`。晨光：`#0A6F61`、該主題的 primary、`#C2185B`（aurora 主題 primary 裡的深色）。
 - Icon 對所在表面至少 3:1，漸層三個顏色都要算，每個主題和模式都檢查，並在 `paletteContrast.test.ts` 或 aurora 的測試裡固定下來。必要時可以調整漸層色，但不要回到淡色。
 
