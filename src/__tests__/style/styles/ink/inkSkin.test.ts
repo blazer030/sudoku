@@ -112,6 +112,17 @@ describe("ink skin", () => {
         describe("brush-grid.svg", () => {
             const svg = new DOMParser().parseFromString(BRUSH_GRID_SVG, "image/svg+xml");
 
+            // An outline is one absolute point, then steps relative to the one before
+            const pointsOf = (path: Element): { x: number; y: number }[] => {
+                const numbers = Array.from((path.getAttribute("d") ?? "").matchAll(/-?\d*\.?\d+/g), ([number]) => Number(number));
+                const points: { x: number; y: number }[] = [{ x: numbers[0], y: numbers[1] }];
+                for (let index = 2; index < numbers.length; index += 2) {
+                    const previous = points[points.length - 1];
+                    points.push({ x: previous.x + numbers[index], y: previous.y + numbers[index + 1] });
+                }
+                return points;
+            };
+
             // The mask is stretched over the square grid, so the drawing must be square too
             it("should parse as a square drawing", () => {
                 const [, , width, height] = (svg.documentElement.getAttribute("viewBox") ?? "").split(/\s+/).map(Number);
@@ -121,10 +132,14 @@ describe("ink skin", () => {
                 expect(width).toBe(height);
             });
 
-            it("should roughen the lines with one turbulence displacement filter, drawn into the image", () => {
-                expect(svg.getElementsByTagName("filter")).toHaveLength(1);
-                expect(svg.getElementsByTagName("feTurbulence")).toHaveLength(1);
-                expect(svg.getElementsByTagName("feDisplacementMap")).toHaveLength(1);
+            // WebKit rasterises an SVG filter in an image at low resolution, so the lines turn blurred and blocky
+            // there alone; drawn into the outlines, every engine draws the same edge
+            it("should carry its roughness in the outlines, with no filter to rasterise", () => {
+                expect(svg.getElementsByTagName("filter")).toHaveLength(0);
+                expect(BRUSH_GRID_SVG).not.toMatch(/\bfilter=/);
+                for (const path of Array.from(svg.getElementsByTagName("path"))) {
+                    expect(pointsOf(path).length).toBeGreaterThan(500);
+                }
             });
 
             // A 9×9 grid has eight inner lines each way: the two box lines each way among them drawn heavier
@@ -142,10 +157,6 @@ describe("ink skin", () => {
 
             // The cells fill the drawing's first 351 by 351 units; the margin round them holds the frame
             const CELLS_SIZE = 351;
-            const pointsOf = (path: Element): { x: number; y: number }[] => Array.from(
-                (path.getAttribute("d") ?? "").matchAll(/(-?[\d.]+) (-?[\d.]+)/g),
-                ([, x, y]) => ({ x: Number(x), y: Number(y) }),
-            );
             const paths = Array.from(svg.getElementsByTagName("path"));
             const frameSides = paths.filter(path => !path.hasAttribute("opacity"));
             const innerLines = paths.filter(path => path.hasAttribute("opacity"));
