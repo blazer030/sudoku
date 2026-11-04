@@ -192,7 +192,7 @@ owner 先前定過白板的麥克筆是平滑均勻的線條，沒有斷點和�
 3. **逐風格：** 每個風格一個 commit，資料加上該風格的 skin 調整。
 4. **收尾：** 更新 `CLAUDE.md`（登記新風格的步驟、`data-icon` hook、`IconSet`）；在 `UNRELEASED_CHANGES` 加一行（兩種語言，不列風格數量）；刪除此規格。
 
-直接在 `develop` 上做，除非 owner 另外要求開分支。
+在 `feature/style-icons` 分支上做，使用主目錄，不另開 worktree（owner 決定）。合併回 `develop` 要等 owner 同意。
 
 ## 驗收
 
