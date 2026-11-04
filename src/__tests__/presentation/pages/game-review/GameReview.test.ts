@@ -23,14 +23,14 @@ const fillStep: GameStep = {
     value: 5,
 };
 
-const mountReview = async (options: { action?: GameStep["action"]; completed?: boolean; nextClicks?: number } = {}) => {
-    const { action = "fill", completed = false, nextClicks = 1 } = options;
+const mountReview = async (options: { action?: GameStep["action"]; completed?: boolean; nextClicks?: number; initialBoard?: ReturnType<typeof emptyBoard> } = {}) => {
+    const { action = "fill", completed = false, nextClicks = 1, initialBoard = emptyBoard() } = options;
     setActivePinia(createPinia());
     useStatisticsStore().recordGame({
         difficulty: "hard",
         elapsedSeconds: 100,
         completed,
-        replay: { initialBoard: emptyBoard(), steps: [{ ...fillStep, action }] },
+        replay: { initialBoard, steps: [{ ...fillStep, action }] },
     });
     const router = createRouter({
         history: createMemoryHistory(),
@@ -62,6 +62,15 @@ const boldTexts = (wrapper: Awaited<ReturnType<typeof mountReview>>) =>
     wrapper.findAll(".font-semibold").map((element) => element.text());
 
 describe("GameReview", () => {
+    it("should show a game's starting notes on its first board", async () => {
+        const initialBoard = emptyBoard();
+        initialBoard[4][4].notes = [7, 8];
+
+        const wrapper = await mountReview({ initialBoard, nextClicks: 0 });
+
+        expect(wrapper.get("[data-testid='review-cell-4-4']").text()).toContain("7");
+    });
+
     it("should describe a fill step in English with bold numbers", async () => {
         const wrapper = await mountReview();
 

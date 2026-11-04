@@ -7,6 +7,7 @@ import { fillAllButLastKnownCell, knownAnswer, knownPuzzle, lastKnownEmptyCell }
 import type { Difficulty } from "@/domain/generator/SudokuGenerator";
 import { useGameStore } from "@/stores/gameStore";
 import { useStatisticsStore } from "@/stores/statisticsStore";
+import { useSettingsStore } from "@/stores/settingsStore";
 
 vi.mock("@/application/puzzleGeneration/PuzzleGenerationService", () => ({
     generatePuzzleAsync: vi.fn(() => Promise.resolve({
@@ -66,6 +67,17 @@ afterEach(() => {
 });
 
 describe("completion actions", () => {
+    it("should start Play Again with notes when the auto notes setting is on", async () => {
+        const { wrapper, gameStore } = await mountGameRoute("medium");
+        useSettingsStore().setAutoNotesAtStart(true);
+
+        await completeKnownGame(wrapper);
+        await wrapper.get("[data-testid='play-again-button']").trigger("click");
+        await flushPromises();
+
+        expect([...(gameStore.sudoku?.puzzle[0][2].notes ?? [])].sort()).toEqual([1, 2, 4]);
+    });
+
     it("should start a fresh game at the same difficulty on Play Again", async () => {
         const { wrapper, router, gameStore } = await mountGameRoute("medium");
         await wrapper.find("[data-testid='hint-button']").trigger("click");

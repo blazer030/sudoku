@@ -8,6 +8,7 @@ import { generatePuzzleAsync } from "@/application/puzzleGeneration/PuzzleGenera
 import type { AnalyticsService } from "@/application/analytics/AnalyticsService";
 import type { GameRepository } from "@/application/game/GameRepository";
 import type { GameReplayData } from "@/application/statistics/StatisticsRepository";
+import { useSettingsStore } from "@/stores/settingsStore";
 
 export const useGameStore = defineStore("game", () => {
     const difficulty = ref<Difficulty | null>(null);
@@ -55,7 +56,10 @@ export const useGameStore = defineStore("game", () => {
     const startNewGame = async (newDifficulty: Difficulty) => {
         const { puzzle, answer } = await generatePuzzleAsync(newDifficulty);
         const puzzleCells = puzzle.map((row) => row.map((value) => new PuzzleCell(value)));
-        sudoku.value = Sudoku.restoreSave(answer, puzzleCells);
+        const newGame = Sudoku.restoreSave(answer, puzzleCells);
+        // The game screen rebuilds the Sudoku from the puzzle, so these notes never enter its undo history
+        if (useSettingsStore().autoNotesAtStart) newGame.autoNotes();
+        sudoku.value = newGame;
         difficulty.value = newDifficulty;
         elapsedSeconds.value = 0;
         replay.value = null;
