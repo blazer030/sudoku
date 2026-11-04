@@ -1563,3 +1563,12 @@
         stroke-dashoffset: 0;
     }
 }
+
+/* Icons: chalk skips and sheds dust on 黑板; 白板's marker draws a plain, even line */
+:root:not(.dark)[data-style="chalkboard"] .chalk-line {
+    stroke-dasharray: none;
+}
+
+:root:not(.dark)[data-style="chalkboard"] .chalk-dust {
+    display: none;
+}

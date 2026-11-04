@@ -971,4 +971,14 @@ describe("chalkboard skin", () => {
             }
         });
     });
+
+    describe("icons", () => {
+        const WHITEBOARD_LINE = ':root:not(.dark)[data-style="chalkboard"] .chalk-line';
+        const WHITEBOARD_DUST = ':root:not(.dark)[data-style="chalkboard"] .chalk-dust';
+
+        it("should draw plain marker lines on the whiteboard", () => {
+            expect(declarationsOf(CHALKBOARD_CSS, WHITEBOARD_LINE).get("stroke-dasharray")).toBe("none");
+            expect(declarationsOf(CHALKBOARD_CSS, WHITEBOARD_DUST).get("display")).toBe("none");
+        });
+    });
 });
