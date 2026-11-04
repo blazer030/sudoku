@@ -69,7 +69,7 @@
 
 /* An icon's construction marks would only muddy it at small sizes */
 [data-style="blueprint"] svg[data-icon-small] .blueprint-mark {
-    display: none;
+    visibility: hidden;
 }
 
 /* The sheet. The body is the one sheet of graph paper behind every screen, across the whole window, so on a wide

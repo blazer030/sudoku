@@ -110,7 +110,7 @@ describe("blueprint skin", () => {
         });
 
         it("should leave an icon's construction marks off where they would only muddy it", () => {
-            expect(declarationsOf(BLUEPRINT_CSS, `${SCOPE} svg[data-icon-small] .blueprint-mark`).get("display")).toBe("none");
+            expect(declarationsOf(BLUEPRINT_CSS, `${SCOPE} svg[data-icon-small] .blueprint-mark`).get("visibility")).toBe("hidden");
         });
 
         it("should set no letter-spacing, font-size or border on any element (only placed decorations size themselves)", () => {

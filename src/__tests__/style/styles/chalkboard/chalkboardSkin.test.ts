@@ -973,12 +973,19 @@ describe("chalkboard skin", () => {
     });
 
     describe("icons", () => {
-        const WHITEBOARD_LINE = ':root:not(.dark)[data-style="chalkboard"] .chalk-line';
-        const WHITEBOARD_DUST = ':root:not(.dark)[data-style="chalkboard"] .chalk-dust';
+        const DARK = ':root.dark[data-style="chalkboard"]';
+        const ANY = '[data-style="chalkboard"]';
 
-        it("should draw plain marker lines on the whiteboard", () => {
-            expect(declarationsOf(CHALKBOARD_CSS, WHITEBOARD_LINE).get("stroke-dasharray")).toBe("none");
-            expect(declarationsOf(CHALKBOARD_CSS, WHITEBOARD_DUST).get("display")).toBe("none");
+        it("should draw plain marker lines, with no dust, on the whiteboard", async () => {
+            const { chalkboardIcons } = await import("@/style/styles/chalkboard/icons");
+
+            expect(Object.values(chalkboardIcons.drawings).join("")).not.toContain("stroke-dasharray");
+            expect(declarationsOf(CHALKBOARD_CSS, `${ANY} .chalk-dust`).get("visibility")).toBe("hidden");
+        });
+
+        it("should break the chalk's line and shed its dust on the blackboard", () => {
+            expect(declarationsOf(CHALKBOARD_CSS, `${DARK} .chalk-line`).get("stroke-dasharray")).toBeTruthy();
+            expect(declarationsOf(CHALKBOARD_CSS, `${DARK} .chalk-dust`).get("visibility")).toBe("visible");
         });
     });
 });
