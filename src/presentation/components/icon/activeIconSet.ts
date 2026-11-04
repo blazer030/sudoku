@@ -13,7 +13,7 @@ export const STYLE_ICON_SETS: Record<StyleId, IconSetLoader | null> = {
     cyber: () => import("@/style/styles/cyber/icons").then(module => module.cyberIcons),
     ink: () => import("@/style/styles/ink/icons").then(module => module.inkIcons),
     chalkboard: () => import("@/style/styles/chalkboard/icons").then(module => module.chalkboardIcons),
-    blueprint: null,
+    blueprint: () => import("@/style/styles/blueprint/icons").then(module => module.blueprintIcons),
     aurora: null,
 };
 
