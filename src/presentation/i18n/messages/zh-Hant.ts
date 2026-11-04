@@ -147,6 +147,8 @@ export const zhHant: MessageSchema = {
         },
         toast: {
             noConflicts: "沒有發現重複的數字",
+            singleNotesFilled: "已填入 {count} 格",
+            noSingleNotes: "沒有只剩一個筆記的格子",
         },
         controls: {
             undo: "復原",

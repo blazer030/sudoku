@@ -150,6 +150,8 @@ export const en = {
         },
         toast: {
             noConflicts: "No repeated digits found",
+            singleNotesFilled: "Filled {count} cell | Filled {count} cells",
+            noSingleNotes: "No cells are down to one note",
         },
         controls: {
             undo: "Undo",

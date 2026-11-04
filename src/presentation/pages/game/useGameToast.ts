@@ -10,12 +10,23 @@ export interface NoConflictsToast {
     kind: "noConflicts";
 }
 
+export interface SingleNotesFilledToast {
+    kind: "singleNotesFilled";
+    count: number;
+}
+
+export interface NoSingleNotesToast {
+    kind: "noSingleNotes";
+}
+
 /** One-off messages on the game screen; only one shows at a time. */
-export type ToastContent = RandomRevealToast | NoConflictsToast;
+export type ToastContent = RandomRevealToast | NoConflictsToast | SingleNotesFilledToast | NoSingleNotesToast;
 
 const TOAST_DURATION_MS: Record<ToastContent["kind"], number> = {
     randomReveal: 3000,
     noConflicts: 3000,
+    singleNotesFilled: 3000,
+    noSingleNotes: 3000,
 };
 
 export const useGameToast = () => {

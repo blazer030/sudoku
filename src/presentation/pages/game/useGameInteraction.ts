@@ -210,6 +210,15 @@ export const useGameInteraction = ({
         selectedDigit.value = selectedDigit.value === digit ? null : digit;
     };
 
+    const clearSelection = () => {
+        selectedCell.value = null;
+    };
+
+    // A picked digit goes once the board holds all nine of it, however they got there
+    const releaseCompletedDigit = () => {
+        if (selectedDigit.value !== null && isDigitCompleted(selectedDigit.value)) selectedDigit.value = null;
+    };
+
     const undo = () => {
         if (isLocked()) return;
         sudoku.undo();
@@ -230,6 +239,8 @@ export const useGameInteraction = ({
         isSelected,
         isPeerOfSelected,
         digitCounts,
+        clearSelection,
+        releaseCompletedDigit,
         undo,
     };
 };

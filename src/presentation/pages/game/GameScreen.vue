@@ -1,5 +1,9 @@
 <template>
-    <div class="flex flex-col gap-2 min-h-full py-6 px-5">
+    <div
+        class="flex flex-col gap-2 min-h-full py-6 px-5 touch-manipulation"
+        data-testid="game-screen"
+        @click="handleScreenTap"
+    >
         <GameHeader
             :elapsed-seconds="elapsedSeconds"
             :hint-mode="hintMode.active.value"
@@ -161,6 +165,7 @@ import HintPanel from "@/presentation/pages/game/hint-mode/HintPanel.vue";
 import { useRoomBelow } from "@/presentation/composables/useRoomBelow";
 import { minimumPanelHeight, panelLift } from "@/presentation/components/step-presentation/panelLift";
 import { InputMode } from "@/presentation/pages/game/InputMode";
+import { useBlankDoubleTap } from "@/presentation/pages/game/useBlankDoubleTap";
 import { useGameInteraction } from "@/presentation/pages/game/useGameInteraction";
 import { useGameSession } from "@/presentation/pages/game/useGameSession";
 import { useSettingsStore } from "@/stores/settingsStore";
@@ -177,6 +182,9 @@ const {
     isRevealed,
     openHintMenu,
     hintMode,
+    singleNoteFill,
+    completed,
+    difficulty,
     toastContent,
     showLeaveDialog,
     checkAndComplete,
@@ -234,6 +242,8 @@ const {
     isSelected,
     isPeerOfSelected,
     digitCounts,
+    clearSelection,
+    releaseCompletedDigit,
     undo,
 } = useGameInteraction({
     sudoku: sudoku.raw(),
@@ -242,7 +252,26 @@ const {
     checkAndComplete,
     onGroupCompleted: playGroupEffect,
     autoRemoveNotes: () => settingsStore.autoRemoveNotes,
-    isLocked: () => hintMode.active.value,
+    isLocked: () => hintMode.active.value || singleNoteFill.running.value,
+});
+
+const { isDoubleTap } = useBlankDoubleTap();
+
+// Easy games keep it off whatever the setting says: there it would all but solve the game
+const canFillSingleNotes = (): boolean => settingsStore.doubleTapFill
+    && difficulty.value !== "easy"
+    && !completed.value
+    && !hintMode.active.value
+    && !singleNoteFill.running.value;
+
+const handleScreenTap = (event: MouseEvent) => {
+    if (!isDoubleTap(event) || !canFillSingleNotes()) return;
+    clearSelection();
+    singleNoteFill.start();
+};
+
+watch(() => singleNoteFill.running.value, (running) => {
+    if (!running) releaseCompletedDigit();
 });
 
 // A running group effect's origin and timing, for the cells' CSS to ripple from

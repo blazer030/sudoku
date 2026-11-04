@@ -21,9 +21,11 @@ interface LeaveGameOptions {
     onLeave?: () => void;
     /** Closes the topmost other overlay (hint menu, hint panel); returns whether one was open. */
     dismissOverlay?: () => boolean;
+    /** Finishes a running fill at once, so nothing is saved or asked with part of it done. */
+    finishPendingFill?: () => void;
 }
 
-export const useLeaveGame = ({ sudoku, difficulty, completed, getElapsedSeconds, getReplayData, analytics, onLeave, dismissOverlay }: LeaveGameOptions) => {
+export const useLeaveGame = ({ sudoku, difficulty, completed, getElapsedSeconds, getReplayData, analytics, onLeave, dismissOverlay, finishPendingFill }: LeaveGameOptions) => {
     const router = useRouter();
     const leaveDialog = provideLeaveDialog();
     const leavingConfirmed = ref(false);
@@ -39,7 +41,16 @@ export const useLeaveGame = ({ sudoku, difficulty, completed, getElapsedSeconds,
         }));
     };
 
+    // True when finishing the fill solved the game, whose celebration then plays instead of any leaving
+    const isSolved = (): boolean => completed.value;
+    const fillSolvedTheGame = (): boolean => {
+        if (isSolved()) return false;
+        finishPendingFill?.();
+        return isSolved();
+    };
+
     const showLeaveDialog = async () => {
+        if (fillSolvedTheGame()) return;
         // A solved game is already recorded, so Back just leaves, as the system Back does
         if (completed.value) {
             router.back();
@@ -78,6 +89,8 @@ export const useLeaveGame = ({ sudoku, difficulty, completed, getElapsedSeconds,
     // progress leaves the board as it was, so the save is whole; the hint itself is not kept.
     const saveWhenHidden = () => {
         if (document.visibilityState !== "hidden" || completed.value || leavingConfirmed.value) return;
+        finishPendingFill?.();
+        if (isSolved()) return;
         saveGame();
     };
     document.addEventListener("visibilitychange", saveWhenHidden);
@@ -86,6 +99,7 @@ export const useLeaveGame = ({ sudoku, difficulty, completed, getElapsedSeconds,
     });
 
     onBeforeRouteLeave(() => {
+        if (fillSolvedTheGame()) return false;
         if (completed.value || leavingConfirmed.value) return true;
         // Back closes the topmost overlay first; only a bare game screen asks to leave.
         if (leaveDialog.visible.value) {

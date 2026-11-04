@@ -12,6 +12,7 @@ import { useGameTimer } from "@/presentation/pages/game/useGameTimer";
 import { useGameCompletion, type CompletionOutcome } from "@/presentation/pages/game/useGameCompletion";
 import { useLeaveGame } from "@/presentation/pages/game/useLeaveGame";
 import { useHintActions } from "@/presentation/pages/game/useHintActions";
+import { useSingleNoteFill } from "@/presentation/pages/game/useSingleNoteFill";
 import { useGameToast } from "@/presentation/pages/game/useGameToast";
 import { useMotionAllowed } from "@/presentation/composables/useMotionAllowed";
 import { useGroupEffect } from "@/presentation/pages/game/useGroupEffect";
@@ -130,6 +131,17 @@ export const useGameSession = ({ onPlayAgain }: GameSessionOptions) => {
         analytics,
     });
 
+    const singleNoteFill = useSingleNoteFill({
+        sudoku: sudoku.raw(),
+        stepRecorder,
+        autoRemoveNotes: () => settingsStore.autoRemoveNotes,
+        motionAllowed,
+        checkAndComplete,
+        onGroupCompleted: playGroupEffect,
+        onFilled: count => { gameToast.show({ kind: "singleNotesFilled", count }); },
+        onNothingToFill: () => { gameToast.show({ kind: "noSingleNotes" }); },
+    });
+
     const { leaveDialog, showLeaveDialog } = useLeaveGame({
         sudoku: sudoku.raw(),
         difficulty,
@@ -140,6 +152,7 @@ export const useGameSession = ({ onPlayAgain }: GameSessionOptions) => {
         // Hint mode is never saved: leaving ends it with the board untouched.
         onLeave: hintMode.cancel,
         dismissOverlay,
+        finishPendingFill: singleNoteFill.finish,
     });
 
     const timerPaused = computed(() => completed.value || leaveDialog.visible.value);
@@ -165,8 +178,11 @@ export const useGameSession = ({ onPlayAgain }: GameSessionOptions) => {
         clearErrors,
         isError,
         isRevealed,
-        openHintMenu,
+        openHintMenu: async () => {
+            if (!singleNoteFill.running.value) await openHintMenu();
+        },
         hintMode,
+        singleNoteFill,
         toastContent: gameToast.content,
         showToast: gameToast.show,
         showLeaveDialog,

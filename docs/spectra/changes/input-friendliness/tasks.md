@@ -11,7 +11,7 @@
 
 ## 3. 連點填入
 
-- [ ] 3.1 [after: 2.3] 實作 Requirement「Fill every single-note cell」「One undo for a fill run」「Staggered arrival」「Merged group effect」（決策：單一筆記填入先定計畫再全部填上、逐格填入且一次復原、合併群組效果）：`Sudoku.singleNoteCells()`、`beginFillRun()`、`fillInRun()`，以及遊戲頁的填入流程，含 60ms 間隔、動態效果關閉時一次填完、填入途中鎖定、按返回和頁面隱藏時補完（含 `useLeaveGame` 的自動存檔）、合併群組效果、整盤完成時只記一局。以 `src/__tests__/domain/game/Sudoku.test.ts` 和新的 `src/__tests__/presentation/pages/game/useSingleNoteFill.test.ts` 驗證只填一輪、衝突照填、一次復原、遊戲回顧逐步、計時和合併。
+- [x] 3.1 [after: 2.3] 實作 Requirement「Fill every single-note cell」「One undo for a fill run」「Staggered arrival」「Merged group effect」（決策：單一筆記填入先定計畫再全部填上、逐格填入且一次復原、合併群組效果）：`Sudoku.singleNoteCells()`、`beginFillRun()`、`fillInRun()`，以及遊戲頁的填入流程，含 60ms 間隔、動態效果關閉時一次填完、填入途中鎖定、按返回和頁面隱藏時補完（含 `useLeaveGame` 的自動存檔）、合併群組效果、整盤完成時只記一局。以 `src/__tests__/domain/game/Sudoku.test.ts` 和新的 `src/__tests__/presentation/pages/game/useSingleNoteFill.test.ts` 驗證只填一輪、衝突照填、一次復原、遊戲回顧逐步、計時和合併。
 - [ ] 3.2 [after: 3.1, 1.1] 實作 Requirement「Blank double tap」「Easy games ignore double tap」「Fill feedback」（決策：空白連點的判定、簡單難度不作用也不提示）：遊戲畫面判定空白連點並加上 `touch-action: manipulation`，簡單難度無反應也無訊息，填入和沒有可填時顯示 toast。以 `src/__tests__/presentation/pages/game/` 下的元件測試跑規格的點擊表格、簡單難度和 toast，並依決策「模擬器實機測試」，在調成 360×640 dp 的 `Pixel_3a_API_34_extension_level_7_arm64-v8a` 和 `iPhone SE (3rd generation)` 模擬器實測可點的空白區。空白不足時依 `design.md` 的退路把 `game-inputs` 的間隙算進去，並回報擁有者。
 
 ## 4. 懸浮數字鍵
