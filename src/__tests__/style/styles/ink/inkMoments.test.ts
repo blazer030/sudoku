@@ -389,11 +389,18 @@ describe("ink moments", () => {
             const frames = framesOf("ink-take");
             const last = frames[frames.length - 1]?.declarations ?? new Map<string, string>();
 
-            expect(frames[0]?.declarations.get("text-shadow")).toBe("none");
             expect(last.get("opacity")).toBe("1");
             expect(last.get("transform")).toBe("none");
-            expect(last.get("text-shadow")).toContain("var(--color-card)");
+            expect(declarationsOf(INK_CSS, TAKING_DIGIT).get("text-shadow")).toContain("var(--color-card)");
             expect(animationOf(TAKING_DIGIT)).toMatch(/ both$/);
+        });
+
+        // Every digit on the board takes the ink at once, and a shadow in the keyframes repaints them all on
+        // every frame: on the Android emulator that alone dropped the celebration to about 6 frames a second
+        it("should move the taking digits by opacity and transform alone", () => {
+            const animated = framesOf("ink-take").flatMap(frame => [...frame.declarations.keys()]);
+
+            expect(new Set(animated)).toEqual(new Set(["opacity", "transform"]));
         });
 
         it("should hold one faint wash still, and nothing moving, when still", () => {

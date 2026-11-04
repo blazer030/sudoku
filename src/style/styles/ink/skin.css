@@ -341,9 +341,9 @@
 }
 
 @keyframes ink-take {
-    0% { opacity: 1; transform: none; text-shadow: none; }
-    35% { opacity: 0.55; transform: scale(1.12); text-shadow: 0 0 2px var(--color-card), 0 0 3px var(--color-card), 0 0 6px var(--color-card); }
-    100% { opacity: 1; transform: none; text-shadow: 0 0 2px var(--color-card), 0 0 3px var(--color-card), 0 0 6px var(--color-card); }
+    0% { opacity: 1; transform: none; }
+    35% { opacity: 0.55; transform: scale(1.12); }
+    100% { opacity: 1; transform: none; }
 }
 
 /* The washes swell past the board as they bloom; the board keeps them inside its box, so the page never
@@ -389,6 +389,9 @@
 
 [data-style="ink"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"]) [data-variant] > div:not(.value-arrive):not(.animate-hint-reveal-pop) {
     animation: ink-take 640ms ease-out calc((max(var(--cell-row) - 4, 4 - var(--cell-row)) + max(var(--cell-column) - 4, 4 - var(--cell-column))) * 55ms) both;
+    /* Set once, not animated: in the keyframes it would repaint every digit on the board on every frame.
+       Paper on paper, it only shows once the wash is under the digit */
+    text-shadow: 0 0 2px var(--color-card), 0 0 3px var(--color-card), 0 0 6px var(--color-card);
 }
 
 /* The completion card is a hanging scroll. It waits for the scrim, then unrolls down from its top rod
