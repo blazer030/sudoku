@@ -15,15 +15,15 @@
             :icon="group.icon"
             :title="group.title"
         >
-            <div class="flex flex-col divide-y divide-border -my-1">
-                <SettingToggleRow
+            <div class="grid grid-cols-2 gap-2">
+                <OptionTile
                     v-for="toggle in group.toggles"
                     :key="toggle.key"
-                    :checked="toggle.value"
                     :data-testid="`toggle-${toggle.key}`"
                     :description="t(`settings.toggles.${toggle.key}.description`)"
                     :icon="toggle.icon"
                     :label="t(`settings.toggles.${toggle.key}.label`)"
+                    :pressed="toggle.value"
                     @toggle="toggle.setter(!toggle.value)"
                 />
             </div>
@@ -174,8 +174,8 @@ import { STYLES, getPalette } from "@/theme/palettes";
 import { vPress } from "@/presentation/directives/press";
 import PageHeader from "@/presentation/components/page-header/PageHeader.vue";
 import SegmentedControl from "@/presentation/components/segmented-control/SegmentedControl.vue";
+import OptionTile from "@/presentation/components/option-tile/OptionTile.vue";
 import SettingsGroup from "@/presentation/pages/settings/components/SettingsGroup.vue";
-import SettingToggleRow from "@/presentation/pages/settings/components/SettingToggleRow.vue";
 import StyleIcon from "@/presentation/components/style-icon/StyleIcon.vue";
 import ClearRecordsDialog from "@/presentation/pages/settings/components/ClearRecordsDialog.vue";
 import { provideClearRecordsDialog } from "@/presentation/pages/settings/components/useClearRecordsDialog";

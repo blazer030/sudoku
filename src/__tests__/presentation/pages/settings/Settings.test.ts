@@ -196,43 +196,44 @@ describe("Settings.vue groups", () => {
             ]);
     });
 
-    it("should show the input and display rows in order, with no gameplay tile left", () => {
+    it("should show the input and display tiles in order, in two columns", () => {
         const wrapper = mountSettings();
 
-        const rowsOf = (group: string) => wrapper.get(`[data-testid='settings-group-${group}']`).findAll("[data-testid^='toggle-']");
+        const tilesOf = (group: string) => wrapper.get(`[data-testid='settings-group-${group}']`).findAll("[data-testid^='toggle-']");
 
-        expect(rowsOf("input").map(row => row.attributes("data-testid"))).toEqual([
+        expect(tilesOf("input").map(tile => tile.attributes("data-testid"))).toEqual([
             "toggle-floatingDigitPad",
             "toggle-doubleTapFill",
             "toggle-autoNotesAtStart",
             "toggle-autoRemoveNotes",
         ]);
-        expect(rowsOf("display").map(row => row.attributes("data-testid"))).toEqual([
+        expect(tilesOf("display").map(tile => tile.attributes("data-testid"))).toEqual([
             "toggle-highlightSameDigit",
             "toggle-highlightScope",
             "toggle-showRemainingCount",
             "toggle-motionEffects",
         ]);
-        expect(wrapper.findAll("[data-skin~='tile']")).toHaveLength(0);
+        expect(wrapper.findAll("[data-skin~='tile']")).toHaveLength(8);
+        expect(wrapper.find("[role='switch']").exists()).toBe(false);
     });
 
-    it("should expose each row as a switch with its state", () => {
+    it("should expose each tile's state", () => {
         const wrapper = mountSettings();
 
         const states = (group: string) => wrapper.get(`[data-testid='settings-group-${group}']`).findAll("[data-testid^='toggle-']")
-            .map(row => [row.attributes("role"), row.attributes("aria-checked")]);
+            .map(tile => tile.attributes("aria-pressed"));
 
-        expect(states("input")).toEqual([["switch", "false"], ["switch", "false"], ["switch", "false"], ["switch", "true"]]);
-        expect(states("display")).toEqual([["switch", "true"], ["switch", "true"], ["switch", "true"], ["switch", "true"]]);
+        expect(states("input")).toEqual(["false", "false", "false", "true"]);
+        expect(states("display")).toEqual(["true", "true", "true", "true"]);
     });
 
-    it("should turn row, column and box highlighting off from its row", async () => {
+    it("should turn row, column and box highlighting off from its tile", async () => {
         const wrapper = mountSettings();
 
         await wrapper.get("[data-testid='toggle-highlightScope']").trigger("click");
 
         expect(useSettingsStore().highlightScope).toBe(false);
-        expect(wrapper.get("[data-testid='toggle-highlightScope']").attributes("aria-checked")).toBe("false");
+        expect(wrapper.get("[data-testid='toggle-highlightScope']").attributes("aria-pressed")).toBe("false");
         expect(readStoredSettings().highlightScope).toBe(false);
     });
 
@@ -244,13 +245,13 @@ describe("Settings.vue groups", () => {
         ["floatingDigitPad", true],
         ["doubleTapFill", true],
         ["autoNotesAtStart", true],
-    ] as const)("should sync the %s row with its setting", async (key, expected) => {
+    ] as const)("should sync the %s tile with its setting", async (key, expected) => {
         const wrapper = mountSettings();
 
         await wrapper.get(`[data-testid='toggle-${key}']`).trigger("click");
 
         expect(useSettingsStore()[key]).toBe(expected);
-        expect(wrapper.get(`[data-testid='toggle-${key}']`).attributes("aria-checked")).toBe(String(expected));
+        expect(wrapper.get(`[data-testid='toggle-${key}']`).attributes("aria-pressed")).toBe(String(expected));
         expect(readStoredSettings()[key]).toBe(expected);
     });
 });

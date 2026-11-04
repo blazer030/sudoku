@@ -35,7 +35,11 @@
 
 ### 懸浮鍵在可作答格出現並含擦除鍵
 
-所有可作答的格子都會出現，包含已填過的格子，方便直接修改；題目給定的格子不出現。按鍵是 3×3 數字加一條擦除鍵，擦除鍵的做法經擁有者在可點示意上確認。高度約 3.6 格（估計值，以 Requirement「Floating pad placement」的 81 格測試確認不超出盤面）。
+所有可作答的格子都會出現，包含已填過的格子，方便直接修改；題目給定的格子不出現。按鍵是 3×3 數字加一條擦除鍵，擦除鍵的做法經擁有者在可點示意上確認。一般盤面上高度約 3.6 格，以 Requirement「Floating pad placement」的 81 格測試確認不超出盤面。
+
+### 懸浮鍵按鍵最小 36px
+
+實測的按鍵大小隨盤面縮小：Pixel 7 Pro 38px、Pixel 3a 36px、iPhone SE 加到主畫面 29px、360×640 dp 的 Android 23px、iPhone SE 的 Safari 21px。擁有者選擇讓按鍵最小 36px：盤面小時懸浮鍵比 3 格大，可能超出盤面，但矮螢幕的盤面左右有空位（實測 iPhone SE 的 Safari 每邊 67px、360×640 dp 每邊 50px），所以仍在畫面內。兩邊都放不下時選超出最少的一邊。懸浮鍵開著時盤面的層級提高，避免超出的部分被下方控制項蓋住。不採用「太小就不顯示」，因為矮螢幕的玩家最需要少移動；不採用維持比例，因為 21px 難以按準。
 
 ### 懸浮鍵共用元件與輸入入口
 
@@ -73,11 +77,11 @@
 
 `DifficultyStats` 新增 `averageHints`，只算該難度完成的遊戲，沒有完成的遊戲時為 `null` 並顯示「—」，顯示到小數一位。統計頁每個難度的數值從 3 欄變 4 欄，把難度名稱移到數值上方，窄螢幕才放得下時間。
 
-### 設定改為兩組開關列
+### 設定沿用方塊並分成兩組
 
-新增 `SettingToggleRow`（圖示、名稱、說明、開關），遊戲區塊拆成「操作」和「顯示」兩個 `SettingsGroup`。`OptionTile` 留給外觀頁。不開子頁面，因為 8 個開關列仍在同一頁的合理長度內。
+遊戲區塊沿用 `OptionTile`，拆成「操作」和「顯示」兩個 `SettingsGroup`，各 2×2。擁有者先前特地把開關改成方塊（`b2a1e66`），任務 1.2 的開關列推翻了這個決定，所以改回。各風格既有的 `tile` 和 `check` 外觀直接沿用，不需要新的開關外觀。不開子頁面，因為 8 個方塊仍在同一頁的合理長度內。
 
-| 組別 | 開關 |
+| 組別 | 方塊 |
 |---|---|
 | 操作 | `floatingDigitPad`、`doubleTapFill`、`autoNotesAtStart`、`autoRemoveNotes` |
 | 顯示 | `highlightSameDigit`、`highlightScope`、`showRemainingCount`、`motionEffects` |
@@ -116,11 +120,12 @@
 - `Settings` 新增 `floatingDigitPad: boolean`、`doubleTapFill: boolean`、`autoNotesAtStart: boolean`，預設皆為 `false`；`settingsStore` 提供對應 setter。
 - `Sudoku.singleNoteCells(): { row: number; column: number; digit: number }[]`，依閱讀順序。
 - `Sudoku.beginFillRun(): void` 存快照；`Sudoku.fillInRun(row, column, digit, { autoRemoveNotes })` 填入但不存快照。
-- `floatingPadPlacement(cell): { rowStart: number; columnStart: number }`，純函式，以格為單位。
+- `floatingPadSize(cellSize): { rows: number; columns: number }`：懸浮鍵以格為單位的大小。
+- `floatingPadPlacement(cell, size): { rowStart: number; columnStart: number }`：純函式，以格為單位。
 - `FloatingDigitPad.vue` props：`cell`、`digitCounts`、`noteMode`、`currentEntry`、`currentNotes`、`disabledDigits`、`eraseDisabled`；emits：`selectDigit`、`erase`。
 - `DifficultyStats.averageHints: number | null`。
 - `ToastContent` 新增 `singleNotesFilled`（帶 `count`）和 `noSingleNotes`。
-- Skin hooks：`floating-pad`、`floating-key`、`floating-erase`、`setting-row`、`switch`。
+- Skin hooks：`floating-pad`、`floating-key`、`floating-erase`。
 
 **Failure modes**
 
@@ -137,14 +142,15 @@
 
 **Scope boundaries**
 
-- 範圍內：本文件列出的功能、9 個風格的懸浮數字鍵和開關 skin、`CLAUDE.md` 的 skin hook 說明、`UNRELEASED_CHANGES`。
+- 範圍內：本文件列出的功能、9 個風格的懸浮數字鍵 skin、`CLAUDE.md` 的 skin hook 說明、`UNRELEASED_CHANGES`。
 - 範圍外：Goals / Non-Goals 列出的項目。
 
 ## Risks / Trade-offs
 
 - [懸浮鍵擋到同宮的格子，而同宮正是判斷依據之一] → 擁有者試過示意後接受；設定預設關閉，可隨時關掉。
 - [點已填的格子只想看相同數字時也會跳出懸浮鍵] → 擁有者明確要求可以改已填的格子；再點一次該格或點空白就收起。
-- [懸浮鍵按鍵約 37px，低於常見的 44～48px 觸控建議（依 375px 寬手機和現有版面估計）] → 和玩家已在點的格子同尺寸；模擬器確認按鍵範圍和實際尺寸，手感和誤觸由擁有者在真機判斷。
+- [懸浮鍵按鍵最小 36px，低於常見的 44～48px 觸控建議] → 擁有者選定最小 36px；模擬器確認按鍵範圍和實際尺寸，手感和誤觸由擁有者在真機判斷。
+- [實測 Pixel 3a 上，點中間的鍵左右距邊緣 3～4px 時，WebView 會歸給隔壁的鍵；調間距、圓角和 `touch-action` 都未消除，盤面格子和下方數字鍵沒有此現象] → 只出現在各 2px 的窄帶，且模擬器的觸控半徑和真手指不同，由擁有者在真機判斷是否處理。
 - [矮手機的空白處很少：依版面類別推算，盤面左右只剩約 8px，上下的彈性空間可能是 0] → 任務 3.2 在 360×640 實測可點的空白區；不足時把 `game-inputs` 內的間隙也算空白，並回報擁有者。
 - [誤觸連點一次填很多格] → 一次復原全部還原。
 - [舊紀錄少算第一次提示，平均偏低] → 擁有者接受，不補正。

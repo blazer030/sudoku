@@ -9,7 +9,7 @@
 - **BREAKING**（遊戲規則）自動筆記移出提示選單，改成「開局自動筆記」設定：開著就每局帶筆記開始，關掉就只能自己寫，遊戲中不再能補。
 - **BREAKING**（遊戲規則）提示不再限制次數，也取消第一次免費：每次使用都算一次。
 - 統計頁依難度新增「平均提示次數」，和平均時間一樣只算完成的遊戲。
-- 設定頁的遊戲區塊改版：方塊格改成開關列，分成「操作」和「顯示」兩組。
+- 設定頁的遊戲區塊沿用方塊，分成「操作」和「顯示」兩組，各 2×2。
 - 三個新設定預設都關閉。
 
 ## Non-Goals
@@ -24,7 +24,7 @@
 - `single-note-fill`: 連點空白處，一次填入所有只剩一個筆記的格子
 - `auto-notes-setting`: 以設定決定遊戲開局是否帶好全部筆記
 - `hint-usage`: 提示不限次數、沒有免費次數，以及統計頁的平均提示次數
-- `gameplay-settings`: 設定頁的遊戲開關分組與開關列
+- `gameplay-settings`: 設定頁的遊戲選項分組
 
 ### Modified Capabilities
 
@@ -32,7 +32,7 @@
 
 ## Impact
 
-- 受影響的視覺風格：全部（minimal、tactile、paper、pixel、cyber、ink、chalkboard、blueprint、aurora）。懸浮數字鍵和設定開關列都要在每個風格下成立，懸浮數字鍵另有各風格專屬設計。
+- 受影響的視覺風格：全部（minimal、tactile、paper、pixel、cyber、ink、chalkboard、blueprint、aurora）。懸浮數字鍵和設定方塊都要在每個風格下成立，懸浮數字鍵另有各風格專屬設計。
 - 玩家看得到：是。合併進 `develop` 時要在 `src/presentation/pages/settings/changelogData.ts` 的 `UNRELEASED_CHANGES` 加一行，或歸入既有的一行。
 - 程式：`src/domain/game/Sudoku.ts`、`src/domain/game/HintTracker.ts`、`src/application/settings/SettingsStorage.ts`、`src/application/analytics/AnalyticsService.ts`、`src/stores/settingsStore.ts`、`src/stores/gameStore.ts`、`src/stores/statisticsStore.ts`、`src/presentation/pages/game/`、`src/presentation/pages/solver-walkthrough/`、`src/presentation/pages/settings/Settings.vue`、`src/presentation/pages/statistics/Statistics.vue`、`src/presentation/pages/home/Home.vue`、`src/presentation/components/`、`src/presentation/i18n/messages/`、`src/style/styles/*/skin.css`。
 - 資料：設定多三個欄位，舊存檔讀到時用預設值。舊遊戲紀錄的 `hintsUsed` 不補正，用過提示的舊紀錄會少算一次。

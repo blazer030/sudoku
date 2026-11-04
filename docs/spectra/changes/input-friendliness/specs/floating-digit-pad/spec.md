@@ -41,12 +41,17 @@ While the setting is on, the system SHALL open the floating pad when a selection
 
 ### Requirement: Floating pad placement
 
-The system SHALL place the pad so that its corner touches the selected cell's corner, below and to the right by default, moving above or to the left when it would otherwise leave the board. The pad SHALL stay inside the board and SHALL NOT cover the selected cell's row or column.
+The system SHALL place the pad so that its corner touches the selected cell's corner, below and to the right by default, moving above or to the left when it would otherwise leave the board. On a board with room for it, the pad SHALL stay inside the board. On a board too small for it, the pad SHALL open on the side where it leaves the board the least, and SHALL stay on the screen. The pad SHALL NOT cover the selected cell's row or column.
 
 #### Scenario: Every cell on the board
 
-- **WHEN** the placement is computed for each of the 81 cells
+- **WHEN** the placement is computed for each of the 81 cells on a board with room for the pad
 - **THEN** the pad stays inside the board and covers no cell of the selected cell's row or column
+
+#### Scenario: Every cell on a small board
+
+- **WHEN** the placement is computed for each of the 81 cells on an iPhone SE in Safari, where a cell is 24.2px wide on a 375×547 screen
+- **THEN** the pad stays on the screen and covers no cell of the selected cell's row or column
 
 ##### Example: placement by cell
 
@@ -57,6 +62,24 @@ The system SHALL place the pad so that its corner touches the selected cell's co
 | 5, 5 | Above, right |
 | 2, 6 | Below, left |
 | 8, 8 | Above, left |
+
+### Requirement: Floating pad key size
+
+Each digit key SHALL be at least 36px on each side, whatever the cell size. On a board whose cells would make the keys smaller, the pad SHALL grow past three cells wide.
+
+#### Scenario: Key size by screen
+
+- **WHEN** the pad opens on the screens below
+- **THEN** the keys measure as the table shows
+
+##### Example: measured cell widths
+
+| Screen | Cell width | Digit key |
+| ------ | ---------- | --------- |
+| iPhone SE in Safari | 24.2px | 36px |
+| Android at 360×640 dp | 26.5px | 36px |
+| iPhone SE added to the home screen | 32.7px | 36px |
+| Pixel 7 Pro | 41.5px | Follows the cell, over 36px |
 
 ### Requirement: Floating pad input
 
