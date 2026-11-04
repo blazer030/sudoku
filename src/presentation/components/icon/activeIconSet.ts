@@ -11,7 +11,7 @@ export const STYLE_ICON_SETS: Record<StyleId, IconSetLoader | null> = {
     paper: () => import("@/style/styles/paper/icons").then(module => module.paperIcons),
     pixel: () => import("@/style/styles/pixel/icons").then(module => module.pixelIcons),
     cyber: () => import("@/style/styles/cyber/icons").then(module => module.cyberIcons),
-    ink: null,
+    ink: () => import("@/style/styles/ink/icons").then(module => module.inkIcons),
     chalkboard: null,
     blueprint: null,
     aurora: null,
