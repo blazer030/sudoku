@@ -109,12 +109,8 @@ describe("blueprint skin", () => {
             expect(declarationsOf(BLUEPRINT_CSS, `${FONTS_READY} [data-skin~="dialog-title"]`).get("font-weight")).toBe("500");
         });
 
-        it("should draw lucide icons in a drafting pen: 1.5 strokes with square ends and mitred corners", () => {
-            const icon = declarationsOf(BLUEPRINT_CSS, `${SCOPE} svg.lucide`);
-
-            expect(icon.get("stroke-width")).toBe("1.5");
-            expect(icon.get("stroke-linecap")).toBe("square");
-            expect(icon.get("stroke-linejoin")).toBe("miter");
+        it("should leave an icon's construction marks off where they would only muddy it", () => {
+            expect(declarationsOf(BLUEPRINT_CSS, `${SCOPE} svg[data-icon-small] .blueprint-mark`).get("visibility")).toBe("hidden");
         });
 
         it("should set no letter-spacing, font-size or border on any element (only placed decorations size themselves)", () => {

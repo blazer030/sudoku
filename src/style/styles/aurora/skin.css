@@ -244,16 +244,39 @@
     font-weight: 600;
 }
 
-/* Line icons keep the canvas's pen: 2 wide, round ends and joins */
-[data-style="aurora"] svg.lucide {
-    stroke-width: 2;
-    stroke-linecap: round;
-    stroke-linejoin: round;
+/* An icon's gradient runs through these, over the glass (paletteContrast checks each at 3:1). Where its colour says
+   something, it keeps that one colour: danger and errors, on a solid fill, and the quiet icons beside small words */
+[data-style="aurora"] {
+    --aurora-icon-start: var(--color-aurora-icon-start);
+    --aurora-icon-middle: var(--color-primary);
+    --aurora-icon-end: var(--color-aurora-icon-end);
+}
+
+[data-style="aurora"] .text-on-primary,
+[data-style="aurora"] .bg-primary,
+[data-style="aurora"] .bg-featured,
+[data-style="aurora"] .hint-primary,
+[data-style="aurora"] [data-skin~="trophy"],
+[data-style="aurora"] [data-skin~="swatch"],
+[data-style="aurora"] .text-danger,
+[data-style="aurora"] .text-error,
+[data-style="aurora"] .text-on-danger,
+[data-style="aurora"] .bg-danger,
+[data-style="aurora"] .text-foreground-muted,
+[data-style="aurora"] .text-foreground-secondary,
+[data-style="aurora"] [data-skin~="icon-tile"][data-skin~="danger"],
+[data-style="aurora"] [data-skin~="icon-tile"][data-skin~="gave-up"],
+[data-style="aurora"] svg[data-icon="Timer"],
+[data-style="aurora"] svg[data-icon="ChevronLeft"],
+[data-style="aurora"] svg[data-icon="ChevronRight"] {
+    --aurora-icon-start: currentColor;
+    --aurora-icon-middle: currentColor;
+    --aurora-icon-end: currentColor;
 }
 
 /* Words with no glass under them lie on the lights, where only the text colour reads (spec ruling 4): the
    header's back button and title already are; the timer's icon and the changelog's note are repointed */
-[data-style="aurora"] svg.lucide-timer,
+[data-style="aurora"] svg[data-icon="Timer"],
 [data-style="aurora"] [data-skin~="app-note"] {
     color: var(--color-foreground);
 }

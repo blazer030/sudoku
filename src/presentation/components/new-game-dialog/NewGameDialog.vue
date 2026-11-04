@@ -81,7 +81,7 @@
 
 <script lang="ts" setup>
 import { computed, onBeforeUnmount, onMounted } from "vue";
-import { Play, TriangleAlert } from "lucide-vue-next";
+import { Play, TriangleAlert } from "@/presentation/components/icon";
 import { useI18n } from "vue-i18n";
 import { useNewGameDialog } from "@/presentation/components/new-game-dialog/useNewGameDialog";
 import { useDifficultyLabel } from "@/presentation/i18n/difficultyLabels";

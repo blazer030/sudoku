@@ -228,7 +228,7 @@
 import { computed, inject, nextTick, onBeforeUnmount, ref, useTemplateRef, watch, type Component } from "vue";
 import { onBeforeRouteLeave, useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
-import { ChevronLeft, Info, ListFilter, Pencil, PencilLine, RotateCcw, Trophy, Wand2 } from "lucide-vue-next";
+import { ChevronLeft, Info, ListFilter, Pencil, PencilLine, RotateCcw, Trophy, Wand2 } from "@/presentation/components/icon";
 import { ROUTER_PATH } from "@/router";
 import { ANALYTICS_KEY } from "@/application/analytics/AnalyticsService";
 import { BOARD_SIZE } from "@/domain/board/constants";

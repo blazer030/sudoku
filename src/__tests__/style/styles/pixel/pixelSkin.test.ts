@@ -268,13 +268,13 @@ describe("pixel skin", () => {
         expect(newGame.get("color")).toBe("var(--color-on-primary)");
     });
 
-    it("should fill the continue card's arrow solid and blink it in steps", () => {
+    it("should blink the continue card's arrow in steps", () => {
         const caret = declarationsOf(PIXEL_CSS, skin("caret"));
 
         // The canvas draws it in the highlight: dark green in 掌機, gold in 紅白機
         expect(caret.get("color")).toBe("var(--color-primary)");
-        expect(caret.get("fill")).toBe("currentColor");
-        expect(caret.get("stroke")).toBe("none");
+        expect(caret.has("fill")).toBe(false);
+        expect(caret.has("stroke")).toBe(false);
         expect(caret.get("animation")).toMatch(/^pixel-blink \d+ms steps\(/);
         expect(reducedMotionDeclarationsOf(skin("caret")).get("animation")).toBe("none");
     });

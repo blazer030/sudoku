@@ -9,6 +9,7 @@ import { syncInkFonts } from "@/style/styles/ink/fonts";
 import { syncChalkboardFonts } from "@/style/styles/chalkboard/fonts";
 import { syncBlueprintFonts } from "@/style/styles/blueprint/fonts";
 import { syncAuroraFonts } from "@/style/styles/aurora/fonts";
+import { selectIconStyle } from "@/presentation/components/icon/activeIconSet";
 import { effectiveColorMode, type ColorMode, type ColorThemeId, type StyleId } from "@/theme/themeIds";
 import type { SystemBarService } from "@/application/systemBar/SystemBarService";
 import type { AppearanceBridgeService } from "@/application/appearanceBridge/AppearanceBridgeService";
@@ -20,8 +21,8 @@ export interface AppearanceSources {
 }
 
 /**
- * Owns the <html> theme attributes, the dark class, the theme-color meta, the favicon, the system bars and
- * paper's font stylesheets, and keeps the Android shell told of the appearance for its next cold start.
+ * Owns the <html> theme attributes, the dark class, the theme-color meta, the favicon, the system bars,
+ * paper's font stylesheets and the icons' set, and keeps the Android shell told of the appearance for its next cold start.
  */
 export const startAppearanceSync = (
     sources: AppearanceSources,
@@ -41,6 +42,7 @@ export const startAppearanceSync = (
         syncChalkboardFonts(sources.style.value === "chalkboard");
         syncBlueprintFonts(sources.style.value === "blueprint");
         syncAuroraFonts(sources.style.value === "aurora");
+        void selectIconStyle(sources.style.value);
         updateMetaThemeColor(systemBarColor(sources.style.value, sources.colorTheme.value, mode));
         updateFavicon(launcherIconKey(sources.style.value, sources.colorTheme.value, mode));
         void systemBar.apply(mode);

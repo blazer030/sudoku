@@ -159,7 +159,7 @@
 import { computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
-import { ChevronRight, Crosshair, Database, Eraser, ExternalLink, Gamepad2, Hash, Highlighter, Info, Languages, Palette, Sparkles, Trash2 } from "lucide-vue-next";
+import { ChevronRight, Crosshair, Database, Eraser, ExternalLink, Gamepad2, Hash, Highlighter, Info, Languages, Palette, Sparkles, Trash2 } from "@/presentation/components/icon";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { useDonateStore } from "@/stores/donateStore";
 import { useStatisticsStore } from "@/stores/statisticsStore";

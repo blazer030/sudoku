@@ -117,7 +117,7 @@
 import { computed } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
-import { Check, Palette, Shapes, Smartphone, SunMoon } from "lucide-vue-next";
+import { Check, Palette, Shapes, Smartphone, SunMoon } from "@/presentation/components/icon";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { usePlatform } from "@/presentation/composables/usePlatform";
 import { STYLE_COLOR_MODES, STYLE_IDS, type ColorMode, type ColorThemeId, type StyleId } from "@/theme/themeIds";

@@ -67,11 +67,9 @@
     font-weight: 500;
 }
 
-/* Icons are drawn with a drafting pen: thinner strokes, square ends, mitred corners */
-[data-style="blueprint"] svg.lucide {
-    stroke-width: 1.5;
-    stroke-linecap: square;
-    stroke-linejoin: miter;
+/* An icon's construction marks would only muddy it at small sizes */
+[data-style="blueprint"] svg[data-icon-small] .blueprint-mark {
+    visibility: hidden;
 }
 
 /* The sheet. The body is the one sheet of graph paper behind every screen, across the whole window, so on a wide

@@ -78,7 +78,7 @@
 import { computed, inject, ref } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
-import { ChartBar, Plus, Settings, Wand2 } from "lucide-vue-next";
+import { ChartBar, Plus, Settings, Wand2 } from "@/presentation/components/icon";
 import { ROUTER_PATH } from "@/router";
 import type { Difficulty } from "@/domain/generator/SudokuGenerator";
 import { useGameStore } from "@/stores/gameStore";

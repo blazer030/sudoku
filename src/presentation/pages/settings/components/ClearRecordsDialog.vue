@@ -60,7 +60,7 @@
 
 <script lang="ts" setup>
 import { useI18n } from "vue-i18n";
-import { Trash2 } from "lucide-vue-next";
+import { Trash2 } from "@/presentation/components/icon";
 import { useClearRecordsDialog } from "@/presentation/pages/settings/components/useClearRecordsDialog";
 import { vPress } from "@/presentation/directives/press";
 

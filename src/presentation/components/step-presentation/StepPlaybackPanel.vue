@@ -65,7 +65,7 @@
 <script lang="ts" setup>
 import { nextTick, useTemplateRef, watch } from "vue";
 import { useI18n } from "vue-i18n";
-import { Pause, Play } from "lucide-vue-next";
+import { Pause, Play } from "@/presentation/components/icon";
 import type { PlayState } from "@/presentation/components/playback/useProgressDrag";
 import ProgressBar from "@/presentation/components/playback/ProgressBar.vue";
 import StepNavigator from "@/presentation/components/step-presentation/StepNavigator.vue";

@@ -75,7 +75,7 @@
 <script lang="ts" setup>
 import { computed, type Component, useId } from "vue";
 import { useI18n } from "vue-i18n";
-import { CircleAlert, CircleHelp, RotateCcw } from "lucide-vue-next";
+import { CircleAlert, CircleHelp, RotateCcw } from "@/presentation/components/icon";
 import { type WalkthroughDialogKind, useWalkthroughDialog } from "@/presentation/pages/solver-walkthrough/useWalkthroughDialog";
 import { vPress } from "@/presentation/directives/press";
 

@@ -971,4 +971,21 @@ describe("chalkboard skin", () => {
             }
         });
     });
+
+    describe("icons", () => {
+        const DARK = ':root.dark[data-style="chalkboard"]';
+        const ANY = '[data-style="chalkboard"]';
+
+        it("should draw plain marker lines, with no dust, on the whiteboard", async () => {
+            const { chalkboardIcons } = await import("@/style/styles/chalkboard/icons");
+
+            expect(Object.values(chalkboardIcons.drawings).join("")).not.toContain("stroke-dasharray");
+            expect(declarationsOf(CHALKBOARD_CSS, `${ANY} .chalk-dust`).get("visibility")).toBe("hidden");
+        });
+
+        it("should break the chalk's line and shed its dust on the blackboard", () => {
+            expect(declarationsOf(CHALKBOARD_CSS, `${DARK} .chalk-line`).get("stroke-dasharray")).toBeTruthy();
+            expect(declarationsOf(CHALKBOARD_CSS, `${DARK} .chalk-dust`).get("visibility")).toBe("visible");
+        });
+    });
 });

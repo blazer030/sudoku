@@ -1097,3 +1097,29 @@
         animation: none;
     }
 }
+
+/* An icon's neon runs from the palette's cyan to its magenta. Where its colour says something, it keeps that one
+   colour: danger and errors, on a solid fill, the trophy and the marks with a colour of their own, and the quiet
+   icons beside small words */
+[data-style="cyber"] {
+    --cyber-icon-start: var(--color-accent);
+    --cyber-icon-end: var(--color-primary);
+}
+
+[data-style="cyber"] .text-on-primary,
+[data-style="cyber"] .bg-primary,
+[data-style="cyber"] .text-danger,
+[data-style="cyber"] .text-error,
+[data-style="cyber"] .text-on-danger,
+[data-style="cyber"] .bg-danger,
+[data-style="cyber"] .text-foreground-muted,
+[data-style="cyber"] .text-foreground-secondary,
+[data-style="cyber"] [data-skin~="icon-tile"][data-skin~="danger"],
+[data-style="cyber"] [data-skin~="icon-tile"][data-skin~="gave-up"],
+[data-style="cyber"] [data-skin~="trophy"],
+[data-style="cyber"] [data-skin~="caret"],
+[data-style="cyber"] [data-skin~="check"],
+[data-style="cyber"] svg[data-icon="Timer"] {
+    --cyber-icon-start: currentColor;
+    --cyber-icon-end: currentColor;
+}

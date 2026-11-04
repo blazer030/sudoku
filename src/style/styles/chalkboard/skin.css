@@ -1563,3 +1563,20 @@
         stroke-dashoffset: 0;
     }
 }
+
+/* Icons: 白板's marker draws a plain, even line; chalk skips and sheds dust on 黑板 */
+[data-style="chalkboard"] .chalk-dust {
+    visibility: hidden;
+}
+
+:root.dark[data-style="chalkboard"] .chalk-dust {
+    visibility: visible;
+}
+
+:root.dark[data-style="chalkboard"] .chalk-line {
+    stroke-dasharray: 7.5 .45 4 .6 9 .35;
+}
+
+:root.dark[data-style="chalkboard"] .chalk-line:nth-child(4n + 1) {
+    stroke-dasharray: 9 .5 3 .6 11 .4;
+}

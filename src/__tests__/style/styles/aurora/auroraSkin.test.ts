@@ -396,7 +396,7 @@ describe("aurora's glass", () => {
     describe("words on the lights", () => {
         // Nothing but the text colour reads 4.5:1 where the lights are brightest (spec ruling 4)
         it("should write the timer's icon and the changelog's note in the text colour", () => {
-            expect(declarationsOf(AURORA_CSS, `${AURORA_SCOPE} svg.lucide-timer`).get("color")).toBe("var(--color-foreground)");
+            expect(declarationsOf(AURORA_CSS, `${AURORA_SCOPE} svg[data-icon="Timer"]`).get("color")).toBe("var(--color-foreground)");
             expect(declarationsOf(AURORA_CSS, `${AURORA_SCOPE} [data-skin~="app-note"]`).get("color")).toBe("var(--color-foreground)");
         });
 
@@ -409,13 +409,41 @@ describe("aurora's glass", () => {
 
             expect(spans.join(" ")).not.toMatch(/\btext-foreground-(?:secondary|muted)\b/);
         });
+    });
 
-        it("should draw line icons 2 wide with round ends and joins", () => {
-            const icons = declarationsOf(AURORA_CSS, `${AURORA_SCOPE} svg.lucide`);
+    describe("icons", () => {
+        it("should draw an icon's gradient from the aurora's own colours around the theme's primary", () => {
+            const root = declarationsOf(AURORA_CSS, AURORA_SCOPE);
 
-            expect(icons.get("stroke-width")).toBe("2");
-            expect(icons.get("stroke-linecap")).toBe("round");
-            expect(icons.get("stroke-linejoin")).toBe("round");
+            expect(root.get("--aurora-icon-start")).toBe("var(--color-aurora-icon-start)");
+            expect(root.get("--aurora-icon-middle")).toBe("var(--color-primary)");
+            expect(root.get("--aurora-icon-end")).toBe("var(--color-aurora-icon-end)");
+        });
+
+        it.each([
+            ".text-on-primary",
+            ".bg-primary",
+            ".hint-primary",
+            ".text-danger",
+            ".text-error",
+            ".text-on-danger",
+            ".bg-danger",
+            ".text-foreground-muted",
+            ".text-foreground-secondary",
+            '[data-skin~="icon-tile"][data-skin~="danger"]',
+            '[data-skin~="icon-tile"][data-skin~="gave-up"]',
+            '[data-skin~="trophy"]',
+            '[data-skin~="swatch"]',
+            ".bg-featured",
+            'svg[data-icon="Timer"]',
+            'svg[data-icon="ChevronLeft"]',
+            'svg[data-icon="ChevronRight"]',
+        ])("should keep icons under %s in their one colour", (selector) => {
+            const solid = declarationsOf(AURORA_CSS, `${AURORA_SCOPE} ${selector}`);
+
+            expect(solid.get("--aurora-icon-start")).toBe("currentColor");
+            expect(solid.get("--aurora-icon-middle")).toBe("currentColor");
+            expect(solid.get("--aurora-icon-end")).toBe("currentColor");
         });
     });
 

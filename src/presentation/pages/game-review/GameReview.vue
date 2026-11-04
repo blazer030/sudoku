@@ -158,7 +158,7 @@
 <script lang="ts" setup>
 import { computed, useTemplateRef, watch, type Component } from "vue";
 import { useRouter } from "vue-router";
-import { ChevronLeft, Eraser, LayoutGrid, Lightbulb, Pencil, Sparkles, StickyNote, Trophy, Undo2, X } from "lucide-vue-next";
+import { ChevronLeft, Eraser, LayoutGrid, Lightbulb, Pencil, Sparkles, StickyNote, Trophy, Undo2, X } from "@/presentation/components/icon";
 import { ROUTER_PATH } from "@/router";
 import { useScrolledHeader } from "@/presentation/composables/useScrolledHeader";
 import type { GameStepAction } from "@/domain/game/GameStep";

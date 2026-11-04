@@ -47,4 +47,16 @@ export default tseslint.config(
             "vue/script-indent": ["warn", 4],
         },
     },
+    {
+        files: ["src/**/*.{ts,vue}"],
+        ignores: ["src/presentation/components/icon/**", "src/__tests__/**"],
+        rules: {
+            "no-restricted-imports": ["error", {
+                paths: [{
+                    name: "lucide-vue-next",
+                    message: "Import icons from @/presentation/components/icon, which draws them in the style's own hand.",
+                }],
+            }],
+        },
+    },
 );
