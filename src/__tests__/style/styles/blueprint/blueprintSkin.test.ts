@@ -657,10 +657,12 @@ describe("blueprint skin", () => {
             expect(errorIndex).toBeGreaterThan(lastRuleIndexOf(`${cell("peer")}[data-pressed]`));
         });
 
-        it("should write notes in the pale ink and the selected digit's note in the primary, with no disc", () => {
+        // Colour alone is too faint in a cell of small notes, so it takes a drafter's balloon, not the shared disc
+        it("should write notes in the pale ink and ring the selected digit's note in the primary", () => {
             const highlighted = declarationsOf(BLUEPRINT_CSS, `${BOARD} [data-note-highlight]`);
 
-            expect(highlighted.get("background-color")).toBe("transparent");
+            expect(highlighted.get("background-color")).toBe("color-mix(in srgb, var(--color-primary) 16%, transparent)");
+            expect(highlighted.get("box-shadow")).toBe("inset 0 0 0 1.25px var(--color-primary)");
             expect(highlighted.get("color")).toBe("var(--color-primary)");
         });
     });
@@ -720,6 +722,7 @@ describe("blueprint skin", () => {
             expect(emphasised.get("background-color")).toBe("var(--color-primary)");
             expect(emphasised.get("color")).toBe("var(--color-on-primary)");
             expect(emphasised.get("border-radius")).toBe("0");
+            expect(emphasised.get("box-shadow")).toBe("none");
         });
     });
     describe("keypad and controls", () => {
