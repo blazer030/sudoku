@@ -254,7 +254,10 @@
 
 [data-style="aurora"] .text-on-primary,
 [data-style="aurora"] .bg-primary,
+[data-style="aurora"] .bg-featured,
 [data-style="aurora"] .hint-primary,
+[data-style="aurora"] [data-skin~="trophy"],
+[data-style="aurora"] [data-skin~="swatch"],
 [data-style="aurora"] .text-danger,
 [data-style="aurora"] .text-error,
 [data-style="aurora"] .text-on-danger,
