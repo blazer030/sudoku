@@ -82,8 +82,9 @@
 }
 
 /* Brush lines: one static drawing (brush-grid.svg: twelve pale cell lines, four box lines, the frame, its
-   edges roughened once when the image is rasterised) shown as a mask in ink, over the cells
-   (inside the grid's border, as the canvas lays it), so its lines land on the cell edges.
+   edges roughened once when the image is rasterised) shown as a mask in ink, over the cells, so its lines
+   land on the cell edges. The frame lies outside the cells, in the drawing's 9-unit margin of the 351 the
+   cells take (the inset below), over the grid's border and the board's padding, so it never hides a note.
    Only where masks are supported do the plain cell lines and the grid's border give way to it, so an
    engine without masks keeps them and draws no block of ink. Above the digits (2), below the 圓相 (4).
    The file is named through the @/ alias: a path relative to this sheet is lost once it is inlined into
@@ -98,7 +99,7 @@
     [data-style="ink"] [data-skin~="board-grid"]::after {
         content: "";
         position: absolute;
-        inset: 0;
+        inset: -2.5641%;
         z-index: 3;
         pointer-events: none;
         background-color: var(--color-foreground);

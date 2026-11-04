@@ -76,10 +76,9 @@ describe("ink skin", () => {
             expect(lines.get("background-color")).toBe("var(--color-foreground)");
         });
 
-        it("should lay the brush lines over the cells, so they land on the cell edges, above the digits, never taking taps", () => {
+        it("should lay the brush lines above the digits, never taking taps", () => {
             const lines = maskSupportsDeclarationsOf(`${GRID}::after`);
 
-            expect(lines.get("inset")).toBe("0");
             expect(Number(lines.get("z-index"))).toBeGreaterThan(Number(declarationsOf(INK_CSS, `${BOARD} [data-variant] > div`).get("z-index")));
             expect(lines.get("pointer-events")).toBe("none");
         });
@@ -139,6 +138,54 @@ describe("ink skin", () => {
                 expect(countAt(levels[0]) + countAt(levels[1])).toBe(2 * 8);
                 expect(countAt(levels[1])).toBe(2 * 2);
                 expect(countAt(levels[2])).toBe(4);
+            });
+
+            // The cells fill the drawing's first 351 by 351 units; the margin round them holds the frame
+            const CELLS_SIZE = 351;
+            const pointsOf = (path: Element): { x: number; y: number }[] => Array.from(
+                (path.getAttribute("d") ?? "").matchAll(/(-?[\d.]+) (-?[\d.]+)/g),
+                ([, x, y]) => ({ x: Number(x), y: Number(y) }),
+            );
+            const paths = Array.from(svg.getElementsByTagName("path"));
+            const frameSides = paths.filter(path => !path.hasAttribute("opacity"));
+            const innerLines = paths.filter(path => path.hasAttribute("opacity"));
+
+            // The frame is above the digits and notes (2), so any of it over a cell hides the note at that edge
+            it("should keep the frame's four sides out of the cells", () => {
+                for (const side of frameSides) {
+                    const points = pointsOf(side);
+                    const xs = points.map(point => point.x);
+                    const ys = points.map(point => point.y);
+                    const across = Math.max(...xs) - Math.min(...xs) < Math.max(...ys) - Math.min(...ys) ? xs : ys;
+
+                    expect(Math.max(...across) <= 0 || Math.min(...across) >= CELLS_SIZE, side.getAttribute("d") ?? "").toBe(true);
+                }
+            });
+
+            it("should run every inner line up to the frame", () => {
+                for (const line of innerLines) {
+                    const points = pointsOf(line);
+                    const xs = points.map(point => point.x);
+                    const ys = points.map(point => point.y);
+                    const along = Math.max(...xs) - Math.min(...xs) > Math.max(...ys) - Math.min(...ys) ? xs : ys;
+
+                    expect(Math.min(...along)).toBeLessThanOrEqual(0);
+                    expect(Math.max(...along)).toBeGreaterThanOrEqual(CELLS_SIZE);
+                }
+            });
+
+            // The mask stretches over the ::after, so the ::after must reach past the cells by exactly the
+            // drawing's margin, or the lines leave the cell edges
+            it("should lay the drawing's margin outside the cells, with its lines on the cell edges", () => {
+                const [left, top, width, height] = (svg.documentElement.getAttribute("viewBox") ?? "").split(/\s+/).map(Number);
+                const margin = -left;
+                const inset = maskSupportsDeclarationsOf(`${GRID}::after`).get("inset");
+
+                expect(margin).toBeGreaterThan(0);
+                expect(top).toBe(left);
+                expect(width).toBe(CELLS_SIZE + 2 * margin);
+                expect(height).toBe(width);
+                expect(Number.parseFloat(inset ?? "")).toBeCloseTo(-margin / CELLS_SIZE * 100, 3);
             });
 
             it("should carry only alpha: every shape in currentColor", () => {
