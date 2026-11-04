@@ -1,0 +1,31 @@
+schema: spec-driven
+
+# Shown to AI when creating artifacts. CLAUDE.md holds the full conventions; where they differ, it wins.
+context: |
+  Sudoku game for the web (PWA) and Android, in English and Traditional Chinese.
+  Stack: Vue 3 Composition API, strict TypeScript, Pinia, Vite, Vitest, Capacitor.
+
+  Architecture: Domain-Driven Design with ports and adapters, in src/domain, src/application,
+  src/infrastructure, src/presentation and src/stores. Dependencies flow inward only: the domain never
+  imports from presentation, stores or application. A native capability is a port in application and an
+  adapter in infrastructure with a no-op web twin.
+
+  Visual styles: minimal, tactile, paper, pixel, cyber, ink, chalkboard, blueprint and aurora, one folder each
+  under src/style/styles. A shared screen has to work in all of them. Most per-style data is a
+  Record<StyleId, ...>, so a new style or a new per-style feature names every style.
+
+  Tests: src/__tests__ mirrors src. Tests check that switching language switches the screen, never the exact
+  wording. Moments that pass in an animation aren't held to contrast; the steady state is.
+
+  Chinese copy follows "Copy (zh-Hant)" in CLAUDE.md, for its fixed terms above all. Store copy never counts
+  or lists the styles.
+
+rules:
+  proposal:
+    - Say which visual styles the change touches, or that it does not depend on the style
+    - Say whether players can see it; if they can, it adds a line to UNRELEASED_CHANGES
+  design:
+    - Anything the game and Walkthrough pages both show comes from one shared module
+    - Say what happens on engines or devices that can't do it (WebKit, WebGL lost, motion off)
+  tasks:
+    - A change to a look ends with a check in Chromium, WebKit and Firefox, and on Android when it touches native code or the webview
