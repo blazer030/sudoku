@@ -3,6 +3,9 @@ import { nextTick } from "vue";
 import { i18n } from "@/presentation/i18n";
 import { flushPromises, mount, type VueWrapper } from "@vue/test-utils";
 import { createMemoryHistory, createRouter } from "vue-router";
+import { readFileSync } from "fs";
+import { createPinia, setActivePinia } from "pinia";
+import FloatingDigitPad from "@/presentation/components/floating-digit-pad/FloatingDigitPad.vue";
 import SolverWalkthrough from "@/presentation/pages/solver-walkthrough/SolverWalkthrough.vue";
 import { BoardState } from "@/domain/solver/BoardState";
 import { buildSolvePath } from "@/domain/solver/SolvePath";
@@ -87,6 +90,142 @@ afterEach(() => {
 });
 
 describe("SolverWalkthrough", () => {
+    describe("floating digit pad", () => {
+        const PAD = "[data-testid='floating-digit-pad']";
+
+        const mountEnteringWithPad = async (floatingDigitPad = true) => {
+            localStorage.setItem("sudoku-settings", JSON.stringify({ floatingDigitPad, motionEffects: false }));
+            setActivePinia(createPinia());
+            return mountEntering();
+        };
+
+        afterEach(() => {
+            localStorage.clear();
+        });
+
+        it("should open at a selected cell's corner while entering a puzzle", async () => {
+            const { wrapper } = await mountEnteringWithPad();
+
+            await cellAt(wrapper, 0, 0).trigger("click");
+
+            expect(wrapper.findComponent(FloatingDigitPad).exists()).toBe(true);
+        });
+
+        it("should stay away with the setting off", async () => {
+            const { wrapper } = await mountEnteringWithPad(false);
+
+            await cellAt(wrapper, 0, 0).trigger("click");
+
+            expect(wrapper.find(PAD).exists()).toBe(false);
+        });
+
+        it("should fill the cell and close", async () => {
+            const { wrapper } = await mountEnteringWithPad();
+            await cellAt(wrapper, 0, 0).trigger("click");
+
+            await wrapper.get("[data-testid='floating-number-5']").trigger("click");
+
+            expect(cellAt(wrapper, 0, 0).text()).toBe("5");
+            expect(wrapper.find(PAD).exists()).toBe(false);
+        });
+
+        it("should disable digits that conflict with peers", async () => {
+            const { wrapper } = await mountEnteringWithPad();
+            await cellAt(wrapper, 0, 0).trigger("click");
+            await wrapper.get("[data-testid='floating-number-5']").trigger("click");
+
+            await cellAt(wrapper, 0, 1).trigger("click");
+
+            expect(wrapper.get("[data-testid='floating-number-5']").attributes("disabled")).toBeDefined();
+            expect(wrapper.get("[data-testid='floating-number-4']").attributes("disabled")).toBeUndefined();
+        });
+
+        it("should change a filled cell, and erase it", async () => {
+            const { wrapper } = await mountEnteringWithPad();
+            await cellAt(wrapper, 0, 0).trigger("click");
+            await wrapper.get("[data-testid='floating-number-5']").trigger("click");
+
+            await cellAt(wrapper, 0, 0).trigger("click");
+            expect(wrapper.get("[data-testid='floating-number-5']").attributes("aria-pressed")).toBe("true");
+            await wrapper.get("[data-testid='floating-number-3']").trigger("click");
+            expect(cellAt(wrapper, 0, 0).text()).toBe("3");
+
+            await cellAt(wrapper, 0, 0).trigger("click");
+            await wrapper.get("[data-testid='floating-erase']").trigger("click");
+            expect(cellAt(wrapper, 0, 0).text()).toBe("");
+            expect(wrapper.find(PAD).exists()).toBe(false);
+        });
+
+        it("should disable the erase key on an empty cell", async () => {
+            const { wrapper } = await mountEnteringWithPad();
+
+            await cellAt(wrapper, 0, 0).trigger("click");
+
+            expect(wrapper.get("[data-testid='floating-erase']").attributes("disabled")).toBeDefined();
+        });
+
+        it("should not open while a digit is picked or in Erase mode", async () => {
+            const { wrapper } = await mountEnteringWithPad();
+
+            await wrapper.get("[data-testid='number-5']").trigger("click");
+            await cellAt(wrapper, 0, 0).trigger("click");
+            expect(wrapper.find(PAD).exists()).toBe(false);
+
+            await wrapper.get("[data-testid='number-5']").trigger("click");
+            await wrapper.get("[data-testid='erase-button']").trigger("click");
+            await cellAt(wrapper, 0, 1).trigger("click");
+            expect(wrapper.find(PAD).exists()).toBe(false);
+        });
+
+        it("should close on a tap of the blank", async () => {
+            const { wrapper } = await mountEnteringWithPad();
+            await cellAt(wrapper, 0, 0).trigger("click");
+
+            await wrapper.get("[data-testid='walkthrough-screen']").trigger("click");
+
+            expect(wrapper.find(PAD).exists()).toBe(false);
+        });
+
+        it("should keep the selection on a tap of the blank with the setting off", async () => {
+            const { wrapper } = await mountEnteringWithPad(false);
+            await cellAt(wrapper, 0, 0).trigger("click");
+
+            await wrapper.get("[data-testid='walkthrough-screen']").trigger("click");
+
+            expect(wrapper.get("[data-testid='walkthrough-board']").attributes("data-selected-cell")).toBe("R1C1");
+        });
+
+        it("should not show under the guide", () => {
+            localStorage.setItem("sudoku-settings", JSON.stringify({ floatingDigitPad: true }));
+            setActivePinia(createPinia());
+            const { wrapper } = mountWalkthrough();
+
+            expect(wrapper.find(PAD).exists()).toBe(false);
+        });
+
+        it("should not show once the solver is running or its steps are playing", async () => {
+            localStorage.setItem("sudoku-settings", JSON.stringify({ floatingDigitPad: true, motionEffects: false }));
+            setActivePinia(createPinia());
+            const { wrapper } = mountWalkthrough({ initialPuzzle: singlesPuzzle });
+            const empty = singlesPuzzle.flatMap((cells, row) => cells.flatMap((value, column) => value === 0 ? [{ row, column }] : []))[0];
+            await cellAt(wrapper, empty.row, empty.column).trigger("click");
+            expect(wrapper.find(PAD).exists()).toBe(true);
+
+            await solve(wrapper);
+
+            expect(wrapper.find(PAD).exists()).toBe(false);
+        });
+
+        it("should be the same component the game uses", () => {
+            const game = readFileSync("src/presentation/pages/game/GameScreen.vue", "utf8");
+            const walkthrough = readFileSync("src/presentation/pages/solver-walkthrough/SolverWalkthrough.vue", "utf8");
+            const shared = 'from "@/presentation/components/floating-digit-pad/FloatingDigitPad.vue"';
+
+            expect(game).toContain(shared);
+            expect(walkthrough).toContain(shared);
+        });
+    });
+
     describe("guide", () => {
         it("should open with the guide", () => {
             const { wrapper } = mountWalkthrough();
