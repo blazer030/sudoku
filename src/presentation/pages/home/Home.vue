@@ -85,7 +85,6 @@ import { useGameStore } from "@/stores/gameStore";
 import { useStatisticsStore } from "@/stores/statisticsStore";
 import { ANALYTICS_KEY } from "@/application/analytics/AnalyticsService";
 import { computeAbandonProgress } from "@/application/analytics/computeAbandonProgress";
-import { HintTracker } from "@/domain/game/HintTracker";
 
 import ContinueButton from "@/presentation/components/continue-button/ContinueButton.vue";
 import DifficultySwitcher from "@/presentation/components/difficulty-switcher/DifficultySwitcher.vue";
@@ -124,14 +123,11 @@ const handleNewGame = async () => {
             correct_pct: correctPct,
             incorrect_pct: incorrectPct,
         });
-        // The save counts every hint used; statistics count the paid ones, as leaving a game does
-        const hints = new HintTracker();
-        hints.restore(saved.hintsUsed);
         statisticsStore.recordGame({
             difficulty: saved.difficulty,
             elapsedSeconds: saved.elapsedSeconds,
             completed: false,
-            hintsUsed: hints.recordedUsed,
+            hintsUsed: saved.hintsUsed,
             replay: saved.replay,
         });
         await gameStore.clearSavedGame();

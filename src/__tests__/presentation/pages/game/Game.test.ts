@@ -39,6 +39,12 @@ const mountGame = (difficulty: Difficulty = "easy", sudoku: Sudoku = createKnown
     return mount(Game, { global: { plugins: [pinia, router] } });
 };
 
+const knownSudokuWithNotes = (): Sudoku => {
+    const sudoku = createKnownSudoku();
+    sudoku.autoNotes();
+    return sudoku;
+};
+
 const mountContinueGame = (savedState: GameState) => {
     const pinia = createPinia();
     const router = createTestRouter();
@@ -440,25 +446,8 @@ describe("Game", () => {
         expect(noteContainer.exists()).toBe(true);
     });
 
-    it("should fill candidate notes for empty cells when using auto-notes hint", async () => {
-        const wrapper = mountGame();
-
-        await wrapper.find("[data-testid='hint-button']").trigger("click");
-        await wrapper.find("[data-testid='hint-auto-notes']").trigger("click");
-
-        // (0, 2) 是空格，候選 [1, 2, 4]
-        const cell = wrapper.find("[data-testid='cell-0-2']");
-        expect(cell.text()).toContain("1");
-        expect(cell.text()).toContain("2");
-        expect(cell.text()).toContain("4");
-    });
-
     it("should auto-remove peer notes when inputting a number", async () => {
-        const wrapper = mountGame();
-
-        // 先填入 auto-notes via hint
-        await wrapper.find("[data-testid='hint-button']").trigger("click");
-        await wrapper.find("[data-testid='hint-auto-notes']").trigger("click");
+        const wrapper = mountGame("easy", knownSudokuWithNotes());
 
         // (0, 5) 和 (0, 6) 同行，候選包含 4
         const cell05 = wrapper.find("[data-testid='cell-0-5']");
@@ -529,11 +518,7 @@ describe("Game", () => {
     });
 
     it("should clear notes when clicking a noted slot cell in erase mode", async () => {
-        const wrapper = mountGame();
-
-        // 用 auto-notes hint 填入筆記
-        await wrapper.find("[data-testid='hint-button']").trigger("click");
-        await wrapper.find("[data-testid='hint-auto-notes']").trigger("click");
+        const wrapper = mountGame("easy", knownSudokuWithNotes());
 
         const cell = wrapper.find("[data-testid='cell-0-2']");
         expect(cell.text()).toContain("1");
@@ -1140,22 +1125,23 @@ describe("Game", () => {
 
             await wrapper.find("[data-testid='hint-button']").trigger("click");
 
-            expect(wrapper.find("[data-testid='hint-auto-notes']").exists()).toBe(true);
+            expect(wrapper.find("[data-testid='hint-check-conflicts']").exists()).toBe(true);
         });
 
-        it("should consume 1 hint when using Auto Notes", async () => {
+        it("should keep every option open and count each use past the old limit of four", async () => {
             const wrapper = mountGame();
 
-            await wrapper.find("[data-testid='hint-button']").trigger("click");
-            await wrapper.find("[data-testid='hint-auto-notes']").trigger("click");
+            for (let use = 0; use < 5; use++) {
+                await wrapper.find("[data-testid='hint-button']").trigger("click");
+                expect(wrapper.find("[data-testid='hint-check-conflicts']").attributes("disabled")).toBeUndefined();
+                expect(wrapper.find("[data-testid='hint-reveal-cell']").attributes("disabled")).toBeUndefined();
+                await wrapper.find("[data-testid='hint-check-conflicts']").trigger("click");
+            }
+            await wrapper.find("[data-testid='back-button']").trigger("click");
+            await wrapper.find("[data-testid='save-and-leave-button']").trigger("click");
+            await flushPromises();
 
-            // 候選數字應該填入
-            expect(wrapper.find("[data-testid='cell-0-2']").text()).toContain("4");
-
-            // 再開 hint menu 檢查用量
-            await wrapper.find("[data-testid='hint-button']").trigger("click");
-            expect(wrapper.find("[data-testid='hint-remaining']").text()).toBe("3 hints left this game");
-            expect(wrapper.find("[data-testid='hint-free-note']").exists()).toBe(false);
+            expect(useGameStore().savedGame?.hintsUsed).toBe(5);
         });
 
         it("should toast when Check Conflicts finds nothing", async () => {
@@ -1257,7 +1243,7 @@ describe("Game", () => {
 
             // 用 2 次 hint
             await wrapper.find("[data-testid='hint-button']").trigger("click");
-            await wrapper.find("[data-testid='hint-auto-notes']").trigger("click");
+            await wrapper.find("[data-testid='hint-check-conflicts']").trigger("click");
             await wrapper.find("[data-testid='hint-button']").trigger("click");
             await wrapper.find("[data-testid='hint-reveal-cell']").trigger("click");
             await flushPromises();
@@ -1290,10 +1276,13 @@ describe("Game", () => {
             };
             const wrapper = mountContinueGame(savedState);
 
-            // Three hints used out of four
             await wrapper.find("[data-testid='hint-button']").trigger("click");
+            await wrapper.find("[data-testid='hint-check-conflicts']").trigger("click");
+            await wrapper.find("[data-testid='back-button']").trigger("click");
+            await wrapper.find("[data-testid='give-up-and-leave-button']").trigger("click");
+            await flushPromises();
 
-            expect(wrapper.find("[data-testid='hint-remaining']").text()).toBe("1 hint left this game");
+            expect(useStatisticsStore().history[0].hintsUsed).toBe(4);
         });
 
         it("should check completion after Reveal Cell", async () => {
@@ -1462,7 +1451,7 @@ describe("Game", () => {
             await wrapper.find("[data-testid='hint-button']").trigger("click");
 
             expect(boardOf(wrapper)).toEqual(before);
-            expect(wrapper.find("[data-testid='hint-auto-notes']").exists()).toBe(false);
+            expect(wrapper.find("[data-testid='hint-check-conflicts']").exists()).toBe(false);
             expect(wrapper.find("[data-testid='hint-panel']").exists()).toBe(true);
 
             await wrapper.find("[data-testid='hint-close']").trigger("click");
@@ -1532,9 +1521,9 @@ describe("Game", () => {
 
         it("should undo the whole hint in one step", async () => {
             const plan = multiStepPlan();
-            const wrapper = mountGameWith(createMultiStepSudoku());
-            await wrapper.find("[data-testid='hint-button']").trigger("click");
-            await wrapper.find("[data-testid='hint-auto-notes']").trigger("click");
+            const sudoku = createMultiStepSudoku();
+            sudoku.autoNotes();
+            const wrapper = mountGameWith(sudoku);
             const before = boardOf(wrapper);
             await openRevealCell(wrapper);
             await pressPrimaryUntilLastStep(wrapper, plan.steps.length);
@@ -1623,8 +1612,8 @@ describe("Game", () => {
             gameStore.setDifficulty("easy");
 
             const firstVisit = visitGame(pinia);
-            await firstVisit.find("[data-testid='hint-button']").trigger("click");
-            await firstVisit.find("[data-testid='hint-auto-notes']").trigger("click");
+            await firstVisit.find("[data-testid='cell-0-3']").trigger("click");
+            await firstVisit.find("[data-testid='number-6']").trigger("click");
             await firstVisit.find("[data-testid='back-button']").trigger("click");
             await firstVisit.find("[data-testid='save-and-leave-button']").trigger("click");
             await flushPromises();
@@ -1640,9 +1629,9 @@ describe("Game", () => {
             await giveUp(secondVisit);
 
             const replay = useStatisticsStore(pinia).history[0].replay;
-            // The initial board is the original puzzle, before Auto Notes
-            expect(replay?.initialBoard.flat().every(cell => cell.notes.length === 0)).toBe(true);
-            expect(replay?.steps.map(step => step.action)).toEqual(["autoNotes", "fill"]);
+            // The initial board is the original puzzle, before the first visit's move
+            expect(replay?.initialBoard[0][3].entry).toBe(0);
+            expect(replay?.steps.map(step => step.action)).toEqual(["fill", "fill"]);
             expect(replay?.steps[1]).toMatchObject({ row: 0, column: 2, value: 4 });
         });
 

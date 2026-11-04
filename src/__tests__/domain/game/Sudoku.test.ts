@@ -661,6 +661,5 @@ describe("Sudoku", () => {
 
         expect(sudoku.hintTracker).toBeDefined();
         expect(sudoku.hintTracker.totalUsed).toBe(0);
-        expect(sudoku.hintTracker.canUseHint).toBe(true);
     });
 });

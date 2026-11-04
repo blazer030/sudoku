@@ -64,7 +64,7 @@ export const useLeaveGame = ({ sudoku, difficulty, completed, getElapsedSeconds,
                 difficulty: difficulty.value,
                 elapsedSeconds: getElapsedSeconds(),
                 completed: false,
-                hintsUsed: sudoku.hintTracker.recordedUsed,
+                hintsUsed: sudoku.hintTracker.totalUsed,
                 replay: getReplayData(),
             });
             void gameStore.clearSavedGame();

@@ -88,7 +88,7 @@ export const useGameSession = ({ onPlayAgain }: GameSessionOptions) => {
             void gameCompleteModal.open({
                 elapsedSeconds: elapsedSeconds.value,
                 difficulty: difficulty.value,
-                hintsUsed: sudoku.hintTracker.recordedUsed,
+                hintsUsed: sudoku.hintTracker.totalUsed,
                 isNewRecord,
                 still,
             }).then(handleCompleteAction);

@@ -73,7 +73,6 @@ describe("useGameCompletion", () => {
             difficulty: "easy",
             time_seconds: 420,
             hints_used: 0,
-            hints_total: 0,
             undo_count: 0,
             wrong_entries: 0,
             used_notes: 0,
@@ -100,7 +99,6 @@ describe("useGameCompletion", () => {
             difficulty: "easy",
             time_seconds: 420,
             hints_used: 0,
-            hints_total: 0,
             undo_count: 1,
             wrong_entries: 1,
             used_notes: 0,
@@ -130,9 +128,10 @@ describe("useGameCompletion", () => {
         expect(event).not.toHaveProperty("used_notes");
     });
 
-    it("reports hints_used 0 and hints_total 1 when only the free hint was used", () => {
+    it("reports every hint used, the first included, and no hints_total", () => {
         const analytics = createAnalyticsSpy();
         const sudoku = buildCompleteSudoku();
+        sudoku.hintTracker.useHint();
         sudoku.hintTracker.useHint();
 
         const { checkAndComplete } = useGameCompletion({
@@ -146,7 +145,8 @@ describe("useGameCompletion", () => {
 
         checkAndComplete();
 
-        expect(analytics.logEvent).toHaveBeenCalledWith(expect.objectContaining({ hints_used: 0, hints_total: 1 }));
+        expect(analytics.logEvent).toHaveBeenCalledWith(expect.objectContaining({ hints_used: 2 }));
+        expect(vi.mocked(analytics.logEvent).mock.calls[0][0]).not.toHaveProperty("hints_total");
     });
 
     it("does not emit event when sudoku is not completed", () => {

@@ -141,10 +141,6 @@ export const zhHant: MessageSchema = {
         },
         hints: {
             title: "提示",
-            remaining: "本局還剩 {count} 次提示",
-            freeNote: "每局第一次提示免費，不計入統計",
-            usedUp: "本局的提示已用完（每局 {max} 次）",
-            autoNotes: "自動筆記",
             checkConflicts: "檢查衝突",
             checkConflictsDescription: "找出同列、欄、宮裡重複的數字",
             revealCell: "揭示一格",
