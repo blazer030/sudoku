@@ -1,11 +1,7 @@
+import { isBlankTap } from "@/presentation/composables/isBlankTap";
+
 const DOUBLE_TAP_MAX_GAP_MS = 300;
 const DOUBLE_TAP_MAX_DISTANCE_PX = 24;
-
-// The board with its frame, the input area, anything pressable, and every overlay on the game screen
-const NOT_BLANK = "button, a, .fixed, [data-skin~='board'], [data-testid='board-frame'], [data-testid='game-inputs'], [data-testid='hint-panel-position']";
-
-export const isBlankTap = (target: EventTarget | null): boolean =>
-    target instanceof Element && target.closest(NOT_BLANK) === null;
 
 /** Told every tap on the screen, it answers whether a tap on the blank completes a double tap. */
 export const useBlankDoubleTap = () => {
