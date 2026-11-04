@@ -10,7 +10,7 @@ export const STYLE_ICON_SETS: Record<StyleId, IconSetLoader | null> = {
     tactile: () => import("@/style/styles/tactile/icons").then(module => module.tactileIcons),
     paper: () => import("@/style/styles/paper/icons").then(module => module.paperIcons),
     pixel: () => import("@/style/styles/pixel/icons").then(module => module.pixelIcons),
-    cyber: null,
+    cyber: () => import("@/style/styles/cyber/icons").then(module => module.cyberIcons),
     ink: null,
     chalkboard: null,
     blueprint: null,
