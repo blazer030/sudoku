@@ -57,12 +57,18 @@ describe("settingsStore", () => {
         expect(store.language).toBe("system");
         expect(store.appearance).toBe("light");
         expect(store.style).toBe("minimal");
+        expect(store.floatingDigitPad).toBe(false);
+        expect(store.doubleTapFill).toBe(false);
+        expect(store.autoNotesAtStart).toBe(false);
     });
 
     it.each([
         ["appearance", (store: ReturnType<typeof useSettingsStore>) => { store.setAppearance("dark"); }, "dark"],
         ["highlightScope", (store: ReturnType<typeof useSettingsStore>) => { store.setHighlightScope(false); }, false],
         ["language", (store: ReturnType<typeof useSettingsStore>) => { store.setLanguage("zh-Hant"); }, "zh-Hant"],
+        ["floatingDigitPad", (store: ReturnType<typeof useSettingsStore>) => { store.setFloatingDigitPad(true); }, true],
+        ["doubleTapFill", (store: ReturnType<typeof useSettingsStore>) => { store.setDoubleTapFill(true); }, true],
+        ["autoNotesAtStart", (store: ReturnType<typeof useSettingsStore>) => { store.setAutoNotesAtStart(true); }, true],
     ] as const)("should persist a %s change and restore it in a new store", (key, change, expected) => {
         change(useSettingsStore());
 

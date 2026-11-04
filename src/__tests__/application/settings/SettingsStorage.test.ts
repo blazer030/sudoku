@@ -36,6 +36,9 @@ describe("SettingsStorage", () => {
                 highlightScope: true,
                 colorThemeByStyle: { minimal: "green" },
                 appearanceByStyle: { minimal: "light" },
+                floatingDigitPad: false,
+                doubleTapFill: false,
+                autoNotesAtStart: false,
             });
         });
 
@@ -222,6 +225,9 @@ describe("SettingsStorage", () => {
                 highlightScope: false,
                 colorThemeByStyle: { minimal: "blue" },
                 appearanceByStyle: { minimal: "dark" },
+                floatingDigitPad: true,
+                doubleTapFill: true,
+                autoNotesAtStart: true,
             });
 
             const settings = loadSettings();
@@ -235,6 +241,9 @@ describe("SettingsStorage", () => {
             expect(settings.language).toBe("zh-Hant");
             expect(settings.appearance).toBe("dark");
             expect(settings.style).toBe("minimal");
+            expect(settings.floatingDigitPad).toBe(true);
+            expect(settings.doubleTapFill).toBe(true);
+            expect(settings.autoNotesAtStart).toBe(true);
         });
 
         it("should drop the retired seenLongPressTip flag from older stored settings", () => {
@@ -271,6 +280,9 @@ describe("SettingsStorage", () => {
             expect(settings.language).toBe("system");
             expect(settings.appearance).toBe("light");
             expect(settings.style).toBe("minimal");
+            expect(settings.floatingDigitPad).toBe(false);
+            expect(settings.doubleTapFill).toBe(false);
+            expect(settings.autoNotesAtStart).toBe(false);
         });
     });
 });

@@ -24,6 +24,9 @@ export interface Settings {
     colorThemeByStyle: RememberedThemes;
     // The light or dark mode last chosen under each style; `appearance` is the current style's entry
     appearanceByStyle: RememberedAppearances;
+    floatingDigitPad: boolean;
+    doubleTapFill: boolean;
+    autoNotesAtStart: boolean;
 }
 
 // index.html's inline script reads these fields too (style, colorTheme, appearance) before first paint
@@ -42,6 +45,9 @@ const DEFAULT_SETTINGS: Settings = {
     highlightScope: true,
     colorThemeByStyle: { minimal: "green" },
     appearanceByStyle: { minimal: "light" },
+    floatingDigitPad: false,
+    doubleTapFill: false,
+    autoNotesAtStart: false,
 };
 
 const isPlainObject = (value: unknown): value is Record<string, unknown> =>
