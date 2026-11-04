@@ -1574,6 +1574,8 @@
     --color-aurora-4: #9BDBFD;
     --color-aurora-ribbon-1: #D2FFDA;
     --color-aurora-ribbon-2: #F5EEFF;
+    --color-aurora-icon-start: #0A6F61;
+    --color-aurora-icon-end: #C2185B;
     --color-glass: #FFFFFF;
     --color-glass-sheen: #FFFFFF;
 }
@@ -1621,6 +1623,8 @@
     --color-aurora-4: #2572BF;
     --color-aurora-ribbon-1: #4A039B;
     --color-aurora-ribbon-2: #21238E;
+    --color-aurora-icon-start: #4FE3C1;
+    --color-aurora-icon-end: #FF8CC6;
     --color-glass: #141A34;
     --color-glass-sheen: #FFFFFF;
 }
@@ -1668,6 +1672,8 @@
     --color-aurora-4: #D1C9FE;
     --color-aurora-ribbon-1: #D2FFDA;
     --color-aurora-ribbon-2: #F5EEFF;
+    --color-aurora-icon-start: #0A6F61;
+    --color-aurora-icon-end: #C2185B;
     --color-glass: #FFFFFF;
     --color-glass-sheen: #FFFFFF;
 }
@@ -1715,6 +1721,8 @@
     --color-aurora-4: #7A59C3;
     --color-aurora-ribbon-1: #004A42;
     --color-aurora-ribbon-2: #0E519E;
+    --color-aurora-icon-start: #4FE3C1;
+    --color-aurora-icon-end: #FF8CC6;
     --color-glass: #141A34;
     --color-glass-sheen: #FFFFFF;
 }
@@ -1762,6 +1770,8 @@
     --color-aurora-4: #FFB7E6;
     --color-aurora-ribbon-1: #D2FFDA;
     --color-aurora-ribbon-2: #F5EEFF;
+    --color-aurora-icon-start: #0A6F61;
+    --color-aurora-icon-end: #C2185B;
     --color-glass: #FFFFFF;
     --color-glass-sheen: #FFFFFF;
 }
@@ -1809,6 +1819,8 @@
     --color-aurora-4: #3769CA;
     --color-aurora-ribbon-1: #913FD5;
     --color-aurora-ribbon-2: #029E72;
+    --color-aurora-icon-start: #4FE3C1;
+    --color-aurora-icon-end: #FF8CC6;
     --color-glass: #141A34;
     --color-glass-sheen: #FFFFFF;
 }
@@ -1856,6 +1868,8 @@
     --color-aurora-4: #FFC49C;
     --color-aurora-ribbon-1: #D2FFDA;
     --color-aurora-ribbon-2: #F5EEFF;
+    --color-aurora-icon-start: #0A6F61;
+    --color-aurora-icon-end: #C2185B;
     --color-glass: #FFFFFF;
     --color-glass-sheen: #FFFFFF;
 }
@@ -1903,6 +1917,8 @@
     --color-aurora-4: #9B6406;
     --color-aurora-ribbon-1: #864AD2;
     --color-aurora-ribbon-2: #019F68;
+    --color-aurora-icon-start: #4FE3C1;
+    --color-aurora-icon-end: #FF8CC6;
     --color-glass: #141A34;
     --color-glass-sheen: #FFFFFF;
 }

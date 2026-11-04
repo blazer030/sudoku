@@ -25,6 +25,9 @@ interface AuroraSky extends AuroraError {
     onDanger: string;
     glass: string;
     sheen: string;
+    /** The ends of an icon's gradient, either side of the theme's primary */
+    iconStart: string;
+    iconEnd: string;
 }
 
 const AURORA_SKIES: Readonly<Record<ColorMode, AuroraSky>> = {
@@ -37,6 +40,8 @@ const AURORA_SKIES: Readonly<Record<ColorMode, AuroraSky>> = {
         onDanger: "#060914",
         glass: "#141A34",
         sheen: "#FFFFFF",
+        iconStart: "#4FE3C1",
+        iconEnd: "#FF8CC6",
     },
     light: {
         background: "#EEF0F7",
@@ -47,6 +52,8 @@ const AURORA_SKIES: Readonly<Record<ColorMode, AuroraSky>> = {
         onDanger: "#FFFFFF",
         glass: "#FFFFFF",
         sheen: "#FFFFFF",
+        iconStart: "#0A6F61",
+        iconEnd: "#C2185B",
     },
 };
 
@@ -168,6 +175,8 @@ const auroraExtras = (mode: ColorMode, { primary, lights, ribbon }: AuroraAccent
         "aurora-4": lights[3],
         "aurora-ribbon-1": ribbon[0],
         "aurora-ribbon-2": ribbon[1],
+        "aurora-icon-start": sky.iconStart,
+        "aurora-icon-end": sky.iconEnd,
         "glass": sky.glass,
         "glass-sheen": sky.sheen,
     };

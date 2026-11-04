@@ -758,6 +758,10 @@ const AURORA_BOARD_CASES: AuroraBoardCase[] = STYLES.aurora.themes.flatMap(theme
     return [
         solid("selected digit (on-primary) on cell-selected", palette["on-primary"], SOLID(palette["cell-selected"])),
         onPage("words on the lights (foreground) on the sky", palette.foreground, sky),
+        // An icon's gradient runs through these three: a mark, held to 3:1 on the glass it lies on
+        ...onGlass("icon gradient start", auroraToken(palette, "aurora-icon-start"), 3),
+        ...onGlass("icon gradient middle (primary)", palette.primary, 3),
+        ...onGlass("icon gradient end", auroraToken(palette, "aurora-icon-end"), 3),
         ...onGlass("foreground", palette.foreground),
         ...onGlass("foreground-secondary", palette["foreground-secondary"]),
         ...onGlass("foreground-muted", palette["foreground-muted"]),

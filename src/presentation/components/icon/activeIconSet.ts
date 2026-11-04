@@ -14,7 +14,7 @@ export const STYLE_ICON_SETS: Record<StyleId, IconSetLoader | null> = {
     ink: () => import("@/style/styles/ink/icons").then(module => module.inkIcons),
     chalkboard: () => import("@/style/styles/chalkboard/icons").then(module => module.chalkboardIcons),
     blueprint: () => import("@/style/styles/blueprint/icons").then(module => module.blueprintIcons),
-    aurora: null,
+    aurora: () => import("@/style/styles/aurora/icons").then(module => module.auroraIcons),
 };
 
 // Kept here rather than read from the settings store, so an icon needs no store to mount
