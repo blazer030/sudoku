@@ -711,3 +711,14 @@
         opacity: 1;
     }
 }
+
+/* The floating digit pad: a slip of the notebook's paper with a hard pencil shadow */
+[data-style="paper"] [data-skin~="floating-pad"] {
+    border-color: var(--color-foreground-secondary);
+    border-radius: 4px;
+    box-shadow: 3px 4px 0 color-mix(in srgb, var(--color-foreground-secondary) 35%, transparent);
+}
+
+[data-style="paper"] [data-skin~="floating-pad"] [data-skin~="key"] {
+    border-radius: 3px;
+}

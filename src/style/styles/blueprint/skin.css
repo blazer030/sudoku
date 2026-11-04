@@ -1271,3 +1271,10 @@
         clip-path: none;
     }
 }
+
+/* The floating digit pad: a square drawn detail on the sheet, framed in the ink with its keys ruled off */
+[data-style="blueprint"] [data-skin~="floating-pad"] {
+    border-color: var(--color-foreground);
+    border-radius: 0;
+    box-shadow: 0 0 0 0.5px var(--color-foreground), 3px 3px 0 color-mix(in srgb, var(--color-foreground) 22%, transparent);
+}

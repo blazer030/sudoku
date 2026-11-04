@@ -1157,3 +1157,9 @@
         opacity: 1;
     }
 }
+
+/* The floating digit pad: a solid slip of paper ruled in vermilion, with the keys' uneven corners */
+[data-style="ink"] [data-skin~="floating-pad"] {
+    border-radius: 5px 4px 6px 4px;
+    box-shadow: 0 6px 18px color-mix(in srgb, var(--color-shadow) 24%, transparent);
+}

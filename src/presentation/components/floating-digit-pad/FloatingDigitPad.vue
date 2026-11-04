@@ -5,7 +5,7 @@
         :data-note-mode="noteMode"
         :style="placementStyle"
         class="floating-pad absolute z-30 grid gap-0.5 p-0.5 bg-card border border-primary rounded-xl shadow-popup"
-        data-skin="floating-pad"
+        data-skin="card floating-pad"
         data-testid="floating-digit-pad"
         role="group"
     >
@@ -22,18 +22,18 @@
             :data-testid="`floating-number-${digit}`"
             :disabled="isDigitDisabled(digit)"
             class="flex items-center justify-center min-w-0 min-h-0 rounded-lg font-key font-semibold leading-none cursor-pointer disabled:opacity-40 disabled:cursor-default"
-            data-skin="floating-key"
+            data-skin="key floating-key"
             type="button"
             @click="emit('selectDigit', digit)"
         >
-            {{ digit }}
+            <span>{{ digit }}</span>
         </button>
         <button
             v-press
             :aria-label="t('game.controls.erase')"
             :disabled="eraseDisabled"
             class="col-span-3 flex items-center justify-center gap-1 min-h-0 rounded-lg bg-background text-foreground text-[11px] font-medium leading-none cursor-pointer disabled:opacity-40 disabled:cursor-default"
-            data-skin="floating-erase"
+            data-skin="key floating-erase"
             data-testid="floating-erase"
             type="button"
             @click="emit('erase')"

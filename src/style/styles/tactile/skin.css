@@ -378,3 +378,17 @@
         opacity: 0;
     }
 }
+
+/* The floating digit pad: a raised tray of the same thick keys, in a small version of their depth */
+[data-style="tactile"] [data-skin~="floating-pad"] {
+    --tactile-depth: 2px;
+    border-color: var(--tactile-edge);
+    box-shadow:
+        inset 0 1px 0 var(--tactile-highlight),
+        0 3px 0 var(--tactile-edge),
+        0 8px 18px var(--tactile-drop-shadow);
+}
+
+[data-style="tactile"] [data-skin~="floating-pad"] [data-skin~="key"] {
+    --tactile-depth: 2px;
+}

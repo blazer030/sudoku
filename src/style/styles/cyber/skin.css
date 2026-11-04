@@ -1129,3 +1129,14 @@
     --cyber-icon-start: currentColor;
     --cyber-icon-end: currentColor;
 }
+
+/* The floating digit pad: a HUD panel with a lit edge, its keys cut small to suit their size */
+[data-style="cyber"] [data-skin~="floating-pad"] {
+    --cyber-edge: var(--color-primary);
+    --cyber-cut: 10px;
+    filter: drop-shadow(0 0 6px color-mix(in srgb, var(--color-primary) 55%, transparent));
+}
+
+[data-style="cyber"] [data-skin~="floating-pad"] [data-skin~="key"] {
+    --cyber-cut: 5px;
+}

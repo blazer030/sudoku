@@ -1411,3 +1411,12 @@
         opacity: 0;
     }
 }
+
+/* The floating digit pad: opaque, as every pane over the board is, with a rim of the theme's light to part it from
+   the board's own pale glass */
+[data-style="aurora"] [data-skin~="floating-pad"] {
+    border-color: transparent;
+    box-shadow:
+        0 0 0 1.5px color-mix(in srgb, var(--color-primary) 55%, transparent),
+        0 8px 28px color-mix(in srgb, var(--color-primary) 32%, transparent);
+}
