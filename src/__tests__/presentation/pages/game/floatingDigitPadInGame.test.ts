@@ -127,6 +127,18 @@ describe("the floating digit pad in a game", () => {
         });
     });
 
+    it("should lift the board above the controls only while the pad is open", async () => {
+        const { wrapper } = await mountGame();
+        const board = () => wrapper.get("[data-testid='game-board']").classes();
+        expect(board()).not.toContain("z-20");
+
+        await click(wrapper, EMPTY_CELL);
+        expect(board()).toContain("z-20");
+
+        await click(wrapper, EMPTY_CELL);
+        expect(board()).not.toContain("z-20");
+    });
+
     describe("input", () => {
         it("should fill the cell, remove peer notes and close", async () => {
             const sudoku = createKnownSudoku();

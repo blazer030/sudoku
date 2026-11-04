@@ -68,6 +68,7 @@ const REQUIRED_SELECTORS: Record<StyleId, readonly string[]> = {
         ".pixel-stage-letter",
     ],
     cyber: [
+        '[data-floating-pad-past]',
         ...PRESS,
         "[data-group]",
         '[data-celebration="playing"]',

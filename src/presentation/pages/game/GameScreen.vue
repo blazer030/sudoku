@@ -19,7 +19,11 @@
                 :target="frameTarget"
             >
                 <div
-                    :class="hintMode.active.value ? 'ring-2 ring-primary/50' : 'ring-0 ring-transparent'"
+                    :class="[
+                        hintMode.active.value ? 'ring-2 ring-primary/50' : 'ring-0 ring-transparent',
+                        // On a small board the pad runs past the board, over the controls
+                        { 'relative z-20': floatingPadCell !== null },
+                    ]"
                     :data-board-canvas="boardCanvasTakes"
                     :data-celebration="celebration ?? undefined"
                     :data-group-effect="groupEffect?.id"

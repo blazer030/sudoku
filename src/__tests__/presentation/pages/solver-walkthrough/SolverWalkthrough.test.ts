@@ -119,6 +119,14 @@ describe("SolverWalkthrough", () => {
             expect(wrapper.find(PAD).exists()).toBe(false);
         });
 
+        it("should lift the board above the inputs while it is open", async () => {
+            const { wrapper } = await mountEnteringWithPad();
+
+            await cellAt(wrapper, 0, 0).trigger("click");
+
+            expect(wrapper.get("[data-testid='walkthrough-board']").classes()).toContain("z-20");
+        });
+
         it("should fill the cell and close", async () => {
             const { wrapper } = await mountEnteringWithPad();
             await cellAt(wrapper, 0, 0).trigger("click");

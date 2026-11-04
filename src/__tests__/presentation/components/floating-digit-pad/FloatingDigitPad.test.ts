@@ -1,5 +1,5 @@
-import { afterEach, describe, expect, it } from "vitest";
-import { mount } from "@vue/test-utils";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { mount, type VueWrapper } from "@vue/test-utils";
 import { createPinia, setActivePinia } from "pinia";
 import { nextTick } from "vue";
 import { i18n } from "@/presentation/i18n";
@@ -46,6 +46,93 @@ describe("FloatingDigitPad", () => {
         await wrapper.setProps({ cell: { row: 0, column: 1 } });
 
         expect(wrapper.get("[data-testid='floating-digit-pad']").attributes("style")).toContain(`left: ${(2 / 9) * 100}%`);
+    });
+
+    describe("on a small board", () => {
+        let boardWidth = 0;
+
+        beforeEach(() => {
+            vi.spyOn(HTMLElement.prototype, "clientWidth", "get").mockImplementation(() => boardWidth);
+        });
+
+        afterEach(() => {
+            vi.restoreAllMocks();
+        });
+
+        // Mounted in a board element, as a page does
+        const mountOnBoard = (width: number, cell = { row: 0, column: 0 }) => {
+            boardWidth = width;
+            localStorage.setItem("sudoku-settings", "{}");
+            const pinia = createPinia();
+            setActivePinia(pinia);
+            const board = document.createElement("div");
+            board.dataset.skin = "board";
+            document.body.append(board);
+            const wrapper = mount(FloatingDigitPad, {
+                props: { cell, digitCounts: NO_DIGITS_PLACED },
+                attachTo: board,
+                global: { plugins: [pinia] },
+            });
+            return { wrapper, board };
+        };
+
+        const widthShare = (wrapper: VueWrapper) =>
+            Number(/width: ([\d.]+)%/.exec(wrapper.get("[data-testid='floating-digit-pad']").attributes("style") ?? "")?.[1]);
+
+        it("should grow past three cells so its keys reach 36px", async () => {
+            // Cells of 24.2px, as measured on an iPhone SE in Safari
+            const { wrapper } = mountOnBoard(24.2 * 9);
+            await nextTick();
+
+            expect(widthShare(wrapper)).toBeCloseTo((118 / 24.2 / 9) * 100, 5);
+            wrapper.unmount();
+        });
+
+        it("should keep three cells on a board with room", async () => {
+            const { wrapper } = mountOnBoard(41.5 * 9);
+            await nextTick();
+
+            expect(widthShare(wrapper)).toBeCloseTo((3 / 9) * 100, 5);
+            wrapper.unmount();
+        });
+
+        it("should measure again when the window changes", async () => {
+            const { wrapper } = mountOnBoard(41.5 * 9);
+            await nextTick();
+            boardWidth = 24.2 * 9;
+
+            window.dispatchEvent(new Event("resize"));
+            await nextTick();
+
+            expect(widthShare(wrapper)).toBeCloseTo((118 / 24.2 / 9) * 100, 5);
+            wrapper.unmount();
+        });
+
+        it("should mark its board while it runs past it, for a style that clips the board", async () => {
+            // From column 4 of a small board, a pad 4.88 cells wide fits on neither side
+            const { wrapper, board } = mountOnBoard(24.2 * 9, { row: 0, column: 4 });
+            await nextTick();
+            await nextTick();
+            expect(board.hasAttribute("data-floating-pad-past")).toBe(true);
+
+            await wrapper.setProps({ cell: { row: 0, column: 0 } });
+            await nextTick();
+            expect(board.hasAttribute("data-floating-pad-past")).toBe(false);
+
+            await wrapper.setProps({ cell: { row: 0, column: 4 } });
+            await nextTick();
+            wrapper.unmount();
+            expect(board.hasAttribute("data-floating-pad-past")).toBe(false);
+        });
+
+        it("should leave its board unmarked where it fits", async () => {
+            const { wrapper, board } = mountOnBoard(41.5 * 9, { row: 4, column: 4 });
+            await nextTick();
+            await nextTick();
+
+            expect(board.hasAttribute("data-floating-pad-past")).toBe(false);
+            wrapper.unmount();
+        });
     });
 
     it("should emit the pressed digit and erase", async () => {

@@ -438,6 +438,12 @@
     clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
 }
 
+/* A floating pad running past a small board would be cut off with it, so the clips stand down meanwhile */
+:root[data-style="cyber"] [data-skin~="board"][data-floating-pad-past],
+[data-style="cyber"] [data-skin~="board"][data-floating-pad-past] > div {
+    clip-path: none;
+}
+
 [data-style="cyber"] [data-skin~="board"] > div::before {
     content: "";
     position: absolute;

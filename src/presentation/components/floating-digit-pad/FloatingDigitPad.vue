@@ -1,5 +1,6 @@
 <template>
     <div
+        ref="pad"
         :class="{ 'floating-pad-enter': motionAllowed() }"
         :data-note-mode="noteMode"
         :style="placementStyle"
@@ -44,11 +45,11 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef, watchPostEffect } from "vue";
 import { useI18n } from "vue-i18n";
 import { BOARD_SIZE } from "@/domain/board/constants";
 import { Eraser } from "@/presentation/components/icon";
-import { floatingPadPlacement, FLOATING_PAD_COLUMNS, FLOATING_PAD_ROWS } from "@/presentation/components/floating-digit-pad/floatingPadPlacement";
+import { floatingPadPlacement, floatingPadSize } from "@/presentation/components/floating-digit-pad/floatingPadPlacement";
 import { useMotionAllowed } from "@/presentation/composables/useMotionAllowed";
 import { vPress } from "@/presentation/directives/press";
 
@@ -79,14 +80,45 @@ const motionAllowed = useMotionAllowed();
 
 const asBoardShare = (cells: number): string => `${(cells / BOARD_SIZE) * 100}%`;
 
-const placementStyle = computed(() => {
-    const { rowStart, columnStart } = floatingPadPlacement(props.cell);
-    return {
-        top: asBoardShare(rowStart),
-        left: asBoardShare(columnStart),
-        width: asBoardShare(FLOATING_PAD_COLUMNS),
-        height: asBoardShare(FLOATING_PAD_ROWS),
-    };
+// The board it sits on sets the cell size, and so how far past three cells the pad must grow
+const pad = useTemplateRef<HTMLElement>("pad");
+const cellSize = ref(0);
+const measureCell = () => {
+    cellSize.value = (pad.value?.parentElement?.clientWidth ?? 0) / BOARD_SIZE;
+};
+onMounted(() => {
+    measureCell();
+    window.addEventListener("resize", measureCell);
+});
+onBeforeUnmount(() => {
+    window.removeEventListener("resize", measureCell);
+});
+
+const size = computed(() => floatingPadSize(cellSize.value));
+const placement = computed(() => floatingPadPlacement(props.cell, size.value));
+
+const placementStyle = computed(() => ({
+    top: asBoardShare(placement.value.rowStart),
+    left: asBoardShare(placement.value.columnStart),
+    width: asBoardShare(size.value.columns),
+    height: asBoardShare(size.value.rows),
+}));
+
+const runsPastBoard = computed(() => {
+    const { rowStart, columnStart } = placement.value;
+    return rowStart < 0 || columnStart < 0
+        || rowStart + size.value.rows > BOARD_SIZE
+        || columnStart + size.value.columns > BOARD_SIZE;
+});
+
+// A skin that clips its board lifts the clip through this mark, so the pad's overhang shows and takes taps.
+// The pad marks the board itself: both pages get it, and the board's own attributes stay as they are.
+const boardElement = (): Element | null => pad.value?.closest("[data-skin~='board']") ?? null;
+watchPostEffect(() => {
+    boardElement()?.toggleAttribute("data-floating-pad-past", runsPastBoard.value);
+});
+onBeforeUnmount(() => {
+    boardElement()?.removeAttribute("data-floating-pad-past");
 });
 
 const isMarked = (digit: number): boolean =>

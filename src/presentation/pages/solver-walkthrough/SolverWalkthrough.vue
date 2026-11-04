@@ -35,7 +35,11 @@
                 <div
                     :data-selected-cell="selectedCellName"
                     data-skin="board"
-                    :class="boardEditable ? '' : 'pointer-events-none'"
+                    :class="[
+                        boardEditable ? '' : 'pointer-events-none',
+                        // On a small board the pad runs past the board, over the inputs
+                        { 'relative z-20': floatingPadCell !== null },
+                    ]"
                     class="bg-card rounded-2xl shadow-card-lg p-2 self-center w-[calc(100%+1.5rem)] max-w-board-fit"
                     data-testid="walkthrough-board"
                 >
