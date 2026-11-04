@@ -19,6 +19,7 @@ import CyberGroupOverlay from "@/presentation/components/style-moments/cyber/Cyb
 import InkLoader from "@/presentation/components/style-moments/ink/InkLoader.vue";
 import InkGroupOverlay from "@/presentation/components/style-moments/ink/InkGroupOverlay.vue";
 import InkCardDecoration from "@/presentation/components/style-moments/ink/InkCardDecoration.vue";
+import InkCanvas from "@/presentation/components/style-moments/ink/InkCanvas.vue";
 import ChalkboardDigitWriter from "@/presentation/components/style-moments/chalkboard/ChalkboardDigitWriter.vue";
 import ChalkboardLoader from "@/presentation/components/style-moments/chalkboard/ChalkboardLoader.vue";
 import ChalkboardGroupOverlay from "@/presentation/components/style-moments/chalkboard/ChalkboardGroupOverlay.vue";
@@ -67,6 +68,13 @@ export interface StyleMoments {
      * None when the skin's `.value-arrive` carries it all.
      */
     digitWriter?: Component | null;
+    /**
+     * One canvas over the whole board, kept for the board's life, that draws moments in the skin's place, given
+     * `{ celebration, effect }`. It reports the moments it has taken through `v-model:takes` (space-separated, such as
+     * `celebration`), which the board carries as `data-board-canvas` so the skin stands its own down; it takes
+     * none where it cannot draw, and the skin's stay. None when the skin draws every moment.
+     */
+    boardCanvas?: Component | null;
 }
 
 // From the boards: each cell's wash waits 100ms and runs 520ms; the dialog opens as the board's scrim
@@ -128,7 +136,8 @@ const CYBER_MOMENTS: StyleMoments = {
 // drawn on in the first 440ms, and the digits' halo of paper runs with it; a box's 圓相 starts 80ms later
 // and runs 1060ms. The effect runs past them all, so a box completed alone from its centre (its farthest
 // cell two steps out, 1380ms) still outlasts the ring's 1220ms by the frames the overlay takes to start.
-// The solved board: two ink washes bloom over 1400ms, the second 200ms later, and the digits take the ink
+// The solved board: two ink washes bloom over 1400ms, the second 200ms later (InkCanvas draws them by WebGL where it
+// can, the skin's gradients elsewhere), and the digits take the ink
 // from the centre outward (640ms each, 55ms a step, the corners last by 1080ms). The dialog opens as the
 // first wash settles, while the second is still spreading under the scrim; the card then unrolls, its
 // title is brushed in and the 過關 seal pressed (InkCardDecoration).
@@ -139,6 +148,7 @@ const INK_MOMENTS: StyleMoments = {
     groupEffectMs: 1260,
     groupOverlay: InkGroupOverlay,
     celebrationBoardMs: 1450,
+    boardCanvas: InkCanvas,
 };
 
 // From the boards: each cell's digits flash yellow from 100ms for 520ms, 45ms a step. A line's chalk is

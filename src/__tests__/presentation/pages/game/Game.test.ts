@@ -1,6 +1,6 @@
 import { createAnalyticsSpy } from "@/__tests__/fixtures/analyticsSpy";
 import { setPageVisibility } from "@/__tests__/fixtures/pageVisibility";
-import { nextTick } from "vue";
+import { defineComponent, h, nextTick, watch } from "vue";
 import { i18n } from "@/presentation/i18n";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { flushPromises, mount } from "@vue/test-utils";
@@ -1024,6 +1024,52 @@ describe("Game", () => {
             wrapper.unmount();
 
             expect(vi.getTimerCount()).toBe(leftoverOfAnyScreen);
+        });
+
+        it("should mark the board with the moments the style's canvas draws in the skin's place", async () => {
+            vi.useFakeTimers();
+            const minimal = STYLE_MOMENTS.minimal;
+            const TakingCanvas = defineComponent({
+                props: { celebration: { type: String, default: null }, takes: { type: String, default: undefined } },
+                emits: ["update:takes"],
+                setup: (props, { emit }) => {
+                    watch(() => props.celebration, (phase) => { emit("update:takes", phase === "playing" ? "celebration" : undefined); });
+                    return () => h("canvas");
+                },
+            });
+            STYLE_MOMENTS.minimal = { ...minimal, boardCanvas: TakingCanvas };
+            try {
+                const wrapper = mountGame("easy", nearlySolvedSudoku());
+                expect(boardOfGame(wrapper).attributes("data-board-canvas")).toBeUndefined();
+                expect(boardOfGame(wrapper).find("canvas").exists()).toBe(true);
+
+                await fillLastCell(wrapper);
+
+                expect(boardOfGame(wrapper).attributes("data-board-canvas")).toBe("celebration");
+            } finally {
+                STYLE_MOMENTS.minimal = minimal;
+            }
+        });
+
+        // jsdom has no WebGL, as some browsers do not: the skin's washes stay
+        it("should leave ink's washes to the skin where the browser has no WebGL", async () => {
+            const getContext = vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(null);
+            const pinia = createPinia();
+            useSettingsStore(pinia).setStyle("ink");
+            useSettingsStore(pinia).setMotionEffects(true);
+            const gameStore = useGameStore(pinia);
+            gameStore.sudoku = nearlySolvedSudoku();
+            gameStore.setDifficulty("easy");
+            const wrapper = mount(Game, { global: { plugins: [pinia, createTestRouter()] } });
+            // The renderer loads apart from the page, and finds no WebGL
+            await vi.waitFor(() => { expect(getContext).toHaveBeenCalled(); });
+            await flushPromises();
+
+            await fillLastCell(wrapper);
+
+            expect(boardOfGame(wrapper).attributes("data-celebration")).toBe("playing");
+            expect(boardOfGame(wrapper).attributes("data-board-canvas")).toBeUndefined();
+            expect(boardOfGame(wrapper).find("canvas").exists()).toBe(false);
         });
 
         it("should show no celebration for a game loaded already solved", () => {

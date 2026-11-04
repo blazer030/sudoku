@@ -16,6 +16,7 @@
             >
                 <div
                     :class="hintMode.active.value ? 'ring-2 ring-primary/50' : 'ring-0 ring-transparent'"
+                    :data-board-canvas="boardCanvasTakes"
                     :data-celebration="celebration ?? undefined"
                     :data-group-effect="groupEffect?.id"
                     :data-hint-mode="hintMode.active.value || undefined"
@@ -25,6 +26,11 @@
                     data-skin="board"
                     data-testid="game-board"
                 >
+                    <BoardCanvas
+                        v-model:takes="boardCanvasTakes"
+                        :celebration="celebration"
+                        :effect="groupEffect"
+                    />
                     <div
                         class="relative flex flex-col border-3 border-foreground/20 rounded-xl"
                         data-skin="board-grid"
@@ -148,6 +154,7 @@ import Cell from "@/presentation/components/board-cell/Cell.vue";
 import BoardFrame from "@/presentation/components/board-frame/BoardFrame.vue";
 import { cellName } from "@/presentation/components/board-cell/cellName";
 import GroupOverlay from "@/presentation/components/style-moments/GroupOverlay.vue";
+import BoardCanvas from "@/presentation/components/style-moments/BoardCanvas.vue";
 import { GROUP_RIPPLE_STEP_MS } from "@/presentation/pages/game/useGroupEffect";
 import StepLinkOverlay from "@/presentation/components/step-presentation/StepLinkOverlay.vue";
 import HintPanel from "@/presentation/pages/game/hint-mode/HintPanel.vue";
@@ -180,6 +187,9 @@ const {
 } = useGameSession({ onPlayAgain: () => { emit("playAgain"); } });
 
 const settingsStore = useSettingsStore();
+
+// The moments the style's board canvas draws in the skin's place
+const boardCanvasTakes = ref<string | undefined>(undefined);
 
 // The panel opens over the controls; keep its buttons on screen when an explanation runs long.
 // It stops this many pixels short of the screen's bottom edge.

@@ -76,10 +76,9 @@ describe("ink skin", () => {
             expect(lines.get("background-color")).toBe("var(--color-foreground)");
         });
 
-        it("should lay the brush lines over the cells, so they land on the cell edges, above the digits, never taking taps", () => {
+        it("should lay the brush lines above the digits, never taking taps", () => {
             const lines = maskSupportsDeclarationsOf(`${GRID}::after`);
 
-            expect(lines.get("inset")).toBe("0");
             expect(Number(lines.get("z-index"))).toBeGreaterThan(Number(declarationsOf(INK_CSS, `${BOARD} [data-variant] > div`).get("z-index")));
             expect(lines.get("pointer-events")).toBe("none");
         });
@@ -113,6 +112,17 @@ describe("ink skin", () => {
         describe("brush-grid.svg", () => {
             const svg = new DOMParser().parseFromString(BRUSH_GRID_SVG, "image/svg+xml");
 
+            // An outline is one absolute point, then steps relative to the one before
+            const pointsOf = (path: Element): { x: number; y: number }[] => {
+                const numbers = Array.from((path.getAttribute("d") ?? "").matchAll(/-?\d*\.?\d+/g), ([number]) => Number(number));
+                const points: { x: number; y: number }[] = [{ x: numbers[0], y: numbers[1] }];
+                for (let index = 2; index < numbers.length; index += 2) {
+                    const previous = points[points.length - 1];
+                    points.push({ x: previous.x + numbers[index], y: previous.y + numbers[index + 1] });
+                }
+                return points;
+            };
+
             // The mask is stretched over the square grid, so the drawing must be square too
             it("should parse as a square drawing", () => {
                 const [, , width, height] = (svg.documentElement.getAttribute("viewBox") ?? "").split(/\s+/).map(Number);
@@ -122,10 +132,14 @@ describe("ink skin", () => {
                 expect(width).toBe(height);
             });
 
-            it("should roughen the lines with one turbulence displacement filter, drawn into the image", () => {
-                expect(svg.getElementsByTagName("filter")).toHaveLength(1);
-                expect(svg.getElementsByTagName("feTurbulence")).toHaveLength(1);
-                expect(svg.getElementsByTagName("feDisplacementMap")).toHaveLength(1);
+            // WebKit rasterises an SVG filter in an image at low resolution, so the lines turn blurred and blocky
+            // there alone; drawn into the outlines, every engine draws the same edge
+            it("should carry its roughness in the outlines, with no filter to rasterise", () => {
+                expect(svg.getElementsByTagName("filter")).toHaveLength(0);
+                expect(BRUSH_GRID_SVG).not.toMatch(/\bfilter=/);
+                for (const path of Array.from(svg.getElementsByTagName("path"))) {
+                    expect(pointsOf(path).length).toBeGreaterThan(500);
+                }
             });
 
             // A 9×9 grid has eight inner lines each way: the two box lines each way among them drawn heavier
@@ -139,6 +153,50 @@ describe("ink skin", () => {
                 expect(countAt(levels[0]) + countAt(levels[1])).toBe(2 * 8);
                 expect(countAt(levels[1])).toBe(2 * 2);
                 expect(countAt(levels[2])).toBe(4);
+            });
+
+            // The cells fill the drawing's first 351 by 351 units; the margin round them holds the frame
+            const CELLS_SIZE = 351;
+            const paths = Array.from(svg.getElementsByTagName("path"));
+            const frameSides = paths.filter(path => !path.hasAttribute("opacity"));
+            const innerLines = paths.filter(path => path.hasAttribute("opacity"));
+
+            // The frame is above the digits and notes (2), so any of it over a cell hides the note at that edge
+            it("should keep the frame's four sides out of the cells", () => {
+                for (const side of frameSides) {
+                    const points = pointsOf(side);
+                    const xs = points.map(point => point.x);
+                    const ys = points.map(point => point.y);
+                    const across = Math.max(...xs) - Math.min(...xs) < Math.max(...ys) - Math.min(...ys) ? xs : ys;
+
+                    expect(Math.max(...across) <= 0 || Math.min(...across) >= CELLS_SIZE, side.getAttribute("d") ?? "").toBe(true);
+                }
+            });
+
+            it("should run every inner line up to the frame", () => {
+                for (const line of innerLines) {
+                    const points = pointsOf(line);
+                    const xs = points.map(point => point.x);
+                    const ys = points.map(point => point.y);
+                    const along = Math.max(...xs) - Math.min(...xs) > Math.max(...ys) - Math.min(...ys) ? xs : ys;
+
+                    expect(Math.min(...along)).toBeLessThanOrEqual(0);
+                    expect(Math.max(...along)).toBeGreaterThanOrEqual(CELLS_SIZE);
+                }
+            });
+
+            // The mask stretches over the ::after, so the ::after must reach past the cells by exactly the
+            // drawing's margin, or the lines leave the cell edges
+            it("should lay the drawing's margin outside the cells, with its lines on the cell edges", () => {
+                const [left, top, width, height] = (svg.documentElement.getAttribute("viewBox") ?? "").split(/\s+/).map(Number);
+                const margin = -left;
+                const inset = maskSupportsDeclarationsOf(`${GRID}::after`).get("inset");
+
+                expect(margin).toBeGreaterThan(0);
+                expect(top).toBe(left);
+                expect(width).toBe(CELLS_SIZE + 2 * margin);
+                expect(height).toBe(width);
+                expect(Number.parseFloat(inset ?? "")).toBeCloseTo(-margin / CELLS_SIZE * 100, 3);
             });
 
             it("should carry only alpha: every shape in currentColor", () => {

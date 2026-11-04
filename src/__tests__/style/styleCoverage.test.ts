@@ -85,6 +85,8 @@ const REQUIRED_SELECTORS: Record<StyleId, readonly string[]> = {
         "[data-group]",
         ".ink-group-brush",
         '[data-celebration="playing"]',
+        '[data-board-canvas~="celebration"]',
+        ".ink-canvas",
         '[data-skin~="trophy"]',
         '[data-skin~="complete-title"]',
         '[data-skin~="celebration"]:not([data-still])',
