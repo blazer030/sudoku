@@ -19,6 +19,12 @@ export interface ChangelogEntry {
 export const UNRELEASED_CHANGES: ChangelogChange[] = [
     {
         text: {
+            en: "Every style now has icons of its own",
+            "zh-Hant": "每個風格都有專屬的圖示",
+        },
+    },
+    {
+        text: {
             en: "Smoother animations in the Ink style",
             "zh-Hant": "水墨風格的動畫更順暢",
         },
