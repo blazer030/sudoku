@@ -870,8 +870,6 @@
 
 [data-style="pixel"] [data-skin~="caret"] {
     color: var(--color-primary);
-    fill: currentColor;
-    stroke: none;
     animation: pixel-blink 1000ms steps(2, jump-none) infinite;
 }
 

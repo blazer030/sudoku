@@ -9,7 +9,7 @@ export const STYLE_ICON_SETS: Record<StyleId, IconSetLoader | null> = {
     minimal: null,
     tactile: null,
     paper: null,
-    pixel: null,
+    pixel: () => import("@/style/styles/pixel/icons").then(module => module.pixelIcons),
     cyber: null,
     ink: null,
     chalkboard: null,
