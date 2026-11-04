@@ -20,6 +20,7 @@ export interface DifficultyStats {
     gamesPlayed: number;
     bestTime: number | null;
     averageTime: number | null;
+    averageHints: number | null;
 }
 
 export interface OverallStats {
@@ -45,6 +46,9 @@ const computeDifficultyStats = (games: GameResult[]): DifficultyStats => {
             : null,
         averageTime: wonGames.length > 0
             ? Math.round(wonGames.reduce((sum, game) => sum + game.elapsedSeconds, 0) / wonGames.length)
+            : null,
+        averageHints: wonGames.length > 0
+            ? wonGames.reduce((sum, game) => sum + game.hintsUsed, 0) / wonGames.length
             : null,
     };
 };

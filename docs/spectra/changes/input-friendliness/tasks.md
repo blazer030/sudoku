@@ -7,7 +7,7 @@
 
 - [x] 2.1 [after: 1.1] 實作 Requirement「Notes at game start」（決策：開局自動筆記不進復原歷史）：`gameStore.startNewGame()` 依設定帶入筆記，涵蓋新遊戲和再玩一局，不計提示、不可復原、遊戲回顧的初始盤面有筆記，繼續舊遊戲時不變動，舊回顧的 `autoNotes` 步驟照常顯示。以 `src/__tests__/stores/gameStore.test.ts`、`src/__tests__/presentation/pages/game/Game.test.ts` 和 `src/__tests__/presentation/pages/game-review/GameReview.test.ts` 驗證規格的每個情境。
 - [x] 2.2 [after: 2.1, 1.2] 實作 Requirement「Unlimited hints」「No free hint」「Hint menu options」（決策：提示不限次數且取消首次免費）：`HintTracker` 移除上限和免費次數，提示選單只剩檢查衝突和揭示一格，完成畫面、離開遊戲、首頁放棄舊遊戲和 `game_complete` 都記實際次數，移除 `hints_total` 和 `hint_used` 的 `auto_notes`，移除不再使用的文案。以 `src/__tests__/domain/game/HintTracker.test.ts`、`src/__tests__/presentation/pages/game/components/HintMenuPopup.test.ts`、`src/__tests__/presentation/pages/game/useHintActions.test.ts`、`src/__tests__/presentation/pages/home/Home.test.ts` 驗證，並確認 `vue-tsc` 沒有對舊 API 的引用。
-- [ ] 2.3 [after: 2.2] 實作 Requirement「Average hints per difficulty」（決策：平均提示次數比照平均時間）：`DifficultyStats.averageHints` 只算完成的遊戲，統計頁每個難度顯示 4 個數值，難度名稱移到數值上方，沒有完成的遊戲顯示「—」。以 `src/__tests__/stores/statisticsStore.test.ts` 跑規格的平均值表格，以統計頁測試驗證顯示和語言切換，並在 320px 寬實測 4 個數值不溢出。
+- [x] 2.3 [after: 2.2] 實作 Requirement「Average hints per difficulty」（決策：平均提示次數比照平均時間）：`DifficultyStats.averageHints` 只算完成的遊戲，統計頁每個難度顯示 4 個數值，難度名稱移到數值上方，沒有完成的遊戲顯示「—」。以 `src/__tests__/stores/statisticsStore.test.ts` 跑規格的平均值表格，以統計頁測試驗證顯示和語言切換，並在 320px 寬實測 4 個數值不溢出。
 
 ## 3. 連點填入
 

@@ -255,6 +255,7 @@ export const zhHant: MessageSchema = {
         byDifficulty: "各難度",
         best: "最佳",
         average: "平均",
+        averageHints: "平均提示",
         completed: "完成",
         notPlayed: "還沒玩過",
         recentGames: "最近遊戲",

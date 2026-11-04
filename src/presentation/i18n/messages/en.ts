@@ -261,6 +261,7 @@ export const en = {
         byDifficulty: "By Difficulty",
         best: "Best",
         average: "Average",
+        averageHints: "Avg. Hints",
         completed: "Completed",
         notPlayed: "Not played yet",
         recentGames: "Recent Games",
