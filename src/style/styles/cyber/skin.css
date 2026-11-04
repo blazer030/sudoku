@@ -761,7 +761,7 @@
 }
 
 /* The dialog powers on like a CRT: a line across its middle opens to the whole card, which flickers twice;
-   the title then glitches in and keeps its magenta/cyan split. A still card (data-still) only fades in,
+   the title then glitches in, keeps its magenta/cyan split and tears now and then, like Home's. A still card (data-still) only fades in,
    like every style's, with its title split. The trophy is yellow on a deep yellow wash with cut corners.
    Board timings minus the 860ms the dialog waits. */
 @keyframes cyber-crt-open {
@@ -794,7 +794,7 @@
 }
 
 [data-style="cyber"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) [data-skin~="complete-title"] {
-    animation: cyber-glitch 520ms steps(1, end) 560ms backwards;
+    animation: cyber-glitch 520ms steps(1, end) 560ms backwards, cyber-title-glitch 2.6s steps(1, end) 1220ms infinite;
 }
 
 [data-style="cyber"] [data-skin~="card"][data-skin~="celebration"] [data-skin~="trophy"] {

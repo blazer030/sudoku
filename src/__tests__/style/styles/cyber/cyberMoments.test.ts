@@ -160,10 +160,10 @@ describe("cyber moments", () => {
             expect(opened).toBeLessThan(1440 * 1.2);
         });
 
-        it("should split the title's shadow into magenta and cyan, glitching it in only with motion", () => {
+        it("should split the title's shadow into magenta and cyan, glitching it in and then now and then only with motion", () => {
             expect(declarationsOf(CYBER_CSS, TITLE).get("text-shadow")).toBe("2px 0 var(--color-primary), -2px 0 var(--color-accent)");
             expect(declarationsOf(CYBER_CSS, TITLE).get("animation")).toBeUndefined();
-            expect(animationOf(GLITCHING_TITLE)).toMatch(/^cyber-glitch \d+ms steps\(1, end\) \d+ms backwards$/);
+            expect(animationOf(GLITCHING_TITLE)).toMatch(/^cyber-glitch \d+ms steps\(1, end\) \d+ms backwards, cyber-title-glitch [\d.]+s steps\(1, end\) \d+ms infinite$/);
         });
 
         it("should set the trophy in yellow on a deep yellow wash with cut corners", () => {
