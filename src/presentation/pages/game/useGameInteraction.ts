@@ -83,6 +83,9 @@ export const useGameInteraction = ({
     };
 
     const noteToCell = (row: number, column: number, value: number) => {
+        // Notes do not apply to a clue or an entry: nothing changes, so no step is recorded
+        const cell = sudoku.puzzle[row][column];
+        if (cell.isClue || cell.hasEntry) return;
         sudoku.toggleNote(row, column, value);
         stepRecorder.record(sudoku.puzzle, "toggleNote", row, column, value);
     };
@@ -199,8 +202,7 @@ export const useGameInteraction = ({
         if (selectedCell.value) {
             const { row, column } = selectedCell.value;
             if (inputMode.value === InputMode.Note) {
-                sudoku.toggleNote(row, column, digit);
-                stepRecorder.record(sudoku.puzzle, "toggleNote", row, column, digit);
+                noteToCell(row, column, digit);
                 return;
             }
             inputToCell(row, column, digit);

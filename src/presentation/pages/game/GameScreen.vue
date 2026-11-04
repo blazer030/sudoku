@@ -65,6 +65,17 @@
                             />
                         </div>
                         <GroupOverlay :effect="groupEffect" />
+                        <FloatingDigitPad
+                            v-if="floatingPadCell !== null"
+                            :cell="floatingPadCell"
+                            :current-entry="sudoku.puzzle[floatingPadCell.row][floatingPadCell.column].entry"
+                            :current-notes="sudoku.puzzle[floatingPadCell.row][floatingPadCell.column].notes"
+                            :digit-counts="digitCounts"
+                            :erase-disabled="eraseDisabled"
+                            :note-mode="inputMode === InputMode.Note"
+                            @erase="toggleEraseMode"
+                            @select-digit="selectDigit"
+                        />
                         <StepLinkOverlay
                             v-if="hintMode.active.value"
                             :links="hintMode.links.value"
@@ -154,6 +165,7 @@ import GameControls from "@/presentation/pages/game/components/GameControls.vue"
 import HintMenuPopup from "@/presentation/pages/game/components/HintMenuPopup.vue";
 import GameToast from "@/presentation/pages/game/components/GameToast.vue";
 import DigitPad from "@/presentation/components/digit-pad/DigitPad.vue";
+import FloatingDigitPad from "@/presentation/components/floating-digit-pad/FloatingDigitPad.vue";
 import Cell from "@/presentation/components/board-cell/Cell.vue";
 import BoardFrame from "@/presentation/components/board-frame/BoardFrame.vue";
 import { cellName } from "@/presentation/components/board-cell/cellName";
@@ -165,7 +177,7 @@ import HintPanel from "@/presentation/pages/game/hint-mode/HintPanel.vue";
 import { useRoomBelow } from "@/presentation/composables/useRoomBelow";
 import { minimumPanelHeight, panelLift } from "@/presentation/components/step-presentation/panelLift";
 import { InputMode } from "@/presentation/pages/game/InputMode";
-import { useBlankDoubleTap } from "@/presentation/pages/game/useBlankDoubleTap";
+import { isBlankTap, useBlankDoubleTap } from "@/presentation/pages/game/useBlankDoubleTap";
 import { useGameInteraction } from "@/presentation/pages/game/useGameInteraction";
 import { useGameSession } from "@/presentation/pages/game/useGameSession";
 import { useSettingsStore } from "@/stores/settingsStore";
@@ -264,7 +276,17 @@ const canFillSingleNotes = (): boolean => settingsStore.doubleTapFill
     && !hintMode.active.value
     && !singleNoteFill.running.value;
 
+// The selected cell, when the floating pad belongs on it: not on a clue, and not while the board ignores the player
+const floatingPadCell = computed((): CellReference | null => {
+    if (!settingsStore.floatingDigitPad || selectedCell.value === null) return null;
+    if (hintMode.active.value || singleNoteFill.running.value || celebration.value !== null) return null;
+    if (selectedDigit.value !== null || inputMode.value === InputMode.Erase) return null;
+    const { row, column } = selectedCell.value;
+    return sudoku.puzzle[row][column].isClue ? null : selectedCell.value;
+});
+
 const handleScreenTap = (event: MouseEvent) => {
+    if (settingsStore.floatingDigitPad && !hintMode.active.value && isBlankTap(event.target)) clearSelection();
     if (!isDoubleTap(event) || !canFillSingleNotes()) return;
     clearSelection();
     singleNoteFill.start();
