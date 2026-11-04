@@ -7,7 +7,7 @@ export type IconSetLoader = () => Promise<IconSet>;
 /** Each style's own icons, a chunk of their own as only one style shows at a time. null draws lucide's. */
 export const STYLE_ICON_SETS: Record<StyleId, IconSetLoader | null> = {
     minimal: null,
-    tactile: null,
+    tactile: () => import("@/style/styles/tactile/icons").then(module => module.tactileIcons),
     paper: null,
     pixel: () => import("@/style/styles/pixel/icons").then(module => module.pixelIcons),
     cyber: null,
