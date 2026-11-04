@@ -60,8 +60,10 @@ export const en = {
         },
         matchLauncherIcon: "Match launcher icon to style",
         matchLauncherIconNote: "The icon updates after you leave the app",
-        gameplay: "Gameplay",
         toggles: {
+            floatingDigitPad: { label: "Floating Keypad", description: "Show digit keys beside the cell you tap" },
+            doubleTapFill: { label: "Double-Tap Fill", description: "Double-tap the blank to fill cells with one note left (Medium and Hard)" },
+            autoNotesAtStart: { label: "Auto Notes at Start", description: "Start each game with every note filled in" },
             highlightSameDigit: { label: "Same Numbers", description: "Light up matching digits" },
             highlightScope: { label: "Row, Column & Box", description: "Shade its row, column and box" },
             motionEffects: { label: "Motion effects", description: "Animations and effects" },
@@ -73,6 +75,8 @@ export const en = {
         donate: "Donate",
         groups: {
             data: "Data",
+            input: "Controls",
+            display: "Display",
         },
         data: {
             clearRecords: "Clear All Records",

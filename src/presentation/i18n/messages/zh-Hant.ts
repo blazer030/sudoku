@@ -57,8 +57,10 @@ export const zhHant: MessageSchema = {
         },
         matchLauncherIcon: "App 圖示配合風格",
         matchLauncherIconNote: "離開 App 後圖示才會更新",
-        gameplay: "遊戲",
         toggles: {
+            floatingDigitPad: { label: "懸浮數字鍵", description: "點格子時，旁邊跳出數字鍵" },
+            doubleTapFill: { label: "連點兩下填入", description: "連點空白處，填入只剩一個筆記的格子（限中等、困難）" },
+            autoNotesAtStart: { label: "開局自動筆記", description: "每局開始就填好所有筆記" },
             highlightSameDigit: { label: "標示相同數字", description: "同樣數字一起亮" },
             highlightScope: { label: "標示同列、欄、宮", description: "淡淡標出所在範圍" },
             motionEffects: { label: "動態效果", description: "動畫與特效" },
@@ -70,6 +72,8 @@ export const zhHant: MessageSchema = {
         donate: "贊助",
         groups: {
             data: "資料",
+            input: "操作",
+            display: "顯示",
         },
         data: {
             clearRecords: "清除所有紀錄",

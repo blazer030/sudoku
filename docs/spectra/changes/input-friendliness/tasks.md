@@ -1,7 +1,7 @@
 ## 1. 設定基礎
 
 - [x] 1.1 實作 Requirement「Floating pad setting」「Double-tap fill setting」「Auto notes setting」的儲存面：`Settings` 新增 `floatingDigitPad`、`doubleTapFill`、`autoNotesAtStart`，預設關閉，舊存檔讀到時用預設值，`settingsStore` 提供 setter 並持久化。以 `src/__tests__/application/settings/SettingsStorage.test.ts` 和 `src/__tests__/stores/settingsStore.test.ts` 驗證預設值、舊存檔和重新載入。
-- [ ] 1.2 [after: 1.1] 實作 Requirement「Grouped toggle rows」（決策：設定改為兩組開關列）：新增 `SettingToggleRow`，以共用 token 呈現狀態，Settings 的遊戲區塊拆成操作和顯示兩組共 8 列，新增 `setting-row`、`switch` skin hook 和中英文案。以 `src/__tests__/presentation/pages/settings/Settings.test.ts` 驗證分組、按列切換、持久化、輔助技術讀得到狀態、切換語言，並確認外觀頁的 `OptionTile` 不受影響。
+- [x] 1.2 [after: 1.1] 實作 Requirement「Grouped toggle rows」（決策：設定改為兩組開關列）：新增 `SettingToggleRow`，以共用 token 呈現狀態，Settings 的遊戲區塊拆成操作和顯示兩組共 8 列，新增 `setting-row`、`switch` skin hook 和中英文案。以 `src/__tests__/presentation/pages/settings/Settings.test.ts` 驗證分組、按列切換、持久化、輔助技術讀得到狀態、切換語言，並確認外觀頁的 `OptionTile` 不受影響。
 
 ## 2. 自動筆記與提示
 
