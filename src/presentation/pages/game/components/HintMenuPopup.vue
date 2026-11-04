@@ -102,7 +102,7 @@
 <script lang="ts" setup>
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
-import { Eye, ScanSearch, Sparkles } from "lucide-vue-next";
+import { Eye, ScanSearch, Sparkles } from "@/presentation/components/icon";
 import { MAX_HINTS } from "@/domain/game/HintTracker";
 import { useHintMenu } from "@/presentation/pages/game/components/useHintMenu";
 import { vPress } from "@/presentation/directives/press";

@@ -45,7 +45,7 @@
 
 <script lang="ts" setup>
 import type { Component } from "vue";
-import { Check } from "lucide-vue-next";
+import { Check } from "@/presentation/components/icon";
 import { vPress } from "@/presentation/directives/press";
 
 withDefaults(defineProps<{

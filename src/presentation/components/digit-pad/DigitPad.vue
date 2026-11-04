@@ -102,7 +102,7 @@
 <script lang="ts" setup>
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
-import { Eraser } from "lucide-vue-next";
+import { Eraser } from "@/presentation/components/icon";
 import { vPress } from "@/presentation/directives/press";
 
 const props = withDefaults(defineProps<{

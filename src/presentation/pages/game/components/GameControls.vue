@@ -25,7 +25,7 @@
 
 <script lang="ts" setup>
 import { useI18n } from "vue-i18n";
-import { Lightbulb, Pencil, Undo2 } from "lucide-vue-next";
+import { Lightbulb, Pencil, Undo2 } from "@/presentation/components/icon";
 import ControlButton from "@/presentation/pages/game/components/ControlButton.vue";
 
 defineProps<{

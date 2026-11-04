@@ -25,7 +25,7 @@
 <script lang="ts" setup>
 import { useTemplateRef } from "vue";
 import { useI18n } from "vue-i18n";
-import { ChevronLeft } from "lucide-vue-next";
+import { ChevronLeft } from "@/presentation/components/icon";
 import { useScrolledHeader } from "@/presentation/composables/useScrolledHeader";
 
 withDefaults(defineProps<{ title: string; backTestId?: string }>(), { backTestId: "back-button" });

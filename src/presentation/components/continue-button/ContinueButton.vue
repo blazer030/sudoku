@@ -39,7 +39,7 @@
 <script lang="ts" setup>
 import { computed } from "vue";
 import { storeToRefs } from "pinia";
-import { Play } from "lucide-vue-next";
+import { Play } from "@/presentation/components/icon";
 import { useI18n } from "vue-i18n";
 import { useGameStore } from "@/stores/gameStore";
 import { computeAbandonProgress } from "@/application/analytics/computeAbandonProgress";

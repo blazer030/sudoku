@@ -82,7 +82,7 @@
 </template>
 
 <script lang="ts" setup>
-import { Save } from "lucide-vue-next";
+import { Save } from "@/presentation/components/icon";
 import { useI18n } from "vue-i18n";
 import { useLeaveDialog } from "@/presentation/pages/game/components/useLeaveDialog";
 import { vPress } from "@/presentation/directives/press";
