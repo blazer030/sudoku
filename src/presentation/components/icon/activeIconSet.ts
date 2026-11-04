@@ -8,7 +8,7 @@ export type IconSetLoader = () => Promise<IconSet>;
 export const STYLE_ICON_SETS: Record<StyleId, IconSetLoader | null> = {
     minimal: null,
     tactile: () => import("@/style/styles/tactile/icons").then(module => module.tactileIcons),
-    paper: null,
+    paper: () => import("@/style/styles/paper/icons").then(module => module.paperIcons),
     pixel: () => import("@/style/styles/pixel/icons").then(module => module.pixelIcons),
     cyber: null,
     ink: null,
