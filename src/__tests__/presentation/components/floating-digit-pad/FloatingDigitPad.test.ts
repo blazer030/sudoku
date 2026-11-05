@@ -258,6 +258,11 @@ describe("FloatingDigitPad", () => {
     });
 
     it("should draw an opaque surface, whatever is beneath it", () => {
-        expect(mountPad().get("[data-testid='floating-digit-pad']").classes()).toContain("bg-card");
+        const pad = mountPad().get("[data-testid='floating-digit-pad']");
+
+        expect(pad.classes()).toContain("bg-card");
+        // What aurora's solid glass is keyed on, which its skin test holds
+        expect(pad.classes()).toContain("shadow-popup");
+        expect(pad.attributes("data-skin")?.split(" ")).toContain("card");
     });
 });

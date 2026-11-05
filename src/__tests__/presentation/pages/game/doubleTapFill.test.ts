@@ -4,6 +4,8 @@ import { flushPromises, mount, type VueWrapper } from "@vue/test-utils";
 import { createPinia } from "pinia";
 import { createMemoryHistory, createRouter } from "vue-router";
 import Game from "@/presentation/pages/game/Game.vue";
+import GameReview from "@/presentation/pages/game-review/GameReview.vue";
+import { i18n } from "@/presentation/i18n";
 import { createKnownSudoku, knownAnswer, knownPuzzle } from "@/__tests__/fixtures/knownPuzzle";
 import type { Difficulty } from "@/domain/generator/SudokuGenerator";
 import type { Sudoku } from "@/domain/game/Sudoku";
@@ -22,18 +24,22 @@ const sudokuWithSingleNotes = (cells: readonly (readonly [number, number, number
     return sudoku;
 };
 
-// Every cell but the last two of row 8 is filled; those two hold their answers as single notes
-const twoCellsFromSolved = (): Sudoku => {
+// Every empty cell is filled but these columns of row 8, which hold their answers as single notes
+const fromSolvedByRow8Columns = (columns: readonly number[]): Sudoku => {
     const sudoku = createKnownSudoku();
     for (let row = 0; row < 9; row++) {
         for (let column = 0; column < 9; column++) {
             if (knownPuzzle[row][column] !== 0) continue;
-            if (row === 8 && (column === 2 || column === 3)) sudoku.toggleNote(row, column, knownAnswer[row][column]);
+            if (row === 8 && columns.includes(column)) sudoku.toggleNote(row, column, knownAnswer[row][column]);
             else sudoku.fill(row, column, knownAnswer[row][column]);
         }
     }
     return sudoku;
 };
+
+const twoCellsFromSolved = (): Sudoku => fromSolvedByRow8Columns([2, 3]);
+// Row 8's six empty cells
+const sixCellsFromSolved = (): Sudoku => fromSolvedByRow8Columns([0, 1, 2, 3, 5, 6]);
 
 interface MountOptions {
     difficulty?: Difficulty;
@@ -57,7 +63,7 @@ const mountGame = async ({ difficulty = "hard", sudoku = sudokuWithSingleNotes()
     await router.isReady();
     const wrapper = mount({ template: "<router-view />" }, { global: { plugins: [pinia, router] } });
     await flushPromises();
-    return { wrapper, router, gameStore, statistics: useStatisticsStore(pinia) };
+    return { wrapper, router, pinia, gameStore, statistics: useStatisticsStore(pinia) };
 };
 
 const tap = async (wrapper: VueWrapper, selector: string, clientX = 10) => {
@@ -424,6 +430,34 @@ describe("double-tap fill", () => {
 
             expect(statistics.history).toHaveLength(1);
             expect(statistics.history[0].completed).toBe(true);
+        });
+
+        it("should ignore a later double tap, saying nothing", async () => {
+            const { wrapper } = await mountGame({ sudoku: twoCellsFromSolved() });
+            await doubleTapBlank(wrapper);
+            vi.advanceTimersByTime(10_000);
+            await flushPromises();
+            expect(wrapper.find(TOAST).exists()).toBe(false);
+
+            await doubleTapBlank(wrapper);
+
+            expect(wrapper.find(TOAST).exists()).toBe(false);
+        });
+
+        it("should show as 6 fill steps in Game Review", async () => {
+            const { wrapper, router, pinia } = await mountGame({ sudoku: sixCellsFromSolved() });
+            await doubleTapBlank(wrapper);
+
+            const review = mount(GameReview, { props: { index: "0" }, global: { plugins: [router, pinia] } });
+            await flushPromises();
+            const actions: string[] = [];
+            for (let step = 0; step < 7; step++) {
+                await review.get("[data-testid='review-next']").trigger("click");
+                actions.push(review.get("[data-testid='review-action']").text());
+            }
+
+            const fill = i18n.global.t("review.actions.fill");
+            expect(actions).toEqual([fill, fill, fill, fill, fill, fill, i18n.global.t("review.stages.completed")]);
         });
     });
 });

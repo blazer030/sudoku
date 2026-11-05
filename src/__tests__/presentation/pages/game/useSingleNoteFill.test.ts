@@ -250,6 +250,27 @@ describe("useSingleNoteFill", () => {
             expect(origin).toEqual({ row: 0, column: 3 });
         });
 
+        it("should hold a row, a column and a box when one cell finishes all three", () => {
+            const sudoku = createKnownSudoku();
+            const finishes = (row: number, column: number) => row === 0 || column === 3 || (row < 3 && column >= 3 && column < 6);
+            for (let row = 0; row < 9; row++) {
+                for (let column = 0; column < 9; column++) {
+                    const isTheRunsCell = row === 0 && column === 3;
+                    if (knownPuzzle[row][column] === 0 && finishes(row, column) && !isTheRunsCell) sudoku.fill(row, column, knownAnswer[row][column]);
+                }
+            }
+            sudoku.toggleNote(0, 3, knownAnswer[0][3]);
+            const { run, onGroupCompleted } = setup(sudoku, { motion: false });
+
+            run.start();
+
+            expect(onGroupCompleted).toHaveBeenCalledOnce();
+            const [completed, origin] = onGroupCompleted.mock.calls[0];
+            expect(completed.groups).toEqual(expect.arrayContaining([{ kind: "row", index: 0 }, { kind: "column", index: 3 }, { kind: "box", index: 1 }]));
+            expect(completed.groups).toHaveLength(3);
+            expect(origin).toEqual({ row: 0, column: 3 });
+        });
+
         it("should hold a row and, elsewhere, a box in one effect", () => {
             const sudoku = createKnownSudoku();
             rowLeftForRun(sudoku, 0, [2]);

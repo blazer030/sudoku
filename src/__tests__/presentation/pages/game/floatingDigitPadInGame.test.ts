@@ -3,7 +3,7 @@ import { flushPromises, mount, type VueWrapper } from "@vue/test-utils";
 import { createPinia } from "pinia";
 import { createMemoryHistory, createRouter } from "vue-router";
 import Game from "@/presentation/pages/game/Game.vue";
-import { createKnownSudoku } from "@/__tests__/fixtures/knownPuzzle";
+import { createKnownSudoku, fillAllButLastKnownCell, lastKnownEmptyCell } from "@/__tests__/fixtures/knownPuzzle";
 import type { Sudoku } from "@/domain/game/Sudoku";
 import { useGameStore } from "@/stores/gameStore";
 
@@ -125,6 +125,23 @@ describe("the floating digit pad in a game", () => {
             await click(wrapper, "[data-testid='cell-0-3']");
             expect(wrapper.find(PAD).exists()).toBe(false);
         });
+    });
+
+    it("should not come back on its cell when a hint solves the board", async () => {
+        const sudoku = createKnownSudoku();
+        fillAllButLastKnownCell(sudoku);
+        const { wrapper } = await mountGame({ sudoku });
+        await click(wrapper, `[data-testid='cell-${lastKnownEmptyCell.row}-${lastKnownEmptyCell.column}']`);
+        expect(wrapper.find(PAD).exists()).toBe(true);
+
+        await click(wrapper, "[data-testid='hint-button']");
+        await click(wrapper, "[data-testid='hint-reveal-cell']");
+        await flushPromises();
+        while (wrapper.find("[data-testid='hint-primary']").exists()) await click(wrapper, "[data-testid='hint-primary']");
+        await flushPromises();
+
+        expect(wrapper.get("[data-testid='game-board']").attributes("data-celebration")).toBeDefined();
+        expect(wrapper.find(PAD).exists()).toBe(false);
     });
 
     it("should lift the board above the controls only while the pad is open", async () => {

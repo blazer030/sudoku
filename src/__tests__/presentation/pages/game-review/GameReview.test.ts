@@ -88,6 +88,13 @@ describe("GameReview", () => {
         expect(boldTexts(wrapper)).toEqual(expect.arrayContaining(["5", "1", "2"]));
     });
 
+    it("should still show an older game's auto notes step", async () => {
+        const wrapper = await mountReview({ action: "autoNotes" });
+
+        expect(wrapper.get("[data-testid='review-action']").text()).toBe(i18n.global.t("review.actions.autoNotes"));
+        expect(wrapper.get("[data-testid='review-explanation']").text()).toBe(i18n.global.t("review.autoNotes"));
+    });
+
     it("should describe a hint step", async () => {
         const wrapper = await mountReview({ action: "hint" });
 

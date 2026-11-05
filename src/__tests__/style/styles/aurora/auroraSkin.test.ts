@@ -87,6 +87,15 @@ const glow = (size: string, amount: string): string => `0 0 ${size} ${soft("prim
 
 describe("aurora's glass", () => {
     describe("its densities", () => {
+        it("should make the floating pad solid glass, so no digit shows through it", () => {
+            expect(declarationsOf(AURORA_CSS, `${skin("card")}:is(.shadow-modal, .shadow-popup)`).get("background-color")).toBe("var(--aurora-glass-dialog-fill)");
+            expect(AURORA_DENSITIES.light.dialog).toBe(1);
+            expect(AURORA_DENSITIES.dark.dialog).toBe(1);
+            const padRule = declarationsOf(AURORA_CSS, skin("floating-pad"));
+            expect(padRule.has("background-color")).toBe(false);
+            expect(padRule.has("background")).toBe(false);
+        });
+
         it.each(["light", "dark"] as const)("should give %s mode the palette's densities and the glass's cues", (mode) => {
             const root = MODE_ROOTS[mode];
 

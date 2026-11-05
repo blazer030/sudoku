@@ -112,6 +112,18 @@ describe("completion actions", () => {
         expect(wrapper.find("[data-testid='leave-game-dialog']").exists()).toBe(true);
     });
 
+    it("should state one hint on the completion screen and in the recorded game", async () => {
+        const { wrapper, statisticsStore } = await mountGameRoute();
+        await wrapper.get("[data-testid='hint-button']").trigger("click");
+        await wrapper.get("[data-testid='hint-check-conflicts']").trigger("click");
+        await flushPromises();
+
+        await completeKnownGame(wrapper);
+
+        expect(wrapper.get("[data-testid='hints-count']").text()).toBe("1");
+        expect(statisticsStore.history[statisticsStore.history.length - 1].hintsUsed).toBe(1);
+    });
+
     it("should open the review of the game just finished", async () => {
         const { wrapper, router, statisticsStore } = await mountGameRoute();
         statisticsStore.recordGame({ difficulty: "easy", elapsedSeconds: 100, completed: true });
