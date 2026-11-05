@@ -122,7 +122,7 @@ The pad SHALL offer the digits 1 to 9 and an erase key, and SHALL apply them by 
 
 ### Requirement: Floating pad closing
 
-The system SHALL close the pad when the selection clears, SHALL move it when another cell is selected, and SHALL clear the selection when the player taps outside the board, the pad and the controls while the setting is on.
+The system SHALL close the pad when the selection clears, SHALL move it when another cell is selected, and SHALL clear the selection when the player taps outside the board, the pad and the controls while the setting is on. While the setting is on, a hint that puts its answer in a cell SHALL clear the selection, so the pad opens only on the player's next tap; a hint that ends with nothing filled SHALL leave the selection as it was.
 
 #### Scenario: Tapping the selected cell again
 
@@ -138,6 +138,16 @@ The system SHALL close the pad when the selection clears, SHALL move it when ano
 
 - **WHEN** the player taps the blank with the setting on
 - **THEN** the selection clears and the pad closes
+
+#### Scenario: A hint fills a cell
+
+- **WHEN** the pad is open, the player uses a hint and its answer goes into a cell
+- **THEN** the selection clears and the pad stays closed until the next tap on a cell
+
+#### Scenario: A hint ends with nothing filled
+
+- **WHEN** the pad is open and the player closes a wrong-entry hint without clearing the entry
+- **THEN** the pad opens again on the selected cell
 
 #### Scenario: Blank tap with the setting off
 

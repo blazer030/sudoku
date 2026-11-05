@@ -53,11 +53,12 @@ interface HarnessParts {
     stepRecorder?: StepRecorder;
     onHintReveal?: (outcome: RevealOutcome) => void;
     onNoConflicts?: () => void;
+    onCellRevealed?: () => void;
 }
 
 const mountHintHarness = (
     analytics: AnalyticsService,
-    { sudoku = buildPartialSudoku(), stepRecorder = new StepRecorder(), onHintReveal, onNoConflicts }: HarnessParts = {},
+    { sudoku = buildPartialSudoku(), stepRecorder = new StepRecorder(), onHintReveal, onNoConflicts, onCellRevealed }: HarnessParts = {},
 ) => {
     const captured: { api: HintApi | undefined } = { api: undefined };
     const Harness = defineComponent({
@@ -69,6 +70,7 @@ const mountHintHarness = (
                 onRevealComplete: () => { /* noop */ },
                 onHintReveal,
                 onNoConflicts,
+                onCellRevealed,
                 analytics,
             });
             return () => null;
@@ -162,6 +164,19 @@ describe("useHintActions — reveal cell", () => {
         expect(onHintReveal).toHaveBeenCalledTimes(1);
         const [outcome] = onHintReveal.mock.calls[0] as [RevealOutcome];
         expect(outcome.value).toBe(sudoku.answer[outcome.cell.row][outcome.cell.column]);
+    });
+
+    it("reports a random reveal's cell as revealed", async () => {
+        openHintDialog.mockReset();
+        openHintDialog.mockResolvedValue("revealCell");
+        const sudoku = createKnownSudoku();
+        vi.spyOn(sudoku, "planRevealHint").mockReturnValue({ kind: "noTechnique" });
+        const onCellRevealed = vi.fn();
+        const api = mountHintHarness(createAnalyticsSpy(), { sudoku, onCellRevealed });
+
+        await api.openHintMenu();
+
+        expect(onCellRevealed).toHaveBeenCalledOnce();
     });
 
     it("enters hint mode, spends one hint and logs it once without touching the board", async () => {

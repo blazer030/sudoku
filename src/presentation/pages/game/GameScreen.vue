@@ -209,7 +209,11 @@ const {
     celebration,
     groupEffect,
     isInGroupEffect,
-} = useGameSession({ onPlayAgain: () => { emit("playAgain"); } });
+} = useGameSession({
+    onPlayAgain: () => { emit("playAgain"); },
+    // Or the pad would come back on the old cell by itself and could cover the one the hint revealed
+    onCellRevealed: () => { if (settingsStore.floatingDigitPad) clearSelection(); },
+});
 
 const settingsStore = useSettingsStore();
 

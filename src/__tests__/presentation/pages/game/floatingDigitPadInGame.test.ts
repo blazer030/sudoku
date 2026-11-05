@@ -144,6 +144,54 @@ describe("the floating digit pad in a game", () => {
         expect(wrapper.find(PAD).exists()).toBe(false);
     });
 
+    describe("after a hint", () => {
+        const pressHintThrough = async (wrapper: VueWrapper) => {
+            await click(wrapper, "[data-testid='hint-button']");
+            await click(wrapper, "[data-testid='hint-reveal-cell']");
+            await flushPromises();
+            while (wrapper.find("[data-testid='hint-primary']").exists()) await click(wrapper, "[data-testid='hint-primary']");
+            await flushPromises();
+        };
+
+        it("should clear the selection when the hint fills a cell, and open again on the next tap", async () => {
+            const { wrapper } = await mountGame();
+            await click(wrapper, EMPTY_CELL);
+
+            await pressHintThrough(wrapper);
+
+            expect(wrapper.get("[data-testid='game-board']").attributes("data-selected-cell")).toBeUndefined();
+            expect(wrapper.find(PAD).exists()).toBe(false);
+            await click(wrapper, "[data-testid='cell-1-1']");
+            expect(wrapper.find(PAD).exists()).toBe(true);
+        });
+
+        it("should come back when a wrong-entry hint closes with nothing filled", async () => {
+            const sudoku = createKnownSudoku();
+            sudoku.fill(0, 3, 1);
+            const { wrapper } = await mountGame({ sudoku });
+            await click(wrapper, EMPTY_CELL);
+            await click(wrapper, "[data-testid='hint-button']");
+            await click(wrapper, "[data-testid='hint-reveal-cell']");
+            await flushPromises();
+            expect(wrapper.find(PAD).exists()).toBe(false);
+
+            await click(wrapper, "[data-testid='hint-close']");
+            await flushPromises();
+
+            expect(wrapper.find(PAD).exists()).toBe(true);
+            expect(hasEntry(wrapper, 0, 3)).toBe(true);
+        });
+
+        it("should keep the selection with the setting off", async () => {
+            const { wrapper } = await mountGame({ floatingDigitPad: false });
+            await click(wrapper, EMPTY_CELL);
+
+            await pressHintThrough(wrapper);
+
+            expect(wrapper.get("[data-testid='game-board']").attributes("data-selected-cell")).toBe("R1C3");
+        });
+    });
+
     it("should lift the board above the controls only while the pad is open", async () => {
         const { wrapper } = await mountGame();
         const board = () => wrapper.get("[data-testid='game-board']").classes();

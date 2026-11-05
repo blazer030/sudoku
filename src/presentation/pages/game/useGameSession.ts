@@ -23,9 +23,11 @@ import { ANALYTICS_KEY } from "@/application/analytics/AnalyticsService";
 interface GameSessionOptions {
     /** The player chose Play Again on the completion modal. */
     onPlayAgain: () => void;
+    /** A hint put its answer in a cell. */
+    onCellRevealed: () => void;
 }
 
-export const useGameSession = ({ onPlayAgain }: GameSessionOptions) => {
+export const useGameSession = ({ onPlayAgain, onCellRevealed }: GameSessionOptions) => {
     const router = useRouter();
     const gameStore = useGameStore();
     const statisticsStore = useStatisticsStore();
@@ -128,6 +130,7 @@ export const useGameSession = ({ onPlayAgain }: GameSessionOptions) => {
         onGroupCompleted: playGroupEffect,
         onHintReveal: outcome => { gameToast.show({ kind: "randomReveal", outcome }); },
         onNoConflicts: () => { gameToast.show({ kind: "noConflicts" }); },
+        onCellRevealed,
         analytics,
     });
 
