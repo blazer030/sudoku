@@ -6,9 +6,15 @@ export const FLOATING_PAD_COLUMNS = 3;
 
 // A digit key is never smaller than this, however small the board makes its cells
 const MINIMUM_KEY_PX = 36;
-// The pad's padding, gaps and border round its keys
-const PAD_CHROME_WIDTH_PX = 10;
-const PAD_CHROME_HEIGHT_PX = 12;
+
+/** What the pad's padding, gaps and border take from its keys, in pixels. */
+export interface FloatingPadChrome {
+    width: number;
+    height: number;
+}
+
+// Used until the pad can be measured, as each style may give it more room
+const USUAL_PAD_CHROME: FloatingPadChrome = { width: 10, height: 12 };
 
 export interface FloatingPadSize {
     rows: number;
@@ -21,11 +27,11 @@ export interface FloatingPadPlacement {
 }
 
 /** The pad's size in cells. An unmeasured board (0) gets the usual size. */
-export const floatingPadSize = (cellSize: number): FloatingPadSize => {
+export const floatingPadSize = (cellSize: number, chrome: FloatingPadChrome = USUAL_PAD_CHROME): FloatingPadSize => {
     if (cellSize <= 0) return { rows: FLOATING_PAD_ROWS, columns: FLOATING_PAD_COLUMNS };
     return {
-        rows: Math.max(FLOATING_PAD_ROWS, (MINIMUM_KEY_PX * FLOATING_PAD_ROWS + PAD_CHROME_HEIGHT_PX) / cellSize),
-        columns: Math.max(FLOATING_PAD_COLUMNS, (MINIMUM_KEY_PX * FLOATING_PAD_COLUMNS + PAD_CHROME_WIDTH_PX) / cellSize),
+        rows: Math.max(FLOATING_PAD_ROWS, (MINIMUM_KEY_PX * FLOATING_PAD_ROWS + chrome.height) / cellSize),
+        columns: Math.max(FLOATING_PAD_COLUMNS, (MINIMUM_KEY_PX * FLOATING_PAD_COLUMNS + chrome.width) / cellSize),
     };
 };
 

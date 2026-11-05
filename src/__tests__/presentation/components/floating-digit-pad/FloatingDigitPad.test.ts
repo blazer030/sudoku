@@ -88,6 +88,24 @@ describe("FloatingDigitPad", () => {
             wrapper.unmount();
         });
 
+        it("should count the padding and gaps its style gives it, so the keys still reach 36px", async () => {
+            const realStyle = window.getComputedStyle.bind(window);
+            vi.spyOn(window, "getComputedStyle").mockImplementation((element) => {
+                if (!(element as HTMLElement).dataset.skin?.includes("floating-pad")) return realStyle(element);
+                return {
+                    paddingLeft: "6px", paddingRight: "6px", paddingTop: "6px", paddingBottom: "6px",
+                    borderLeftWidth: "1px", borderRightWidth: "1px", borderTopWidth: "1px", borderBottomWidth: "1px",
+                    columnGap: "3px", rowGap: "3px",
+                } as CSSStyleDeclaration;
+            });
+            const { wrapper } = mountOnBoard(40 * 9);
+            await nextTick();
+
+            // 3 keys of 36px, 12px of padding, 2px of border and 2 gaps of 3px across: 128px of cells of 40px
+            expect(widthShare(wrapper)).toBeCloseTo((128 / 40 / 9) * 100, 5);
+            wrapper.unmount();
+        });
+
         it("should keep three cells on a board with room", async () => {
             const { wrapper } = mountOnBoard(41.5 * 9);
             await nextTick();

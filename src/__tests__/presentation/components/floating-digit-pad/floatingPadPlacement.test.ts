@@ -24,6 +24,13 @@ describe("floatingPadSize", () => {
         expect(floatingPadSize(cellSize)).toEqual({ rows: FLOATING_PAD_ROWS, columns: FLOATING_PAD_COLUMNS });
     });
 
+    it("should grow further when a style gives the pad more room round its keys", () => {
+        const size = floatingPadSize(40, { width: 20, height: 24 });
+
+        expect(size.columns).toBeCloseTo(128 / 40, 5);
+        expect(size.rows).toBeCloseTo(153.6 / 40, 5);
+    });
+
     it("should keep its usual size before the board is measured", () => {
         expect(floatingPadSize(0)).toEqual({ rows: FLOATING_PAD_ROWS, columns: FLOATING_PAD_COLUMNS });
     });

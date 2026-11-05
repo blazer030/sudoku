@@ -4,7 +4,7 @@
         :class="{ 'floating-pad-enter': motionAllowed() }"
         :data-note-mode="noteMode"
         :style="placementStyle"
-        class="floating-pad absolute z-30 grid gap-0.5 p-0.5 bg-card border border-primary rounded-xl shadow-popup"
+        class="floating-pad absolute z-30 grid bg-card border border-primary rounded-xl shadow-popup"
         data-skin="card floating-pad"
         data-testid="floating-digit-pad"
         role="group"
@@ -49,7 +49,7 @@ import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef, watchPostEff
 import { useI18n } from "vue-i18n";
 import { BOARD_SIZE } from "@/domain/board/constants";
 import { Eraser } from "@/presentation/components/icon";
-import { floatingPadPlacement, floatingPadSize } from "@/presentation/components/floating-digit-pad/floatingPadPlacement";
+import { FLOATING_PAD_COLUMNS, type FloatingPadChrome, floatingPadPlacement, floatingPadSize } from "@/presentation/components/floating-digit-pad/floatingPadPlacement";
 import { useMotionAllowed } from "@/presentation/composables/useMotionAllowed";
 import { vPress } from "@/presentation/directives/press";
 
@@ -78,23 +78,41 @@ const emit = defineEmits<{
 const { t } = useI18n();
 const motionAllowed = useMotionAllowed();
 
+// Three rows of digits and the erase key's row
+const FLOATING_PAD_ROW_GAPS = 3;
+
 const asBoardShare = (cells: number): string => `${(cells / BOARD_SIZE) * 100}%`;
 
-// The board it sits on sets the cell size, and so how far past three cells the pad must grow
+// Undefined where the style's padding and gaps can't be read, and the usual room is assumed
+const measureChrome = (element: HTMLElement): FloatingPadChrome | undefined => {
+    const style = getComputedStyle(element);
+    const width = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight)
+        + parseFloat(style.borderLeftWidth) + parseFloat(style.borderRightWidth)
+        + (FLOATING_PAD_COLUMNS - 1) * parseFloat(style.columnGap);
+    const height = parseFloat(style.paddingTop) + parseFloat(style.paddingBottom)
+        + parseFloat(style.borderTopWidth) + parseFloat(style.borderBottomWidth)
+        + FLOATING_PAD_ROW_GAPS * parseFloat(style.rowGap);
+    return Number.isNaN(width + height) ? undefined : { width, height };
+};
+
+// The board it sits on sets the cell size and the style its padding, and so how far past three cells the pad must grow
 const pad = useTemplateRef<HTMLElement>("pad");
 const cellSize = ref(0);
-const measureCell = () => {
-    cellSize.value = (pad.value?.parentElement?.clientWidth ?? 0) / BOARD_SIZE;
+const chrome = ref<FloatingPadChrome>();
+const measure = () => {
+    if (!pad.value) return;
+    cellSize.value = (pad.value.parentElement?.clientWidth ?? 0) / BOARD_SIZE;
+    chrome.value = measureChrome(pad.value);
 };
 onMounted(() => {
-    measureCell();
-    window.addEventListener("resize", measureCell);
+    measure();
+    window.addEventListener("resize", measure);
 });
 onBeforeUnmount(() => {
-    window.removeEventListener("resize", measureCell);
+    window.removeEventListener("resize", measure);
 });
 
-const size = computed(() => floatingPadSize(cellSize.value));
+const size = computed(() => floatingPadSize(cellSize.value, chrome.value));
 const placement = computed(() => floatingPadPlacement(props.cell, size.value));
 
 const placementStyle = computed(() => ({
@@ -133,6 +151,8 @@ const digitLabel = (digit: number): string =>
 
 <style scoped>
 .floating-pad {
+    padding: var(--floating-pad-padding, 2px);
+    gap: var(--floating-pad-gap, 2px);
     grid-template-columns: repeat(3, minmax(0, 1fr));
     grid-template-rows: repeat(3, minmax(0, 1fr)) minmax(0, 0.6fr);
 }
