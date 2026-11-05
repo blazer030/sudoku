@@ -68,11 +68,11 @@
         data-testid="home-hero"
     >
         <div
-            class="w-20 h-20 bg-primary rounded-popup flex items-center justify-center shadow-primary-lg"
+            class="size-(--home-logo-size) bg-primary rounded-popup flex items-center justify-center shadow-primary-lg"
             data-skin="logo"
             data-testid="home-logo"
         >
-            <div class="grid grid-cols-3 gap-1 w-12 h-12">
+            <div class="grid grid-cols-3 gap-1 size-(--home-logo-mark)">
                 <div
                     v-for="square in 9"
                     :key="square"
@@ -105,11 +105,11 @@
         data-testid="home-hero"
     >
         <div
-            class="w-20 h-20 bg-primary rounded-popup flex items-center justify-center shadow-primary-lg"
+            class="size-(--home-logo-size) bg-primary rounded-popup flex items-center justify-center shadow-primary-lg"
             data-skin="logo"
             data-testid="home-logo"
         >
-            <div class="grid grid-cols-3 gap-1 w-12 h-12">
+            <div class="grid grid-cols-3 gap-1 size-(--home-logo-mark)">
                 <div class="rounded-sm bg-on-primary/40" />
                 <div class="rounded-sm bg-on-primary" />
                 <div class="rounded-sm bg-on-primary/40" />

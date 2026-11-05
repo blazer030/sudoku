@@ -1,3 +1,4 @@
+import { readFileSync } from "fs";
 import { createAnalyticsSpy } from "@/__tests__/fixtures/analyticsSpy";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { nextTick } from "vue";
@@ -353,6 +354,51 @@ describe("Home", () => {
 
         expect(subtitle("walkthrough")).toBe("Enter a puzzle, see the steps");
         expect(subtitle("settings")).toBe("Theme, mode, language");
+    });
+
+    describe("on a short window", () => {
+        const indexCss = readFileSync("src/style/index.css", "utf8");
+        const size = (token: string): { smallest: number; share: number } => {
+            const match = new RegExp(`--home-${token}: calc\\(([\\d.]+)px \\+ ([\\d.]+) \\* var\\(--home-step\\)\\);`).exec(indexCss);
+            if (match === null) throw new Error(`--home-${token} is not a size on --home-step`);
+            return { smallest: Number(match[1]), share: Number(match[2]) };
+        };
+
+        it("should give back exactly the room the sizes have to give", () => {
+            // Each size, as often as it counts from top to bottom of the page
+            const parts: [token: string, times: number][] = [
+                ["page-top", 1], ["logo-size", 1], ["continue-padding", 2], ["new-game-height", 1], ["tile-padding", 2], ["page-bottom", 1],
+            ];
+            const given = parts.reduce((sum, [token, times]) => sum + times * size(token).share, 0);
+            const step = /--home-step: calc\(clamp\(0px, .* - (\d+)px, (\d+)px\) \/ (\d+)\);/.exec(indexCss);
+
+            expect(given).toBe(Number(step?.[2]));
+            expect(given).toBe(Number(step?.[3]));
+            // Full size from a 720px window up
+            expect(Number(step?.[1]) + given).toBe(720);
+        });
+
+        it("should keep the logo's mark its share of the logo", () => {
+            const logo = size("logo-size");
+            const mark = size("logo-mark");
+
+            expect(mark.smallest / logo.smallest).toBeCloseTo((mark.smallest + mark.share) / (logo.smallest + logo.share));
+        });
+
+        it("should keep the cards off what is above and below them, however little room there is", () => {
+            const { wrapper } = mountHome({ savedGame: dummySave });
+            const spacers = (wrapper.element as HTMLElement).querySelectorAll(":scope > .flex-1");
+
+            expect(spacers).toHaveLength(2);
+            for (const spacer of spacers) expect(spacer.classList).toContain("min-h-3");
+        });
+
+        it("should shrink later without a saved game, which has no Continue card to make room for", () => {
+            const spare = "[--home-spare:106px]";
+
+            expect(mountHome().wrapper.classes()).toContain(spare);
+            expect(mountHome({ savedGame: dummySave }).wrapper.classes()).not.toContain(spare);
+        });
     });
 
     it("should make the whole tile the tap target", () => {

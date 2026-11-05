@@ -1,11 +1,13 @@
 <template>
     <div
-        class="flex flex-col min-h-full items-center pt-20 pb-15 px-6"
+        class="home-sizes flex flex-col min-h-full items-center pt-(--home-page-top) pb-(--home-page-bottom) px-6"
+        :class="gameStore.savedGame === null ? '[--home-spare:106px]' : ''"
         data-skin="page-ruled"
     >
         <HomeHero />
 
-        <div class="flex-1" />
+        <!-- However short the window, the cards never touch what is above and below them -->
+        <div class="flex-1 min-h-3" />
 
         <div class="flex flex-col gap-3 w-full">
             <ContinueButton @continue="continueGame" />
@@ -24,7 +26,7 @@
                     :class="gameStore.savedGame === null
                         ? 'bg-primary text-on-primary shadow-primary'
                         : 'bg-primary-light text-primary'"
-                    class="flex items-center justify-center gap-2.5 h-14 w-full rounded-2xl cursor-pointer"
+                    class="flex items-center justify-center gap-2.5 h-(--home-new-game-height) w-full rounded-2xl cursor-pointer"
                     data-testid="new-game-button"
                     type="button"
                     @click="handleNewGame"
@@ -35,7 +37,7 @@
             </div>
         </div>
 
-        <div class="flex-1" />
+        <div class="flex-1 min-h-3" />
 
         <!-- Becomes grid-cols-2 when Technique Lessons adds a fourth tile -->
         <div
@@ -48,7 +50,7 @@
                 v-press
                 data-skin="tile home-tile"
                 :data-testid="`${entry.id}-button`"
-                class="flex flex-col items-center gap-1 min-h-22 bg-card rounded-2xl shadow-card px-2 py-3 cursor-pointer"
+                class="flex flex-col items-center gap-1 min-h-22 bg-card rounded-2xl shadow-card px-2 py-(--home-tile-padding) cursor-pointer"
                 type="button"
                 @click="entry.open"
             >

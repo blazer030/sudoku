@@ -124,8 +124,8 @@
    the column (640px less 8px each side), and no further. A window 720px tall or more stays at full size,
    which only matters when it is wider than it is tall, as the board cannot reach the width there. */
 :root {
-  --game-window: calc(100dvh - var(--safe-area-inset-top, env(safe-area-inset-top)) - var(--safe-area-inset-bottom, env(safe-area-inset-bottom)));
-  --game-step: calc(clamp(0px, max(var(--game-window) - (min(100vw, 640px) - 16px) - 220px, var(--game-window) - 609px), 111px) / 111);
+  --usable-height: calc(100dvh - var(--safe-area-inset-top, env(safe-area-inset-top)) - var(--safe-area-inset-bottom, env(safe-area-inset-bottom)));
+  --game-step: calc(clamp(0px, max(var(--usable-height) - (min(100vw, 640px) - 16px) - 220px, var(--usable-height) - 609px), 111px) / 111);
   --board-room: calc(220px + 111 * var(--game-step));
   --game-page-top: calc(8px + 16 * var(--game-step));
   --game-page-bottom: calc(12px + 12 * var(--game-step));
@@ -139,6 +139,22 @@
   /* Not in the sum: a digit keeps its share of the key */
   --digit-key-text: calc(18px + 6 * var(--game-step));
   --digit-key-note-text: calc(13.5px + 4.5 * var(--game-step));
+}
+
+/* Home does the same on a short window, by a step of its own: 168px to give back, a pixel for each pixel
+   of window, so the gaps round its cards stay as they are from 720px down to 552px, and only then close.
+   A page with no saved game has no Continue card, so it needs --home-spare less and shrinks that much later.
+   A test holds the shares to that sum. */
+.home-sizes {
+  --home-step: calc(clamp(0px, var(--usable-height) + var(--home-spare, 0px) - 552px, 168px) / 168);
+  --home-page-top: calc(12px + 68 * var(--home-step));
+  --home-page-bottom: calc(16px + 44 * var(--home-step));
+  --home-logo-size: calc(48px + 32 * var(--home-step));
+  --home-continue-padding: calc(12px + 4 * var(--home-step));
+  --home-new-game-height: calc(48px + 8 * var(--home-step));
+  --home-tile-padding: calc(8px + 4 * var(--home-step));
+  /* Not in the sum: the mark stays its share of the logo */
+  --home-logo-mark: calc(28.8px + 19.2 * var(--home-step));
 }
 
 :root {

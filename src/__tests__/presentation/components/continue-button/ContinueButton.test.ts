@@ -55,7 +55,7 @@ describe("ContinueButton", () => {
         const button = wrapper.get("[data-testid='continue-button']");
 
         expect(button.attributes("data-layout")).toBe("chips");
-        expect(button.classes()).toEqual(expect.arrayContaining(["flex", "flex-col", "items-start", "gap-2.5", "px-5", "py-4", "rounded-2xl"]));
+        expect(button.classes()).toEqual(expect.arrayContaining(["flex", "flex-col", "items-start", "gap-2.5", "px-5", "py-(--home-continue-padding)", "rounded-2xl"]));
         for (const id of CHIP_IDS) {
             expect(wrapper.get(`[data-testid='${id}']`).classes()).toEqual(["text-sm", "bg-on-featured/20", "rounded-full", "px-2.5", "py-0.5"]);
         }
