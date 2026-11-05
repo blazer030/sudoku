@@ -48,7 +48,7 @@ export const useGameCompletion = ({ sudoku, difficulty, getElapsedSeconds, getRe
             ...(replaySummary && {
                 undo_count: replaySummary.undoCount,
                 wrong_entries: replaySummary.wrongEntries,
-                used_notes: replaySummary.usedNotes,
+                ...(replaySummary.usedNotes !== null && { used_notes: replaySummary.usedNotes }),
             }),
         });
         onCompleted({ isNewRecord });

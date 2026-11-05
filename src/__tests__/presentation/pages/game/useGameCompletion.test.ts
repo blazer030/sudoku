@@ -6,6 +6,7 @@ import { Sudoku } from "@/domain/game/Sudoku";
 import { PuzzleCell } from "@/domain/board/PuzzleCell";
 import { useGameCompletion } from "@/presentation/pages/game/useGameCompletion";
 import { useStatisticsStore } from "@/stores/statisticsStore";
+import { createKnownSudoku } from "@/__tests__/fixtures/knownPuzzle";
 import type { AnalyticsEvent } from "@/application/analytics/AnalyticsService";
 import type { GameStep } from "@/domain/game/GameStep";
 import type { GameReplayData } from "@/application/statistics/StatisticsRepository";
@@ -125,6 +126,29 @@ describe("useGameCompletion", () => {
         expect(event.name).toBe("game_complete");
         expect(event).not.toHaveProperty("undo_count");
         expect(event).not.toHaveProperty("wrong_entries");
+        expect(event).not.toHaveProperty("used_notes");
+    });
+
+    it("keeps undo_count and wrong_entries but leaves out used_notes for a game started with auto notes", () => {
+        const analytics = createAnalyticsSpy();
+        const fresh = createKnownSudoku();
+        fresh.autoNotes();
+        const { checkAndComplete } = useGameCompletion({
+            sudoku: buildCompleteSudoku(),
+            difficulty: ref("hard"),
+            getElapsedSeconds: () => 420,
+            getReplayData: () => ({
+                initialBoard: fresh.puzzle.map((row) => row.map((cell) => ({ clue: cell.clue, entry: 0, notes: [...cell.notes] }))),
+                steps: [stepOf("undo", 0)],
+            }),
+            onCompleted: () => { /* noop */ },
+            analytics,
+        });
+
+        checkAndComplete();
+
+        const event = analytics.logEvent.mock.calls[0][0] as AnalyticsEvent;
+        expect(event).toMatchObject({ undo_count: 1, wrong_entries: 0 });
         expect(event).not.toHaveProperty("used_notes");
     });
 

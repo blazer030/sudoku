@@ -42,6 +42,11 @@ While the setting is on, every new game, including Play Again, SHALL start with 
 - **WHEN** the player opens Game Review for such a game
 - **THEN** its first board shows the notes and no auto notes step is listed
 
+#### Scenario: Analytics for such a game
+
+- **WHEN** a game started with the setting on completes
+- **THEN** `game_complete` carries `undo_count` and `wrong_entries`, and no `used_notes`
+
 #### Scenario: Old reviews
 
 - **WHEN** the player opens Game Review for an older game that used Auto Notes as a hint

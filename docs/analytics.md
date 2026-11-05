@@ -7,7 +7,7 @@ Events go through the `AnalyticsService` port (`src/application/analytics/Analyt
 | Event | Params | Question it answers |
 | --- | --- | --- |
 | `game_start` | `difficulty` | How many games start, per difficulty? |
-| `game_complete` | `difficulty`, `time_seconds`, `hints_used`, `undo_count`, `wrong_entries`, `used_notes` (0/1) | How long and how clean are finished games? The last three are left out for games resumed from a save without a full replay. |
+| `game_complete` | `difficulty`, `time_seconds`, `hints_used`, `undo_count`, `wrong_entries`, `used_notes` (0/1) | How long and how clean are finished games? The last three are left out for games resumed from a save without a full replay; `used_notes` alone is left out for games started with Auto Notes at Start, which begin with every note in place. |
 | `game_abandon` | `difficulty`, `progress_pct`, `correct_pct`, `incorrect_pct` | How far do players get before quitting? |
 | `hint_used` | `hint_type` (`check_conflicts`, `reveal_cell`) | Which hints do players reach for? |
 | `donate_view` | none | How many players see the donate page? |

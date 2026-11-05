@@ -4,6 +4,7 @@ import { createPinia } from "pinia";
 import { createMemoryHistory, createRouter } from "vue-router";
 import Game from "@/presentation/pages/game/Game.vue";
 import { knownAnswer, knownPuzzle } from "@/__tests__/fixtures/knownPuzzle";
+import { summarizeReplay } from "@/application/analytics/summarizeReplay";
 import { useGameStore } from "@/stores/gameStore";
 import { useStatisticsStore } from "@/stores/statisticsStore";
 
@@ -63,5 +64,17 @@ describe("a game started with auto notes", () => {
         expect([...(replay?.initialBoard[0][2].notes ?? [])].sort()).toEqual([1, 2, 4]);
         expect(replay?.steps.map(step => step.action)).toEqual([]);
         expect(statistics.history[0].hintsUsed).toBe(0);
+    });
+
+    it("should leave a replay that still gives its undo and wrong-entry counts, and no notes use", async () => {
+        const { wrapper, statistics } = await startGameWithAutoNotes();
+
+        await wrapper.get("[data-testid='back-button']").trigger("click");
+        await wrapper.get("[data-testid='give-up-and-leave-button']").trigger("click");
+        await flushPromises();
+
+        const replay = statistics.history[0].replay;
+        if (replay === undefined) throw new Error("the game left no replay");
+        expect(summarizeReplay(replay, knownAnswer)).toEqual({ undoCount: 0, wrongEntries: 0, usedNotes: null });
     });
 });
