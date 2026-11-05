@@ -53,7 +53,8 @@ describe("gameStore", () => {
             localStorage.clear();
         });
 
-        it("should start with no notes by default", async () => {
+        it("should start with no notes with the setting off", async () => {
+            useSettingsStore().setAutoNotesAtStart(false);
             const store = useGameStore();
 
             await store.startNewGame("medium");
@@ -61,8 +62,7 @@ describe("gameStore", () => {
             expect(store.sudoku?.puzzle.flat().every(cell => cell.notes.length === 0)).toBe(true);
         });
 
-        it("should start with every unfilled cell's candidates, spending no hint, with the setting on", async () => {
-            useSettingsStore().setAutoNotesAtStart(true);
+        it("should start with every unfilled cell's candidates, spending no hint, by default", async () => {
             const store = useGameStore();
 
             await store.startNewGame("medium");

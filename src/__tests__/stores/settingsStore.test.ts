@@ -57,9 +57,9 @@ describe("settingsStore", () => {
         expect(store.language).toBe("system");
         expect(store.appearance).toBe("light");
         expect(store.style).toBe("minimal");
-        expect(store.floatingDigitPad).toBe(false);
-        expect(store.doubleTapFill).toBe(false);
-        expect(store.autoNotesAtStart).toBe(false);
+        expect(store.floatingDigitPad).toBe(true);
+        expect(store.doubleTapFill).toBe(true);
+        expect(store.autoNotesAtStart).toBe(true);
     });
 
     it.each([

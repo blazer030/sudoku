@@ -223,7 +223,7 @@ describe("Settings.vue groups", () => {
         const states = (group: string) => wrapper.get(`[data-testid='settings-group-${group}']`).findAll("[data-testid^='toggle-']")
             .map(tile => tile.attributes("aria-pressed"));
 
-        expect(states("input")).toEqual(["false", "false", "false", "true"]);
+        expect(states("input")).toEqual(["true", "true", "true", "true"]);
         expect(states("display")).toEqual(["true", "true", "true", "true"]);
     });
 
@@ -242,9 +242,9 @@ describe("Settings.vue groups", () => {
         ["motionEffects", false],
         ["autoRemoveNotes", false],
         ["showRemainingCount", false],
-        ["floatingDigitPad", true],
-        ["doubleTapFill", true],
-        ["autoNotesAtStart", true],
+        ["floatingDigitPad", false],
+        ["doubleTapFill", false],
+        ["autoNotesAtStart", false],
     ] as const)("should sync the %s tile with its setting", async (key, expected) => {
         const wrapper = mountSettings();
 

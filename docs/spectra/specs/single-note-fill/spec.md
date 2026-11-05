@@ -8,11 +8,16 @@ A double tap on the blank fills every cell whose notes are down to one digit, so
 
 ### Requirement: Double-tap fill setting
 
-The system SHALL offer a persisted double-tap fill setting that is off by default, and a double tap SHALL do nothing while it is off.
+The system SHALL offer a persisted double-tap fill setting that is on by default, and a double tap SHALL do nothing while it is off.
 
-#### Scenario: Off by default
+#### Scenario: On by default
 
 - **WHEN** a player with no saved value double taps the blank in a hard game with single-note cells
+- **THEN** those cells fill
+
+#### Scenario: Turned off
+
+- **WHEN** a player who turned the setting off double taps the blank in a hard game with single-note cells
 - **THEN** the board does not change
 
 

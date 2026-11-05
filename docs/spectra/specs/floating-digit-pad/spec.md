@@ -8,11 +8,16 @@ A digit pad that appears at the corner of the selected cell, so a player who tap
 
 ### Requirement: Floating pad setting
 
-The system SHALL offer a persisted floating digit pad setting that is off by default, and SHALL show no floating pad while it is off.
+The system SHALL offer a persisted floating digit pad setting that is on by default, and SHALL show no floating pad while it is off.
 
-#### Scenario: Off by default
+#### Scenario: On by default
 
 - **WHEN** a player with no saved value for the setting taps an empty cell
+- **THEN** the cell is selected and the floating pad appears
+
+#### Scenario: Turned off
+
+- **WHEN** a player who turned the setting off taps an empty cell
 - **THEN** the cell is selected and no floating pad appears
 
 #### Scenario: The choice is kept

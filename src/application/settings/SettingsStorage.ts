@@ -45,9 +45,9 @@ const DEFAULT_SETTINGS: Settings = {
     highlightScope: true,
     colorThemeByStyle: { minimal: "green" },
     appearanceByStyle: { minimal: "light" },
-    floatingDigitPad: false,
-    doubleTapFill: false,
-    autoNotesAtStart: false,
+    floatingDigitPad: true,
+    doubleTapFill: true,
+    autoNotesAtStart: true,
 };
 
 const isPlainObject = (value: unknown): value is Record<string, unknown> =>

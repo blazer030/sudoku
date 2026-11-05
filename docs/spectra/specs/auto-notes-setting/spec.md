@@ -8,11 +8,16 @@ Auto Notes becomes a setting that decides how each game starts, so players eithe
 
 ### Requirement: Auto notes setting
 
-The system SHALL offer a persisted setting for starting games with auto notes, off by default. Changing it SHALL NOT alter a game already started or saved.
+The system SHALL offer a persisted setting for starting games with auto notes, on by default. Changing it SHALL NOT alter a game already started or saved.
 
-#### Scenario: Off by default
+#### Scenario: On by default
 
 - **WHEN** a player with no saved value starts a new game
+- **THEN** every unfilled cell holds the digits its row, column and box allow
+
+#### Scenario: Turned off
+
+- **WHEN** a player who turned the setting off starts a new game
 - **THEN** no cell holds notes
 
 #### Scenario: A game under way

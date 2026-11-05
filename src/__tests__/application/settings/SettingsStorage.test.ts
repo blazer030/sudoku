@@ -36,9 +36,9 @@ describe("SettingsStorage", () => {
                 highlightScope: true,
                 colorThemeByStyle: { minimal: "green" },
                 appearanceByStyle: { minimal: "light" },
-                floatingDigitPad: false,
-                doubleTapFill: false,
-                autoNotesAtStart: false,
+                floatingDigitPad: true,
+                doubleTapFill: true,
+                autoNotesAtStart: true,
             });
         });
 
@@ -280,9 +280,9 @@ describe("SettingsStorage", () => {
             expect(settings.language).toBe("system");
             expect(settings.appearance).toBe("light");
             expect(settings.style).toBe("minimal");
-            expect(settings.floatingDigitPad).toBe(false);
-            expect(settings.doubleTapFill).toBe(false);
-            expect(settings.autoNotesAtStart).toBe(false);
+            expect(settings.floatingDigitPad).toBe(true);
+            expect(settings.doubleTapFill).toBe(true);
+            expect(settings.autoNotesAtStart).toBe(true);
         });
     });
 });

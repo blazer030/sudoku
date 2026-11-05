@@ -1108,6 +1108,8 @@ describe("Game", () => {
             vi.useFakeTimers();
             vi.spyOn(Sudoku.prototype, "planRevealHint").mockReturnValue({ kind: "noTechnique" });
             const wrapper = mountGame("easy", nearlySolvedSudoku());
+            // With the pad on a reveal clears the selection, so this needs it off
+            useSettingsStore().setFloatingDigitPad(false);
             await wrapper.find("[data-testid='cell-0-0']").trigger("click");
 
             // Reveal Cell fills the last cell, leaving the selection
