@@ -1413,8 +1413,11 @@
 }
 
 /* The floating digit pad: opaque, as every pane over the board is, with a rim of the theme's light to part it from
-   the board's own pale glass. In 晨光 the keys' glass would vanish on the pale pane, so they carry a rim too. */
+   the board's own pale glass. In 晨光 the keys' glass would vanish on the pale pane, so they carry a rim too. Its
+   corners are far rounder than the erase pill's, so the pill's curve needs this room to clear them. */
 [data-style="aurora"] [data-skin~="floating-pad"] {
+    --floating-pad-padding: 5px;
+    --floating-pad-padding-bottom: 8px;
     border-color: transparent;
     box-shadow:
         0 0 0 1.5px color-mix(in srgb, var(--color-primary) 55%, transparent),

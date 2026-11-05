@@ -106,6 +106,25 @@ describe("FloatingDigitPad", () => {
             wrapper.unmount();
         });
 
+        it("should count a deeper padding under the keys in its height", async () => {
+            const realStyle = window.getComputedStyle.bind(window);
+            vi.spyOn(window, "getComputedStyle").mockImplementation((element) => {
+                if (!(element as HTMLElement).dataset.skin?.includes("floating-pad")) return realStyle(element);
+                return {
+                    paddingLeft: "5px", paddingRight: "5px", paddingTop: "5px", paddingBottom: "8px",
+                    borderLeftWidth: "1px", borderRightWidth: "1px", borderTopWidth: "1px", borderBottomWidth: "1px",
+                    columnGap: "2px", rowGap: "2px",
+                } as CSSStyleDeclaration;
+            });
+            const { wrapper } = mountOnBoard(40 * 9);
+            await nextTick();
+            const style = wrapper.get("[data-testid='floating-digit-pad']").attributes("style") ?? "";
+
+            // 3.6 rows of 36px, 13px of padding, 2px of border and 3 gaps of 2px down: 150.6px of cells of 40px
+            expect(Number(/height: ([\d.]+)%/.exec(style)?.[1])).toBeCloseTo((150.6 / 40 / 9) * 100, 5);
+            wrapper.unmount();
+        });
+
         it("should keep three cells on a board with room", async () => {
             const { wrapper } = mountOnBoard(41.5 * 9);
             await nextTick();

@@ -152,6 +152,7 @@ const digitLabel = (digit: number): string =>
 <style scoped>
 .floating-pad {
     padding: var(--floating-pad-padding, 2px);
+    padding-bottom: var(--floating-pad-padding-bottom, var(--floating-pad-padding, 2px));
     gap: var(--floating-pad-gap, 2px);
     grid-template-columns: repeat(3, minmax(0, 1fr));
     grid-template-rows: repeat(3, minmax(0, 1fr)) minmax(0, 0.6fr);
