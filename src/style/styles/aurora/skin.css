@@ -1433,3 +1433,9 @@
 [data-style="aurora"] [data-skin~="floating-pad"] [data-skin~="floating-erase"] {
     border-radius: 9999px;
 }
+
+/* A round key has no room in its corners: in note mode the digits and their steps shrink together, so 1, 3, 7 and 9
+   stay on the key's disc */
+[data-style="aurora"] [data-skin~="floating-pad"][data-note-mode="true"] [data-skin~="floating-key"] > span {
+    scale: 0.88;
+}

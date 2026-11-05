@@ -1278,3 +1278,8 @@
     border-radius: 0;
     box-shadow: 0 0 0 0.5px var(--color-foreground), 3px 3px 0 color-mix(in srgb, var(--color-foreground) 22%, transparent);
 }
+
+/* In note mode a digit sits in each key's corner, where the key's registration ticks are */
+[data-style="blueprint"] [data-skin~="floating-pad"][data-note-mode="true"] [data-skin~="floating-key"]::before {
+    opacity: 0;
+}

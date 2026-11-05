@@ -105,6 +105,11 @@ The pad SHALL offer the digits 1 to 9 and an erase key, and SHALL apply them by 
 - **WHEN** the player presses digit keys in note mode on a cell without an entry
 - **THEN** each press toggles that note, the keys show which notes the cell holds, and the pad stays open
 
+#### Scenario: Digits take their note places in note mode
+
+- **WHEN** the pad is open in note mode
+- **THEN** each digit sits at its place in a cell's 3×3 note grid, 1 at the top left through 9 at the bottom right, as the digit keys show them
+
 #### Scenario: Notes on a filled cell
 
 - **WHEN** the player presses a digit key in note mode on a filled cell

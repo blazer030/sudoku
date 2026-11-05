@@ -1590,3 +1590,9 @@
     border-radius: var(--chalkboard-wob);
     box-shadow: 0 0 0 1px var(--color-foreground-secondary), 0 6px 16px color-mix(in srgb, var(--color-shadow) 40%, transparent);
 }
+
+/* The keys' uneven corners leave little room: in note mode the digits and their steps shrink together, so the corner
+   digits stay off the outline */
+[data-style="chalkboard"] [data-skin~="floating-pad"][data-note-mode="true"] [data-skin~="floating-key"] > span {
+    scale: 0.88;
+}

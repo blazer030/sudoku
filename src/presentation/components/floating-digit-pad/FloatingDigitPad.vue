@@ -15,18 +15,19 @@
             v-press:bounce
             :aria-label="digitLabel(digit)"
             :aria-pressed="isMarked(digit)"
-            :class="[
-                isMarked(digit) ? 'bg-primary text-on-primary' : 'bg-background text-foreground',
-                noteMode ? 'text-[length:calc(var(--text-sm)*var(--key-scale,1))]' : 'text-[length:calc(var(--text-xl)*var(--key-scale,1))]',
-            ]"
+            :class="isMarked(digit) ? 'bg-primary text-on-primary' : 'bg-background text-foreground'"
             :data-testid="`floating-number-${digit}`"
             :disabled="isDigitDisabled(digit)"
-            class="flex items-center justify-center min-w-0 min-h-0 rounded-lg font-key font-semibold leading-none cursor-pointer disabled:opacity-40 disabled:cursor-default"
+            class="@container flex items-center justify-center min-w-0 min-h-0 rounded-lg font-key font-semibold leading-none cursor-pointer disabled:opacity-40 disabled:cursor-default"
             data-skin="key floating-key"
             type="button"
             @click="emit('selectDigit', digit)"
         >
-            <span>{{ digit }}</span>
+            <span
+                :class="noteMode ? 'text-[length:calc(max(12px,32cqw)*var(--key-scale,1))]' : 'text-[length:calc(var(--text-xl)*var(--key-scale,1))]'"
+                :style="noteGlyphStyle(digit, noteMode)"
+                class="inline-block transition-transform duration-300 ease-out motion-reduce:transition-none"
+            >{{ digit }}</span>
         </button>
         <button
             v-press
@@ -48,6 +49,7 @@
 import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef, watchPostEffect } from "vue";
 import { useI18n } from "vue-i18n";
 import { BOARD_SIZE } from "@/domain/board/constants";
+import { noteGlyphStyle } from "@/presentation/components/digit-pad/noteGlyphPlace";
 import { Eraser } from "@/presentation/components/icon";
 import { FLOATING_PAD_COLUMNS, type FloatingPadChrome, floatingPadPlacement, floatingPadSize } from "@/presentation/components/floating-digit-pad/floatingPadPlacement";
 import { useMotionAllowed } from "@/presentation/composables/useMotionAllowed";

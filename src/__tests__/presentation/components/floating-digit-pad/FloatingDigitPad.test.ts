@@ -216,6 +216,19 @@ describe("FloatingDigitPad", () => {
         expect(wrapper.get("[data-testid='floating-digit-pad']").attributes("data-note-mode")).toBe("true");
     });
 
+    it("should move each digit to its note place in note mode, as the keypad does", () => {
+        const keys = digitKeys(mountPad({ noteMode: true }));
+
+        expect(keys.every(key => key.classes().includes("@container"))).toBe(true);
+        expect(keys[0].get("span").attributes("style")).toContain("translate(-27cqw, -27cqw)");
+        expect(keys[1].get("span").attributes("style")).toContain("translate(0cqw, -27cqw)");
+        expect(keys[8].get("span").attributes("style")).toContain("translate(27cqw, 27cqw)");
+    });
+
+    it("should keep each digit centred outside note mode", () => {
+        expect(digitKeys(mountPad({ noteMode: false }))[0].get("span").attributes("style")).toBeUndefined();
+    });
+
     it("should not mark notes outside note mode", () => {
         const keys = digitKeys(mountPad({ noteMode: false, currentNotes: [2] }));
 
