@@ -62,7 +62,7 @@ export const en = {
         matchLauncherIconNote: "The icon updates after you leave the app",
         toggles: {
             floatingDigitPad: { label: "Floating Keypad", description: "Show digit keys beside the cell you tap" },
-            doubleTapFill: { label: "Double-Tap Fill", description: "Double-tap the blank to fill cells with one note left (Medium and Hard)" },
+            doubleTapFill: { label: "Quick Fill", description: "Double-tap the blank to fill cells with one note left (Medium and Hard)" },
             autoNotesAtStart: { label: "Auto Notes at Start", description: "Start each game with every note filled in" },
             highlightSameDigit: { label: "Same Numbers", description: "Light up matching digits" },
             highlightScope: { label: "Row, Column & Box", description: "Shade its row, column and box" },
