@@ -53,6 +53,8 @@
    once the faces have loaded (fonts.ts beside this sheet marks it), so nothing paints in a half-loaded
    stack. Garamond's figures are lining by default; the board asks for them anyway. */
 [data-style="ink"][data-ink-fonts="ready"] {
+    /* Garamond's figures are shorter and much narrower than the other styles', and read small on the keys */
+    --key-scale: 1.15;
     --font-sans: var(--font-ink-serif);
     --font-mono: var(--font-ink-digits);
     --font-clue: var(--font-ink-digits);
