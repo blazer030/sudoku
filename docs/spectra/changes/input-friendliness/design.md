@@ -120,12 +120,12 @@
 - `Settings` 新增 `floatingDigitPad: boolean`、`doubleTapFill: boolean`、`autoNotesAtStart: boolean`，預設皆為 `false`；`settingsStore` 提供對應 setter。
 - `Sudoku.singleNoteCells(): { row: number; column: number; digit: number }[]`，依閱讀順序。
 - `Sudoku.beginFillRun(): void` 存快照；`Sudoku.fillInRun(row, column, digit, { autoRemoveNotes })` 填入但不存快照。
-- `floatingPadSize(cellSize): { rows: number; columns: number }`：懸浮鍵以格為單位的大小。
+- `floatingPadSize(cellSize, chrome?): { rows: number; columns: number }`：懸浮鍵以格為單位的大小。`chrome` 是量到的內距、間距和邊框 `{ width, height }`，用來讓數字鍵維持至少 36px。
 - `floatingPadPlacement(cell, size): { rowStart: number; columnStart: number }`：純函式，以格為單位。
 - `FloatingDigitPad.vue` props：`cell`、`digitCounts`、`noteMode`、`currentEntry`、`currentNotes`、`disabledDigits`、`eraseDisabled`；emits：`selectDigit`、`erase`。
 - `DifficultyStats.averageHints: number | null`。
 - `ToastContent` 新增 `singleNotesFilled`（帶 `count`）和 `noSingleNotes`。
-- Skin hooks：`floating-pad`、`floating-key`、`floating-erase`。
+- Skin hooks：每個風格都有 `floating-pad`；`floating-key`、`floating-erase` 由風格依需要使用，沒寫的部分沿用 `key`。風格用 `--floating-pad-padding`、`--floating-pad-padding-bottom`、`--floating-pad-gap` 設定按鍵外圍的空間。懸浮鍵超出盤面時，盤面帶 `data-floating-pad-past`，會裁切盤面的風格（cyber）藉此取消裁切。
 
 **Failure modes**
 

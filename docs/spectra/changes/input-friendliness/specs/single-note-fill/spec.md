@@ -82,7 +82,12 @@ One press of Undo SHALL restore the board as it was before the double tap, inclu
 
 ### Requirement: Staggered arrival
 
-With motion allowed, the system SHALL fill the cells one after another in reading order, 60ms apart, each playing its style's arrival. With motion not allowed it SHALL fill them all at once. The board and controls SHALL ignore the player until the run ends. Pressing Back or the page being hidden during a run SHALL finish the run at once, before the leave dialog opens or the game is saved, so no save ever holds part of a run.
+With motion allowed, the system SHALL fill the cells one after another in reading order, 60ms apart, each playing its style's arrival. With motion not allowed it SHALL fill them all at once. The board and controls SHALL ignore the player until the run ends. A picked digit SHALL be let go when the run ends with all nine copies of it on the board, however few cells the run filled. Pressing Back or the page being hidden during a run SHALL finish the run at once, before the leave dialog opens or the game is saved, so no save ever holds part of a run.
+
+#### Scenario: A run fills the ninth copy of the picked digit
+
+- **WHEN** a digit is picked, eight copies of it are on the board, and a run of one cell fills the ninth, with motion allowed or not
+- **THEN** the digit is no longer picked, and tapping an empty cell enters nothing
 
 #### Scenario: Motion on
 

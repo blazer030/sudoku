@@ -160,12 +160,12 @@ While the setting is on, the Walkthrough's editable board SHALL show the same fl
 
 ### Requirement: Per-style floating pad
 
-Each visual style SHALL give the floating pad its own look through the `floating-pad`, `floating-key` and `floating-erase` skin hooks, keeping the digits readable in the steady state. The pad's surface SHALL be opaque in every style, including the glass of aurora, so the board's digits never show through it.
+Each visual style SHALL give the floating pad its own look through the `floating-pad` skin hook, keeping the digits readable in the steady state. A style MAY also style the pad's keys through `floating-key` and `floating-erase`; those it leaves alone follow its `key` rules. The pad's surface SHALL be opaque in every style, including the glass of aurora, so the board's digits never show through it.
 
 #### Scenario: Style coverage
 
 - **WHEN** the style coverage test reads each style's skin sheet
-- **THEN** every style has rules for the floating pad hooks
+- **THEN** every style has rules for the `floating-pad` hook
 
 #### Scenario: An opaque surface
 
