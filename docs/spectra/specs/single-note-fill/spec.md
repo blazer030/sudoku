@@ -780,17 +780,17 @@ tests:
 ---
 ### Requirement: Fill feedback
 
-The system SHALL show a toast with the number of cells a run filled, and a toast saying there is nothing to fill when a double tap finds no single-note cell.
+The system SHALL show no toast for a double tap, whether its run fills cells or it finds no single-note cell.
 
 #### Scenario: Filled cells
 
 - **WHEN** a run fills 6 cells
-- **THEN** a toast states 6 cells were filled
+- **THEN** the cells fill and no toast appears
 
 #### Scenario: Nothing to fill
 
 - **WHEN** the player double taps in a medium game with no single-note cell
-- **THEN** the board does not change and a toast says there is nothing to fill
+- **THEN** the board does not change and no toast appears
 
 <!-- @trace
 source: input-friendliness

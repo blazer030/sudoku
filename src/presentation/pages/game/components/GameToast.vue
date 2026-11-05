@@ -33,10 +33,6 @@ const message = (content: ToastContent): string => {
         return t("game.randomReveal", { position: position(content.outcome) });
     case "noConflicts":
         return t("game.toast.noConflicts");
-    case "singleNotesFilled":
-        return t("game.toast.singleNotesFilled", { count: content.count }, content.count);
-    case "noSingleNotes":
-        return t("game.toast.noSingleNotes");
     }
 };
 </script>

@@ -12,8 +12,6 @@ interface SingleNoteFillOptions {
     motionAllowed: () => boolean;
     checkAndComplete: () => void;
     onGroupCompleted?: (completed: CompletedCells, origin: { row: number; column: number }) => void;
-    onFilled?: (count: number) => void;
-    onNothingToFill?: () => void;
 }
 
 /**
@@ -27,8 +25,6 @@ export const useSingleNoteFill = ({
     motionAllowed,
     checkAndComplete,
     onGroupCompleted,
-    onFilled,
-    onNothingToFill,
 }: SingleNoteFillOptions) => {
     const running = ref(false);
     let plan: ReturnType<Sudoku["singleNoteCells"]> = [];
@@ -60,7 +56,6 @@ export const useSingleNoteFill = ({
         running.value = false;
         if (!sudoku.isCompleted()) playMergedGroupEffect();
         checkAndComplete();
-        onFilled?.(plan.length);
     };
 
     const scheduleNext = () => {
@@ -89,10 +84,7 @@ export const useSingleNoteFill = ({
         if (running.value) return;
         plan = sudoku.singleNoteCells();
         nextIndex = 0;
-        if (plan.length === 0) {
-            onNothingToFill?.();
-            return;
-        }
+        if (plan.length === 0) return;
         sudoku.beginFillRun();
         running.value = true;
         if (!motionAllowed()) {

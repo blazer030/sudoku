@@ -230,20 +230,21 @@ describe("double-tap fill", () => {
     });
 
     describe("feedback", () => {
-        it("should say how many cells were filled", async () => {
+        it("should say nothing when a run fills cells", async () => {
             const { wrapper } = await mountGame();
 
             await doubleTapBlank(wrapper);
 
-            expect(wrapper.get(TOAST).text()).toContain("6");
+            expect(entryText(wrapper, 0, 2)).toBe("4");
+            expect(wrapper.find(TOAST).exists()).toBe(false);
         });
 
-        it("should say when there is nothing to fill, leaving the board alone", async () => {
+        it("should say nothing when there is nothing to fill, leaving the board alone", async () => {
             const { wrapper } = await mountGame({ difficulty: "medium", sudoku: createKnownSudoku() });
 
             await doubleTapBlank(wrapper);
 
-            expect(wrapper.get(TOAST).text()).not.toBe("");
+            expect(wrapper.find(TOAST).exists()).toBe(false);
             expect(entryText(wrapper, 0, 2)).toBe("");
         });
     });
@@ -439,18 +440,6 @@ describe("double-tap fill", () => {
 
             expect(statistics.history).toHaveLength(1);
             expect(statistics.history[0].completed).toBe(true);
-        });
-
-        it("should ignore a later double tap, saying nothing", async () => {
-            const { wrapper } = await mountGame({ sudoku: twoCellsFromSolved() });
-            await doubleTapBlank(wrapper);
-            vi.advanceTimersByTime(10_000);
-            await flushPromises();
-            expect(wrapper.find(TOAST).exists()).toBe(false);
-
-            await doubleTapBlank(wrapper);
-
-            expect(wrapper.find(TOAST).exists()).toBe(false);
         });
 
         it("should show as 6 fill steps in Game Review", async () => {

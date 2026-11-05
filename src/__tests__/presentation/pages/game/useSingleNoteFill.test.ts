@@ -21,8 +21,6 @@ const setup = (sudoku: Sudoku, { motion = true, autoRemove = true } = {}) => {
     const stepRecorder = new StepRecorder();
     const checkAndComplete = vi.fn();
     const onGroupCompleted = vi.fn<(completed: CompletedCells, origin: { row: number; column: number }) => void>();
-    const onFilled = vi.fn<(count: number) => void>();
-    const onNothingToFill = vi.fn();
     const run = scope.run(() => useSingleNoteFill({
         sudoku,
         stepRecorder,
@@ -30,11 +28,9 @@ const setup = (sudoku: Sudoku, { motion = true, autoRemove = true } = {}) => {
         motionAllowed: () => motion,
         checkAndComplete,
         onGroupCompleted,
-        onFilled,
-        onNothingToFill,
     }));
     if (run === undefined) throw new Error("the scope did not run");
-    return { run, stepRecorder, checkAndComplete, onGroupCompleted, onFilled, onNothingToFill };
+    return { run, stepRecorder, checkAndComplete, onGroupCompleted };
 };
 
 beforeEach(() => {
@@ -75,12 +71,11 @@ describe("useSingleNoteFill", () => {
         it("should fill a wrong note without flagging anything", () => {
             const sudoku = createKnownSudoku();
             noteCells(sudoku, [[0, 2, WRONG_FOR_0_2]]);
-            const { run, onFilled } = setup(sudoku, { motion: false });
+            const { run } = setup(sudoku, { motion: false });
 
             run.start();
 
             expect(sudoku.puzzle[0][2].entry).toBe(WRONG_FOR_0_2);
-            expect(onFilled).toHaveBeenCalledWith(1);
         });
 
         it("should leave peer notes alone with Auto Remove Notes off", () => {
@@ -93,14 +88,12 @@ describe("useSingleNoteFill", () => {
             expect(sudoku.puzzle[0][3].notes).toEqual([4, 6]);
         });
 
-        it("should report nothing to fill and leave the board and history alone", () => {
+        it("should leave the board and history alone with nothing to fill", () => {
             const sudoku = createKnownSudoku();
-            const { run, onNothingToFill, onFilled, stepRecorder } = setup(sudoku, { motion: false });
+            const { run, stepRecorder } = setup(sudoku, { motion: false });
 
             run.start();
 
-            expect(onNothingToFill).toHaveBeenCalledOnce();
-            expect(onFilled).not.toHaveBeenCalled();
             expect(stepRecorder.steps).toEqual([]);
             expect(run.running.value).toBe(false);
         });
@@ -140,7 +133,7 @@ describe("useSingleNoteFill", () => {
         it("should fill one cell every 60ms in reading order, with motion allowed", () => {
             const sudoku = createKnownSudoku();
             noteCells(sudoku, [[0, 2, 4], [0, 3, 6], [1, 1, 7]]);
-            const { run, onFilled } = setup(sudoku);
+            const { run } = setup(sudoku);
 
             run.start();
             expect(sudoku.puzzle[0][2].entry).toBe(4);
@@ -156,7 +149,6 @@ describe("useSingleNoteFill", () => {
             vi.advanceTimersByTime(60);
             expect(sudoku.puzzle[1][1].entry).toBe(7);
             expect(run.running.value).toBe(false);
-            expect(onFilled).toHaveBeenCalledWith(3);
         });
 
         it("should fill every cell at once with motion not allowed", () => {
@@ -186,24 +178,24 @@ describe("useSingleNoteFill", () => {
         it("should finish at once when asked, with no timer left", () => {
             const sudoku = createKnownSudoku();
             noteCells(sudoku, [[0, 2, 4], [0, 3, 6], [1, 1, 7]]);
-            const { run, onFilled, stepRecorder } = setup(sudoku);
+            const { run, checkAndComplete, stepRecorder } = setup(sudoku);
             run.start();
 
             run.finish();
 
             expect(sudoku.puzzle[1][1].entry).toBe(7);
             expect(stepRecorder.steps).toHaveLength(3);
-            expect(onFilled).toHaveBeenCalledOnce();
+            expect(checkAndComplete).toHaveBeenCalledOnce();
             expect(run.running.value).toBe(false);
             expect(vi.getTimerCount()).toBe(0);
         });
 
         it("should do nothing when asked to finish with no run going", () => {
-            const { run, onFilled } = setup(createKnownSudoku());
+            const { run, checkAndComplete } = setup(createKnownSudoku());
 
             run.finish();
 
-            expect(onFilled).not.toHaveBeenCalled();
+            expect(checkAndComplete).not.toHaveBeenCalled();
         });
 
         it("should leave no timer behind when the screen goes away", () => {

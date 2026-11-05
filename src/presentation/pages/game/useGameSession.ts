@@ -141,8 +141,6 @@ export const useGameSession = ({ onPlayAgain, onCellRevealed }: GameSessionOptio
         motionAllowed,
         checkAndComplete,
         onGroupCompleted: playGroupEffect,
-        onFilled: count => { gameToast.show({ kind: "singleNotesFilled", count }); },
-        onNothingToFill: () => { gameToast.show({ kind: "noSingleNotes" }); },
     });
 
     const { leaveDialog, showLeaveDialog } = useLeaveGame({
