@@ -1158,8 +1158,40 @@
     }
 }
 
-/* The floating digit pad: a solid slip of paper ruled in vermilion, with the keys' uneven corners */
-[data-style="ink"] [data-skin~="floating-pad"] {
-    border-radius: 5px 4px 6px 4px;
-    box-shadow: 0 6px 18px color-mix(in srgb, var(--color-shadow) 24%, transparent);
+/* The floating digit pad: a slip of the washi with its dots, ruled by a finer hand of the board's brush. The keys are
+   clear, the digit the cell holds a seal as on the keypad. As on the board, only where masks are supported do the
+   keys' plain edge lines give way to the brush. */
+[data-style="ink"] [data-skin~="floating-pad"].shadow-popup {
+    --floating-pad-padding: 4px;
+    --floating-pad-gap: 4px;
+    border-color: transparent;
+    border-radius: 2px;
+    background-color: var(--color-background);
+    background-image: radial-gradient(color-mix(in srgb, var(--ink-grain) 24%, transparent) 0.7px, transparent 1.1px);
+    background-size: 6px 6px;
+    box-shadow: 0 10px 24px -6px color-mix(in srgb, var(--color-shadow) 38%, transparent);
+}
+
+[data-style="ink"] [data-skin~="floating-pad"] [data-skin~="key"]:not([aria-pressed="true"]) {
+    background-color: transparent;
+}
+
+@supports ((mask-image: url("")) or (-webkit-mask-image: url(""))) {
+    [data-style="ink"] [data-skin~="floating-pad"] [data-skin~="key"]:not([aria-pressed="true"]) {
+        box-shadow: none;
+    }
+
+    [data-style="ink"] [data-skin~="floating-pad"]::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background-color: var(--color-foreground);
+        -webkit-mask-image: url("@/style/styles/ink/floating-pad-grid.svg");
+        mask-image: url("@/style/styles/ink/floating-pad-grid.svg");
+        -webkit-mask-size: 100% 100%;
+        mask-size: 100% 100%;
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+    }
 }

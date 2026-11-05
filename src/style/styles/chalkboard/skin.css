@@ -1581,8 +1581,11 @@
     stroke-dasharray: 9 .5 3 .6 11 .4;
 }
 
-/* The floating digit pad: a patch of clean board with a chalk outline, the keys drawn on it */
+/* The floating digit pad: a patch of clean board with a chalk outline, the keys drawn on it with room round them,
+   as their corners are uneven */
 [data-style="chalkboard"] [data-skin~="floating-pad"] {
+    --floating-pad-padding: 6px;
+    --floating-pad-gap: 3px;
     border-color: var(--color-foreground-secondary);
     border-radius: var(--chalkboard-wob);
     box-shadow: 0 0 0 1px var(--color-foreground-secondary), 0 6px 16px color-mix(in srgb, var(--color-shadow) 40%, transparent);

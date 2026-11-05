@@ -1413,10 +1413,20 @@
 }
 
 /* The floating digit pad: opaque, as every pane over the board is, with a rim of the theme's light to part it from
-   the board's own pale glass */
+   the board's own pale glass. In 晨光 the keys' glass would vanish on the pale pane, so they carry a rim too. */
 [data-style="aurora"] [data-skin~="floating-pad"] {
     border-color: transparent;
     box-shadow:
         0 0 0 1.5px color-mix(in srgb, var(--color-primary) 55%, transparent),
         0 8px 28px color-mix(in srgb, var(--color-primary) 32%, transparent);
+}
+
+:root[data-style="aurora"]:not(.dark) [data-skin~="floating-pad"] [data-skin~="key"]:not([aria-pressed="true"]) {
+    box-shadow:
+        inset 0 0 0 1px color-mix(in srgb, var(--color-primary) 38%, transparent),
+        0 1px 4px color-mix(in srgb, var(--color-primary) 18%, transparent);
+}
+
+[data-style="aurora"] [data-skin~="floating-pad"] [data-skin~="floating-erase"] {
+    border-radius: 9999px;
 }

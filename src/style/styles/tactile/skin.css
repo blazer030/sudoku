@@ -379,16 +379,30 @@
     }
 }
 
-/* The floating digit pad: a raised tray of the same thick keys, in a small version of their depth */
+/* The floating digit pad: a raised tray of the same thick keys, in a small version of their depth. Its padding and
+   gaps are wider than the keys' edges and the keys drop no soft shadow, so nothing of theirs leaves the tray. */
 [data-style="tactile"] [data-skin~="floating-pad"] {
     --tactile-depth: 2px;
+    --floating-pad-padding: 4px;
+    --floating-pad-gap: 4px;
     border-color: var(--tactile-edge);
     box-shadow:
         inset 0 1px 0 var(--tactile-highlight),
         0 3px 0 var(--tactile-edge),
-        0 8px 18px var(--tactile-drop-shadow);
+        0 14px 28px color-mix(in srgb, var(--color-shadow) 30%, transparent);
+}
+
+:root.dark[data-style="tactile"] [data-skin~="floating-pad"] {
+    border-color: color-mix(in srgb, var(--color-foreground) 30%, var(--color-card));
+    box-shadow:
+        inset 0 1px 0 var(--tactile-highlight),
+        0 3px 0 var(--tactile-edge),
+        0 16px 32px color-mix(in srgb, var(--color-shadow) 65%, transparent);
 }
 
 [data-style="tactile"] [data-skin~="floating-pad"] [data-skin~="key"] {
     --tactile-depth: 2px;
+    box-shadow:
+        inset 0 1px 0 var(--tactile-highlight),
+        0 var(--tactile-depth) 0 var(--tactile-edge);
 }
