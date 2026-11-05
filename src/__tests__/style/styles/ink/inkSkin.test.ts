@@ -8,6 +8,7 @@ const BRUSH_GRID_SVG = readFileSync("src/style/styles/ink/brush-grid.svg", "utf8
 const WASHI_FIBRES_SVG = readFileSync("src/style/styles/ink/washi-fibres.svg", "utf8");
 const HOME_MOUNTAINS_SVG = readFileSync("src/style/styles/ink/home-mountains.svg", "utf8");
 const NOTE_RING_SVG = readFileSync("src/style/styles/ink/note-ring.svg", "utf8");
+const FLOATING_PAD_GRID_SVG = readFileSync("src/style/styles/ink/floating-pad-grid.svg", "utf8");
 
 const SCOPE = '[data-style="ink"]';
 const FONTS_READY = '[data-style="ink"][data-ink-fonts="ready"]';
@@ -107,6 +108,17 @@ describe("ink skin", () => {
                 expect(cell.get("background-color"), variant).toBe("transparent");
                 expect(cell.get("box-shadow"), variant).toBe("none");
             }
+        });
+
+        describe("floating-pad-grid.svg", () => {
+            it("should carry its roughness in the outlines and only alpha, as the board's brush grid does", () => {
+                const svg = new DOMParser().parseFromString(FLOATING_PAD_GRID_SVG, "image/svg+xml");
+
+                expect(svg.getElementsByTagName("filter")).toHaveLength(0);
+                expect(FLOATING_PAD_GRID_SVG).not.toMatch(/#[0-9a-fA-F]{3,8}\b|rgba?\(/);
+                expect(svg.getElementsByTagName("path")[0].getAttribute("fill")).toBe("currentColor");
+                expect(svg.documentElement.getAttribute("preserveAspectRatio")).toBe("none");
+            });
         });
 
         describe("brush-grid.svg", () => {

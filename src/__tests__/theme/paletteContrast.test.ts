@@ -779,6 +779,16 @@ const AURORA_BOARD_CASES: AuroraBoardCase[] = STYLES.aurora.themes.flatMap(theme
         ...onCard("control that is on (primary) on the soft tint over card glass", palette.primary, softTint),
         solid("badge count (on-primary) on its primary disc", palette["on-primary"], SOLID(palette.primary)),
         ...onCard("key digit (foreground) on card glass", palette.foreground, pane => pane),
+        // The floating pad's keys: card glass over the pad's opaque dialog glass, so the sky never shows through
+        ...([
+            ["floating key digit (foreground)", palette.foreground, TEXT],
+            ["floating erase icon gradient start", auroraToken(palette, "aurora-icon-start"), LARGE_OR_ICON],
+            ["floating erase icon gradient middle (primary)", palette.primary, LARGE_OR_ICON],
+            ["floating erase icon gradient end", auroraToken(palette, "aurora-icon-end"), LARGE_OR_ICON],
+        ] as const).flatMap(([name, ink, minimum]) => [
+            onPage(`${name} on its glass`, ink, ground => panes.card(panes.dialog(ground)), minimum),
+            onPage(`${name} on its glass, under its sheen`, ink, ground => underSheen(panes.card(panes.dialog(ground))), minimum),
+        ]),
         onPage("toast text (on-toast) on dialog glass", palette["on-toast"], panes.dialog),
         // Home: the continue button's chips are drawn in 16% of the text colour over the primary in 晨光 and of on-primary
         // in 夜空, written in on-primary; a tile's icon is the primary on card glass (the 3:1 of an icon)
@@ -868,6 +878,39 @@ const BLUEPRINT_ROW_CASES = STYLES.blueprint.themes.flatMap(theme => STYLE_COLOR
         drawn("gave-up chip (danger)", palette.danger, LARGE_OR_ICON),
     ];
 }));
+
+// The floating digit pad's keys, as each skin draws them: the surface of a plain key and the ink and surface of the
+// one marking the cell's digit or note. Aurora's glass is in AURORA_BOARD_CASES. Paper's and ink's keys are clear, so
+// their digits are also checked over the darkest mark of the page beneath: a ruled line and a dot of the washi's grain.
+const FLOATING_PAD_KEY_SURFACE: Readonly<Record<Exclude<StyleId, "aurora">, PaletteToken>> = {
+    minimal: "background",
+    tactile: "background",
+    paper: "background",
+    pixel: "card",
+    cyber: "card",
+    ink: "background",
+    chalkboard: "card",
+    blueprint: "card",
+};
+const FLOATING_PAD_MARKED_KEY: Partial<Record<StyleId, readonly [PaletteToken, PaletteToken]>> = {
+    cyber: ["primary-ink", "primary-light"],
+    chalkboard: ["primary", "primary-light"],
+};
+const FLOATING_PAD_CASES = (Object.keys(FLOATING_PAD_KEY_SURFACE) as (keyof typeof FLOATING_PAD_KEY_SURFACE)[]).flatMap(style =>
+    STYLES[style].themes.flatMap(theme => STYLE_COLOR_MODES[style].flatMap((mode) => {
+        const palette = getPalette(style, theme.id, mode);
+        const drawn = (name: string, foreground: string, background: string) => ({
+            label: `floating pad: ${style}/${theme.id}/${mode}: ${name} ≥ ${TEXT}`, foreground, background, minimum: TEXT,
+        });
+        const surface = FLOATING_PAD_KEY_SURFACE[style];
+        const [markedInk, markedSurface] = FLOATING_PAD_MARKED_KEY[style] ?? ["on-primary", "primary"];
+        return [
+            drawn(`digit and erase key (foreground) on ${surface}`, palette.foreground, palette[surface]),
+            drawn(`marked digit (${markedInk}) on ${markedSurface}`, palette[markedInk], palette[markedSurface]),
+            ...(style === "paper" ? [drawn("digit over a ruled line", palette.foreground, palette.rule)] : []),
+            ...(style === "ink" ? [drawn("digit over a dot of the grain", palette.foreground, mixColors(palette["foreground-secondary"], 0.24, palette.background))] : []),
+        ];
+    })));
 
 describe("palette contrast", () => {
     it("should check every style, theme and the modes the style has", () => {
@@ -999,6 +1042,10 @@ describe("palette contrast", () => {
     });
 
     it.each(INK_BOARD_CASES)("$label", ({ foreground, background, minimum }) => {
+        expect(contrastRatio(foreground, background)).toBeGreaterThanOrEqual(minimum);
+    });
+
+    it.each(FLOATING_PAD_CASES)("$label", ({ foreground, background, minimum }) => {
         expect(contrastRatio(foreground, background)).toBeGreaterThanOrEqual(minimum);
     });
 
