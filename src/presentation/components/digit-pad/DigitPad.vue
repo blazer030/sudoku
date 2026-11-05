@@ -1,5 +1,8 @@
 <template>
-    <div class="flex flex-col gap-3">
+    <div
+        class="flex flex-col gap-3"
+        data-testid="digit-pad"
+    >
         <!-- Each row is five square keys of at most 56px; in a window narrower than the
              312px row they shrink together instead of the outer keys being cut off -->
         <div

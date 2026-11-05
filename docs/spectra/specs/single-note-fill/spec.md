@@ -108,7 +108,7 @@ tests:
 ---
 ### Requirement: Blank double tap
 
-The system SHALL treat two taps as a double tap when both land on the game screen outside the board and its frame, the input area, and every button or link, no more than 300ms and 24px apart. It SHALL ignore a double tap during hint mode, during a running fill and after the game is completed.
+The system SHALL treat two taps as a double tap when both land on the game screen outside the board and its frame, the rows of keys below the board with the gaps between their keys, and every button or link, no more than 300ms and 24px apart. It SHALL ignore a double tap during hint mode, during a running fill and after the game is completed.
 
 #### Scenario: What counts as a double tap
 
@@ -124,6 +124,8 @@ The system SHALL treat two taps as a double tap when both land on the game scree
 | Blank | Blank | 200ms, 60px | Nothing |
 | Board | Blank | 200ms, 10px | Nothing |
 | Blank | Digit key | 200ms, 10px | Digit key acts as usual; nothing fills |
+| Beside the undo, notes and hint row | Same place | 200ms, 10px | Fills |
+| Gap between digit keys | Same gap | 200ms, 10px | Nothing |
 
 
 <!-- @trace

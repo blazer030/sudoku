@@ -1,5 +1,8 @@
 <template>
-    <div class="flex justify-center gap-6">
+    <div
+        class="flex justify-center gap-6"
+        data-testid="game-controls"
+    >
         <ControlButton
             :icon="Undo2"
             :label="t('game.controls.undo')"

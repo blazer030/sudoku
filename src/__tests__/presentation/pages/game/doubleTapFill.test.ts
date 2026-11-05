@@ -144,11 +144,20 @@ describe("double-tap fill", () => {
             expect(wrapper.get("[data-testid='number-5']").attributes("aria-pressed")).toBe("true");
         });
 
-        it("should fill nothing when both taps land in the input area's gaps", async () => {
+        it("should fill on a double tap beside the undo, notes and hint row", async () => {
             const { wrapper } = await mountGame();
 
             await tap(wrapper, "[data-testid='game-inputs']");
             await tap(wrapper, "[data-testid='game-inputs']");
+
+            expect(entryText(wrapper, 0, 2)).toBe("4");
+        });
+
+        it.each(["game-controls", "digit-pad"])("should fill nothing when both taps land in the gaps of %s, between its keys", async (testid) => {
+            const { wrapper } = await mountGame();
+
+            await tap(wrapper, `[data-testid='${testid}']`);
+            await tap(wrapper, `[data-testid='${testid}']`);
 
             expect(entryText(wrapper, 0, 2)).toBe("");
         });

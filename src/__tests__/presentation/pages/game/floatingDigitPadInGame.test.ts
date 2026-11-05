@@ -344,13 +344,22 @@ describe("the floating digit pad in a game", () => {
             expect(wrapper.get("[data-testid='game-board']").attributes("data-selected-cell")).toBe("R1C3");
         });
 
-        it("should keep the selection on a tap of the input area", async () => {
+        it.each(["game-controls", "digit-pad"])("should keep the selection on a tap in the gaps of %s", async (testid) => {
+            const { wrapper } = await mountGame();
+            await click(wrapper, EMPTY_CELL);
+
+            await click(wrapper, `[data-testid='${testid}']`);
+
+            expect(wrapper.find(PAD).exists()).toBe(true);
+        });
+
+        it("should clear the selection on a tap beside the undo, notes and hint row", async () => {
             const { wrapper } = await mountGame();
             await click(wrapper, EMPTY_CELL);
 
             await click(wrapper, "[data-testid='game-inputs']");
 
-            expect(wrapper.find(PAD).exists()).toBe(true);
+            expect(wrapper.find(PAD).exists()).toBe(false);
         });
     });
 });
