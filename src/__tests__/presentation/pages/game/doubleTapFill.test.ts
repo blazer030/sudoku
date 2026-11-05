@@ -258,6 +258,54 @@ describe("double-tap fill", () => {
         });
     });
 
+    describe("a picked digit whose ninth copy the run fills", () => {
+        // Eight 4s on the board; the ninth, (0, 2), is the run's only cell, so the run ends in the tick it starts
+        const oneCellFromNineFours = (): Sudoku => {
+            const sudoku = sudokuWithSingleNotes([[0, 2, 4]]);
+            for (const [row, column] of [[1, 7], [2, 4], [3, 6], [5, 5], [6, 8], [8, 1]] as const) sudoku.fill(row, column, 4);
+            return sudoku;
+        };
+
+        it.each([
+            { motion: "off", motionEffects: false },
+            { motion: "on", motionEffects: true },
+        ])("should let go of the digit with motion $motion, so no tenth copy can be entered", async ({ motionEffects }) => {
+            const { wrapper } = await mountGame({ sudoku: oneCellFromNineFours(), motionEffects });
+            await tap(wrapper, "[data-testid='number-4']");
+
+            await doubleTapBlank(wrapper);
+            await flushPromises();
+            await tap(wrapper, "[data-testid='cell-1-1']");
+
+            expect(entryText(wrapper, 0, 2)).toBe("4");
+            expect(wrapper.get("[data-testid='number-4']").attributes("aria-pressed")).toBe("false");
+            expect(entryText(wrapper, 1, 1)).toBe("");
+        });
+
+        it("should let go of it when a longer run ends on later timers", async () => {
+            const sudoku = oneCellFromNineFours();
+            sudoku.toggleNote(0, 3, 6);
+            const { wrapper } = await mountGame({ sudoku, motionEffects: true });
+            await tap(wrapper, "[data-testid='number-4']");
+
+            await doubleTapBlank(wrapper);
+            vi.advanceTimersByTime(60);
+            await flushPromises();
+
+            expect(wrapper.get("[data-testid='number-4']").attributes("aria-pressed")).toBe("false");
+        });
+
+        it("should keep a picked digit the run leaves short of nine", async () => {
+            const { wrapper } = await mountGame({ sudoku: sudokuWithSingleNotes([[0, 2, 4]]) });
+            await tap(wrapper, "[data-testid='number-4']");
+
+            await doubleTapBlank(wrapper);
+            await flushPromises();
+
+            expect(wrapper.get("[data-testid='number-4']").attributes("aria-pressed")).toBe("true");
+        });
+    });
+
     describe("undo", () => {
         it("should restore the whole run with one press", async () => {
             const { wrapper } = await mountGame();

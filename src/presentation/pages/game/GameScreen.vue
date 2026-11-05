@@ -297,9 +297,10 @@ const handleScreenTap = (event: MouseEvent) => {
     singleNoteFill.start();
 };
 
+// Sync, as a one-cell or motion-off run starts and ends in one tick, which a queued watcher never sees
 watch(() => singleNoteFill.running.value, (running) => {
     if (!running) releaseCompletedDigit();
-});
+}, { flush: "sync" });
 
 // A running group effect's origin and timing, for the cells' CSS to ripple from
 const groupEffectPlacement = computed(() => {
