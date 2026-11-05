@@ -39,8 +39,7 @@ describe("board geometry", () => {
         ["src/presentation/pages/game-review/GameReview.vue", "review-board"],
         ["src/presentation/pages/solver-walkthrough/SolverWalkthrough.vue", "walkthrough-board"],
     ])("%s widens its board past the page gutter, but no further than a short screen allows", (path, testId) => {
-        // Centred and 24px wider than the page's content, so it reaches 8px from the screen edges;
-        // every board shares one cap, so the three match on a short screen (309px at 360×640)
+        // Centred and 24px wider than the page's content, so it reaches 8px from the screen edges
         const boardTag = boardTagOf(path, testId);
         expect(boardTag).toMatch(/class="[^"]*\bself-center\b/);
         expect(boardTag).toMatch(/class="[^"]*\bw-\[calc\(100%\+1\.5rem\)\]/);
@@ -55,6 +54,62 @@ describe("board geometry", () => {
         expect(utility).toMatch(/max-width: (?:calc\()?max\(15rem, calc\(100dvh - /);
         expect(utility).toContain("safe-area-inset-top");
         expect(utility).toContain("safe-area-inset-bottom");
+    });
+
+    describe("what shrinks round the board on a short window", () => {
+        const indexCss = readFileSync("src/style/index.css", "utf8");
+        const size = (token: string): { smallest: number; share: number } => {
+            const match = new RegExp(`--${token}: calc\\(([\\d.]+)px \\+ ([\\d.]+) \\* var\\(--game-step\\)\\);`).exec(indexCss);
+            if (match === null) throw new Error(`--${token} is not a size on --game-step`);
+            return { smallest: Number(match[1]), share: Number(match[2]) };
+        };
+        const HEADER = 28;
+        // Each part of the game screen besides the board, as often as it appears from top to bottom
+        const PARTS: [token: string, times: number][] = [
+            ["game-page-top", 1],
+            ["game-page-gap", 3],
+            ["game-section-gap", 2],
+            ["game-control-size", 1],
+            ["game-control-label-gap", 1],
+            ["game-control-label-text", 1],
+            ["digit-key-size", 2],
+            ["digit-key-row-gap", 1],
+            ["game-page-bottom", 1],
+        ];
+        const total = (read: (part: { smallest: number; share: number }) => number): number =>
+            PARTS.reduce((sum, [token, times]) => sum + times * read(size(token)), 0);
+
+        it("should leave the board the room those parts do not take, at every size", () => {
+            const room = size("board-room");
+
+            expect(total(part => part.smallest) + HEADER).toBe(room.smallest);
+            expect(total(part => part.share)).toBe(room.share);
+            // At full size the screen is as it always was
+            expect(room.smallest + room.share).toBe(331);
+        });
+
+        it("should give back exactly the room the sizes have to give", () => {
+            const room = size("board-room");
+            const step = /--game-step: calc\(clamp\(0px, max\(.* - ([\d.]+)px, .* - ([\d.]+)px\), ([\d.]+)px\) \/ ([\d.]+)\);/.exec(indexCss);
+
+            expect(Number(step?.[1])).toBe(room.smallest);
+            expect(Number(step?.[3])).toBe(room.share);
+            expect(Number(step?.[4])).toBe(room.share);
+            // Full size from a 720px window up
+            expect(Number(step?.[2]) + room.share).toBe(720);
+        });
+
+        it("should keep a digit's share of its key as the key shrinks", () => {
+            const key = size("digit-key-size");
+            for (const token of ["digit-key-text", "digit-key-note-text"]) {
+                const text = size(token);
+                expect(text.smallest / key.smallest).toBeCloseTo((text.smallest + text.share) / (key.smallest + key.share));
+            }
+        });
+
+        it("should keep Game Review's board at the room it always had, as it has no keys to shrink", () => {
+            expect(readFileSync("src/presentation/pages/game-review/GameReview.vue", "utf8")).toContain("[--board-room:331px]");
+        });
     });
 
     it("should shrink the boards by the height a style's board frame adds, so the digit keys stay on a short screen", () => {

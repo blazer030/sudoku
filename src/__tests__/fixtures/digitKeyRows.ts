@@ -2,10 +2,10 @@ import { expect } from "vitest";
 import type { VueWrapper } from "@vue/test-utils";
 
 // Five 56px keys and four 8px gaps make a 312px row. A letterboxed window can leave less than
-// that, so each row shares out its width in five columns that never grow past 3.5rem (56px)
+// that, so each row shares out its width in five columns that never grow past --digit-key-size
 // but may shrink, and every key fills its column as a square. jsdom has no layout, so the
 // classes stand in for the measurement.
-export const KEY_ROW_COLUMNS = "grid-cols-[repeat(5,minmax(0,3.5rem))]";
+export const KEY_ROW_COLUMNS = "grid-cols-[repeat(5,minmax(0,var(--digit-key-size)))]";
 
 const KEY_IDS = [1, 2, 3, 4, 5, 6, 7, 8, 9].map(digit => `number-${digit}`).concat("erase-button");
 

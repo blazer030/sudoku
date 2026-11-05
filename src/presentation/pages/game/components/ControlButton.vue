@@ -2,7 +2,7 @@
     <button
         :aria-label="label"
         :aria-pressed="pressed === null ? undefined : pressed"
-        class="flex flex-col items-center gap-1 cursor-pointer"
+        class="flex flex-col items-center gap-(--game-control-label-gap) cursor-pointer"
         @click="$emit('click')"
     >
         <span
@@ -11,7 +11,7 @@
             :class="pressed
                 ? 'bg-primary text-on-primary shadow-primary-active'
                 : 'bg-card text-foreground shadow-card-sm hover:bg-foreground/5'"
-            class="w-11 h-11 rounded-xl flex items-center justify-center transition-all duration-200"
+            class="size-(--game-control-size) rounded-xl flex items-center justify-center transition-all duration-200"
             data-testid="control-tile"
         >
             <component
@@ -21,7 +21,7 @@
         </span>
         <span
             :class="pressed ? 'text-primary font-semibold' : 'text-foreground-secondary font-medium'"
-            class="text-[11px] leading-none whitespace-nowrap"
+            class="text-(length:--game-control-label-text) leading-none whitespace-nowrap"
         >{{ visibleText ?? label }}</span>
     </button>
 </template>

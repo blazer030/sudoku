@@ -1759,8 +1759,8 @@ describe("Game", () => {
             const wrapper = mountGame();
             const digitKey = (digit: number) => wrapper.get(`[data-testid='number-${digit}']`);
             const glyph = (digit: number) => wrapper.get(`[data-testid='number-${digit}-glyph']`);
-            const normalSize = "text-[length:calc(var(--text-2xl)*var(--key-scale,1))]";
-            const noteSize = "text-[length:calc(var(--text-lg)*var(--key-scale,1))]";
+            const normalSize = "text-[length:calc(var(--digit-key-text)*var(--key-scale,1))]";
+            const noteSize = "text-[length:calc(var(--digit-key-note-text)*var(--key-scale,1))]";
             expect(digitKey(8).classes()).toContain(normalSize);
             for (const digit of [1, 5, 9]) expect(glyph(digit).attributes("style") ?? "").not.toContain("translate");
 

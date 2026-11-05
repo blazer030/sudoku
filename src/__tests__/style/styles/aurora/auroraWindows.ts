@@ -10,9 +10,10 @@ export interface AuroraWindow {
 
 export const AURORA_WINDOWS: readonly AuroraWindow[] = [
     { width: 390, height: 844, board: [19, 149, 371, 501] },
-    { width: 360, height: 640, board: [37, 79, 324, 366] },
-    // iPhone SE, a 7-inch tablet, an iPad upright and on its side
-    { width: 375, height: 667, board: [31, 79, 345, 393] },
+    { width: 360, height: 640, board: [19, 71, 341, 394] },
+    // iPhone SE, in Safari with its bars and on its own, a 7-inch tablet, an iPad upright and on its side
+    { width: 375, height: 553, board: [32, 55, 343, 366] },
+    { width: 375, height: 667, board: [19, 74, 356, 411] },
     { width: 600, height: 960, board: [19, 101, 581, 664] },
     { width: 768, height: 1024, board: [83, 114, 685, 716] },
     { width: 1024, height: 768, board: [305, 79, 719, 494] },

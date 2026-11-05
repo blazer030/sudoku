@@ -105,17 +105,40 @@
   padding-block: max(var(--safe-area-inset-top, env(safe-area-inset-top)), var(--safe-area-inset-bottom, env(safe-area-inset-bottom)));
 }
 
-/* The boards (game, review, walkthrough) give up width on a short screen so the game's digit keys
-   stay on it, and all three stay the same size. 331px is what the game screen needs besides the
-   board (page padding, header, gaps, controls and two rows of 56px keys), measured at 360×640;
-   the board is square, so its width is its height. It never goes under 15rem, which still fits a
-   640px phone after its system bars; a shorter window (a phone in landscape, split screen) scrolls.
+/* The boards give up width on a short screen so the game's digit keys stay on it; the board is square,
+   so its width is its height. --board-room is what the page needs besides the board. It never goes
+   under 15rem, which keeps a usable board in a very short window (a phone in landscape, split screen),
+   which scrolls instead.
    A style's board frame sets --board-frame-block on its own element to the height it adds round the
    board, and the board gives that up too. A frame that takes over the board's width (the board then
    fills it) also carries this utility and sets --board-frame-inline to the width it adds, so the frame
    grows by its sides and the board inside keeps the size the height allows. */
 @utility max-w-board-fit {
-  max-width: calc(max(15rem, calc(100dvh - 331px - var(--board-frame-block, 0px) - var(--safe-area-inset-top, env(safe-area-inset-top)) - var(--safe-area-inset-bottom, env(safe-area-inset-bottom)))) + var(--board-frame-inline, 0px));
+  max-width: calc(max(15rem, calc(100dvh - var(--board-room) - var(--board-frame-block, 0px) - var(--safe-area-inset-top, env(safe-area-inset-top)) - var(--safe-area-inset-bottom, env(safe-area-inset-bottom)))) + var(--board-frame-inline, 0px));
+}
+
+/* On a short window the game and the Walkthrough shrink what sits round the board, so the board keeps
+   its size. --game-step runs from 0px (everything at its smallest) to 1px (full size), and each size is
+   its smallest plus its share of the 111px there is to give back; a test holds the shares to that sum.
+   The room goes to the board first: the rest shrinks just enough for the board to reach the width of
+   the column (640px less 8px each side), and no further. A window 720px tall or more stays at full size,
+   which only matters when it is wider than it is tall, as the board cannot reach the width there. */
+:root {
+  --game-window: calc(100dvh - var(--safe-area-inset-top, env(safe-area-inset-top)) - var(--safe-area-inset-bottom, env(safe-area-inset-bottom)));
+  --game-step: calc(clamp(0px, max(var(--game-window) - (min(100vw, 640px) - 16px) - 220px, var(--game-window) - 609px), 111px) / 111);
+  --board-room: calc(220px + 111 * var(--game-step));
+  --game-page-top: calc(8px + 16 * var(--game-step));
+  --game-page-bottom: calc(12px + 12 * var(--game-step));
+  --game-page-gap: calc(4px + 4 * var(--game-step));
+  --game-section-gap: calc(10px + 14 * var(--game-step));
+  --game-control-size: calc(36px + 8 * var(--game-step));
+  --game-control-label-gap: calc(2px + 2 * var(--game-step));
+  --game-control-label-text: calc(10px + 1 * var(--game-step));
+  --digit-key-size: calc(42px + 14 * var(--game-step));
+  --digit-key-row-gap: calc(8px + 4 * var(--game-step));
+  /* Not in the sum: a digit keeps its share of the key */
+  --digit-key-text: calc(18px + 6 * var(--game-step));
+  --digit-key-note-text: calc(13.5px + 4.5 * var(--game-step));
 }
 
 :root {

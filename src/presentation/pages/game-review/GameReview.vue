@@ -75,8 +75,9 @@
 
         <div class="flex-1" />
         <!-- The board reaches into the page gutter from inside this wrapper: as a direct child it would
-             count the page's end padding past it as sideways overflow -->
-        <div class="flex flex-col gap-6">
+             count the page's end padding past it as sideways overflow. There are no keys to shrink here:
+             a larger board would only push the playback buttons off a short screen, so it keeps the room -->
+        <div class="flex flex-col gap-6 [--board-room:331px]">
             <BoardFrame
                 :celebration="null"
                 :effect="null"

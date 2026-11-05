@@ -1,6 +1,6 @@
 <template>
     <div
-        class="flex flex-col gap-2 min-h-full py-6 px-5 touch-manipulation"
+        class="flex flex-col gap-(--game-page-gap) min-h-full pt-(--game-page-top) pb-(--game-page-bottom) px-5 touch-manipulation"
         data-testid="game-screen"
         @click="handleScreenTap"
     >
@@ -12,7 +12,7 @@
 
         <div class="flex-1" />
 
-        <div class="flex flex-col items-center gap-6">
+        <div class="flex flex-col items-center gap-(--game-section-gap)">
             <BoardFrame
                 :celebration="celebration"
                 :effect="groupEffect"
@@ -96,7 +96,7 @@
                 <div
                     :class="hintMode.active.value ? 'opacity-0 pointer-events-none' : 'opacity-100 delay-100'"
                     :inert="hintMode.active.value || undefined"
-                    class="flex flex-col items-center gap-6 transition-opacity duration-200"
+                    class="flex flex-col items-center gap-(--game-section-gap) transition-opacity duration-200"
                     data-testid="game-inputs"
                 >
                     <GameControls
