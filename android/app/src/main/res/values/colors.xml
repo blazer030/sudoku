@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Below API 26 the navigation bar's icons stay white, so it keeps a dark scrim over a light page -->
+    <color name="navigation_bar">#801b1b1b</color>
+</resources>

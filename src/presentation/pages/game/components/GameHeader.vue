@@ -56,7 +56,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ChevronLeft, Lightbulb, Timer } from "lucide-vue-next";
+import { ChevronLeft, Lightbulb, Timer } from "@/presentation/components/icon";
 import { useGameStore } from "@/stores/gameStore";
 import { formatTime } from "@/utils/formatTime";
 import { computed } from "vue";

@@ -7,6 +7,7 @@ import { fillAllButLastKnownCell, knownAnswer, knownPuzzle, lastKnownEmptyCell }
 import type { Difficulty } from "@/domain/generator/SudokuGenerator";
 import { useGameStore } from "@/stores/gameStore";
 import { useStatisticsStore } from "@/stores/statisticsStore";
+import { useSettingsStore } from "@/stores/settingsStore";
 
 vi.mock("@/application/puzzleGeneration/PuzzleGenerationService", () => ({
     generatePuzzleAsync: vi.fn(() => Promise.resolve({
@@ -26,7 +27,7 @@ vi.mock("@/presentation/components/puzzle-loader/usePuzzleLoader", async () => {
 });
 
 const mountGameRoute = async (difficulty: Difficulty = "easy") => {
-    localStorage.setItem("sudoku-settings", JSON.stringify({ motionEffects: false }));
+    localStorage.setItem("sudoku-settings", JSON.stringify({ motionEffects: false, autoNotesAtStart: false }));
     const pinia = createPinia();
     const router = createRouter({
         history: createMemoryHistory(),
@@ -66,10 +67,21 @@ afterEach(() => {
 });
 
 describe("completion actions", () => {
+    it("should start Play Again with notes when the auto notes setting is on", async () => {
+        const { wrapper, gameStore } = await mountGameRoute("medium");
+        useSettingsStore().setAutoNotesAtStart(true);
+
+        await completeKnownGame(wrapper);
+        await wrapper.get("[data-testid='play-again-button']").trigger("click");
+        await flushPromises();
+
+        expect([...(gameStore.sudoku?.puzzle[0][2].notes ?? [])].sort()).toEqual([1, 2, 4]);
+    });
+
     it("should start a fresh game at the same difficulty on Play Again", async () => {
         const { wrapper, router, gameStore } = await mountGameRoute("medium");
         await wrapper.find("[data-testid='hint-button']").trigger("click");
-        await wrapper.find("[data-testid='hint-auto-notes']").trigger("click");
+        await wrapper.find("[data-testid='hint-check-conflicts']").trigger("click");
         await completeKnownGame(wrapper);
 
         await wrapper.find("[data-testid='play-again-button']").trigger("click");
@@ -80,8 +92,11 @@ describe("completion actions", () => {
         expect(wrapper.find("[data-testid='cell-0-2']").text()).toBe("");
         expect(gameStore.difficulty).toBe("medium");
         expect(router.currentRoute.value.path).toBe("/game");
-        await wrapper.find("[data-testid='hint-button']").trigger("click");
-        expect(wrapper.find("[data-testid='hint-remaining']").text()).toBe("4 hints left this game");
+        await wrapper.find("[data-testid='back-button']").trigger("click");
+        await wrapper.find("[data-testid='give-up-and-leave-button']").trigger("click");
+        await flushPromises();
+        const { history } = useStatisticsStore();
+        expect(history[history.length - 1].hintsUsed).toBe(0);
     });
 
     it("should guard leaving the new game after Play Again", async () => {
@@ -95,6 +110,18 @@ describe("completion actions", () => {
 
         expect(router.currentRoute.value.path).toBe("/game");
         expect(wrapper.find("[data-testid='leave-game-dialog']").exists()).toBe(true);
+    });
+
+    it("should state one hint on the completion screen and in the recorded game", async () => {
+        const { wrapper, statisticsStore } = await mountGameRoute();
+        await wrapper.get("[data-testid='hint-button']").trigger("click");
+        await wrapper.get("[data-testid='hint-check-conflicts']").trigger("click");
+        await flushPromises();
+
+        await completeKnownGame(wrapper);
+
+        expect(wrapper.get("[data-testid='hints-count']").text()).toBe("1");
+        expect(statisticsStore.history[statisticsStore.history.length - 1].hintsUsed).toBe(1);
     });
 
     it("should open the review of the game just finished", async () => {

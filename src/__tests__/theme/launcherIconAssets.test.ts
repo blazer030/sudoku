@@ -13,8 +13,6 @@ import type { Palette, PaletteToken, StyleOwnToken } from "@/theme/palettes";
 const RES_ROOT = "android/app/src/main/res";
 const MANIFEST = "android/app/src/main/AndroidManifest.xml";
 const DENSITIES = ["mdpi", "hdpi", "xhdpi", "xxhdpi", "xxxhdpi"];
-// Capacitor's own icons, which no alias or adaptive icon of ours draws
-const CAPACITOR_ICONS = ["ic_launcher.png", "ic_launcher_foreground.png", "ic_launcher_round.png"];
 
 const icons = LAUNCHER_ICONS.map((icon) => {
     const palette = getPalette(icon.style, icon.themeId, icon.mode);
@@ -259,7 +257,7 @@ describe("launcher icon assets", () => {
         for (const density of DENSITIES) {
             const files = readdirSync(`${RES_ROOT}/mipmap-${density}`);
 
-            expect(files.filter(file => file.endsWith(".png") && !CAPACITOR_ICONS.includes(file)), density).toEqual([]);
+            expect(files.filter(file => file.endsWith(".png")), density).toEqual([]);
             for (const { name } of icons) {
                 expect((await sharp(`${RES_ROOT}/mipmap-${density}/${name}.webp`).metadata()).format, `${density} ${name}`).toBe("webp");
             }

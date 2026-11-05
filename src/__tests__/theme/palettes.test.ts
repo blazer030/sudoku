@@ -115,7 +115,7 @@ describe("palettes", () => {
     const OWN_TOKENS_BY_STYLE: Partial<Record<StyleId, readonly StyleOwnToken[]>> = {
         chalkboard: ["tray", "tray-shade", "tray-edge", "duster", "duster-felt", "smudge", "smear", "icon-frame", "doodle"],
         blueprint: ["grid-minor", "grid-major", "hatch", "error-hatch"],
-        aurora: ["aurora-1", "aurora-2", "aurora-3", "aurora-4", "aurora-ribbon-1", "aurora-ribbon-2", "glass", "glass-sheen"],
+        aurora: ["aurora-1", "aurora-2", "aurora-3", "aurora-4", "aurora-ribbon-1", "aurora-ribbon-2", "aurora-icon-start", "aurora-icon-end", "glass", "glass-sheen"],
     };
 
     it("should give chalkboard and blueprint only their own colours, and no other style any", () => {

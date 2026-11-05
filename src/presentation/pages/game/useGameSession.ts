@@ -12,6 +12,7 @@ import { useGameTimer } from "@/presentation/pages/game/useGameTimer";
 import { useGameCompletion, type CompletionOutcome } from "@/presentation/pages/game/useGameCompletion";
 import { useLeaveGame } from "@/presentation/pages/game/useLeaveGame";
 import { useHintActions } from "@/presentation/pages/game/useHintActions";
+import { useSingleNoteFill } from "@/presentation/pages/game/useSingleNoteFill";
 import { useGameToast } from "@/presentation/pages/game/useGameToast";
 import { useMotionAllowed } from "@/presentation/composables/useMotionAllowed";
 import { useGroupEffect } from "@/presentation/pages/game/useGroupEffect";
@@ -22,9 +23,11 @@ import { ANALYTICS_KEY } from "@/application/analytics/AnalyticsService";
 interface GameSessionOptions {
     /** The player chose Play Again on the completion modal. */
     onPlayAgain: () => void;
+    /** A hint put its answer in a cell. */
+    onCellRevealed: () => void;
 }
 
-export const useGameSession = ({ onPlayAgain }: GameSessionOptions) => {
+export const useGameSession = ({ onPlayAgain, onCellRevealed }: GameSessionOptions) => {
     const router = useRouter();
     const gameStore = useGameStore();
     const statisticsStore = useStatisticsStore();
@@ -88,7 +91,7 @@ export const useGameSession = ({ onPlayAgain }: GameSessionOptions) => {
             void gameCompleteModal.open({
                 elapsedSeconds: elapsedSeconds.value,
                 difficulty: difficulty.value,
-                hintsUsed: sudoku.hintTracker.recordedUsed,
+                hintsUsed: sudoku.hintTracker.totalUsed,
                 isNewRecord,
                 still,
             }).then(handleCompleteAction);
@@ -127,7 +130,17 @@ export const useGameSession = ({ onPlayAgain }: GameSessionOptions) => {
         onGroupCompleted: playGroupEffect,
         onHintReveal: outcome => { gameToast.show({ kind: "randomReveal", outcome }); },
         onNoConflicts: () => { gameToast.show({ kind: "noConflicts" }); },
+        onCellRevealed,
         analytics,
+    });
+
+    const singleNoteFill = useSingleNoteFill({
+        sudoku: sudoku.raw(),
+        stepRecorder,
+        autoRemoveNotes: () => settingsStore.autoRemoveNotes,
+        motionAllowed,
+        checkAndComplete,
+        onGroupCompleted: playGroupEffect,
     });
 
     const { leaveDialog, showLeaveDialog } = useLeaveGame({
@@ -140,6 +153,7 @@ export const useGameSession = ({ onPlayAgain }: GameSessionOptions) => {
         // Hint mode is never saved: leaving ends it with the board untouched.
         onLeave: hintMode.cancel,
         dismissOverlay,
+        finishPendingFill: singleNoteFill.finish,
     });
 
     const timerPaused = computed(() => completed.value || leaveDialog.visible.value);
@@ -165,8 +179,11 @@ export const useGameSession = ({ onPlayAgain }: GameSessionOptions) => {
         clearErrors,
         isError,
         isRevealed,
-        openHintMenu,
+        openHintMenu: async () => {
+            if (!singleNoteFill.running.value) await openHintMenu();
+        },
         hintMode,
+        singleNoteFill,
         toastContent: gameToast.content,
         showToast: gameToast.show,
         showLeaveDialog,

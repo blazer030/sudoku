@@ -97,8 +97,8 @@ describe("skin hooks", () => {
         expect(cards.every(tag => hasSkinToken(tag, "stat-card"))).toBe(true);
         // Overview, By Difficulty and Recent Games
         expect(tags.filter(tag => hasSkinToken(tag, "stat-heading"))).toHaveLength(3);
-        // The overview's three numbers and each difficulty's best, average and completed
-        expect(tags.filter(tag => hasSkinToken(tag, "stat-value"))).toHaveLength(6);
+        // The overview's three numbers and each difficulty's best, average time, average hints and completed
+        expect(tags.filter(tag => hasSkinToken(tag, "stat-value"))).toHaveLength(7);
     });
 
     it("should mark opaque page roots and sticky headers, so a style's page background reaches them", () => {

@@ -53,6 +53,8 @@
    once the faces have loaded (fonts.ts beside this sheet marks it), so nothing paints in a half-loaded
    stack. Garamond's figures are lining by default; the board asks for them anyway. */
 [data-style="ink"][data-ink-fonts="ready"] {
+    /* Garamond's figures are shorter and much narrower than the other styles', and read small on the keys */
+    --key-scale: 1.15;
     --font-sans: var(--font-ink-serif);
     --font-mono: var(--font-ink-digits);
     --font-clue: var(--font-ink-digits);
@@ -64,8 +66,8 @@
 
 /* The board: no frame and no card. The board and its plain cells lie bare on the washi, and every wash
    (peers, the same digit, a hint's pattern) is mixed over the page in the palette. Digits are a size up,
-   like the canvas's 25px. The board is its own stacking context: under the washi fibres fixed to the
-   screen, WebKit otherwise draws a digit's blur (its bleed, its wash) as a sharp digit. */
+   like the canvas's 25px. The board is its own stacking context, so its washes, digits and lines layer
+   among themselves, under the washi fibres fixed to the screen. */
 [data-style="ink"] [data-skin~="board"] {
     --clue-scale: 1.14;
     --entry-scale: 1.14;
@@ -81,9 +83,10 @@
     border-radius: 0;
 }
 
-/* Brush lines: one static drawing (brush-grid.svg: twelve pale cell lines, four box lines, the frame, its
-   edges roughened once when the image is rasterised) shown as a mask in ink, over the cells
-   (inside the grid's border, as the canvas lays it), so its lines land on the cell edges.
+/* Brush lines: one static drawing (brush-grid.svg: twelve pale cell lines, four box lines, the frame, their
+   rough edges drawn into the outlines, so every engine draws the same) shown as a mask in ink, over the cells, so its lines
+   land on the cell edges. The frame lies outside the cells, in the drawing's 9-unit margin of the 351 the
+   cells take (the inset below), over the grid's border and the board's padding, so it never hides a note.
    Only where masks are supported do the plain cell lines and the grid's border give way to it, so an
    engine without masks keeps them and draws no block of ink. Above the digits (2), below the 圓相 (4).
    The file is named through the @/ alias: a path relative to this sheet is lost once it is inlined into
@@ -98,7 +101,7 @@
     [data-style="ink"] [data-skin~="board-grid"]::after {
         content: "";
         position: absolute;
-        inset: 0;
+        inset: -2.5641%;
         z-index: 3;
         pointer-events: none;
         background-color: var(--color-foreground);
@@ -173,16 +176,39 @@
     transform: rotate(-28deg);
 }
 
-/* Filling a digit: it bleeds into the paper, from a blur a size up to the sharp digit, while a halo of
+/* Filling a digit: it soaks into the paper, a size up and soft down to the sharp digit, while a halo of
    ink spreads from under it and fades. Erasing washes it off: a ghost of the digit that left (the cell's
-   data-leaving-value) blurs, sinks and swells away. The halo and the ghost are the cell's ::before (its
-   ::after is the 圓相, which stays), and their animationend settles arriving / leaving like the digit's own.
-   Only the one digit or its ghost animates a blur; the halo moves by opacity and transform. With the
+   data-leaving-value) goes soft, sinks and swells away. Nothing animates a filter, so every engine draws
+   it alike: the softness is the digit's fill thinned, faint offset copies of it spread round it (shadows
+   with no blur) and a radial mask that opens from a soft core round its middle to past its corners, or
+   closes back for the ghost. The halo and the ghost are the cell's ::before (its ::after is the 圓相,
+   which stays), and their animationend settles arriving / leaving like the digit's own. With the
    animations stopped, the halo and the ghost stay unseen. */
+
+/* The soak's three measures, registered so that they, not the shadows and fill built from them, animate:
+   Chromium steps a colour mixed from currentColor instead of easing it */
+@property --ink-soak-spread {
+    syntax: "<length>";
+    inherits: false;
+    initial-value: 0px;
+}
+
+@property --ink-soak-copies {
+    syntax: "<percentage>";
+    inherits: false;
+    initial-value: 0%;
+}
+
+@property --ink-soak-fill {
+    syntax: "<percentage>";
+    inherits: false;
+    initial-value: 100%;
+}
+
 @keyframes ink-bleed {
-    0% { opacity: 0; filter: blur(7px); transform: scale(1.45); }
-    55% { opacity: 0.85; filter: blur(1.5px); transform: scale(1.05); }
-    100% { opacity: 1; filter: blur(0); transform: scale(1); }
+    0% { opacity: 0; transform: scale(1.45); -webkit-mask-size: 90% 90%; mask-size: 90% 90%; --ink-soak-spread: 5px; --ink-soak-copies: 14%; --ink-soak-fill: 20%; }
+    55% { opacity: 0.85; transform: scale(1.05); -webkit-mask-size: 200% 200%; mask-size: 200% 200%; --ink-soak-spread: 1.8px; --ink-soak-copies: 14%; --ink-soak-fill: 55%; }
+    100% { opacity: 1; transform: scale(1); -webkit-mask-size: 400% 400%; mask-size: 400% 400%; --ink-soak-spread: 0px; --ink-soak-copies: 0%; --ink-soak-fill: 100%; }
 }
 
 @keyframes ink-halo {
@@ -192,16 +218,44 @@
 }
 
 @keyframes ink-wash {
-    0% { opacity: 1; filter: blur(0); transform: none; }
-    100% { opacity: 0; filter: blur(6px); transform: translateY(5px) scale(1.25); }
+    0% { opacity: 1; transform: none; -webkit-mask-size: 400% 400%; mask-size: 400% 400%; --ink-soak-spread: 0px; --ink-soak-copies: 0%; --ink-soak-fill: 100%; }
+    100% { opacity: 0; transform: translateY(5px) scale(1.25); -webkit-mask-size: 90% 90%; mask-size: 90% 90%; --ink-soak-spread: 5px; --ink-soak-copies: 14%; --ink-soak-fill: 20%; }
+}
+
+/* The soft edge: the digit's fill thinned, two rings of faint copies of it spread round it, and a radial mask */
+[data-style="ink"] [data-skin~="board"] .value-arrive,
+[data-style="ink"] [data-skin~="board"] [data-variant].value-leave::before {
+    -webkit-text-fill-color: color-mix(in srgb, currentColor var(--ink-soak-fill), transparent);
+    text-shadow:
+        var(--ink-soak-spread) 0px color-mix(in srgb, currentColor var(--ink-soak-copies), transparent),
+        calc(var(--ink-soak-spread) * -1) 0px color-mix(in srgb, currentColor var(--ink-soak-copies), transparent),
+        0px var(--ink-soak-spread) color-mix(in srgb, currentColor var(--ink-soak-copies), transparent),
+        0px calc(var(--ink-soak-spread) * -1) color-mix(in srgb, currentColor var(--ink-soak-copies), transparent),
+        calc(var(--ink-soak-spread) * 0.7) calc(var(--ink-soak-spread) * 0.7) color-mix(in srgb, currentColor var(--ink-soak-copies), transparent),
+        calc(var(--ink-soak-spread) * -0.7) calc(var(--ink-soak-spread) * 0.7) color-mix(in srgb, currentColor var(--ink-soak-copies), transparent),
+        calc(var(--ink-soak-spread) * 0.7) calc(var(--ink-soak-spread) * -0.7) color-mix(in srgb, currentColor var(--ink-soak-copies), transparent),
+        calc(var(--ink-soak-spread) * -0.7) calc(var(--ink-soak-spread) * -0.7) color-mix(in srgb, currentColor var(--ink-soak-copies), transparent),
+        calc(var(--ink-soak-spread) * 0.5) 0px color-mix(in srgb, currentColor var(--ink-soak-copies), transparent),
+        calc(var(--ink-soak-spread) * -0.5) 0px color-mix(in srgb, currentColor var(--ink-soak-copies), transparent),
+        0px calc(var(--ink-soak-spread) * 0.5) color-mix(in srgb, currentColor var(--ink-soak-copies), transparent),
+        0px calc(var(--ink-soak-spread) * -0.5) color-mix(in srgb, currentColor var(--ink-soak-copies), transparent),
+        calc(var(--ink-soak-spread) * 0.35) calc(var(--ink-soak-spread) * 0.35) color-mix(in srgb, currentColor var(--ink-soak-copies), transparent),
+        calc(var(--ink-soak-spread) * -0.35) calc(var(--ink-soak-spread) * 0.35) color-mix(in srgb, currentColor var(--ink-soak-copies), transparent),
+        calc(var(--ink-soak-spread) * 0.35) calc(var(--ink-soak-spread) * -0.35) color-mix(in srgb, currentColor var(--ink-soak-copies), transparent),
+        calc(var(--ink-soak-spread) * -0.35) calc(var(--ink-soak-spread) * -0.35) color-mix(in srgb, currentColor var(--ink-soak-copies), transparent);
+    -webkit-mask-image: radial-gradient(closest-side, var(--color-foreground) 35%, transparent);
+    mask-image: radial-gradient(closest-side, var(--color-foreground) 35%, transparent);
+    -webkit-mask-position: center;
+    mask-position: center;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
 }
 
 [data-style="ink"] [data-skin~="board"] .value-arrive {
     animation: ink-bleed 900ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
 
-/* Its own rule, so a WebView without :has() still reads the leaving one */
-[data-style="ink"] [data-skin~="board"] [data-variant]:has(> .value-arrive)::before {
+[data-style="ink"] [data-skin~="board"] [data-variant][data-arriving]::before {
     content: "";
     position: absolute;
     inset: -8px;
@@ -211,6 +265,13 @@
     background-image: radial-gradient(circle, color-mix(in srgb, var(--color-foreground) 16%, transparent) 0 32%, transparent 68%);
     opacity: 0;
     animation: ink-halo 900ms ease-out forwards;
+}
+
+/* Where WebGL runs, the board's ink canvas (InkCanvas) drops the ink under an arriving digit, soaking a little
+   into its neighbours, and the board carries data-board-canvas~="digit": the halo stands down, while the digit
+   still bleeds in and settles its arrival */
+[data-style="ink"] [data-skin~="board"][data-board-canvas~="digit"] [data-variant][data-arriving]::before {
+    content: none;
 }
 
 [data-style="ink"] [data-skin~="board"] [data-variant].value-leave::before {
@@ -303,10 +364,17 @@
     animation: ink-brush-reveal 540ms cubic-bezier(0.45, 0, 0.35, 1) 160ms both;
 }
 
+/* Where WebGL runs, the board's ink canvas brushes the stroke and the 圓相 instead (data-board-canvas~="group");
+   the digits keep their halo of paper */
+[data-style="ink"] [data-skin~="board"][data-board-canvas~="group"] .ink-group-brush {
+    visibility: hidden;
+}
+
 /* The solved board (only with motion allowed): two deep ink washes bloom across it, the second a beat
-   later and off centre, on the board's own ::before and ::after (inside its stacking context, under the
-   digits). They are soft by their gradients alone, with no filter, and move only by opacity and
-   transform. The digits take the ink from the centre outward, dipping and swelling, and keep a halo of
+   later and off centre. Where WebGL runs, the board's ink canvas (InkCanvas) draws them as ink spreading
+   through washi and the board carries data-board-canvas="celebration"; elsewhere they are the board's own
+   ::before and ::after (inside its stacking context, under the digits), soft by their gradients alone, with
+   no filter, moving only by opacity and transform. The digits take the ink from the centre outward, dipping and swelling, and keep a halo of
    paper so they read on it. Both stay under the dialog. An entered digit still bleeding in, or a revealed
    one popping, takes the ink once it has settled. Without motion one faint wash is simply there. */
 @keyframes ink-board-wash {
@@ -316,10 +384,19 @@
     100% { opacity: 0.55; transform: scale(1.35); }
 }
 
+/* The board's ink canvas (placed over the whole board by InkCanvas) lies level with the washes, under the
+   digits; its ink is multiplied into whatever lies under it on the board, the page showing through where
+   nothing does */
+[data-style="ink"] [data-skin~="board"] > .ink-canvas {
+    z-index: 1;
+    border-radius: inherit;
+    mix-blend-mode: multiply;
+}
+
 @keyframes ink-take {
-    0% { opacity: 1; transform: none; text-shadow: none; }
-    35% { opacity: 0.55; transform: scale(1.12); text-shadow: 0 0 2px var(--color-card), 0 0 3px var(--color-card), 0 0 6px var(--color-card); }
-    100% { opacity: 1; transform: none; text-shadow: 0 0 2px var(--color-card), 0 0 3px var(--color-card), 0 0 6px var(--color-card); }
+    0% { opacity: 1; transform: none; }
+    35% { opacity: 0.55; transform: scale(1.12); }
+    100% { opacity: 1; transform: none; }
 }
 
 /* The washes swell past the board as they bloom; the board keeps them inside its box, so the page never
@@ -329,8 +406,8 @@
     overflow: clip;
 }
 
-[data-style="ink"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"])::before,
-[data-style="ink"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"])::after,
+[data-style="ink"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"]):not([data-board-canvas~="celebration"])::before,
+[data-style="ink"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"]):not([data-board-canvas~="celebration"])::after,
 [data-style="ink"] [data-skin~="board"][data-celebration="still"]::before {
     content: "";
     position: absolute;
@@ -340,21 +417,21 @@
     background-image: radial-gradient(circle, color-mix(in srgb, var(--color-foreground) 44%, transparent) 0, color-mix(in srgb, var(--color-foreground) 32%, transparent) 42%, transparent 70%);
 }
 
-[data-style="ink"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"])::before,
+[data-style="ink"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"]):not([data-board-canvas~="celebration"])::before,
 [data-style="ink"] [data-skin~="board"][data-celebration="still"]::before {
     inset: 11%;
 }
 
-[data-style="ink"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"])::after {
+[data-style="ink"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"]):not([data-board-canvas~="celebration"])::after {
     inset: 34% 0 9% 43%;
 }
 
-[data-style="ink"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"])::before {
+[data-style="ink"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"]):not([data-board-canvas~="celebration"])::before {
     opacity: 0;
     animation: ink-board-wash 1400ms ease-out both;
 }
 
-[data-style="ink"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"])::after {
+[data-style="ink"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"]):not([data-board-canvas~="celebration"])::after {
     opacity: 0;
     animation: ink-board-wash 1400ms ease-out 200ms both;
 }
@@ -365,6 +442,9 @@
 
 [data-style="ink"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"]) [data-variant] > div:not(.value-arrive):not(.animate-hint-reveal-pop) {
     animation: ink-take 640ms ease-out calc((max(var(--cell-row) - 4, 4 - var(--cell-row)) + max(var(--cell-column) - 4, 4 - var(--cell-column))) * 55ms) both;
+    /* Set once, not animated: in the keyframes it would repaint every digit on the board on every frame.
+       Paper on paper, it only shows once the wash is under the digit */
+    text-shadow: 0 0 2px var(--color-card), 0 0 3px var(--color-card), 0 0 6px var(--color-card);
 }
 
 /* The completion card is a hanging scroll. It waits for the scrim, then unrolls down from its top rod
@@ -1013,12 +1093,8 @@
     }
 
     [data-style="ink"] [data-skin~="board"] .value-arrive,
+    [data-style="ink"] [data-skin~="board"] [data-variant][data-arriving]::before,
     [data-style="ink"] [data-skin~="board"] [data-variant].value-leave::before {
-        animation: none;
-    }
-
-    /* Its own rule, so a WebView without :has() still reads the list above */
-    [data-style="ink"] [data-skin~="board"] [data-variant]:has(> .value-arrive)::before {
         animation: none;
     }
 
@@ -1035,8 +1111,8 @@
     }
 
     /* The celebration never starts without motion, so it is only stopped */
-    [data-style="ink"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"])::before,
-    [data-style="ink"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"])::after,
+    [data-style="ink"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"]):not([data-board-canvas~="celebration"])::before,
+    [data-style="ink"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"]):not([data-board-canvas~="celebration"])::after,
     [data-style="ink"] [data-skin~="board"]:is([data-celebration="playing"], [data-celebration="done"]) [data-variant] > div:not(.value-arrive):not(.animate-hint-reveal-pop),
     [data-style="ink"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]),
     [data-style="ink"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) .ink-rod-track,
@@ -1081,5 +1157,43 @@
     [data-style="ink"] .ink-loader-digit,
     [data-style="ink"] .ink-loader-seal {
         opacity: 1;
+    }
+}
+
+/* The floating digit pad: a slip of the washi with its dots, ruled by a finer hand of the board's brush. The keys are
+   clear, the digit the cell holds a seal as on the keypad. As on the board, only where masks are supported do the
+   keys' plain edge lines give way to the brush. */
+[data-style="ink"] [data-skin~="floating-pad"].shadow-popup {
+    --floating-pad-padding: 4px;
+    --floating-pad-gap: 4px;
+    border-color: transparent;
+    border-radius: 2px;
+    background-color: var(--color-background);
+    background-image: radial-gradient(color-mix(in srgb, var(--ink-grain) 24%, transparent) 0.7px, transparent 1.1px);
+    background-size: 6px 6px;
+    box-shadow: 0 10px 24px -6px color-mix(in srgb, var(--color-shadow) 38%, transparent);
+}
+
+[data-style="ink"] [data-skin~="floating-pad"] [data-skin~="key"]:not([aria-pressed="true"]) {
+    background-color: transparent;
+}
+
+@supports ((mask-image: url("")) or (-webkit-mask-image: url(""))) {
+    [data-style="ink"] [data-skin~="floating-pad"] [data-skin~="key"]:not([aria-pressed="true"]) {
+        box-shadow: none;
+    }
+
+    [data-style="ink"] [data-skin~="floating-pad"]::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background-color: var(--color-foreground);
+        -webkit-mask-image: url("@/style/styles/ink/floating-pad-grid.svg");
+        mask-image: url("@/style/styles/ink/floating-pad-grid.svg");
+        -webkit-mask-size: 100% 100%;
+        mask-size: 100% 100%;
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
     }
 }

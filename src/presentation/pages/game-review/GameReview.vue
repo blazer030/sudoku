@@ -1,5 +1,6 @@
 <template>
     <div
+        v-if="game"
         ref="scrollArea"
         class="flex flex-col gap-4 h-full overflow-y-auto overflow-x-hidden overscroll-y-contain bg-background px-5 pb-6"
         data-skin="page"
@@ -157,7 +158,7 @@
 <script lang="ts" setup>
 import { computed, useTemplateRef, watch, type Component } from "vue";
 import { useRouter } from "vue-router";
-import { ChevronLeft, Eraser, LayoutGrid, Lightbulb, Pencil, Sparkles, StickyNote, Trophy, Undo2, X } from "lucide-vue-next";
+import { ChevronLeft, Eraser, LayoutGrid, Lightbulb, Pencil, Sparkles, StickyNote, Trophy, Undo2, X } from "@/presentation/components/icon";
 import { ROUTER_PATH } from "@/router";
 import { useScrolledHeader } from "@/presentation/composables/useScrolledHeader";
 import type { GameStepAction } from "@/domain/game/GameStep";
@@ -174,6 +175,7 @@ import StepPlaybackPanel from "@/presentation/components/step-presentation/StepP
 import StepTag from "@/presentation/components/step-presentation/StepTag.vue";
 import { useGameReview } from "@/presentation/pages/game-review/useGameReview";
 import { revealInScroller } from "@/presentation/pages/game-review/revealInScroller";
+import { findReviewedGame } from "@/presentation/pages/game-review/reviewedGame";
 
 const props = defineProps<{
     index: string;
@@ -182,14 +184,12 @@ const props = defineProps<{
 const { t } = useI18n();
 const appLocale = useAppLocale();
 const router = useRouter();
-const history = useStatisticsStore().history;
-const gameIndex = Number(props.index);
-const game = history[gameIndex];
-const replayData = game.replay;
-
-if (!replayData) {
+// A typed URL can name a game that isn't there, or one kept without its moves: back to Statistics
+const game = findReviewedGame(useStatisticsStore().history, props.index);
+if (game === null) {
     void router.replace(ROUTER_PATH.statistics);
 }
+const completed = game?.completed ?? false;
 
 const {
     currentStep,
@@ -204,7 +204,7 @@ const {
     previous,
     goToStep,
     togglePlay,
-} = useGameReview(replayData ?? { initialBoard: [], steps: [] }, game.completed);
+} = useGameReview(game?.replay ?? { initialBoard: [], steps: [] }, completed);
 
 const ACTION_ICONS: Record<GameStepAction, Component> = {
     fill: Pencil,
@@ -217,7 +217,7 @@ const ACTION_ICONS: Record<GameStepAction, Component> = {
 
 const tag = computed((): { label: string; icon: Component } => {
     if (stage.value === "final") {
-        return game.completed
+        return completed
             ? { label: t("review.stages.completed"), icon: Trophy }
             : { label: t("review.stages.gaveUp"), icon: X };
     }

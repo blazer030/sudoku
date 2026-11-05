@@ -20,6 +20,9 @@ export const useSettingsStore = defineStore("settings", () => {
     const highlightScope = ref(settings.highlightScope);
     const colorThemeByStyle = ref<RememberedThemes>(settings.colorThemeByStyle);
     const appearanceByStyle = ref<RememberedAppearances>(settings.appearanceByStyle);
+    const floatingDigitPad = ref(settings.floatingDigitPad);
+    const doubleTapFill = ref(settings.doubleTapFill);
+    const autoNotesAtStart = ref(settings.autoNotesAtStart);
 
     // Installed web apps keep the light icon; the favicon also follows light or dark, so appearanceSync keeps it
     const applyColorTheme = () => {
@@ -42,6 +45,9 @@ export const useSettingsStore = defineStore("settings", () => {
             highlightScope: highlightScope.value,
             colorThemeByStyle: { ...colorThemeByStyle.value },
             appearanceByStyle: { ...appearanceByStyle.value },
+            floatingDigitPad: floatingDigitPad.value,
+            doubleTapFill: doubleTapFill.value,
+            autoNotesAtStart: autoNotesAtStart.value,
         });
     };
 
@@ -100,6 +106,21 @@ export const useSettingsStore = defineStore("settings", () => {
         persistAll();
     };
 
+    const setFloatingDigitPad = (value: boolean) => {
+        floatingDigitPad.value = value;
+        persistAll();
+    };
+
+    const setDoubleTapFill = (value: boolean) => {
+        doubleTapFill.value = value;
+        persistAll();
+    };
+
+    const setAutoNotesAtStart = (value: boolean) => {
+        autoNotesAtStart.value = value;
+        persistAll();
+    };
+
     applyColorTheme();
 
     return {
@@ -115,6 +136,9 @@ export const useSettingsStore = defineStore("settings", () => {
         highlightScope,
         colorThemeByStyle,
         appearanceByStyle,
+        floatingDigitPad,
+        doubleTapFill,
+        autoNotesAtStart,
         setColorTheme,
         setStyle,
         setHighlightSameDigit,
@@ -125,5 +149,8 @@ export const useSettingsStore = defineStore("settings", () => {
         setLanguage,
         setAppearance,
         setHighlightScope,
+        setFloatingDigitPad,
+        setDoubleTapFill,
+        setAutoNotesAtStart,
     };
 });

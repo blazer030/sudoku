@@ -23,14 +23,14 @@ const fillStep: GameStep = {
     value: 5,
 };
 
-const mountReview = async (options: { action?: GameStep["action"]; completed?: boolean; nextClicks?: number } = {}) => {
-    const { action = "fill", completed = false, nextClicks = 1 } = options;
+const mountReview = async (options: { action?: GameStep["action"]; completed?: boolean; nextClicks?: number; initialBoard?: ReturnType<typeof emptyBoard> } = {}) => {
+    const { action = "fill", completed = false, nextClicks = 1, initialBoard = emptyBoard() } = options;
     setActivePinia(createPinia());
     useStatisticsStore().recordGame({
         difficulty: "hard",
         elapsedSeconds: 100,
         completed,
-        replay: { initialBoard: emptyBoard(), steps: [{ ...fillStep, action }] },
+        replay: { initialBoard, steps: [{ ...fillStep, action }] },
     });
     const router = createRouter({
         history: createMemoryHistory(),
@@ -62,6 +62,15 @@ const boldTexts = (wrapper: Awaited<ReturnType<typeof mountReview>>) =>
     wrapper.findAll(".font-semibold").map((element) => element.text());
 
 describe("GameReview", () => {
+    it("should show a game's starting notes on its first board", async () => {
+        const initialBoard = emptyBoard();
+        initialBoard[4][4].notes = [7, 8];
+
+        const wrapper = await mountReview({ initialBoard, nextClicks: 0 });
+
+        expect(wrapper.get("[data-testid='review-cell-4-4']").text()).toContain("7");
+    });
+
     it("should describe a fill step in English with bold numbers", async () => {
         const wrapper = await mountReview();
 
@@ -77,6 +86,13 @@ describe("GameReview", () => {
 
         expect(wrapper.text()).toContain("在第 1 列第 2 欄填入 5");
         expect(boldTexts(wrapper)).toEqual(expect.arrayContaining(["5", "1", "2"]));
+    });
+
+    it("should still show an older game's auto notes step", async () => {
+        const wrapper = await mountReview({ action: "autoNotes" });
+
+        expect(wrapper.get("[data-testid='review-action']").text()).toBe(i18n.global.t("review.actions.autoNotes"));
+        expect(wrapper.get("[data-testid='review-explanation']").text()).toBe(i18n.global.t("review.autoNotes"));
     });
 
     it("should describe a hint step", async () => {
@@ -331,5 +347,41 @@ describe("GameReview", () => {
         const wrapper = await mountReview({ nextClicks: 0 });
 
         expect(wrapper.findAll("[data-testid^='review-cell-'][role='button']")).toHaveLength(0);
+    });
+});
+
+describe("GameReview with an index that names no game", () => {
+    const mountAt = async (index: string) => {
+        setActivePinia(createPinia());
+        useStatisticsStore().recordGame({
+            difficulty: "easy",
+            elapsedSeconds: 60,
+            completed: true,
+            replay: { initialBoard: emptyBoard(), steps: [fillStep] },
+        });
+        const router = createRouter({
+            history: createMemoryHistory(),
+            routes: [
+                { path: "/", component: { template: "<div />" } },
+                { path: "/statistics", component: { template: "<div />" } },
+                { path: "/game-review/:index", component: { template: "<div />" } },
+            ],
+        });
+        await router.push(`/game-review/${index}`);
+        const pinia = getActivePinia();
+        if (pinia === undefined) throw new Error("pinia not active");
+        const wrapper = mount(GameReview, {
+            props: { index },
+            global: { plugins: [router, pinia] },
+        });
+        await flushPromises();
+        return { wrapper, router };
+    };
+
+    it.each(["1", "99", "-1", "abc", "1.5", ""])("should send the player back to Statistics for index %j", async (index) => {
+        const { wrapper, router } = await mountAt(index);
+
+        expect(router.currentRoute.value.path).toBe("/statistics");
+        expect(wrapper.find("[data-testid='review-board']").exists()).toBe(false);
     });
 });

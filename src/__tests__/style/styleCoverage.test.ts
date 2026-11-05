@@ -8,6 +8,7 @@ const PRESS = ["[data-pressed]", "[data-press-motion][data-pressed]", "[data-pre
 // Each fragment must occur in some selector of that style's sheet
 const REQUIRED_SELECTORS: Record<StyleId, readonly string[]> = {
     minimal: [
+        '[data-skin~="floating-pad"]',
         ...PRESS,
         "[data-group]",
         '[data-celebration="playing"]',
@@ -17,6 +18,7 @@ const REQUIRED_SELECTORS: Record<StyleId, readonly string[]> = {
         ".minimal-loader-square",
     ],
     tactile: [
+        '[data-skin~="floating-pad"]',
         ...PRESS,
         '[data-skin~="key"]',
         '[data-skin~="button"]',
@@ -34,6 +36,7 @@ const REQUIRED_SELECTORS: Record<StyleId, readonly string[]> = {
         ".tactile-loader-tile",
     ],
     paper: [
+        '[data-skin~="floating-pad"]',
         ...PRESS,
         '[data-skin~="page-ruled"]',
         '[data-skin~="page"]',
@@ -58,6 +61,7 @@ const REQUIRED_SELECTORS: Record<StyleId, readonly string[]> = {
         ".paper-stamp",
     ],
     pixel: [
+        '[data-skin~="floating-pad"]',
         ...PRESS,
         "[data-group]",
         '[data-celebration="playing"]',
@@ -68,6 +72,8 @@ const REQUIRED_SELECTORS: Record<StyleId, readonly string[]> = {
         ".pixel-stage-letter",
     ],
     cyber: [
+        '[data-skin~="floating-pad"]',
+        '[data-floating-pad-past]',
         ...PRESS,
         "[data-group]",
         '[data-celebration="playing"]',
@@ -79,12 +85,15 @@ const REQUIRED_SELECTORS: Record<StyleId, readonly string[]> = {
         ".cyber-mission",
     ],
     ink: [
+        '[data-skin~="floating-pad"]',
         ...PRESS,
         ".ink-loader-stroke",
         ".ink-loader-seal",
         "[data-group]",
         ".ink-group-brush",
         '[data-celebration="playing"]',
+        '[data-board-canvas~="celebration"]',
+        ".ink-canvas",
         '[data-skin~="trophy"]',
         '[data-skin~="complete-title"]',
         '[data-skin~="celebration"]:not([data-still])',
@@ -94,6 +103,7 @@ const REQUIRED_SELECTORS: Record<StyleId, readonly string[]> = {
         '[data-skin~="hero-vertical"]',
     ],
     chalkboard: [
+        '[data-skin~="floating-pad"]',
         ...PRESS,
         '[data-skin~="board"]',
         '[data-skin~="board-grid"]::after',
@@ -126,6 +136,7 @@ const REQUIRED_SELECTORS: Record<StyleId, readonly string[]> = {
     ],
     // The press hooks, the shared pieces and the board for now; the moments add theirs
     blueprint: [
+        '[data-skin~="floating-pad"]',
         ...PRESS,
         '[data-skin~="board"]',
         '[data-skin~="board-grid"]::after',
@@ -150,6 +161,7 @@ const REQUIRED_SELECTORS: Record<StyleId, readonly string[]> = {
     ],
     // The press hooks and the drifting lights for now; the board, the moments and the pages add theirs
     aurora: [
+        '[data-skin~="floating-pad"]',
         ...PRESS,
         "body::before",
         "body::after",

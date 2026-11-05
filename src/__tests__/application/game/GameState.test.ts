@@ -117,7 +117,6 @@ describe("GameStateConverter", () => {
             const sudoku = GameStateConverter.toSudoku(state);
 
             expect(sudoku.hintTracker.totalUsed).toBe(3);
-            expect(sudoku.hintTracker.recordedUsed).toBe(2);
         });
     });
 

@@ -64,7 +64,7 @@ export const MAX_STEP_DOTS = 6;
 
 <script lang="ts" setup>
 import { useI18n } from "vue-i18n";
-import { ChevronLeft, ChevronRight } from "lucide-vue-next";
+import { ChevronLeft, ChevronRight } from "@/presentation/components/icon";
 import { vPress } from "@/presentation/directives/press";
 
 const props = defineProps<{

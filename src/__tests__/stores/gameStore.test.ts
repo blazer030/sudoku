@@ -1,7 +1,8 @@
 import { createAnalyticsSpy } from "@/__tests__/fixtures/analyticsSpy";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createPinia, setActivePinia } from "pinia";
 import { useGameStore } from "@/stores/gameStore";
+import { useSettingsStore } from "@/stores/settingsStore";
 import type { GameState } from "@/application/game/GameState";
 import type { GameRepository } from "@/application/game/GameRepository";
 import { knownPuzzle, knownAnswer } from "@/__tests__/fixtures/knownPuzzle";
@@ -41,6 +42,45 @@ describe("gameStore", () => {
         expect(store.hasActiveGame).toBe(false);
         expect(store.difficulty).toBeNull();
         expect(store.savedGame).toBeNull();
+    });
+
+    describe("auto notes at start", () => {
+        beforeEach(() => {
+            localStorage.clear();
+        });
+
+        afterEach(() => {
+            localStorage.clear();
+        });
+
+        it("should start with no notes with the setting off", async () => {
+            useSettingsStore().setAutoNotesAtStart(false);
+            const store = useGameStore();
+
+            await store.startNewGame("medium");
+
+            expect(store.sudoku?.puzzle.flat().every(cell => cell.notes.length === 0)).toBe(true);
+        });
+
+        it("should start with every unfilled cell's candidates, spending no hint, by default", async () => {
+            const store = useGameStore();
+
+            await store.startNewGame("medium");
+
+            // Row 0 holds 5, 3, 7; column 2 holds 8; its box holds 5, 3, 6, 9, 8
+            expect([...(store.sudoku?.puzzle[0][2].notes ?? [])].sort()).toEqual([1, 2, 4]);
+            expect(store.sudoku?.puzzle[0][0].notes).toEqual([]);
+            expect(store.sudoku?.hintTracker.totalUsed).toBe(0);
+        });
+
+        it("should leave a saved game's notes alone with the setting on", () => {
+            useSettingsStore().setAutoNotesAtStart(true);
+            const store = useGameStore();
+
+            store.loadSavedGame(sampleState);
+
+            expect(store.sudoku?.puzzle.flat().every(cell => cell.notes.length === 0)).toBe(true);
+        });
     });
 
     it("startNewGame should create a new game in store", async () => {

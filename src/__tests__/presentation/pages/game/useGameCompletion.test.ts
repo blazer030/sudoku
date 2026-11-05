@@ -6,6 +6,7 @@ import { Sudoku } from "@/domain/game/Sudoku";
 import { PuzzleCell } from "@/domain/board/PuzzleCell";
 import { useGameCompletion } from "@/presentation/pages/game/useGameCompletion";
 import { useStatisticsStore } from "@/stores/statisticsStore";
+import { createKnownSudoku } from "@/__tests__/fixtures/knownPuzzle";
 import type { AnalyticsEvent } from "@/application/analytics/AnalyticsService";
 import type { GameStep } from "@/domain/game/GameStep";
 import type { GameReplayData } from "@/application/statistics/StatisticsRepository";
@@ -73,7 +74,6 @@ describe("useGameCompletion", () => {
             difficulty: "easy",
             time_seconds: 420,
             hints_used: 0,
-            hints_total: 0,
             undo_count: 0,
             wrong_entries: 0,
             used_notes: 0,
@@ -100,7 +100,6 @@ describe("useGameCompletion", () => {
             difficulty: "easy",
             time_seconds: 420,
             hints_used: 0,
-            hints_total: 0,
             undo_count: 1,
             wrong_entries: 1,
             used_notes: 0,
@@ -130,9 +129,33 @@ describe("useGameCompletion", () => {
         expect(event).not.toHaveProperty("used_notes");
     });
 
-    it("reports hints_used 0 and hints_total 1 when only the free hint was used", () => {
+    it("keeps undo_count and wrong_entries but leaves out used_notes for a game started with auto notes", () => {
+        const analytics = createAnalyticsSpy();
+        const fresh = createKnownSudoku();
+        fresh.autoNotes();
+        const { checkAndComplete } = useGameCompletion({
+            sudoku: buildCompleteSudoku(),
+            difficulty: ref("hard"),
+            getElapsedSeconds: () => 420,
+            getReplayData: () => ({
+                initialBoard: fresh.puzzle.map((row) => row.map((cell) => ({ clue: cell.clue, entry: 0, notes: [...cell.notes] }))),
+                steps: [stepOf("undo", 0)],
+            }),
+            onCompleted: () => { /* noop */ },
+            analytics,
+        });
+
+        checkAndComplete();
+
+        const event = analytics.logEvent.mock.calls[0][0] as AnalyticsEvent;
+        expect(event).toMatchObject({ undo_count: 1, wrong_entries: 0 });
+        expect(event).not.toHaveProperty("used_notes");
+    });
+
+    it("reports every hint used, the first included, and no hints_total", () => {
         const analytics = createAnalyticsSpy();
         const sudoku = buildCompleteSudoku();
+        sudoku.hintTracker.useHint();
         sudoku.hintTracker.useHint();
 
         const { checkAndComplete } = useGameCompletion({
@@ -146,7 +169,8 @@ describe("useGameCompletion", () => {
 
         checkAndComplete();
 
-        expect(analytics.logEvent).toHaveBeenCalledWith(expect.objectContaining({ hints_used: 0, hints_total: 1 }));
+        expect(analytics.logEvent).toHaveBeenCalledWith(expect.objectContaining({ hints_used: 2 }));
+        expect(vi.mocked(analytics.logEvent).mock.calls[0][0]).not.toHaveProperty("hints_total");
     });
 
     it("does not emit event when sudoku is not completed", () => {

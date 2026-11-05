@@ -1,5 +1,9 @@
 <template>
-    <div class="flex flex-col gap-2 min-h-full py-6 px-5">
+    <div
+        class="flex flex-col gap-2 min-h-full py-6 px-5 touch-manipulation"
+        data-testid="game-screen"
+        @click="handleScreenTap"
+    >
         <GameHeader
             :elapsed-seconds="elapsedSeconds"
             :hint-mode="hintMode.active.value"
@@ -15,7 +19,12 @@
                 :target="frameTarget"
             >
                 <div
-                    :class="hintMode.active.value ? 'ring-2 ring-primary/50' : 'ring-0 ring-transparent'"
+                    :class="[
+                        hintMode.active.value ? 'ring-2 ring-primary/50' : 'ring-0 ring-transparent',
+                        // On a small board the pad runs past the board, over the controls
+                        { 'relative z-20': floatingPadCell !== null },
+                    ]"
+                    :data-board-canvas="boardCanvasTakes"
                     :data-celebration="celebration ?? undefined"
                     :data-group-effect="groupEffect?.id"
                     :data-hint-mode="hintMode.active.value || undefined"
@@ -25,6 +34,11 @@
                     data-skin="board"
                     data-testid="game-board"
                 >
+                    <BoardCanvas
+                        v-model:takes="boardCanvasTakes"
+                        :celebration="celebration"
+                        :effect="groupEffect"
+                    />
                     <div
                         class="relative flex flex-col border-3 border-foreground/20 rounded-xl"
                         data-skin="board-grid"
@@ -55,6 +69,17 @@
                             />
                         </div>
                         <GroupOverlay :effect="groupEffect" />
+                        <FloatingDigitPad
+                            v-if="floatingPadCell !== null"
+                            :cell="floatingPadCell"
+                            :current-entry="sudoku.puzzle[floatingPadCell.row][floatingPadCell.column].entry"
+                            :current-notes="sudoku.puzzle[floatingPadCell.row][floatingPadCell.column].notes"
+                            :digit-counts="digitCounts"
+                            :erase-disabled="eraseDisabled"
+                            :note-mode="inputMode === InputMode.Note"
+                            @erase="toggleEraseMode"
+                            @select-digit="selectDigit"
+                        />
                         <StepLinkOverlay
                             v-if="hintMode.active.value"
                             :links="hintMode.links.value"
@@ -144,16 +169,20 @@ import GameControls from "@/presentation/pages/game/components/GameControls.vue"
 import HintMenuPopup from "@/presentation/pages/game/components/HintMenuPopup.vue";
 import GameToast from "@/presentation/pages/game/components/GameToast.vue";
 import DigitPad from "@/presentation/components/digit-pad/DigitPad.vue";
+import FloatingDigitPad from "@/presentation/components/floating-digit-pad/FloatingDigitPad.vue";
 import Cell from "@/presentation/components/board-cell/Cell.vue";
 import BoardFrame from "@/presentation/components/board-frame/BoardFrame.vue";
 import { cellName } from "@/presentation/components/board-cell/cellName";
 import GroupOverlay from "@/presentation/components/style-moments/GroupOverlay.vue";
+import BoardCanvas from "@/presentation/components/style-moments/BoardCanvas.vue";
 import { GROUP_RIPPLE_STEP_MS } from "@/presentation/pages/game/useGroupEffect";
 import StepLinkOverlay from "@/presentation/components/step-presentation/StepLinkOverlay.vue";
 import HintPanel from "@/presentation/pages/game/hint-mode/HintPanel.vue";
 import { useRoomBelow } from "@/presentation/composables/useRoomBelow";
 import { minimumPanelHeight, panelLift } from "@/presentation/components/step-presentation/panelLift";
 import { InputMode } from "@/presentation/pages/game/InputMode";
+import { isBlankTap } from "@/presentation/composables/isBlankTap";
+import { useBlankDoubleTap } from "@/presentation/pages/game/useBlankDoubleTap";
 import { useGameInteraction } from "@/presentation/pages/game/useGameInteraction";
 import { useGameSession } from "@/presentation/pages/game/useGameSession";
 import { useSettingsStore } from "@/stores/settingsStore";
@@ -170,6 +199,9 @@ const {
     isRevealed,
     openHintMenu,
     hintMode,
+    singleNoteFill,
+    completed,
+    difficulty,
     toastContent,
     showLeaveDialog,
     checkAndComplete,
@@ -177,9 +209,16 @@ const {
     celebration,
     groupEffect,
     isInGroupEffect,
-} = useGameSession({ onPlayAgain: () => { emit("playAgain"); } });
+} = useGameSession({
+    onPlayAgain: () => { emit("playAgain"); },
+    // Or the pad would come back on the old cell by itself and could cover the one the hint revealed
+    onCellRevealed: () => { if (settingsStore.floatingDigitPad) clearSelection(); },
+});
 
 const settingsStore = useSettingsStore();
+
+// The moments the style's board canvas draws in the skin's place
+const boardCanvasTakes = ref<string | undefined>(undefined);
 
 // The panel opens over the controls; keep its buttons on screen when an explanation runs long.
 // It stops this many pixels short of the screen's bottom edge.
@@ -224,6 +263,8 @@ const {
     isSelected,
     isPeerOfSelected,
     digitCounts,
+    clearSelection,
+    releaseCompletedDigit,
     undo,
 } = useGameInteraction({
     sudoku: sudoku.raw(),
@@ -232,8 +273,38 @@ const {
     checkAndComplete,
     onGroupCompleted: playGroupEffect,
     autoRemoveNotes: () => settingsStore.autoRemoveNotes,
-    isLocked: () => hintMode.active.value,
+    isLocked: () => hintMode.active.value || singleNoteFill.running.value,
 });
+
+const { isDoubleTap } = useBlankDoubleTap();
+
+// Easy games keep it off whatever the setting says: there it would all but solve the game
+const canFillSingleNotes = (): boolean => settingsStore.doubleTapFill
+    && difficulty.value !== "easy"
+    && !completed.value
+    && !hintMode.active.value
+    && !singleNoteFill.running.value;
+
+// The selected cell, when the floating pad belongs on it: not on a clue, and not while the board ignores the player
+const floatingPadCell = computed((): CellReference | null => {
+    if (!settingsStore.floatingDigitPad || selectedCell.value === null) return null;
+    if (hintMode.active.value || singleNoteFill.running.value || celebration.value !== null) return null;
+    if (selectedDigit.value !== null || inputMode.value === InputMode.Erase) return null;
+    const { row, column } = selectedCell.value;
+    return sudoku.puzzle[row][column].isClue ? null : selectedCell.value;
+});
+
+const handleScreenTap = (event: MouseEvent) => {
+    if (settingsStore.floatingDigitPad && !hintMode.active.value && isBlankTap(event.target)) clearSelection();
+    if (!isDoubleTap(event) || !canFillSingleNotes()) return;
+    clearSelection();
+    singleNoteFill.start();
+};
+
+// Sync, as a one-cell or motion-off run starts and ends in one tick, which a queued watcher never sees
+watch(() => singleNoteFill.running.value, (running) => {
+    if (!running) releaseCompletedDigit();
+}, { flush: "sync" });
 
 // A running group effect's origin and timing, for the cells' CSS to ripple from
 const groupEffectPlacement = computed(() => {

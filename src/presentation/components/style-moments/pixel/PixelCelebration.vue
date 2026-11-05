@@ -8,7 +8,7 @@
         aria-hidden="true"
     >
         <div class="pixel-celebration-stars absolute inset-0" />
-        <p class="pixel-stage-clear absolute inset-x-0 top-[calc(env(safe-area-inset-top)+78px)] m-0 flex justify-center text-[20px] leading-none">
+        <p class="pixel-stage-clear absolute inset-x-0 top-[calc(var(--safe-area-inset-top,env(safe-area-inset-top))+78px)] m-0 flex justify-center text-[20px] leading-none">
             <template
                 v-for="(letter, step) in STAGE_CLEAR"
                 :key="step"

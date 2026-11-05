@@ -438,6 +438,12 @@
     clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
 }
 
+/* A floating pad running past a small board would be cut off with it, so the clips stand down meanwhile */
+:root[data-style="cyber"] [data-skin~="board"][data-floating-pad-past],
+[data-style="cyber"] [data-skin~="board"][data-floating-pad-past] > div {
+    clip-path: none;
+}
+
 [data-style="cyber"] [data-skin~="board"] > div::before {
     content: "";
     position: absolute;
@@ -761,7 +767,7 @@
 }
 
 /* The dialog powers on like a CRT: a line across its middle opens to the whole card, which flickers twice;
-   the title then glitches in and keeps its magenta/cyan split. A still card (data-still) only fades in,
+   the title then glitches in, keeps its magenta/cyan split and tears now and then, like Home's. A still card (data-still) only fades in,
    like every style's, with its title split. The trophy is yellow on a deep yellow wash with cut corners.
    Board timings minus the 860ms the dialog waits. */
 @keyframes cyber-crt-open {
@@ -794,7 +800,7 @@
 }
 
 [data-style="cyber"] [data-skin~="card"][data-skin~="celebration"]:not([data-still]) [data-skin~="complete-title"] {
-    animation: cyber-glitch 520ms steps(1, end) 560ms backwards;
+    animation: cyber-glitch 520ms steps(1, end) 560ms backwards, cyber-title-glitch 2.6s steps(1, end) 1220ms infinite;
 }
 
 [data-style="cyber"] [data-skin~="card"][data-skin~="celebration"] [data-skin~="trophy"] {
@@ -1096,4 +1102,44 @@
         transform: none;
         animation: none;
     }
+}
+
+/* An icon's neon runs from the palette's cyan to its magenta. Where its colour says something, it keeps that one
+   colour: danger and errors, on a solid fill, the trophy and the marks with a colour of their own, and the quiet
+   icons beside small words */
+[data-style="cyber"] {
+    --cyber-icon-start: var(--color-accent);
+    --cyber-icon-end: var(--color-primary);
+}
+
+[data-style="cyber"] .text-on-primary,
+[data-style="cyber"] .bg-primary,
+[data-style="cyber"] .text-danger,
+[data-style="cyber"] .text-error,
+[data-style="cyber"] .text-on-danger,
+[data-style="cyber"] .bg-danger,
+[data-style="cyber"] .text-foreground-muted,
+[data-style="cyber"] .text-foreground-secondary,
+[data-style="cyber"] [data-skin~="icon-tile"][data-skin~="danger"],
+[data-style="cyber"] [data-skin~="icon-tile"][data-skin~="gave-up"],
+[data-style="cyber"] [data-skin~="trophy"],
+[data-style="cyber"] [data-skin~="caret"],
+[data-style="cyber"] [data-skin~="check"],
+[data-style="cyber"] svg[data-icon="Timer"] {
+    --cyber-icon-start: currentColor;
+    --cyber-icon-end: currentColor;
+}
+
+/* The floating digit pad: a HUD panel with a lit edge, its keys cut small to suit their size. Its own cut is small and
+   its padding wide, so the cut edge clears the corner keys. */
+[data-style="cyber"] [data-skin~="floating-pad"] {
+    --cyber-edge: var(--color-primary);
+    --cyber-cut: 7px;
+    --floating-pad-padding: 4px;
+    --floating-pad-gap: 3px;
+    filter: drop-shadow(0 0 6px color-mix(in srgb, var(--color-primary) 55%, transparent));
+}
+
+[data-style="cyber"] [data-skin~="floating-pad"] [data-skin~="key"] {
+    --cyber-cut: 5px;
 }

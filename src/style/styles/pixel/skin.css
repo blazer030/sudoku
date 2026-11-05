@@ -870,8 +870,6 @@
 
 [data-style="pixel"] [data-skin~="caret"] {
     color: var(--color-primary);
-    fill: currentColor;
-    stroke: none;
     animation: pixel-blink 1000ms steps(2, jump-none) infinite;
 }
 
@@ -1097,4 +1095,27 @@
     [data-style="pixel"] [data-skin~="board"] [data-variant]:has(> .value-arrive)::after {
         animation: none;
     }
+}
+
+/* The floating digit pad: ink shows between its keys and round them, so it stands off a board of the same shade */
+[data-style="pixel"] [data-skin~="floating-pad"] {
+    border-color: var(--color-foreground);
+    border-radius: 0;
+    background-color: var(--color-foreground);
+    box-shadow: 0 0 0 1px var(--color-foreground), 4px 4px 0 1px color-mix(in srgb, var(--color-foreground) 45%, transparent);
+}
+
+[data-style="pixel"] [data-skin~="floating-pad"] [data-skin~="key"] {
+    background-color: var(--color-card);
+    box-shadow: none;
+}
+
+[data-style="pixel"] [data-skin~="floating-pad"] [data-skin~="key"][aria-pressed="true"] {
+    background-color: var(--color-primary);
+}
+
+[data-style="pixel"] [data-skin~="floating-pad"] [data-skin~="key"]:disabled {
+    background-color: var(--color-card);
+    opacity: 1;
+    color: var(--color-foreground-muted);
 }

@@ -1,5 +1,5 @@
 import { readFileSync } from "fs";
-import postcss from "postcss";
+import postcss, { type Rule } from "postcss";
 import { syncInkFonts } from "@/style/styles/ink/fonts";
 
 // The font tokens declared in index.css's @theme
@@ -110,5 +110,16 @@ describe("syncInkFonts", () => {
         await new Promise((resolve) => { setTimeout(resolve, 0); });
 
         expect(root.dataset.inkFonts).toBeUndefined();
+    });
+    it("should enlarge the keys' digits only once Garamond has loaded", () => {
+        // Garamond's figures measured 7% shorter and 27% narrower than Outfit's at the same size; a fallback
+        // face is full size, and enlarged it would read too large
+        const selectors: string[] = [];
+        postcss.parse(readFileSync("src/style/styles/ink/skin.css", "utf8")).walkDecls("--key-scale", (declaration) => {
+            selectors.push((declaration.parent as Rule).selector);
+            expect(Number(declaration.value)).toBeGreaterThan(1);
+        });
+
+        expect(selectors).toEqual(['[data-style="ink"][data-ink-fonts="ready"]']);
     });
 });

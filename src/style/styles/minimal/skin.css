@@ -204,3 +204,16 @@
         background-color: var(--minimal-loader-lit);
     }
 }
+
+/* The floating digit pad: a card lifted clear of the board on a close shadow and a wide one */
+[data-style="minimal"] [data-skin~="floating-pad"] {
+    box-shadow:
+        0 2px 6px color-mix(in srgb, var(--color-shadow) 24%, transparent),
+        0 14px 32px color-mix(in srgb, var(--color-shadow) 42%, transparent);
+}
+
+:root.dark[data-style="minimal"] [data-skin~="floating-pad"] {
+    box-shadow:
+        0 2px 8px color-mix(in srgb, var(--color-shadow) 60%, transparent),
+        0 16px 36px color-mix(in srgb, var(--color-shadow) 85%, transparent);
+}

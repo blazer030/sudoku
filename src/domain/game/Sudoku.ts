@@ -168,6 +168,21 @@ export class Sudoku {
 
     public fill(row: number, column: number, value: number, options?: { autoRemoveNotes?: boolean }): void {
         this.snapshot();
+        this.fillInRun(row, column, value, options);
+    }
+
+    /** The cells showing exactly one note and no entry, in reading order. */
+    public singleNoteCells(): { row: number; column: number; digit: number }[] {
+        return this._puzzle.flatMap((puzzleRow, row) => puzzleRow.flatMap((cell, column) =>
+            !cell.isClue && !cell.hasEntry && cell.notes.length === 1 ? [{ row, column, digit: cell.notes[0] }] : []));
+    }
+
+    /** Takes the one snapshot a run of fills undoes to; each fill then goes through `fillInRun`. */
+    public beginFillRun(): void {
+        this.snapshot();
+    }
+
+    public fillInRun(row: number, column: number, value: number, options?: { autoRemoveNotes?: boolean }): void {
         this._puzzle[row][column].entry = value;
         if (value > 0 && (options?.autoRemoveNotes ?? true)) {
             this.removeNoteFromPeers(row, column, value);

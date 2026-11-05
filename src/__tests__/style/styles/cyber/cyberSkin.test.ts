@@ -1,6 +1,8 @@
 import { readFileSync } from "fs";
 import postcss, { type AtRule, type Declaration, type Rule } from "postcss";
 import { ARRIVAL_SETTLE_MS } from "@/presentation/components/board-cell/useArrivalMotion";
+import { contrastRatio } from "@/theme/contrast";
+import { getPalette } from "@/theme/palettes";
 import { declarationsOf } from "../../styleSheetRules";
 
 const CYBER_CSS = readFileSync("src/style/styles/cyber/skin.css", "utf8");
@@ -521,6 +523,44 @@ describe("cyber skin", () => {
                     .map(([, amount, unit]) => Number(amount) * (unit === "s" ? 1000 : 1));
                 for (const duration of milliseconds) expect(duration, declaration.value).toBeLessThan(ARRIVAL_SETTLE_MS);
             }
+        });
+    });
+
+    describe("icons", () => {
+        it("should draw an icon's neon from the palette's cyan to its magenta", () => {
+            const root = declarationsOf(CYBER_CSS, SCOPE);
+
+            expect(root.get("--cyber-icon-start")).toBe("var(--color-accent)");
+            expect(root.get("--cyber-icon-end")).toBe("var(--color-primary)");
+        });
+
+        it.each([
+            ".text-on-primary",
+            ".bg-primary",
+            ".text-danger",
+            ".text-error",
+            ".text-on-danger",
+            ".bg-danger",
+            ".text-foreground-muted",
+            ".text-foreground-secondary",
+            '[data-skin~="icon-tile"][data-skin~="danger"]',
+            '[data-skin~="icon-tile"][data-skin~="gave-up"]',
+            '[data-skin~="trophy"]',
+            '[data-skin~="caret"]',
+            '[data-skin~="check"]',
+            'svg[data-icon="Timer"]',
+        ])("should keep icons under %s in their one colour", (selector) => {
+            const solid = declarationsOf(CYBER_CSS, `${SCOPE} ${selector}`);
+
+            expect(solid.get("--cyber-icon-start")).toBe("currentColor");
+            expect(solid.get("--cyber-icon-end")).toBe("currentColor");
+        });
+
+        it("should hold each end of the neon at 3:1 on a card", () => {
+            const palette = getPalette("cyber", "neon", "dark");
+
+            expect(contrastRatio(palette.accent, palette.card)).toBeGreaterThanOrEqual(3);
+            expect(contrastRatio(palette.primary, palette.card)).toBeGreaterThanOrEqual(3);
         });
     });
 });

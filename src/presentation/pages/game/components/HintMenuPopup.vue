@@ -15,48 +15,13 @@
                 data-skin="card"
                 data-testid="hint-menu"
             >
-                <div class="flex flex-col px-3 pb-1">
-                    <div class="flex flex-wrap items-baseline gap-x-2">
-                        <span
-                            class="text-foreground text-sm font-bold"
-                            data-testid="hint-title"
-                        >{{ t("game.hints.title") }}</span>
-                        <span
-                            v-if="params?.firstHintFree"
-                            class="flex-1 min-w-[9rem] text-foreground-muted text-[11px] text-left text-pretty"
-                            data-testid="hint-free-note"
-                        >{{ t("game.hints.freeNote") }}</span>
-                    </div>
-                    <span
-                        v-if="remaining > 0"
-                        class="text-[13px] text-foreground-secondary text-balance"
-                        data-testid="hint-remaining"
-                    >{{ t("game.hints.remaining", { count: remaining }, remaining) }}</span>
-                    <span
-                        v-else
-                        class="text-[13px] text-foreground-secondary text-balance"
-                        data-testid="hint-used-up"
-                    >{{ t("game.hints.usedUp", { max: MAX_HINTS }) }}</span>
-                </div>
+                <span
+                    class="px-3 pb-1 text-foreground text-sm font-bold"
+                    data-testid="hint-title"
+                >{{ t("game.hints.title") }}</span>
 
                 <button
                     v-press
-                    :disabled="remaining === 0"
-                    class="hint-option"
-                    data-skin="menu-option"
-                    data-testid="hint-auto-notes"
-                    @click="close('autoNotes')"
-                >
-                    <Sparkles
-                        :size="20"
-                        class="text-foreground shrink-0"
-                    />
-                    <span>{{ t("game.hints.autoNotes") }}</span>
-                </button>
-
-                <button
-                    v-press
-                    :disabled="remaining === 0"
                     class="hint-option"
                     data-skin="menu-option"
                     data-testid="hint-check-conflicts"
@@ -82,7 +47,6 @@
 
                 <button
                     v-press
-                    :disabled="remaining === 0"
                     class="hint-option"
                     data-skin="menu-option"
                     data-testid="hint-reveal-cell"
@@ -100,23 +64,19 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from "vue";
 import { useI18n } from "vue-i18n";
-import { Eye, ScanSearch, Sparkles } from "lucide-vue-next";
-import { MAX_HINTS } from "@/domain/game/HintTracker";
+import { Eye, ScanSearch } from "@/presentation/components/icon";
 import { useHintMenu } from "@/presentation/pages/game/components/useHintMenu";
 import { vPress } from "@/presentation/directives/press";
 
 const { t } = useI18n();
-const { visible, params, close } = useHintMenu();
-
-const remaining = computed(() => params.value?.remaining ?? 0);
+const { visible, close } = useHintMenu();
 </script>
 
 <style scoped>
 @reference "../../../../style/index.css";
 
 .hint-option {
-    @apply w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[15px] font-medium text-foreground cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 hover:bg-foreground/5;
+    @apply w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[15px] font-medium text-foreground cursor-pointer transition-all duration-200 hover:bg-foreground/5;
 }
 </style>

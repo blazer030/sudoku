@@ -98,7 +98,7 @@
 import { inject, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
-import { ChevronRight } from "lucide-vue-next";
+import { ChevronRight } from "@/presentation/components/icon";
 import { useDonateStore } from "@/stores/donateStore";
 import { ANALYTICS_KEY, type DonateTier } from "@/application/analytics/AnalyticsService";
 import type { Product } from "@/application/billing/BillingService";

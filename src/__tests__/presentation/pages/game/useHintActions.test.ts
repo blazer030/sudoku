@@ -53,11 +53,12 @@ interface HarnessParts {
     stepRecorder?: StepRecorder;
     onHintReveal?: (outcome: RevealOutcome) => void;
     onNoConflicts?: () => void;
+    onCellRevealed?: () => void;
 }
 
 const mountHintHarness = (
     analytics: AnalyticsService,
-    { sudoku = buildPartialSudoku(), stepRecorder = new StepRecorder(), onHintReveal, onNoConflicts }: HarnessParts = {},
+    { sudoku = buildPartialSudoku(), stepRecorder = new StepRecorder(), onHintReveal, onNoConflicts, onCellRevealed }: HarnessParts = {},
 ) => {
     const captured: { api: HintApi | undefined } = { api: undefined };
     const Harness = defineComponent({
@@ -69,6 +70,7 @@ const mountHintHarness = (
                 onRevealComplete: () => { /* noop */ },
                 onHintReveal,
                 onNoConflicts,
+                onCellRevealed,
                 analytics,
             });
             return () => null;
@@ -87,7 +89,6 @@ const runAction = async (action: HintAction, analytics: AnalyticsService) => {
 
 describe("useHintActions — analytics", () => {
     it.each([
-        ["autoNotes" as const,       "auto_notes"],
         ["checkConflicts" as const,  "check_conflicts"],
         ["revealCell" as const,      "reveal_cell"],
     ])("emits hint_used with hint_type=%s -> %s", async (action, hintType) => {
@@ -100,22 +101,6 @@ describe("useHintActions — analytics", () => {
         const analytics = createAnalyticsSpy();
         await runAction("close", analytics);
         expect(analytics.logEvent).not.toHaveBeenCalled();
-    });
-});
-
-describe("useHintActions — step recording", () => {
-    it("records the free first Auto Notes as a replay step", async () => {
-        openHintDialog.mockResolvedValue("autoNotes");
-        const sudoku = buildPartialSudoku();
-        const stepRecorder = new StepRecorder();
-        const api = mountHintHarness(createAnalyticsSpy(), { sudoku, stepRecorder });
-
-        await api.openHintMenu();
-
-        // The first hint is free: it is not counted, but it is still a move in the replay
-        expect(sudoku.hintTracker.recordedUsed).toBe(0);
-        expect(stepRecorder.steps).toHaveLength(1);
-        expect(stepRecorder.steps[0].action).toBe("autoNotes");
     });
 });
 
@@ -179,6 +164,19 @@ describe("useHintActions — reveal cell", () => {
         expect(onHintReveal).toHaveBeenCalledTimes(1);
         const [outcome] = onHintReveal.mock.calls[0] as [RevealOutcome];
         expect(outcome.value).toBe(sudoku.answer[outcome.cell.row][outcome.cell.column]);
+    });
+
+    it("reports a random reveal's cell as revealed", async () => {
+        openHintDialog.mockReset();
+        openHintDialog.mockResolvedValue("revealCell");
+        const sudoku = createKnownSudoku();
+        vi.spyOn(sudoku, "planRevealHint").mockReturnValue({ kind: "noTechnique" });
+        const onCellRevealed = vi.fn();
+        const api = mountHintHarness(createAnalyticsSpy(), { sudoku, onCellRevealed });
+
+        await api.openHintMenu();
+
+        expect(onCellRevealed).toHaveBeenCalledOnce();
     });
 
     it("enters hint mode, spends one hint and logs it once without touching the board", async () => {

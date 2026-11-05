@@ -72,6 +72,18 @@ describe("safe area", () => {
         expect(offenders).toEqual([]);
     });
 
+    it("should prefer Capacitor's injected inset wherever the app reads a safe-area inset", () => {
+        const sources = [...collectVueFiles("src"), "src/style/index.css"];
+        const rawInsets = sources.flatMap((path) => {
+            const source = readFileSync(path, "utf8");
+            return [...source.matchAll(/env\(safe-area-inset-(\w+)\)/g)]
+                .filter(match => !new RegExp(`var\\(--safe-area-inset-${match[1]},\\s*$`).test(source.slice(0, match.index)))
+                .map(match => `${path}: ${match[0]}`);
+        });
+
+        expect(rawInsets).toEqual([]);
+    });
+
     it("should lift bottom-anchored floating elements above the bottom inset", () => {
         const floating = [
             "src/presentation/pages/game/components/GameToast.vue",

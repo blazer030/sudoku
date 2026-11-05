@@ -126,7 +126,7 @@
 </template>
 
 <script lang="ts" setup>
-import { History, RotateCcw, Trophy } from "lucide-vue-next";
+import { History, RotateCcw, Trophy } from "@/presentation/components/icon";
 import { formatTime } from "@/utils/formatTime";
 import { useDifficultyLabel } from "@/presentation/i18n/difficultyLabels";
 import { computed, useTemplateRef } from "vue";

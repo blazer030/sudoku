@@ -1,7 +1,7 @@
 import { summarizeReplay } from "@/application/analytics/summarizeReplay";
 import type { GameReplayData } from "@/application/statistics/StatisticsRepository";
 import type { GameStep, GameStepAction } from "@/domain/game/GameStep";
-import { knownAnswer, knownPuzzle } from "@/__tests__/fixtures/knownPuzzle";
+import { createKnownSudoku, knownAnswer, knownPuzzle } from "@/__tests__/fixtures/knownPuzzle";
 
 const buildReplay = (steps: GameStep[] = []): GameReplayData => ({
     initialBoard: knownPuzzle.map((row) => row.map((clue) => ({ clue, entry: 0, notes: [] }))),
@@ -15,6 +15,16 @@ const buildStep = (action: GameStepAction, row = 0, column = 2, value = 0): Game
     column,
     value,
 });
+
+// A fresh game under Auto Notes at Start: every empty cell holds its candidates on the bare clues
+const buildAutoNotesReplay = (steps: GameStep[] = []): GameReplayData => {
+    const sudoku = createKnownSudoku();
+    sudoku.autoNotes();
+    return {
+        initialBoard: sudoku.puzzle.map((row) => row.map((cell) => ({ clue: cell.clue, entry: 0, notes: [...cell.notes] }))),
+        steps,
+    };
+};
 
 // knownAnswer[0][2] is 4, so any other digit there is wrong.
 const CORRECT_VALUE = knownAnswer[0][2];
@@ -72,5 +82,36 @@ describe("summarizeReplay", () => {
         replay.initialBoard[0][2] = { clue: 0, entry: 0, notes: [1, 2] };
 
         expect(summarizeReplay(replay, knownAnswer)).toBeNull();
+    });
+
+    describe("a game started with auto notes", () => {
+        it("counts undos and wrong entries, as its replay describes the whole game", () => {
+            const replay = buildAutoNotesReplay([buildStep("undo"), buildStep("fill", 0, 2, WRONG_VALUE)]);
+
+            const summary = summarizeReplay(replay, knownAnswer);
+
+            expect(summary?.undoCount).toBe(1);
+            expect(summary?.wrongEntries).toBe(1);
+        });
+
+        it("reports no notes use, whatever the player does with the notes", () => {
+            const replay = buildAutoNotesReplay([buildStep("toggleNote")]);
+
+            expect(summarizeReplay(replay, knownAnswer)?.usedNotes).toBeNull();
+        });
+
+        it("returns null when one cell lacks a candidate, as a player's own notes would", () => {
+            const replay = buildAutoNotesReplay();
+            replay.initialBoard[0][2].notes.pop();
+
+            expect(summarizeReplay(replay, knownAnswer)).toBeNull();
+        });
+
+        it("returns null when the board also holds a player entry", () => {
+            const replay = buildAutoNotesReplay();
+            replay.initialBoard[0][2] = { clue: 0, entry: CORRECT_VALUE, notes: [] };
+
+            expect(summarizeReplay(replay, knownAnswer)).toBeNull();
+        });
     });
 });

@@ -25,7 +25,7 @@ export type PaletteToken = typeof PALETTE_TOKENS[number];
 export const STYLE_OWN_TOKENS = [
     "tray", "tray-shade", "tray-edge", "duster", "duster-felt", "smudge", "smear", "icon-frame", "doodle",
     "grid-minor", "grid-major", "hatch", "error-hatch",
-    "aurora-1", "aurora-2", "aurora-3", "aurora-4", "aurora-ribbon-1", "aurora-ribbon-2", "glass", "glass-sheen",
+    "aurora-1", "aurora-2", "aurora-3", "aurora-4", "aurora-ribbon-1", "aurora-ribbon-2", "aurora-icon-start", "aurora-icon-end", "glass", "glass-sheen",
 ] as const;
 export type StyleOwnToken = typeof STYLE_OWN_TOKENS[number];
 export type Palette = Record<PaletteToken, string> & Partial<Record<StyleOwnToken, string>>;

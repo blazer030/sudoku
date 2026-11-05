@@ -1,5 +1,9 @@
 <template>
-    <div class="flex flex-col gap-2 min-h-full py-6 px-5">
+    <div
+        class="flex flex-col gap-2 min-h-full py-6 px-5"
+        data-testid="walkthrough-screen"
+        @click="handleScreenTap"
+    >
         <div class="flex items-center justify-between">
             <!-- Stays above the checking loader, so Back can cancel the check. -->
             <button
@@ -31,7 +35,11 @@
                 <div
                     :data-selected-cell="selectedCellName"
                     data-skin="board"
-                    :class="boardEditable ? '' : 'pointer-events-none'"
+                    :class="[
+                        boardEditable ? '' : 'pointer-events-none',
+                        // On a small board the pad runs past the board, over the inputs
+                        { 'relative z-20': floatingPadCell !== null },
+                    ]"
                     class="bg-card rounded-2xl shadow-card-lg p-2 self-center w-[calc(100%+1.5rem)] max-w-board-fit"
                     data-testid="walkthrough-board"
                 >
@@ -62,6 +70,16 @@
                         <StepLinkOverlay
                             v-if="inPlayback"
                             :links="links"
+                        />
+                        <FloatingDigitPad
+                            v-if="floatingPadCell !== null"
+                            :cell="floatingPadCell"
+                            :current-entry="userValues[floatingPadCell.row][floatingPadCell.column]"
+                            :digit-counts="emptyDigitCounts"
+                            :disabled-digits="invalidDigitsForSelectedCell"
+                            :erase-disabled="eraseDisabledForSelectedCell"
+                            @erase="toggleEraseMode"
+                            @select-digit="pickDigit"
                         />
                     </div>
                 </div>
@@ -228,7 +246,7 @@
 import { computed, inject, nextTick, onBeforeUnmount, ref, useTemplateRef, watch, type Component } from "vue";
 import { onBeforeRouteLeave, useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
-import { ChevronLeft, Info, ListFilter, Pencil, PencilLine, RotateCcw, Trophy, Wand2 } from "lucide-vue-next";
+import { ChevronLeft, Info, ListFilter, Pencil, PencilLine, RotateCcw, Trophy, Wand2 } from "@/presentation/components/icon";
 import { ROUTER_PATH } from "@/router";
 import { ANALYTICS_KEY } from "@/application/analytics/AnalyticsService";
 import { BOARD_SIZE } from "@/domain/board/constants";
@@ -242,6 +260,9 @@ import Cell from "@/presentation/components/board-cell/Cell.vue";
 import BoardFrame from "@/presentation/components/board-frame/BoardFrame.vue";
 import { cellName } from "@/presentation/components/board-cell/cellName";
 import DigitPad from "@/presentation/components/digit-pad/DigitPad.vue";
+import FloatingDigitPad from "@/presentation/components/floating-digit-pad/FloatingDigitPad.vue";
+import { isBlankTap } from "@/presentation/composables/isBlankTap";
+import { useSettingsStore } from "@/stores/settingsStore";
 import StepLinkOverlay from "@/presentation/components/step-presentation/StepLinkOverlay.vue";
 import StepPlaybackPanel from "@/presentation/components/step-presentation/StepPlaybackPanel.vue";
 import StepTag from "@/presentation/components/step-presentation/StepTag.vue";
@@ -319,6 +340,19 @@ const {
     selectCell,
     pickDigit,
 } = useWalkthroughInput(userValues, boardEditable);
+
+const settingsStore = useSettingsStore();
+
+// The selected cell, while the floating pad belongs on it: only while entering, and not with a digit or Erase picked
+const floatingPadCell = computed((): CellReference | null => {
+    if (!settingsStore.floatingDigitPad || !boardEditable.value) return null;
+    if (selectedDigit.value !== null || eraseMode.value) return null;
+    return selectedCell.value;
+});
+
+const handleScreenTap = (event: MouseEvent) => {
+    if (settingsStore.floatingDigitPad && boardEditable.value && isBlankTap(event.target)) selectedCell.value = null;
+};
 
 const selectedCellName = computed(() => boardEditable.value && selectedCell.value !== null ? cellName(selectedCell.value.row, selectedCell.value.column) : undefined);
 

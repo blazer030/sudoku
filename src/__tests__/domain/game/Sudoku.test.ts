@@ -656,11 +656,54 @@ describe("Sudoku", () => {
         });
     });
 
+    describe('filling single-note cells', () => {
+        it('should list the cells with one note and no entry, in reading order', () => {
+            const sudoku = createKnownSudoku();
+            sudoku.toggleNote(1, 1, 7);
+            sudoku.toggleNote(0, 2, 4);
+            sudoku.toggleNote(0, 3, 6);
+            sudoku.toggleNote(0, 3, 2);
+
+            expect(sudoku.singleNoteCells()).toEqual([
+                { row: 0, column: 2, digit: 4 },
+                { row: 1, column: 1, digit: 7 },
+            ]);
+        });
+
+        it('should restore everything a run did with one undo', () => {
+            const sudoku = createKnownSudoku();
+            sudoku.toggleNote(0, 2, 4);
+            sudoku.toggleNote(1, 2, 2);
+            sudoku.toggleNote(1, 2, 4);
+
+            sudoku.beginFillRun();
+            sudoku.fillInRun(0, 2, 4, { autoRemoveNotes: true });
+            sudoku.fillInRun(1, 1, 7, { autoRemoveNotes: true });
+            expect(sudoku.puzzle[1][2].notes).toEqual([2]);
+
+            sudoku.undo();
+
+            expect(sudoku.puzzle[0][2].entry).toBe(0);
+            expect(sudoku.puzzle[0][2].notes).toEqual([4]);
+            expect(sudoku.puzzle[1][1].entry).toBe(0);
+            expect(sudoku.puzzle[1][2].notes).toEqual([2, 4]);
+        });
+
+        it('should leave peer notes alone in a run with Auto Remove Notes off', () => {
+            const sudoku = createKnownSudoku();
+            sudoku.toggleNote(1, 2, 4);
+
+            sudoku.beginFillRun();
+            sudoku.fillInRun(0, 2, 4, { autoRemoveNotes: false });
+
+            expect(sudoku.puzzle[1][2].notes).toEqual([4]);
+        });
+    });
+
     it('should include hintTracker in Sudoku instance', () => {
         const sudoku = createKnownSudoku();
 
         expect(sudoku.hintTracker).toBeDefined();
         expect(sudoku.hintTracker.totalUsed).toBe(0);
-        expect(sudoku.hintTracker.canUseHint).toBe(true);
     });
 });

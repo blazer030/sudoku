@@ -1563,3 +1563,48 @@
         stroke-dashoffset: 0;
     }
 }
+
+/* Icons: 白板's marker draws a plain, even line; chalk skips and sheds dust on 黑板 */
+[data-style="chalkboard"] .chalk-dust {
+    visibility: hidden;
+}
+
+:root.dark[data-style="chalkboard"] .chalk-dust {
+    visibility: visible;
+}
+
+:root.dark[data-style="chalkboard"] .chalk-line {
+    stroke-dasharray: 7.5 .45 4 .6 9 .35;
+}
+
+:root.dark[data-style="chalkboard"] .chalk-line:nth-child(4n + 1) {
+    stroke-dasharray: 9 .5 3 .6 11 .4;
+}
+
+/* The floating digit pad: a patch of clean board with a chalk outline, the keys drawn on it with room round them,
+   as their corners are uneven */
+[data-style="chalkboard"] [data-skin~="floating-pad"] {
+    --floating-pad-padding: 6px;
+    --floating-pad-gap: 3px;
+    border-color: var(--color-foreground-secondary);
+    border-radius: var(--chalkboard-wob);
+    box-shadow: 0 0 0 1px var(--color-foreground-secondary), 0 6px 16px color-mix(in srgb, var(--color-shadow) 40%, transparent);
+}
+
+/* The keys' uneven corners leave little room: in note mode 1, 3, 7 and 9 stop a little short of their places, so they
+   stay off the outline at the same size as the other digits */
+[data-style="chalkboard"] [data-skin~="floating-pad"][data-note-mode="true"] [data-skin~="floating-key"]:nth-child(1) > span {
+    translate: 4cqw 4cqw;
+}
+
+[data-style="chalkboard"] [data-skin~="floating-pad"][data-note-mode="true"] [data-skin~="floating-key"]:nth-child(3) > span {
+    translate: -4cqw 4cqw;
+}
+
+[data-style="chalkboard"] [data-skin~="floating-pad"][data-note-mode="true"] [data-skin~="floating-key"]:nth-child(7) > span {
+    translate: 4cqw -4cqw;
+}
+
+[data-style="chalkboard"] [data-skin~="floating-pad"][data-note-mode="true"] [data-skin~="floating-key"]:nth-child(9) > span {
+    translate: -4cqw -4cqw;
+}

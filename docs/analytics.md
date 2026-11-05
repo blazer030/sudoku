@@ -7,9 +7,9 @@ Events go through the `AnalyticsService` port (`src/application/analytics/Analyt
 | Event | Params | Question it answers |
 | --- | --- | --- |
 | `game_start` | `difficulty` | How many games start, per difficulty? |
-| `game_complete` | `difficulty`, `time_seconds`, `hints_used`, `hints_total`, `undo_count`, `wrong_entries`, `used_notes` (0/1) | How long and how clean are finished games? The last three are left out for games resumed from a save without a full replay. |
+| `game_complete` | `difficulty`, `time_seconds`, `hints_used`, `undo_count`, `wrong_entries`, `used_notes` (0/1) | How long and how clean are finished games? The last three are left out for games resumed from a save without a full replay; `used_notes` alone is left out for games started with Auto Notes at Start, which begin with every note in place. |
 | `game_abandon` | `difficulty`, `progress_pct`, `correct_pct`, `incorrect_pct` | How far do players get before quitting? |
-| `hint_used` | `hint_type` (`auto_notes`, `check_conflicts`, `reveal_cell`) | Which hints do players reach for? |
+| `hint_used` | `hint_type` (`check_conflicts`, `reveal_cell`) | Which hints do players reach for? |
 | `donate_view` | none | How many players see the donate page? |
 | `donate_tap` | `tier` | Which tier do they tap? |
 | `donate_success` | `tier`, `amount_usd` | How many purchases finish, and for how much? |
@@ -34,7 +34,7 @@ Games left without an ending = `game_start − game_complete − game_abandon`.
 - Params and user properties show in reports only after they are registered (Admin → Data display → Custom definitions). Register each once:
   - **User-scoped custom dimensions**: `style`, `color_theme`, `color_mode`, `language`, `icon_follows_theme`.
   - **Event-scoped custom dimensions** (values to group by): `result`, `source`, `confirmed`, `used_notes`, `difficulty`, `hint_type`, `tier`.
-  - **Custom metrics** (numbers to add up or average, unit Standard): `undo_count`, `wrong_entries`, `time_seconds`, `hints_used`, `hints_total`, `progress_pct`, `correct_pct`, `incorrect_pct`, `amount_usd`.
+  - **Custom metrics** (numbers to add up or average, unit Standard): `undo_count`, `wrong_entries`, `time_seconds`, `hints_used`, `progress_pct`, `correct_pct`, `incorrect_pct`, `amount_usd`.
   - Data collected before a definition exists is not filled in afterwards, so register them before reading the numbers.
 - `firebase_screen` (from `screen_view`) needs no registration: GA4 shows it as the built-in "Page title and screen name" (Screen name) dimension.
 - The web build suppresses gtag's automatic page_view on load in code (`send_page_view: false`). History-change page views are a separate Enhanced-measurement feature: on the web data stream, turn off Enhanced measurement's "Page changes based on browser history events". Otherwise GA adds its own `page_view` next to our `screen_view`.

@@ -137,7 +137,7 @@
 <script lang="ts" setup>
 import { computed, nextTick, onMounted, useTemplateRef, watch } from "vue";
 import { useI18n } from "vue-i18n";
-import { ChevronRight, CircleAlert, Eraser, EyeOff, ListFilter, PencilLine } from "lucide-vue-next";
+import { ChevronRight, CircleAlert, Eraser, EyeOff, ListFilter, PencilLine } from "@/presentation/components/icon";
 import type { RevealHintStep } from "@/domain/game/RevealHint";
 import type { CellReference } from "@/domain/solver/SolveStep";
 import type { HintPhase } from "@/presentation/pages/game/hint-mode/useHintMode";

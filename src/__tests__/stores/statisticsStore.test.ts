@@ -136,9 +136,9 @@ describe("useStatisticsStore", () => {
         it("returns zeroed difficulty stats when history is empty", () => {
             const store = useStatisticsStore();
             expect(store.statistics).toEqual({
-                easy: { gamesWon: 0, gamesPlayed: 0, bestTime: null, averageTime: null },
-                medium: { gamesWon: 0, gamesPlayed: 0, bestTime: null, averageTime: null },
-                hard: { gamesWon: 0, gamesPlayed: 0, bestTime: null, averageTime: null },
+                easy: { gamesWon: 0, gamesPlayed: 0, bestTime: null, averageTime: null, averageHints: null },
+                medium: { gamesWon: 0, gamesPlayed: 0, bestTime: null, averageTime: null, averageHints: null },
+                hard: { gamesWon: 0, gamesPlayed: 0, bestTime: null, averageTime: null, averageHints: null },
                 overall: { gamesWon: 0, gamesPlayed: 0, winRate: 0 },
             });
         });
@@ -162,12 +162,14 @@ describe("useStatisticsStore", () => {
                 gamesPlayed: 3,
                 bestTime: 50,
                 averageTime: 75,
+                averageHints: 0,
             });
             expect(stats.hard).toEqual({
                 gamesWon: 1,
                 gamesPlayed: 1,
                 bestTime: 600,
                 averageTime: 600,
+                averageHints: 0,
             });
             expect(stats.overall).toEqual({
                 gamesWon: 3,
@@ -182,6 +184,31 @@ describe("useStatisticsStore", () => {
             store.recordGame({ difficulty: "easy", elapsedSeconds: 51, completed: true });
 
             expect(store.statistics.easy.averageTime).toBe(76);
+        });
+    });
+
+    describe("average hints", () => {
+        it.each([
+            ["won with 0, 1 and 2 hints", [[true, 0], [true, 1], [true, 2]], 1],
+            ["won with 1 and 2 hints", [[true, 1], [true, 2]], 1.5],
+            ["won with 1 hint, given up with 4", [[true, 1], [false, 4]], 1],
+            ["only given-up games", [[false, 3]], null],
+        ] as const)("should compute the average for games %s", (_label, games, expected) => {
+            const store = useStatisticsStore();
+            for (const [completed, hintsUsed] of games) {
+                store.recordGame({ difficulty: "medium", elapsedSeconds: 100, completed, hintsUsed });
+            }
+
+            expect(store.statistics.medium.averageHints).toBe(expected);
+        });
+
+        it("should keep each difficulty's average apart", () => {
+            const store = useStatisticsStore();
+            store.recordGame({ difficulty: "easy", elapsedSeconds: 100, completed: true, hintsUsed: 4 });
+            store.recordGame({ difficulty: "hard", elapsedSeconds: 100, completed: true, hintsUsed: 1 });
+
+            expect(store.statistics.easy.averageHints).toBe(4);
+            expect(store.statistics.hard.averageHints).toBe(1);
         });
     });
 

@@ -129,6 +129,19 @@ describe("Statistics", () => {
         expect(average).not.toContain(".");
     });
 
+    it("should show the average hints to one decimal place", () => {
+        recordGames([
+            { difficulty: "easy", elapsedSeconds: 100, completed: true, hintsUsed: 1 },
+            { difficulty: "easy", elapsedSeconds: 100, completed: true, hintsUsed: 2 },
+            { difficulty: "hard", elapsedSeconds: 100, completed: true, hintsUsed: 3 },
+        ]);
+
+        const { wrapper } = mountStatistics();
+
+        expect(wrapper.get("[data-testid='difficulty-hints-easy']").text()).toContain("1.5");
+        expect(wrapper.get("[data-testid='difficulty-hints-hard']").text()).toContain("3.0");
+    });
+
     it("should show a dash when a difficulty has no win", () => {
         recordGames([{ difficulty: "medium", elapsedSeconds: 400, completed: false }]);
 
@@ -137,6 +150,7 @@ describe("Statistics", () => {
         expect(wrapper.find("[data-testid='difficulty-best-medium']").text()).toContain("—");
         expect(wrapper.find("[data-testid='difficulty-average-medium']").text()).toContain("—");
         expect(wrapper.find("[data-testid='difficulty-completed-medium']").text()).toContain("0/1");
+        expect(wrapper.find("[data-testid='difficulty-hints-medium']").text()).toContain("—");
     });
 
     it("should say a difficulty was not played yet", () => {

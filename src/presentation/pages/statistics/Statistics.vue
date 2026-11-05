@@ -65,12 +65,16 @@
                         v-for="difficulty in DIFFICULTIES"
                         :key="difficulty"
                         :data-testid="`difficulty-stats-${difficulty}`"
-                        class="flex items-center gap-2 py-3 first:pt-0 last:pb-0"
+                        class="flex flex-wrap items-center gap-x-2 gap-y-1.5 py-3 first:pt-0 last:pb-0"
                     >
-                        <span class="text-base font-medium text-foreground w-16 shrink-0">{{ difficultyLabel(difficulty) }}</span>
+                        <!-- Above the four figures, which take the card's full width; beside "not played yet" -->
+                        <span
+                            :class="stats[difficulty].gamesPlayed > 0 ? 'w-full' : 'w-16 shrink-0'"
+                            class="text-base font-medium text-foreground"
+                        >{{ difficultyLabel(difficulty) }}</span>
                         <div
                             v-if="stats[difficulty].gamesPlayed > 0"
-                            class="grid grid-cols-3 flex-1"
+                            class="grid grid-cols-4 w-full"
                         >
                             <div
                                 :data-testid="`difficulty-best-${difficulty}`"
@@ -91,6 +95,16 @@
                                     data-skin="stat-value"
                                 >{{ formatOptionalTime(stats[difficulty].averageTime) }}</span>
                                 <span class="text-[11px] text-foreground-secondary">{{ t("statistics.average") }}</span>
+                            </div>
+                            <div
+                                :data-testid="`difficulty-hints-${difficulty}`"
+                                class="flex flex-col items-center"
+                            >
+                                <span
+                                    class="text-base font-semibold font-mono text-foreground"
+                                    data-skin="stat-value"
+                                >{{ formatAverageHints(stats[difficulty].averageHints) }}</span>
+                                <span class="text-[11px] text-foreground-secondary">{{ t("statistics.averageHints") }}</span>
                             </div>
                             <div
                                 :data-testid="`difficulty-completed-${difficulty}`"
@@ -236,7 +250,7 @@
 <script lang="ts" setup>
 import { computed, ref, watch } from "vue";
 import { useRouter } from "vue-router";
-import { ChartBar, ChevronRight, Lightbulb, Trophy, X } from "lucide-vue-next";
+import { ChartBar, ChevronRight, Lightbulb, Trophy, X } from "@/presentation/components/icon";
 import { ROUTER_PATH } from "@/router";
 import { useStatisticsStore } from "@/stores/statisticsStore";
 import type { Difficulty } from "@/domain/generator/SudokuGenerator";
@@ -278,6 +292,11 @@ const DIFFICULTIES: readonly Difficulty[] = ["easy", "medium", "hard"];
 const formatOptionalTime = (seconds: number | null): string => {
     if (seconds === null) return "—";
     return formatTime(seconds);
+};
+
+const formatAverageHints = (hints: number | null): string => {
+    if (hints === null) return "—";
+    return hints.toFixed(1);
 };
 
 const difficultyLabel = useDifficultyLabel();

@@ -12,7 +12,7 @@
         </div>
         <!-- English in both languages, so its tracking is inline: Chinese drops the tracking classes -->
         <p
-            class="cyber-mission absolute inset-x-0 top-[calc(env(safe-area-inset-top)+78px)] m-0 text-center text-base leading-none"
+            class="cyber-mission absolute inset-x-0 top-[calc(var(--safe-area-inset-top,env(safe-area-inset-top))+78px)] m-0 text-center text-base leading-none"
             style="letter-spacing: 0.3em"
         >
             // MISSION COMPLETE

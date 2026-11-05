@@ -1,5 +1,8 @@
 <template>
-    <div class="flex flex-col gap-3">
+    <div
+        class="flex flex-col gap-3"
+        data-testid="digit-pad"
+    >
         <!-- Each row is five square keys of at most 56px; in a window narrower than the
              312px row they shrink together instead of the outer keys being cut off -->
         <div
@@ -102,7 +105,8 @@
 <script lang="ts" setup>
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
-import { Eraser } from "lucide-vue-next";
+import { noteGlyphStyle } from "@/presentation/components/digit-pad/noteGlyphPlace";
+import { Eraser } from "@/presentation/components/icon";
 import { vPress } from "@/presentation/directives/press";
 
 const props = withDefaults(defineProps<{
@@ -142,16 +146,9 @@ const digitSizeClasses = computed(() => (props.noteMode
     ? "text-[length:calc(var(--text-lg)*var(--key-scale,1))]"
     : "text-[length:calc(var(--text-2xl)*var(--key-scale,1))]"));
 
-// In note mode each digit moves to its place in a cell's 3×3 note grid (1 top left … 9 bottom right),
-// and the remaining counts fade so they do not cover the corner digits; the keys still speak them.
-// The step is a share of the key's width (15px on a 56px key), so it holds when keys shrink.
-const NOTE_PLACE_STEP = 27;
-const glyphStyle = (digit: number): { transform: string } | undefined => {
-    if (!props.noteMode) return undefined;
-    const column = (digit - 1) % 3 - 1;
-    const row = Math.floor((digit - 1) / 3) - 1;
-    return { transform: `translate(${column * NOTE_PLACE_STEP}cqw, ${row * NOTE_PLACE_STEP}cqw)` };
-};
+// In note mode each digit moves to its note place, and the remaining counts fade so they do not cover the
+// corner digits; the keys still speak them.
+const glyphStyle = (digit: number) => noteGlyphStyle(digit, props.noteMode);
 
 const digitButtonClasses = (digit: number): string => {
     if (isDigitDisabled(digit)) return "bg-card opacity-50 text-foreground-muted";

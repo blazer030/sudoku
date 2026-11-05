@@ -83,6 +83,9 @@ export const useGameInteraction = ({
     };
 
     const noteToCell = (row: number, column: number, value: number) => {
+        // Notes do not apply to a clue or an entry: nothing changes, so no step is recorded
+        const cell = sudoku.puzzle[row][column];
+        if (cell.isClue || cell.hasEntry) return;
         sudoku.toggleNote(row, column, value);
         stepRecorder.record(sudoku.puzzle, "toggleNote", row, column, value);
     };
@@ -199,8 +202,7 @@ export const useGameInteraction = ({
         if (selectedCell.value) {
             const { row, column } = selectedCell.value;
             if (inputMode.value === InputMode.Note) {
-                sudoku.toggleNote(row, column, digit);
-                stepRecorder.record(sudoku.puzzle, "toggleNote", row, column, digit);
+                noteToCell(row, column, digit);
                 return;
             }
             inputToCell(row, column, digit);
@@ -208,6 +210,15 @@ export const useGameInteraction = ({
             return;
         }
         selectedDigit.value = selectedDigit.value === digit ? null : digit;
+    };
+
+    const clearSelection = () => {
+        selectedCell.value = null;
+    };
+
+    // A picked digit goes once the board holds all nine of it, however they got there
+    const releaseCompletedDigit = () => {
+        if (selectedDigit.value !== null && isDigitCompleted(selectedDigit.value)) selectedDigit.value = null;
     };
 
     const undo = () => {
@@ -230,6 +241,8 @@ export const useGameInteraction = ({
         isSelected,
         isPeerOfSelected,
         digitCounts,
+        clearSelection,
+        releaseCompletedDigit,
         undo,
     };
 };

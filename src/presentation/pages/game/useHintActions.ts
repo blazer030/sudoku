@@ -14,6 +14,8 @@ interface HintActionsOptions {
     onRevealComplete: () => void;
     onGroupCompleted?: (completed: CompletedCells, origin: { row: number; column: number }) => void;
     onHintReveal?: (outcome: RevealOutcome) => void;
+    /** A hint put its answer in a cell. */
+    onCellRevealed?: () => void;
     /** Check Conflicts found no repeated digits; the hint is still spent. */
     onNoConflicts?: () => void;
     analytics?: AnalyticsService;
@@ -22,7 +24,6 @@ interface HintActionsOptions {
 type HintUsedEvent = Extract<AnalyticsEvent, { name: "hint_used" }>;
 
 const HINT_TYPE_EVENT: Record<Exclude<HintAction, "close">, HintUsedEvent["hint_type"]> = {
-    autoNotes:      "auto_notes",
     checkConflicts: "check_conflicts",
     revealCell:     "reveal_cell",
 };
@@ -38,6 +39,7 @@ export const useHintActions = ({
     onGroupCompleted,
     onHintReveal,
     onNoConflicts,
+    onCellRevealed,
     analytics,
 }: HintActionsOptions) => {
     const hintMenu = provideHintMenu();
@@ -65,6 +67,7 @@ export const useHintActions = ({
     };
 
     const finishReveal = (cell: CellReference) => {
+        onCellRevealed?.();
         if (!sudoku.isCompleted()) {
             const completed = sudoku.findCompletedGroups(cell.row, cell.column);
             if (completed.cells.length > 0) onGroupCompleted?.(completed, cell);
@@ -100,10 +103,7 @@ export const useHintActions = ({
 
     const openHintMenu = async () => {
         if (hintMode.active.value) return;
-        const action = await hintMenu.open({
-            remaining: sudoku.hintTracker.remainingHints,
-            firstHintFree: sudoku.hintTracker.totalUsed === 0,
-        });
+        const action = await hintMenu.open();
         if (action === "close") return;
         // Plan before spending: a solved board has nothing to reveal and must not cost a hint.
         const plan = action === "revealCell" ? sudoku.planRevealHint() : null;
@@ -111,10 +111,6 @@ export const useHintActions = ({
         sudoku.hintTracker.useHint();
         void analytics?.logEvent({ name: "hint_used", hint_type: HINT_TYPE_EVENT[action] });
         switch (action) {
-        case "autoNotes":
-            sudoku.autoNotes();
-            stepRecorder.record(sudoku.puzzle, "autoNotes", 0, 0, 0);
-            break;
         case "checkConflicts":
             errorCells.value = sudoku.checkAllConflicts();
             if (errorCells.value.length === 0) onNoConflicts?.();

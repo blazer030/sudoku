@@ -9,21 +9,21 @@
         />
 
         <SettingsGroup
-            id="gameplay"
-            :icon="Gamepad2"
-            :title="t('settings.gameplay')"
+            v-for="group in toggleGroups"
+            :id="group.id"
+            :key="group.id"
+            :icon="group.icon"
+            :title="group.title"
         >
             <div class="grid grid-cols-2 gap-2">
                 <OptionTile
-                    v-for="toggle in toggles"
+                    v-for="toggle in group.toggles"
                     :key="toggle.key"
-                    :class="{ 'col-span-2': toggle.wide }"
                     :data-testid="`toggle-${toggle.key}`"
-                    :description="toggle.description"
+                    :description="t(`settings.toggles.${toggle.key}.description`)"
                     :icon="toggle.icon"
-                    :label="toggle.label"
+                    :label="t(`settings.toggles.${toggle.key}.label`)"
                     :pressed="toggle.value"
-                    :wide="toggle.wide"
                     @toggle="toggle.setter(!toggle.value)"
                 />
             </div>
@@ -159,7 +159,7 @@
 import { computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
-import { ChevronRight, Crosshair, Database, Eraser, ExternalLink, Gamepad2, Hash, Highlighter, Info, Languages, Palette, Sparkles, Trash2 } from "lucide-vue-next";
+import { ChevronRight, Crosshair, Database, Eraser, ExternalLink, Eye, Gamepad2, Hash, Highlighter, Info, Languages, LayoutGrid, Palette, PencilLine, Sparkles, StickyNote, Trash2 } from "@/presentation/components/icon";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { useDonateStore } from "@/stores/donateStore";
 import { useStatisticsStore } from "@/stores/statisticsStore";
@@ -215,44 +215,30 @@ const appearanceSummary = computed(() => {
     return t(`settings.style.names.${settingsStore.style}`);
 });
 
-const toggles = computed(() => [
+const toggleGroups = computed(() => [
     {
-        key: "highlightSameDigit",
-        icon: Highlighter,
-        value: settingsStore.highlightSameDigit,
-        setter: settingsStore.setHighlightSameDigit,
+        id: "input",
+        icon: Gamepad2,
+        title: t("settings.groups.input"),
+        toggles: [
+            { key: "floatingDigitPad", icon: LayoutGrid, value: settingsStore.floatingDigitPad, setter: settingsStore.setFloatingDigitPad },
+            { key: "doubleTapFill", icon: PencilLine, value: settingsStore.doubleTapFill, setter: settingsStore.setDoubleTapFill },
+            { key: "autoNotesAtStart", icon: StickyNote, value: settingsStore.autoNotesAtStart, setter: settingsStore.setAutoNotesAtStart },
+            { key: "autoRemoveNotes", icon: Eraser, value: settingsStore.autoRemoveNotes, setter: settingsStore.setAutoRemoveNotes },
+        ],
     },
     {
-        key: "highlightScope",
-        icon: Crosshair,
-        value: settingsStore.highlightScope,
-        setter: settingsStore.setHighlightScope,
+        id: "display",
+        icon: Eye,
+        title: t("settings.groups.display"),
+        toggles: [
+            { key: "highlightSameDigit", icon: Highlighter, value: settingsStore.highlightSameDigit, setter: settingsStore.setHighlightSameDigit },
+            { key: "highlightScope", icon: Crosshair, value: settingsStore.highlightScope, setter: settingsStore.setHighlightScope },
+            { key: "showRemainingCount", icon: Hash, value: settingsStore.showRemainingCount, setter: settingsStore.setShowRemainingCount },
+            { key: "motionEffects", icon: Sparkles, value: settingsStore.motionEffects, setter: settingsStore.setMotionEffects },
+        ],
     },
-    {
-        key: "motionEffects",
-        icon: Sparkles,
-        value: settingsStore.motionEffects,
-        setter: settingsStore.setMotionEffects,
-    },
-    {
-        key: "autoRemoveNotes",
-        icon: Eraser,
-        value: settingsStore.autoRemoveNotes,
-        setter: settingsStore.setAutoRemoveNotes,
-    },
-    {
-        key: "showRemainingCount",
-        icon: Hash,
-        value: settingsStore.showRemainingCount,
-        setter: settingsStore.setShowRemainingCount,
-    },
-].map((toggle, position, all) => ({
-    ...toggle,
-    label: t(`settings.toggles.${toggle.key}.label`),
-    description: t(`settings.toggles.${toggle.key}.description`),
-    // An odd last tile spans both columns of the grid
-    wide: all.length % 2 === 1 && position === all.length - 1,
-})));
+]);
 
 const hasRecords = computed(() => statisticsStore.statistics.overall.gamesPlayed > 0);
 

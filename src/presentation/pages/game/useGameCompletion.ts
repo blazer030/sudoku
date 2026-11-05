@@ -37,19 +37,18 @@ export const useGameCompletion = ({ sudoku, difficulty, getElapsedSeconds, getRe
             difficulty: difficulty.value,
             elapsedSeconds: getElapsedSeconds(),
             completed: true,
-            hintsUsed: sudoku.hintTracker.recordedUsed,
+            hintsUsed: sudoku.hintTracker.totalUsed,
             replay,
         });
         void analytics?.logEvent({
             name: "game_complete",
             difficulty: difficulty.value,
             time_seconds: getElapsedSeconds(),
-            hints_used: sudoku.hintTracker.recordedUsed,
-            hints_total: sudoku.hintTracker.totalUsed,
+            hints_used: sudoku.hintTracker.totalUsed,
             ...(replaySummary && {
                 undo_count: replaySummary.undoCount,
                 wrong_entries: replaySummary.wrongEntries,
-                used_notes: replaySummary.usedNotes,
+                ...(replaySummary.usedNotes !== null && { used_notes: replaySummary.usedNotes }),
             }),
         });
         onCompleted({ isNewRecord });

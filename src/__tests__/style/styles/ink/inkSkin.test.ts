@@ -1,6 +1,6 @@
 import { readFileSync } from "fs";
 import postcss, { type AtRule } from "postcss";
-import { animationTimingOf, declarationsOf, reducedMotionDeclarationsOf } from "../../styleSheetRules";
+import { animationTimingOf, declarationsOf, reducedMotionDeclarationsOf, splitTopLevel } from "../../styleSheetRules";
 import { ARRIVAL_SETTLE_MS } from "@/presentation/components/board-cell/useArrivalMotion";
 
 const INK_CSS = readFileSync("src/style/styles/ink/skin.css", "utf8");
@@ -8,6 +8,7 @@ const BRUSH_GRID_SVG = readFileSync("src/style/styles/ink/brush-grid.svg", "utf8
 const WASHI_FIBRES_SVG = readFileSync("src/style/styles/ink/washi-fibres.svg", "utf8");
 const HOME_MOUNTAINS_SVG = readFileSync("src/style/styles/ink/home-mountains.svg", "utf8");
 const NOTE_RING_SVG = readFileSync("src/style/styles/ink/note-ring.svg", "utf8");
+const FLOATING_PAD_GRID_SVG = readFileSync("src/style/styles/ink/floating-pad-grid.svg", "utf8");
 
 const SCOPE = '[data-style="ink"]';
 const FONTS_READY = '[data-style="ink"][data-ink-fonts="ready"]';
@@ -76,10 +77,9 @@ describe("ink skin", () => {
             expect(lines.get("background-color")).toBe("var(--color-foreground)");
         });
 
-        it("should lay the brush lines over the cells, so they land on the cell edges, above the digits, never taking taps", () => {
+        it("should lay the brush lines above the digits, never taking taps", () => {
             const lines = maskSupportsDeclarationsOf(`${GRID}::after`);
 
-            expect(lines.get("inset")).toBe("0");
             expect(Number(lines.get("z-index"))).toBeGreaterThan(Number(declarationsOf(INK_CSS, `${BOARD} [data-variant] > div`).get("z-index")));
             expect(lines.get("pointer-events")).toBe("none");
         });
@@ -110,8 +110,30 @@ describe("ink skin", () => {
             }
         });
 
+        describe("floating-pad-grid.svg", () => {
+            it("should carry its roughness in the outlines and only alpha, as the board's brush grid does", () => {
+                const svg = new DOMParser().parseFromString(FLOATING_PAD_GRID_SVG, "image/svg+xml");
+
+                expect(svg.getElementsByTagName("filter")).toHaveLength(0);
+                expect(FLOATING_PAD_GRID_SVG).not.toMatch(/#[0-9a-fA-F]{3,8}\b|rgba?\(/);
+                expect(svg.getElementsByTagName("path")[0].getAttribute("fill")).toBe("currentColor");
+                expect(svg.documentElement.getAttribute("preserveAspectRatio")).toBe("none");
+            });
+        });
+
         describe("brush-grid.svg", () => {
             const svg = new DOMParser().parseFromString(BRUSH_GRID_SVG, "image/svg+xml");
+
+            // An outline is one absolute point, then steps relative to the one before
+            const pointsOf = (path: Element): { x: number; y: number }[] => {
+                const numbers = Array.from((path.getAttribute("d") ?? "").matchAll(/-?\d*\.?\d+/g), ([number]) => Number(number));
+                const points: { x: number; y: number }[] = [{ x: numbers[0], y: numbers[1] }];
+                for (let index = 2; index < numbers.length; index += 2) {
+                    const previous = points[points.length - 1];
+                    points.push({ x: previous.x + numbers[index], y: previous.y + numbers[index + 1] });
+                }
+                return points;
+            };
 
             // The mask is stretched over the square grid, so the drawing must be square too
             it("should parse as a square drawing", () => {
@@ -122,10 +144,14 @@ describe("ink skin", () => {
                 expect(width).toBe(height);
             });
 
-            it("should roughen the lines with one turbulence displacement filter, drawn into the image", () => {
-                expect(svg.getElementsByTagName("filter")).toHaveLength(1);
-                expect(svg.getElementsByTagName("feTurbulence")).toHaveLength(1);
-                expect(svg.getElementsByTagName("feDisplacementMap")).toHaveLength(1);
+            // WebKit rasterises an SVG filter in an image at low resolution, so the lines turn blurred and blocky
+            // there alone; drawn into the outlines, every engine draws the same edge
+            it("should carry its roughness in the outlines, with no filter to rasterise", () => {
+                expect(svg.getElementsByTagName("filter")).toHaveLength(0);
+                expect(BRUSH_GRID_SVG).not.toMatch(/\bfilter=/);
+                for (const path of Array.from(svg.getElementsByTagName("path"))) {
+                    expect(pointsOf(path).length).toBeGreaterThan(500);
+                }
             });
 
             // A 9×9 grid has eight inner lines each way: the two box lines each way among them drawn heavier
@@ -139,6 +165,50 @@ describe("ink skin", () => {
                 expect(countAt(levels[0]) + countAt(levels[1])).toBe(2 * 8);
                 expect(countAt(levels[1])).toBe(2 * 2);
                 expect(countAt(levels[2])).toBe(4);
+            });
+
+            // The cells fill the drawing's first 351 by 351 units; the margin round them holds the frame
+            const CELLS_SIZE = 351;
+            const paths = Array.from(svg.getElementsByTagName("path"));
+            const frameSides = paths.filter(path => !path.hasAttribute("opacity"));
+            const innerLines = paths.filter(path => path.hasAttribute("opacity"));
+
+            // The frame is above the digits and notes (2), so any of it over a cell hides the note at that edge
+            it("should keep the frame's four sides out of the cells", () => {
+                for (const side of frameSides) {
+                    const points = pointsOf(side);
+                    const xs = points.map(point => point.x);
+                    const ys = points.map(point => point.y);
+                    const across = Math.max(...xs) - Math.min(...xs) < Math.max(...ys) - Math.min(...ys) ? xs : ys;
+
+                    expect(Math.max(...across) <= 0 || Math.min(...across) >= CELLS_SIZE, side.getAttribute("d") ?? "").toBe(true);
+                }
+            });
+
+            it("should run every inner line up to the frame", () => {
+                for (const line of innerLines) {
+                    const points = pointsOf(line);
+                    const xs = points.map(point => point.x);
+                    const ys = points.map(point => point.y);
+                    const along = Math.max(...xs) - Math.min(...xs) > Math.max(...ys) - Math.min(...ys) ? xs : ys;
+
+                    expect(Math.min(...along)).toBeLessThanOrEqual(0);
+                    expect(Math.max(...along)).toBeGreaterThanOrEqual(CELLS_SIZE);
+                }
+            });
+
+            // The mask stretches over the ::after, so the ::after must reach past the cells by exactly the
+            // drawing's margin, or the lines leave the cell edges
+            it("should lay the drawing's margin outside the cells, with its lines on the cell edges", () => {
+                const [left, top, width, height] = (svg.documentElement.getAttribute("viewBox") ?? "").split(/\s+/).map(Number);
+                const margin = -left;
+                const inset = maskSupportsDeclarationsOf(`${GRID}::after`).get("inset");
+
+                expect(margin).toBeGreaterThan(0);
+                expect(top).toBe(left);
+                expect(width).toBe(CELLS_SIZE + 2 * margin);
+                expect(height).toBe(width);
+                expect(Number.parseFloat(inset ?? "")).toBeCloseTo(-margin / CELLS_SIZE * 100, 3);
             });
 
             it("should carry only alpha: every shape in currentColor", () => {
@@ -556,7 +626,7 @@ describe("ink skin", () => {
 
     describe("fill and erase", () => {
         const DIGIT = `${BOARD} .value-arrive`;
-        const HALO = `${BOARD} [data-variant]:has(> .value-arrive)::before`;
+        const HALO = `${BOARD} [data-variant][data-arriving]::before`;
         const GHOST = `${BOARD} [data-variant].value-leave::before`;
         const CELL_ANIMATIONS: [string, string][] = [[DIGIT, "ink-bleed"], [HALO, "ink-halo"], [GHOST, "ink-wash"]];
 
@@ -578,27 +648,86 @@ describe("ink skin", () => {
         const animatedPropertiesOf = (name: string): Set<string> =>
             new Set([...keyframesOf(name).values()].flatMap(frame => [...frame.keys()]));
         const opacityOf = (frame: Map<string, string> | undefined): number => Number(frame?.get("opacity"));
-        // A frame's blur radius in px (0 for blur(0)), and its scale (1 without one)
-        const blurOf = (frame: Map<string, string> | undefined): number => Number.parseFloat(/blur\(([\d.]+)/.exec(frame?.get("filter") ?? "")?.[1] ?? "NaN");
+        // A frame's soft mask's size in % (both prefixes alike), and its scale (1 without one)
+        const maskSizeOf = (frame: Map<string, string> | undefined): number => {
+            const size = frame?.get("mask-size") ?? "";
+            expect(frame?.get("-webkit-mask-size")).toBe(size);
+            return Number.parseFloat(size);
+        };
         const scaleOf = (frame: Map<string, string> | undefined): number => Number(/scale\(([\d.]+)\)/.exec(frame?.get("transform") ?? "")?.[1] ?? "1");
         const durationOf = (selector: string, name: string): number =>
             animationTimingOf(declarationsOf(INK_CSS, selector).get("animation") ?? "", name)?.durationMs ?? Number.NaN;
 
-        it("should bleed an entered digit in from a blur, a size up, to the sharp digit", () => {
+        // No live blur: every engine draws a soft-edged mask alike, where WebKit drew a blurred digit sharp
+        it("should soften the digit's edge by a radial mask, centred and drawn once", () => {
+            const digit = declarationsOf(INK_CSS, DIGIT);
+
+            for (const prefix of ["", "-webkit-"]) {
+                expect(digit.get(`${prefix}mask-image`), prefix).toMatch(/^radial-gradient\(closest-side, var\(--color-foreground\) [\d.]+%, transparent\)$/);
+                expect(digit.get(`${prefix}mask-position`), prefix).toBe("center");
+                expect(digit.get(`${prefix}mask-repeat`), prefix).toBe("no-repeat");
+            }
+        });
+
+        it("should soak an entered digit in, a size up with its edge soft, to the sharp digit", () => {
             const frames = keyframesOf("ink-bleed");
 
             expect(opacityOf(frames.get("0%"))).toBe(0);
-            expect(blurOf(frames.get("0%"))).toBeGreaterThan(0);
             expect(scaleOf(frames.get("0%"))).toBeGreaterThan(1);
             expect(opacityOf(frames.get("100%"))).toBe(1);
-            expect(blurOf(frames.get("100%"))).toBe(0);
             expect(scaleOf(frames.get("100%"))).toBe(1);
+            // The mask opens from a soft core round the digit's middle until it covers the whole digit
+            expect(maskSizeOf(frames.get("0%"))).toBeLessThan(maskSizeOf(frames.get("100%")));
+            expect(maskSizeOf(frames.get("100%"))).toBeGreaterThanOrEqual(400);
             // Hidden until it starts, and held sharp once done
             expect(declarationsOf(INK_CSS, DIGIT).get("animation")).toMatch(/ both$/);
         });
 
-        it("should animate the bleeding digit only by opacity, filter and transform", () => {
-            expect([...animatedPropertiesOf("ink-bleed")].sort()).toEqual(["filter", "opacity", "transform"]);
+        it("should animate the soaking digit only by opacity, transform, its mask's size and its soak", () => {
+            expect([...animatedPropertiesOf("ink-bleed")].sort()).toEqual(["--ink-soak-copies", "--ink-soak-fill", "--ink-soak-spread", "-webkit-mask-size", "mask-size", "opacity", "transform"]);
+        });
+
+        // Chromium steps a colour built on currentColor instead of easing it, so the shadows and the fill are
+        // built from registered numbers, and only the numbers animate
+        it("should register the soak's measures, settled by default, so every engine eases them alike", () => {
+            const registered = new Map<string, Map<string, string>>();
+            postcss.parse(INK_CSS).walkAtRules("property", (atRule) => {
+                const descriptors = new Map<string, string>();
+                atRule.walkDecls((declaration) => {
+                    descriptors.set(declaration.prop, collapse(declaration.value));
+                });
+                registered.set(atRule.params.trim(), descriptors);
+            });
+
+            expect(Object.fromEntries([...registered].map(([name, descriptors]) => [name, [descriptors.get("syntax"), descriptors.get("inherits"), descriptors.get("initial-value")]]))).toEqual({
+                "--ink-soak-spread": ['"<length>"', "false", "0px"],
+                "--ink-soak-copies": ['"<percentage>"', "false", "0%"],
+                "--ink-soak-fill": ['"<percentage>"', "false", "100%"],
+            });
+        });
+
+        it("should soak the digit in from a thin fill among spread copies to its own ink", () => {
+            const frames = keyframesOf("ink-bleed");
+            const first = frames.get("0%");
+            const last = frames.get("100%");
+
+            expect(Number.parseFloat(first?.get("--ink-soak-spread") ?? "")).toBeGreaterThan(0);
+            expect(Number.parseFloat(first?.get("--ink-soak-copies") ?? "")).toBeGreaterThan(0);
+            expect(Number.parseFloat(first?.get("--ink-soak-fill") ?? "")).toBeLessThan(100);
+            expect([last?.get("--ink-soak-spread"), last?.get("--ink-soak-copies"), last?.get("--ink-soak-fill")]).toEqual(["0px", "0%", "100%"]);
+        });
+
+        // Each shadow is an offset copy with no blur radius: two lengths and the colour
+        it("should soften the digit by faint offset copies of itself, never a blur", () => {
+            const digit = declarationsOf(INK_CSS, DIGIT);
+            const copies = splitTopLevel(digit.get("text-shadow") ?? "", /,/);
+
+            expect(copies.length).toBeGreaterThanOrEqual(8);
+            for (const copy of copies) {
+                expect(splitTopLevel(copy, /\s/), copy).toEqual([expect.any(String), expect.any(String), "color-mix(in srgb, currentColor var(--ink-soak-copies), transparent)"]);
+            }
+            expect(copies.every(copy => !copy.startsWith("0px 0px"))).toBe(true);
+            expect(digit.get("-webkit-text-fill-color")).toBe("color-mix(in srgb, currentColor var(--ink-soak-fill), transparent)");
         });
 
         it("should spread an ink halo from under the arriving digit, without taking taps", () => {
@@ -619,6 +748,11 @@ describe("ink skin", () => {
             expect([...animatedPropertiesOf("ink-halo")].every(property => ["opacity", "transform"].includes(property))).toBe(true);
         });
 
+        // Every engine reads the cell's data-arriving, so the halo needs no :has()
+        it("should find the arriving digit's cell by its data-arriving hook", () => {
+            expect(allRules().flatMap(rule => rule.selectors).filter(selector => selector.includes(":has("))).toEqual([]);
+        });
+
         it("should leave the cell's ::after to the 圓相 while a digit arrives or leaves", () => {
             expect(allRules().flatMap(rule => rule.selectors).filter(selector => /value-(?:arrive|leave)[^,]*::after/.test(selector))).toEqual([]);
         });
@@ -635,16 +769,31 @@ describe("ink skin", () => {
             expect(ghost.get("color")).toBe(entered.get("color"));
             expect(ghost.get("font-style")).toBe(entered.get("font-style"));
             expect(ghost.get("font-weight")).toBe(entered.get("font-weight"));
-            // It leaves as the digit showed it, then blurs, sinks and swells away
+            // It leaves as the digit showed it, then its edge dissolves as it sinks and swells away
             expect(opacityOf(frames.get("0%"))).toBe(1);
             expect(opacityOf(frames.get("100%"))).toBe(0);
-            expect(blurOf(frames.get("100%"))).toBeGreaterThan(blurOf(frames.get("0%")));
+            expect(maskSizeOf(frames.get("100%"))).toBeLessThan(maskSizeOf(frames.get("0%")));
             expect(frames.get("100%")?.get("transform")).toMatch(/translateY\([\d.]+px\)/);
             expect(scaleOf(frames.get("100%"))).toBeGreaterThan(1);
+            for (const prefix of ["", "-webkit-"]) {
+                expect(ghost.get(`${prefix}mask-image`), prefix).toBe(declarationsOf(INK_CSS, DIGIT).get(`${prefix}mask-image`));
+            }
+            expect([...animatedPropertiesOf("ink-wash")].sort()).toEqual(["--ink-soak-copies", "--ink-soak-fill", "--ink-soak-spread", "-webkit-mask-size", "mask-size", "opacity", "transform"]);
+            expect(ghost.get("text-shadow")).toBe(declarationsOf(INK_CSS, DIGIT).get("text-shadow"));
+            expect(ghost.get("-webkit-text-fill-color")).toBe(declarationsOf(INK_CSS, DIGIT).get("-webkit-text-fill-color"));
+            const last = frames.get("100%");
+            expect(Number.parseFloat(last?.get("--ink-soak-spread") ?? "")).toBeGreaterThan(0);
+            expect(Number.parseFloat(last?.get("--ink-soak-fill") ?? "")).toBeLessThan(100);
         });
 
-        it("should isolate the board, so WebKit still draws the blur under the washi fibres fixed to the screen", () => {
+        it("should keep the board its own stacking context, so its washes, digits and lines layer among themselves", () => {
             expect(declarationsOf(INK_CSS, BOARD).get("isolation")).toBe("isolate");
+        });
+
+        it("should animate no filter on a digit, its halo or its ghost", () => {
+            for (const name of ["ink-bleed", "ink-halo", "ink-wash"]) {
+                expect(animatedPropertiesOf(name).has("filter"), name).toBe(false);
+            }
         });
 
         it.each([["halo", HALO], ["ghost", GHOST]])("should show no %s when its animation does not run", (_name, selector) => {

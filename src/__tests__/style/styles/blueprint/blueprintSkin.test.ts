@@ -109,12 +109,8 @@ describe("blueprint skin", () => {
             expect(declarationsOf(BLUEPRINT_CSS, `${FONTS_READY} [data-skin~="dialog-title"]`).get("font-weight")).toBe("500");
         });
 
-        it("should draw lucide icons in a drafting pen: 1.5 strokes with square ends and mitred corners", () => {
-            const icon = declarationsOf(BLUEPRINT_CSS, `${SCOPE} svg.lucide`);
-
-            expect(icon.get("stroke-width")).toBe("1.5");
-            expect(icon.get("stroke-linecap")).toBe("square");
-            expect(icon.get("stroke-linejoin")).toBe("miter");
+        it("should leave an icon's construction marks off where they would only muddy it", () => {
+            expect(declarationsOf(BLUEPRINT_CSS, `${SCOPE} svg[data-icon-small] .blueprint-mark`).get("visibility")).toBe("hidden");
         });
 
         it("should set no letter-spacing, font-size or border on any element (only placed decorations size themselves)", () => {
@@ -657,10 +653,12 @@ describe("blueprint skin", () => {
             expect(errorIndex).toBeGreaterThan(lastRuleIndexOf(`${cell("peer")}[data-pressed]`));
         });
 
-        it("should write notes in the pale ink and the selected digit's note in the primary, with no disc", () => {
+        // Colour alone is too faint in a cell of small notes, so it takes a drafter's balloon, not the shared disc
+        it("should write notes in the pale ink and ring the selected digit's note in the primary", () => {
             const highlighted = declarationsOf(BLUEPRINT_CSS, `${BOARD} [data-note-highlight]`);
 
-            expect(highlighted.get("background-color")).toBe("transparent");
+            expect(highlighted.get("background-color")).toBe("color-mix(in srgb, var(--color-primary) 16%, transparent)");
+            expect(highlighted.get("box-shadow")).toBe("inset 0 0 0 1.25px var(--color-primary)");
             expect(highlighted.get("color")).toBe("var(--color-primary)");
         });
     });
@@ -720,6 +718,7 @@ describe("blueprint skin", () => {
             expect(emphasised.get("background-color")).toBe("var(--color-primary)");
             expect(emphasised.get("color")).toBe("var(--color-on-primary)");
             expect(emphasised.get("border-radius")).toBe("0");
+            expect(emphasised.get("box-shadow")).toBe("none");
         });
     });
     describe("keypad and controls", () => {
