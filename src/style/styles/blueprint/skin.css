@@ -1279,7 +1279,8 @@
     box-shadow: 0 0 0 0.5px var(--color-foreground), 3px 3px 0 color-mix(in srgb, var(--color-foreground) 22%, transparent);
 }
 
-/* In note mode a digit sits in each key's corner, where the key's registration ticks are */
+/* In note mode a digit sits in each key's corner, so the ticks move out to the key's edge and shorten, round it */
 [data-style="blueprint"] [data-skin~="floating-pad"][data-note-mode="true"] [data-skin~="floating-key"]::before {
-    opacity: 0;
+    inset: 2px;
+    background-size: 4px 1px, 1px 4px, 4px 1px, 1px 4px, 4px 1px, 1px 4px, 4px 1px, 1px 4px;
 }

@@ -1434,8 +1434,20 @@
     border-radius: 9999px;
 }
 
-/* A round key has no room in its corners: in note mode the digits and their steps shrink together, so 1, 3, 7 and 9
-   stay on the key's disc */
-[data-style="aurora"] [data-skin~="floating-pad"][data-note-mode="true"] [data-skin~="floating-key"] > span {
-    scale: 0.88;
+/* A round key has no room in its corners: in note mode 1, 3, 7 and 9 stop a little short of their places, so they stay
+   on the key's disc at the same size as the other digits */
+[data-style="aurora"] [data-skin~="floating-pad"][data-note-mode="true"] [data-skin~="floating-key"]:nth-child(1) > span {
+    translate: 5cqw 5cqw;
+}
+
+[data-style="aurora"] [data-skin~="floating-pad"][data-note-mode="true"] [data-skin~="floating-key"]:nth-child(3) > span {
+    translate: -5cqw 5cqw;
+}
+
+[data-style="aurora"] [data-skin~="floating-pad"][data-note-mode="true"] [data-skin~="floating-key"]:nth-child(7) > span {
+    translate: 5cqw -5cqw;
+}
+
+[data-style="aurora"] [data-skin~="floating-pad"][data-note-mode="true"] [data-skin~="floating-key"]:nth-child(9) > span {
+    translate: -5cqw -5cqw;
 }

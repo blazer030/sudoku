@@ -1591,8 +1591,20 @@
     box-shadow: 0 0 0 1px var(--color-foreground-secondary), 0 6px 16px color-mix(in srgb, var(--color-shadow) 40%, transparent);
 }
 
-/* The keys' uneven corners leave little room: in note mode the digits and their steps shrink together, so the corner
-   digits stay off the outline */
-[data-style="chalkboard"] [data-skin~="floating-pad"][data-note-mode="true"] [data-skin~="floating-key"] > span {
-    scale: 0.88;
+/* The keys' uneven corners leave little room: in note mode 1, 3, 7 and 9 stop a little short of their places, so they
+   stay off the outline at the same size as the other digits */
+[data-style="chalkboard"] [data-skin~="floating-pad"][data-note-mode="true"] [data-skin~="floating-key"]:nth-child(1) > span {
+    translate: 4cqw 4cqw;
+}
+
+[data-style="chalkboard"] [data-skin~="floating-pad"][data-note-mode="true"] [data-skin~="floating-key"]:nth-child(3) > span {
+    translate: -4cqw 4cqw;
+}
+
+[data-style="chalkboard"] [data-skin~="floating-pad"][data-note-mode="true"] [data-skin~="floating-key"]:nth-child(7) > span {
+    translate: 4cqw -4cqw;
+}
+
+[data-style="chalkboard"] [data-skin~="floating-pad"][data-note-mode="true"] [data-skin~="floating-key"]:nth-child(9) > span {
+    translate: -4cqw -4cqw;
 }
