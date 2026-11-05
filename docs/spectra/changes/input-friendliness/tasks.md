@@ -32,5 +32,5 @@
 
 ## 6. 收尾
 
-- [ ] 6.1 [after: 4.3, 5.4] 把新的 skin hook 和懸浮數字鍵寫進 `CLAUDE.md`，在 `UNRELEASED_CHANGES` 加入或歸入中英文各一行，並完成跨引擎檢查：懸浮鍵、連點和設定方塊在 Chromium、WebKit、Firefox 都檢查過。最後跑 `npx vitest run`、`npm run lint`、`npm run build`，全部通過才算完成。
+- [x] 6.1 [after: 4.3, 5.4] 把新的 skin hook 和懸浮數字鍵寫進 `CLAUDE.md`，在 `UNRELEASED_CHANGES` 加入或歸入中英文各一行，並完成跨引擎檢查：懸浮鍵、連點和設定方塊在 Chromium、WebKit、Firefox 都檢查過。最後跑 `npx vitest run`、`npm run lint`、`npm run build`，全部通過才算完成。
 - [ ] 6.2 [after: 6.1] 依決策「模擬器實機測試」跑最終檢查：`Pixel_7_Pro_API_34` 逐一切換 9 個風格及其明暗模式，截圖懸浮鍵的一般、筆記和已填格子狀態與設定方塊，確認文字可讀且懸浮鍵蓋在盤面框和動畫之上；`Pixel_8_Pro_API_35` 跑一局從開局筆記、懸浮鍵輸入到連點完成並進入遊戲回顧；`iPhone SE (3rd generation)` 和 `iPhone 16` 用 Safari 確認懸浮鍵可操作，連點會填入且畫面不縮放，動態效果關閉時一次填完。完成標準是每台模擬器的結果和截圖都回報給擁有者，且所有發現的缺陷已修正並重跑該項；任何一台無法執行時本任務保持未完成並說明原因。
