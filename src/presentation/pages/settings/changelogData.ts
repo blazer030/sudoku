@@ -35,6 +35,18 @@ export const UNRELEASED_CHANGES: ChangelogChange[] = [
             "zh-Hant": "介面優化",
         },
     },
+    {
+        text: {
+            en: "Optional floating digit keys, and a double tap to fill single notes",
+            "zh-Hant": "新增可開關的懸浮數字鍵，以及連點填入單一筆記",
+        },
+    },
+    {
+        text: {
+            en: "Auto Notes is now a setting, hints have no limit, and Statistics shows average hints",
+            "zh-Hant": "自動筆記改為設定，提示不限次數，統計新增平均提示次數",
+        },
+    },
 ];
 
 export const CHANGELOG: ChangelogEntry[] = [

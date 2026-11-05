@@ -25,10 +25,10 @@
 
 ## 5. 各風格外觀
 
-- [ ] 5.1 [after: 4.5] 依決策「各風格設計先上 canvas 再做 skin」，在 `feature/style-research` worktree 用 `docs/style-research/generator/` 新增 9 個風格的懸浮數字鍵畫板（含筆記模式和擦除鍵），發布到風格研究 canvas。完成標準是擁有者確認各風格外觀；該分支不合併進 `develop`。
-- [ ] 5.2 [after: 5.1, 1.3] 實作 Requirement「Per-style floating pad」的 minimal、tactile、paper：依 canvas 寫懸浮數字鍵的 skin。以 `src/__tests__/style/styleCoverage.test.ts` 的 `REQUIRED_SELECTORS` 和 `paletteContrast.test.ts` 驗證，並在這三個風格各截圖確認。
-- [ ] 5.3 [after: 5.2] 實作 Requirement「Per-style floating pad」的 pixel、cyber、ink：依 canvas 寫懸浮數字鍵的 skin，檢查擦除圖示的漸層規則和 ink 的書法字型。以 `styleCoverage.test.ts`、`paletteContrast.test.ts` 驗證，並在這三個風格各截圖確認。
-- [ ] 5.4 [after: 5.3] 實作 Requirement「Per-style floating pad」的 chalkboard、blueprint、aurora：依 canvas 寫懸浮數字鍵的 skin，aurora 的懸浮鍵不透明並加入 `AURORA_BOARD_CASES`，檢查擦除圖示的 `--aurora-icon-*` 規則和 blueprint 盤面框的層級。以 `styleCoverage.test.ts`、`paletteContrast.test.ts` 驗證，並在這三個風格各截圖確認。
+- [x] 5.1 [after: 4.5] 依決策「各風格設計先上 canvas 再做 skin」，在 `feature/style-research` worktree 用 `docs/style-research/generator/` 新增 9 個風格的懸浮數字鍵畫板（含筆記模式和擦除鍵），發布到風格研究 canvas。完成標準是擁有者確認各風格外觀；該分支不合併進 `develop`。
+- [x] 5.2 [after: 5.1, 1.3] 實作 Requirement「Per-style floating pad」的 minimal、tactile、paper：依 canvas 寫懸浮數字鍵的 skin。以 `src/__tests__/style/styleCoverage.test.ts` 的 `REQUIRED_SELECTORS` 和 `paletteContrast.test.ts` 驗證，並在這三個風格各截圖確認。
+- [x] 5.3 [after: 5.2] 實作 Requirement「Per-style floating pad」的 pixel、cyber、ink：依 canvas 寫懸浮數字鍵的 skin，檢查擦除圖示的漸層規則和 ink 的書法字型。以 `styleCoverage.test.ts`、`paletteContrast.test.ts` 驗證，並在這三個風格各截圖確認。
+- [x] 5.4 [after: 5.3] 實作 Requirement「Per-style floating pad」的 chalkboard、blueprint、aurora：依 canvas 寫懸浮數字鍵的 skin，aurora 的懸浮鍵不透明並加入 `AURORA_BOARD_CASES`，檢查擦除圖示的 `--aurora-icon-*` 規則和 blueprint 盤面框的層級。以 `styleCoverage.test.ts`、`paletteContrast.test.ts` 驗證，並在這三個風格各截圖確認。
 
 ## 6. 收尾
 
