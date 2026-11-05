@@ -119,7 +119,9 @@ import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { Check, Palette, Shapes, Smartphone, SunMoon } from "@/presentation/components/icon";
 import { useSettingsStore } from "@/stores/settingsStore";
+import { goBackOr } from "@/presentation/composables/goBackOr";
 import { usePlatform } from "@/presentation/composables/usePlatform";
+import { ROUTER_PATH } from "@/router";
 import { STYLE_COLOR_MODES, STYLE_IDS, type ColorMode, type ColorThemeId, type StyleId } from "@/theme/themeIds";
 import { STYLES, getPalette, rememberedAppearanceFor, rememberedThemeFor, swatchColors } from "@/theme/palettes";
 import { useColorModeLabel } from "@/presentation/i18n/colorModeLabels";
@@ -152,7 +154,7 @@ const modeOptions = computed((): { value: ColorMode; label: string }[] =>
     STYLE_COLOR_MODES[settingsStore.style].map(mode => ({ value: mode, label: colorModeLabel(settingsStore.style, mode) })));
 
 const goBack = () => {
-    router.back();
+    goBackOr(router, ROUTER_PATH.settings);
 };
 
 // Re-selecting the current choice must not re-run side effects such as the launcher-icon change

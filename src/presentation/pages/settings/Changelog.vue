@@ -56,7 +56,9 @@
 import { computed } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
+import { goBackOr } from "@/presentation/composables/goBackOr";
 import { useAppLocale } from "@/presentation/i18n/useAppLocale";
+import { ROUTER_PATH } from "@/router";
 import PageHeader from "@/presentation/components/page-header/PageHeader.vue";
 import { CHANGELOG, UNRELEASED_CHANGES, type ChangelogChange } from "@/presentation/pages/settings/changelogData";
 import { isFeatureEnabled } from "@/utils/featureToggle";
@@ -81,6 +83,6 @@ const entries = computed((): ShownEntry[] => [
 ]);
 
 const goBack = () => {
-    router.back();
+    goBackOr(router, ROUTER_PATH.settings);
 };
 </script>
