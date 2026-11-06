@@ -1,4 +1,7 @@
+import { lessonContentEn } from "./contentEn";
+
 export const lessonsEn = {
+    content: lessonContentEn,
     title: "Technique Lessons",
     finishedCount: "{done} / {total}",
     firstCaption: "Start here",

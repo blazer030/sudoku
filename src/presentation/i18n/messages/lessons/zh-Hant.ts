@@ -1,6 +1,8 @@
+import { lessonContentZhHant } from "./contentZhHant";
 import type { lessonsEn } from "./en";
 
 export const lessonsZhHant: typeof lessonsEn = {
+    content: lessonContentZhHant,
     title: "技巧教學",
     finishedCount: "{done}／{total}",
     firstCaption: "從這裡開始",
