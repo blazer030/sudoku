@@ -50,7 +50,7 @@ describe("SegmentedControl", () => {
         const wrapper = mountControl("small");
 
         // Only horizontal track padding: vertical padding would leave each option 40px tall and a dead strip above and below
-        expect(wrapper.classes()).toContain("h-12");
+        expect(wrapper.classes()).toContain("h-(--segmented-height,3rem)");
         expect(wrapper.attributes("style")).toContain("padding-inline");
         expect(wrapper.classes()).not.toContain("p-1");
         for (const option of OPTIONS) {

@@ -17,20 +17,20 @@
         <div
             aria-hidden="true"
             lang="zh-Hant"
-            class="grid grid-cols-[auto_auto] gap-x-3 gap-y-3.5 items-start mr-1 [@media(max-height:740px)]:gap-y-2.5"
+            class="grid grid-cols-[auto_auto] gap-x-3 gap-y-3.5 items-start mr-1 [@media(max-height:800px)]:gap-y-2.5 home-short:gap-y-1.5"
             data-skin="hero-vertical"
             data-testid="home-hero-emblem"
         >
             <span
-                class="row-span-2 pt-7.5 text-[15px] [letter-spacing:.35em] text-foreground-secondary [writing-mode:vertical-rl] [@media(max-height:740px)]:pt-5 [@media(max-height:740px)]:text-[13px] [@media(max-height:740px)]:[letter-spacing:.25em]"
+                class="row-span-2 pt-7.5 text-[15px] [letter-spacing:.35em] text-foreground-secondary [writing-mode:vertical-rl] [@media(max-height:800px)]:pt-5 [@media(max-height:800px)]:text-[13px] [@media(max-height:800px)]:[letter-spacing:.25em] home-short:pt-2.5 home-short:text-xs home-tiny:hidden"
                 data-skin="hero-subtitle"
             >{{ EMBLEM.subtitle }}</span>
             <span
-                class="text-[78px] leading-none [letter-spacing:.06em] font-normal text-foreground [writing-mode:vertical-rl] [@media(max-height:740px)]:text-[48px]"
+                class="text-[78px] leading-none [letter-spacing:.06em] font-normal text-foreground [writing-mode:vertical-rl] [@media(max-height:800px)]:text-[48px] home-short:text-[40px] home-tiny:text-[32px]"
                 data-skin="hero-title"
             >{{ EMBLEM.title }}</span>
             <span
-                class="col-start-2 justify-self-center grid place-items-center size-[42px] text-[15px] leading-[1.05] font-black rotate-[-4deg] bg-primary text-on-primary rounded-sm [writing-mode:vertical-rl] [@media(max-height:740px)]:size-9 [@media(max-height:740px)]:text-[13px]"
+                class="col-start-2 justify-self-center grid place-items-center size-[42px] text-[15px] leading-[1.05] font-black rotate-[-4deg] bg-primary text-on-primary rounded-sm [writing-mode:vertical-rl] [@media(max-height:800px)]:size-9 [@media(max-height:800px)]:text-[13px] home-short:size-[30px] home-short:text-[11px] home-tiny:hidden"
                 data-skin="hero-seal"
             >{{ EMBLEM.title }}</span>
         </div>
@@ -43,7 +43,7 @@
         data-testid="home-hero"
     >
         <h1
-            class="text-foreground text-[66px] leading-[1.1] font-bold [letter-spacing:.08em] mr-[-.08em]"
+            class="text-foreground text-[66px] home-short:text-[48px] leading-[1.1] font-bold [letter-spacing:.08em] mr-[-.08em]"
             data-skin="title"
         >
             <span
@@ -54,7 +54,7 @@
             >{{ glyph }}</span>
         </h1>
         <p
-            class="mt-7 text-foreground-secondary text-base"
+            class="mt-7 home-short:mt-3 text-foreground-secondary text-base home-short:text-sm"
             data-skin="home-subtitle"
         >
             {{ t("home.subtitle") }}
@@ -64,7 +64,7 @@
          as the emblem above; the title gives its trailing space back, so it stays centred -->
     <div
         v-else-if="layout === 'spaced'"
-        class="flex flex-col items-center gap-2"
+        class="flex flex-col items-center gap-2 home-short:gap-1"
         data-testid="home-hero"
     >
         <div
@@ -82,7 +82,7 @@
             </div>
         </div>
         <h1
-            class="text-foreground text-[44px] font-light [letter-spacing:.5em] mr-[-.5em]"
+            class="text-foreground text-[44px] home-short:text-[34px] home-short:leading-[44px] font-light [letter-spacing:.5em] mr-[-.5em]"
             data-skin="title"
         >
             <span
@@ -122,7 +122,7 @@
             </div>
         </div>
         <h1
-            class="text-foreground text-4xl font-bold tracking-[-1px]"
+            class="text-foreground text-4xl home-short:text-[28px] home-short:leading-8 font-bold tracking-[-1px]"
             data-skin="title"
         >
             <!-- One span per plate; the heading's text is unchanged, so it reads as before -->
@@ -134,7 +134,7 @@
             >{{ glyph }}</span>
         </h1>
         <p
-            class="text-foreground-secondary text-sm"
+            class="text-foreground-secondary text-sm home-short:text-xs"
             data-skin="home-subtitle"
         >
             {{ t("home.subtitle") }}

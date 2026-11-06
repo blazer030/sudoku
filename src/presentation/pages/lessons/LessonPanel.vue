@@ -147,7 +147,7 @@ const tagLabel = computed(() => {
 </script>
 
 <style scoped>
-@reference "@/style/index.css";
+@reference "../../../style/index.css";
 
 .lesson-primary {
     @apply flex-[1.6] flex items-center justify-center gap-1.5 py-2.5 rounded-2xl bg-primary text-on-primary text-[15px] font-semibold cursor-pointer shadow-primary transition-all duration-200 hover:bg-primary-hover disabled:opacity-40 disabled:cursor-default disabled:shadow-none;

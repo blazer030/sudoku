@@ -9,11 +9,11 @@
         <!-- However short a narrow window, the cards never touch what is above and below them -->
         <div class="flex-1 min-h-(--home-spacer-min)" />
 
-        <div class="flex flex-col gap-3 w-full">
+        <div class="flex flex-col gap-3 home-short:gap-2 w-full">
             <ContinueButton @continue="newGameFlow.continueGame" />
 
             <div
-                class="flex flex-col gap-3 bg-card rounded-2xl shadow-card p-3"
+                class="flex flex-col gap-3 home-short:gap-2 bg-card rounded-2xl shadow-card p-3 home-short:p-2"
                 data-skin="card new-game-card"
                 data-testid="new-game-card"
             >
@@ -39,9 +39,8 @@
 
         <div class="flex-1 min-h-(--home-spacer-min)" />
 
-        <!-- Becomes grid-cols-2 when Technique Lessons adds a fourth tile -->
         <div
-            class="grid grid-cols-3 gap-3 w-full"
+            class="grid grid-cols-2 gap-3 home-short:gap-2 w-full"
             data-testid="home-entries"
         >
             <button
@@ -50,7 +49,7 @@
                 v-press
                 data-skin="tile home-tile"
                 :data-testid="`${entry.id}-button`"
-                class="flex flex-col items-center gap-1 min-h-22 bg-card rounded-2xl shadow-card px-2 py-(--home-tile-padding) cursor-pointer"
+                class="flex flex-col items-center justify-center gap-1 home-short:gap-0.5 min-h-(--home-tile-min) bg-card rounded-2xl shadow-card px-2 py-(--home-tile-padding) cursor-pointer"
                 type="button"
                 @click="entry.open"
             >
@@ -61,11 +60,11 @@
                 />
                 <span
                     :data-testid="`${entry.id}-label`"
-                    class="text-sm font-semibold text-foreground"
+                    class="text-sm home-short:text-[13px] font-semibold text-foreground"
                 >{{ entry.label }}</span>
                 <span
                     :data-testid="`${entry.id}-subtitle`"
-                    class="text-[11px] text-foreground-secondary text-center leading-tight"
+                    class="text-[11px] text-foreground-secondary text-center leading-tight home-tiny:hidden"
                 >{{ entry.subtitle }}</span>
             </button>
         </div>
@@ -80,10 +79,12 @@
 import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
-import { ChartBar, Plus, Settings, Wand2 } from "@/presentation/components/icon";
+import { ChartBar, Lightbulb, Plus, Settings, Wand2 } from "@/presentation/components/icon";
+import { ALL_LESSON_IDS } from "@/domain/lessons/curriculum";
 import { ROUTER_PATH } from "@/router";
 import type { Difficulty } from "@/domain/generator/SudokuGenerator";
 import { useGameStore } from "@/stores/gameStore";
+import { useLessonStore } from "@/stores/lessonStore";
 import { useStatisticsStore } from "@/stores/statisticsStore";
 
 import ContinueButton from "@/presentation/components/continue-button/ContinueButton.vue";
@@ -97,6 +98,7 @@ import HomeHero from "@/presentation/pages/home/HomeHero.vue";
 const { t } = useI18n();
 const router = useRouter();
 const statisticsStore = useStatisticsStore();
+const lessonStore = useLessonStore();
 const gameStore = useGameStore();
 const newGameFlow = useNewGameFlow();
 
@@ -112,11 +114,21 @@ const statisticsSubtitle = computed(() => {
         : t("home.entries.winRate", { percent: Math.round(winRate * 100) });
 });
 
+// Invites a new player in, then shows how far they are
+const lessonsSubtitle = computed(() => (lessonStore.finishedCount === 0
+    ? t("home.entries.lessonsFirst")
+    : t("home.entries.lessonsProgress", { done: lessonStore.finishedCount, total: ALL_LESSON_IDS.length })));
+
 const entries = computed(() => [
-    { id: "statistics", icon: ChartBar, label: t("home.statistics"), subtitle: statisticsSubtitle.value, open: goToStatistics },
+    { id: "lessons", icon: Lightbulb, label: t("lessons.title"), subtitle: lessonsSubtitle.value, open: goToLessons },
     { id: "walkthrough", icon: Wand2, label: t("home.walkthrough"), subtitle: t("home.entries.walkthrough"), open: goToWalkthrough },
+    { id: "statistics", icon: ChartBar, label: t("home.statistics"), subtitle: statisticsSubtitle.value, open: goToStatistics },
     { id: "settings", icon: Settings, label: t("settings.title"), subtitle: t("home.entries.settings"), open: goToSettings },
 ]);
+
+const goToLessons = () => {
+    void router.push(ROUTER_PATH.lessons);
+};
 
 const goToSettings = () => {
     void router.push(ROUTER_PATH.settings);

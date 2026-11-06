@@ -13,7 +13,7 @@
 
 ## 3. 入口
 
-- [ ] 3.1 [after: 2.2] 完成首頁 Four entries、Lesson entry subtitle 與 Home fits short windows（Home sizes extend the existing step）：入口改成 2×2 並以技巧教學為第一格，依高度分段縮小，500 高以下隱藏副標。在瀏覽器量測 9 種風格有存檔時的總高，把設計和規格裡的估計值校正成實際值（數字有差異時同步更新 `home-lesson-entry` 規格）後，更新 `Home.test.ts` 的尺寸加總與入口順序。同時驗證 Tall screens keep their sizes：390×844 逐元素比對舊版，只有入口區和卡片周圍的空間不同。
+- [x] 3.1 [after: 2.2] 完成首頁 Four entries、Lesson entry subtitle 與 Home fits short windows（Home sizes extend the existing step）：入口改成 2×2 並以技巧教學為第一格，依高度分段縮小，500 高以下隱藏副標。在瀏覽器量測 9 種風格有存檔時的總高，把設計和規格裡的估計值校正成實際值（數字有差異時同步更新 `home-lesson-entry` 規格）後，更新 `Home.test.ts` 的尺寸加總與入口順序。同時驗證 Tall screens keep their sizes：390×844 逐元素比對舊版，只有入口區和卡片周圍的空間不同。
 - [ ] 3.2 [after: 2.5] 完成 Learning from the Walkthrough（Lessons open over the Walkthrough rather than by route）：技巧標籤旁有「學這招」，課程疊在解題演示上，返回鈕和系統返回鍵都回到同一步，播放狀態不變；提示模式沒有連結。以 `SolverWalkthrough` 元件測試驗證，並用 `HintPanel` 測試確認沒有連結。
 
 ## 4. 課程內容

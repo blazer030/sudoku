@@ -14,6 +14,10 @@
 
 @variant dark (&:where(.dark, .dark *));
 
+/* Home on a short phone, and on a window too short for its tiles to keep their subtitles */
+@custom-variant home-short (@media (max-height: 619.98px) and (max-width: 640px));
+@custom-variant home-tiny (@media (max-height: 499.98px) and (max-width: 640px));
+
 @custom-variant hover {
   @media (hover: hover) and (pointer: fine) {
     &:hover {
@@ -148,7 +152,7 @@
    A page with no saved game has no Continue card, so it needs --home-spare less and shrinks that much later.
    A test holds the shares to that sum. */
 .home-sizes {
-  --home-step: max(calc(clamp(0px, var(--usable-height) + var(--home-spare, 0px) - 552px, 168px) / 168), var(--wider-than-column));
+  --home-step: max(calc(clamp(0px, var(--usable-height) + var(--home-spare, 0px) - 644px, 176px) / 176), var(--wider-than-column));
   /* Not in the sum: what the spacers round the cards keep, on a window narrow enough to shrink */
   --home-spacer-min: calc(12px - 12 * var(--wider-than-column));
   --home-page-top: calc(12px + 68 * var(--home-step));
@@ -157,8 +161,34 @@
   --home-continue-padding: calc(12px + 4 * var(--home-step));
   --home-new-game-height: calc(48px + 8 * var(--home-step));
   --home-tile-padding: calc(8px + 4 * var(--home-step));
+  /* Not in the sum: a tile's words and icon take 64px, so it never holds more than its padding asks for */
+  --home-tile-min: calc(72px + 16 * var(--home-step));
   /* Not in the sum: the mark stays its share of the logo */
   --home-logo-mark: calc(28.8px + 19.2 * var(--home-step));
+}
+
+/* Under what the sizes above can reach, the words and the gaps round the cards close too */
+@media (max-height: 619.98px) and (max-width: 640px) {
+  .home-sizes {
+    --home-logo-size: 40px;
+    --home-logo-mark: 24px;
+    --home-spacer-min: 8px;
+    --home-continue-padding: 8px;
+    --home-new-game-height: 44px;
+    --home-tile-min: 0px;
+    --segmented-height: 44px;
+  }
+}
+
+/* Shorter still, the tiles lose their subtitles (Home.vue) and the page its margins */
+@media (max-height: 499.98px) and (max-width: 640px) {
+  .home-sizes {
+    --home-page-top: 6px;
+    --home-page-bottom: 8px;
+    --home-spacer-min: 4px;
+    --home-logo-size: 28px;
+    --home-logo-mark: 16.8px;
+  }
 }
 
 /* Game Review's board takes the game's room, so it is the game's size, and the page shrinks round it by a

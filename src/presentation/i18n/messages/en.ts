@@ -129,6 +129,8 @@ export const en = {
             winRate: "Win rate {percent}%",
             noGames: "No games yet",
             walkthrough: "Enter a puzzle, see the steps",
+            lessonsFirst: "First time? Start here",
+            lessonsProgress: "{done} of {total} learned",
             settings: "Theme, mode, language",
         },
         generatingPuzzle: "Generating puzzle…",

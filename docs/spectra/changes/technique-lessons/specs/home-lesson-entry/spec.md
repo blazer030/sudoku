@@ -38,19 +38,20 @@ Home SHALL fit without scrolling in every style, with a saved game, on windows f
 - **WHEN** Home opens on a narrow window of the given height
 - **THEN** its sizes follow the example
 
-##### Example: bands, for the stacked hero
+##### Example: bands, for every style
 
 | Window height | Sizes |
 | ------------- | ----- |
-| 754px and up | Full size |
-| 578px to 753px | Gaps, logo, and new game button shrink with the height |
-| 500px to 577px | Also smaller title, subtitle, tile labels and card gaps |
-| Under 500px | Also no subtitles on the four entries |
+| 820px and up | Full size |
+| 644px to 819px | Gaps, logo, and new game button shrink with the height |
+| 620px to 643px | Those at their smallest |
+| 500px to 619px | Also smaller title, subtitle, tile labels and card gaps |
+| Under 500px | Also no subtitles on the four entries, and smaller margins and logo |
 
-#### Scenario: Taller heroes start earlier
+#### Scenario: Ink's vertical title
 
-- **WHEN** the style's hero is taller than the stacked one, as blueprint's and ink's are
-- **THEN** shrinking starts at that much greater a height, so Home still fits
+- **WHEN** the window is under 801px tall in the ink style
+- **THEN** its vertical title takes its smaller size, so Home still fits
 
 #### Scenario: Subtitles leave only when needed
 
