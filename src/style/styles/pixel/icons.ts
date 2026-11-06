@@ -51,5 +51,6 @@ export const pixelIcons: IconSet = {
         Smartphone: "<path d=\"M1 0h6v1h-6zM1 1h1v1h-1zM6 1h1v1h-1zM1 2h1v1h-1zM6 2h1v1h-1zM1 3h1v1h-1zM6 3h1v1h-1zM1 4h1v1h-1zM6 4h1v1h-1zM1 5h1v1h-1zM6 5h1v1h-1zM1 6h1v1h-1zM3 6h2v1h-2zM6 6h1v1h-1zM1 7h6v1h-6z\"/>",
         Crosshair: "<path d=\"M3 0h1v1h-1zM1 1h5v1h-5zM1 2h1v1h-1zM3 2h1v1h-1zM5 2h1v1h-1zM0 3h7v1h-7zM1 4h1v1h-1zM3 4h1v1h-1zM5 4h1v1h-1zM1 5h5v1h-5zM3 6h1v1h-1z\"/>",
         Hash: "<path d=\"M1 0h1v1h-1zM4 0h1v1h-1zM1 1h1v1h-1zM4 1h1v1h-1zM0 2h6v1h-6zM1 3h1v1h-1zM4 3h1v1h-1zM0 4h6v1h-6zM1 5h1v1h-1zM4 5h1v1h-1zM1 6h1v1h-1zM4 6h1v1h-1z\"/>",
+        GraduationCap: "<path d=\"M2 0h3v1h-3zM1 1h5v1h-5zM0 2h8v1h-8zM1 3h5v1h-5zM7 3h1v1h-1zM7 4h1v1h-1zM1 5h1v1h-1zM5 5h1v1h-1zM7 5h1v1h-1zM1 6h5v1h-5zM7 6h1v1h-1zM2 7h3v1h-3z\"/>",
     },
 };

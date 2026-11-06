@@ -12,6 +12,7 @@ import {
     Eye as LucideEye,
     EyeOff as LucideEyeOff,
     Gamepad2 as LucideGamepad2,
+    GraduationCap as LucideGraduationCap,
     Hash as LucideHash,
     Highlighter as LucideHighlighter,
     History as LucideHistory,
@@ -58,6 +59,7 @@ export const ExternalLink = bindIcon("ExternalLink", LucideExternalLink);
 export const Eye = bindIcon("Eye", LucideEye);
 export const EyeOff = bindIcon("EyeOff", LucideEyeOff);
 export const Gamepad2 = bindIcon("Gamepad2", LucideGamepad2);
+export const GraduationCap = bindIcon("GraduationCap", LucideGraduationCap);
 export const Hash = bindIcon("Hash", LucideHash);
 export const Highlighter = bindIcon("Highlighter", LucideHighlighter);
 export const History = bindIcon("History", LucideHistory);

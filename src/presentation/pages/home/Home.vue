@@ -79,7 +79,7 @@
 import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
-import { ChartBar, Lightbulb, Plus, Settings, Wand2 } from "@/presentation/components/icon";
+import { ChartBar, GraduationCap, Plus, Settings, Wand2 } from "@/presentation/components/icon";
 import { ALL_LESSON_IDS } from "@/domain/lessons/curriculum";
 import { ROUTER_PATH } from "@/router";
 import type { Difficulty } from "@/domain/generator/SudokuGenerator";
@@ -120,7 +120,7 @@ const lessonsSubtitle = computed(() => (lessonStore.finishedCount === 0
     : t("home.entries.lessonsProgress", { done: lessonStore.finishedCount, total: ALL_LESSON_IDS.length })));
 
 const entries = computed(() => [
-    { id: "lessons", icon: Lightbulb, label: t("lessons.title"), subtitle: lessonsSubtitle.value, open: goToLessons },
+    { id: "lessons", icon: GraduationCap, label: t("lessons.title"), subtitle: lessonsSubtitle.value, open: goToLessons },
     { id: "walkthrough", icon: Wand2, label: t("home.walkthrough"), subtitle: t("home.entries.walkthrough"), open: goToWalkthrough },
     { id: "statistics", icon: ChartBar, label: t("home.statistics"), subtitle: statisticsSubtitle.value, open: goToStatistics },
     { id: "settings", icon: Settings, label: t("settings.title"), subtitle: t("home.entries.settings"), open: goToSettings },
