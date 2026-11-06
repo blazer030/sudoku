@@ -10,7 +10,7 @@
         <div class="flex-1 min-h-(--home-spacer-min)" />
 
         <div class="flex flex-col gap-3 w-full">
-            <ContinueButton @continue="continueGame" />
+            <ContinueButton @continue="newGameFlow.continueGame" />
 
             <div
                 class="flex flex-col gap-3 bg-card rounded-2xl shadow-card p-3"
@@ -72,12 +72,12 @@
 
         <NewGameDialog />
 
-        <PuzzleLoader :visible="puzzleLoader.visible.value" />
+        <PuzzleLoader :visible="newGameFlow.puzzleLoader.visible.value" />
     </div>
 </template>
 
 <script lang="ts" setup>
-import { computed, inject, ref } from "vue";
+import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { ChartBar, Plus, Settings, Wand2 } from "@/presentation/components/icon";
@@ -85,62 +85,24 @@ import { ROUTER_PATH } from "@/router";
 import type { Difficulty } from "@/domain/generator/SudokuGenerator";
 import { useGameStore } from "@/stores/gameStore";
 import { useStatisticsStore } from "@/stores/statisticsStore";
-import { ANALYTICS_KEY } from "@/application/analytics/AnalyticsService";
-import { computeAbandonProgress } from "@/application/analytics/computeAbandonProgress";
 
 import ContinueButton from "@/presentation/components/continue-button/ContinueButton.vue";
 import DifficultySwitcher from "@/presentation/components/difficulty-switcher/DifficultySwitcher.vue";
 import NewGameDialog from "@/presentation/components/new-game-dialog/NewGameDialog.vue";
-import { provideNewGameDialog } from "@/presentation/components/new-game-dialog/useNewGameDialog";
 import PuzzleLoader from "@/presentation/components/puzzle-loader/PuzzleLoader.vue";
-import { usePuzzleLoader } from "@/presentation/components/puzzle-loader/usePuzzleLoader";
+import { useNewGameFlow } from "@/presentation/composables/useNewGameFlow";
 import { vPress } from "@/presentation/directives/press";
 import HomeHero from "@/presentation/pages/home/HomeHero.vue";
 
 const { t } = useI18n();
 const router = useRouter();
-const gameStore = useGameStore();
 const statisticsStore = useStatisticsStore();
-const newGameDialog = provideNewGameDialog();
-const puzzleLoader = usePuzzleLoader();
-const analytics = inject(ANALYTICS_KEY);
+const gameStore = useGameStore();
+const newGameFlow = useNewGameFlow();
 
 const difficulty = ref<Difficulty>("easy");
 
-const handleNewGame = async () => {
-    if (gameStore.savedGame !== null) {
-        const unfinished = gameStore.savedGame;
-        const result = await newGameDialog.open({ difficulty: unfinished.difficulty, elapsedSeconds: unfinished.elapsedSeconds });
-        if (result === "stay") return;
-        if (result === "continue") {
-            continueGame();
-            return;
-        }
-        const saved = gameStore.savedGame;
-        const { progressPct, correctPct, incorrectPct } = computeAbandonProgress(saved.cells, saved.answer);
-        void analytics?.logEvent({
-            name: "game_abandon",
-            difficulty: saved.difficulty,
-            progress_pct: progressPct,
-            correct_pct: correctPct,
-            incorrect_pct: incorrectPct,
-        });
-        statisticsStore.recordGame({
-            difficulty: saved.difficulty,
-            elapsedSeconds: saved.elapsedSeconds,
-            completed: false,
-            hintsUsed: saved.hintsUsed,
-            replay: saved.replay,
-        });
-        await gameStore.clearSavedGame();
-    }
-    await startGame();
-};
-
-const startGame = async () => {
-    await puzzleLoader.runWithLoader(() => gameStore.startNewGame(difficulty.value));
-    void router.push(ROUTER_PATH.game);
-};
+const handleNewGame = () => newGameFlow.startNewGame(difficulty.value);
 
 // Says "no games yet" rather than a 0% win rate nobody earned
 const statisticsSubtitle = computed(() => {
@@ -166,13 +128,5 @@ const goToStatistics = () => {
 
 const goToWalkthrough = () => {
     void router.push(ROUTER_PATH.solverWalkthrough);
-};
-
-const continueGame = () => {
-    const saved = gameStore.savedGame;
-    if (saved) {
-        gameStore.loadSavedGame(saved);
-    }
-    void router.push(ROUTER_PATH.game);
 };
 </script>
