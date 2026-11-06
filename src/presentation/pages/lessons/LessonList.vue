@@ -47,7 +47,7 @@
         >
             <div class="flex flex-col gap-0.5 px-1">
                 <h2
-                    class="flex justify-between text-foreground-secondary text-[13px] font-semibold"
+                    class="flex justify-between gap-2 text-foreground-secondary text-[13px] font-semibold"
                     data-skin="group-heading"
                 >
                     <span>{{ t(`lessons.groups.${group.id}.name`) }}</span>
@@ -77,7 +77,7 @@
                     <span
                         :class="MARK_CLASSES[markOf(lesson)]"
                         class="flex items-center justify-center size-6 shrink-0 rounded-full"
-                        :data-skin="`lesson-mark ${markOf(lesson)}`"
+                        :data-skin="markOf(lesson) === 'done' ? 'lesson-mark done' : markOf(lesson) === 'next' ? 'lesson-mark next' : 'lesson-mark rest'"
                     >
                         <Check
                             v-if="markOf(lesson) === 'done'"
@@ -109,12 +109,14 @@
             </div>
         </section>
 
+        <LessonNoticeDialog />
         <NewGameDialog />
         <PuzzleLoader :visible="newGameFlow.puzzleLoader.visible.value" />
     </div>
 </template>
 
 <script lang="ts" setup>
+import { onMounted } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
 import { ALL_LESSON_IDS, LESSON_GROUPS, type LessonGroup } from "@/domain/lessons/curriculum";
@@ -127,6 +129,8 @@ import { goBackOr } from "@/presentation/composables/goBackOr";
 import { useNewGameFlow } from "@/presentation/composables/useNewGameFlow";
 import { vPress } from "@/presentation/directives/press";
 import { useDifficultyLabel } from "@/presentation/i18n/difficultyLabels";
+import LessonNoticeDialog from "@/presentation/pages/lessons/LessonNoticeDialog.vue";
+import { useLessonNotice } from "@/presentation/pages/lessons/useLessonNotice";
 import { ROUTER_PATH } from "@/router";
 import { useLessonStore } from "@/stores/lessonStore";
 
@@ -143,6 +147,11 @@ const router = useRouter();
 const lessonStore = useLessonStore();
 const newGameFlow = useNewGameFlow();
 const difficultyLabel = useDifficultyLabel();
+const notice = useLessonNotice();
+
+onMounted(async () => {
+    if (await notice.check() === "cancelled") goBack();
+});
 
 const markOf = (lesson: LessonId): LessonMark => {
     if (lessonStore.isFinished(lesson)) return "done";

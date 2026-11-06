@@ -17,6 +17,7 @@ import { SAMPLE_PUZZLES } from "@/presentation/pages/solver-walkthrough/samplePu
 import { expectKeyRowsToShrinkToFit } from "@/__tests__/fixtures/digitKeyRows";
 import { PUZZLE_LOADER_MINIMUM_MS } from "@/presentation/components/puzzle-loader/usePuzzleLoader";
 import { handleBackButton } from "@/presentation/composables/backDismissal";
+import { useSettingsStore } from "@/stores/settingsStore";
 import { ANALYTICS_KEY, type AnalyticsEvent } from "@/application/analytics/AnalyticsService";
 import { createAnalyticsSpy } from "@/__tests__/fixtures/analyticsSpy";
 import { StubBoardFrame, frameMinimalWithStubInEachTest, frameTarget } from "@/__tests__/fixtures/boardFrameStub";
@@ -581,6 +582,25 @@ describe("SolverWalkthrough", () => {
 
             expect(counter(wrapper)).toBe(before);
             expect(play().attributes("aria-pressed")).toBe("true");
+        });
+
+        it("should show 8-bit's light mode notice before the lesson", async () => {
+            const settings = useSettingsStore();
+            settings.setStyle("pixel");
+            settings.setAppearance("light");
+            const wrapper = await playing();
+
+            await learn(wrapper).trigger("click");
+            await flushPromises();
+
+            expect(wrapper.find("[data-testid='lesson-notice']").exists()).toBe(true);
+            expect(lesson(wrapper).exists()).toBe(false);
+
+            await wrapper.get("[data-testid='lesson-notice-carry-on']").trigger("click");
+            await flushPromises();
+
+            expect(lesson(wrapper).exists()).toBe(true);
+            localStorage.clear();
         });
 
         it("should offer nothing on the solved board", async () => {

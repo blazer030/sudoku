@@ -1,4 +1,5 @@
 import { LESSONS } from "@/domain/lessons/content";
+import { ALL_LESSON_IDS } from "@/domain/lessons/curriculum";
 import type { Lesson, LessonStep, PracticeStep } from "@/domain/lessons/Lesson";
 import { freshPracticeState, practiceReducer, type PracticeAction, type PracticeState } from "@/domain/lessons/practice";
 import { verifyLessonStep } from "@/domain/lessons/verifyLesson";
@@ -58,6 +59,12 @@ const fillDigit = (state: PracticeState, step: PracticeStep): number => {
     }
     throw new Error("No digit fits the selected cell");
 };
+
+describe("the curriculum's content", () => {
+    it("should have every lesson", () => {
+        expect(lessons.map(lesson => lesson.id).sort()).toEqual([...ALL_LESSON_IDS].sort());
+    });
+});
 
 describe.each(lessons.map(lesson => [lesson.id, lesson] as const))("lesson %s", (_, lesson) => {
     it("should run explanation, practice and closing, ending on its takeaway", () => {

@@ -39,6 +39,7 @@ describe("SettingsStorage", () => {
                 floatingDigitPad: true,
                 doubleTapFill: true,
                 autoNotesAtStart: true,
+                handheldLessonNoticeDismissed: false,
             });
         });
 
@@ -228,6 +229,7 @@ describe("SettingsStorage", () => {
                 floatingDigitPad: true,
                 doubleTapFill: true,
                 autoNotesAtStart: true,
+                handheldLessonNoticeDismissed: false,
             });
 
             const settings = loadSettings();

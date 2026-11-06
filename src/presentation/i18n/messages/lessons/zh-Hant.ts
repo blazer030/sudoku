@@ -1,9 +1,18 @@
+import { lessonContentHardZhHant } from "./contentHardZhHant";
+import { lessonContentMediumZhHant } from "./contentMediumZhHant";
 import { lessonContentZhHant } from "./contentZhHant";
 import type { lessonsEn } from "./en";
 
 export const lessonsZhHant: typeof lessonsEn = {
-    content: lessonContentZhHant,
+    content: { ...lessonContentZhHant, ...lessonContentMediumZhHant, ...lessonContentHardZhHant },
     title: "技巧教學",
+    notice: {
+        title: "這個配色不太適合看教學",
+        message: "{light}只有幾種綠色，教學裡有些步驟的標示可能不太清楚。要換個配色再看嗎？",
+        switch: "換成{dark}",
+        otherStyles: "看其他風格",
+        carryOn: "還是用{light}看",
+    },
     finishedCount: "{done}／{total}",
     firstCaption: "從這裡開始",
     nextCaption: "下一課",

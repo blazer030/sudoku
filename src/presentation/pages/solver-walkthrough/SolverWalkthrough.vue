@@ -44,6 +44,7 @@
                     data-testid="walkthrough-board"
                 >
                     <div
+                        :class="{ 'has-step-links': inPlayback && links.length > 0 }"
                         class="relative flex flex-col border-3 border-foreground/20 rounded-xl"
                         data-skin="board-grid"
                     >
@@ -247,10 +248,12 @@
         <div class="flex-1" />
 
         <WalkthroughDialog />
+        <LessonNoticeDialog />
         <!-- Over the page rather than a route of its own: the Walkthrough's steps live in this page -->
         <div
             v-if="openedLesson !== null"
             class="app-safe-area fixed inset-0 z-70 max-w-screen-sm mx-auto overflow-y-auto bg-background"
+            data-skin="page"
             data-testid="walkthrough-lesson"
         >
             <LessonScreen
@@ -284,7 +287,9 @@ import { lessonContent } from "@/domain/lessons/content";
 import { lessonForTechnique } from "@/domain/lessons/curriculum";
 import type { Lesson } from "@/domain/lessons/Lesson";
 import { registerBackDismissal } from "@/presentation/composables/backDismissal";
+import LessonNoticeDialog from "@/presentation/pages/lessons/LessonNoticeDialog.vue";
 import LessonScreen from "@/presentation/pages/lessons/LessonScreen.vue";
+import { useLessonNotice } from "@/presentation/pages/lessons/useLessonNotice";
 import Cell from "@/presentation/components/board-cell/Cell.vue";
 import BoardFrame from "@/presentation/components/board-frame/BoardFrame.vue";
 import { cellName } from "@/presentation/components/board-cell/cellName";
@@ -420,7 +425,10 @@ const closeLesson = () => {
     resumeAfterLesson = false;
 };
 
-const openLessonOfStep = () => {
+const lessonNotice = useLessonNotice();
+
+const openLessonOfStep = async () => {
+    if (await lessonNotice.check() !== "open") return;
     openedLesson.value = lessonOfStep.value;
     // Playback holds while the lesson is open, so the player comes back to the step they left
     resumeAfterLesson = playState.isPlaying.value;

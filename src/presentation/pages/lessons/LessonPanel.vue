@@ -1,7 +1,7 @@
 <template>
     <div
         :aria-label="t('lessons.title')"
-        class="bg-card rounded-2xl shadow-card-lg w-full px-4 pt-[var(--step-panel-top,1rem)] pb-[var(--step-panel-bottom,0.75rem)] flex flex-col gap-[var(--step-panel-gap,0.75rem)] outline-none [&>*]:shrink-0"
+        class="bg-card rounded-2xl shadow-card-lg w-full max-h-full px-4 pt-[var(--step-panel-top,1rem)] pb-[var(--step-panel-bottom,0.75rem)] flex flex-col gap-[var(--step-panel-gap,0.75rem)] outline-none [&>*]:shrink-0"
         data-skin="card"
         data-testid="lesson-panel"
         role="group"
@@ -26,6 +26,7 @@
         </div>
 
         <StepExplanation
+            compact
             :step-key="messageKey"
             test-id-prefix="lesson"
         >
@@ -62,7 +63,7 @@
                 v-if="showsNoteToggle"
                 v-press
                 :aria-pressed="noteMode"
-                :class="noteMode ? 'bg-primary-light text-primary' : 'bg-foreground/5 text-foreground'"
+                :class="noteMode ? 'bg-primary-light text-primary' : 'hint-secondary'"
                 class="lesson-toggle"
                 data-skin="button"
                 data-testid="lesson-note-toggle"
@@ -74,7 +75,7 @@
             <button
                 v-press
                 :disabled="secondaryDisabled"
-                class="lesson-secondary"
+                class="hint-secondary"
                 data-skin="button"
                 data-testid="lesson-secondary"
                 type="button"
@@ -85,7 +86,7 @@
             <button
                 v-press
                 :disabled="primaryDisabled"
-                class="lesson-primary"
+                class="hint-primary"
                 data-skin="button"
                 data-testid="lesson-primary"
                 type="button"
@@ -149,11 +150,11 @@ const tagLabel = computed(() => {
 <style scoped>
 @reference "../../../style/index.css";
 
-.lesson-primary {
+.hint-primary {
     @apply flex-[1.6] flex items-center justify-center gap-1.5 py-2.5 rounded-2xl bg-primary text-on-primary text-[15px] font-semibold cursor-pointer shadow-primary transition-all duration-200 hover:bg-primary-hover disabled:opacity-40 disabled:cursor-default disabled:shadow-none;
 }
 
-.lesson-secondary {
+.hint-secondary {
     @apply flex-1 py-2.5 rounded-2xl bg-foreground/5 text-foreground text-[15px] font-medium cursor-pointer transition-all duration-200 hover:bg-foreground/10 disabled:opacity-40 disabled:cursor-default;
 }
 

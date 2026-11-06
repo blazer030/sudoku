@@ -289,6 +289,12 @@
   transform: translateY(-4px);
 }
 
+/* A step's lines pass under the digits they cross, so the digits stay readable */
+.has-step-links .cell-digit {
+    position: relative;
+    z-index: 1;
+}
+
 /* Diagonal strike-through for eliminated candidates (top-left to bottom-right) */
 .strike-diagonal {
     position: relative;

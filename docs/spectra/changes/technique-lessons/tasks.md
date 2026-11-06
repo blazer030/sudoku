@@ -19,13 +19,13 @@
 ## 4. 課程內容
 
 - [x] 4.1 [after: 2.5, 3.2] 寫好基礎與簡單四課（規則、填數字與筆記、隱藏唯一數、唯一候選數）的盤面與兩種語言文案，文案照 CLAUDE.md 的列、欄、宮用語。以內容驗證測試確認盤面有效且答案符合題目唯一解，並手動走完四課。
-- [ ] 4.2 [after: 4.1] 寫好中等六課（宮區塊摒除、行列區塊摒除、顯性與隱性數對、顯性與隱性三數組與四數組）的盤面與文案，盤面取自解題器實際走到的局面。以內容驗證測試確認每一步的規律與可刪項目等於對應技巧的結果，並手動走完六課。
-- [ ] 4.3 [after: 4.2] 寫好困難七課（X-Wing、Swordfish 與 Jellyfish、XY-Wing、W-Wing、XYZ-Wing 與 WXYZ-Wing、X 鏈、XY 鏈）的盤面與文案，連線沿用 `StepLinkOverlay` 並畫在數字下方。以內容驗證測試確認結果，手動走完七課，並在 360×640 確認 X 鏈、XY 鏈的文字能捲動讀完。
+- [x] 4.2 [after: 4.1] 寫好中等六課（宮區塊摒除、行列區塊摒除、顯性與隱性數對、顯性與隱性三數組與四數組）的盤面與文案，盤面取自解題器實際走到的局面。以內容驗證測試確認每一步的規律與可刪項目等於對應技巧的結果，並手動走完六課。
+- [x] 4.3 [after: 4.2] 寫好困難七課（X-Wing、Swordfish 與 Jellyfish、XY-Wing、W-Wing、XYZ-Wing 與 WXYZ-Wing、X 鏈、XY 鏈）的盤面與文案，連線沿用 `StepLinkOverlay` 並畫在數字下方。以內容驗證測試確認結果，手動走完七課，並在 360×640 確認 X 鏈、XY 鏈的文字能捲動讀完。
 
 ## 5. 各風格
 
-- [ ] 5.1 [after: 2.5, 3.1] 讓其他 8 種風格完成 Lessons in every style 與 Lesson state marks（Lesson rows get their own skin hooks）：新增 `lesson-row`、`lesson-mark`，各風格畫出自己的記號；新增技巧教學圖示的 8 套畫法；補上 `lesson-dim` 色值與對比下限 1.5:1 的測試。以 `styleCoverage.test.ts`、`iconSets.test.ts`、`paletteContrast.test.ts` 驗證，並照 `Sketch.dc.html` 比對 8 種風格的截圖。
-- [ ] 5.2 [after: 2.1, 2.2, 3.2] 完成 8-bit range and pattern marks 與 Handheld notice（The handheld notice is remembered in settings）：範圍用暗點、目標反白、規律格維持淺底讓線看得到、被刪候選數斜線加粗；掌機進教學先提醒，可換成紅白機、看其他風格或繼續，選繼續後記住，從解題演示進入也一樣。以 `pixelSkin.test.ts` 與 `settingsStore` 測試驗證，並截圖比對 `PixelOptions.dc.html`、`PixelNotice.dc.html`，同時確認遊戲中的 `same-digit` 外觀不變。
+- [x] 5.1 [after: 2.5, 3.1] 讓其他 8 種風格完成 Lessons in every style 與 Lesson state marks（Lesson rows get their own skin hooks）：新增 `lesson-row`、`lesson-mark`，各風格畫出自己的記號；新增技巧教學圖示的 8 套畫法；補上 `lesson-dim` 色值與對比下限 1.5:1 的測試。以 `styleCoverage.test.ts`、`iconSets.test.ts`、`paletteContrast.test.ts` 驗證，並照 `Sketch.dc.html` 比對 8 種風格的截圖。
+- [x] 5.2 [after: 2.1, 2.2, 3.2] 完成 8-bit range and pattern marks 與 Handheld notice（The handheld notice is remembered in settings）：範圍用暗點、目標反白、規律格維持淺底讓線看得到、被刪候選數斜線加粗；掌機進教學先提醒，可換成紅白機、看其他風格或繼續，選繼續後記住，從解題演示進入也一樣。以 `pixelSkin.test.ts` 與 `settingsStore` 測試驗證，並截圖比對 `PixelOptions.dc.html`、`PixelNotice.dc.html`，同時確認遊戲中的 `same-digit` 外觀不變。
 
 ## 6. 收尾
 

@@ -27,6 +27,7 @@
                 pops ? 'animate-hint-reveal-pop' : '',
                 arriving ? 'value-arrive' : '',
                 'leading-none',
+                'cell-digit',
             ]"
             :data-dimmed="dimmed ? '' : undefined"
             :style="digitStyle"

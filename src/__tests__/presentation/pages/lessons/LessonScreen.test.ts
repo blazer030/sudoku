@@ -361,6 +361,30 @@ describe("LessonScreen", () => {
         });
     });
 
+    it("should show how many cells are left on a step that needs several", async () => {
+        const pick: Lesson = {
+            id: "nakedPair",
+            steps: [{
+                kind: "pick",
+                stage: "follow",
+                board: BOARD,
+                marks: {},
+                targets: [cell(2, 2), cell(1, 2)],
+                wrongKey: "lessons.names.xWing",
+                promptKey: "lessons.names.xWing",
+                successKey: "lessons.names.fish",
+                hints: [],
+            }],
+        };
+        const wrapper = mountScreen(pick);
+        const tag = () => wrapper.get("[data-testid='lesson-tag']").text();
+
+        expect(tag()).toContain("0");
+        await tap(wrapper, 2, 2);
+
+        expect(tag()).toContain("1");
+    });
+
     it("should ask to go back", async () => {
         const wrapper = mountScreen();
 

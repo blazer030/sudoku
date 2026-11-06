@@ -1,8 +1,17 @@
 import { lessonContentEn } from "./contentEn";
+import { lessonContentHardEn } from "./contentHardEn";
+import { lessonContentMediumEn } from "./contentMediumEn";
 
 export const lessonsEn = {
-    content: lessonContentEn,
+    content: { ...lessonContentEn, ...lessonContentMediumEn, ...lessonContentHardEn },
     title: "Technique Lessons",
+    notice: {
+        title: "These colours are hard to learn in",
+        message: "{light} has only a few greens, so the marks in some lesson steps can be hard to see. Change colours first?",
+        switch: "Switch to {dark}",
+        otherStyles: "See other styles",
+        carryOn: "Carry on in {light}",
+    },
     finishedCount: "{done} / {total}",
     firstCaption: "Start here",
     nextCaption: "Next lesson",

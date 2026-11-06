@@ -1,10 +1,10 @@
 <template>
     <div
-        class="flex flex-col gap-(--game-page-gap) min-h-full pt-(--game-page-top) pb-(--game-page-bottom) px-5 bg-background"
+        class="flex flex-col gap-(--game-page-gap) h-full overflow-hidden pt-(--game-page-top) pb-(--game-page-bottom) px-5 bg-background"
         data-skin="page"
         data-testid="lesson-screen"
     >
-        <div class="grid grid-cols-[1fr_auto_1fr] items-center">
+        <div class="grid grid-cols-[1fr_auto_1fr] items-center shrink-0">
             <button
                 class="flex items-center gap-2 cursor-pointer justify-self-start"
                 data-testid="back-button"
@@ -15,15 +15,15 @@
                     :size="24"
                     class="text-foreground"
                 />
-                <span class="text-foreground text-base font-medium">{{ t("common.back") }}</span>
+                <span class="text-foreground text-base font-medium whitespace-nowrap">{{ t("common.back") }}</span>
             </button>
             <span
-                class="text-foreground text-lg font-semibold text-center"
+                class="text-foreground text-lg [@media(max-height:719.98px)]:text-base font-semibold text-center whitespace-nowrap"
                 data-testid="lesson-title"
             >{{ t(`lessons.names.${lesson.id}`) }}</span>
         </div>
 
-        <!-- The board stays where it is however long the panel's message runs -->
+        <!-- The board stays where it is: the panel grows up towards it, and a message too long for the room scrolls inside it -->
         <BoardFrame
             :celebration="null"
             :effect="null"
@@ -31,11 +31,12 @@
         >
             <div
                 :class="{ 'relative z-20': session.padCell.value !== null }"
-                class="bg-card rounded-2xl shadow-card-lg p-2 self-center w-[calc(100%+1.5rem)] max-w-board-fit"
+                class="bg-card rounded-2xl shadow-card-lg p-2 self-center shrink-0 w-[calc(100%+1.5rem)] max-w-board-fit"
                 data-skin="board"
                 data-testid="lesson-board"
             >
                 <div
+                    :class="{ 'has-step-links': links.length > 0 }"
                     class="relative flex flex-col border-3 border-foreground/20 rounded-xl"
                     data-skin="board-grid"
                 >
@@ -70,7 +71,7 @@
             </div>
         </BoardFrame>
 
-        <div class="mt-auto pt-(--game-section-gap)">
+        <div class="flex-1 min-h-0 flex flex-col justify-end pt-(--game-section-gap)">
             <LessonPanel
                 :can-go-next="session.canGoNext.value"
                 :message-key="messageKey"
@@ -105,7 +106,7 @@ import type { Difficulty } from "@/domain/generator/SudokuGenerator";
 import { ALL_LESSON_IDS, groupOfLesson } from "@/domain/lessons/curriculum";
 import type { Lesson, LessonId } from "@/domain/lessons/Lesson";
 import type { PracticeFeedback } from "@/domain/lessons/practice";
-import type { CellReference } from "@/domain/solver/SolveStep";
+import type { CellReference, Elimination } from "@/domain/solver/SolveStep";
 import BoardFrame from "@/presentation/components/board-frame/BoardFrame.vue";
 import Cell from "@/presentation/components/board-cell/Cell.vue";
 import FloatingDigitPad from "@/presentation/components/floating-digit-pad/FloatingDigitPad.vue";
@@ -171,8 +172,15 @@ const messageKey = computed(() => `${session.stepIndex.value}-${messageText.valu
 
 const progress = computed(() => {
     const step = session.step.value;
-    if (step.kind !== "fill" || step.required <= 1) return null;
-    return { done: session.practice.value.placed.length, total: step.required };
+    const practice = session.practice.value;
+    if (step.kind === "fill" && step.required > 1) return { done: practice.placed.length, total: step.required };
+    if (step.kind === "pick" && step.targets.length > 1) return { done: practice.picked.length, total: step.targets.length };
+    if (step.kind === "remove") {
+        const cellsOf = (removals: readonly Elimination[]) => new Set(removals.map(({ cell }) => `${cell.row}-${cell.column}`)).size;
+        const total = cellsOf(step.removals);
+        if (total > 1) return { done: cellsOf(practice.removed), total };
+    }
+    return null;
 });
 
 const nextIsPractice = computed(() => {
