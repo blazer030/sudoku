@@ -2,14 +2,14 @@
     <div
         v-if="game"
         ref="scrollArea"
-        class="flex flex-col gap-4 h-full overflow-y-auto overflow-x-hidden overscroll-y-contain bg-background px-5 pb-6"
+        class="review-sizes flex flex-col gap-(--review-page-gap) h-full overflow-y-auto overflow-x-hidden overscroll-y-contain bg-background px-5 pb-(--review-page-bottom)"
         data-skin="page"
         data-testid="review-scroll-area"
     >
         <div
             ref="header"
             :data-scrolled="headerScrolled ? '' : undefined"
-            class="flex items-center justify-between sticky top-0 bg-background -mx-5 px-5 pt-6 pb-1 z-10"
+            class="flex items-center justify-between sticky top-0 bg-background -mx-5 px-5 pt-(--review-page-top) pb-(--review-header-bottom) z-10"
             data-skin="page-header"
             data-testid="review-header"
         >
@@ -29,7 +29,7 @@
         </div>
 
         <div
-            class="flex items-center justify-between bg-card rounded-xl py-2 px-4 shadow-card-sm"
+            class="flex items-center justify-between bg-card rounded-xl py-(--review-card-padding) px-4 shadow-card-sm"
             data-skin="card"
         >
             <div class="flex items-center gap-3">
@@ -75,9 +75,8 @@
 
         <div class="flex-1" />
         <!-- The board reaches into the page gutter from inside this wrapper: as a direct child it would
-             count the page's end padding past it as sideways overflow. There are no keys to shrink here:
-             a larger board would only push the playback buttons off a short screen, so it keeps the room -->
-        <div class="flex flex-col gap-6 [--board-room:331px]">
+             count the page's end padding past it as sideways overflow -->
+        <div class="flex flex-col gap-(--review-section-gap)">
             <BoardFrame
                 :celebration="null"
                 :effect="null"

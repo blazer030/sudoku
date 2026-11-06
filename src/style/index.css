@@ -157,6 +157,26 @@
   --home-logo-mark: calc(28.8px + 19.2 * var(--home-step));
 }
 
+/* Game Review's board takes the game's room, so it is the game's size, and the page shrinks round it by a
+   step of its own: 158px to give back, once its smallest sizes fit. What it has left is the window less the
+   board, the game's room when the board stops short of the column's width. A window with all 378px to spare
+   stays at full size. The step-panel sizes are read by the shared panel, which falls back to its full size,
+   so the Walkthrough's stays as it is. */
+.review-sizes {
+  --review-step: calc(clamp(0px, max(var(--usable-height) - (min(100vw, 640px) - 16px), var(--board-room)) - 220px, 158px) / 158);
+  --review-page-top: calc(8px + 16 * var(--review-step));
+  --review-header-bottom: calc(0px + 4 * var(--review-step));
+  --review-page-gap: calc(4px + 12 * var(--review-step));
+  --review-card-padding: calc(2px + 6 * var(--review-step));
+  --review-section-gap: calc(8px + 16 * var(--review-step));
+  --review-page-bottom: calc(4px + 20 * var(--review-step));
+  --step-panel-top: calc(6px + 10 * var(--review-step));
+  --step-panel-row: calc(28px + 4 * var(--review-step));
+  --step-panel-gap: calc(4px + 8 * var(--review-step));
+  --step-panel-control: calc(36px + 8 * var(--review-step));
+  --step-panel-bottom: calc(8px + 4 * var(--review-step));
+}
+
 :root {
   color-scheme: light;
 }

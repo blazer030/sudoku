@@ -3,11 +3,11 @@
         :aria-label="label"
         :data-testid="`${testIdPrefix}-panel`"
         :style="maxHeight === null ? undefined : { maxHeight: `${maxHeight}px` }"
-        class="bg-card rounded-2xl shadow-card-lg w-full p-4 pb-3 flex flex-col gap-3 outline-none [&>*]:shrink-0"
+        class="bg-card rounded-2xl shadow-card-lg w-full px-4 pt-[var(--step-panel-top,1rem)] pb-[var(--step-panel-bottom,0.75rem)] flex flex-col gap-[var(--step-panel-gap,0.75rem)] outline-none [&>*]:shrink-0"
         data-skin="card"
         role="group"
     >
-        <div class="flex items-center justify-between gap-2 min-h-8">
+        <div class="flex items-center justify-between gap-2 min-h-[var(--step-panel-row,2rem)]">
             <slot name="tag" />
             <StepNavigator
                 :step-index="stepIndex"
@@ -37,7 +37,7 @@
                 :aria-pressed="playState.isPlaying.value"
                 :data-testid="`${testIdPrefix}-play`"
                 :disabled="totalSteps <= 1"
-                class="size-11 shrink-0 rounded-full bg-primary text-on-primary flex items-center justify-center cursor-pointer shadow-primary transition-all duration-200 disabled:opacity-40 disabled:cursor-default disabled:shadow-none"
+                class="size-[var(--step-panel-control,2.75rem)] shrink-0 rounded-full bg-primary text-on-primary flex items-center justify-center cursor-pointer shadow-primary transition-all duration-200 disabled:opacity-40 disabled:cursor-default disabled:shadow-none"
                 @click="emit('togglePlay')"
             >
                 <Pause
