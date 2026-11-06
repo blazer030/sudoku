@@ -178,7 +178,8 @@
     color: var(--color-error);
 }
 
-[data-style="chalkboard"] [data-skin~="board"] [data-variant="same-digit"][data-value-kind] > div {
+[data-style="chalkboard"] [data-skin~="board"] [data-variant="same-digit"][data-value-kind] > div,
+[data-style="chalkboard"] [data-skin~="board"] [data-variant="target"][data-value-kind] > div {
     color: var(--color-primary);
 }
 
@@ -1607,4 +1608,17 @@
 
 [data-style="chalkboard"] [data-skin~="floating-pad"][data-note-mode="true"] [data-skin~="floating-key"]:nth-child(9) > span {
     translate: -4cqw -4cqw;
+}
+
+/* Lessons: chalk draws its marks by hand, the finished one a filled blob */
+[data-style="chalkboard"] [data-skin~="lesson-mark"][data-skin~="done"] {
+    border-radius: 45% 55% 50% 50% / 60% 40% 60% 40%;
+}
+
+[data-style="chalkboard"] [data-skin~="lesson-mark"][data-skin~="next"] {
+    border-radius: 48% 52% 45% 55% / 55% 45% 52% 48%;
+}
+
+[data-style="chalkboard"] [data-skin~="cell-cross"] {
+    color: var(--color-error);
 }

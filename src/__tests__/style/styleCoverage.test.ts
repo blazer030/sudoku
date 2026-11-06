@@ -18,6 +18,8 @@ const REQUIRED_SELECTORS: Record<StyleId, readonly string[]> = {
         ".minimal-loader-square",
     ],
     tactile: [
+        '[data-skin~="lesson-mark"]',
+        '[data-skin~="cell-cross"]',
         '[data-skin~="floating-pad"]',
         ...PRESS,
         '[data-skin~="key"]',
@@ -36,6 +38,8 @@ const REQUIRED_SELECTORS: Record<StyleId, readonly string[]> = {
         ".tactile-loader-tile",
     ],
     paper: [
+        '[data-skin~="lesson-mark"]',
+        '[data-skin~="cell-cross"]',
         '[data-skin~="floating-pad"]',
         ...PRESS,
         '[data-skin~="page-ruled"]',
@@ -61,6 +65,8 @@ const REQUIRED_SELECTORS: Record<StyleId, readonly string[]> = {
         ".paper-stamp",
     ],
     pixel: [
+        '[data-skin~="lesson-mark"]',
+        '[data-skin~="cell-cross"]',
         '[data-skin~="floating-pad"]',
         ...PRESS,
         "[data-group]",
@@ -72,6 +78,8 @@ const REQUIRED_SELECTORS: Record<StyleId, readonly string[]> = {
         ".pixel-stage-letter",
     ],
     cyber: [
+        '[data-skin~="lesson-mark"]',
+        '[data-skin~="cell-cross"]',
         '[data-skin~="floating-pad"]',
         '[data-floating-pad-past]',
         ...PRESS,
@@ -85,6 +93,8 @@ const REQUIRED_SELECTORS: Record<StyleId, readonly string[]> = {
         ".cyber-mission",
     ],
     ink: [
+        '[data-skin~="lesson-mark"]',
+        '[data-skin~="cell-cross"]',
         '[data-skin~="floating-pad"]',
         ...PRESS,
         ".ink-loader-stroke",
@@ -103,6 +113,8 @@ const REQUIRED_SELECTORS: Record<StyleId, readonly string[]> = {
         '[data-skin~="hero-vertical"]',
     ],
     chalkboard: [
+        '[data-skin~="lesson-mark"]',
+        '[data-skin~="cell-cross"]',
         '[data-skin~="floating-pad"]',
         ...PRESS,
         '[data-skin~="board"]',
@@ -136,6 +148,8 @@ const REQUIRED_SELECTORS: Record<StyleId, readonly string[]> = {
     ],
     // The press hooks, the shared pieces and the board for now; the moments add theirs
     blueprint: [
+        '[data-skin~="lesson-mark"]',
+        '[data-skin~="cell-cross"]',
         '[data-skin~="floating-pad"]',
         ...PRESS,
         '[data-skin~="board"]',
@@ -161,6 +175,8 @@ const REQUIRED_SELECTORS: Record<StyleId, readonly string[]> = {
     ],
     // The press hooks and the drifting lights for now; the board, the moments and the pages add theirs
     aurora: [
+        '[data-skin~="lesson-mark"]',
+        '[data-skin~="cell-cross"]',
         '[data-skin~="floating-pad"]',
         ...PRESS,
         "body::before",

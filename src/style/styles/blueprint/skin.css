@@ -520,11 +520,13 @@
 
 /* The same digit, and a step's pattern cells, take a flat wash of the primary; the same digit is written in it */
 [data-style="blueprint"] [data-skin~="board"] [data-variant="same-digit"],
+[data-style="blueprint"] [data-skin~="board"] [data-variant="target"],
 [data-style="blueprint"] [data-skin~="board"] [data-variant="pattern"] {
     background-color: var(--color-highlight);
 }
 
-[data-style="blueprint"] [data-skin~="board"] [data-variant="same-digit"][data-value-kind] > div {
+[data-style="blueprint"] [data-skin~="board"] [data-variant="same-digit"][data-value-kind] > div,
+[data-style="blueprint"] [data-skin~="board"] [data-variant="target"][data-value-kind] > div {
     color: var(--color-primary);
 }
 
@@ -1283,4 +1285,22 @@
 [data-style="blueprint"] [data-skin~="floating-pad"][data-note-mode="true"] [data-skin~="floating-key"]::before {
     inset: 2px;
     background-size: 4px 1px, 1px 4px, 4px 1px, 1px 4px, 4px 1px, 1px 4px, 4px 1px, 1px 4px;
+}
+
+/* Lessons: a drawing's marks are square, the next lesson's a callout in the amber pen */
+[data-style="blueprint"] [data-skin~="lesson-mark"] {
+    border-radius: 0;
+}
+
+[data-style="blueprint"] [data-skin~="lesson-mark"][data-skin~="next"] {
+    background: color-mix(in srgb, var(--color-primary) 16%, transparent);
+    box-shadow: inset 0 0 0 1.25px var(--color-primary);
+}
+
+[data-style="blueprint"] [data-skin~="lesson-mark"][data-skin~="rest"] {
+    box-shadow: inset 0 0 0 1px var(--color-foreground-secondary);
+}
+
+[data-style="blueprint"] [data-skin~="cell-cross"] {
+    color: var(--color-error);
 }

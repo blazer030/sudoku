@@ -996,7 +996,7 @@
     --color-primary-ink: #0F380F;
     --color-signal: #8BAC0F;
     --color-signal-surface: #8BAC0F;
-    --color-lesson-dim: #71940F;
+    --color-lesson-dim: #306230;
 }
 
 :root.dark[data-style="pixel"][data-color-theme="classic"] {
@@ -1036,7 +1036,7 @@
     --color-primary-ink: #F8B800;
     --color-signal: #0058F8;
     --color-signal-surface: #1E1E3C;
-    --color-lesson-dim: #616176;
+    --color-lesson-dim: #6C6C6C;
 }
 
 :root.dark[data-style="cyber"][data-color-theme="neon"] {

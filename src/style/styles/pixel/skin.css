@@ -34,6 +34,8 @@
     --board-box-line: var(--color-foreground);
     /* The board's patterns (dither, hatch) and hint fills: the light green over the page in 掌機 */
     --pixel-pattern-shade: var(--color-highlight);
+    --pixel-target-fill: var(--color-foreground);
+    --pixel-target-ink: var(--color-background);
     /* A digit's burst: the two dark greens as it arrives, the mid green alone as it leaves (the light
        green barely shows on the page) */
     --pixel-burst-1: var(--color-foreground);
@@ -71,6 +73,8 @@
     --pixel-hint: var(--color-primary);
     /* ...and the navy card over the dark page in 紅白機 */
     --pixel-pattern-shade: var(--color-card);
+    --pixel-target-fill: var(--color-highlight);
+    --pixel-target-ink: var(--color-foreground);
     /* The console's burst is its red, gold and two blues; leaving, the light grey */
     --pixel-burst-1: var(--color-error);
     --pixel-burst-2: var(--color-primary);
@@ -313,9 +317,19 @@
     background-color: currentColor;
 }
 
-[data-style="pixel"] [data-skin~="board"] [data-variant="scope"],
 [data-style="pixel"] [data-skin~="board"] [data-variant="peer"] {
     --pixel-cell-pattern: repeating-conic-gradient(var(--pixel-pattern-shade) 0 25%, transparent 0 50%);
+}
+
+/* A step's range is dots in the mid ink: the two close greens of 掌機 are too faint to mark it, whatever their
+   pattern. A 2px dot in a 6px tile leaves a digit readable over it. */
+[data-style="pixel"] [data-skin~="board"] [data-variant="scope"] {
+    --pixel-cell-pattern: conic-gradient(from 0deg at 2px 2px, transparent 75%, var(--color-border) 0);
+    background-size: 6px 6px;
+}
+
+[data-style="pixel"] [data-skin~="board"] [data-variant="scope"][data-pressed] {
+    background-size: auto, 6px 6px;
 }
 
 /* An error (檢查衝突) or a hint's wrong entry is hatched; the error's digit blinks twice as it shows.
@@ -347,10 +361,29 @@
     --pixel-entry-ink: var(--color-foreground);
 }
 
+/* A digit a lesson points at is inverted, so it stands out on a board of close colours; the game's same digit
+   keeps its fill */
+[data-style="pixel"] [data-skin~="board"] [data-variant="target"] {
+    --pixel-cell-fill: var(--pixel-target-fill);
+    --pixel-clue-ink: var(--pixel-target-ink);
+    --pixel-entry-ink: var(--pixel-target-ink);
+}
+
 /* Hint mode's pattern cells are the pattern shade solid; its answer keeps the board and takes the cursor */
 [data-style="pixel"] [data-skin~="board"] [data-variant="focus"],
 [data-style="pixel"] [data-skin~="board"] [data-variant="pattern"] {
     --pixel-cell-fill: var(--pixel-pattern-shade);
+}
+
+/* A struck candidate needs more than a 1px line: its colour is the ink of every other note in 掌機 */
+[data-style="pixel"] .strike-diagonal::after {
+    background: linear-gradient(
+        to top right,
+        transparent calc(50% - 1.2px),
+        currentColor calc(50% - 1.2px),
+        currentColor calc(50% + 1.2px),
+        transparent calc(50% + 1.2px)
+    );
 }
 
 /* The shared answer ring gives way to the cursor, as on the selected cell */
@@ -1118,4 +1151,21 @@
     background-color: var(--color-card);
     opacity: 1;
     color: var(--color-foreground-muted);
+}
+
+/* Lessons: nothing in 8-bit is round, so the marks are square frames in the inks */
+[data-style="pixel"] [data-skin~="lesson-mark"] {
+    border-radius: 0;
+}
+
+[data-style="pixel"] [data-skin~="lesson-mark"][data-skin~="next"] {
+    box-shadow: inset 0 0 0 3px var(--color-primary);
+}
+
+[data-style="pixel"] [data-skin~="lesson-mark"][data-skin~="rest"] {
+    box-shadow: inset 0 0 0 2px var(--color-border);
+}
+
+[data-style="pixel"] [data-skin~="cell-cross"] {
+    color: var(--color-error);
 }
