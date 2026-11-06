@@ -2,7 +2,10 @@ import { flushPromises, mount } from "@vue/test-utils";
 import { createPinia, setActivePinia } from "pinia";
 import type { Lesson, LessonBoard } from "@/domain/lessons/Lesson";
 import LessonScreen from "@/presentation/pages/lessons/LessonScreen.vue";
+import { useGameStore } from "@/stores/gameStore";
+import { useLessonStore } from "@/stores/lessonStore";
 import { useSettingsStore } from "@/stores/settingsStore";
+import { useStatisticsStore } from "@/stores/statisticsStore";
 import { i18n } from "@/presentation/i18n";
 
 /*
@@ -242,6 +245,120 @@ describe("LessonScreen", () => {
         await toPractice(wrapper);
 
         expect(wrapper.find("[data-testid='lesson-note-toggle']").exists()).toBe(false);
+    });
+
+    describe("finishing", () => {
+        const finish = async (wrapper: Screen) => {
+            await toPractice(wrapper);
+            await tap(wrapper, 2, 4);
+            await primary(wrapper).trigger("click");
+            await flushPromises();
+            await tap(wrapper, 2, 2);
+            await wrapper.get("[data-testid='floating-number-7']").trigger("click");
+            await tap(wrapper, 2, 4);
+            await tap(wrapper, 0, 0);
+            await wrapper.get("[data-testid='floating-number-4']").trigger("click");
+            await flushPromises();
+            await primary(wrapper).trigger("click");
+            await flushPromises();
+        };
+
+        const lessonNamed = (id: Lesson["id"]): Lesson => ({ ...LESSON, id });
+
+        it("should record the lesson and show its takeaway on reaching the end", async () => {
+            const store = useLessonStore();
+            const wrapper = mountScreen();
+
+            await finish(wrapper);
+
+            expect(store.isFinished("hiddenSingle")).toBe(true);
+            expect(explanation(wrapper)).toContain(nameOf("xyWing"));
+        });
+
+        it("should keep the last practice's board on the closing step", async () => {
+            const wrapper = mountScreen();
+
+            await finish(wrapper);
+
+            expect(wrapper.get("[data-testid='lesson-cell-2-2'] [data-testid='cell-value']").text()).toBe("7");
+        });
+
+        it("should not record a lesson left before its end", async () => {
+            const store = useLessonStore();
+            const wrapper = mountScreen();
+
+            await toPractice(wrapper);
+            await tap(wrapper, 2, 4);
+            await wrapper.get("[data-testid='back-button']").trigger("click");
+
+            expect(store.isFinished("hiddenSingle")).toBe(false);
+        });
+
+        it("should offer the next lesson mid-group", async () => {
+            const wrapper = mountScreen();
+
+            await finish(wrapper);
+            await primary(wrapper).trigger("click");
+
+            expect(primary(wrapper).text()).toContain(nameOf("nakedSingle"));
+            expect(wrapper.emitted("openLesson")).toEqual([["nakedSingle"]]);
+        });
+
+        it.each([
+            ["nakedSingle", "easy"],
+            ["hiddenSubset", "medium"],
+            ["xyChain", "hard"],
+        ] as const)("should offer a new game after %s, the end of %s", async (id, difficulty) => {
+            const wrapper = mountScreen(lessonNamed(id));
+
+            await finish(wrapper);
+            await primary(wrapper).trigger("click");
+
+            expect(wrapper.emitted("playDifficulty")).toEqual([[difficulty]]);
+            expect(wrapper.emitted("openLesson")).toBeUndefined();
+        });
+
+        it("should go on to the next lesson after the basics, which have no difficulty", async () => {
+            const wrapper = mountScreen(lessonNamed("fillingIn"));
+
+            await finish(wrapper);
+            await primary(wrapper).trigger("click");
+
+            expect(wrapper.emitted("openLesson")).toEqual([["hiddenSingle"]]);
+            expect(wrapper.emitted("playDifficulty")).toBeUndefined();
+        });
+
+        it("should go back to the list from its second action", async () => {
+            const wrapper = mountScreen();
+
+            await finish(wrapper);
+            await secondary(wrapper).trigger("click");
+
+            expect(wrapper.emitted("back")).toHaveLength(1);
+        });
+
+        it("should leave game statistics and the saved game alone", async () => {
+            const statistics = useStatisticsStore();
+            const game = useGameStore();
+            const wrapper = mountScreen();
+            const recordGame = vi.spyOn(statistics, "recordGame");
+
+            await finish(wrapper);
+
+            expect(recordGame).not.toHaveBeenCalled();
+            expect(game.savedGame).toBeNull();
+        });
+
+        it("should only offer going back when opened from the Walkthrough", async () => {
+            const wrapper = mount(LessonScreen, { props: { lesson: LESSON, fromWalkthrough: true } });
+
+            await finish(wrapper);
+            await primary(wrapper).trigger("click");
+
+            expect(wrapper.emitted("back")).toHaveLength(1);
+            expect(wrapper.emitted("openLesson")).toBeUndefined();
+            expect(wrapper.emitted("playDifficulty")).toBeUndefined();
+        });
     });
 
     it("should ask to go back", async () => {

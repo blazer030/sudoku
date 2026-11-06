@@ -98,10 +98,12 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from "vue";
+import { computed, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { BOARD_SIZE } from "@/domain/board/constants";
-import type { Lesson } from "@/domain/lessons/Lesson";
+import type { Difficulty } from "@/domain/generator/SudokuGenerator";
+import { ALL_LESSON_IDS, groupOfLesson } from "@/domain/lessons/curriculum";
+import type { Lesson, LessonId } from "@/domain/lessons/Lesson";
 import type { PracticeFeedback } from "@/domain/lessons/practice";
 import type { CellReference } from "@/domain/solver/SolveStep";
 import BoardFrame from "@/presentation/components/board-frame/BoardFrame.vue";
@@ -109,17 +111,29 @@ import Cell from "@/presentation/components/board-cell/Cell.vue";
 import FloatingDigitPad from "@/presentation/components/floating-digit-pad/FloatingDigitPad.vue";
 import { ChevronLeft } from "@/presentation/components/icon";
 import StepLinkOverlay from "@/presentation/components/step-presentation/StepLinkOverlay.vue";
+import { useDifficultyLabel } from "@/presentation/i18n/difficultyLabels";
 import LessonPanel from "@/presentation/pages/lessons/LessonPanel.vue";
 import { useLessonSession } from "@/presentation/pages/lessons/useLessonSession";
+import { useLessonStore } from "@/stores/lessonStore";
 
-const props = defineProps<{ lesson: Lesson }>();
+const props = withDefaults(defineProps<{
+    lesson: Lesson;
+    /** Opened over the Walkthrough: the way on is back to its step, not another lesson or a game. */
+    fromWalkthrough?: boolean;
+}>(), { fromWalkthrough: false });
 
-const emit = defineEmits<{ back: [] }>();
+const emit = defineEmits<{
+    back: [];
+    openLesson: [lesson: LessonId];
+    playDifficulty: [difficulty: Difficulty];
+}>();
 
 // No key is greyed out for having all nine on the board: that would give the answer away
 const NO_DIGITS_USED_UP = Array.from({ length: BOARD_SIZE + 1 }, () => 0);
 
 const { t } = useI18n();
+const difficultyLabel = useDifficultyLabel();
+const lessonStore = useLessonStore();
 const session = useLessonSession(props.lesson);
 
 const isPractising = computed(() => session.step.value.kind !== "show" && session.step.value.kind !== "done");
@@ -131,17 +145,17 @@ const frameTarget = computed((): CellReference | null =>
 
 const feedbackText = (feedback: PracticeFeedback): string => {
     switch (feedback.kind) {
-        case "conflict": {
-            const key = { row: "conflictRow", column: "conflictColumn", box: "conflictBox" }[feedback.house];
-            return t(`lessons.common.feedback.${key}`, { number: feedback.number, digit: feedback.digit });
-        }
-        case "notCertain":
-        case "notTheAnswer":
-            return t(`lessons.common.feedback.${feedback.kind}`, { digit: feedback.digit });
-        case "message":
-            return t(feedback.key);
-        default:
-            return t(`lessons.common.feedback.${feedback.kind}`);
+    case "conflict": {
+        const key = { row: "conflictRow", column: "conflictColumn", box: "conflictBox" }[feedback.house];
+        return t(`lessons.common.feedback.${key}`, { number: feedback.number, digit: feedback.digit });
+    }
+    case "notCertain":
+    case "notTheAnswer":
+        return t(`lessons.common.feedback.${feedback.kind}`, { digit: feedback.digit });
+    case "message":
+        return t(feedback.key);
+    default:
+        return t(`lessons.common.feedback.${feedback.kind}`);
     }
 };
 
@@ -166,14 +180,51 @@ const nextIsPractice = computed(() => {
     return session.step.value.kind === "show" && following !== undefined && following.kind !== "show";
 });
 
-const primaryLabel = computed(() => t(nextIsPractice.value ? "lessons.common.actions.tryIt" : "lessons.common.actions.next"));
-const primaryDisabled = computed(() => !session.canGoNext.value);
-const handlePrimary = () => { session.next(); };
+const isDone = computed(() => session.step.value.kind === "done");
 
-const secondaryLabel = computed(() => t(session.step.value.kind === "show" ? "lessons.common.actions.skipToPractice" : "lessons.common.actions.hint"));
-const secondaryDisabled = computed(() => session.step.value.kind !== "show" && !session.hintsLeft.value);
+watch(isDone, (done) => {
+    if (done) lessonStore.finish(props.lesson.id);
+});
+
+const group = groupOfLesson(props.lesson.id);
+const isLastOfGroup = group.lessons[group.lessons.length - 1] === props.lesson.id;
+const followingLesson = ALL_LESSON_IDS[ALL_LESSON_IDS.indexOf(props.lesson.id) + 1] as LessonId | undefined;
+
+const finishLabel = (): string => {
+    if (props.fromWalkthrough) return t("lessons.common.actions.backToWalkthrough");
+    if (isLastOfGroup && group.difficulty !== null) {
+        return t("lessons.common.actions.playDifficulty", { difficulty: difficultyLabel(group.difficulty) });
+    }
+    return followingLesson === undefined
+        ? t("lessons.common.actions.backToLessons")
+        : t("lessons.common.actions.nextLesson", { name: t(`lessons.names.${followingLesson}`) });
+};
+
+const finishAction = () => {
+    if (props.fromWalkthrough) emit("back");
+    else if (isLastOfGroup && group.difficulty !== null) emit("playDifficulty", group.difficulty);
+    else if (followingLesson !== undefined) emit("openLesson", followingLesson);
+    else emit("back");
+};
+
+const primaryLabel = computed(() => {
+    if (isDone.value) return finishLabel();
+    return t(nextIsPractice.value ? "lessons.common.actions.tryIt" : "lessons.common.actions.next");
+});
+const primaryDisabled = computed(() => !isDone.value && !session.canGoNext.value);
+const handlePrimary = () => {
+    if (isDone.value) finishAction();
+    else session.next();
+};
+
+const secondaryLabel = computed(() => {
+    if (isDone.value) return t("lessons.common.actions.backToLessons");
+    return t(session.step.value.kind === "show" ? "lessons.common.actions.skipToPractice" : "lessons.common.actions.hint");
+});
+const secondaryDisabled = computed(() => !isDone.value && session.step.value.kind !== "show" && !session.hintsLeft.value);
 const handleSecondary = () => {
-    if (session.step.value.kind === "show") session.skipToPractice();
+    if (isDone.value) emit("back");
+    else if (session.step.value.kind === "show") session.skipToPractice();
     else session.requestHint();
 };
 </script>
