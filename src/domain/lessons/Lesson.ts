@@ -55,6 +55,8 @@ export interface LessonHint {
     textKey: string;
     params?: Record<string, number>;
     marks?: StepMarks;
+    /** The cell a fill step's last hint selects, so the digit pad opens there. */
+    selects?: CellReference;
 }
 
 interface LessonStepBase {
@@ -108,8 +110,6 @@ export interface RemoveStep extends PracticeStepBase {
     wrongKey: string;
     /** The digits the step is about; a cell with none of them says so. */
     digits?: readonly number[];
-    /** How a technique's other candidates can be kept: a cell of the pattern may itself lose some, as in hidden pairs. */
-    removesFromPattern?: boolean;
 }
 
 export type FillRule = "answer" | "nakedSingle" | "hiddenSingle";

@@ -1,4 +1,4 @@
-import type { LessonBoard, LessonStep } from "@/domain/lessons/Lesson";
+import type { LessonBoard, LessonStep, RemoveStep } from "@/domain/lessons/Lesson";
 import { verifyLessonStep } from "@/domain/lessons/verifyLesson";
 
 // A real position from the solver: rows 6 and 7 hold their 2s in columns 5 and 7 only (counted from 1)
@@ -15,7 +15,7 @@ const corners = [
     { row: 6, column: 6 },
 ];
 
-const removeStep = (removals: { cell: { row: number; column: number }; digit: number }[]): LessonStep => ({
+const removeStep = (removals: { cell: { row: number; column: number }; digit: number }[]): RemoveStep => ({
     kind: "remove",
     stage: "follow",
     board: X_WING_BOARD,

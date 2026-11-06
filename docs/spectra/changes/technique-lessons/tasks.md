@@ -1,7 +1,7 @@
 ## 1. 課程核心
 
 - [x] 1.1 完成 Curriculum 與內容模型（Lesson content lives in the domain as data）：`src/domain/lessons/` 能列出四組 17 課，`lessonForTechnique` 對 19 個 `TechniqueId` 都回傳一課。同時建立內容驗證工具（Every lesson board is validated by the technique solver，Lesson boards are verified），用 `BoardState.fromPuzzle` 加 `eliminate` 重建盤面，再和對應技巧的 `find` 結果比對。以 `src/__tests__/domain/lessons/curriculum.test.ts` 驗證順序與對應，並用一個故意寫錯的盤面確認驗證工具會失敗。
-- [ ] 1.2 [after: 1.1] 完成練習判定（Practice is a pure state machine in the domain）：`practiceReducer` 處理 `place`、`pick`、`remove`、`fill`、`note` 五種步驟，涵蓋 Wrong answers explain themselves 的每種原因、Layered hints 的分段與最後才給答案，以及 Independent practice has one target 接受任一合法答案。以 `src/__tests__/domain/lessons/practiceReducer.test.ts` 驗證規格裡的範例表。
+- [x] 1.2 [after: 1.1] 完成練習判定（Practice is a pure state machine in the domain）：`practiceReducer` 處理 `place`、`pick`、`remove`、`fill`、`note` 五種步驟，涵蓋 Wrong answers explain themselves 的每種原因、Layered hints 的分段與最後才給答案，以及 Independent practice has one target 接受任一合法答案。以 `src/__tests__/domain/lessons/practiceReducer.test.ts` 驗證規格裡的範例表。
 
 ## 2. 課程畫面（先做極簡）
 
