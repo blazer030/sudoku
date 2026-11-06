@@ -7,8 +7,8 @@
 
 - [x] 2.1 [after: 1.1] 讓共用棋盤支援教學標示（Lesson boards reuse Cell and StepCellView）：`StepCellView` 新增 `crossed`、`dimmed` 與 `target`，`BoardCell` 輸出 `data-crossed`、`data-dimmed`、`data-variant="target"`。這一步完成 Target digits get their own cell variant、Target digits、Crossed-out cells（The cross mark is an icon），以及 Dimmed digits（Dimmed digits use a per-style colour token, not opacity，含 palette token `lesson-dim`）。以 `BoardCell` 元件測試驗證，並確認遊戲中選數字仍是 `same-digit`、提示模式與解題演示的現有測試不變。
 - [x] 2.2 [after: 1.1] 完成 Lesson list 頁：路由 `/lessons` 與 `/lessons/:lessonId`、不存在的課程導回列表、下一課標示、分組計數、學完一組可開新遊戲、`ScreenName` 新增 `lessons` 與 `lesson`。以 `src/__tests__/presentation/pages/lessons/LessonList.test.ts` 和 `screenTracking` 測試驗證，含語言切換（Lesson language）。
-- [ ] 2.3 [after: 1.2, 2.1] 完成 `LessonScreen` 的 Lesson stages 與 Explanation steps：`LessonPanel`（The lesson panel composes the step components）可前後翻步、跳到練習，未解的練習不能往下走；符合 One message at a time，訊息切換時棋盤不移動。以元件測試驗證流程，並在 360×640 量測棋盤位置與按鈕都在畫面內。
-- [ ] 2.4 [after: 2.3] 完成 Practising by tapping 與 Notes in lessons：點格子填數字、點出規律、點格子刪候選數；要決定數字時才開 `FloatingDigitPad`，不看懸浮鍵設定，也沒有常駐數字鍵；簡單的課不顯示筆記，中等以上顯示全部候選數。提示與答錯原因接上文案。以 `LessonScreen` 元件測試驗證，含懸浮鍵設定關閉的情況。
+- [x] 2.3 [after: 1.2, 2.1] 完成 `LessonScreen` 的 Lesson stages 與 Explanation steps：`LessonPanel`（The lesson panel composes the step components）可前後翻步、跳到練習，未解的練習不能往下走；符合 One message at a time，訊息切換時棋盤不移動。以元件測試驗證流程，並在 360×640 量測棋盤位置與按鈕都在畫面內。
+- [x] 2.4 [after: 2.3] 完成 Practising by tapping 與 Notes in lessons：點格子填數字、點出規律、點格子刪候選數；要決定數字時才開 `FloatingDigitPad`，不看懸浮鍵設定，也沒有常駐數字鍵；簡單的課不顯示筆記，中等以上顯示全部候選數。提示與答錯原因接上文案。以 `LessonScreen` 元件測試驗證，含懸浮鍵設定關閉的情況。
 - [ ] 2.5 [after: 2.4] 完成 Completion 與 Lesson progress（Lesson progress has its own repository）：整課走完才記錄完成，完成畫面顯示一句話重點並提供下一課，一組的最後一課改提供新遊戲；進度重開 App 還在，「清除紀錄」不影響，讀不到時視為未完成；統計和存檔不受影響。以 `lessonStore` 與 repository 的測試驗證。
 
 ## 3. 入口

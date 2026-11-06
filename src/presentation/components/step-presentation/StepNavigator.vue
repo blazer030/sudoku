@@ -46,7 +46,7 @@
             v-press
             :aria-label="t('stepPanel.nextStep')"
             :data-testid="`${testIdPrefix}-next`"
-            :disabled="stepIndex >= totalSteps - 1"
+            :disabled="stepIndex >= totalSteps - 1 || nextDisabled"
             class="step-arrow"
             data-skin="step-arrow"
             @click="emit('next')"
@@ -71,6 +71,8 @@ const props = defineProps<{
     stepIndex: number;
     totalSteps: number;
     testIdPrefix: string;
+    /** The way on is closed until this step is done; a lesson's practice. */
+    nextDisabled?: boolean;
 }>();
 
 const emit = defineEmits<{

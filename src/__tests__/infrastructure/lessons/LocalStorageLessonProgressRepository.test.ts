@@ -43,6 +43,6 @@ describe("LocalStorageLessonProgressRepository", () => {
             throw new Error("full");
         });
 
-        expect(() => new LocalStorageLessonProgressRepository().save(["rules"])).not.toThrow();
+        expect(() => { new LocalStorageLessonProgressRepository().save(["rules"]); }).not.toThrow();
     });
 });
