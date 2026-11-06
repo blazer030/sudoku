@@ -19,6 +19,12 @@ export interface ChangelogEntry {
 export const UNRELEASED_CHANGES: ChangelogChange[] = [
     {
         text: {
+            en: "New technique lessons",
+            "zh-Hant": "全新技巧教學",
+        },
+    },
+    {
+        text: {
             en: "Interface refinements",
             "zh-Hant": "介面優化",
         },

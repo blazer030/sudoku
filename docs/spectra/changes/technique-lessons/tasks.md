@@ -29,4 +29,4 @@
 
 ## 6. 收尾
 
-- [ ] 6.1 [after: 4.3, 5.1, 5.2] 完成上線前檢查：在 `UNRELEASED_CHANGES` 加一行兩種語言的「技巧教學」；新的水墨標題加進 `INK_BRUSH_MESSAGE_KEYS`；跑 `npm run generate:fonts`、`generate:theme-css`、`generate:icons`；`npx vitest run`、`npm run lint`、`npm run build` 全過；在 Chromium、WebKit、Firefox 看過 9 種風格的課程列表與課程頁，動態效果關閉時也看過；在 Android 模擬器比對首頁 844 高以上與舊版相同，並檢查返回鍵。
+- [x] 6.1 [after: 4.3, 5.1, 5.2] 完成上線前檢查：在 `UNRELEASED_CHANGES` 加一行兩種語言的「技巧教學」；新的水墨標題加進 `INK_BRUSH_MESSAGE_KEYS`；跑 `npm run generate:fonts`、`generate:theme-css`、`generate:icons`；`npx vitest run`、`npm run lint`、`npm run build` 全過；在 Chromium、WebKit、Firefox 看過 9 種風格的課程列表與課程頁，動態效果關閉時也看過；在 Android 模擬器比對首頁 844 高以上與舊版相同，並檢查返回鍵。
