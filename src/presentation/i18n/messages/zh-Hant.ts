@@ -1,6 +1,8 @@
 import type { MessageSchema } from "./en";
+import { lessonsZhHant } from "./lessons/zh-Hant";
 
 export const zhHant: MessageSchema = {
+    lessons: lessonsZhHant,
     common: {
         back: "返回",
         cancel: "取消",

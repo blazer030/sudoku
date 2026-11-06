@@ -2,8 +2,10 @@ import type { TechniqueId } from "@/domain/solver/SolveStep";
 import type { Difficulty } from "@/domain/generator/SudokuGenerator";
 import type { DonateTier } from "@/application/analytics/AnalyticsService";
 import type { GameStepAction } from "@/domain/game/GameStep";
+import { lessonsEn } from "./lessons/en";
 
 export const en = {
+    lessons: lessonsEn,
     common: {
         back: "Back",
         cancel: "Cancel",

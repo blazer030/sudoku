@@ -18,7 +18,9 @@
         </button>
         <span class="text-foreground text-lg font-semibold">{{ title }}</span>
         <!-- Balances the Back button so the title stays centred -->
-        <div class="w-15" />
+        <div class="w-15 flex justify-end">
+            <slot name="end" />
+        </div>
     </div>
 </template>
 

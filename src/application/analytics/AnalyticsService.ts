@@ -25,7 +25,9 @@ export type ScreenName =
     | "changelog"
     | "donate"
     | "game_review"
-    | "solver";
+    | "solver"
+    | "lessons"
+    | "lesson";
 
 export type UserPropertyName = "style" | "color_theme" | "color_mode" | "language" | "icon_follows_theme";
 
