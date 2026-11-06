@@ -21,6 +21,16 @@ import { ANALYTICS_KEY, type AnalyticsEvent } from "@/application/analytics/Anal
 import { createAnalyticsSpy } from "@/__tests__/fixtures/analyticsSpy";
 import { StubBoardFrame, frameMinimalWithStubInEachTest, frameTarget } from "@/__tests__/fixtures/boardFrameStub";
 
+vi.mock("@/domain/lessons/content", () => ({
+    lessonContent: (id: string) => ({
+        id,
+        steps: [
+            { kind: "show", stage: "explain", board: { values: "0".repeat(81), showsCandidates: false }, marks: {}, textKey: "lessons.title" },
+            { kind: "done", stage: "done", board: { values: "0".repeat(81), showsCandidates: false }, marks: {}, takeawayKey: "lessons.title" },
+        ],
+    }),
+}));
+
 const samplePuzzle = (id: string): number[][] => {
     const sample = SAMPLE_PUZZLES.find((candidate) => candidate.id === id);
     if (!sample) throw new Error(`expected the ${id} sample to exist`);
@@ -507,6 +517,79 @@ describe("SolverWalkthrough", () => {
             const { wrapper } = await mountEntering();
 
             expect(wrapper.find("[data-testid='solve-button']").exists()).toBe(true);
+        });
+    });
+
+    describe("learning a step's technique", () => {
+        const playing = async () => {
+            const { wrapper } = mountWalkthrough({ initialPuzzle: singlesPuzzle });
+            await solve(wrapper);
+            await clickNext(wrapper, 2);
+            return wrapper;
+        };
+        const learn = (wrapper: VueWrapper) => wrapper.find("[data-testid='walkthrough-learn']");
+        const lesson = (wrapper: VueWrapper) => wrapper.find("[data-testid='lesson-screen']");
+        const counter = (wrapper: VueWrapper) => wrapper.find("[data-testid='walkthrough-explanation']").text();
+
+        it("should open the technique's lesson over the Walkthrough", async () => {
+            const wrapper = await playing();
+
+            await learn(wrapper).trigger("click");
+            await flushPromises();
+
+            expect(lesson(wrapper).exists()).toBe(true);
+            expect(wrapper.find("[data-testid='walkthrough-board']").exists()).toBe(true);
+        });
+
+        it("should come back to the same step from the lesson's back button", async () => {
+            const wrapper = await playing();
+            const before = counter(wrapper);
+
+            await learn(wrapper).trigger("click");
+            await lesson(wrapper).find("[data-testid='back-button']").trigger("click");
+            await flushPromises();
+
+            expect(lesson(wrapper).exists()).toBe(false);
+            expect(counter(wrapper)).toBe(before);
+        });
+
+        it("should close the lesson with the system Back key, staying on the step", async () => {
+            const wrapper = await playing();
+            const before = counter(wrapper);
+
+            await learn(wrapper).trigger("click");
+            handleBackButton(true);
+            await flushPromises();
+
+            expect(lesson(wrapper).exists()).toBe(false);
+            expect(counter(wrapper)).toBe(before);
+        });
+
+        it("should hold a running playback while the lesson is open, and carry on after", async () => {
+            const wrapper = await playing();
+            const play = () => wrapper.find("[data-testid='walkthrough-play']");
+            await play().trigger("click");
+            expect(play().attributes("aria-pressed")).toBe("true");
+            const before = counter(wrapper);
+
+            await learn(wrapper).trigger("click");
+            await nextTick();
+            expect(play().attributes("aria-pressed")).toBe("false");
+
+            await lesson(wrapper).find("[data-testid='back-button']").trigger("click");
+            await flushPromises();
+
+            expect(counter(wrapper)).toBe(before);
+            expect(play().attributes("aria-pressed")).toBe("true");
+        });
+
+        it("should offer nothing on the solved board", async () => {
+            const { wrapper } = mountWalkthrough({ initialPuzzle: singlesPuzzle });
+            await solve(wrapper);
+
+            await clickNext(wrapper, singlesPositionCount);
+
+            expect(learn(wrapper).exists()).toBe(false);
         });
     });
 

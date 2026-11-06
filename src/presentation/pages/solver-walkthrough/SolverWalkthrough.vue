@@ -217,14 +217,26 @@
                             @toggle-play="togglePlay"
                         >
                             <template #tag>
-                                <StepTag
-                                    v-if="tag"
-                                    :icon="tag.icon"
-                                    :label="tag.label"
-                                    :step-key="stepIndex"
-                                    :strong="tag.strong"
-                                    :test-id="tag.testId"
-                                />
+                                <span class="flex items-center gap-1 min-w-0">
+                                    <StepTag
+                                        v-if="tag"
+                                        :icon="tag.icon"
+                                        :label="tag.label"
+                                        :step-key="stepIndex"
+                                        :strong="tag.strong"
+                                        :test-id="tag.testId"
+                                    />
+                                    <button
+                                        v-if="lessonOfStep !== null"
+                                        class="flex items-center min-h-8 px-1 text-primary text-[13px] font-semibold whitespace-nowrap cursor-pointer"
+                                        data-skin="text-button"
+                                        data-testid="walkthrough-learn"
+                                        type="button"
+                                        @click="openLessonOfStep"
+                                    >
+                                        {{ t("walkthrough.learnTechnique") }}
+                                    </button>
+                                </span>
                             </template>
                             {{ explanation }}
                         </StepPlaybackPanel>
@@ -235,6 +247,18 @@
         <div class="flex-1" />
 
         <WalkthroughDialog />
+        <!-- Over the page rather than a route of its own: the Walkthrough's steps live in this page -->
+        <div
+            v-if="openedLesson !== null"
+            class="app-safe-area fixed inset-0 z-70 max-w-screen-sm mx-auto overflow-y-auto bg-background"
+            data-testid="walkthrough-lesson"
+        >
+            <LessonScreen
+                :from-walkthrough="true"
+                :lesson="openedLesson"
+                @back="closeLesson"
+            />
+        </div>
         <PuzzleLoader
             :message="t('walkthrough.checking')"
             :visible="puzzleLoader.visible.value"
@@ -256,6 +280,11 @@ import type { PuzzleCheck } from "@/application/puzzleCheck/checkPuzzle";
 import PuzzleLoader from "@/presentation/components/puzzle-loader/PuzzleLoader.vue";
 import { usePuzzleLoader } from "@/presentation/components/puzzle-loader/usePuzzleLoader";
 import { useTechniqueLabel } from "@/presentation/i18n/techniqueLabels";
+import { lessonContent } from "@/domain/lessons/content";
+import { lessonForTechnique } from "@/domain/lessons/curriculum";
+import type { Lesson } from "@/domain/lessons/Lesson";
+import { registerBackDismissal } from "@/presentation/composables/backDismissal";
+import LessonScreen from "@/presentation/pages/lessons/LessonScreen.vue";
 import Cell from "@/presentation/components/board-cell/Cell.vue";
 import BoardFrame from "@/presentation/components/board-frame/BoardFrame.vue";
 import { cellName } from "@/presentation/components/board-cell/cellName";
@@ -372,6 +401,33 @@ const tag = computed((): { label: string; icon: Component; strong: boolean; test
     const assigns = current.step.assignments.length > 0;
     return { label: techniqueLabel(current.step.technique), icon: assigns ? PencilLine : ListFilter, strong: assigns, testId: "walkthrough-technique" };
 });
+
+// The lesson that teaches this step's technique
+const lessonOfStep = computed((): Lesson | null => {
+    if (isCompleted.value || currentStep.value === null) return null;
+    return lessonContent(lessonForTechnique(currentStep.value.step.technique));
+});
+
+const openedLesson = ref<Lesson | null>(null);
+let resumeAfterLesson = false;
+let withdrawBackDismissal: (() => void) | null = null;
+
+const closeLesson = () => {
+    openedLesson.value = null;
+    withdrawBackDismissal?.();
+    withdrawBackDismissal = null;
+    if (resumeAfterLesson) togglePlay();
+    resumeAfterLesson = false;
+};
+
+const openLessonOfStep = () => {
+    openedLesson.value = lessonOfStep.value;
+    // Playback holds while the lesson is open, so the player comes back to the step they left
+    resumeAfterLesson = playState.isPlaying.value;
+    if (resumeAfterLesson) togglePlay();
+    withdrawBackDismissal = registerBackDismissal(closeLesson);
+};
+onBeforeUnmount(() => { withdrawBackDismissal?.(); });
 
 const explanation = computed(() => {
     if (isCompleted.value) return t("walkthrough.completed");

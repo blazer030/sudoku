@@ -197,6 +197,7 @@ export const en = {
         },
     },
     walkthrough: {
+        learnTechnique: "Learn this",
         reset: "Reset",
         solve: "Solve",
         checking: "Checking the puzzle…",

@@ -191,6 +191,7 @@ export const zhHant: MessageSchema = {
         },
     },
     walkthrough: {
+        learnTechnique: "學這招",
         reset: "重設",
         solve: "解題",
         checking: "正在檢查題目…",
