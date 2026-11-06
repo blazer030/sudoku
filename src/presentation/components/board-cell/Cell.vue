@@ -17,6 +17,9 @@
         :note-tone="hint?.candidates ? 'solver' : 'player'"
         :eliminated-digits="hint?.eliminated ?? []"
         :emphasized-digits="hint?.emphasized ?? []"
+        :dimmed="hint?.dimmed ?? false"
+        :dimmed-notes="hint?.dimmedNotes ?? []"
+        :crossed="hint?.crossed ?? false"
         :popping="revealed"
         :class="[interactionClass, 'select-none [-webkit-touch-callout:none]']"
         :role="interactive ? 'button' : undefined"
@@ -74,6 +77,7 @@ const HINT_VARIANTS: Record<Exclude<StepHighlight, "none">, CellVariant> = {
     pattern: "pattern",
     answer: "answer",
     wrong: "wrong",
+    target: "target",
 };
 
 const emit = defineEmits<{

@@ -14,6 +14,8 @@ export const PALETTE_TOKENS = [
     // A neon ink, a signal colour and its deep surface; other styles alias them to the primary, highlight
     // and primary-light
     "primary-ink", "signal", "signal-surface",
+    // A lesson board's digits and notes that have nothing to do with the step
+    "lesson-dim",
 ] as const;
 export type PaletteToken = typeof PALETTE_TOKENS[number];
 // Colours only one style paints: chalkboard's chalk tray (its top, its shaded foot and its lit edge) and the duster
@@ -48,12 +50,12 @@ export type DarkThemeColors = Pick<Palette, "primary" | "primary-hover" | "accen
 type DerivedToken = "primary-light" | "highlight" | "cell-focus" | "cell-scope" | "cell-pattern" | "cell-peer";
 // Tokens that repeat another token of the same palette unless a style sets its own
 type AliasToken = "note" | "cell-selected" | "featured" | "on-featured" | "rule" | "margin-line"
-    | "primary-ink" | "signal" | "signal-surface";
+    | "primary-ink" | "signal" | "signal-surface" | "lesson-dim";
 // A style's own values for aliases, for the same-digit fill, the primary's light surface and the board
 // tints where a fixed palette sets them rather than tinting the primary, and for its own colours
 type StyleExtras = Partial<Pick<Palette,
     "featured" | "on-featured" | "rule" | "margin-line" | "highlight" | "primary-light"
-    | "primary-ink" | "signal" | "signal-surface"
+    | "primary-ink" | "signal" | "signal-surface" | "lesson-dim"
     | "cell-selected" | "cell-focus" | "cell-scope" | "cell-pattern" | "cell-peer">> & Partial<Record<StyleOwnToken, string>>;
 export type Neutrals<ThemeColors> = Omit<Palette, keyof ThemeColors | DerivedToken | AliasToken>;
 
@@ -66,6 +68,9 @@ const LIGHT_TINTS = { "cell-focus": 0.22, "cell-scope": 0.08, "cell-pattern": 0.
 const DARK_TINTS = {
     "primary-light": 0.18, "highlight": 0.25, "cell-focus": 0.24, "cell-scope": 0.1, "cell-pattern": 0.17, "cell-peer": 0.12,
 } as const;
+
+// A lesson's unrelated digits are the text colour this far over the card, unless a style sets its own
+const LESSON_DIM_STRENGTH = 0.3;
 
 const tintsOf = <Token extends DerivedToken>(primary: string, card: string, strengths: Readonly<Record<Token, number>>) =>
     Object.fromEntries(Object.entries<number>(strengths).map(([token, alpha]) =>
@@ -90,6 +95,7 @@ const withAliases = (palette: Omit<Palette, AliasToken>, extras: StyleExtras): P
         "primary-ink": extras["primary-ink"] ?? settled.primary,
         "signal": extras.signal ?? settled.highlight,
         "signal-surface": extras["signal-surface"] ?? settled["primary-light"],
+        "lesson-dim": extras["lesson-dim"] ?? mixColors(settled.foreground, LESSON_DIM_STRENGTH, settled.card),
     };
 };
 

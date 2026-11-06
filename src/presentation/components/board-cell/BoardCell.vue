@@ -28,7 +28,8 @@
                 arriving ? 'value-arrive' : '',
                 'leading-none',
             ]"
-            :style="digitWriter ? { '--digit-writer-mask': `url(#${writerMaskId})` } : undefined"
+            :data-dimmed="dimmed ? '' : undefined"
+            :style="digitStyle"
             data-testid="cell-value"
             @animationend="settleFromDigit"
         >
@@ -46,13 +47,22 @@
                 <span
                     v-if="notes.includes(noteDigit) || eliminatedDigits.includes(noteDigit)"
                     :class="[noteClass(noteDigit), noteSizeClass, 'font-note']"
+                    :data-note-dimmed="isNoteDimmed(noteDigit) ? '' : undefined"
                     :data-note-highlight="isNoteHighlighted(noteDigit) ? '' : undefined"
+                    :style="isNoteDimmed(noteDigit) ? DIMMED_COLOR : undefined"
                     :data-testid="eliminatedDigits.includes(noteDigit) ? `eliminated-note-${noteDigit}` : undefined"
                 >
                     {{ noteDigit }}
                 </span>
             </div>
         </div>
+        <X
+            v-else-if="crossed"
+            :size="16"
+            class="text-foreground-muted"
+            data-skin="cell-cross"
+            data-testid="cell-cross"
+        />
         <!-- The style's pen: it draws the mask the arriving digit is shown through, beside the digit so its
              strokes' animations never reach the digit's own animationend -->
         <component
@@ -67,6 +77,7 @@
 
 <script lang="ts" setup>
 import { computed, nextTick, ref, toRef, useId, useTemplateRef, watch } from "vue";
+import { X } from "@/presentation/components/icon";
 import { BOX_SIZE } from "@/domain/board/constants";
 import type { GroupKind } from "@/domain/game/Sudoku";
 import { useMotionAllowed } from "@/presentation/composables/useMotionAllowed";
@@ -74,7 +85,7 @@ import { useArrivalMotion } from "@/presentation/components/board-cell/useArriva
 import { useStyleMoments } from "@/presentation/components/style-moments/styleMoments";
 import { canMaskByReference } from "@/presentation/components/style-moments/maskReferenceSupport";
 
-export type CellVariant = "default" | "clue" | "selected" | "focus" | "scope" | "error" | "same-digit" | "pattern" | "answer" | "wrong" | "peer";
+export type CellVariant = "default" | "clue" | "selected" | "focus" | "scope" | "error" | "same-digit" | "target" | "pattern" | "answer" | "wrong" | "peer";
 /** Player notes are muted; solver candidates are bold in the theme colour so they never pass for the player's own. */
 export type NoteTone = "player" | "solver";
 export type ValueTextColor = "normal" | "error" | "primary";
@@ -102,6 +113,12 @@ const props = withDefaults(defineProps<{
     valueKind?: ValueKind;
     /** The selected cell, even when another state (an error) decides its variant; a style may mark it. */
     selected?: boolean;
+    /** A lesson step has nothing to say about this digit, so it recedes. */
+    dimmed?: boolean;
+    /** The notes a lesson step has nothing to say about. */
+    dimmedNotes?: number[];
+    /** A lesson step has ruled this empty cell out. */
+    crossed?: boolean;
 }>(), {
     notes: () => [],
     eliminatedDigits: () => [],
@@ -116,6 +133,9 @@ const props = withDefaults(defineProps<{
     popping: false,
     valueKind: "given",
     selected: false,
+    dimmed: false,
+    dimmedNotes: () => [],
+    crossed: false,
 });
 
 type BoxCorner = "top-left" | "top-right" | "bottom-left" | "bottom-right";
@@ -137,6 +157,7 @@ const VARIANT_BACKGROUNDS: Record<CellVariant, string> = {
     scope: "bg-cell-scope",
     error: "bg-error-surface",
     "same-digit": "bg-highlight",
+    target: "bg-highlight",
     pattern: "bg-cell-pattern",
     answer: "bg-primary-light ring-2 ring-inset ring-primary",
     wrong: "bg-error-surface ring-2 ring-inset ring-error",
@@ -222,6 +243,15 @@ const VALUE_FACES: Record<ValueKind, string> = {
 
 const valueFaceClass = computed(() => VALUE_FACES[props.valueKind]);
 
+// A colour rather than opacity: a skin may have no fading in its language, and its digit animations set opacity themselves.
+// Set on the element, as a skin's own digit colours would outrank a utility class.
+const DIMMED_COLOR = { color: "var(--color-lesson-dim)" };
+
+const digitStyle = computed(() => ({
+    ...(digitWriter.value ? { "--digit-writer-mask": `url(#${writerMaskId})` } : {}),
+    ...(props.dimmed ? DIMMED_COLOR : {}),
+}));
+
 const noteSizeClass = computed(() => (props.noteTone === "solver"
     ? "text-[length:calc(clamp(10px,-0.49px+2.7vw,15px)*var(--note-scale,1))]"
     : "text-[length:calc(clamp(10px,-0.49px+2.26vw,14px)*var(--note-scale,1))]"));
@@ -229,6 +259,9 @@ const noteSizeClass = computed(() => (props.noteTone === "solver"
 // The selected digit's note, or a hint's emphasised candidate; a style may redraw it
 const isNoteHighlighted = (digit: number): boolean =>
     !props.eliminatedDigits.includes(digit) && (props.highlightedNote === digit || props.emphasizedDigits.includes(digit));
+
+const isNoteDimmed = (digit: number): boolean =>
+    props.dimmedNotes.includes(digit) && !props.eliminatedDigits.includes(digit) && !isNoteHighlighted(digit);
 
 const noteClass = (digit: number): string => {
     if (props.eliminatedDigits.includes(digit)) {

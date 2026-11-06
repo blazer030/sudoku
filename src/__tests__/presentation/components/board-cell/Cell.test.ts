@@ -9,6 +9,37 @@ describe("Cell", () => {
     const mountCell = (props: { puzzleCell: PuzzleCell } & Record<string, unknown>) =>
         mount(Cell, { props: { row: 0, column: 0, ...props } });
 
+    describe("a lesson's marks", () => {
+        const view = { highlight: "none", candidates: null, eliminated: [], emphasized: [] } as const;
+
+        it("should show a target by its own variant", () => {
+            const wrapper = mountCell({ puzzleCell: new PuzzleCell(7), hint: { ...view, highlight: "target" } });
+
+            expect(wrapper.attributes("data-variant")).toBe("target");
+        });
+
+        it("should pass a dimmed digit down", () => {
+            const wrapper = mountCell({ puzzleCell: new PuzzleCell(7), hint: { ...view, dimmed: true } });
+
+            expect(wrapper.get("[data-testid='cell-value']").attributes("data-dimmed")).toBe("");
+        });
+
+        it("should pass dimmed notes down", () => {
+            const wrapper = mountCell({
+                puzzleCell: new PuzzleCell(0),
+                hint: { ...view, candidates: [2, 3], dimmedNotes: [3] },
+            });
+
+            expect(wrapper.findAll("[data-note-dimmed]").map(note => note.text())).toEqual(["3"]);
+        });
+
+        it("should pass a cross down", () => {
+            const wrapper = mountCell({ puzzleCell: new PuzzleCell(0), hint: { ...view, crossed: true } });
+
+            expect(wrapper.find("[data-testid='cell-cross']").exists()).toBe(true);
+        });
+    });
+
     it("should show red background and text when error=true", () => {
         const puzzleCell = new PuzzleCell(0);
         puzzleCell.entry = 5;
