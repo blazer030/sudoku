@@ -90,13 +90,18 @@ describe("board geometry", () => {
 
         it("should give back exactly the room the sizes have to give", () => {
             const room = size("board-room");
-            const step = /--game-step: calc\(clamp\(0px, max\(.* - ([\d.]+)px, .* - ([\d.]+)px\), ([\d.]+)px\) \/ ([\d.]+)\);/.exec(indexCss);
+            const step = /--game-step: max\(calc\(clamp\(0px, max\(.* - ([\d.]+)px, .* - ([\d.]+)px\), ([\d.]+)px\) \/ ([\d.]+)\),/.exec(indexCss);
 
             expect(Number(step?.[1])).toBe(room.smallest);
             expect(Number(step?.[3])).toBe(room.share);
             expect(Number(step?.[4])).toBe(room.share);
             // Full size from a 720px window up
             expect(Number(step?.[2]) + room.share).toBe(720);
+        });
+
+        it("should leave a window wider than the column at full size, however short: a tablet or a laptop, not a small screen", () => {
+            expect(indexCss).toContain("--wider-than-column: clamp(0px, 100vw - 640px, 1px);");
+            expect(indexCss).toMatch(/--game-step: max\(.*, var\(--wider-than-column\)\);/);
         });
 
         it("should keep a digit's share of its key as the key shrinks", () => {
@@ -155,13 +160,19 @@ describe("board geometry", () => {
         });
 
         it("should give back exactly the room the sizes have to give", () => {
-            const step = /--review-step: calc\(clamp\(0px, .* - ([\d.]+)px, ([\d.]+)px\) \/ ([\d.]+)\);/.exec(indexCss);
+            const step = /--review-step: max\(calc\(clamp\(0px, .* - ([\d.]+)px, ([\d.]+)px\) \/ ([\d.]+)\),/.exec(indexCss);
             const shares = sum(part => part.share);
 
             expect(Number(step?.[2])).toBe(shares);
             expect(Number(step?.[3])).toBe(shares);
             // It starts to grow only once the parts' smallest sizes fit
             expect(Number(step?.[1])).toBeGreaterThanOrEqual(sum(part => part.smallest) + FIXED);
+        });
+
+        it("should leave a window 720px tall or more alone, even one too wide for its board to leave room for it all", () => {
+            const fullSizeFrom = /--review-step: max\(.*, clamp\(0px, var\(--usable-height\) - ([\d.]+)px, 1px\), var\(--wider-than-column\)\);/.exec(indexCss);
+
+            expect(Number(fullSizeFrom?.[1]) + 1).toBe(720);
         });
 
         it("should leave the Walkthrough's panel, which it shares, as it is", () => {

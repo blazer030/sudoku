@@ -17,7 +17,7 @@ const FULL_SIZE_WINDOW = 720;
 
 const expectedBoard = (width: number, height: number): [number, number, number] => {
     const widest = Math.min(width, COLUMN) - 2 * PAGE_PADDING;
-    const giveBack = Math.max(0, Math.min(ROOM_SHARE, Math.max(height - widest - SMALLEST_ROOM, height - FULL_SIZE_WINDOW + ROOM_SHARE)));
+    const giveBack = width > COLUMN ? ROOM_SHARE : Math.max(0, Math.min(ROOM_SHARE, Math.max(height - widest - SMALLEST_ROOM, height - FULL_SIZE_WINDOW + ROOM_SHARE)));
     const step = giveBack / ROOM_SHARE;
     const room = SMALLEST_ROOM + giveBack;
     const cells = Math.min(widest, height - room) - 2 * BOARD_INSET;

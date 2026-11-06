@@ -370,7 +370,7 @@ describe("Home", () => {
                 ["page-top", 1], ["logo-size", 1], ["continue-padding", 2], ["new-game-height", 1], ["tile-padding", 2], ["page-bottom", 1],
             ];
             const given = parts.reduce((sum, [token, times]) => sum + times * size(token).share, 0);
-            const step = /--home-step: calc\(clamp\(0px, .* - (\d+)px, (\d+)px\) \/ (\d+)\);/.exec(indexCss);
+            const step = /--home-step: max\(calc\(clamp\(0px, .* - (\d+)px, (\d+)px\) \/ (\d+)\),/.exec(indexCss);
 
             expect(given).toBe(Number(step?.[2]));
             expect(given).toBe(Number(step?.[3]));
@@ -390,7 +390,12 @@ describe("Home", () => {
             const spacers = (wrapper.element as HTMLElement).querySelectorAll(":scope > .flex-1");
 
             expect(spacers).toHaveLength(2);
-            for (const spacer of spacers) expect(spacer.classList).toContain("min-h-3");
+            for (const spacer of spacers) expect(spacer.classList).toContain("min-h-(--home-spacer-min)");
+            expect(indexCss).toContain("--home-spacer-min: calc(12px - 12 * var(--wider-than-column));");
+        });
+
+        it("should leave a window wider than the column as it was, however short", () => {
+            expect(indexCss).toMatch(/--home-step: max\(.*, var\(--wider-than-column\)\);/);
         });
 
         it("should shrink later without a saved game, which has no Continue card to make room for", () => {

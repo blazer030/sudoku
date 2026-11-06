@@ -6,8 +6,8 @@
     >
         <HomeHero />
 
-        <!-- However short the window, the cards never touch what is above and below them -->
-        <div class="flex-1 min-h-3" />
+        <!-- However short a narrow window, the cards never touch what is above and below them -->
+        <div class="flex-1 min-h-(--home-spacer-min)" />
 
         <div class="flex flex-col gap-3 w-full">
             <ContinueButton @continue="continueGame" />
@@ -37,7 +37,7 @@
             </div>
         </div>
 
-        <div class="flex-1 min-h-3" />
+        <div class="flex-1 min-h-(--home-spacer-min)" />
 
         <!-- Becomes grid-cols-2 when Technique Lessons adds a fourth tile -->
         <div
