@@ -51,3 +51,5 @@ owner 2026-11-07 的裁定：點已有數字的格子不算點錯；「填數字
 - [x] 8.3 移除沒有課程會出現的 `notCertain`、`notTheAnswer` 與文案。在 `lessonContent.test.ts` 新增每課每個空格每個數字的列舉，點錯或按錯都必須有原因。
 - [x] 8.4 補測試：`LessonPage.test.ts`（返回、下一課取代目前記錄、開新遊戲、直接開網址時的提醒）、`LessonList.test.ts`（各難度的開新遊戲）、`lessonStore.test.ts`（清除紀錄不影響進度）、`LessonScreen.test.ts`（列、欄、宮的原因文字）、`practiceReducer.test.ts`（列與宮的衝突）、`lessonContent.test.ts`（提示最後標出答案、自己找的步驟不標範圍）。
 - [x] 8.5 把上述裁定寫進規格與設計文件，並更新 `CLAUDE.md` 的 skin hook 清單。`npx vitest run`、`npm run lint`、`npx vue-tsc --noEmit` 全過。
+- [x] 8.6 修正 Home fits short windows：把首頁的兩個分界提高到 624 與 550，英文的解題演示副標縮短成一行，水墨標題在窄視窗提早到 812 換小字、寬視窗維持 740。用瀏覽器逐高度量 480 到 850（有存檔），並和改動前的版本比對 844 高以上與寬視窗，除了四格和它撐開的空白，元素大小都相同。
+- [x] 8.7 補 The Filling in lesson dims nothing 的測試（`lessonContent.test.ts`），並修正文件與程式的落差：課程面板不會縮小、「基礎」組沒有難度、點錯的數字會暫留在格子上、提案不再列 `brushTitles.ts`、`CLAUDE.md` 的架構段落列出技巧教學。

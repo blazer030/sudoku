@@ -30,7 +30,7 @@
 - **新程式**：`src/domain/lessons/`（課程與練習規則）、`src/application/lessons/` 與 `src/infrastructure/` 的進度儲存、`src/stores/lessonStore.ts`、`src/presentation/pages/lessons/`。
 - **改動的頁面**：`src/presentation/pages/home/Home.vue`、`src/presentation/pages/solver-walkthrough/SolverWalkthrough.vue`、`src/router.ts`、`src/presentation/analytics/screenTracking.ts`。
 - **共用元件**：`src/presentation/components/board-cell/`、`src/presentation/components/step-presentation/`。
-- **風格**：`src/style/index.css`、`src/style/styles/*/skin.css` 與 `icons.ts`、`src/style/iconSet.ts`、`src/theme/paletteBuilder.ts`、`src/style/themes.generated.css`、`src/style/styles/ink/brushTitles.ts`。
+- **風格**：`src/style/index.css`、`src/style/styles/*/skin.css` 與 `icons.ts`、`src/style/iconSet.ts`、`src/theme/paletteBuilder.ts`、`src/style/themes.generated.css`。
 - **設定**：`src/application/settings/SettingsStorage.ts`、`src/stores/settingsStore.ts`（記住掌機提醒）。
 - **文案與字型**：`src/presentation/i18n/messages/`、`src/presentation/pages/settings/changelogData.ts`，新文案要重跑 `npm run generate:fonts`。
 - **測試**：`src/__tests__/presentation/pages/home/Home.test.ts` 的尺寸加總和入口順序測試要跟著改。

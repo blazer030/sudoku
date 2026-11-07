@@ -128,7 +128,7 @@ Independent practice SHALL show a whole board without a highlighted range, and S
 
 ### Requirement: Wrong answers explain themselves
 
-A wrong tap SHALL leave the player on the same step, SHALL NOT change the board, and SHALL say why it was wrong. Tapping a cell that already holds a digit, when the step asks the player to place a digit or remove candidates, is not a wrong tap: it SHALL change nothing and give no reason, and only clears a reason shown before it.
+A wrong tap SHALL leave the player on the same step, SHALL NOT change the board, and SHALL say why it was wrong. A wrong digit stays in its cell, marked as wrong, until the player's next action; it is not part of the board. Tapping a cell that already holds a digit, when the step asks the player to place a digit or remove candidates, is not a wrong tap: it SHALL change nothing and give no reason, and only clears a reason shown before it.
 
 #### Scenario: The reasons given
 
@@ -204,7 +204,7 @@ When a window has more room than the lesson's tallest panel needs, the panel SHA
 
 ### Requirement: Completion
 
-Finishing a lesson SHALL show its one-sentence takeaway, record the lesson as finished, and offer the next lesson. The last lesson of a group SHALL offer a new game at that group's difficulty instead.
+Finishing a lesson SHALL show its one-sentence takeaway, record the lesson as finished, and offer the next lesson. The last lesson of a group with a difficulty SHALL offer a new game at that difficulty instead; Basics has none, so its last lesson goes on to the next lesson.
 
 #### Scenario: Finishing mid-group
 

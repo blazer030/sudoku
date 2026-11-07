@@ -178,3 +178,12 @@ describe.each(lessons.map(lesson => [lesson.id, lesson] as const))("lesson %s", 
         }
     });
 });
+
+describe("the Filling in lesson", () => {
+    it("should dim nothing, as working out a cell takes the digits around it", () => {
+        for (const step of LESSONS.fillingIn.steps) {
+            expect(step.marks.dimOthers).toBeUndefined();
+            expect(step.marks.noteDigit).toBeUndefined();
+        }
+    });
+});
