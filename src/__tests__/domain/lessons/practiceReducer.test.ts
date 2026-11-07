@@ -159,6 +159,12 @@ describe("practiceReducer", () => {
             hints: [],
         };
 
+        it("should not call a filled cell wrong", () => {
+            const before = freshPracticeState();
+
+            expect(practiceReducer(step, before, tap(0, 3))).toBe(before);
+        });
+
         it("should solve the step once every target is tapped", () => {
             const first = practiceReducer(step, freshPracticeState(), tap(2, 2));
             expect(first.solved).toBe(false);

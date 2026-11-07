@@ -125,7 +125,10 @@ const tapOnPlace = (step: PlaceStep, state: PracticeState, cell: CellReference):
 
 const tapOnPick = (step: PickStep, state: PracticeState, cell: CellReference): PracticeState => {
     if (includesCell(state.picked, cell)) return state;
-    if (!includesCell(step.targets, cell)) return { ...state, feedback: { kind: "message", key: step.wrongKey } };
+    if (!includesCell(step.targets, cell)) {
+        if (practiceValueAt(step.board, state, cell) !== 0) return state;
+        return { ...state, feedback: { kind: "message", key: step.wrongKey } };
+    }
     const picked = [...state.picked, cell];
     return { ...state, picked, solved: picked.length === step.targets.length };
 };
