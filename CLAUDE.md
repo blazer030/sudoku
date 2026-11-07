@@ -40,6 +40,7 @@ npm run lint           # ESLint (--max-warnings 0, must pass before commit)
 npm test               # Run all tests (Vitest, watch mode)
 npx vitest run         # Run all tests once (CI mode)
 npx vitest run src/__tests__/domain/game/Sudoku.test.ts  # Run single test file
+npm run deploy:nas     # Build and copy a develop build to the NAS test server (deploy/nas/README.md)
 ```
 
 ## Architecture
