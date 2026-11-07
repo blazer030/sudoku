@@ -31,3 +31,7 @@ After the first deploy, create a project in Container Manager from `/volume1/doc
 ## It needs HTTPS
 
 Over plain HTTP on a LAN address the pages open but New Game does nothing, because `crypto.randomUUID()` exists only in a secure context, and there is no service worker.
+
+DSM's reverse proxy adds it with no change to the container. Control Panel → Login Portal → Advanced → Reverse Proxy, a rule from HTTPS, host `*` (the field refuses an IP address), port 8443, to HTTP, `localhost`, port 8088. Then open `https://<NAS address>:8443`. Don't forward this port on the router.
+
+DSM's certificate is self-signed, so the browser warns once and has to be told to proceed. New Game works after that, but the service worker still can't register, so the PWA's offline and update behaviour can't be tested here. The HTTP and HTTPS addresses keep separate progress and saved games.
