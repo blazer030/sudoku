@@ -48,12 +48,17 @@ The lesson list SHALL show each lesson's name, a one-line summary and its state,
 
 ### Requirement: Lesson stages
 
-Each lesson SHALL run through explanation, guided practice, independent practice and completion, in that order. The Rules and Filling in lessons SHALL have no independent stage.
+Each lesson SHALL run through explanation, guided practice, independent practice and completion, in that order. The Rules and Filling in lessons SHALL have no independent stage. The Filling in lesson MAY alternate explanation and guided practice, as it teaches one skill after another.
 
 #### Scenario: Skipping the explanation
 
 - **WHEN** the player taps the action to skip to practice during an explanation
-- **THEN** the lesson moves to its first practice step
+- **THEN** the lesson moves to the next practice step after the current step, never to an earlier one
+
+#### Scenario: No practice left to skip to
+
+- **WHEN** an explanation step has no practice step after it
+- **THEN** the action to skip to practice is not offered
 
 #### Scenario: Practice must be solved to move on
 
@@ -158,6 +163,25 @@ The lesson panel SHALL show one message at a time, and a change of message SHALL
 - **WHEN** a lesson is shown on a 360×640 screen
 - **THEN** the board, the panel and its actions all fit without scrolling the page
 
+### Requirement: Board placement on tall screens
+
+When a window has more room than the lesson's tallest panel needs, the panel SHALL stay at the bottom of the screen and the spare room SHALL go above and below the board, so the board sits about midway between the header and the panel. The board's place SHALL depend only on the window, not on the message shown. A window without that spare room SHALL keep the board directly under the header.
+
+#### Scenario: A tall narrow phone
+
+- **WHEN** a lesson is shown on a 390×844 screen
+- **THEN** the panel's bottom edge is where it is on any other step, and the gap above the board and the gap below it differ by no more than a line of the panel's text, for a two-line message
+
+#### Scenario: Every step keeps the board in place
+
+- **WHEN** the player moves through a lesson on any window
+- **THEN** the board's position is the same on every step
+
+#### Scenario: A small phone has no room to spare
+
+- **WHEN** a lesson is shown on a 360×640 screen
+- **THEN** the board sits directly under the header
+
 ### Requirement: Completion
 
 Finishing a lesson SHALL show its one-sentence takeaway, record the lesson as finished, and offer the next lesson. The last lesson of a group SHALL offer a new game at that group's difficulty instead.
@@ -171,6 +195,11 @@ Finishing a lesson SHALL show its one-sentence takeaway, record the lesson as fi
 
 - **WHEN** the player finishes Naked Single
 - **THEN** the main action starts a new easy game
+
+#### Scenario: Finishing from the Walkthrough
+
+- **WHEN** the player finishes a lesson opened from the Walkthrough
+- **THEN** the only action goes back to the Walkthrough, and no action offers the lesson list
 
 #### Scenario: Lessons are not games
 
@@ -213,6 +242,16 @@ The Walkthrough's technique tag SHALL offer a link to that technique's lesson. R
 
 - **WHEN** a lesson is open over the Walkthrough and the system Back key is pressed
 - **THEN** the lesson closes and the Walkthrough stays on its step
+
+#### Scenario: The handheld notice holds playback
+
+- **WHEN** the player taps the link during playback in 8-bit's handheld look, so the handheld notice opens
+- **THEN** playback holds while the notice is open, and the lesson that opens is the one for the step the player tapped on
+
+#### Scenario: Backing out of the notice during playback
+
+- **WHEN** the player backs out of that notice
+- **THEN** no lesson opens, playback carries on from the same step, and the next Back key press works as usual
 
 #### Scenario: No link during a game
 

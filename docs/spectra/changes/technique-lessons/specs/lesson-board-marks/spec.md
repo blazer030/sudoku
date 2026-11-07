@@ -24,12 +24,12 @@ A cell ruled out by an explanation SHALL show a cross drawn with the current sty
 
 ### Requirement: Lesson state marks
 
-Each lesson row SHALL show a mark for finished, next or not started, each distinguishable from the others in every style. Each style SHALL draw the mark in its own shape language, through skin hooks of the lesson row's own.
+Each lesson row SHALL show a mark for finished, next or not started, each distinguishable from the others in every style. The shared look SHALL already tell the three apart; a style MAY override any of them in its own shape language, through skin hooks of the lesson row's own.
 
 #### Scenario: The three states differ
 
 - **WHEN** the lesson list shows finished, next and unstarted lessons
-- **THEN** each row's mark carries its state in a `data-skin` token, and each style has a rule for all three
+- **THEN** each row's mark carries its state in a `data-skin` token, and the three look different in every style, whether from the shared look or the style's own rules
 
 ### Requirement: Target digits
 

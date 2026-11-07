@@ -20,12 +20,12 @@
 | 課程列的狀態記號 | 24px；極簡：完成實心 primary 加 14px check、下一課 2px primary 圓環、未開始 1.5px border 圓環 |
 | 狀態記號形狀 | 8-bit、藍圖方形；賽博切角 6px；水墨圓相；黑板手繪圓；其他圓形 |
 | × 記號 | 圖示 16px，畫在空格正中；各風格顏色見 `Sketch.dc.html` 的 `cross` |
-| 淡色（`lesson-dim`） | 極簡 #B5B4B1、觸感 #B3AEA4、紙本 #B9B2A5、掌機 #306230、紅白機 #6C6C6C、賽博 #4A5A70、水墨 #B9B2A3、黑板 #7E9588、藍圖 #7792B5、極光 #6B7390 |
+| 淡色（`lesson-dim`） | 各主題由 `paletteBuilder` 算出：foreground 以 0.3 混入 card，例如極簡淺色 #BABABA；只有 8-bit 自訂（掌機 #306230、紅白機 #6C6C6C）。下限 1.5:1 由 `paletteContrast.test.ts` 把關 |
 | 8-bit 範圍暗點 | 6px 一格、2px 方點；掌機 #306230 疊 #9BBC0F，紅白機 #6C6C6C 疊 #000000 |
 | 8-bit 目標數字 | 掌機 #0F380F 底 #9BBC0F 字；紅白機 #0058F8 底 #FCFCFC 字 |
 | 8-bit 規律格 | 掌機 #8BAC0F 底；紅白機 #1E1E3C 底 |
 | 首頁矮螢幕（620 高以下） | 標誌 40px、標題 0.78 倍、副標行高 16px、卡片內距與間距 8px、分段與新遊戲按鈕 44px、磚塊間距 8px |
-| 課程面板 | 內距 16 / 16 / 12、間距 12、文字 14.5px / 1.6；360×640 時內距 12 / 16 / 10、間距 8 |
+| 課程面板 | 內距 16 / 16 / 12、間距 12、文字 14.5px / 1.6，全尺寸；更矮時沿用 `--step-panel-*` 隨 `--review-step` 縮小。實測 360×640 仍是全尺寸，除文字外的部分共 126.5px |
 
 ## Goals / Non-Goals
 
@@ -79,11 +79,24 @@
 
 ### The cross mark is an icon
 
-新增 `CellMark`，用 `X` 圖示畫 ×。內建的 Caveat、Press Start 2P、Silkscreen、Share Tech Mono 都沒有 U+00D7，所以不能用文字。`X` 已在 `ICON_NAMES`，各風格已有畫法。
+`BoardCell` 在 `crossed` 時用 `X` 圖示畫 ×（`data-skin="cell-cross"`），不另開元件。內建的 Caveat、Press Start 2P、Silkscreen、Share Tech Mono 都沒有 U+00D7，所以不能用文字。`X` 已在 `ICON_NAMES`，各風格已有畫法。
+
+### The board sits midway above the panel on tall screens
+
+細長的手機上，棋盤貼著標題、面板貼著底部，兩者中間會空出一大段（實測 390×844 有 236px）。owner 要面板留在原處，棋盤放到上方空白的中間。
+
+只用 flex 分配，不量測，所以三個引擎和動態效果開關下都一樣，也不需要 WebGL 或 mask。棋盤上方加一個 `flex: 2 1 0` 的空白，面板區改成 `flex: 1 1 <面板區基準>`：
+
+- **基準**是最長訊息的面板高度加上面板區的上內距，即 `calc(219px + var(--game-section-gap))`。219 是實測值：面板固定部分 126.5px 加四行 23.2px，四行是兩種語言、360 到 412 寬之間最長的訊息。
+- **放不下基準時**，空白縮成 0，棋盤貼著標題，和原本完全相同，所以小手機不受影響，最長的訊息也不會多被裁掉。
+- **有餘裕時**，多出來的空間 2:1 分給棋盤上方和面板區。最常見的訊息是兩行，預估 390×844 棋盤上方約 103px、下方約 118px，三行時下方約 95px，所以看起來大致置中。這組預估由任務 7.4 在瀏覽器量測確認。
+- **基準與訊息無關**，所以換訊息不會移動棋盤；面板從底部往上長，訊息比兩行長時只會吃掉棋盤下方的空白。
+
+不選「棋盤置中於實際的面板上方」：面板高度隨訊息變，棋盤會跟著跳，違反 One message at a time。也不選 JS 量測，因為 flex 就能做到，不需要多一個 resize 監聽。
 
 ### Lesson rows get their own skin hooks
 
-新增 `lesson-row`、`lesson-mark`（`done`、`next`、`rest`）。不重用 `recent-row`（四個 skin 沒有規則，掌機會完全看不見）、`check`（賽博會隱藏圖示）、`new-game`（紙本會傾斜成印章）。
+新增 `lesson-row`、`lesson-mark`（`done`、`next`、`rest`）。`LessonList` 的基本樣式已能區分三種狀態，各風格只在形狀語言需要時才覆寫其中幾種，所以不要求每個風格三種都有規則。目前沒有風格用到 `lesson-row`，留給之後要改整列外觀的風格。不重用 `recent-row`（四個 skin 沒有規則，掌機會完全看不見）、`check`（賽博會隱藏圖示）、`new-game`（紙本會傾斜成印章）。
 
 ### Home sizes extend the existing step
 
@@ -109,8 +122,8 @@
 
 - `LessonStep` 種類：`show`（講解）、`place`（點格子，數字已定）、`pick`（點出規律格）、`remove`（點能刪候選數的格子）、`fill`（點格子再用懸浮鍵填數字）、`note`（「填數字與筆記」那課專用：打開筆記模式，在指定格寫下指定候選數）、`done`。
 - `lessonForTechnique(technique: TechniqueId): LessonId`：19 個技巧都有對應。
-- `practiceReducer(step, state, action) => { state, feedback }`，`action` 是 `{ kind: "tapCell", row, column }`、`{ kind: "pressDigit", digit }`、`{ kind: "toggleNoteMode" }` 或 `{ kind: "requestHint" }`。
-- `StepCellView` 新增 `crossed: boolean`、`dimmed: boolean`，`StepHighlight` 新增 `"target"`。`BoardCell` 對應輸出 `data-dimmed`、`data-crossed`，`data-variant="target"`。
+- `practiceReducer(step, state, action) => PracticeState`，答錯的原因放在 `state.feedback`，`action` 是 `{ kind: "tapCell", row, column }`、`{ kind: "pressDigit", digit }`、`{ kind: "toggleNoteMode" }` 或 `{ kind: "requestHint" }`。
+- `StepCellView` 新增選用的 `crossed`、`dimmed`、`dimmedNotes`，`StepHighlight` 新增 `"target"`。`BoardCell` 對應輸出 `data-dimmed`、`data-note-dimmed`、`data-variant="target"`，× 是帶 `data-skin="cell-cross"` 的圖示，沒有 `data-crossed`。
 - 路由：`ROUTER_PATH.lessons`（`/lessons`）、`ROUTER_PATH.lesson`（`/lessons/:lessonId`）；`ScreenName` 新增 `lessons`、`lesson`。
 
 **Failure modes**
@@ -123,6 +136,7 @@
 
 - `npx vitest run` 全綠，含內容驗證、練習判定、首頁尺寸、皮膚覆蓋測試；`npm run lint` 與 `npm run build` 通過。
 - 在 360×640、375×667、320×568、390×844 量測：教學頁按鈕都在畫面內，棋盤在訊息切換時不移動。
+- 在 360×800、390×844、412×915 量測：棋盤上下的空白在兩行訊息時相差不超過一行字；放不下基準的尺寸（320×568、360×640）棋盤位置和改動前相同。
 - 844 高以上逐元素比對舊版：除了入口磚塊區，其他元素的大小都不變，Android 模擬器也要比對。
 - 9 種風格的課程列表和課程頁都實際截圖看過。
 
