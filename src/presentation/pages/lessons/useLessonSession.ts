@@ -96,7 +96,8 @@ export const useLessonSession = (lesson: Lesson) => {
 
     // Only explanations lie between here and the next practice, so nothing unsolved is passed on the way
     const nextPracticeIndex = computed(() => lesson.steps.findIndex((candidate, index) => index > stepIndex.value && isPractice(candidate)));
-    const canSkipToPractice = computed(() => nextPracticeIndex.value !== -1);
+    // Only where explanation lies between here and the practice; otherwise Next is the way there
+    const canSkipToPractice = computed(() => nextPracticeIndex.value > stepIndex.value + 1);
     const skipToPractice = () => { goTo(nextPracticeIndex.value); };
 
     const dispatch = (action: PracticeAction) => {

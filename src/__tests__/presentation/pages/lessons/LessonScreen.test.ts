@@ -156,13 +156,16 @@ describe("LessonScreen", () => {
             id: "fillingIn",
             steps: [
                 show("lessons.names.rules"),
+                show("lessons.names.hiddenSingle"),
                 place("lessons.names.pointing"),
                 show("lessons.names.fillingIn"),
+                show("lessons.names.claiming"),
                 place("lessons.names.xWing"),
                 show("lessons.names.nakedPair"),
                 { kind: "done", stage: "done", board: BOARD, marks: {}, takeawayKey: "lessons.names.xyWing" },
             ],
         };
+        const action = (key: string) => i18n.global.t(`lessons.common.actions.${key}`);
         const solveAndGoOn = async (wrapper: Screen) => {
             await tap(wrapper, 2, 4);
             await primary(wrapper).trigger("click");
@@ -180,6 +183,16 @@ describe("LessonScreen", () => {
             expect(explanation(wrapper)).toContain(nameOf("xWing"));
         });
 
+        it("should offer the practice as the next step, not also as a skip", async () => {
+            const wrapper = mountScreen(ALTERNATING);
+            await primary(wrapper).trigger("click");
+            await flushPromises();
+
+            expect(explanation(wrapper)).toContain(nameOf("hiddenSingle"));
+            expect(primary(wrapper).text()).toBe(action("tryIt"));
+            expect(wrapper.find("[data-testid='lesson-secondary']").exists()).toBe(false);
+        });
+
         it("should not offer to skip when no practice is left", async () => {
             const wrapper = mountScreen(ALTERNATING);
             await toPractice(wrapper);
@@ -190,6 +203,7 @@ describe("LessonScreen", () => {
             expect(explanation(wrapper)).toContain(nameOf("nakedPair"));
             expect(wrapper.find("[data-testid='lesson-secondary']").exists()).toBe(false);
             expect(primary(wrapper).attributes("disabled")).toBeUndefined();
+            expect(primary(wrapper).text()).toBe(action("next"));
         });
     });
 

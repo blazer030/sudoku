@@ -184,7 +184,7 @@ const progress = computed(() => {
 
 const nextIsPractice = computed(() => {
     const following = props.lesson.steps[session.stepIndex.value + 1] as Lesson["steps"][number] | undefined;
-    return session.step.value.kind === "show" && following !== undefined && following.kind !== "show";
+    return session.step.value.kind === "show" && following !== undefined && following.kind !== "show" && following.kind !== "done";
 });
 
 const isDone = computed(() => session.step.value.kind === "done");
