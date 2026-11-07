@@ -133,7 +133,7 @@ Independent practice SHALL show a whole board without a highlighted range, and S
 
 ### Requirement: Wrong answers explain themselves
 
-A wrong tap SHALL leave the player on the same step, SHALL NOT change the board, and SHALL say why it was wrong. A wrong digit stays in its cell, marked as wrong, until the player's next action; it is not part of the board. Tapping a cell that already holds a digit is not a wrong tap, unless the step asks for that very cell: it SHALL give no reason and only clears a reason shown before it. On a fill or place step it also lights that digit across the board, as in a game, and a place step keeps it lit through a wrong tap, as the player is still looking for it. A lit digit is not dimmed.
+A wrong tap SHALL leave the player on the same step, SHALL NOT change the board, and SHALL say why it was wrong. A wrong digit stays in its cell, marked as wrong, until the player's next action; it is not part of the board. Tapping a cell that already holds a digit is not a wrong tap, unless the step asks for that very cell: it SHALL give no reason and only clears a reason shown before it. On a fill or place step it also lights that digit across the board, as in a game, and a place step keeps it lit through a wrong tap, as the player is still looking for it. A lit digit is not dimmed. A place step that holds its digit lights no other: tapping a filled cell changes nothing.
 
 #### Scenario: The reasons given
 
@@ -164,6 +164,16 @@ A wrong tap SHALL leave the player on the same step, SHALL NOT change the board,
 
 - **WHEN** the player reaches the end of Hidden Single's explanation, before its first practice
 - **THEN** a step says a digit on the board can be tapped to light every matching digit, and shows every 7 lit
+
+#### Scenario: Hidden Single has the player light the digit first
+
+- **WHEN** the player starts Hidden Single's guided practice
+- **THEN** the first step asks them to tap any 3 on the board; another digit lights without being called wrong and does not finish the step, an empty cell says why, and a 3 lights every 3 and finishes it
+
+#### Scenario: The digit is held while looking for its place
+
+- **WHEN** the player is on the next step, looking for the only cell in box 2 for the 3, and taps a cell holding an 8
+- **THEN** the 3s stay lit, the 8s do not light, and no reason is shown
 
 ### Requirement: Layered hints
 

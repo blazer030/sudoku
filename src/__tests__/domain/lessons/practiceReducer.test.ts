@@ -1,5 +1,5 @@
 import { HIDDEN_SINGLE, RULES } from "@/domain/lessons/content/basicsAndEasy";
-import type { FillStep, Lesson, LessonBoard, LessonStep, NoteStep, PickStep, PlaceStep, RemoveStep } from "@/domain/lessons/Lesson";
+import type { FillStep, Lesson, LessonBoard, LessonStep, LightStep, NoteStep, PickStep, PlaceStep, RemoveStep } from "@/domain/lessons/Lesson";
 import { freshPracticeState, hintsFor, practiceReducer, type PracticeState } from "@/domain/lessons/practice";
 import type { CellReference } from "@/domain/solver/SolveStep";
 
@@ -134,6 +134,58 @@ describe("practiceReducer", () => {
             const wrong = practiceReducer(placeStep, freshPracticeState(), tap(1, 3));
 
             expect(practiceReducer(placeStep, wrong, tap(2, 4)).feedback).toBeNull();
+        });
+    });
+
+    describe("a place step that holds its digit", () => {
+        const step: PlaceStep = { ...placeStep, holdsDigit: true };
+
+        it("should not let another digit be lit", () => {
+            const before = freshPracticeState();
+
+            expect(practiceReducer(step, before, tap(0, 3))).toBe(before);
+        });
+
+        it("should still solve on the right cell", () => {
+            expect(practiceReducer(step, freshPracticeState(), tap(2, 4)).solved).toBe(true);
+        });
+    });
+
+    describe("lighting a digit", () => {
+        const step: LightStep = {
+            kind: "light",
+            stage: "follow",
+            board: EASY_BOARD,
+            marks: {},
+            digit: 3,
+            answer: cell(6, 3),
+            promptKey: "prompt",
+            successKey: "success",
+            wrongKey: "wrong",
+            hints: [],
+        };
+
+        it.each([[6, 3], [8, 2], [5, 5]])("should light the digit and solve the step on any of its cells (%i, %i)", (row, column) => {
+            const state = practiceReducer(step, freshPracticeState(), tap(row, column));
+
+            expect(state.solved).toBe(true);
+            expect(state.sameDigit).toBe(3);
+            expect(state.feedback).toBeNull();
+        });
+
+        it("should light another digit without solving or calling it wrong", () => {
+            const state = practiceReducer(step, freshPracticeState(), tap(0, 3));
+
+            expect(state.solved).toBe(false);
+            expect(state.sameDigit).toBe(2);
+            expect(state.feedback).toBeNull();
+        });
+
+        it("should say why for an empty cell", () => {
+            const state = practiceReducer(step, freshPracticeState(), tap(0, 0));
+
+            expect(state.solved).toBe(false);
+            expect(state.feedback).toEqual({ kind: "message", key: "wrong" });
         });
     });
 

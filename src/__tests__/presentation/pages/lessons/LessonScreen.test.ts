@@ -255,6 +255,38 @@ describe("LessonScreen", () => {
         expect(explanation(wrapper)).toContain(nameOf("pointing"));
     });
 
+    it("should let a light step go on once its digit is lit", async () => {
+        const wrapper = mountScreen({
+            id: "hiddenSingle",
+            steps: [
+                {
+                    kind: "light",
+                    stage: "follow",
+                    board: BOARD,
+                    marks: {},
+                    digit: 7,
+                    answer: cell(0, 6),
+                    wrongKey: "lessons.names.rules",
+                    promptKey: "lessons.names.pointing",
+                    successKey: "lessons.names.claiming",
+                    hints: [],
+                },
+                { kind: "done", stage: "done", board: BOARD, marks: {}, takeawayKey: "lessons.names.xyWing" },
+            ],
+        });
+        expect(primary(wrapper).attributes("disabled")).toBeDefined();
+
+        await tap(wrapper, 0, 0); // empty
+        expect(wrapper.find("[data-testid='lesson-wrong']").exists()).toBe(true);
+        expect(primary(wrapper).attributes("disabled")).toBeDefined();
+
+        await tap(wrapper, 0, 6); // a 7
+
+        expect(wrapper.get("[data-testid='lesson-cell-1-4']").attributes("data-variant")).toBe("target");
+        expect(explanation(wrapper)).toContain(nameOf("claiming"));
+        expect(primary(wrapper).attributes("disabled")).toBeUndefined();
+    });
+
     it("should light every matching digit when a filled cell is tapped on a place step", async () => {
         const wrapper = mountScreen();
         await toPractice(wrapper);

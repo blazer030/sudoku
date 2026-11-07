@@ -140,6 +140,21 @@ export const HIDDEN_SINGLE: Lesson = {
             textKey: key("hiddenSingle", "tapToLight"),
         },
         {
+            kind: "light",
+            stage: "follow",
+            board: EASY_BOARD,
+            marks: {},
+            digit: 3,
+            answer: at(7, 4),
+            wrongKey: key("hiddenSingle", "lightWrong"),
+            promptKey: key("hiddenSingle", "lightPrompt"),
+            successKey: key("hiddenSingle", "lightSuccess"),
+            hints: [
+                { textKey: key("hiddenSingle", "lightHintColumn"), marks: { range: columnOf(4) } },
+                { textKey: key("hiddenSingle", "lightHintAnswer"), marks: { lit: [at(7, 4)] } },
+            ],
+        },
+        {
             kind: "place",
             stage: "follow",
             board: EASY_BOARD,
@@ -152,6 +167,7 @@ export const HIDDEN_SINGLE: Lesson = {
             digit: 3,
             answer: at(3, 5),
             range: boxOf(2),
+            holdsDigit: true,
             promptKey: key("hiddenSingle", "followPrompt"),
             successKey: key("hiddenSingle", "followSuccess"),
             hints: [

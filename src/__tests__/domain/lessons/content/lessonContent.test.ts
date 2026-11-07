@@ -20,7 +20,7 @@ const keysOf = (step: LessonStep): string[] => {
     if (step.kind === "done") return [step.takeawayKey];
     const keys = [step.promptKey, step.successKey, ...step.hints.map(hint => hint.textKey)];
     if (step.kind === "remove") keys.push(step.keepKey, step.wrongKey);
-    if (step.kind === "pick") keys.push(step.wrongKey);
+    if (step.kind === "pick" || step.kind === "light") keys.push(step.wrongKey);
     if (step.kind === "place" && step.notYetKey !== undefined) keys.push(step.notYetKey);
     if (step.kind === "fill") {
         if (step.notYetKey !== undefined) keys.push(step.notYetKey);
@@ -33,7 +33,8 @@ const keysOf = (step: LessonStep): string[] => {
 const solution = (step: PracticeStep): PracticeAction[] => {
     const tap = ({ row, column }: { row: number; column: number }): PracticeAction => ({ kind: "tapCell", row, column });
     switch (step.kind) {
-        case "place": return [tap(step.answer)];
+        case "place":
+        case "light": return [tap(step.answer)];
         case "pick": return step.targets.map(tap);
         case "remove": return step.removals.map(({ cell }) => tap(cell));
         case "note": return [{ kind: "toggleNoteMode" }, tap(step.cell), ...step.digits.map((digit): PracticeAction => ({ kind: "pressDigit", digit }))];
@@ -44,7 +45,8 @@ const solution = (step: PracticeStep): PracticeAction[] => {
 // Where a step's answer lies; a fill step's hints are worked out from the board, and tested with the reducer
 const answerCells = (step: Exclude<PracticeStep, { kind: "fill" }>): readonly CellReference[] => {
     switch (step.kind) {
-        case "place": return [step.answer];
+        case "place":
+        case "light": return [step.answer];
         case "pick": return step.targets;
         case "remove": return step.removals.map(({ cell }) => cell);
         case "note": return [step.cell];
@@ -186,6 +188,25 @@ describe("the Hidden Single lesson", () => {
     it("should teach lighting a digit before the first practice", () => {
         expect(tipAt).toBeGreaterThan(-1);
         expect(tipAt).toBeLessThan(steps.findIndex(isPractice));
+    });
+
+    it("should have the player light the digit, then look for its place with that digit held", () => {
+        const [first, second] = steps.filter(isPractice);
+
+        expect(first.kind).toBe("light");
+        expect(second.kind).toBe("place");
+        if (first.kind !== "light" || second.kind !== "place") return;
+        expect(first.stage).toBe("follow");
+        expect(second.stage).toBe("follow");
+        expect(second.digit).toBe(first.digit);
+        expect(second.holdsDigit).toBe(true);
+    });
+
+    it("should leave the digit free to change when the player is on their own", () => {
+        const alone = steps.find(step => step.stage === "alone");
+
+        expect(alone?.kind).toBe("place");
+        if (alone?.kind === "place") expect(alone.holdsDigit).toBeUndefined();
     });
 
     it("should show the tip lighting every 7 on the board", () => {

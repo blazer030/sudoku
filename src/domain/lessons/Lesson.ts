@@ -91,6 +91,18 @@ export interface PlaceStep extends PracticeStepBase {
     range?: readonly CellReference[];
     /** Said for a cell where the digit fits but isn't the answer. A step where that can happen must have it (a test checks). */
     notYetKey?: string;
+    /** The step is about this digit alone: tapping a filled cell lights no other. */
+    holdsDigit?: boolean;
+}
+
+/** Tap any cell holding the digit, which lights it across the board. */
+export interface LightStep extends PracticeStepBase {
+    kind: "light";
+    digit: number;
+    /** The cell hints lead to. */
+    answer: CellReference;
+    /** Said for an empty cell. */
+    wrongKey: string;
 }
 
 /** Tap the cells of a pattern. */
@@ -140,7 +152,7 @@ export interface DoneStep extends LessonStepBase {
     takeawayKey: string;
 }
 
-export type PracticeStep = PlaceStep | PickStep | RemoveStep | FillStep | NoteStep;
+export type PracticeStep = PlaceStep | LightStep | PickStep | RemoveStep | FillStep | NoteStep;
 
 export type LessonStep = ShowStep | PracticeStep | DoneStep;
 

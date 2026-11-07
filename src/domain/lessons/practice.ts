@@ -1,7 +1,7 @@
 import { BOARD_SIZE, BOX_SIZE } from "@/domain/board/constants";
 import { SudokuSolver } from "@/domain/generator/SudokuSolver";
 import { boardGrid, boardState } from "@/domain/lessons/lessonBoard";
-import type { FillStep, LessonBoard, LessonHint, NoteStep, PickStep, PlaceStep, PracticeStep, RemoveStep } from "@/domain/lessons/Lesson";
+import type { FillStep, LessonBoard, LessonHint, LightStep, NoteStep, PickStep, PlaceStep, PracticeStep, RemoveStep } from "@/domain/lessons/Lesson";
 import { sameCell } from "@/domain/solver/cellRelations";
 import type { Assignment, CellReference, Elimination } from "@/domain/solver/SolveStep";
 
@@ -114,7 +114,7 @@ const notYetOf = (key: string | undefined): PracticeFeedback | null => key === u
 
 const tapOnPlace = (step: PlaceStep, state: PracticeState, cell: CellReference): PracticeState => {
     const value = practiceValueAt(step.board, state, cell);
-    if (value !== 0) return state.sameDigit === value ? state : { ...state, sameDigit: value };
+    if (value !== 0) return step.holdsDigit || state.sameDigit === value ? state : { ...state, sameDigit: value };
     const isRight = step.acceptsAnyHiddenSingle
         ? isHiddenSingle(step.board, state, cell, step.digit)
         : sameCell(cell, step.answer);
@@ -122,6 +122,12 @@ const tapOnPlace = (step: PlaceStep, state: PracticeState, cell: CellReference):
     if (step.range && !includesCell(step.range, cell)) return { ...state, feedback: { kind: "outsideRange" } };
 
     return { ...state, feedback: conflictOf(step.board, state, cell, step.digit) ?? notYetOf(step.notYetKey) };
+};
+
+const tapOnLight = (step: LightStep, state: PracticeState, cell: CellReference): PracticeState => {
+    const value = practiceValueAt(step.board, state, cell);
+    if (value === 0) return { ...state, feedback: { kind: "message", key: step.wrongKey } };
+    return { ...state, sameDigit: value, solved: value === step.digit };
 };
 
 const tapOnPick = (step: PickStep, state: PracticeState, cell: CellReference): PracticeState => {
@@ -240,6 +246,7 @@ const requestHint = (step: PracticeStep, state: PracticeState): PracticeState =>
 const tapCell = (step: PracticeStep, state: PracticeState, cell: CellReference): PracticeState => {
     switch (step.kind) {
         case "place": return tapOnPlace(step, state, cell);
+        case "light": return tapOnLight(step, state, cell);
         case "pick": return tapOnPick(step, state, cell);
         case "remove": return tapOnRemove(step, state, cell);
         case "fill": return tapOnFill(step, state, cell);
