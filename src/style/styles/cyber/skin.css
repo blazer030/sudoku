@@ -288,6 +288,7 @@
 [data-style="cyber"] [data-skin~="key"][aria-pressed="true"],
 [data-style="cyber"] [data-skin~="segment"][aria-pressed="true"],
 [data-style="cyber"] [aria-pressed="true"] > [data-skin~="control"],
+[data-style="cyber"] [data-skin~="lesson-toggle"][aria-pressed="true"],
 [data-style="cyber"] [data-skin~="button"]:is(.bg-primary, .hint-primary, [data-skin~="new-game"]) {
     --cyber-edge: var(--color-primary);
     --cyber-fill: var(--color-primary-light);

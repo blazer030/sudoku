@@ -1304,3 +1304,11 @@
 [data-style="blueprint"] [data-skin~="cell-cross"] {
     color: var(--color-error);
 }
+
+/* The lesson's notes toggle, on: the game's notes control when on, a doubled line in the primary */
+[data-style="blueprint"] [data-skin~="button"][data-skin~="lesson-toggle"][aria-pressed="true"] {
+    box-shadow:
+        inset 0 0 0 1px var(--color-primary),
+        inset 0 0 0 2px var(--color-primary);
+    color: var(--color-primary);
+}

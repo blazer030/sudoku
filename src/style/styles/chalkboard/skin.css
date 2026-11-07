@@ -1622,3 +1622,10 @@
 [data-style="chalkboard"] [data-skin~="cell-cross"] {
     color: var(--color-error);
 }
+
+/* The lesson's notes toggle, on: the chosen key, a faint wash of the primary ringed and written in the primary */
+[data-style="chalkboard"] [data-skin~="button"][data-skin~="lesson-toggle"][aria-pressed="true"] {
+    background-color: var(--color-primary-light);
+    box-shadow: inset 0 0 0 2px var(--color-primary);
+    color: var(--color-primary);
+}

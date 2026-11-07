@@ -294,6 +294,12 @@ describe("LessonScreen", () => {
         expect(wrapper.get("[data-testid='lesson-cell-2-2']").text()).toContain("2");
     });
 
+    it("should give the notes toggle a hook each style can mark its on state by", () => {
+        const wrapper = mountScreen(NOTE_LESSON);
+
+        expect(wrapper.get("[data-testid='lesson-note-toggle']").attributes("data-skin")?.split(" ")).toContain("lesson-toggle");
+    });
+
     it("should have no notes toggle elsewhere", async () => {
         const wrapper = mountScreen();
         await toPractice(wrapper);

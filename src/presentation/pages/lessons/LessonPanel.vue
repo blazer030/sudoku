@@ -65,7 +65,7 @@
                 :aria-pressed="noteMode"
                 :class="noteMode ? 'bg-primary-light text-primary' : 'hint-secondary'"
                 class="lesson-toggle"
-                data-skin="button"
+                data-skin="button lesson-toggle"
                 data-testid="lesson-note-toggle"
                 type="button"
                 @click="emit('toggleNoteMode')"

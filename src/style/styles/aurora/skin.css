@@ -1475,3 +1475,11 @@
 [data-style="aurora"] [data-skin~="cell-cross"] {
     color: var(--color-error);
 }
+
+/* The lesson's notes toggle: a secondary button here already lies in the primary's tint, so on is the chosen key's
+   solid primary */
+[data-style="aurora"] [data-skin~="button"][data-skin~="lesson-toggle"][aria-pressed="true"] {
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+    box-shadow: 0 0 22px color-mix(in srgb, var(--color-primary) 60%, transparent);
+}
