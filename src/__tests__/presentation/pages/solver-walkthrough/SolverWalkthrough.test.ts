@@ -603,6 +603,65 @@ describe("SolverWalkthrough", () => {
             localStorage.clear();
         });
 
+        describe("during playback in 8-bit's light mode", () => {
+            const playingUnderTheNotice = async () => {
+                const settings = useSettingsStore();
+                settings.setStyle("pixel");
+                settings.setAppearance("light");
+                const wrapper = await playing();
+                await wrapper.get("[data-testid='walkthrough-play']").trigger("click");
+                const before = counter(wrapper);
+                await learn(wrapper).trigger("click");
+                await flushPromises();
+                return { wrapper, before };
+            };
+            const isPlaying = (wrapper: VueWrapper) => wrapper.get("[data-testid='walkthrough-play']").attributes("aria-pressed") === "true";
+
+            afterEach(() => { localStorage.clear(); });
+
+            it("should hold the step while the notice is open, and open that step's lesson", async () => {
+                const { wrapper, before } = await playingUnderTheNotice();
+
+                expect(isPlaying(wrapper)).toBe(false);
+                await vi.advanceTimersByTimeAsync(800 * 3);
+                expect(counter(wrapper)).toBe(before);
+
+                await wrapper.get("[data-testid='lesson-notice-carry-on']").trigger("click");
+                await flushPromises();
+                expect(lesson(wrapper).exists()).toBe(true);
+
+                await lesson(wrapper).find("[data-testid='back-button']").trigger("click");
+                await flushPromises();
+                expect(counter(wrapper)).toBe(before);
+                expect(isPlaying(wrapper)).toBe(true);
+            });
+
+            it("should carry on playing when backing out of the notice, leaving the next Back alone", async () => {
+                const { wrapper, before } = await playingUnderTheNotice();
+
+                handleBackButton(true);
+                await flushPromises();
+
+                expect(lesson(wrapper).exists()).toBe(false);
+                expect(counter(wrapper)).toBe(before);
+                expect(isPlaying(wrapper)).toBe(true);
+
+                const goBack = vi.spyOn(window.history, "back").mockImplementation(() => undefined);
+                handleBackButton(true);
+                expect(goBack).toHaveBeenCalledOnce();
+            });
+
+            it("should stay paused on going off to choose another style", async () => {
+                const { wrapper } = await playingUnderTheNotice();
+
+                await wrapper.get("[data-testid='lesson-notice-styles']").trigger("click");
+                await flushPromises();
+
+                expect(lesson(wrapper).exists()).toBe(false);
+                expect(isPlaying(wrapper)).toBe(false);
+            });
+        });
+
         it("should offer nothing on the solved board", async () => {
             const { wrapper } = mountWalkthrough({ initialPuzzle: singlesPuzzle });
             await solve(wrapper);

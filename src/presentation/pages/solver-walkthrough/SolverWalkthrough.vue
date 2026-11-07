@@ -428,12 +428,20 @@ const closeLesson = () => {
 const lessonNotice = useLessonNotice();
 
 const openLessonOfStep = async () => {
-    if (await lessonNotice.check() !== "open") return;
-    openedLesson.value = lessonOfStep.value;
-    // Playback holds while the lesson is open, so the player comes back to the step they left
-    resumeAfterLesson = playState.isPlaying.value;
-    if (resumeAfterLesson) togglePlay();
-    withdrawBackDismissal = registerBackDismissal(closeLesson);
+    // Playback holds from the tap, through the notice and the lesson, so the player gets the lesson of the step
+    // they tapped on and comes back to that step
+    const lesson = lessonOfStep.value;
+    const wasPlaying = playState.isPlaying.value;
+    if (wasPlaying) togglePlay();
+
+    const outcome = await lessonNotice.check();
+    if (outcome === "open") {
+        openedLesson.value = lesson;
+        resumeAfterLesson = wasPlaying;
+        withdrawBackDismissal = registerBackDismissal(closeLesson);
+    } else if (outcome === "cancelled" && wasPlaying) {
+        togglePlay();
+    }
 };
 onBeforeUnmount(() => { withdrawBackDismissal?.(); });
 
