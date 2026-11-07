@@ -224,7 +224,7 @@ export const NAKED_SINGLE: Lesson = {
             kind: "fill",
             stage: "alone",
             board: EASY_BOARD,
-            marks: {},
+            marks: { range: rowOf(8) },
             rule: "nakedSingle",
             required: 1,
             area: rowOf(8),

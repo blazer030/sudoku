@@ -124,7 +124,17 @@ Practice boards in the Basics and Easy groups SHALL show no notes, except where 
 
 ### Requirement: Independent practice has one target
 
-Independent practice SHALL show a whole board without a highlighted range, and SHALL name one target to look for: a digit, a row, a column or a box.
+Independent practice SHALL show a whole board and SHALL name one target to look for: a digit, a row, a column or a box. A row, column or box its prompt names SHALL be framed on the board, so the player need not count to find it, and nothing else SHALL be marked. A prompt that names no particular row, column or box frames nothing.
+
+#### Scenario: The named house is framed
+
+- **WHEN** independent practice for Pointing says to look in box 8
+- **THEN** box 8 is framed on the board, and nothing marks the pattern or the answer
+
+#### Scenario: Nothing is named
+
+- **WHEN** independent practice for X-Wing says digit 1 forms an X-Wing on two columns, without saying which
+- **THEN** no range is framed
 
 #### Scenario: Any valid answer counts
 

@@ -61,6 +61,38 @@ const cellsShownBy = (marks: StepMarks = {}): readonly CellReference[] => [
     ...(marks.eliminated ?? []).map(({ cell }) => cell),
 ];
 
+interface NamedHouse {
+    house: "row" | "column" | "box";
+    number: number;
+}
+
+const housesNamedInChinese = (prompt: string): NamedHouse[] =>
+    [...prompt.matchAll(/第 (\d+) ([列欄宮])/g)].map(([, number, house]) => ({
+        house: ({ 列: "row", 欄: "column", 宮: "box" } as const)[house as "列" | "欄" | "宮"],
+        number: Number(number),
+    }));
+
+const housesNamedInEnglish = (prompt: string): NamedHouse[] =>
+    [...prompt.matchAll(/\b(row|column|box) (\d+)/gi)].map(([, house, number]) => ({
+        house: house.toLowerCase() as NamedHouse["house"],
+        number: Number(number),
+    }));
+
+const cellsOfHouse = ({ house, number }: NamedHouse): CellReference[] => {
+    const cells: CellReference[] = [];
+    for (let row = 0; row < BOARD_SIZE; row++) {
+        for (let column = 0; column < BOARD_SIZE; column++) {
+            const box = Math.floor(row / 3) * 3 + Math.floor(column / 3) + 1;
+            const isIn = house === "row" ? row === number - 1 : house === "column" ? column === number - 1 : box === number;
+            if (isIn) cells.push({ row, column });
+        }
+    }
+    return cells;
+};
+
+const sortedCells = (cells: readonly CellReference[]): CellReference[] =>
+    [...cells].sort((first, second) => first.row - second.row || first.column - second.column);
+
 const solveFill = (step: PracticeStep): PracticeState => {
     // A fill step's hints lead to a next move until it is solved, which is what a stuck player gets
     let state = freshPracticeState();
@@ -163,12 +195,18 @@ describe.each(lessons.map(lesson => [lesson.id, lesson] as const))("lesson %s", 
         }
     });
 
-    it("should leave a player on their own to find the place, with nothing marked on the board", () => {
+    it("should leave a player on their own to find the place, with only the house the prompt names framed", () => {
         for (const step of lesson.steps.filter(isPractice)) {
             if (step.stage !== "alone") continue;
-            expect(step.marks.range, step.promptKey).toBeUndefined();
             expect(step.marks.pattern, step.promptKey).toBeUndefined();
             expect(step.marks.targets, step.promptKey).toBeUndefined();
+
+            for (const [language, named] of [["zh-Hant", housesNamedInChinese], ["en", housesNamedInEnglish]] as const) {
+                const messages = language === "en" ? en : zhHant;
+                const prompt = stringAt(messages, step.promptKey) as string;
+                const framed = named(prompt).flatMap(cellsOfHouse);
+                expect(sortedCells(step.marks.range ?? []), `${language}: ${prompt}`).toEqual(sortedCells(framed));
+            }
         }
     });
 

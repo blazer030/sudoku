@@ -765,7 +765,7 @@ export const X_CHAIN: Lesson = {
             kind: "remove",
             stage: "alone",
             board: X_CHAIN_ALONE_BOARD,
-            marks: { noteDigit: 3 },
+            marks: { range: rowOf(4), noteDigit: 3 },
             removals: [removal(4, 5, 3)],
             pattern: X_CHAIN_ALONE_CELLS,
             digits: [3],
