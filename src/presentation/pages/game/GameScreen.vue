@@ -40,6 +40,7 @@
                         :effect="groupEffect"
                     />
                     <div
+                        :class="{ 'has-step-links': hintMode.active.value && hintMode.links.value.length > 0 }"
                         class="relative flex flex-col border-3 border-foreground/20 rounded-xl"
                         data-skin="board-grid"
                     >
