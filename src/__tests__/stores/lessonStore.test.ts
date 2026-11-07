@@ -48,9 +48,9 @@ describe("lessonStore", () => {
 
     it("should offer the first unfinished lesson in teaching order, whatever order they were finished in", () => {
         const store = useLessonStore();
-        store.setRepository(fakeRepository(["fillingIn", "xWing"]));
+        store.setRepository(fakeRepository(["rules", "xWing"]));
 
-        expect(store.nextLesson).toBe("rules");
+        expect(store.nextLesson).toBe("fillingIn");
     });
 
     it("should offer nothing once every lesson is finished", () => {

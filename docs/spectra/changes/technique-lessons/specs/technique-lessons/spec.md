@@ -228,6 +228,11 @@ The lesson panel SHALL show one message at a time, and a change of message SHALL
 - **WHEN** a lesson is shown on a 360×640 screen
 - **THEN** the board, the panel and its actions all fit without scrolling the page
 
+#### Scenario: The narrowest phones
+
+- **WHEN** a lesson is shown 320 wide, in a language or style whose words run long
+- **THEN** the stage tag's words shorten, and the step arrows beside it stay on screen; a long message may scroll inside the panel
+
 ### Requirement: Board placement on tall screens
 
 When a window has more room than the lesson's tallest panel needs, the panel SHALL stay at the bottom of the screen and the spare room SHALL go above and below the board, so the board sits about midway between the header and the panel. The board's place SHALL depend only on the window, not on the message shown. A window without that spare room SHALL keep the board directly under the header.
