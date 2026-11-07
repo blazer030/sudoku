@@ -340,6 +340,25 @@ describe("LessonScreen", () => {
         expect(wrapper.get("[data-testid='lesson-cell-2-2']").text()).toContain("2");
     });
 
+    it("should draw a step's lines under the digits, only on a step that has them", async () => {
+        const line = { from: cell(0, 0), to: cell(0, 2), digit: 4, type: "strong" as const };
+        const wrapper = mountScreen({
+            id: "xWing",
+            steps: [
+                { kind: "show", stage: "explain", board: BOARD, marks: {}, textKey: "lessons.names.rules" },
+                { kind: "show", stage: "explain", board: BOARD, marks: { links: [line] }, textKey: "lessons.names.xWing" },
+            ],
+        });
+        const grid = () => wrapper.get("[data-skin='board-grid']");
+        expect(grid().classes()).not.toContain("has-step-links");
+
+        await primary(wrapper).trigger("click");
+        await flushPromises();
+
+        expect(wrapper.find("[data-testid='step-link-overlay']").exists()).toBe(true);
+        expect(grid().classes()).toContain("has-step-links");
+    });
+
     it("should give the notes toggle a hook each style can mark its on state by", () => {
         const wrapper = mountScreen(NOTE_LESSON);
 

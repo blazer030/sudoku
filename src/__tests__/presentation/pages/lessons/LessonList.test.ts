@@ -135,6 +135,30 @@ describe("LessonList", () => {
         expect(router.currentRoute.value.path).toBe("/game");
     });
 
+    it("should stay on the list, starting nothing, when the player keeps an unfinished game", async () => {
+        const { wrapper, router } = await mountList([...ALL_LESSON_IDS]);
+        const game = useGameStore();
+        game.persistGame({
+            difficulty: "easy",
+            answer: Array.from({ length: 9 }, () => Array.from({ length: 9 }, () => 0)),
+            cells: Array.from({ length: 9 }, () => Array.from({ length: 9 }, () => ({ clue: 0, entry: 0, notes: [] }))),
+            elapsedSeconds: 204,
+            completed: false,
+            hintsUsed: 0,
+        });
+        const startNewGame = vi.spyOn(game, "startNewGame").mockResolvedValue();
+
+        await wrapper.get("[data-testid='lesson-group-play-easy']").trigger("click");
+        await flushPromises();
+        const stay = wrapper.get("[data-testid='new-game-stay-button']");
+        expect(stay.text()).toBe(i18n.global.t("home.giveUp.stayInLessons"));
+        await stay.trigger("click");
+        await flushPromises();
+
+        expect(router.currentRoute.value.path).toBe("/lessons");
+        expect(startNewGame).not.toHaveBeenCalled();
+    });
+
     describe("in 8-bit's light mode", () => {
         const useHandheld = () => {
             const settings = useSettingsStore();

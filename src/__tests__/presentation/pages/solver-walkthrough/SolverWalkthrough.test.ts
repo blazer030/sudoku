@@ -510,6 +510,22 @@ describe("SolverWalkthrough", () => {
         });
     });
 
+    it("should draw a step's lines under the digits, only on a step that has them", async () => {
+        const { wrapper } = mountWalkthrough({ initialPuzzle: samplePuzzle("hard") });
+        const grid = () => wrapper.get("[data-skin='board-grid']");
+        const overlay = () => wrapper.find("[data-testid='step-link-overlay']");
+        expect(grid().classes()).not.toContain("has-step-links");
+
+        await solve(wrapper);
+        expect(overlay().exists()).toBe(false);
+        expect(grid().classes()).not.toContain("has-step-links");
+
+        for (let step = 0; step < 200 && !overlay().exists(); step++) await clickNext(wrapper, 1);
+
+        expect(overlay().exists()).toBe(true);
+        expect(grid().classes()).toContain("has-step-links");
+    });
+
     it("should not lead the player off to a lesson from a step", async () => {
         const { wrapper } = mountWalkthrough({ initialPuzzle: singlesPuzzle });
         await solve(wrapper);
