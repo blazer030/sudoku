@@ -73,6 +73,7 @@
                 {{ noteMode ? t("game.controls.notesOn") : t("game.controls.notes") }}
             </button>
             <button
+                v-if="secondaryLabel !== null"
                 v-press
                 :disabled="secondaryDisabled"
                 class="hint-secondary"
@@ -120,7 +121,7 @@ const props = defineProps<{
     messageText: string;
     showsNoteToggle: boolean;
     noteMode: boolean;
-    secondaryLabel: string;
+    secondaryLabel: string | null;
     secondaryDisabled: boolean;
     primaryLabel: string;
     primaryDisabled: boolean;

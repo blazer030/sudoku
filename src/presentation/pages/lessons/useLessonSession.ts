@@ -94,8 +94,10 @@ export const useLessonSession = (lesson: Lesson) => {
     const next = () => { goTo(stepIndex.value + 1); };
     const previous = () => { goTo(stepIndex.value - 1); };
 
-    const firstPracticeIndex = lesson.steps.findIndex(isPractice);
-    const skipToPractice = () => { stepIndex.value = firstPracticeIndex; };
+    // Only explanations lie between here and the next practice, so nothing unsolved is passed on the way
+    const nextPracticeIndex = computed(() => lesson.steps.findIndex((candidate, index) => index > stepIndex.value && isPractice(candidate)));
+    const canSkipToPractice = computed(() => nextPracticeIndex.value !== -1);
+    const skipToPractice = () => { goTo(nextPracticeIndex.value); };
 
     const dispatch = (action: PracticeAction) => {
         const current = step.value;
@@ -120,6 +122,7 @@ export const useLessonSession = (lesson: Lesson) => {
         padCell,
         canGoNext,
         hintsLeft,
+        canSkipToPractice,
         goTo,
         next,
         previous,

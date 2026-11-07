@@ -225,9 +225,11 @@ const handlePrimary = () => {
     else session.next();
 };
 
-const secondaryLabel = computed(() => {
-    if (isDone.value) return t("lessons.common.actions.backToLessons");
-    return t(session.step.value.kind === "show" ? "lessons.common.actions.skipToPractice" : "lessons.common.actions.hint");
+// Null where there is no second way on: past the last practice, or finishing a lesson opened over the Walkthrough
+const secondaryLabel = computed((): string | null => {
+    if (isDone.value) return props.fromWalkthrough ? null : t("lessons.common.actions.backToLessons");
+    if (session.step.value.kind !== "show") return t("lessons.common.actions.hint");
+    return session.canSkipToPractice.value ? t("lessons.common.actions.skipToPractice") : null;
 });
 const secondaryDisabled = computed(() => !isDone.value && session.step.value.kind !== "show" && !session.hintsLeft.value);
 const handleSecondary = () => {

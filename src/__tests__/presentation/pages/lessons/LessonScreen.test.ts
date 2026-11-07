@@ -121,6 +121,60 @@ describe("LessonScreen", () => {
         expect(explanation(wrapper)).toContain(nameOf("pointing"));
     });
 
+    describe("a lesson that alternates explanation and practice", () => {
+        const place = (promptKey: string) => ({
+            kind: "place" as const,
+            stage: "follow" as const,
+            board: BOARD,
+            marks: {},
+            digit: 3,
+            answer: cell(2, 4),
+            promptKey,
+            successKey: "lessons.names.claiming",
+            hints: [],
+        });
+        const show = (textKey: string) => ({ kind: "show" as const, stage: "explain" as const, board: BOARD, marks: {}, textKey });
+        const ALTERNATING: Lesson = {
+            id: "fillingIn",
+            steps: [
+                show("lessons.names.rules"),
+                place("lessons.names.pointing"),
+                show("lessons.names.fillingIn"),
+                place("lessons.names.xWing"),
+                show("lessons.names.nakedPair"),
+                { kind: "done", stage: "done", board: BOARD, marks: {}, takeawayKey: "lessons.names.xyWing" },
+            ],
+        };
+        const solveAndGoOn = async (wrapper: Screen) => {
+            await tap(wrapper, 2, 4);
+            await primary(wrapper).trigger("click");
+            await flushPromises();
+        };
+
+        it("should skip forward to the practice after this explanation, never back to an earlier one", async () => {
+            const wrapper = mountScreen(ALTERNATING);
+            await toPractice(wrapper);
+            await solveAndGoOn(wrapper);
+            expect(explanation(wrapper)).toContain(nameOf("fillingIn"));
+
+            await toPractice(wrapper);
+
+            expect(explanation(wrapper)).toContain(nameOf("xWing"));
+        });
+
+        it("should not offer to skip when no practice is left", async () => {
+            const wrapper = mountScreen(ALTERNATING);
+            await toPractice(wrapper);
+            await solveAndGoOn(wrapper);
+            await toPractice(wrapper);
+            await solveAndGoOn(wrapper);
+
+            expect(explanation(wrapper)).toContain(nameOf("nakedPair"));
+            expect(wrapper.find("[data-testid='lesson-secondary']").exists()).toBe(false);
+            expect(primary(wrapper).attributes("disabled")).toBeUndefined();
+        });
+    });
+
     it("should not let an unsolved practice be passed", async () => {
         const wrapper = mountScreen();
         await toPractice(wrapper);
@@ -358,6 +412,14 @@ describe("LessonScreen", () => {
             expect(wrapper.emitted("back")).toHaveLength(1);
             expect(wrapper.emitted("openLesson")).toBeUndefined();
             expect(wrapper.emitted("playDifficulty")).toBeUndefined();
+        });
+
+        it("should offer no way to the lesson list when opened from the Walkthrough", async () => {
+            const wrapper = mount(LessonScreen, { props: { lesson: LESSON, fromWalkthrough: true } });
+
+            await finish(wrapper);
+
+            expect(wrapper.find("[data-testid='lesson-secondary']").exists()).toBe(false);
         });
     });
 
