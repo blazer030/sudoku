@@ -389,8 +389,8 @@ describe("Home", () => {
         const { wrapper } = mountHome();
         const subtitle = (id: string) => wrapper.get(`[data-testid='${id}-subtitle']`).text();
 
-        expect(subtitle("walkthrough")).toBe("Enter a puzzle, see the steps");
-        expect(subtitle("settings")).toBe("Theme, mode, language");
+        expect(subtitle("walkthrough")).toBe(i18n.global.t("home.entries.walkthrough"));
+        expect(subtitle("settings")).toBe(i18n.global.t("home.entries.settings"));
     });
 
     describe("on a short window", () => {

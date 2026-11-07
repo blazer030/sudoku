@@ -15,8 +15,18 @@
 @variant dark (&:where(.dark, .dark *));
 
 /* Home on a short phone, and on a window too short for its tiles to keep their subtitles */
-@custom-variant home-short (@media (max-height: 619.98px) and (max-width: 640px));
-@custom-variant home-tiny (@media (max-height: 499.98px) and (max-width: 640px));
+@custom-variant home-short (@media (max-height: 623.98px) and (max-width: 640px));
+@custom-variant home-tiny (@media (max-height: 549.98px) and (max-width: 640px));
+/* Ink's vertical title takes its smaller size: from a taller window on a phone, whose Home needs the room; wider
+   windows keep the height they always had */
+@custom-variant home-ink-compact {
+  @media (max-height: 740px) {
+    @slot;
+  }
+  @media (max-height: 812px) and (max-width: 640px) {
+    @slot;
+  }
+}
 
 @custom-variant hover {
   @media (hover: hover) and (pointer: fine) {
@@ -168,7 +178,7 @@
 }
 
 /* Under what the sizes above can reach, the words and the gaps round the cards close too */
-@media (max-height: 619.98px) and (max-width: 640px) {
+@media (max-height: 623.98px) and (max-width: 640px) {
   .home-sizes {
     --home-logo-size: 40px;
     --home-logo-mark: 24px;
@@ -181,7 +191,7 @@
 }
 
 /* Shorter still, the tiles lose their subtitles (Home.vue) and the page its margins */
-@media (max-height: 499.98px) and (max-width: 640px) {
+@media (max-height: 549.98px) and (max-width: 640px) {
   .home-sizes {
     --home-page-top: 6px;
     --home-page-bottom: 8px;

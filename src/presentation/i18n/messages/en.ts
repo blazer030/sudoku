@@ -128,7 +128,7 @@ export const en = {
         entries: {
             winRate: "Win rate {percent}%",
             noGames: "No games yet",
-            walkthrough: "Enter a puzzle, see the steps",
+            walkthrough: "See any puzzle's steps",
             lessonsFirst: "First time? Start here",
             lessonsProgress: "{done} of {total} learned",
             settings: "Theme, mode, language",

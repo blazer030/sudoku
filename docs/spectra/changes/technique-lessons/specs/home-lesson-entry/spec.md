@@ -44,14 +44,14 @@ Home SHALL fit without scrolling in every style, with a saved game, on windows f
 | ------------- | ----- |
 | 820px and up | Full size |
 | 644px to 819px | Gaps, logo, and new game button shrink with the height |
-| 620px to 643px | Those at their smallest |
-| 500px to 619px | Also smaller title, subtitle, tile labels and card gaps |
-| Under 500px | Also no subtitles on the four entries, and smaller margins and logo |
+| 624px to 643px | Those at their smallest |
+| 550px to 623px | Also smaller title, subtitle, tile labels and card gaps |
+| Under 550px | Also no subtitles on the four entries, and smaller margins and logo |
 
 #### Scenario: Ink's vertical title
 
-- **WHEN** the window is under 801px tall in the ink style
-- **THEN** its vertical title takes its smaller size, so Home still fits
+- **WHEN** the window is under 813px tall on a narrow window in the ink style
+- **THEN** its vertical title takes its smaller size, so Home still fits; a window wider than the column does so only under 741px, as it did before
 
 #### Scenario: Subtitles leave only when needed
 
