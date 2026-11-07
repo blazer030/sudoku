@@ -112,7 +112,7 @@ export interface RemoveStep extends PracticeStepBase {
     digits?: readonly number[];
 }
 
-export type FillRule = "answer" | "nakedSingle" | "hiddenSingle";
+export type FillRule = "answer" | "nakedSingle";
 
 /** The digit has to be worked out: tap a cell, then use the digit pad. */
 export interface FillStep extends PracticeStepBase {

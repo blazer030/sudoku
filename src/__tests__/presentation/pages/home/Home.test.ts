@@ -5,6 +5,7 @@ import { nextTick } from "vue";
 import { flushPromises, mount, type VueWrapper } from "@vue/test-utils";
 import { createPinia, setActivePinia } from "pinia";
 import { createRouter, createMemoryHistory } from "vue-router";
+import { ALL_LESSON_IDS } from "@/domain/lessons/curriculum";
 import Home from "@/presentation/pages/home/Home.vue";
 import { ROUTER_PATH } from "@/router";
 import { useGameStore } from "@/stores/gameStore";
@@ -351,14 +352,12 @@ describe("Home", () => {
         const { wrapper, pinia } = mountHome();
         const fresh = wrapper.get("[data-testid='lessons-subtitle']").text();
 
-        useLessonStore(pinia).finish("rules");
-        useLessonStore(pinia).finish("fillingIn");
+        for (const lesson of ALL_LESSON_IDS.slice(0, 6)) useLessonStore(pinia).finish(lesson);
         await nextTick();
         const later = wrapper.get("[data-testid='lessons-subtitle']").text();
 
-        expect(later).not.toBe(fresh);
-        expect(later).toContain("2");
-        expect(later).toContain("17");
+        expect(fresh).toBe(i18n.global.t("home.entries.lessonsFirst"));
+        expect(later).toBe(i18n.global.t("home.entries.lessonsProgress", { done: 6, total: 17 }));
     });
 
     it("should take every entry's subtitle away on a very short window", () => {

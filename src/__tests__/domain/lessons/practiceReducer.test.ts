@@ -1,3 +1,4 @@
+import { HIDDEN_SINGLE } from "@/domain/lessons/content/basicsAndEasy";
 import type { FillStep, LessonBoard, NoteStep, PickStep, PlaceStep, RemoveStep } from "@/domain/lessons/Lesson";
 import { freshPracticeState, hintsFor, practiceReducer, type PracticeState } from "@/domain/lessons/practice";
 import type { CellReference } from "@/domain/solver/SolveStep";
@@ -382,29 +383,20 @@ describe("practiceReducer", () => {
             expect(practiceReducer(placeStep, wrong, requestHint).feedback).toBeNull();
         });
 
-        it("should give a hidden single's box, then its digit's place, then the cell, from the board as it stands", () => {
-            const step: FillStep = {
-                kind: "fill",
-                stage: "alone",
-                board: EASY_BOARD,
-                marks: {},
-                rule: "hiddenSingle",
-                required: 1,
-                promptKey: "prompt",
-                successKey: "success",
-                hints: [],
-            };
+        it("should narrow the Hidden Single lesson's own hints from the box, to the digit's place, to the cell", () => {
+            const alone = HIDDEN_SINGLE.steps.find(step => step.stage === "alone");
+            if (alone?.kind !== "place") throw new Error("Hidden Single ends with placing a digit on its own");
 
-            const hints = hintsFor(step, freshPracticeState());
+            const [box, digit, answer, ...rest] = hintsFor(alone, freshPracticeState());
 
-            expect(hints.map(hint => hint.textKey)).toEqual([
-                "lessons.common.hints.lookAtBox",
-                "lessons.common.hints.digitInBox",
-                "lessons.common.hints.answer",
-            ]);
-            expect(hints[0].params).toEqual({ box: 1 });
-            expect(hints[1].params).toEqual({ box: 1, digit: 4 });
-            expect(hints[2].params).toEqual({ row: 1, column: 1, digit: 4 });
+            expect(rest).toEqual([]);
+            expect(box.marks?.range).toHaveLength(9);
+            expect(box.marks?.lit).toBeUndefined();
+            expect(box.marks?.keepDigit).toBeUndefined();
+            expect(digit.marks?.range).toEqual(box.marks?.range);
+            expect(digit.marks?.keepDigit).toBe(alone.digit);
+            expect(digit.marks?.lit).toBeUndefined();
+            expect(answer.marks?.lit).toEqual([alone.answer]);
         });
 
         it("should select the answer's cell at a fill step's last hint", () => {

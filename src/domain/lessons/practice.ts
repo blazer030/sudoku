@@ -110,7 +110,6 @@ const answerOf = (board: LessonBoard): number[][] | null => {
 
 const fillAccepts = (step: FillStep, state: PracticeState, cell: CellReference, digit: number): boolean => {
     if (step.rule === "nakedSingle") return isNakedSingle(step.board, state, cell, digit);
-    if (step.rule === "hiddenSingle") return isHiddenSingle(step.board, state, cell, digit);
     return answerOf(step.board)?.[cell.row][cell.column] === digit;
 };
 
@@ -223,13 +222,6 @@ export const hintsFor = (step: PracticeStep, state: PracticeState): readonly Les
         selects: cell,
     };
     if (step.rule === "answer") return [answer];
-    if (step.rule === "hiddenSingle") {
-        return [
-            { textKey: "lessons.common.hints.lookAtBox", params: { box }, marks: { range: boxCells(box) } },
-            { textKey: "lessons.common.hints.digitInBox", params: { box, digit }, marks: { range: boxCells(box), keepDigit: digit, dimOthers: true } },
-            answer,
-        ];
-    }
     const houses = [...rowCells(cell.row), ...columnCells(cell.column), ...boxCells(box)];
     return [
         { textKey: "lessons.common.hints.lookAtCell", params: { row: cell.row + 1, column: cell.column + 1 }, marks: { lit: [cell] } },

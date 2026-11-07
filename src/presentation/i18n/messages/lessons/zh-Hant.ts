@@ -43,8 +43,6 @@ export const lessonsZhHant: typeof lessonsEn = {
             turnOnNotes: "先打開筆記。",
         },
         hints: {
-            lookAtBox: "看第 {box} 宮。",
-            digitInBox: "第 {box} 宮的 {digit} 只有一個位置。",
             lookAtCell: "看第 {row} 列第 {column} 欄。",
             countHouses: "這格的列、欄、宮已經湊齊八個數字。",
             answer: "第 {row} 列第 {column} 欄填 {digit}。",

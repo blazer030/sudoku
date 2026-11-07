@@ -42,8 +42,6 @@ export const lessonsEn = {
             turnOnNotes: "Turn on Notes first.",
         },
         hints: {
-            lookAtBox: "Look at box {box}.",
-            digitInBox: "The {digit} in box {box} has only one place.",
             lookAtCell: "Look at row {row}, column {column}.",
             countHouses: "This cell's row, column and box already have eight digits between them.",
             answer: "Row {row}, column {column} is {digit}.",
