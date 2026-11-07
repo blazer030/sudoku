@@ -34,8 +34,6 @@ export const lessonsEn = {
             conflictRow: "Row {number} already has a {digit}.",
             conflictColumn: "Column {number} already has a {digit}.",
             conflictBox: "Box {number} already has a {digit}.",
-            notCertain: "{digit} fits here, but it has another place too, so it isn't certain yet.",
-            notTheAnswer: "This cell isn't {digit}.",
             outsideRange: "Look in the marked cells first.",
             noCandidates: "This cell doesn't have those candidates.",
             selectCellFirst: "Tap an empty cell first.",

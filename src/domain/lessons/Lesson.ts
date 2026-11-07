@@ -89,6 +89,7 @@ export interface PlaceStep extends PracticeStepBase {
     acceptsAnyHiddenSingle?: boolean;
     /** Tapping outside this says to look here first. */
     range?: readonly CellReference[];
+    /** Said for a cell where the digit fits but isn't the answer. A step where that can happen must have it (a test checks). */
     notYetKey?: string;
 }
 
@@ -123,6 +124,7 @@ export interface FillStep extends PracticeStepBase {
     /** Only these cells can be chosen. */
     area?: readonly CellReference[];
     areaKey?: string;
+    /** Said for a digit that fits the cell but isn't the answer. A step where that can happen must have it (a test checks). */
     notYetKey?: string;
 }
 

@@ -10,8 +10,6 @@ export type PracticeHouse = "row" | "column" | "box";
 /** Why a tap was wrong, or what to do first. */
 export type PracticeFeedback =
     | { kind: "conflict"; house: PracticeHouse; number: number; digit: number }
-    | { kind: "notCertain"; digit: number }
-    | { kind: "notTheAnswer"; digit: number }
     | { kind: "outsideRange" }
     | { kind: "noCandidates" }
     | { kind: "selectCellFirst" }
@@ -113,6 +111,8 @@ const fillAccepts = (step: FillStep, state: PracticeState, cell: CellReference, 
     return answerOf(step.board)?.[cell.row][cell.column] === digit;
 };
 
+const notYetOf = (key: string | undefined): PracticeFeedback | null => key === undefined ? null : { kind: "message", key };
+
 const tapOnPlace = (step: PlaceStep, state: PracticeState, cell: CellReference): PracticeState => {
     if (practiceValueAt(step.board, state, cell) !== 0) return state;
     const isRight = step.acceptsAnyHiddenSingle
@@ -121,10 +121,7 @@ const tapOnPlace = (step: PlaceStep, state: PracticeState, cell: CellReference):
     if (isRight) return { ...state, placed: [...state.placed, { cell, digit: step.digit }], solved: true };
     if (step.range && !includesCell(step.range, cell)) return { ...state, feedback: { kind: "outsideRange" } };
 
-    const notYet: PracticeFeedback = step.notYetKey
-        ? { kind: "message", key: step.notYetKey }
-        : { kind: "notCertain", digit: step.digit };
-    return { ...state, feedback: conflictOf(step.board, state, cell, step.digit) ?? notYet };
+    return { ...state, feedback: conflictOf(step.board, state, cell, step.digit) ?? notYetOf(step.notYetKey) };
 };
 
 const tapOnPick = (step: PickStep, state: PracticeState, cell: CellReference): PracticeState => {
@@ -173,13 +170,10 @@ const pressOnFill = (step: FillStep, state: PracticeState, digit: number): Pract
         const placed = [...state.placed, { cell: selected, digit }];
         return { ...state, placed, selected: null, hintLevel: 0, solved: placed.length >= step.required };
     }
-    const notYet: PracticeFeedback = step.notYetKey
-        ? { kind: "message", key: step.notYetKey }
-        : { kind: "notTheAnswer", digit };
     return {
         ...state,
         wrong: { cell: selected, digit },
-        feedback: conflictOf(step.board, state, selected, digit) ?? notYet,
+        feedback: conflictOf(step.board, state, selected, digit) ?? notYetOf(step.notYetKey),
     };
 };
 
@@ -187,7 +181,7 @@ const pressOnNote = (step: NoteStep, state: PracticeState, digit: number): Pract
     if (state.selected === null) return { ...state, feedback: { kind: "selectCellFirst" } };
     if (!state.noteMode) return { ...state, feedback: { kind: "turnOnNotes" } };
     if (!step.digits.includes(digit)) {
-        return { ...state, feedback: conflictOf(step.board, state, step.cell, digit) ?? { kind: "notTheAnswer", digit } };
+        return { ...state, feedback: conflictOf(step.board, state, step.cell, digit) };
     }
     if (state.notes.includes(digit)) return state;
     const notes = [...state.notes, digit];

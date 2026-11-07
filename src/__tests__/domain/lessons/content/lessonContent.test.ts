@@ -1,7 +1,8 @@
+import { BOARD_SIZE } from "@/domain/board/constants";
 import { LESSONS } from "@/domain/lessons/content";
 import { ALL_LESSON_IDS } from "@/domain/lessons/curriculum";
 import type { Lesson, LessonStep, PracticeStep, StepMarks } from "@/domain/lessons/Lesson";
-import { freshPracticeState, practiceReducer, type PracticeAction, type PracticeState } from "@/domain/lessons/practice";
+import { freshPracticeState, practiceReducer, practiceValueAt, type PracticeAction, type PracticeState } from "@/domain/lessons/practice";
 import { verifyLessonStep } from "@/domain/lessons/verifyLesson";
 import type { CellReference } from "@/domain/solver/SolveStep";
 import { en } from "@/presentation/i18n/messages/en";
@@ -133,6 +134,29 @@ describe.each(lessons.map(lesson => [lesson.id, lesson] as const))("lesson %s", 
             const shown = cellsShownBy(step.hints[step.hints.length - 1].marks);
             for (const answer of answerCells(step)) {
                 expect(shown, `${step.promptKey}, row ${answer.row} column ${answer.column}`).toContainEqual(answer);
+            }
+        }
+    });
+
+    it("should say why for every wrong move on an empty cell", () => {
+        for (const step of lesson.steps.filter(isPractice)) {
+            const fresh = step.kind === "note" ? { ...freshPracticeState(), noteMode: true } : freshPracticeState();
+            for (let row = 0; row < BOARD_SIZE; row++) {
+                for (let column = 0; column < BOARD_SIZE; column++) {
+                    if (practiceValueAt(step.board, fresh, { row, column }) !== 0) continue;
+                    const where = `${step.promptKey}, row ${row} column ${column}`;
+
+                    const tapped = practiceReducer(step, fresh, { kind: "tapCell", row, column });
+                    const moved = tapped.solved || tapped.selected !== null || tapped.picked.length > 0 || tapped.removed.length > 0;
+                    if (!moved) expect(tapped.feedback, where).not.toBeNull();
+                    if (tapped.selected === null) continue;
+
+                    for (let digit = 1; digit <= BOARD_SIZE; digit++) {
+                        const pressed = practiceReducer(step, tapped, { kind: "pressDigit", digit });
+                        const accepted = pressed.placed.length > 0 || pressed.notes.length > 0;
+                        if (!accepted) expect(pressed.feedback, `${where}, digit ${digit}`).not.toBeNull();
+                    }
+                }
             }
         }
     });

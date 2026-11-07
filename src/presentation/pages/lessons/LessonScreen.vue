@@ -156,9 +156,6 @@ const feedbackText = (feedback: PracticeFeedback): string => {
         const key = { row: "conflictRow", column: "conflictColumn", box: "conflictBox" }[feedback.house];
         return t(`lessons.common.feedback.${key}`, { number: feedback.number, digit: feedback.digit });
     }
-    case "notCertain":
-    case "notTheAnswer":
-        return t(`lessons.common.feedback.${feedback.kind}`, { digit: feedback.digit });
     case "message":
         return t(feedback.key);
     default:

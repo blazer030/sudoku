@@ -35,8 +35,6 @@ export const lessonsZhHant: typeof lessonsEn = {
             conflictRow: "第 {number} 列已經有 {digit}。",
             conflictColumn: "第 {number} 欄已經有 {digit}。",
             conflictBox: "第 {number} 宮已經有 {digit}。",
-            notCertain: "這裡放得下 {digit}，但還有別的位置，還不能確定。",
-            notTheAnswer: "這格不是 {digit}。",
             outsideRange: "先看標示出來的格子。",
             noCandidates: "這格沒有這些候選數。",
             selectCellFirst: "先點一格空格。",
