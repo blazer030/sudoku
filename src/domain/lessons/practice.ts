@@ -113,7 +113,8 @@ const fillAccepts = (step: FillStep, state: PracticeState, cell: CellReference, 
 const notYetOf = (key: string | undefined): PracticeFeedback | null => key === undefined ? null : { kind: "message", key };
 
 const tapOnPlace = (step: PlaceStep, state: PracticeState, cell: CellReference): PracticeState => {
-    if (practiceValueAt(step.board, state, cell) !== 0) return state;
+    const value = practiceValueAt(step.board, state, cell);
+    if (value !== 0) return state.sameDigit === value ? state : { ...state, sameDigit: value };
     const isRight = step.acceptsAnyHiddenSingle
         ? isHiddenSingle(step.board, state, cell, step.digit)
         : sameCell(cell, step.answer);
@@ -160,8 +161,9 @@ const tapOnFill = (step: FillStep, state: PracticeState, cell: CellReference): P
 };
 
 const tapOnNote = (step: NoteStep, state: PracticeState, cell: CellReference): PracticeState => {
-    if (!sameCell(step.cell, cell)) return { ...state, selected: null, feedback: { kind: "outsideRange" } };
-    return { ...state, selected: cell };
+    if (sameCell(step.cell, cell)) return { ...state, selected: cell };
+    if (practiceValueAt(step.board, state, cell) !== 0) return state;
+    return { ...state, selected: null, feedback: { kind: "outsideRange" } };
 };
 
 const pressOnFill = (step: FillStep, state: PracticeState, digit: number): PracticeState => {

@@ -133,6 +133,13 @@ export const HIDDEN_SINGLE: Lesson = {
             textKey: key("hiddenSingle", "onlyCell"),
         },
         {
+            kind: "show",
+            stage: "explain",
+            board: EASY_BOARD,
+            marks: { targets: cells([1, 7], [2, 5], [7, 8], [9, 1]) },
+            textKey: key("hiddenSingle", "tapToLight"),
+        },
+        {
             kind: "place",
             stage: "follow",
             board: EASY_BOARD,

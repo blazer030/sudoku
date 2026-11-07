@@ -60,7 +60,7 @@ export const lessonCellViews = (board: LessonBoard, marks: StepMarks, practice: 
             emphasized: (has(marks.pattern, cell) || has(practice.picked, cell))
                 ? (candidates ?? []).filter(digit => (marks.emphasized ?? []).includes(digit))
                 : [],
-            dimmed: value !== 0 && isDimmedCell && value !== marks.keepDigit && answer === undefined,
+            dimmed: value !== 0 && isDimmedCell && value !== marks.keepDigit && value !== practice.sameDigit && answer === undefined,
             dimmedNotes: (candidates ?? []).filter(digit =>
                 isDimmedCell || (marks.noteDigit !== undefined && digit !== marks.noteDigit)),
             crossed: has(marks.crossed, cell),

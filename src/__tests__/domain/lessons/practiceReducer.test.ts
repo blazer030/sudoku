@@ -100,10 +100,28 @@ describe("practiceReducer", () => {
             expect(state.feedback).toEqual(feedback);
         });
 
-        it("should ignore a filled cell", () => {
-            const before = freshPracticeState();
+        it("should light a filled cell's digit, without calling it wrong", () => {
+            const state = practiceReducer(placeStep, freshPracticeState(), tap(0, 3));
 
-            expect(practiceReducer(placeStep, before, tap(0, 3))).toBe(before);
+            expect(state.sameDigit).toBe(2);
+            expect(state.feedback).toBeNull();
+            expect(state.placed).toEqual([]);
+            expect(state.solved).toBe(false);
+        });
+
+        it("should change nothing when the digit is already lit", () => {
+            const lit = practiceReducer(placeStep, freshPracticeState(), tap(0, 3));
+
+            expect(practiceReducer(placeStep, lit, tap(0, 3))).toBe(lit);
+        });
+
+        it("should keep the digit lit through a wrong tap, as the player is still looking for it", () => {
+            const lit = practiceReducer(placeStep, freshPracticeState(), tap(0, 3));
+
+            const state = practiceReducer(placeStep, lit, tap(1, 3));
+
+            expect(state.sameDigit).toBe(2);
+            expect(state.feedback).not.toBeNull();
         });
 
         it("should ignore taps once solved", () => {
@@ -405,6 +423,12 @@ describe("practiceReducer", () => {
 
             expect(state.selected).toBeNull();
             expect(state.feedback).toEqual({ kind: "outsideRange" });
+        });
+
+        it("should not call a filled cell wrong", () => {
+            const before = freshPracticeState();
+
+            expect(practiceReducer(step, before, tap(0, 3))).toBe(before);
         });
     });
 

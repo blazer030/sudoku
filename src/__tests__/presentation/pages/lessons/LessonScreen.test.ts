@@ -255,6 +255,19 @@ describe("LessonScreen", () => {
         expect(explanation(wrapper)).toContain(nameOf("pointing"));
     });
 
+    it("should light every matching digit when a filled cell is tapped on a place step", async () => {
+        const wrapper = mountScreen();
+        await toPractice(wrapper);
+        const variantAt = (row: number, column: number) =>
+            wrapper.get(`[data-testid='lesson-cell-${row}-${column}']`).attributes("data-variant");
+
+        await tap(wrapper, 0, 6); // a 7
+
+        expect(variantAt(1, 4)).toBe("target"); // the 7 of row 2
+        expect(variantAt(0, 3)).not.toBe("target"); // a 2
+        expect(wrapper.find("[data-testid='lesson-wrong']").exists()).toBe(false);
+    });
+
     it.each([
         ["row", 5, "conflictRow", { number: 3, digit: 5 }],
         ["column", 2, "conflictColumn", { number: 4, digit: 2 }],

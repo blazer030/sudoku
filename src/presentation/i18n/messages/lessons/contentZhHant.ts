@@ -27,6 +27,7 @@ export const lessonContentZhHant: typeof lessonContentEn = {
         firstRow: "第 1 列已經有 7，所以第 1 宮在第 1 列的三格都不能放 7。",
         secondRow: "第 2 列也有 7，所以第 2 列第 3 欄同樣不能放。",
         onlyCell: "第 1 宮只剩第 3 列第 3 欄能放 7。這格自己可能是 2 或 7，但 7 只能來這裡，所以叫隱藏唯一數。",
+        tapToLight: "小技巧：點盤面上已有的數字，相同的數字都會亮起來，像這裡的 7。找隱藏唯一數時會更好找。",
         followPrompt: "第 2 宮還沒有 3。點出 3 唯一能放的那一格。",
         followSuccess: "對了。第 4 欄和第 6 欄都有 3，第 2 宮只剩這一格能放。",
         followHintColumns: "看第 4 欄和第 6 欄裡的 3。",

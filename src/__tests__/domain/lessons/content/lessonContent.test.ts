@@ -179,6 +179,28 @@ describe.each(lessons.map(lesson => [lesson.id, lesson] as const))("lesson %s", 
     });
 });
 
+describe("the Hidden Single lesson", () => {
+    const steps = LESSONS.hiddenSingle.steps;
+    const tipAt = steps.findIndex(step => step.kind === "show" && step.textKey === "lessons.content.hiddenSingle.tapToLight");
+
+    it("should teach lighting a digit before the first practice", () => {
+        expect(tipAt).toBeGreaterThan(-1);
+        expect(tipAt).toBeLessThan(steps.findIndex(isPractice));
+    });
+
+    it("should show the tip lighting every 7 on the board", () => {
+        const { board, marks } = steps[tipAt];
+        const sevens: CellReference[] = [];
+        for (let row = 0; row < BOARD_SIZE; row++) {
+            for (let column = 0; column < BOARD_SIZE; column++) {
+                if (board.values[row * BOARD_SIZE + column] === "7") sevens.push({ row, column });
+            }
+        }
+
+        expect(marks.targets).toEqual(sevens);
+    });
+});
+
 describe("the Filling in lesson", () => {
     it("should dim nothing, as working out a cell takes the digits around it", () => {
         for (const step of LESSONS.fillingIn.steps) {

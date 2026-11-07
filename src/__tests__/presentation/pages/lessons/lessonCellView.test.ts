@@ -112,6 +112,13 @@ describe("lessonCellViews", () => {
         expect(views[0][6].highlight).toBe("target");
         expect(views[0][3].highlight).toBe("none");
     });
+
+    it("should not leave the digit the player lit dimmed", () => {
+        const views = lessonCellViews(BOARD, { dimOthers: true, keepDigit: 3 }, { ...freshPracticeState(), sameDigit: 7 });
+
+        expect(views[0][6].dimmed).toBe(false); // the lit 7
+        expect(views[0][3].dimmed).toBe(true); // an unrelated 2
+    });
 });
 
 describe("mergeMarks", () => {

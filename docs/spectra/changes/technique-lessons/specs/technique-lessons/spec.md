@@ -133,7 +133,7 @@ Independent practice SHALL show a whole board without a highlighted range, and S
 
 ### Requirement: Wrong answers explain themselves
 
-A wrong tap SHALL leave the player on the same step, SHALL NOT change the board, and SHALL say why it was wrong. A wrong digit stays in its cell, marked as wrong, until the player's next action; it is not part of the board. Tapping a cell that already holds a digit is not a wrong tap, unless the step asks for that very cell: it SHALL give no reason and only clears a reason shown before it. On a fill step it also lights that digit across the board, as in a game.
+A wrong tap SHALL leave the player on the same step, SHALL NOT change the board, and SHALL say why it was wrong. A wrong digit stays in its cell, marked as wrong, until the player's next action; it is not part of the board. Tapping a cell that already holds a digit is not a wrong tap, unless the step asks for that very cell: it SHALL give no reason and only clears a reason shown before it. On a fill or place step it also lights that digit across the board, as in a game, and a place step keeps it lit through a wrong tap, as the player is still looking for it. A lit digit is not dimmed.
 
 #### Scenario: The reasons given
 
@@ -152,13 +152,18 @@ A wrong tap SHALL leave the player on the same step, SHALL NOT change the board,
 
 #### Scenario: A cell that already holds a digit
 
-- **WHEN** a step asks the player to place digit 5 and the player taps a cell holding a 7
+- **WHEN** a step asks the player to pick a pattern or write notes, and the player taps a cell holding a 7 it does not ask for
 - **THEN** the step and the board stay as they were, and no reason is shown
 
-#### Scenario: A filled cell during a fill step
+#### Scenario: A filled cell during a fill or place step
 
-- **WHEN** a step asks the player to work out a digit and the player taps a cell holding a 7
+- **WHEN** a step asks the player to work out a digit or place digit 5, and the player taps a cell holding a 7
 - **THEN** no reason is shown, and the 7s light up across the board
+
+#### Scenario: Hidden Single teaches lighting a digit
+
+- **WHEN** the player reaches the end of Hidden Single's explanation, before its first practice
+- **THEN** a step says a digit on the board can be tapped to light every matching digit, and shows every 7 lit
 
 ### Requirement: Layered hints
 

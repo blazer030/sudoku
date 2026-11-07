@@ -25,6 +25,7 @@ export const lessonContentEn = {
         firstRow: "Row 1 already has a 7, so the three cells of box 1 in row 1 can't be 7.",
         secondRow: "Row 2 has a 7 too, so row 2, column 3 can't be 7 either.",
         onlyCell: "Only row 3, column 3 is left for the 7 in box 1. That cell could be 2 or 7, but 7 can only go here: it's a hidden single.",
+        tapToLight: "Tip: tap a digit already on the board and every matching digit lights up, like these 7s. It makes hidden singles easier to find.",
         followPrompt: "Box 2 has no 3 yet. Tap the only cell it can go in.",
         followSuccess: "Right. Columns 4 and 6 both have a 3, so box 2 has only this cell left.",
         followHintColumns: "Look at the 3s in columns 4 and 6.",
