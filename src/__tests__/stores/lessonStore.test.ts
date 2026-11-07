@@ -2,6 +2,7 @@ import { createPinia, setActivePinia } from "pinia";
 import type { LessonProgressRepository } from "@/application/lessons/LessonProgressRepository";
 import type { LessonId } from "@/domain/lessons/Lesson";
 import { useLessonStore } from "@/stores/lessonStore";
+import { useStatisticsStore } from "@/stores/statisticsStore";
 
 const fakeRepository = (stored: LessonId[] = []): LessonProgressRepository & { saved: LessonId[][] } => {
     const saved: LessonId[][] = [];
@@ -21,6 +22,17 @@ describe("lessonStore", () => {
         expect(store.isFinished("rules")).toBe(true);
         expect(store.isFinished("fillingIn")).toBe(false);
         expect(store.finishedCount).toBe(1);
+    });
+
+    it("should keep the progress when the game records are cleared", async () => {
+        const store = useLessonStore();
+        const repository = fakeRepository(["rules"]);
+        store.setRepository(repository);
+
+        await useStatisticsStore().clearAll();
+
+        expect(store.isFinished("rules")).toBe(true);
+        expect(repository.saved).toEqual([]);
     });
 
     it("should save a finished lesson once", () => {

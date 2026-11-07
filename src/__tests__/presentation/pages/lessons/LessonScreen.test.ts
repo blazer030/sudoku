@@ -70,6 +70,24 @@ const NOTE_LESSON: Lesson = {
     ],
 };
 
+const FILL_LESSON: Lesson = {
+    id: "fillingIn",
+    steps: [
+        {
+            kind: "fill",
+            stage: "follow",
+            board: BOARD,
+            marks: {},
+            rule: "answer",
+            required: 1,
+            area: [cell(2, 3)],
+            promptKey: "lessons.names.xWing",
+            successKey: "lessons.names.fish",
+            hints: [],
+        },
+    ],
+};
+
 const mountScreen = (lesson: Lesson = LESSON) => mount(LessonScreen, { props: { lesson } });
 type Screen = ReturnType<typeof mountScreen>;
 
@@ -221,6 +239,20 @@ describe("LessonScreen", () => {
 
         expect(wrapper.find("[data-testid='lesson-wrong']").exists()).toBe(false);
         expect(explanation(wrapper)).toContain(nameOf("pointing"));
+    });
+
+    it.each([
+        ["row", 5, "conflictRow", { number: 3, digit: 5 }],
+        ["column", 2, "conflictColumn", { number: 4, digit: 2 }],
+        ["box", 7, "conflictBox", { number: 2, digit: 7 }],
+    ] as const)("should say which %s already has the digit", async (_, digit, key, params) => {
+        const wrapper = mountScreen(FILL_LESSON);
+
+        await tap(wrapper, 2, 3);
+        await wrapper.get(`[data-testid='floating-number-${digit}']`).trigger("click");
+        await flushPromises();
+
+        expect(wrapper.get("[data-testid='lesson-wrong']").text()).toBe(i18n.global.t(`lessons.common.feedback.${key}`, params));
     });
 
     it("should give hints one level at a time, then disable the action", async () => {

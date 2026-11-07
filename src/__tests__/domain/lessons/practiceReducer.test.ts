@@ -91,6 +91,15 @@ describe("practiceReducer", () => {
             expect(state.feedback).toEqual(feedback);
         });
 
+        it.each([
+            ["its row", 5, { kind: "conflict", house: "row", number: 3, digit: 5 }],
+            ["its box", 7, { kind: "conflict", house: "box", number: 2, digit: 7 }],
+        ] as const)("should name %s when that already has the digit", (_, digit, feedback) => {
+            const state = practiceReducer({ ...placeStep, digit, range: undefined }, freshPracticeState(), tap(2, 3));
+
+            expect(state.feedback).toEqual(feedback);
+        });
+
         it("should ignore a filled cell", () => {
             const before = freshPracticeState();
 

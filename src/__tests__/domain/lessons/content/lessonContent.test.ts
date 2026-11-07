@@ -1,8 +1,9 @@
 import { LESSONS } from "@/domain/lessons/content";
 import { ALL_LESSON_IDS } from "@/domain/lessons/curriculum";
-import type { Lesson, LessonStep, PracticeStep } from "@/domain/lessons/Lesson";
+import type { Lesson, LessonStep, PracticeStep, StepMarks } from "@/domain/lessons/Lesson";
 import { freshPracticeState, practiceReducer, type PracticeAction, type PracticeState } from "@/domain/lessons/practice";
 import { verifyLessonStep } from "@/domain/lessons/verifyLesson";
+import type { CellReference } from "@/domain/solver/SolveStep";
 import { en } from "@/presentation/i18n/messages/en";
 import { zhHant } from "@/presentation/i18n/messages/zh-Hant";
 
@@ -38,6 +39,24 @@ const solution = (step: PracticeStep): PracticeAction[] => {
         case "fill": return [];
     }
 };
+
+// Where a step's answer lies; a fill step's hints are worked out from the board, and tested with the reducer
+const answerCells = (step: Exclude<PracticeStep, { kind: "fill" }>): readonly CellReference[] => {
+    switch (step.kind) {
+        case "place": return [step.answer];
+        case "pick": return step.targets;
+        case "remove": return step.removals.map(({ cell }) => cell);
+        case "note": return [step.cell];
+    }
+};
+
+const cellsShownBy = (marks: StepMarks = {}): readonly CellReference[] => [
+    ...(marks.lit ?? []),
+    ...(marks.targets ?? []),
+    ...(marks.pattern ?? []),
+    ...(marks.answers ?? []).map(({ cell }) => cell),
+    ...(marks.eliminated ?? []).map(({ cell }) => cell),
+];
 
 const solveFill = (step: PracticeStep): PracticeState => {
     // A fill step's hints lead to a next move until it is solved, which is what a stuck player gets
@@ -110,6 +129,20 @@ describe.each(lessons.map(lesson => [lesson.id, lesson] as const))("lesson %s", 
         for (const step of lesson.steps.filter(isPractice)) {
             if (step.kind === "fill" || step.hints.length === 0) continue;
             expect(step.hints.length, step.promptKey).toBeGreaterThanOrEqual(2);
+
+            const shown = cellsShownBy(step.hints[step.hints.length - 1].marks);
+            for (const answer of answerCells(step)) {
+                expect(shown, `${step.promptKey}, row ${answer.row} column ${answer.column}`).toContainEqual(answer);
+            }
+        }
+    });
+
+    it("should leave a player on their own to find the place, with nothing marked on the board", () => {
+        for (const step of lesson.steps.filter(isPractice)) {
+            if (step.stage !== "alone") continue;
+            expect(step.marks.range, step.promptKey).toBeUndefined();
+            expect(step.marks.pattern, step.promptKey).toBeUndefined();
+            expect(step.marks.targets, step.promptKey).toBeUndefined();
         }
     });
 

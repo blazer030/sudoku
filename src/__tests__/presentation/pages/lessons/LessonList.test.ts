@@ -3,14 +3,26 @@ import { createPinia, setActivePinia } from "pinia";
 import { createMemoryHistory, createRouter } from "vue-router";
 import { defineComponent } from "vue";
 import { ANALYTICS_KEY } from "@/application/analytics/AnalyticsService";
+import { ALL_LESSON_IDS } from "@/domain/lessons/curriculum";
 import type { LessonId } from "@/domain/lessons/Lesson";
 import { NoopAnalyticsAdapter } from "@/infrastructure/analytics/NoopAnalyticsAdapter";
 import { i18n } from "@/presentation/i18n";
 import { handleBackButton } from "@/presentation/composables/backDismissal";
 import LessonList from "@/presentation/pages/lessons/LessonList.vue";
 import { ROUTER_PATH } from "@/router";
+import { useGameStore } from "@/stores/gameStore";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { useLessonStore } from "@/stores/lessonStore";
+
+vi.mock("@/presentation/components/puzzle-loader/usePuzzleLoader", async () => {
+    const { ref } = await import("vue");
+    return {
+        usePuzzleLoader: () => ({
+            visible: ref(false),
+            runWithLoader: <T,>(task: () => Promise<T>) => task(),
+        }),
+    };
+});
 
 const FIRST_SIX: LessonId[] = ["rules", "fillingIn", "hiddenSingle", "nakedSingle", "pointing", "claiming"];
 const Blank = defineComponent({ template: "<div />" });
@@ -106,6 +118,21 @@ describe("LessonList", () => {
         expect(wrapper.find("[data-testid='lesson-group-play-easy']").exists()).toBe(true);
         expect(wrapper.find("[data-testid='lesson-group-play-basics']").exists()).toBe(false);
         expect(wrapper.find("[data-testid='lesson-group-play-medium']").exists()).toBe(false);
+    });
+
+    it.each([
+        ["easy", "easy"],
+        ["medium", "medium"],
+        ["hard", "hard"],
+    ] as const)("should start a %s game from that group's button, once every lesson of it is finished", async (group, difficulty) => {
+        const { wrapper, router } = await mountList([...ALL_LESSON_IDS]);
+        const startNewGame = vi.spyOn(useGameStore(), "startNewGame").mockResolvedValue();
+
+        await wrapper.get(`[data-testid='lesson-group-play-${group}']`).trigger("click");
+        await flushPromises();
+
+        expect(startNewGame).toHaveBeenCalledWith(difficulty);
+        expect(router.currentRoute.value.path).toBe("/game");
     });
 
     describe("in 8-bit's light mode", () => {
