@@ -23,7 +23,13 @@
             >{{ t(`lessons.names.${lesson.id}`) }}</span>
         </div>
 
-        <!-- The board stays where it is: the panel grows up towards it, and a message too long for the room scrolls inside it -->
+        <!-- The board's place depends only on the window: the panel grows up towards it, and a message too long for
+             the room scrolls inside it. The panel's area asks for the tallest panel (measured: 126.5px plus four
+             lines of 23.2px) and its gap; what a tall window has beyond that goes five parts above the board and two
+             below it, which, with the panel's usual two lines, leaves the board about midway. A window without that
+             much keeps the board right under the header. -->
+        <div class="flex-[5_1_0px] -mb-(--game-page-gap)" />
+
         <BoardFrame
             :celebration="null"
             :effect="null"
@@ -71,7 +77,7 @@
             </div>
         </BoardFrame>
 
-        <div class="flex-1 min-h-0 flex flex-col justify-end pt-(--game-section-gap)">
+        <div class="flex-[2_1_calc(219px+var(--game-section-gap))] min-h-0 flex flex-col justify-end pt-(--game-section-gap)">
             <LessonPanel
                 :can-go-next="session.canGoNext.value"
                 :message-key="messageKey"
