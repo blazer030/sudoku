@@ -4,7 +4,7 @@ import type { TechniqueId } from "@/domain/solver/SolveStep";
 describe("curriculum", () => {
     it("should list the lessons by group, in their teaching order", () => {
         expect(LESSON_GROUPS.map(group => [group.id, group.lessons])).toEqual([
-            ["basics", ["rules", "fillingIn"]],
+            ["basics", ["fillingIn", "rules"]],
             ["easy", ["hiddenSingle", "nakedSingle"]],
             ["medium", ["pointing", "claiming", "nakedPair", "hiddenPair", "nakedSubset", "hiddenSubset"]],
             ["hard", ["xWing", "fish", "xyWing", "wWing", "xyzWing", "xChain", "xyChain"]],

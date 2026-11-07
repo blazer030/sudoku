@@ -61,7 +61,7 @@ export const FILLING_IN: Lesson = {
             areaKey: key("fillingIn", "fillArea"),
             promptKey: key("fillingIn", "fillPrompt"),
             successKey: key("fillingIn", "fillSuccess"),
-            hints: [],
+            hints: [{ textKey: key("fillingIn", "fillHint"), marks: { lit: [at(3, 4)] }, selects: at(3, 4) }],
         },
         { kind: "show", stage: "explain", board: EASY_BOARD, marks: { lit: [at(3, 3)] }, textKey: key("fillingIn", "notes") },
         {

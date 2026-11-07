@@ -17,10 +17,15 @@ The app SHALL offer 17 lessons in four groups, in a fixed order, that together c
 
 | Group | Lessons in order |
 | ----- | ---------------- |
-| Basics | Rules; Filling in and notes |
+| Basics | Filling in and notes; Rules |
 | Easy | Hidden Single; Naked Single |
 | Medium | Pointing; Claiming; Naked Pair; Hidden Pair; Naked Triple and Quad; Hidden Triple and Quad |
 | Hard | X-Wing; Swordfish and Jellyfish; XY-Wing; W-Wing; XYZ-Wing and WXYZ-Wing; X-Chain; XY-Chain |
+
+#### Scenario: Input comes before the rules
+
+- **WHEN** a player starts with the first lesson
+- **THEN** it teaches filling in and notes, pointing at the marked cell rather than naming its row and column, as the next lesson, Rules, is the first to use a digit pad on its own and to name rows and columns
 
 #### Scenario: Every technique has a lesson
 

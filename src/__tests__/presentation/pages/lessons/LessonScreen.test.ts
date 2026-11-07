@@ -539,7 +539,7 @@ describe("LessonScreen", () => {
         });
 
         it("should go on to the next lesson after the basics, which have no difficulty", async () => {
-            const wrapper = mountScreen(lessonNamed("fillingIn"));
+            const wrapper = mountScreen(lessonNamed("rules"));
 
             await finish(wrapper);
             await nextAction(wrapper).trigger("click");

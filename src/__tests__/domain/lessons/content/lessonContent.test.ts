@@ -275,6 +275,15 @@ describe("the Hidden Single lesson", () => {
 });
 
 describe("the Filling in lesson", () => {
+    it("should point at its cells rather than name them, as it comes before the lesson on rows and columns", () => {
+        for (const step of LESSONS.fillingIn.steps) {
+            for (const key of keysOf(step)) {
+                expect(stringAt(zhHant, key), key).not.toMatch(/[列欄宮]/);
+                expect(stringAt(en, key), key).not.toMatch(/\b(row|column|box)\b/i);
+            }
+        }
+    });
+
     it("should dim nothing, as working out a cell takes the digits around it", () => {
         for (const step of LESSONS.fillingIn.steps) {
             expect(step.marks.dimOthers).toBeUndefined();

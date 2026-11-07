@@ -10,7 +10,7 @@ export interface LessonGroup {
 }
 
 export const LESSON_GROUPS: readonly LessonGroup[] = [
-    { id: "basics", lessons: ["rules", "fillingIn"], difficulty: null },
+    { id: "basics", lessons: ["fillingIn", "rules"], difficulty: null },
     { id: "easy", lessons: ["hiddenSingle", "nakedSingle"], difficulty: "easy" },
     { id: "medium", lessons: ["pointing", "claiming", "nakedPair", "hiddenPair", "nakedSubset", "hiddenSubset"], difficulty: "medium" },
     { id: "hard", lessons: ["xWing", "fish", "xyWing", "wWing", "xyzWing", "xChain", "xyChain"], difficulty: "hard" },
