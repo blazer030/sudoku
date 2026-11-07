@@ -8,12 +8,15 @@ import type { Assignment, CellReference, Elimination } from "@/domain/solver/Sol
 export type PracticeHouse = "row" | "column" | "box";
 
 /** Why a tap was wrong, or what to do first. */
-export type PracticeFeedback =
+export type PracticeMistake =
     | { kind: "conflict"; house: PracticeHouse; number: number; digit: number }
     | { kind: "outsideRange" }
     | { kind: "noCandidates" }
     | { kind: "turnOnNotes" }
     | { kind: "message"; key: string };
+
+/** What a tap drew from the step: a mistake, or a right cell that isn't the answer itself. */
+export type PracticeFeedback = PracticeMistake | { kind: "found"; key: string };
 
 export interface PracticeState {
     placed: readonly Assignment[];
@@ -76,7 +79,7 @@ export const practiceValueAt = (board: LessonBoard, state: PracticeState, cell: 
     return placed ? placed.digit : Number(board.values[cell.row * BOARD_SIZE + cell.column]);
 };
 
-const conflictOf = (board: LessonBoard, state: PracticeState, cell: CellReference, digit: number): PracticeFeedback | null => {
+const conflictOf = (board: LessonBoard, state: PracticeState, cell: CellReference, digit: number): PracticeMistake | null => {
     const holds = (other: CellReference) => practiceValueAt(board, state, other) === digit;
     if (rowCells(cell.row).some(holds)) return { kind: "conflict", house: "row", number: cell.row + 1, digit };
     if (columnCells(cell.column).some(holds)) return { kind: "conflict", house: "column", number: cell.column + 1, digit };
@@ -110,7 +113,7 @@ const fillAccepts = (step: FillStep, state: PracticeState, cell: CellReference, 
     return answerOf(step.board)?.[cell.row][cell.column] === digit;
 };
 
-const notYetOf = (key: string | undefined): PracticeFeedback | null => key === undefined ? null : { kind: "message", key };
+const notYetOf = (key: string | undefined): PracticeMistake | null => key === undefined ? null : { kind: "message", key };
 
 const tapOnPlace = (step: PlaceStep, state: PracticeState, cell: CellReference): PracticeState => {
     const value = practiceValueAt(step.board, state, cell);
@@ -147,7 +150,12 @@ const tapOnRemove = (step: RemoveStep, state: PracticeState, cell: CellReference
         const removed = [...state.removed, ...here];
         return { ...state, removed, solved: removed.length === step.removals.length };
     }
-    if (includesCell(step.pattern, cell)) return { ...state, feedback: { kind: "message", key: step.keepKey } };
+    if (includesCell(step.pattern, cell)) {
+        if (step.stage !== "alone") return { ...state, feedback: { kind: "message", key: step.keepKey } };
+        // On their own, finding the pattern first is what the guided steps taught
+        const picked = includesCell(state.picked, cell) ? state.picked : [...state.picked, cell];
+        return { ...state, picked, feedback: { kind: "found", key: step.keepKey } };
+    }
     if (practiceValueAt(step.board, state, cell) !== 0) return state;
 
     const candidates = boardState(step.board).candidatesOf(cell.row, cell.column);
@@ -160,7 +168,7 @@ const tapOnFill = (step: FillStep, state: PracticeState, cell: CellReference): P
     const value = practiceValueAt(step.board, state, cell);
     if (value !== 0) return { ...state, selected: null, sameDigit: value };
     if (step.area && !includesCell(step.area, cell)) {
-        const feedback: PracticeFeedback = step.areaKey ? { kind: "message", key: step.areaKey } : { kind: "outsideRange" };
+        const feedback: PracticeMistake = step.areaKey ? { kind: "message", key: step.areaKey } : { kind: "outsideRange" };
         return { ...state, selected: null, sameDigit: 0, feedback };
     }
     return { ...state, selected: cell, sameDigit: 0 };

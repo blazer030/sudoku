@@ -210,6 +210,26 @@ describe.each(lessons.map(lesson => [lesson.id, lesson] as const))("lesson %s", 
         }
     });
 
+    it("should let a player on their own mark the pattern first, without calling it wrong, or go straight to the removal", () => {
+        for (const step of lesson.steps.filter(isPractice)) {
+            if (step.stage !== "alone" || step.kind !== "remove") continue;
+            const tap = ({ row, column }: CellReference): PracticeAction => ({ kind: "tapCell", row, column });
+            const removalCells = step.removals.map(({ cell }) => cell);
+            const corners = step.pattern.filter(cell => !removalCells.some(other => other.row === cell.row && other.column === cell.column));
+
+            let state = freshPracticeState();
+            for (const corner of corners) {
+                state = practiceReducer(step, state, tap(corner));
+                expect(state.feedback?.kind, step.promptKey).toBe("found");
+                expect(state.solved, step.promptKey).toBe(false);
+            }
+            expect(state.picked, step.promptKey).toEqual(corners);
+
+            const solved = removalCells.reduce((current, cell) => practiceReducer(step, current, tap(cell)), state);
+            expect(solved.solved, step.promptKey).toBe(true);
+        }
+    });
+
     it("should only have notes in the lesson that teaches them, or on boards past the basics", () => {
         const isSingles = lesson.id === "hiddenSingle" || lesson.id === "nakedSingle" || lesson.id === "rules";
         for (const step of lesson.steps) {
