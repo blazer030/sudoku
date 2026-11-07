@@ -35,9 +35,9 @@
 
 任務 1.2、2.1 當時寫的 `{ state, feedback }` 回傳值、`data-crossed` 與必填欄位和實作不同，以 `design.md` 的 Interface 段落為準；任務 5.1 的「各風格畫出自己的記號」改由 Lesson state marks 的新寫法取代。
 
-- [ ] 7.1 修正 Lesson stages 的跳到練習：`useLessonSession` 的 `skipToPractice` 走到目前步驟之後的下一個練習，後面沒有練習時 `LessonPanel` 不顯示這顆按鈕。以 `LessonScreen.test.ts` 的交錯講解與練習課程驗證，新測試要先失敗。
-- [ ] 7.2 修正 Completion 的 Finishing from the Walkthrough：從解題演示開的課，完成時只剩回解題演示的按鈕。以 `LessonScreen.test.ts` 驗證 `lesson-secondary` 不存在，新測試要先失敗。
-- [ ] 7.3 修正 Learning from the Walkthrough 的掌機提醒：`openLessonOfStep` 在提醒前就暫停播放並記下課程；取消提醒時恢復播放且不註冊返回鍵處理；去外觀頁時不恢復。以 `SolverWalkthrough.test.ts` 的「播放中加掌機」驗證，新測試要先失敗。
-- [ ] 7.4 完成 Board placement on tall screens（The board sits midway above the panel on tall screens）：`LessonScreen` 加上棋盤上方的空白與面板區基準。在 Chromium 量測 360×800、390×844、412×915 的上下空白與 17 課每一步的棋盤位置，並確認 320×568、360×640 棋盤位置和改動前相同；在 WebKit、Firefox 與藍圖（棋盤框多佔高度）各看一次。把量測值寫回 `design.md` 取代預估值。
-- [ ] 7.5 確認 Lesson state marks 的新寫法：9 種風格（8-bit 含兩種模式）的課程列表截圖，三種狀態都分得出來。分不出來的風格補規則。
-- [ ] 7.6 補測試：Hint 分段改測隱藏唯一數這課真實的提示內容，並移除沒有課程使用的 `FillRule` `hiddenSingle` 分支與它的文案；首頁副標用規格範例的 6 課驗證（用文案鍵，不寫死字串）；`reducedMotion.test.ts` 確認教學頁和課程記號的規則沒有靠動畫才看得到的狀態。`npx vitest run`、`npm run lint`、`npx vue-tsc --noEmit` 全過。
+- [x] 7.1 修正 Lesson stages 的跳到練習：`useLessonSession` 的 `skipToPractice` 走到目前步驟之後的下一個練習，後面沒有練習時 `LessonPanel` 不顯示這顆按鈕。以 `LessonScreen.test.ts` 的交錯講解與練習課程驗證，新測試要先失敗。
+- [x] 7.2 修正 Completion 的 Finishing from the Walkthrough：從解題演示開的課，完成時只剩回解題演示的按鈕。以 `LessonScreen.test.ts` 驗證 `lesson-secondary` 不存在，新測試要先失敗。
+- [x] 7.3 修正 Learning from the Walkthrough 的掌機提醒：`openLessonOfStep` 在提醒前就暫停播放並記下課程；取消提醒時恢復播放且不註冊返回鍵處理；去外觀頁時不恢復。以 `SolverWalkthrough.test.ts` 的「播放中加掌機」驗證，新測試要先失敗。
+- [x] 7.4 完成 Board placement on tall screens（The board sits midway above the panel on tall screens）：`LessonScreen` 加上棋盤上方的空白與面板區基準。在 Chromium 量測 360×800、390×844、412×915 的上下空白與 17 課每一步的棋盤位置，並確認 320×568、360×640 棋盤位置和改動前相同；在 WebKit、Firefox 與藍圖（棋盤框多佔高度）各看一次。把量測值寫回 `design.md` 取代預估值。
+- [x] 7.5 確認 Lesson state marks 的新寫法：9 種風格（8-bit 含兩種模式）的課程列表截圖，三種狀態都分得出來。分不出來的風格補規則。
+- [x] 7.6 補測試：Hint 分段改測隱藏唯一數這課真實的提示內容，並移除沒有課程使用的 `FillRule` `hiddenSingle` 分支與它的文案；首頁副標用規格範例的 6 課驗證（用文案鍵，不寫死字串）；`reducedMotion.test.ts` 確認教學頁和課程記號的規則沒有靠動畫才看得到的狀態。`npx vitest run`、`npm run lint`、`npx vue-tsc --noEmit` 全過。
