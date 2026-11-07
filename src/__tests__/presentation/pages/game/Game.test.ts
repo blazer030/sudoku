@@ -16,7 +16,7 @@ import type { Difficulty } from "@/domain/generator/SudokuGenerator";
 import { useStatisticsStore } from "@/stores/statisticsStore";
 import { Sudoku } from "@/domain/game/Sudoku";
 import type { PuzzleCell } from "@/domain/board/PuzzleCell";
-import { createMultiStepSudoku } from "@/__tests__/fixtures/multiStepPuzzle";
+import { createMultiStepSudoku, createSudokuWithHintLines } from "@/__tests__/fixtures/multiStepPuzzle";
 import { ANALYTICS_KEY, type AnalyticsService } from "@/application/analytics/AnalyticsService";
 import { expectKeyRowsToShrinkToFit } from "@/__tests__/fixtures/digitKeyRows";
 import { STYLE_MOMENTS, type GroupEffect } from "@/presentation/components/style-moments/styleMoments";
@@ -1349,6 +1349,23 @@ describe("Game", () => {
             expect(wrapper.find("[data-testid='hint-panel']").exists()).toBe(false);
             expect(wrapper.find("[data-testid='cell-1-1']").text()).toBe("");
             expect(wrapper.find("[data-testid='cell-0-2']").text()).toBe("4");
+        });
+
+        it("should draw a hint's lines under the digits, only on a step that has them", async () => {
+            const { sudoku, stepIndex } = createSudokuWithHintLines();
+            const wrapper = mountGameWith(sudoku);
+            const grid = () => wrapper.get("[data-skin='board-grid']");
+            await openRevealCell(wrapper);
+            expect(stepIndex).toBeGreaterThan(0);
+            expect(grid().classes()).not.toContain("has-step-links");
+
+            for (let step = 0; step < stepIndex; step++) {
+                await wrapper.get("[data-testid='hint-next']").trigger("click");
+                await flushPromises();
+            }
+
+            expect(wrapper.find("[data-testid='step-link-overlay']").exists()).toBe(true);
+            expect(grid().classes()).toContain("has-step-links");
         });
 
         it("should count a long run of steps with a counter that fits the panel", async () => {

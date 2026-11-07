@@ -510,6 +510,15 @@ describe("SolverWalkthrough", () => {
         });
     });
 
+    it("should not lead the player off to a lesson from a step", async () => {
+        const { wrapper } = mountWalkthrough({ initialPuzzle: singlesPuzzle });
+        await solve(wrapper);
+        await clickNext(wrapper, 2);
+
+        expect(wrapper.find("[data-testid='walkthrough-technique']").exists()).toBe(true);
+        expect(wrapper.get("[data-testid='walkthrough-panel']").findAll("[data-skin~='text-button']")).toHaveLength(0);
+    });
+
     describe("playback", () => {
         it("should keep the inputs in place under the panel", async () => {
             const { wrapper } = mountWalkthrough({ initialPuzzle: singlesPuzzle });
