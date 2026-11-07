@@ -57,6 +57,11 @@ In the 8-bit style, a highlighted range SHALL be drawn as dots in a dark ink, ta
 | Target digit | #9BBC0F on #0F380F | #FCFCFC on #0058F8 |
 | Pattern cell | #8BAC0F | #1E1E3C |
 
+#### Scenario: Lines pass under the digits
+
+- **WHEN** a step with lines is shown in a lesson, the Walkthrough or game hint mode, in any style but 8-bit
+- **THEN** the lines are drawn under the digits they cross; 8-bit keeps its lines above the cells on all three
+
 #### Scenario: Lines stay visible
 
 - **WHEN** an X-Wing's rectangle is drawn over its corners in the 8-bit style

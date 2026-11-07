@@ -58,7 +58,12 @@ Each lesson SHALL run through explanation, guided practice, independent practice
 #### Scenario: No practice left to skip to
 
 - **WHEN** an explanation step has no practice step after it
-- **THEN** the action to skip to practice is not offered
+- **THEN** the action to skip to practice is not offered, and the main action says next rather than offering a turn
+
+#### Scenario: The practice is the next step
+
+- **WHEN** the next step after an explanation is a practice step
+- **THEN** the main action offers the practice, and the action to skip to practice is not offered
 
 #### Scenario: Practice must be solved to move on
 
@@ -216,6 +221,11 @@ Finishing a lesson SHALL show its one-sentence takeaway, record the lesson as fi
 - **WHEN** the player finishes Naked Single
 - **THEN** the main action starts a new easy game
 
+#### Scenario: Starting a game with one unfinished
+
+- **WHEN** the player starts a game from the lessons with an unfinished game saved
+- **THEN** the dialog's action to stay names the lessons, and staying leaves the player where they were; from Home it names Home
+
 #### Scenario: Lessons are not games
 
 - **WHEN** a lesson is finished
@@ -252,16 +262,6 @@ Lessons SHALL open from Home's lessons entry and by a lesson's address only. Nei
 
 - **WHEN** a Walkthrough step shows its technique tag
 - **THEN** nothing beside the tag opens a lesson
-
-#### Scenario: Hint mode shows no link
-
-- **WHEN** hint mode shows a technique during a game
-- **THEN** nothing in the hint panel opens a lesson
-
-#### Scenario: Backing out of the notice during playback
-
-- **WHEN** the player backs out of that notice
-- **THEN** no lesson opens, playback carries on from the same step, and the next Back key press works as usual
 
 #### Scenario: No link during a game
 

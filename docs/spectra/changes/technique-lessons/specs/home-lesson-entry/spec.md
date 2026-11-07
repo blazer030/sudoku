@@ -31,7 +31,7 @@ The lesson entry's subtitle SHALL invite a new player in, and SHALL show progres
 
 ### Requirement: Home fits short windows
 
-Home SHALL fit without scrolling in every style, with a saved game, on windows from 480px tall up, by shrinking in steps. Windows wider than the column SHALL stay at full size, as they do today.
+Home SHALL fit without scrolling in every style, with a saved game, on windows from 480px tall up and 360px wide up in both languages, by shrinking in steps. Windows wider than the column SHALL stay at full size, as they do today. Two extreme shapes MAY scroll a little, with every control still reachable: windows wider than the column and too short for its full size, and windows under 360px wide in English, where the blueprint and ink styles' wider text wraps.
 
 #### Scenario: Sizes by window height
 
@@ -47,6 +47,11 @@ Home SHALL fit without scrolling in every style, with a saved game, on windows f
 | 624px to 643px | Those at their smallest |
 | 550px to 623px | Also smaller title, subtitle, tile labels and card gaps |
 | Under 550px | Also no subtitles on the four entries, and smaller margins and logo |
+
+#### Scenario: An extreme window scrolls
+
+- **WHEN** Home opens at 320px wide in English in the blueprint style, or at 1024×700
+- **THEN** the page scrolls by a few dozen pixels at most and the last entries can be scrolled to
 
 #### Scenario: Ink's vertical title
 
