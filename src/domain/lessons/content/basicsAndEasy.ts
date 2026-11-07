@@ -36,7 +36,7 @@ export const RULES: Lesson = {
             stage: "follow",
             board: RULES_BOARD,
             marks: {},
-            rule: "answer",
+            rule: "nakedSingle",
             required: 3,
             promptKey: key("rules", "fillPrompt"),
             successKey: key("rules", "fillSuccess"),

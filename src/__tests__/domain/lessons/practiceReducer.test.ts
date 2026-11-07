@@ -1,5 +1,5 @@
-import { HIDDEN_SINGLE } from "@/domain/lessons/content/basicsAndEasy";
-import type { FillStep, LessonBoard, NoteStep, PickStep, PlaceStep, RemoveStep } from "@/domain/lessons/Lesson";
+import { HIDDEN_SINGLE, RULES } from "@/domain/lessons/content/basicsAndEasy";
+import type { FillStep, Lesson, LessonBoard, LessonStep, NoteStep, PickStep, PlaceStep, RemoveStep } from "@/domain/lessons/Lesson";
 import { freshPracticeState, hintsFor, practiceReducer, type PracticeState } from "@/domain/lessons/practice";
 import type { CellReference } from "@/domain/solver/SolveStep";
 
@@ -40,6 +40,34 @@ const placeStep: PlaceStep = {
 };
 
 const tap = (row: number, column: number) => ({ kind: "tapCell", row, column }) as const;
+
+const stepOfKind = <Kind extends LessonStep["kind"]>(lesson: Lesson, kind: Kind) =>
+    lesson.steps.find((step): step is Extract<LessonStep, { kind: Kind }> => step.kind === kind) as Extract<LessonStep, { kind: Kind }>;
+
+describe("the Rules lesson's hints", () => {
+    const COMMON = "lessons.common.hints";
+    const LEVELS = [`${COMMON}.lookAtCell`, `${COMMON}.countHouses`, `${COMMON}.answer`];
+
+    it("should teach step by step, the answer last", () => {
+        const step = stepOfKind(RULES, "fill");
+
+        expect(hintsFor(step, freshPracticeState()).map(hint => hint.textKey)).toEqual(LEVELS);
+    });
+
+    it("should begin again on the next cell once one is filled", () => {
+        const step = stepOfKind(RULES, "fill");
+        const answer = hintsFor(step, freshPracticeState())[2];
+        if (answer.selects === undefined || typeof answer.params?.digit !== "number") throw new Error("The last hint names the answer");
+        const selected = practiceReducer(step, freshPracticeState(), { kind: "tapCell", ...answer.selects });
+        const placed = practiceReducer(step, selected, { kind: "pressDigit", digit: answer.params.digit });
+
+        const next = hintsFor(step, placed);
+
+        expect(placed.hintLevel).toBe(0);
+        expect(next.map(hint => hint.textKey)).toEqual(LEVELS);
+        expect(next[2].selects).not.toEqual(answer.selects);
+    });
+});
 
 describe("practiceReducer", () => {
     describe("placing a known digit", () => {
