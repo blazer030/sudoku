@@ -41,3 +41,13 @@
 - [x] 7.4 完成 Board placement on tall screens（The board sits midway above the panel on tall screens）：`LessonScreen` 加上棋盤上方的空白與面板區基準。在 Chromium 量測 360×800、390×844、412×915 的上下空白與 17 課每一步的棋盤位置，並確認 320×568、360×640 棋盤位置和改動前相同；在 WebKit、Firefox 與藍圖（棋盤框多佔高度）各看一次。把量測值寫回 `design.md` 取代預估值。
 - [x] 7.5 確認 Lesson state marks 的新寫法：9 種風格（8-bit 含兩種模式）的課程列表截圖，三種狀態都分得出來。分不出來的風格補規則。
 - [x] 7.6 補測試：Hint 分段改測隱藏唯一數這課真實的提示內容，並移除沒有課程使用的 `FillRule` `hiddenSingle` 分支與它的文案；首頁副標用規格範例的 6 課驗證（用文案鍵，不寫死字串）；`reducedMotion.test.ts` 確認教學頁和課程記號的規則沒有靠動畫才看得到的狀態。`npx vitest run`、`npm run lint`、`npx vue-tsc --noEmit` 全過。
+
+## 8. 第二次 Verify 之後的修正
+
+owner 2026-11-07 的裁定：點已有數字的格子不算點錯；「填數字與筆記」的講解不淡化；按提示要一步一步教。
+
+- [x] 8.1 完成 Notes in lessons 的 The notes toggle shows it is on：筆記鍵加上 `lesson-toggle` hook，水墨、黑板、藍圖、極光、賽博、8-bit 用各自選取的樣子標出開啟。以 `styleCoverage.test.ts` 驗證規則存在，並在 Chromium 比對 9 種風格 45 種主題與明暗組合的開關差異。
+- [x] 8.2 完成 Layered hints 的 The Rules lesson teaches step by step：「規則」課的填數字步驟改成三層提示，填完一格後從下一格重新開始。以 `practiceReducer.test.ts` 驗證，新測試要先失敗，並在瀏覽器走過一次。
+- [x] 8.3 移除沒有課程會出現的 `notCertain`、`notTheAnswer` 與文案。在 `lessonContent.test.ts` 新增每課每個空格每個數字的列舉，點錯或按錯都必須有原因。
+- [x] 8.4 補測試：`LessonPage.test.ts`（返回、下一課取代目前記錄、開新遊戲、直接開網址時的提醒）、`LessonList.test.ts`（各難度的開新遊戲）、`lessonStore.test.ts`（清除紀錄不影響進度）、`LessonScreen.test.ts`（列、欄、宮的原因文字）、`practiceReducer.test.ts`（列與宮的衝突）、`lessonContent.test.ts`（提示最後標出答案、自己找的步驟不標範圍）。
+- [x] 8.5 把上述裁定寫進規格與設計文件，並更新 `CLAUDE.md` 的 skin hook 清單。`npx vitest run`、`npm run lint`、`npx vue-tsc --noEmit` 全過。

@@ -72,12 +72,17 @@ Each lesson SHALL run through explanation, guided practice, independent practice
 
 ### Requirement: Explanation steps
 
-An explanation SHALL show one idea per step on a board, with the digits and candidates unrelated to that step dimmed.
+An explanation SHALL show one idea per step on a board, with the digits and candidates unrelated to that step dimmed. The Filling in lesson is the exception: it teaches the controls, not a pattern on the board, and its explanations SHALL dim nothing, because working out what a cell can hold takes the digits around it.
 
 #### Scenario: Unrelated digits are dimmed
 
 - **WHEN** an explanation step about digit 7 in box 1 is shown
 - **THEN** digits outside the step's range other than 7 carry the dimmed state, and the 7s stay undimmed
+
+#### Scenario: The Filling in lesson dims nothing
+
+- **WHEN** an explanation step of the Filling in lesson is shown
+- **THEN** no digit or candidate carries the dimmed state
 
 ### Requirement: Practising by tapping
 
@@ -107,6 +112,11 @@ Practice boards in the Basics and Easy groups SHALL show no notes, except where 
 - **WHEN** a Naked Pair practice step opens
 - **THEN** every empty cell shows its candidates without the player doing anything
 
+#### Scenario: The notes toggle shows it is on
+
+- **WHEN** the player turns on the notes toggle of the Filling in lesson, in any style, theme or mode
+- **THEN** the toggle looks different from when it is off in more than its words, using that style's own look for a chosen control
+
 ### Requirement: Independent practice has one target
 
 Independent practice SHALL show a whole board without a highlighted range, and SHALL name one target to look for: a digit, a row, a column or a box.
@@ -118,7 +128,7 @@ Independent practice SHALL show a whole board without a highlighted range, and S
 
 ### Requirement: Wrong answers explain themselves
 
-A wrong tap SHALL leave the player on the same step, SHALL NOT change the board, and SHALL say why it was wrong.
+A wrong tap SHALL leave the player on the same step, SHALL NOT change the board, and SHALL say why it was wrong. Tapping a cell that already holds a digit, when the step asks the player to place a digit or remove candidates, is not a wrong tap: it SHALL change nothing and give no reason, and only clears a reason shown before it.
 
 #### Scenario: The reasons given
 
@@ -130,19 +140,29 @@ A wrong tap SHALL leave the player on the same step, SHALL NOT change the board,
 | Situation | Message says |
 | --------- | ------------ |
 | Digit 3 asked; the column already has a 3 | That column already has a 3 |
-| Digit 5 asked; no conflict, but the box has another place | The box still has another place, so it is not certain |
+| Digit 5 asked; no conflict, but not certain yet | The step's own words on why it is not certain yet |
 | Cell outside the step's range | Look in the step's range first |
 | A cell of the pattern tapped during removal | This cell is part of the pattern and stays |
 | A cell without the candidates in question | This cell does not have those candidates |
 
+#### Scenario: A cell that already holds a digit
+
+- **WHEN** a step asks the player to place digit 5 and the player taps a cell holding a 7
+- **THEN** the step and the board stay as they were, and no reason is shown
+
 ### Requirement: Layered hints
 
-Each practice step SHALL offer a hint that gives more with each use, and SHALL give the answer only at its last level. Hints SHALL NOT count towards game statistics.
+Each practice step SHALL offer a hint that gives more with each use, and SHALL give the answer only at its last level. A step SHALL have only one level only where its prompt already names the answer, as the Filling in lesson's fill step does. Hints SHALL NOT count towards game statistics.
 
 #### Scenario: Hints narrow step by step
 
 - **WHEN** the player uses the hint repeatedly on a Hidden Single step
 - **THEN** it shows the box first, then the digit's only place in that box, and lastly the cell itself
+
+#### Scenario: The Rules lesson teaches step by step
+
+- **WHEN** the player uses the hint repeatedly on the Rules lesson's fill step
+- **THEN** it names a cell first, then says its row, column and box hold eight digits between them, and lastly gives the digit, and begins again on the next cell once that one is filled
 
 #### Scenario: The last hint leaves the hint action disabled
 

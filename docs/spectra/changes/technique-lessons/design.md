@@ -55,7 +55,7 @@
 
 ### Practice is a pure state machine in the domain
 
-`LessonPractice` 是純函式：輸入步驟、目前狀態與一次點格子或按數字，回傳新狀態與回饋原因（例如 `{ kind: "conflictInColumn", column: 4, digit: 3 }`）。presentation 只負責把原因翻成文案。這樣每種答錯情境都能不開瀏覽器測試。
+`LessonPractice` 是純函式：輸入步驟、目前狀態與一次點格子或按數字，回傳新狀態與回饋原因（例如 `{ kind: "conflict", house: "column", number: 4, digit: 3 }`）。presentation 只負責把原因翻成文案。這樣每種答錯情境都能不開瀏覽器測試。
 
 ### Lesson boards reuse Cell and StepCellView
 
@@ -108,7 +108,7 @@
 
 ### The handheld notice is remembered in settings
 
-`Settings` 新增 `handheldLessonNoticeDismissed`。只有選「還是用掌機看」才記住；換配色或看其他風格之後，若又回到掌機，還會再提醒。提醒由 `useLessonNotice` 統一在進入課程列表或從解題演示開課時判斷。
+`Settings` 新增 `handheldLessonNoticeDismissed`。只有選「還是用掌機看」才記住；換配色或看其他風格之後，若又回到掌機，還會再提醒。提醒由 `useLessonNotice` 統一判斷，時機是進入課程列表、從解題演示開課，以及直接開課程網址時（`LessonPage` 掛載時檢查，取消就返回）。
 
 ## Implementation Contract
 
