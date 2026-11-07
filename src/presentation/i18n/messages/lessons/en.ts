@@ -35,7 +35,6 @@ export const lessonsEn = {
             conflictBox: "Box {number} already has a {digit}.",
             outsideRange: "Look in the marked cells first.",
             noCandidates: "This cell doesn't have those candidates.",
-            selectCellFirst: "Tap an empty cell first.",
             turnOnNotes: "Turn on Notes first.",
         },
         hints: {

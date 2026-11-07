@@ -287,10 +287,10 @@ describe("practiceReducer", () => {
             expect(state.feedback).toEqual({ kind: "message", key: "lookAtRow" });
         });
 
-        it("should ask for a cell first when none is selected", () => {
-            const state = practiceReducer(step, freshPracticeState(), press(2));
+        it("should ignore a digit while no cell is selected, as the pad is not shown then", () => {
+            const before = freshPracticeState();
 
-            expect(state.feedback).toEqual({ kind: "selectCellFirst" });
+            expect(practiceReducer(step, before, press(2))).toBe(before);
         });
 
         it("should fill the digit that is the only one left and solve the step", () => {

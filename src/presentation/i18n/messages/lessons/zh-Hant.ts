@@ -36,7 +36,6 @@ export const lessonsZhHant: typeof lessonsEn = {
             conflictBox: "第 {number} 宮已經有 {digit}。",
             outsideRange: "先看標示出來的格子。",
             noCandidates: "這格沒有這些候選數。",
-            selectCellFirst: "先點一格空格。",
             turnOnNotes: "先打開筆記。",
         },
         hints: {

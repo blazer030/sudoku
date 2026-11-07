@@ -12,7 +12,6 @@ export type PracticeFeedback =
     | { kind: "conflict"; house: PracticeHouse; number: number; digit: number }
     | { kind: "outsideRange" }
     | { kind: "noCandidates" }
-    | { kind: "selectCellFirst" }
     | { kind: "turnOnNotes" }
     | { kind: "message"; key: string };
 
@@ -163,8 +162,9 @@ const tapOnNote = (step: NoteStep, state: PracticeState, cell: CellReference): P
 };
 
 const pressOnFill = (step: FillStep, state: PracticeState, digit: number): PracticeState => {
+    // The pad only shows while a cell is selected, so a press always has one
     const { selected } = state;
-    if (selected === null) return { ...state, sameDigit: digit, feedback: { kind: "selectCellFirst" } };
+    if (selected === null) return state;
 
     if (fillAccepts(step, state, selected, digit)) {
         const placed = [...state.placed, { cell: selected, digit }];
@@ -178,7 +178,7 @@ const pressOnFill = (step: FillStep, state: PracticeState, digit: number): Pract
 };
 
 const pressOnNote = (step: NoteStep, state: PracticeState, digit: number): PracticeState => {
-    if (state.selected === null) return { ...state, feedback: { kind: "selectCellFirst" } };
+    if (state.selected === null) return state;
     if (!state.noteMode) return { ...state, feedback: { kind: "turnOnNotes" } };
     if (!step.digits.includes(digit)) {
         return { ...state, feedback: conflictOf(step.board, state, step.cell, digit) };
