@@ -54,10 +54,16 @@ owner 2026-11-07 的裁定：點已有數字的格子不算點錯；「填數字
 - [x] 8.6 修正 Home fits short windows：把首頁的兩個分界提高到 624 與 550，英文的解題演示副標縮短成一行，水墨標題在窄視窗提早到 812 換小字、寬視窗維持 740。用瀏覽器逐高度量 480 到 850（有存檔），並和改動前的版本比對 844 高以上與寬視窗，除了四格和它撐開的空白，元素大小都相同。
 - [x] 8.7 補 The Filling in lesson dims nothing 的測試（`lessonContent.test.ts`），並修正文件與程式的落差：課程面板不會縮小、「基礎」組沒有難度、點錯的數字會暫留在格子上、提案不再列 `brushTitles.ts`、`CLAUDE.md` 的架構段落列出技巧教學。
 
-owner 2026-11-07 的第二批裁定：拿掉解題演示的「學這招」（Supersedes 任務 3.2、7.2、7.3 的入口與修正；它們的記錄保留，程式已移除）；320 寬的英文首頁和寬而矮的視窗可以稍微捲動，不再處理。
+owner 2026-11-07 的第二批裁定：拿掉解題演示的「學這招」（Supersedes 任務 3.2、5.2 的「從解題演示進入」、7.2、7.3 的入口與修正；它們的記錄保留，程式已移除）；320 寬的英文首頁和寬而矮的視窗可以稍微捲動，不再處理。
 
 - [x] 8.8 拿掉 Learning from the Walkthrough，改成 Entry points：`SolverWalkthrough` 不再有「學這招」、課程疊層與掌機提醒；`LessonScreen` 去掉 `fromWalkthrough`；刪除兩處文案；`lessonForTechnique` 改成匯出 `LESSON_BY_TECHNIQUE`。以 `SolverWalkthrough.test.ts` 沒有 `walkthrough-learn`、`curriculum.test.ts` 仍驗證 19 種技巧都有課驗證。
 - [x] 8.9 修正講解最後一步的按鈕：下一步是完成時寫「下一步」而不是「換你試試」；下一步就是練習時不再另外顯示「跳到練習」。以 `LessonScreen.test.ts` 驗證，新測試要先失敗。
 - [x] 8.10 移除不會出現的 `selectCellFirst` 與文案（數字鍵只在選了格子時顯示）。
 - [x] 8.11 遊戲提示模式的連線畫在數字下方，與解題演示、教學一致：`GameScreen` 的棋盤格在有連線時帶 `has-step-links`。以 `Game.test.ts` 走到真實盤面有連線的那一步驗證，拿掉這個 class 測試要失敗，並在瀏覽器確認 9 種風格的堆疊順序。
 - [x] 8.12 從課程開新遊戲時，「還有一局沒完成」對話框的留下按鈕改寫成留在教學（首頁維持「留在首頁」）。以 `LessonPage.test.ts` 或 `LessonList.test.ts` 用文案鍵驗證。
+
+任務 6.1 的「新的水墨標題加進 `INK_BRUSH_MESSAGE_KEYS`」最後不需要：唯一新增的對話框標題只在 8-bit 出現，水墨不會顯示。
+
+- [x] 8.13 依 owner「點題目的格子原本就不算錯」，圈出格子的步驟點已填格也不說明（`practiceReducer.test.ts`，新測試要先失敗）；移除走不到的「最後一課之後」分支。
+- [x] 8.14 補測試：課程頁與解題演示的 `has-step-links`、從課程頁與課程列表按「留在教學」後不換頁也不開新局、8-bit 範圍暗點的兩個色值。修正設計與提案裡過期的內容。
+- [x] 8.15 在 Android 模擬器比對首頁與教學之前的版本（有存檔）：除了四格和它撐開的空白，元素大小都相同，首頁不用捲動。

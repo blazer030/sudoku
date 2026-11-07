@@ -121,7 +121,7 @@
 **Interface / data shape**
 
 - `LessonStep` 種類：`show`（講解）、`place`（點格子，數字已定）、`pick`（點出規律格）、`remove`（點能刪候選數的格子）、`fill`（點格子再用懸浮鍵填數字）、`note`（「填數字與筆記」那課專用：打開筆記模式，在指定格寫下指定候選數）、`done`。
-- `lessonForTechnique(technique: TechniqueId): LessonId`：19 個技巧都有對應。
+- `LESSON_BY_TECHNIQUE: Record<TechniqueId, LessonId>`：19 個技巧都有對應，少一個就是型別錯誤。
 - `practiceReducer(step, state, action) => PracticeState`，答錯的原因放在 `state.feedback`，`action` 是 `{ kind: "tapCell", row, column }`、`{ kind: "pressDigit", digit }`、`{ kind: "toggleNoteMode" }` 或 `{ kind: "requestHint" }`。
 - `StepCellView` 新增選用的 `crossed`、`dimmed`、`dimmedNotes`，`StepHighlight` 新增 `"target"`。`BoardCell` 對應輸出 `data-dimmed`、`data-note-dimmed`、`data-variant="target"`，× 是帶 `data-skin="cell-cross"` 的圖示，沒有 `data-crossed`。
 - 路由：`ROUTER_PATH.lessons`（`/lessons`）、`ROUTER_PATH.lesson`（`/lessons/:lessonId`）；`ScreenName` 新增 `lessons`、`lesson`。
@@ -142,7 +142,7 @@
 
 **Scope**
 
-- 範圍內：17 課內容、課程列表、課程頁、兩個入口、首頁尺寸、9 種風格的新元素、8-bit 標示與掌機提醒、兩種語言文案。
+- 範圍內：17 課內容、課程列表、課程頁、首頁入口與課程網址、首頁尺寸、9 種風格的新元素、8-bit 標示與掌機提醒、兩種語言文案。
 - 範圍外：統計、成就、遊戲中入口、解題器改動。
 
 ## Risks / Trade-offs

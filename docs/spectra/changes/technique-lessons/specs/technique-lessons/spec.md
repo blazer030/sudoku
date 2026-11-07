@@ -133,7 +133,7 @@ Independent practice SHALL show a whole board without a highlighted range, and S
 
 ### Requirement: Wrong answers explain themselves
 
-A wrong tap SHALL leave the player on the same step, SHALL NOT change the board, and SHALL say why it was wrong. A wrong digit stays in its cell, marked as wrong, until the player's next action; it is not part of the board. Tapping a cell that already holds a digit, when the step asks the player to place a digit or remove candidates, is not a wrong tap: it SHALL change nothing and give no reason, and only clears a reason shown before it.
+A wrong tap SHALL leave the player on the same step, SHALL NOT change the board, and SHALL say why it was wrong. A wrong digit stays in its cell, marked as wrong, until the player's next action; it is not part of the board. Tapping a cell that already holds a digit is not a wrong tap, unless the step asks for that very cell: it SHALL give no reason and only clears a reason shown before it. On a fill step it also lights that digit across the board, as in a game.
 
 #### Scenario: The reasons given
 
@@ -154,6 +154,11 @@ A wrong tap SHALL leave the player on the same step, SHALL NOT change the board,
 
 - **WHEN** a step asks the player to place digit 5 and the player taps a cell holding a 7
 - **THEN** the step and the board stay as they were, and no reason is shown
+
+#### Scenario: A filled cell during a fill step
+
+- **WHEN** a step asks the player to work out a digit and the player taps a cell holding a 7
+- **THEN** no reason is shown, and the 7s light up across the board
 
 ### Requirement: Layered hints
 
