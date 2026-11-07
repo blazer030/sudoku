@@ -2,14 +2,14 @@ import { computed, ref } from "vue";
 import { PuzzleCell } from "@/domain/board/PuzzleCell";
 import type { Lesson, LessonHint, LessonStep, PracticeStep, StepMarks } from "@/domain/lessons/Lesson";
 import { boardGrid } from "@/domain/lessons/lessonBoard";
-import { freshPracticeState, hintsFor, practiceReducer, type PracticeAction, type PracticeMistake, type PracticeState } from "@/domain/lessons/practice";
+import { freshPracticeState, hintsFor, practiceReducer, type PracticeAction, type PracticeFeedback, type PracticeState } from "@/domain/lessons/practice";
 import type { CellReference } from "@/domain/solver/SolveStep";
 import { lessonCellViews, mergeMarks } from "@/presentation/pages/lessons/lessonCellView";
 
 export type LessonMessage =
     | { kind: "plain"; key: string }
     | { kind: "hint"; hint: LessonHint }
-    | { kind: "wrong"; feedback: PracticeMistake };
+    | { kind: "wrong"; feedback: PracticeFeedback };
 
 const isPractice = (step: LessonStep): step is PracticeStep => step.kind !== "show" && step.kind !== "done";
 
@@ -68,7 +68,6 @@ export const useLessonSession = (lesson: Lesson) => {
         if (current.kind === "done") return { kind: "plain", key: current.takeawayKey };
         const state = practice.value;
         if (state.solved) return { kind: "plain", key: current.successKey };
-        if (state.feedback?.kind === "found") return { kind: "plain", key: state.feedback.key };
         if (state.feedback !== null) return { kind: "wrong", feedback: state.feedback };
         if (hint.value !== null) return { kind: "hint", hint: hint.value };
         return { kind: "plain", key: current.promptKey };

@@ -121,7 +121,7 @@ import { BOARD_SIZE } from "@/domain/board/constants";
 import type { Difficulty } from "@/domain/generator/SudokuGenerator";
 import { ALL_LESSON_IDS, groupOfLesson } from "@/domain/lessons/curriculum";
 import type { Lesson, LessonId } from "@/domain/lessons/Lesson";
-import type { PracticeMistake } from "@/domain/lessons/practice";
+import type { PracticeFeedback } from "@/domain/lessons/practice";
 import type { CellReference, Elimination } from "@/domain/solver/SolveStep";
 import BoardFrame from "@/presentation/components/board-frame/BoardFrame.vue";
 import Cell from "@/presentation/components/board-cell/Cell.vue";
@@ -157,7 +157,7 @@ const links = computed(() => [...(session.marks.value.links ?? [])]);
 const frameTarget = computed((): CellReference | null =>
     session.padCell.value ?? session.marks.value.answers?.[0]?.cell ?? session.marks.value.lit?.[0] ?? null);
 
-const feedbackText = (feedback: PracticeMistake): string => {
+const feedbackText = (feedback: PracticeFeedback): string => {
     switch (feedback.kind) {
     case "conflict": {
         const key = { row: "conflictRow", column: "conflictColumn", box: "conflictBox" }[feedback.house];

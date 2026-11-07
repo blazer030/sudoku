@@ -92,10 +92,27 @@ const POINTING: Lesson = {
             ],
         },
         {
+            kind: "pick",
+            stage: "alone",
+            board: POINTING_ALONE_BOARD,
+            marks: { range: boxOf(8), emphasized: [3] },
+            targets: POINTING_ALONE_PATTERN,
+            promptKey: key("pointing", "alonePickPrompt"),
+            wrongKey: key("pointing", "alonePickWrong"),
+            successKey: key("pointing", "alonePickSuccess"),
+            hints: [
+                { textKey: key("pointing", "aloneHintDigit"), marks: { range: boxOf(8), noteDigit: 3, dimOthers: true } },
+                {
+                    textKey: key("pointing", "aloneHintLine"),
+                    marks: { range: columnOf(4), pattern: POINTING_ALONE_PATTERN, emphasized: [3], noteDigit: 3, dimOthers: true },
+                },
+            ],
+        },
+        {
             kind: "remove",
             stage: "alone",
             board: POINTING_ALONE_BOARD,
-            marks: { range: boxOf(8) },
+            marks: { range: columnOf(4), pattern: POINTING_ALONE_PATTERN, emphasized: [3] },
             removals: [removal(4, 4, 3)],
             pattern: POINTING_ALONE_PATTERN,
             technique: "pointing",
@@ -105,7 +122,6 @@ const POINTING: Lesson = {
             wrongKey: key("pointing", "aloneWrong"),
             successKey: key("pointing", "aloneSuccess"),
             hints: [
-                { textKey: key("pointing", "aloneHintDigit"), marks: { range: boxOf(8), noteDigit: 3, dimOthers: true } },
                 {
                     textKey: key("pointing", "aloneHintLine"),
                     marks: { range: columnOf(4), pattern: POINTING_ALONE_PATTERN, emphasized: [3], noteDigit: 3, dimOthers: true },
@@ -206,10 +222,27 @@ const CLAIMING: Lesson = {
             ],
         },
         {
+            kind: "pick",
+            stage: "alone",
+            board: CLAIMING_ALONE_BOARD,
+            marks: { range: columnOf(9), emphasized: [3] },
+            targets: CLAIMING_ALONE_PATTERN,
+            promptKey: key("claiming", "alonePickPrompt"),
+            wrongKey: key("claiming", "alonePickWrong"),
+            successKey: key("claiming", "alonePickSuccess"),
+            hints: [
+                { textKey: key("claiming", "aloneHintDigit"), marks: { range: columnOf(9), noteDigit: 3, dimOthers: true } },
+                {
+                    textKey: key("claiming", "aloneHintBox"),
+                    marks: { range: boxOf(6), pattern: CLAIMING_ALONE_PATTERN, emphasized: [3], noteDigit: 3, dimOthers: true },
+                },
+            ],
+        },
+        {
             kind: "remove",
             stage: "alone",
             board: CLAIMING_ALONE_BOARD,
-            marks: { range: columnOf(9) },
+            marks: { range: boxOf(6), pattern: CLAIMING_ALONE_PATTERN, emphasized: [3] },
             removals: [removal(4, 7, 3)],
             pattern: CLAIMING_ALONE_PATTERN,
             technique: "claiming",
@@ -219,7 +252,6 @@ const CLAIMING: Lesson = {
             wrongKey: key("claiming", "aloneWrong"),
             successKey: key("claiming", "aloneSuccess"),
             hints: [
-                { textKey: key("claiming", "aloneHintDigit"), marks: { range: columnOf(9), noteDigit: 3, dimOthers: true } },
                 {
                     textKey: key("claiming", "aloneHintBox"),
                     marks: { range: boxOf(6), pattern: CLAIMING_ALONE_PATTERN, emphasized: [3], noteDigit: 3, dimOthers: true },
@@ -320,10 +352,27 @@ const NAKED_PAIR: Lesson = {
             ],
         },
         {
+            kind: "pick",
+            stage: "alone",
+            board: NAKED_PAIR_ALONE_BOARD,
+            marks: { range: boxOf(2), emphasized: [2, 5] },
+            targets: NAKED_PAIR_ALONE_PATTERN,
+            promptKey: key("nakedPair", "alonePickPrompt"),
+            wrongKey: key("nakedPair", "alonePickWrong"),
+            successKey: key("nakedPair", "alonePickSuccess"),
+            hints: [
+                { textKey: key("nakedPair", "aloneHintCount"), marks: { range: boxOf(2) } },
+                {
+                    textKey: key("nakedPair", "aloneHintPair"),
+                    marks: { range: boxOf(2), pattern: NAKED_PAIR_ALONE_PATTERN, emphasized: [2, 5] },
+                },
+            ],
+        },
+        {
             kind: "remove",
             stage: "alone",
             board: NAKED_PAIR_ALONE_BOARD,
-            marks: { range: boxOf(2) },
+            marks: { range: boxOf(2), pattern: NAKED_PAIR_ALONE_PATTERN, emphasized: [2, 5] },
             removals: [removal(2, 4, 5)],
             pattern: NAKED_PAIR_ALONE_PATTERN,
             technique: "nakedPair",
@@ -333,7 +382,6 @@ const NAKED_PAIR: Lesson = {
             wrongKey: key("nakedPair", "aloneWrong"),
             successKey: key("nakedPair", "aloneSuccess"),
             hints: [
-                { textKey: key("nakedPair", "aloneHintCount"), marks: { range: boxOf(2) } },
                 {
                     textKey: key("nakedPair", "aloneHintPair"),
                     marks: { range: boxOf(2), pattern: NAKED_PAIR_ALONE_PATTERN, emphasized: [2, 5] },
@@ -440,10 +488,27 @@ const HIDDEN_PAIR: Lesson = {
             ],
         },
         {
+            kind: "pick",
+            stage: "alone",
+            board: HIDDEN_PAIR_ALONE_BOARD,
+            marks: { range: boxOf(3), emphasized: [3, 7] },
+            targets: HIDDEN_PAIR_ALONE_PATTERN,
+            promptKey: key("hiddenPair", "alonePickPrompt"),
+            wrongKey: key("hiddenPair", "alonePickWrong"),
+            successKey: key("hiddenPair", "alonePickSuccess"),
+            hints: [
+                { textKey: key("hiddenPair", "aloneHintBox"), marks: { range: boxOf(3) } },
+                {
+                    textKey: key("hiddenPair", "aloneHintPair"),
+                    marks: { range: boxOf(3), pattern: HIDDEN_PAIR_ALONE_PATTERN, emphasized: [3, 7] },
+                },
+            ],
+        },
+        {
             kind: "remove",
             stage: "alone",
             board: HIDDEN_PAIR_ALONE_BOARD,
-            marks: { range: boxOf(3) },
+            marks: { pattern: HIDDEN_PAIR_ALONE_PATTERN, emphasized: [3, 7] },
             removals: [removal(1, 7, 6), removal(1, 9, 4)],
             pattern: HIDDEN_PAIR_ALONE_PATTERN,
             technique: "hiddenPair",
@@ -452,7 +517,6 @@ const HIDDEN_PAIR: Lesson = {
             wrongKey: key("hiddenPair", "aloneWrong"),
             successKey: key("hiddenPair", "aloneSuccess"),
             hints: [
-                { textKey: key("hiddenPair", "aloneHintBox"), marks: { range: boxOf(3) } },
                 {
                     textKey: key("hiddenPair", "aloneHintPair"),
                     marks: { range: boxOf(3), pattern: HIDDEN_PAIR_ALONE_PATTERN, emphasized: [3, 7] },
@@ -579,10 +643,27 @@ const NAKED_SUBSET: Lesson = {
             ],
         },
         {
+            kind: "pick",
+            stage: "alone",
+            board: NAKED_SUBSET_ALONE_BOARD,
+            marks: { range: boxOf(9), emphasized: [2, 6, 9] },
+            targets: NAKED_SUBSET_ALONE_PATTERN,
+            promptKey: key("nakedSubset", "alonePickPrompt"),
+            wrongKey: key("nakedSubset", "alonePickWrong"),
+            successKey: key("nakedSubset", "alonePickSuccess"),
+            hints: [
+                { textKey: key("nakedSubset", "aloneHintExclude"), marks: { range: boxOf(9) } },
+                {
+                    textKey: key("nakedSubset", "aloneHintTriple"),
+                    marks: { range: boxOf(9), pattern: NAKED_SUBSET_ALONE_PATTERN, emphasized: [2, 6, 9] },
+                },
+            ],
+        },
+        {
             kind: "remove",
             stage: "alone",
             board: NAKED_SUBSET_ALONE_BOARD,
-            marks: { range: boxOf(9) },
+            marks: { range: boxOf(9), pattern: NAKED_SUBSET_ALONE_PATTERN, emphasized: [2, 6, 9] },
             removals: [removal(8, 9, 2)],
             pattern: NAKED_SUBSET_ALONE_PATTERN,
             technique: "nakedTriple",
@@ -592,7 +673,6 @@ const NAKED_SUBSET: Lesson = {
             wrongKey: key("nakedSubset", "aloneWrong"),
             successKey: key("nakedSubset", "aloneSuccess"),
             hints: [
-                { textKey: key("nakedSubset", "aloneHintExclude"), marks: { range: boxOf(9) } },
                 {
                     textKey: key("nakedSubset", "aloneHintTriple"),
                     marks: { range: boxOf(9), pattern: NAKED_SUBSET_ALONE_PATTERN, emphasized: [2, 6, 9] },
@@ -736,10 +816,27 @@ const HIDDEN_SUBSET: Lesson = {
             ],
         },
         {
+            kind: "pick",
+            stage: "alone",
+            board: HIDDEN_SUBSET_ALONE_BOARD,
+            marks: { range: columnOf(8), emphasized: [2, 4, 8] },
+            targets: HIDDEN_SUBSET_ALONE_PATTERN,
+            promptKey: key("hiddenSubset", "alonePickPrompt"),
+            wrongKey: key("hiddenSubset", "alonePickWrong"),
+            successKey: key("hiddenSubset", "alonePickSuccess"),
+            hints: [
+                { textKey: key("hiddenSubset", "aloneHintFew"), marks: { range: columnOf(8) } },
+                {
+                    textKey: key("hiddenSubset", "aloneHintTriple"),
+                    marks: { range: columnOf(8), pattern: HIDDEN_SUBSET_ALONE_PATTERN, emphasized: [2, 4, 8] },
+                },
+            ],
+        },
+        {
             kind: "remove",
             stage: "alone",
             board: HIDDEN_SUBSET_ALONE_BOARD,
-            marks: { range: columnOf(8) },
+            marks: { pattern: HIDDEN_SUBSET_ALONE_PATTERN, emphasized: [2, 4, 8] },
             removals: [removal(1, 8, 6), removal(1, 8, 7), removal(2, 8, 7), removal(9, 8, 6)],
             pattern: HIDDEN_SUBSET_ALONE_PATTERN,
             technique: "hiddenTriple",
@@ -748,7 +845,6 @@ const HIDDEN_SUBSET: Lesson = {
             wrongKey: key("hiddenSubset", "aloneWrong"),
             successKey: key("hiddenSubset", "aloneSuccess"),
             hints: [
-                { textKey: key("hiddenSubset", "aloneHintFew"), marks: { range: columnOf(8) } },
                 {
                     textKey: key("hiddenSubset", "aloneHintTriple"),
                     marks: { range: columnOf(8), pattern: HIDDEN_SUBSET_ALONE_PATTERN, emphasized: [2, 4, 8] },

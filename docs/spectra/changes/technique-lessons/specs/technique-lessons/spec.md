@@ -124,27 +124,22 @@ Practice boards in the Basics and Easy groups SHALL show no notes, except where 
 
 ### Requirement: Independent practice has one target
 
-Independent practice SHALL show a whole board and SHALL name one target to look for: a digit, a row, a column or a box. A row, column or box its prompt names SHALL be framed on the board, so the player need not count to find it, and nothing else SHALL be marked. A prompt that names no particular row, column or box frames nothing. Finding the pattern first SHALL be allowed but not required: tapping a cell of the pattern on an independent removal step marks it and says so in plain words, not as a mistake.
+Independent practice SHALL show a whole board and SHALL name one target to look for: a digit, a row, a column or a box. A row, column or box its prompt names SHALL be framed on the board, so the player need not count to find it, and nothing else SHALL be marked. A prompt that names no particular row, column or box frames nothing. A lesson that removes candidates SHALL split its independent practice into the same two steps as its guided practice: first tapping the pattern's cells, then, with the pattern marked, tapping what can lose a candidate.
 
 #### Scenario: The named house is framed
 
 - **WHEN** independent practice for Pointing says to look in box 8
-- **THEN** box 8 is framed on the board, and nothing marks the pattern or the answer
+- **THEN** box 8 is framed on the board, and nothing marks the cells to find
 
 #### Scenario: Nothing is named
 
-- **WHEN** independent practice for X-Wing says digit 1 forms an X-Wing on two columns, without saying which
+- **WHEN** independent practice for X-Wing asks for the corners of an X-Wing on two columns, without saying which
 - **THEN** no range is framed
 
-#### Scenario: Finding the pattern first
+#### Scenario: Finding the pattern, then removing
 
-- **WHEN** independent practice for X-Wing asks which 1 can go, and the player taps a corner of the rectangle
-- **THEN** the corner is marked, plain words say it stays, and the step is not solved
-
-#### Scenario: Going straight to the removal
-
-- **WHEN** independent practice for X-Wing asks which 1 can go, and the player taps that cell without marking any corner
-- **THEN** the step is solved
+- **WHEN** the player reaches independent practice for X-Wing
+- **THEN** the first step asks for the rectangle's four corners, and a cell that is not a corner says why; the next step shows the corners marked and asks which 1 can go
 
 #### Scenario: Any valid answer counts
 
@@ -167,7 +162,7 @@ A wrong tap SHALL leave the player on the same step, SHALL NOT change the board,
 | Digit 3 asked; the column already has a 3 | That column already has a 3 |
 | Digit 5 asked; no conflict, but not certain yet | The step's own words on why it is not certain yet |
 | Cell outside the step's range | Look in the step's range first |
-| A cell of the pattern tapped during guided removal | This cell is part of the pattern and stays |
+| A cell of the pattern tapped during removal | This cell is part of the pattern and stays |
 | A cell without the candidates in question | This cell does not have those candidates |
 
 #### Scenario: A cell that already holds a digit

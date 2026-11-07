@@ -292,38 +292,6 @@ describe("practiceReducer", () => {
             expect(state.feedback).toEqual({ kind: "message", key: "keep" });
         });
 
-        describe("when the player is on their own", () => {
-            const alone: RemoveStep = { ...step, stage: "alone" };
-
-            it("should mark a cell of the pattern as found, not wrong", () => {
-                const state = practiceReducer(alone, freshPracticeState(), tap(7, 1));
-
-                expect(state.picked).toEqual([cell(7, 1)]);
-                expect(state.feedback).toEqual({ kind: "found", key: "keep" });
-                expect(state.removed).toEqual([]);
-                expect(state.solved).toBe(false);
-            });
-
-            it("should mark it once, however often it is tapped", () => {
-                const once = practiceReducer(alone, freshPracticeState(), tap(7, 1));
-
-                expect(practiceReducer(alone, once, tap(7, 1)).picked).toEqual([cell(7, 1)]);
-            });
-
-            it("should not need the pattern before the removal", () => {
-                expect(practiceReducer(alone, freshPracticeState(), tap(7, 7)).solved).toBe(true);
-            });
-
-            it("should clear the words on the next tap, keeping the mark", () => {
-                const found = practiceReducer(alone, freshPracticeState(), tap(7, 1));
-
-                const state = practiceReducer(alone, found, tap(0, 3));
-
-                expect(state.feedback).toBeNull();
-                expect(state.picked).toEqual([cell(7, 1)]);
-            });
-        });
-
         it("should say a cell lacks the candidates in question", () => {
             // Row 8, column 4 (counted from 1) holds only 4 and 6
             const state = practiceReducer(step, freshPracticeState(), tap(7, 3));

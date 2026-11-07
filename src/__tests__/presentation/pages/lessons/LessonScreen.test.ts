@@ -289,34 +289,6 @@ describe("LessonScreen", () => {
         expect(primary(wrapper).attributes("disabled")).toBeUndefined();
     });
 
-    it("should mark a pattern cell on an independent removal as found, in plain words", async () => {
-        const wrapper = mountScreen({
-            id: "xWing",
-            steps: [
-                {
-                    kind: "remove",
-                    stage: "alone",
-                    board: { ...BOARD, showsCandidates: true },
-                    marks: {},
-                    removals: [{ cell: cell(0, 0), digit: 3 }],
-                    pattern: [cell(0, 1)],
-                    promptKey: "lessons.names.pointing",
-                    successKey: "lessons.names.claiming",
-                    keepKey: "lessons.names.fish",
-                    wrongKey: "lessons.names.rules",
-                    hints: [],
-                },
-                { kind: "done", stage: "done", board: BOARD, marks: {}, takeawayKey: "lessons.names.xyWing" },
-            ],
-        });
-
-        await tap(wrapper, 0, 1);
-
-        expect(wrapper.find("[data-testid='lesson-wrong']").exists()).toBe(false);
-        expect(explanation(wrapper)).toContain(nameOf("fish"));
-        expect(wrapper.get("[data-testid='lesson-cell-0-1']").attributes("data-variant")).toBe("pattern");
-    });
-
     it("should light every matching digit when a filled cell is tapped on a place step", async () => {
         const wrapper = mountScreen();
         await toPractice(wrapper);
