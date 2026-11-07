@@ -75,16 +75,6 @@
                     >
                         {{ t("lessons.common.actions.backToLessons") }}
                     </button>
-                    <button
-                        v-press
-                        class="h-11 px-3 flex items-center justify-center text-foreground-secondary font-medium cursor-pointer"
-                        data-skin="text-button"
-                        data-testid="lesson-complete-previous"
-                        type="button"
-                        @click="emit('previous')"
-                    >
-                        {{ t("lessons.common.complete.previousStep") }}
-                    </button>
                 </div>
             </div>
         </div>
@@ -114,7 +104,6 @@ const props = defineProps<{
 const emit = defineEmits<{
     next: [];
     leave: [];
-    previous: [];
 }>();
 
 const { t } = useI18n();
@@ -131,7 +120,7 @@ const withdraw = () => {
 
 watch(() => props.visible, (visible) => {
     withdraw();
-    if (visible) withdrawBackDismissal = registerBackDismissal(() => { emit("previous"); });
+    if (visible) withdrawBackDismissal = registerBackDismissal(() => { emit("leave"); });
 });
 // A next lesson takes the page with the dialog still open; Back must not be left closing it
 onScopeDispose(withdraw);

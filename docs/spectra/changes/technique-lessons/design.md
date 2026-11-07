@@ -116,11 +116,13 @@
 
 - 首頁第一格是「技巧教學」，進入課程列表，看得到四組 17 課、已完成數與下一課。
 - 一課依序走過講解、跟著做、自己找、完成。任何一步都能用返回離開，進度以「完成整課」為單位記錄。
+- 完成時開 `LessonCompleteDialog`：沿用通關卡片的 `celebration`、`trophy`、`complete-title` 與各風格的慶祝效果，顯示課名、重點、已完成課數，只有下一課（或玩一局）與回課程清單兩個動作，系統返回鍵同回課程清單。完成時不顯示課程面板。換課時整頁淡出淡入。
+- 點已填格亮起相同數字：`fill` 與 `place` 步驟會亮，亮起的數字不淡化；`pick`、`remove`、`note` 步驟沒有反應。
 - 解題演示和提示模式都沒有連到教學的入口：教學只從首頁和課程網址進入。
 
 **Interface / data shape**
 
-- `LessonStep` 種類：`show`（講解）、`place`（點格子，數字已定）、`pick`（點出規律格）、`remove`（點能刪候選數的格子）、`fill`（點格子再用懸浮鍵填數字）、`note`（「填數字與筆記」那課專用：打開筆記模式，在指定格寫下指定候選數）、`done`。
+- `LessonStep` 種類：`show`（講解）、`place`（點格子，數字已定；`holdsDigit` 時點已填格不會改變亮的數字）、`light`（點任一個指定數字，把它點亮）、`pick`（點出規律格）、`remove`（點能刪候選數的格子）、`fill`（點格子再用懸浮鍵填數字）、`note`（「填數字與筆記」那課專用：打開筆記模式，在指定格寫下指定候選數）、`done`。
 - `LESSON_BY_TECHNIQUE: Record<TechniqueId, LessonId>`：19 個技巧都有對應，少一個就是型別錯誤。
 - `practiceReducer(step, state, action) => PracticeState`，答錯的原因放在 `state.feedback`，`action` 是 `{ kind: "tapCell", row, column }`、`{ kind: "pressDigit", digit }`、`{ kind: "toggleNoteMode" }` 或 `{ kind: "requestHint" }`。
 - `StepCellView` 新增選用的 `crossed`、`dimmed`、`dimmedNotes`，`StepHighlight` 新增 `"target"`。`BoardCell` 對應輸出 `data-dimmed`、`data-note-dimmed`、`data-variant="target"`，× 是帶 `data-skin="cell-cross"` 的圖示，沒有 `data-crossed`。

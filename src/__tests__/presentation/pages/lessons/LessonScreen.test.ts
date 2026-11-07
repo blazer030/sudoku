@@ -477,22 +477,22 @@ describe("LessonScreen", () => {
             expect(wrapper.find("[data-testid='lesson-panel']").exists()).toBe(false);
         });
 
-        it.each([
-            ["its action", (wrapper: Screen) => wrapper.get("[data-testid='lesson-complete-previous']").trigger("click")],
-            ["the system Back key", () => { handleBackButton(true); }],
-        ])("should go back to the last step through %s, and open again from there", async (_, goBack) => {
+        it("should offer only going on and going back to the list", async () => {
+            const wrapper = mountScreen();
+
+            await finish(wrapper);
+
+            expect(wrapper.get("[data-testid='lesson-complete-card']").findAll("button")).toHaveLength(2);
+        });
+
+        it("should go back to the list on the system Back key", async () => {
             const wrapper = mountScreen();
             await finish(wrapper);
 
-            await goBack(wrapper);
+            handleBackButton(true);
             await flushPromises();
 
-            expect(dialog(wrapper).exists()).toBe(false);
-            expect(wrapper.find("[data-testid='lesson-panel']").exists()).toBe(true);
-
-            await primary(wrapper).trigger("click");
-            await flushPromises();
-            expect(dialog(wrapper).exists()).toBe(true);
+            expect(wrapper.emitted("back")).toHaveLength(1);
         });
 
         it("should keep the last practice's board on the closing step", async () => {

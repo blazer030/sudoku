@@ -32,7 +32,6 @@ export const lessonsEn = {
         complete: {
             title: "Lesson Complete!",
             progress: "{done} of {total} lessons finished",
-            previousStep: "Previous step",
         },
         feedback: {
             conflictRow: "Row {number} already has a {digit}.",

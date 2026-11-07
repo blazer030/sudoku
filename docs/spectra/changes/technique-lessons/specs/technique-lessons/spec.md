@@ -229,7 +229,7 @@ When a window has more room than the lesson's tallest panel needs, the panel SHA
 
 ### Requirement: Completion
 
-Finishing a lesson SHALL open a dialog in the style's completion look, with the lesson's name, its one-sentence takeaway and how many lessons are finished, record the lesson as finished, and offer the next lesson. The last lesson of a group with a difficulty SHALL offer a new game at that difficulty instead; Basics has none, so its last lesson goes on to the next lesson. The dialog SHALL also offer going back to the list and to the last step, as the system Back key does, and the lesson panel SHALL NOT show behind it. Going on to the next lesson SHALL fade one lesson out and the next in.
+Finishing a lesson SHALL open a dialog in the style's completion look, with the lesson's name, its one-sentence takeaway and how many lessons are finished, record the lesson as finished, and offer the next lesson. The last lesson of a group with a difficulty SHALL offer a new game at that difficulty instead; Basics has none, so its last lesson goes on to the next lesson. The dialog SHALL offer only that and going back to the list, which the system Back key also does, and the lesson panel SHALL NOT show behind it. Going on to the next lesson SHALL fade one lesson out and the next in.
 
 #### Scenario: Finishing mid-group
 
@@ -238,8 +238,8 @@ Finishing a lesson SHALL open a dialog in the style's completion look, with the 
 
 #### Scenario: Going back from the dialog
 
-- **WHEN** the player chooses the last step in the dialog, or presses the system Back key
-- **THEN** the dialog closes on the last practice step, and moving on from there opens it again
+- **WHEN** the player chooses to go back to the list in the dialog, or presses the system Back key
+- **THEN** the lesson list shows, with the lesson recorded as finished
 
 #### Scenario: Finishing a group
 

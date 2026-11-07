@@ -110,7 +110,6 @@
             :visible="isDone"
             @leave="emit('back')"
             @next="finishAction"
-            @previous="session.previous"
         />
     </div>
 </template>
