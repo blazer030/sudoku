@@ -146,6 +146,11 @@ Independent practice SHALL show a whole board and SHALL name one target to look 
 - **WHEN** the player reaches independent practice for X-Wing
 - **THEN** the first step asks for the rectangle's four corners, and a cell that is not a corner says why; the next step shows the corners marked and asks which 1 can go
 
+#### Scenario: W-Wing follows its explanation's order
+
+- **WHEN** the player reaches W-Wing's guided or independent practice
+- **THEN** one step asks for the two cells with the same pair, the next for the two cells that join them, and the last for what can lose a candidate; on the independent board no other cell holds that pair, so there is one answer to find
+
 #### Scenario: Any valid answer counts
 
 - **WHEN** independent practice for Hidden Single names digit 5 and the board has two cells where 5 is a hidden single

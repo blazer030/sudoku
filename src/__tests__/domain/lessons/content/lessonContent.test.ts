@@ -2,6 +2,7 @@ import { BOARD_SIZE } from "@/domain/board/constants";
 import { LESSONS } from "@/domain/lessons/content";
 import { ALL_LESSON_IDS } from "@/domain/lessons/curriculum";
 import type { Lesson, LessonStep, PracticeStep, StepMarks } from "@/domain/lessons/Lesson";
+import { boardState } from "@/domain/lessons/lessonBoard";
 import { freshPracticeState, practiceReducer, practiceValueAt, type PracticeAction, type PracticeState } from "@/domain/lessons/practice";
 import { verifyLessonStep } from "@/domain/lessons/verifyLesson";
 import type { CellReference } from "@/domain/solver/SolveStep";
@@ -94,6 +95,12 @@ const cellsOfHouse = ({ house, number }: NamedHouse): CellReference[] => {
 
 const sortedCells = (cells: readonly CellReference[]): CellReference[] =>
     [...cells].sort((first, second) => first.row - second.row || first.column - second.column);
+
+// The cells the player has picked by this step of the same stage
+const foundBefore = (lesson: Lesson, step: PracticeStep): readonly CellReference[] =>
+    lesson.steps
+        .slice(0, lesson.steps.indexOf(step))
+        .flatMap(earlier => (earlier.kind === "pick" && earlier.stage === step.stage ? earlier.targets : []));
 
 const solveFill = (step: PracticeStep): PracticeState => {
     // A fill step's hints lead to a next move until it is solved, which is what a stuck player gets
@@ -200,8 +207,12 @@ describe.each(lessons.map(lesson => [lesson.id, lesson] as const))("lesson %s", 
     it("should leave a player on their own to find the place, with only the house the prompt names framed", () => {
         for (const step of lesson.steps.filter(isPractice)) {
             if (step.stage !== "alone") continue;
-            expect(step.marks.pattern, step.promptKey).toEqual(step.kind === "remove" ? step.pattern : undefined);
-            expect(step.marks.targets, step.promptKey).toBeUndefined();
+            // Only what the player has already found is marked for them
+            const found = foundBefore(lesson, step);
+            for (const cell of [...(step.marks.pattern ?? []), ...(step.marks.targets ?? [])]) {
+                expect(found, step.promptKey).toContainEqual(cell);
+            }
+            if (step.kind === "remove") expect(step.marks.pattern, step.promptKey).toEqual(step.pattern);
 
             for (const [language, named] of [["zh-Hant", housesNamedInChinese], ["en", housesNamedInEnglish]] as const) {
                 const messages = language === "en" ? en : zhHant;
@@ -213,15 +224,12 @@ describe.each(lessons.map(lesson => [lesson.id, lesson] as const))("lesson %s", 
     });
 
     it("should have a player on their own find the pattern, then remove, as the guided steps taught", () => {
-        const steps = lesson.steps;
-        steps.forEach((step, index) => {
-            if (step.stage !== "alone" || step.kind !== "remove") return;
-            const before = steps[index - 1];
+        for (const step of lesson.steps.filter(isPractice)) {
+            if (step.stage !== "alone" || step.kind !== "remove") continue;
+            const found = foundBefore(lesson, step);
 
-            expect(before.stage, step.promptKey).toBe("alone");
-            expect(before.kind, step.promptKey).toBe("pick");
-            if (before.kind === "pick") expect(sortedCells(before.targets), step.promptKey).toEqual(sortedCells(step.pattern));
-        });
+            for (const cell of step.pattern) expect(found, step.promptKey).toContainEqual(cell);
+        }
     });
 
     it("should only have notes in the lesson that teaches them, or on boards past the basics", () => {
@@ -230,6 +238,53 @@ describe.each(lessons.map(lesson => [lesson.id, lesson] as const))("lesson %s", 
             if (isSingles) expect(step.board.showsCandidates).toBe(false);
             else if (lesson.id !== "fillingIn" && step.kind !== "done") expect(step.board.showsCandidates).toBe(true);
         }
+    });
+});
+
+describe("the W-Wing lesson", () => {
+    const practiceOf = (stage: "follow" | "alone") => LESSONS.wWing.steps.filter(isPractice).filter(step => step.stage === stage);
+
+    it.each(["follow", "alone"] as const)("should go pair, join, then removal when %s, as its explanation does", (stage) => {
+        const [pair, join, remove] = practiceOf(stage);
+
+        expect([pair.kind, join.kind, remove.kind]).toEqual(["pick", "pick", "remove"]);
+        if (pair.kind !== "pick" || join.kind !== "pick" || remove.kind !== "remove") return;
+        expect(sortedCells(pair.targets)).toEqual(sortedCells(remove.pattern));
+        expect(join.targets).toHaveLength(2);
+        for (const cell of join.targets) expect(pair.targets).not.toContainEqual(cell);
+    });
+
+    it.each([
+        ["follow", 2, "row"],
+        ["alone", 7, "column"],
+    ] as const)("should join the pair when %s through a digit with just two places in its line", (stage, digit, line) => {
+        const [, join] = practiceOf(stage);
+        if (join.kind !== "pick") throw new Error("The second step picks what joins the pair");
+        const state = boardState(join.board);
+        const [first] = join.targets;
+        const places: CellReference[] = [];
+        for (let other = 0; other < BOARD_SIZE; other++) {
+            const cell = line === "row" ? { row: first.row, column: other } : { row: other, column: first.column };
+            if (state.candidatesOf(cell.row, cell.column).includes(digit)) places.push(cell);
+        }
+
+        expect(sortedCells(places)).toEqual(sortedCells(join.targets));
+    });
+
+    it("should have no other cell with the pair when the player is on their own, so there is one answer to find", () => {
+        const [pair] = practiceOf("alone");
+        if (pair.kind !== "pick") throw new Error("The first step picks the pair");
+        const state = boardState(pair.board);
+        const candidates = (row: number, column: number) => state.candidatesOf(row, column).join();
+        const wanted = candidates(pair.targets[0].row, pair.targets[0].column);
+        const holders: CellReference[] = [];
+        for (let row = 0; row < BOARD_SIZE; row++) {
+            for (let column = 0; column < BOARD_SIZE; column++) {
+                if (candidates(row, column) === wanted) holders.push({ row, column });
+            }
+        }
+
+        expect(sortedCells(holders)).toEqual(sortedCells(pair.targets));
     });
 });
 

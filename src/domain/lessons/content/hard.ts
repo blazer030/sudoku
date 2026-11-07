@@ -466,10 +466,10 @@ const W_WING_FOLLOW_ENDS = cells([4, 5], [7, 9]);
 const W_WING_FOLLOW_LINK_CELLS = cells([5, 4], [5, 9]);
 
 // The 3s of column 8 join two 3-6 cells
-const W_WING_ALONE_BOARD = board("824671395010945782795238400047569820589123647002784509970452108401897250258316974");
-const W_WING_ALONE_ENDS = cells([6, 2], [7, 3]);
-const W_WING_ALONE_LINK_CELLS = cells([6, 8], [7, 8]);
-const W_WING_ALONE_LINKS = [link([6, 2], [6, 8], 3, "weak"), link([6, 8], [7, 8], 3), link([7, 8], [7, 3], 3, "weak")];
+const W_WING_ALONE_BOARD = board("953860240127354986008029153875693421219400000034015090781040369540937812392006074");
+const W_WING_ALONE_ENDS = cells([5, 5], [6, 9]);
+const W_WING_ALONE_LINK_CELLS = cells([5, 7], [6, 7]);
+const W_WING_ALONE_LINKS = [link([5, 5], [5, 7], 7, "weak"), link([5, 7], [6, 7], 7), link([6, 7], [6, 9], 7, "weak")];
 
 export const W_WING: Lesson = {
     id: "wWing",
@@ -514,14 +514,28 @@ export const W_WING: Lesson = {
             kind: "pick",
             stage: "follow",
             board: W_WING_FOLLOW_BOARD,
-            marks: { range: [...rowOf(5), ...W_WING_FOLLOW_ENDS], dimOthers: true },
-            targets: [...W_WING_FOLLOW_ENDS, ...W_WING_FOLLOW_LINK_CELLS],
+            marks: { range: W_WING_FOLLOW_ENDS, dimOthers: true },
+            targets: W_WING_FOLLOW_ENDS,
+            promptKey: key("wWing", "pairPrompt"),
+            successKey: key("wWing", "pairSuccess"),
+            wrongKey: key("wWing", "pairWrong"),
+            hints: [
+                { textKey: key("wWing", "pairHintFirst"), marks: { lit: [at(4, 5)] } },
+                { textKey: key("wWing", "pairHintSecond"), marks: { lit: W_WING_FOLLOW_ENDS } },
+            ],
+        },
+        {
+            kind: "pick",
+            stage: "follow",
+            board: W_WING_FOLLOW_BOARD,
+            marks: { range: rowOf(5), pattern: W_WING_FOLLOW_ENDS, emphasized: [2], dimOthers: true },
+            targets: W_WING_FOLLOW_LINK_CELLS,
             promptKey: key("wWing", "pickPrompt"),
             successKey: key("wWing", "pickSuccess"),
             wrongKey: key("wWing", "pickWrong"),
             hints: [
+                { textKey: key("wWing", "pickHintLook"), marks: { noteDigit: 2 } },
                 { textKey: key("wWing", "pickHintRow"), marks: { lit: W_WING_FOLLOW_LINK_CELLS } },
-                { textKey: key("wWing", "pickHintEnds"), marks: { lit: [...W_WING_FOLLOW_ENDS, ...W_WING_FOLLOW_LINK_CELLS] } },
             ],
         },
         {
@@ -553,32 +567,46 @@ export const W_WING: Lesson = {
             kind: "pick",
             stage: "alone",
             board: W_WING_ALONE_BOARD,
-            marks: { emphasized: [6] },
+            marks: { emphasized: [8] },
             targets: W_WING_ALONE_ENDS,
             promptKey: key("wWing", "alonePickPrompt"),
             wrongKey: key("wWing", "alonePickWrong"),
             successKey: key("wWing", "alonePickSuccess"),
             hints: [
-                { textKey: key("wWing", "aloneHintEnds"), marks: { pattern: W_WING_ALONE_ENDS, emphasized: [6] } },
-                { textKey: key("wWing", "aloneHintColumn"), marks: { range: columnOf(8), pattern: W_WING_ALONE_ENDS, targets: W_WING_ALONE_LINK_CELLS, links: W_WING_ALONE_LINKS, emphasized: [6] } },
+                { textKey: key("wWing", "aloneHintPair") },
+                { textKey: key("wWing", "aloneHintEnds"), marks: { pattern: W_WING_ALONE_ENDS, emphasized: [8] } },
+            ],
+        },
+        {
+            kind: "pick",
+            stage: "alone",
+            board: W_WING_ALONE_BOARD,
+            marks: { pattern: W_WING_ALONE_ENDS, emphasized: [7] },
+            targets: W_WING_ALONE_LINK_CELLS,
+            promptKey: key("wWing", "aloneLinkPrompt"),
+            wrongKey: key("wWing", "aloneLinkWrong"),
+            successKey: key("wWing", "aloneLinkSuccess"),
+            hints: [
+                { textKey: key("wWing", "aloneHintLook"), marks: { range: columnOf(7), noteDigit: 7 } },
+                { textKey: key("wWing", "aloneHintColumn"), marks: { range: columnOf(7), pattern: W_WING_ALONE_ENDS, targets: W_WING_ALONE_LINK_CELLS, links: W_WING_ALONE_LINKS, emphasized: [7] } },
             ],
         },
         {
             kind: "remove",
             stage: "alone",
             board: W_WING_ALONE_BOARD,
-            marks: { pattern: W_WING_ALONE_ENDS, emphasized: [6] },
-            removals: [removal(8, 2, 6)],
+            marks: { pattern: W_WING_ALONE_ENDS, targets: W_WING_ALONE_LINK_CELLS, links: W_WING_ALONE_LINKS, emphasized: [8] },
+            removals: [removal(5, 9, 8)],
             pattern: W_WING_ALONE_ENDS,
-            digits: [6],
+            digits: [8],
             technique: "wWing",
             promptKey: key("wWing", "alonePrompt"),
             successKey: key("wWing", "aloneSuccess"),
             keepKey: key("wWing", "keep"),
             wrongKey: key("wWing", "aloneWrong"),
             hints: [
-                { textKey: key("wWing", "aloneHintColumn"), marks: { range: columnOf(8), pattern: W_WING_ALONE_ENDS, targets: W_WING_ALONE_LINK_CELLS, links: W_WING_ALONE_LINKS, emphasized: [6] } },
-                { textKey: key("wWing", "aloneHintAnswer"), marks: { pattern: W_WING_ALONE_ENDS, targets: W_WING_ALONE_LINK_CELLS, links: W_WING_ALONE_LINKS, emphasized: [6], lit: [at(8, 2)] } },
+                { textKey: key("wWing", "aloneHintLines"), marks: { range: [...rowOf(5), ...columnOf(9)] } },
+                { textKey: key("wWing", "aloneHintAnswer"), marks: { lit: [at(5, 9)] } },
             ],
         },
         { kind: "done", stage: "done", board: W_WING_SHOW_BOARD, marks: {}, takeawayKey: key("wWing", "takeaway") },
