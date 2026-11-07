@@ -3,7 +3,7 @@ import { useRouter } from "vue-router";
 import { ANALYTICS_KEY } from "@/application/analytics/AnalyticsService";
 import { computeAbandonProgress } from "@/application/analytics/computeAbandonProgress";
 import type { Difficulty } from "@/domain/generator/SudokuGenerator";
-import { provideNewGameDialog } from "@/presentation/components/new-game-dialog/useNewGameDialog";
+import { provideNewGameDialog, type NewGameOrigin } from "@/presentation/components/new-game-dialog/useNewGameDialog";
 import { usePuzzleLoader } from "@/presentation/components/puzzle-loader/usePuzzleLoader";
 import { ROUTER_PATH } from "@/router";
 import { useGameStore } from "@/stores/gameStore";
@@ -13,7 +13,7 @@ import { useStatisticsStore } from "@/stores/statisticsStore";
  * Starting a game from a page that offers it: asks first about an unfinished game, then generates the
  * puzzle behind the loader and opens the game. The page renders NewGameDialog and PuzzleLoader.
  */
-export const useNewGameFlow = () => {
+export const useNewGameFlow = (origin: NewGameOrigin = "home") => {
     const router = useRouter();
     const gameStore = useGameStore();
     const statisticsStore = useStatisticsStore();
@@ -37,7 +37,7 @@ export const useNewGameFlow = () => {
     const startNewGame = async (difficulty: Difficulty) => {
         if (gameStore.savedGame !== null) {
             const unfinished = gameStore.savedGame;
-            const result = await newGameDialog.open({ difficulty: unfinished.difficulty, elapsedSeconds: unfinished.elapsedSeconds });
+            const result = await newGameDialog.open({ difficulty: unfinished.difficulty, elapsedSeconds: unfinished.elapsedSeconds, origin });
             if (result === "stay") return;
             if (result === "continue") {
                 continueGame();

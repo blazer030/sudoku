@@ -30,7 +30,7 @@ import { ROUTER_PATH } from "@/router";
 const props = defineProps<{ lessonId: LessonId }>();
 
 const router = useRouter();
-const newGameFlow = useNewGameFlow();
+const newGameFlow = useNewGameFlow("lessons");
 
 const notice = useLessonNotice();
 

@@ -145,7 +145,7 @@ const MARK_CLASSES: Record<LessonMark, string> = {
 const { t } = useI18n();
 const router = useRouter();
 const lessonStore = useLessonStore();
-const newGameFlow = useNewGameFlow();
+const newGameFlow = useNewGameFlow("lessons");
 const difficultyLabel = useDifficultyLabel();
 const notice = useLessonNotice();
 

@@ -110,6 +110,25 @@ describe("LessonPage", () => {
         expect(router.currentRoute.value.path).toBe("/game");
     });
 
+    it("should ask about an unfinished game first, with staying worded for the lessons", async () => {
+        const { wrapper } = await mountPage(["/lessons", "/lessons/nakedSingle"]);
+        useGameStore().persistGame({
+            difficulty: "easy",
+            answer: Array.from({ length: 9 }, () => Array.from({ length: 9 }, () => 0)),
+            cells: Array.from({ length: 9 }, () => Array.from({ length: 9 }, () => ({ clue: 0, entry: 0, notes: [] }))),
+            elapsedSeconds: 204,
+            completed: false,
+            hintsUsed: 0,
+        });
+
+        wrapper.getComponent(LessonScreen).vm.$emit("playDifficulty", "easy");
+        await settled();
+
+        const stay = wrapper.get("[data-testid='new-game-stay-button']");
+        expect(stay.text()).toBe(i18n.global.t("home.giveUp.stayInLessons"));
+        expect(stay.text()).not.toBe(i18n.global.t("home.giveUp.stay"));
+    });
+
     describe("opened by its address in 8-bit's light mode", () => {
         const useHandheld = () => {
             const settings = useSettingsStore();

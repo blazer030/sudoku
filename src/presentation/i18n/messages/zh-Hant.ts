@@ -137,6 +137,7 @@ export const zhHant: MessageSchema = {
             continue: "繼續原本那局",
             confirm: "放棄並開新局",
             stay: "留在首頁",
+            stayInLessons: "留在教學",
         },
     },
     game: {

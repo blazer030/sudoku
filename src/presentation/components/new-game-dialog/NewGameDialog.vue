@@ -71,7 +71,7 @@
                         data-testid="new-game-stay-button"
                         @click="close('stay')"
                     >
-                        {{ t("home.giveUp.stay") }}
+                        {{ t(params?.origin === "lessons" ? "home.giveUp.stayInLessons" : "home.giveUp.stay") }}
                     </button>
                 </div>
             </div>

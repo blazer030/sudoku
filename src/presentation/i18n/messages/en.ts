@@ -140,6 +140,7 @@ export const en = {
             continue: "Continue That Game",
             confirm: "Give Up & Start New",
             stay: "Stay here",
+            stayInLessons: "Stay in Lessons",
         },
     },
     game: {

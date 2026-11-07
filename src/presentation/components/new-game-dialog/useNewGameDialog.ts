@@ -5,7 +5,11 @@ import type { Difficulty } from "@/domain/generator/SudokuGenerator";
 export interface SavedGameSummary {
     difficulty: Difficulty;
     elapsedSeconds: number;
+    /** Where the player stays when they neither continue nor give up: Home, or the lessons. */
+    origin: NewGameOrigin;
 }
+
+export type NewGameOrigin = "home" | "lessons";
 
 export const { provideDialog: provideNewGameDialog, useDialog: useNewGameDialog } =
     createDialog<SavedGameSummary, "continue" | "giveUp" | "stay">({ dismissResult: "stay" });
