@@ -256,6 +256,11 @@ Finishing a lesson SHALL open a dialog in the style's completion look, with the 
 - **WHEN** the player finishes Naked Single
 - **THEN** the dialog's main action starts a new easy game
 
+#### Scenario: Going home after a game from the lessons
+
+- **WHEN** the player finishes a game started from a lesson or the lesson list, and chooses Back to Home on its completion card
+- **THEN** Home shows, not the lessons
+
 #### Scenario: Starting a game with one unfinished
 
 - **WHEN** the player starts a game from the lessons with an unfinished game saved
