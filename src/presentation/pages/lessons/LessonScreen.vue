@@ -79,6 +79,7 @@
 
         <div class="flex-[2_1_calc(219px+var(--game-section-gap))] min-h-0 flex flex-col justify-end pt-(--game-section-gap)">
             <LessonPanel
+                v-if="!isDone"
                 :can-go-next="session.canGoNext.value"
                 :message-key="messageKey"
                 :message-kind="session.message.value.kind"
@@ -96,11 +97,21 @@
                 @go-to="session.goTo"
                 @next="session.next"
                 @previous="session.previous"
-                @primary="handlePrimary"
+                @primary="session.next"
                 @secondary="handleSecondary"
                 @toggle-note-mode="session.toggleNoteMode"
             />
         </div>
+
+        <LessonCompleteDialog
+            :action-label="finishLabel"
+            :lesson-id="lesson.id"
+            :takeaway="messageText"
+            :visible="isDone"
+            @leave="emit('back')"
+            @next="finishAction"
+            @previous="session.previous"
+        />
     </div>
 </template>
 
@@ -119,6 +130,7 @@ import FloatingDigitPad from "@/presentation/components/floating-digit-pad/Float
 import { ChevronLeft } from "@/presentation/components/icon";
 import StepLinkOverlay from "@/presentation/components/step-presentation/StepLinkOverlay.vue";
 import { useDifficultyLabel } from "@/presentation/i18n/difficultyLabels";
+import LessonCompleteDialog from "@/presentation/pages/lessons/LessonCompleteDialog.vue";
 import LessonPanel from "@/presentation/pages/lessons/LessonPanel.vue";
 import { useLessonSession } from "@/presentation/pages/lessons/useLessonSession";
 import { useLessonStore } from "@/stores/lessonStore";
@@ -198,38 +210,29 @@ const isLastOfGroup = group.lessons[group.lessons.length - 1] === props.lesson.i
 // Never read after the last lesson: that one ends the hard group, which hands on to a game
 const followingLesson = ALL_LESSON_IDS[ALL_LESSON_IDS.indexOf(props.lesson.id) + 1];
 
-const finishLabel = (): string => {
+const finishLabel = computed((): string => {
     if (isLastOfGroup && group.difficulty !== null) {
         return t("lessons.common.actions.playDifficulty", { difficulty: difficultyLabel(group.difficulty) });
     }
     return t("lessons.common.actions.nextLesson", { name: t(`lessons.names.${followingLesson}`) });
-};
+});
 
 const finishAction = () => {
     if (isLastOfGroup && group.difficulty !== null) emit("playDifficulty", group.difficulty);
     else emit("openLesson", followingLesson);
 };
 
-const primaryLabel = computed(() => {
-    if (isDone.value) return finishLabel();
-    return t(nextIsPractice.value ? "lessons.common.actions.tryIt" : "lessons.common.actions.next");
-});
-const primaryDisabled = computed(() => !isDone.value && !session.canGoNext.value);
-const handlePrimary = () => {
-    if (isDone.value) finishAction();
-    else session.next();
-};
+const primaryLabel = computed(() => t(nextIsPractice.value ? "lessons.common.actions.tryIt" : "lessons.common.actions.next"));
+const primaryDisabled = computed(() => !session.canGoNext.value);
 
 // Null where there is no second way on: past the last practice
 const secondaryLabel = computed((): string | null => {
-    if (isDone.value) return t("lessons.common.actions.backToLessons");
     if (session.step.value.kind !== "show") return t("lessons.common.actions.hint");
     return session.canSkipToPractice.value ? t("lessons.common.actions.skipToPractice") : null;
 });
-const secondaryDisabled = computed(() => !isDone.value && session.step.value.kind !== "show" && !session.hintsLeft.value);
+const secondaryDisabled = computed(() => session.step.value.kind !== "show" && !session.hintsLeft.value);
 const handleSecondary = () => {
-    if (isDone.value) emit("back");
-    else if (session.step.value.kind === "show") session.skipToPractice();
+    if (session.step.value.kind === "show") session.skipToPractice();
     else session.requestHint();
 };
 </script>

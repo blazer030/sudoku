@@ -1,6 +1,8 @@
 import { flushPromises, mount } from "@vue/test-utils";
 import { createPinia, setActivePinia } from "pinia";
 import type { Lesson, LessonBoard } from "@/domain/lessons/Lesson";
+import { ALL_LESSON_IDS } from "@/domain/lessons/curriculum";
+import { handleBackButton } from "@/presentation/composables/backDismissal";
 import LessonScreen from "@/presentation/pages/lessons/LessonScreen.vue";
 import { useGameStore } from "@/stores/gameStore";
 import { useLessonStore } from "@/stores/lessonStore";
@@ -434,15 +436,63 @@ describe("LessonScreen", () => {
         };
 
         const lessonNamed = (id: Lesson["id"]): Lesson => ({ ...LESSON, id });
+        const dialog = (wrapper: Screen) => wrapper.find("[data-testid='lesson-complete']");
+        const nextAction = (wrapper: Screen) => wrapper.get("[data-testid='lesson-complete-next']");
 
-        it("should record the lesson and show its takeaway on reaching the end", async () => {
+        it("should record the lesson and open a dialog with its name and takeaway on reaching the end", async () => {
             const store = useLessonStore();
             const wrapper = mountScreen();
+            expect(dialog(wrapper).exists()).toBe(false);
 
             await finish(wrapper);
 
             expect(store.isFinished("hiddenSingle")).toBe(true);
-            expect(explanation(wrapper)).toContain(nameOf("xyWing"));
+            expect(dialog(wrapper).text()).toContain(nameOf("xyWing"));
+            expect(dialog(wrapper).text()).toContain(nameOf("hiddenSingle"));
+        });
+
+        it("should say how many lessons are finished", async () => {
+            const wrapper = mountScreen();
+
+            await finish(wrapper);
+
+            expect(dialog(wrapper).text()).toContain(i18n.global.t("lessons.common.complete.progress", { done: 1, total: ALL_LESSON_IDS.length }));
+        });
+
+        it("should celebrate through the hooks each style draws its completion by", async () => {
+            const wrapper = mountScreen();
+
+            await finish(wrapper);
+
+            expect(wrapper.get("[data-testid='lesson-complete-card']").attributes("data-skin")?.split(" ")).toContain("celebration");
+            expect(wrapper.find("[data-skin~='trophy']").exists()).toBe(true);
+            expect(wrapper.find("[data-skin~='complete-title']").exists()).toBe(true);
+        });
+
+        it("should take the panel away while the dialog is open, without moving the board's place", async () => {
+            const wrapper = mountScreen();
+
+            await finish(wrapper);
+
+            expect(wrapper.find("[data-testid='lesson-panel']").exists()).toBe(false);
+        });
+
+        it.each([
+            ["its action", (wrapper: Screen) => wrapper.get("[data-testid='lesson-complete-previous']").trigger("click")],
+            ["the system Back key", () => { handleBackButton(true); }],
+        ])("should go back to the last step through %s, and open again from there", async (_, goBack) => {
+            const wrapper = mountScreen();
+            await finish(wrapper);
+
+            await goBack(wrapper);
+            await flushPromises();
+
+            expect(dialog(wrapper).exists()).toBe(false);
+            expect(wrapper.find("[data-testid='lesson-panel']").exists()).toBe(true);
+
+            await primary(wrapper).trigger("click");
+            await flushPromises();
+            expect(dialog(wrapper).exists()).toBe(true);
         });
 
         it("should keep the last practice's board on the closing step", async () => {
@@ -468,9 +518,9 @@ describe("LessonScreen", () => {
             const wrapper = mountScreen();
 
             await finish(wrapper);
-            await primary(wrapper).trigger("click");
+            await nextAction(wrapper).trigger("click");
 
-            expect(primary(wrapper).text()).toContain(nameOf("nakedSingle"));
+            expect(nextAction(wrapper).text()).toContain(nameOf("nakedSingle"));
             expect(wrapper.emitted("openLesson")).toEqual([["nakedSingle"]]);
         });
 
@@ -482,7 +532,7 @@ describe("LessonScreen", () => {
             const wrapper = mountScreen(lessonNamed(id));
 
             await finish(wrapper);
-            await primary(wrapper).trigger("click");
+            await nextAction(wrapper).trigger("click");
 
             expect(wrapper.emitted("playDifficulty")).toEqual([[difficulty]]);
             expect(wrapper.emitted("openLesson")).toBeUndefined();
@@ -492,7 +542,7 @@ describe("LessonScreen", () => {
             const wrapper = mountScreen(lessonNamed("fillingIn"));
 
             await finish(wrapper);
-            await primary(wrapper).trigger("click");
+            await nextAction(wrapper).trigger("click");
 
             expect(wrapper.emitted("openLesson")).toEqual([["hiddenSingle"]]);
             expect(wrapper.emitted("playDifficulty")).toBeUndefined();
@@ -502,7 +552,7 @@ describe("LessonScreen", () => {
             const wrapper = mountScreen();
 
             await finish(wrapper);
-            await secondary(wrapper).trigger("click");
+            await wrapper.get("[data-testid='lesson-complete-back']").trigger("click");
 
             expect(wrapper.emitted("back")).toHaveLength(1);
         });

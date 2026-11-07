@@ -1,12 +1,17 @@
 <template>
     <div class="h-full overflow-y-auto">
-        <LessonScreen
-            :key="lesson.id"
-            :lesson="lesson"
-            @back="goBack"
-            @open-lesson="openLesson"
-            @play-difficulty="newGameFlow.startNewGame"
-        />
+        <Transition
+            mode="out-in"
+            name="lesson-swap"
+        >
+            <LessonScreen
+                :key="lesson.id"
+                :lesson="lesson"
+                @back="goBack"
+                @open-lesson="openLesson"
+                @play-difficulty="newGameFlow.startNewGame"
+            />
+        </Transition>
         <LessonNoticeDialog />
         <NewGameDialog />
         <PuzzleLoader :visible="newGameFlow.puzzleLoader.visible.value" />

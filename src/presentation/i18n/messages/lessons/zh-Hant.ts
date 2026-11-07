@@ -30,6 +30,11 @@ export const lessonsZhHant: typeof lessonsEn = {
             nextLesson: "下一課：{name}",
             playDifficulty: "玩一局{difficulty}",
         },
+        complete: {
+            title: "完成了！",
+            progress: "已完成 {done}／{total} 課",
+            previousStep: "回上一步",
+        },
         feedback: {
             conflictRow: "第 {number} 列已經有 {digit}。",
             conflictColumn: "第 {number} 欄已經有 {digit}。",

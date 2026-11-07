@@ -229,17 +229,22 @@ When a window has more room than the lesson's tallest panel needs, the panel SHA
 
 ### Requirement: Completion
 
-Finishing a lesson SHALL show its one-sentence takeaway, record the lesson as finished, and offer the next lesson. The last lesson of a group with a difficulty SHALL offer a new game at that difficulty instead; Basics has none, so its last lesson goes on to the next lesson.
+Finishing a lesson SHALL open a dialog in the style's completion look, with the lesson's name, its one-sentence takeaway and how many lessons are finished, record the lesson as finished, and offer the next lesson. The last lesson of a group with a difficulty SHALL offer a new game at that difficulty instead; Basics has none, so its last lesson goes on to the next lesson. The dialog SHALL also offer going back to the list and to the last step, as the system Back key does, and the lesson panel SHALL NOT show behind it. Going on to the next lesson SHALL fade one lesson out and the next in.
 
 #### Scenario: Finishing mid-group
 
 - **WHEN** the player finishes Hidden Single
-- **THEN** the lesson is recorded as finished and the main action offers Naked Single
+- **THEN** the lesson is recorded as finished, and a dialog names it, gives its takeaway and how many lessons are finished, and its main action offers Naked Single
+
+#### Scenario: Going back from the dialog
+
+- **WHEN** the player chooses the last step in the dialog, or presses the system Back key
+- **THEN** the dialog closes on the last practice step, and moving on from there opens it again
 
 #### Scenario: Finishing a group
 
 - **WHEN** the player finishes Naked Single
-- **THEN** the main action starts a new easy game
+- **THEN** the dialog's main action starts a new easy game
 
 #### Scenario: Starting a game with one unfinished
 

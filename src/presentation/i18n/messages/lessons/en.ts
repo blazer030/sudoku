@@ -29,6 +29,11 @@ export const lessonsEn = {
             nextLesson: "Next: {name}",
             playDifficulty: "Play a game: {difficulty}",
         },
+        complete: {
+            title: "Lesson Complete!",
+            progress: "{done} of {total} lessons finished",
+            previousStep: "Previous step",
+        },
         feedback: {
             conflictRow: "Row {number} already has a {digit}.",
             conflictColumn: "Column {number} already has a {digit}.",

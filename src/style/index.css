@@ -285,6 +285,16 @@
   opacity: 0;
 }
 
+/* One lesson fades out, its dialog with it, and the next fades in */
+.lesson-swap-enter-active,
+.lesson-swap-leave-active {
+  transition: opacity 220ms ease;
+}
+.lesson-swap-enter-from,
+.lesson-swap-leave-to {
+  opacity: 0;
+}
+
 /* A step's tag and explanation swap out, then in, as the step changes */
 .step-swap-enter-active,
 .step-swap-leave-active {

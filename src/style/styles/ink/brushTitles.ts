@@ -1,6 +1,6 @@
 /**
  * The ink style's brushed titles (data-skin hero-title, complete-title and dialog-title): the home title, the
- * completion title and the titles of the new-game, leave-game, clear-records and walkthrough dialogs.
+ * completion titles (a game's and a lesson's) and the titles of the new-game, leave-game, clear-records and walkthrough dialogs.
  * scripts/generate-fonts.ts cuts Yuji Boku to these strings in both languages, so a new brushed title
  * adds its key here; any other character falls to LXGW WenKai TC. Relative imports only: the script
  * reads this file.
@@ -8,6 +8,7 @@
 export const INK_BRUSH_MESSAGE_KEYS: readonly string[] = [
     "home.title",
     "game.complete.title",
+    "lessons.common.complete.title",
     "home.giveUp.title",
     "game.leave.title",
     "settings.data.clearDialog.title",
