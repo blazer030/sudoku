@@ -195,21 +195,19 @@ watch(isDone, (done) => {
 
 const group = groupOfLesson(props.lesson.id);
 const isLastOfGroup = group.lessons[group.lessons.length - 1] === props.lesson.id;
-const followingLesson = ALL_LESSON_IDS[ALL_LESSON_IDS.indexOf(props.lesson.id) + 1] as LessonId | undefined;
+// Never read after the last lesson: that one ends the hard group, which hands on to a game
+const followingLesson = ALL_LESSON_IDS[ALL_LESSON_IDS.indexOf(props.lesson.id) + 1];
 
 const finishLabel = (): string => {
     if (isLastOfGroup && group.difficulty !== null) {
         return t("lessons.common.actions.playDifficulty", { difficulty: difficultyLabel(group.difficulty) });
     }
-    return followingLesson === undefined
-        ? t("lessons.common.actions.backToLessons")
-        : t("lessons.common.actions.nextLesson", { name: t(`lessons.names.${followingLesson}`) });
+    return t("lessons.common.actions.nextLesson", { name: t(`lessons.names.${followingLesson}`) });
 };
 
 const finishAction = () => {
     if (isLastOfGroup && group.difficulty !== null) emit("playDifficulty", group.difficulty);
-    else if (followingLesson !== undefined) emit("openLesson", followingLesson);
-    else emit("back");
+    else emit("openLesson", followingLesson);
 };
 
 const primaryLabel = computed(() => {
