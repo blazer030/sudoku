@@ -440,25 +440,6 @@ describe("LessonScreen", () => {
             expect(recordGame).not.toHaveBeenCalled();
             expect(game.savedGame).toBeNull();
         });
-
-        it("should only offer going back when opened from the Walkthrough", async () => {
-            const wrapper = mount(LessonScreen, { props: { lesson: LESSON, fromWalkthrough: true } });
-
-            await finish(wrapper);
-            await primary(wrapper).trigger("click");
-
-            expect(wrapper.emitted("back")).toHaveLength(1);
-            expect(wrapper.emitted("openLesson")).toBeUndefined();
-            expect(wrapper.emitted("playDifficulty")).toBeUndefined();
-        });
-
-        it("should offer no way to the lesson list when opened from the Walkthrough", async () => {
-            const wrapper = mount(LessonScreen, { props: { lesson: LESSON, fromWalkthrough: true } });
-
-            await finish(wrapper);
-
-            expect(wrapper.find("[data-testid='lesson-secondary']").exists()).toBe(false);
-        });
     });
 
     it("should show how many cells are left on a step that needs several", async () => {

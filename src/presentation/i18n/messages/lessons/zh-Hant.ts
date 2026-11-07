@@ -28,7 +28,6 @@ export const lessonsZhHant: typeof lessonsEn = {
             hint: "提示",
             backToLessons: "回課程",
             nextLesson: "下一課：{name}",
-            backToWalkthrough: "回到解題演示",
             playDifficulty: "玩一局{difficulty}",
         },
         feedback: {

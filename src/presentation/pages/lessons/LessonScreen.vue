@@ -123,11 +123,7 @@ import LessonPanel from "@/presentation/pages/lessons/LessonPanel.vue";
 import { useLessonSession } from "@/presentation/pages/lessons/useLessonSession";
 import { useLessonStore } from "@/stores/lessonStore";
 
-const props = withDefaults(defineProps<{
-    lesson: Lesson;
-    /** Opened over the Walkthrough: the way on is back to its step, not another lesson or a game. */
-    fromWalkthrough?: boolean;
-}>(), { fromWalkthrough: false });
+const props = defineProps<{ lesson: Lesson }>();
 
 const emit = defineEmits<{
     back: [];
@@ -202,7 +198,6 @@ const isLastOfGroup = group.lessons[group.lessons.length - 1] === props.lesson.i
 const followingLesson = ALL_LESSON_IDS[ALL_LESSON_IDS.indexOf(props.lesson.id) + 1] as LessonId | undefined;
 
 const finishLabel = (): string => {
-    if (props.fromWalkthrough) return t("lessons.common.actions.backToWalkthrough");
     if (isLastOfGroup && group.difficulty !== null) {
         return t("lessons.common.actions.playDifficulty", { difficulty: difficultyLabel(group.difficulty) });
     }
@@ -212,8 +207,7 @@ const finishLabel = (): string => {
 };
 
 const finishAction = () => {
-    if (props.fromWalkthrough) emit("back");
-    else if (isLastOfGroup && group.difficulty !== null) emit("playDifficulty", group.difficulty);
+    if (isLastOfGroup && group.difficulty !== null) emit("playDifficulty", group.difficulty);
     else if (followingLesson !== undefined) emit("openLesson", followingLesson);
     else emit("back");
 };
@@ -228,9 +222,9 @@ const handlePrimary = () => {
     else session.next();
 };
 
-// Null where there is no second way on: past the last practice, or finishing a lesson opened over the Walkthrough
+// Null where there is no second way on: past the last practice
 const secondaryLabel = computed((): string | null => {
-    if (isDone.value) return props.fromWalkthrough ? null : t("lessons.common.actions.backToLessons");
+    if (isDone.value) return t("lessons.common.actions.backToLessons");
     if (session.step.value.kind !== "show") return t("lessons.common.actions.hint");
     return session.canSkipToPractice.value ? t("lessons.common.actions.skipToPractice") : null;
 });

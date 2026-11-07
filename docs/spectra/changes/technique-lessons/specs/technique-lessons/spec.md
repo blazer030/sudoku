@@ -216,11 +216,6 @@ Finishing a lesson SHALL show its one-sentence takeaway, record the lesson as fi
 - **WHEN** the player finishes Naked Single
 - **THEN** the main action starts a new easy game
 
-#### Scenario: Finishing from the Walkthrough
-
-- **WHEN** the player finishes a lesson opened from the Walkthrough
-- **THEN** the only action goes back to the Walkthrough, and no action offers the lesson list
-
 #### Scenario: Lessons are not games
 
 - **WHEN** a lesson is finished
@@ -249,24 +244,19 @@ Every lesson board SHALL be a valid position, and each technique step's pattern 
 - **WHEN** a lesson's declared removal differs from the solver technique's result on that board
 - **THEN** the lesson content test fails
 
-### Requirement: Learning from the Walkthrough
+### Requirement: Entry points
 
-The Walkthrough's technique tag SHALL offer a link to that technique's lesson. Returning from the lesson SHALL put the player back on the same Walkthrough step. Game hint mode SHALL NOT link to lessons.
+Lessons SHALL open from Home's lessons entry and by a lesson's address only. Neither the Walkthrough nor game hint mode SHALL link to lessons: a player in the middle of either is not sent away from it.
 
-#### Scenario: Returning to the step
+#### Scenario: The Walkthrough shows no link
 
-- **WHEN** the player opens a lesson from step 12 of a Walkthrough and goes back
-- **THEN** the Walkthrough shows step 12 with its board and playback state unchanged
+- **WHEN** a Walkthrough step shows its technique tag
+- **THEN** nothing beside the tag opens a lesson
 
-#### Scenario: The system back key closes the lesson
+#### Scenario: Hint mode shows no link
 
-- **WHEN** a lesson is open over the Walkthrough and the system Back key is pressed
-- **THEN** the lesson closes and the Walkthrough stays on its step
-
-#### Scenario: The handheld notice holds playback
-
-- **WHEN** the player taps the link during playback in 8-bit's handheld look, so the handheld notice opens
-- **THEN** playback holds while the notice is open, and the lesson that opens is the one for the step the player tapped on
+- **WHEN** hint mode shows a technique during a game
+- **THEN** nothing in the hint panel opens a lesson
 
 #### Scenario: Backing out of the notice during playback
 

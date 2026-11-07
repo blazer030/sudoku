@@ -69,9 +69,9 @@
 
 新增 `LessonPanel`，由 `StepTag`、`StepNavigator`、`StepExplanation` 組成，下面放兩顆按鈕，版型同 `HintPanel`。不用 `StepPlaybackPanel`，因為課程沒有自動播放，而且一次只顯示一則訊息。
 
-### Lessons open over the Walkthrough rather than by route
+### Lessons open by route only
 
-`LessonScreen` 是可獨立使用的元件。從課程列表進入時由 `/lessons/:lessonId` 路由呈現；從解題演示進入時疊在 `SolverWalkthrough` 上方，用 `registerBackDismissal` 接返回鍵，因此解題演示不會被卸載，步驟保留。替代方案是加 `KeepAlive` 或把步驟存進 store，影響範圍都比較大。
+`LessonScreen` 是可獨立使用的元件，由 `/lessons/:lessonId` 路由呈現。原本還會從解題演示的「學這招」疊在 `SolverWalkthrough` 上方開課，owner 2026-11-07 決定拿掉：在解題演示中途把玩家帶去上課不是好的引導，而且掌機提醒的「看其他風格」會離開頁面，輸入的題目和步驟就沒了。`LESSON_BY_TECHNIQUE` 留在 `curriculum.ts`，型別就保證解題器的每種技巧都有一課。
 
 ### Dimmed digits use a per-style colour token, not opacity
 
@@ -108,7 +108,7 @@
 
 ### The handheld notice is remembered in settings
 
-`Settings` 新增 `handheldLessonNoticeDismissed`。只有選「還是用掌機看」才記住；換配色或看其他風格之後，若又回到掌機，還會再提醒。提醒由 `useLessonNotice` 統一判斷，時機是進入課程列表、從解題演示開課，以及直接開課程網址時（`LessonPage` 掛載時檢查，取消就返回）。
+`Settings` 新增 `handheldLessonNoticeDismissed`。只有選「還是用掌機看」才記住；換配色或看其他風格之後，若又回到掌機，還會再提醒。提醒由 `useLessonNotice` 統一判斷，時機是進入課程列表，以及直接開課程網址時（`LessonPage` 掛載時檢查，取消就返回）。
 
 ## Implementation Contract
 
@@ -116,7 +116,7 @@
 
 - 首頁第一格是「技巧教學」，進入課程列表，看得到四組 17 課、已完成數與下一課。
 - 一課依序走過講解、跟著做、自己找、完成。任何一步都能用返回離開，進度以「完成整課」為單位記錄。
-- 解題演示的技巧標籤旁有「學這招」，開啟對應課程，返回後解題演示停在原本的步驟。提示模式沒有這個連結。
+- 解題演示和提示模式都沒有連到教學的入口：教學只從首頁和課程網址進入。
 
 **Interface / data shape**
 

@@ -18,7 +18,8 @@ export const LESSON_GROUPS: readonly LessonGroup[] = [
 
 export const ALL_LESSON_IDS: readonly LessonId[] = LESSON_GROUPS.flatMap(group => group.lessons);
 
-const LESSON_BY_TECHNIQUE: Record<TechniqueId, LessonId> = {
+/** The lesson that teaches each of the solver's techniques: a Record, so a technique without a lesson is a type error. */
+export const LESSON_BY_TECHNIQUE: Record<TechniqueId, LessonId> = {
     nakedSingle: "nakedSingle",
     hiddenSingle: "hiddenSingle",
     nakedPair: "nakedPair",
@@ -39,8 +40,6 @@ const LESSON_BY_TECHNIQUE: Record<TechniqueId, LessonId> = {
     xChain: "xChain",
     xyChain: "xyChain",
 };
-
-export const lessonForTechnique = (technique: TechniqueId): LessonId => LESSON_BY_TECHNIQUE[technique];
 
 export const isLessonId = (id: string): id is LessonId => (ALL_LESSON_IDS as readonly string[]).includes(id);
 

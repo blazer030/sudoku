@@ -27,7 +27,6 @@ export const lessonsEn = {
             hint: "Hint",
             backToLessons: "All lessons",
             nextLesson: "Next: {name}",
-            backToWalkthrough: "Back to Walkthrough",
             playDifficulty: "Play a game: {difficulty}",
         },
         feedback: {

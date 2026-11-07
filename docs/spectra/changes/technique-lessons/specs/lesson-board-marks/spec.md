@@ -71,10 +71,10 @@ Entering lessons in the 8-bit style's 掌機 mode SHALL first show a notice that
 - **WHEN** the player in 掌機 opens the lessons for the first time
 - **THEN** the notice shows before the lesson list can be used
 
-#### Scenario: Entering from the Walkthrough
+#### Scenario: Opening a lesson by its address
 
-- **WHEN** the player in 掌機 opens a lesson from the Walkthrough and has not chosen to carry on before
-- **THEN** the notice shows before the lesson
+- **WHEN** the player in 掌機 opens a lesson by its address and has not chosen to carry on before
+- **THEN** the notice shows before the lesson, and backing out of it goes to the lesson list
 
 #### Scenario: Switching to the dark mode
 

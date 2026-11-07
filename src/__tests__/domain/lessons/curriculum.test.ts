@@ -1,4 +1,4 @@
-import { LESSON_GROUPS, lessonForTechnique } from "@/domain/lessons/curriculum";
+import { LESSON_BY_TECHNIQUE, LESSON_GROUPS } from "@/domain/lessons/curriculum";
 import type { TechniqueId } from "@/domain/solver/SolveStep";
 
 describe("curriculum", () => {
@@ -32,6 +32,6 @@ describe("curriculum", () => {
         ["xChain", "xChain"],
         ["xyChain", "xyChain"],
     ])("should teach %s in the %s lesson", (technique, lesson) => {
-        expect(lessonForTechnique(technique)).toBe(lesson);
+        expect(LESSON_BY_TECHNIQUE[technique]).toBe(lesson);
     });
 });
