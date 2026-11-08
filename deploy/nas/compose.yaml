@@ -8,3 +8,15 @@ services:
     volumes:
       - ./site:/usr/share/nginx/html:ro
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+
+  # Carries https://sudoku-test.blazer030.dev to sudoku-test:80 with no port open on the router.
+  # The token comes from .env beside this file, which the deploy writes from .env.nas.local.
+  tunnel:
+    image: cloudflare/cloudflared:2026.10.7
+    container_name: sudoku-test-tunnel
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    environment:
+      TUNNEL_TOKEN: ${TUNNEL_TOKEN:?Set NAS_TUNNEL_TOKEN in .env.nas.local and deploy again}
+    depends_on:
+      - sudoku-test
