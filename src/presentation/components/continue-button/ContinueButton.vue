@@ -4,7 +4,7 @@
         v-press
         data-skin="button continue"
         :data-layout="layout"
-        :class="titleBlock ? 'items-stretch' : 'items-start gap-2.5 px-5 py-4'"
+        :class="titleBlock ? 'items-stretch' : 'items-start gap-2.5 px-5 py-(--home-continue-padding)'"
         class="flex flex-col w-full bg-featured text-on-featured rounded-2xl shadow-primary cursor-pointer"
         data-testid="continue-button"
         type="button"

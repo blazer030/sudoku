@@ -20,6 +20,24 @@ export const UNRELEASED_CHANGES: ChangelogChange[] = [];
 
 export const CHANGELOG: ChangelogEntry[] = [
     {
+        version: "2.6.0",
+        date: "2026-11-08",
+        changes: [
+            {
+                text: {
+                    en: "Added lessons on solving techniques",
+                    "zh-Hant": "新增解題技巧教學",
+                },
+            },
+            {
+                text: {
+                    en: "Interface refinements",
+                    "zh-Hant": "介面優化",
+                },
+            },
+        ],
+    },
+    {
         version: "2.5.0",
         date: "2026-11-05",
         changes: [

@@ -288,6 +288,7 @@
 [data-style="cyber"] [data-skin~="key"][aria-pressed="true"],
 [data-style="cyber"] [data-skin~="segment"][aria-pressed="true"],
 [data-style="cyber"] [aria-pressed="true"] > [data-skin~="control"],
+[data-style="cyber"] [data-skin~="lesson-toggle"][aria-pressed="true"],
 [data-style="cyber"] [data-skin~="button"]:is(.bg-primary, .hint-primary, [data-skin~="new-game"]) {
     --cyber-edge: var(--color-primary);
     --cyber-fill: var(--color-primary-light);
@@ -504,7 +505,8 @@
     text-shadow: none;
 }
 
-[data-style="cyber"] [data-skin~="board"] [data-variant="same-digit"][data-value-kind] > div {
+[data-style="cyber"] [data-skin~="board"] [data-variant="same-digit"][data-value-kind] > div,
+[data-style="cyber"] [data-skin~="board"] [data-variant="target"][data-value-kind] > div {
     color: var(--color-primary-ink);
     text-shadow: none;
 }
@@ -1142,4 +1144,28 @@
 
 [data-style="cyber"] [data-skin~="floating-pad"] [data-skin~="key"] {
     --cyber-cut: 5px;
+}
+
+/* Lessons: lit is a deep fill with a neon edge, never a bright block; the marks are small cut panels */
+[data-style="cyber"] [data-skin~="lesson-mark"] {
+    clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+    border-radius: 0;
+}
+
+[data-style="cyber"] [data-skin~="lesson-mark"][data-skin~="done"] {
+    background: var(--color-primary-light);
+    color: var(--color-primary-ink);
+    box-shadow: inset 0 0 0 1px var(--color-primary), inset 0 0 8px color-mix(in srgb, var(--color-primary) 40%, transparent);
+}
+
+[data-style="cyber"] [data-skin~="lesson-mark"][data-skin~="next"] {
+    box-shadow: inset 0 0 0 1px var(--color-accent);
+}
+
+[data-style="cyber"] [data-skin~="lesson-mark"][data-skin~="rest"] {
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-foreground-secondary) 35%, transparent);
+}
+
+[data-style="cyber"] [data-skin~="cell-cross"] {
+    color: var(--color-error);
 }

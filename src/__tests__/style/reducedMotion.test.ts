@@ -1,4 +1,4 @@
-import { readFileSync } from "fs";
+import { readdirSync, readFileSync } from "fs";
 import { declarationsOf } from "./styleSheetRules";
 
 const REDUCED_MOTION_QUERY = "@media (prefers-reduced-motion: reduce)";
@@ -49,6 +49,19 @@ describe("reduced motion", () => {
         expect(block).toContain(".animate-hint-reveal-pop");
         expect(minimalBlock).toContain("[data-press-bounce]");
         expect(minimalBlock).toContain(".segmented-indicator-motion");
+    });
+
+    // A lesson says everything through its marks and its one message, so none of them may wait on an animation
+    it("should show lessons' states without any animation of their own", () => {
+        for (const page of readdirSync("src/presentation/pages/lessons").filter(file => file.endsWith(".vue"))) {
+            const source = readFileSync(`src/presentation/pages/lessons/${page}`, "utf8");
+            expect(source, page).not.toMatch(/animate-|animation|@keyframes/);
+        }
+        for (const style of readdirSync("src/style/styles")) {
+            const skin = readFileSync(`src/style/styles/${style}/skin.css`, "utf8");
+            const lessonRules = skin.match(/[^{}]*(lesson-mark|cell-cross|data-dimmed|data-note-dimmed)[^{}]*\{[^{}]*\}/g) ?? [];
+            for (const rule of lessonRules) expect(rule, style).not.toContain("animation");
+        }
     });
 
     // With motion not allowed the completion dialog is marked still: it fades in and out without scaling

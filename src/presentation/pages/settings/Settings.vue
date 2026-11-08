@@ -163,6 +163,7 @@ import { ChevronRight, Crosshair, Database, Eraser, ExternalLink, Eye, Gamepad2,
 import { useSettingsStore } from "@/stores/settingsStore";
 import { useDonateStore } from "@/stores/donateStore";
 import { useStatisticsStore } from "@/stores/statisticsStore";
+import { goBackOr } from "@/presentation/composables/goBackOr";
 import { usePlatform } from "@/presentation/composables/usePlatform";
 import { appVersion } from "@/utils/appVersion";
 import { PRIVACY_POLICY_URL } from "@/presentation/pages/settings/externalLinks";
@@ -250,7 +251,7 @@ const handleClearRecords = async () => {
 };
 
 const goBack = () => {
-    router.back();
+    goBackOr(router, ROUTER_PATH.home);
 };
 
 const goToChangelog = () => {

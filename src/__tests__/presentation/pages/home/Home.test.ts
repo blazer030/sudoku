@@ -1,12 +1,15 @@
+import { readFileSync } from "fs";
 import { createAnalyticsSpy } from "@/__tests__/fixtures/analyticsSpy";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { nextTick } from "vue";
 import { flushPromises, mount, type VueWrapper } from "@vue/test-utils";
 import { createPinia, setActivePinia } from "pinia";
 import { createRouter, createMemoryHistory } from "vue-router";
+import { ALL_LESSON_IDS } from "@/domain/lessons/curriculum";
 import Home from "@/presentation/pages/home/Home.vue";
 import { ROUTER_PATH } from "@/router";
 import { useGameStore } from "@/stores/gameStore";
+import { useLessonStore } from "@/stores/lessonStore";
 import { useStatisticsStore } from "@/stores/statisticsStore";
 import type { CellState, GameState } from "@/application/game/GameState";
 import { i18n } from "@/presentation/i18n";
@@ -327,7 +330,42 @@ describe("Home", () => {
         const { wrapper } = mountHome();
 
         expect(wrapper.get("[data-testid='home-entries']").findAll("button").map(button => button.attributes("data-testid")))
-            .toEqual(["statistics-button", "walkthrough-button", "settings-button"]);
+            .toEqual(["lessons-button", "walkthrough-button", "statistics-button", "settings-button"]);
+    });
+
+    it("should lay the entries out in two columns", () => {
+        const { wrapper } = mountHome();
+
+        expect(wrapper.get("[data-testid='home-entries']").classes()).toContain("grid-cols-2");
+    });
+
+    it("should open the lessons", async () => {
+        const { wrapper, router } = mountHome();
+        const push = vi.spyOn(router, "push");
+
+        await wrapper.get("[data-testid='lessons-button']").trigger("click");
+
+        expect(push).toHaveBeenCalledWith(ROUTER_PATH.lessons);
+    });
+
+    it("should invite a new player to the lessons", async () => {
+        const { wrapper, pinia } = mountHome();
+        const fresh = wrapper.get("[data-testid='lessons-subtitle']").text();
+
+        for (const lesson of ALL_LESSON_IDS.slice(0, 6)) useLessonStore(pinia).finish(lesson);
+        await nextTick();
+        const later = wrapper.get("[data-testid='lessons-subtitle']").text();
+
+        expect(fresh).toBe(i18n.global.t("home.entries.lessonsFirst"));
+        expect(later).toBe(i18n.global.t("home.entries.lessonsProgress", { done: 6, total: 17 }));
+    });
+
+    it("should take every entry's subtitle away on a very short window", () => {
+        const { wrapper } = mountHome();
+
+        for (const id of ["lessons", "walkthrough", "statistics", "settings"]) {
+            expect(wrapper.get(`[data-testid='${id}-subtitle']`).classes()).toContain("home-tiny:hidden");
+        }
     });
 
     it("should say no games yet instead of a 0% win rate", () => {
@@ -351,8 +389,58 @@ describe("Home", () => {
         const { wrapper } = mountHome();
         const subtitle = (id: string) => wrapper.get(`[data-testid='${id}-subtitle']`).text();
 
-        expect(subtitle("walkthrough")).toBe("Enter a puzzle, see the steps");
-        expect(subtitle("settings")).toBe("Theme, mode, language");
+        expect(subtitle("walkthrough")).toBe(i18n.global.t("home.entries.walkthrough"));
+        expect(subtitle("settings")).toBe(i18n.global.t("home.entries.settings"));
+    });
+
+    describe("on a short window", () => {
+        const indexCss = readFileSync("src/style/index.css", "utf8");
+        const size = (token: string): { smallest: number; share: number } => {
+            const match = new RegExp(`--home-${token}: calc\\(([\\d.]+)px \\+ ([\\d.]+) \\* var\\(--home-step\\)\\);`).exec(indexCss);
+            if (match === null) throw new Error(`--home-${token} is not a size on --home-step`);
+            return { smallest: Number(match[1]), share: Number(match[2]) };
+        };
+
+        it("should give back exactly the room the sizes have to give", () => {
+            // Each size, as often as it counts from top to bottom of the page
+            const parts: [token: string, times: number][] = [
+                ["page-top", 1], ["logo-size", 1], ["continue-padding", 2], ["new-game-height", 1], ["tile-padding", 4], ["page-bottom", 1],
+            ];
+            const given = parts.reduce((sum, [token, times]) => sum + times * size(token).share, 0);
+            const step = /--home-step: max\(calc\(clamp\(0px, .* - (\d+)px, (\d+)px\) \/ (\d+)\),/.exec(indexCss);
+
+            expect(given).toBe(Number(step?.[2]));
+            expect(given).toBe(Number(step?.[3]));
+            // Full size from an 820px window up, which holds even ink's tall hero and two rows of tiles
+            expect(Number(step?.[1]) + given).toBe(820);
+        });
+
+        it("should keep the logo's mark its share of the logo", () => {
+            const logo = size("logo-size");
+            const mark = size("logo-mark");
+
+            expect(mark.smallest / logo.smallest).toBeCloseTo((mark.smallest + mark.share) / (logo.smallest + logo.share));
+        });
+
+        it("should keep the cards off what is above and below them, however little room there is", () => {
+            const { wrapper } = mountHome({ savedGame: dummySave });
+            const spacers = (wrapper.element as HTMLElement).querySelectorAll(":scope > .flex-1");
+
+            expect(spacers).toHaveLength(2);
+            for (const spacer of spacers) expect(spacer.classList).toContain("min-h-(--home-spacer-min)");
+            expect(indexCss).toContain("--home-spacer-min: calc(12px - 12 * var(--wider-than-column));");
+        });
+
+        it("should leave a window wider than the column as it was, however short", () => {
+            expect(indexCss).toMatch(/--home-step: max\(.*, var\(--wider-than-column\)\);/);
+        });
+
+        it("should shrink later without a saved game, which has no Continue card to make room for", () => {
+            const spare = "[--home-spare:106px]";
+
+            expect(mountHome().wrapper.classes()).toContain(spare);
+            expect(mountHome({ savedGame: dummySave }).wrapper.classes()).not.toContain(spare);
+        });
     });
 
     it("should make the whole tile the tap target", () => {
@@ -364,7 +452,7 @@ describe("Home", () => {
             expect(button.find("svg").exists()).toBe(true);
             expect(button.find(`[data-testid='${id}-label']`).exists()).toBe(true);
             expect(button.find(`[data-testid='${id}-subtitle']`).exists()).toBe(true);
-            expect(button.classes()).toContain("min-h-22");
+            expect(button.classes()).toContain("min-h-(--home-tile-min)");
         }
     });
 

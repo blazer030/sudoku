@@ -59,8 +59,9 @@ const PIXEL_DARK_NEUTRALS: Neutrals<DarkThemeColors> = {
 const pixelTheme = themeBuilder(
     PIXEL_LIGHT_NEUTRALS,
     PIXEL_DARK_NEUTRALS,
-    { "featured": HANDHELD.lightest, "on-featured": HANDHELD.darkest },
-    { "featured": "#000000", "on-featured": "#FCFCFC", "highlight": "#0058F8", "primary-light": "#1E1E3C" },
+    // A lesson's unrelated digits stay in the handheld's own inks, the next one down from the text
+    { "featured": HANDHELD.lightest, "on-featured": HANDHELD.darkest, "lesson-dim": HANDHELD.dark },
+    { "featured": "#000000", "on-featured": "#FCFCFC", "highlight": "#0058F8", "primary-light": "#1E1E3C", "lesson-dim": "#6C6C6C" },
 );
 
 export const PIXEL_STYLE: StyleDefinition = {

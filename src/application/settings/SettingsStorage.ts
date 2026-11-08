@@ -27,6 +27,8 @@ export interface Settings {
     floatingDigitPad: boolean;
     doubleTapFill: boolean;
     autoNotesAtStart: boolean;
+    /** The player chose to see the lessons in 8-bit's 掌機 anyway, so its notice stays away. */
+    handheldLessonNoticeDismissed: boolean;
 }
 
 // index.html's inline script reads these fields too (style, colorTheme, appearance) before first paint
@@ -48,6 +50,7 @@ const DEFAULT_SETTINGS: Settings = {
     floatingDigitPad: true,
     doubleTapFill: true,
     autoNotesAtStart: true,
+    handheldLessonNoticeDismissed: false,
 };
 
 const isPlainObject = (value: unknown): value is Record<string, unknown> =>

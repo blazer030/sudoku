@@ -37,6 +37,12 @@ const mountWrongEntry = () =>
     });
 
 describe("HintPanel", () => {
+    it("should not link to a lesson during a game", () => {
+        const wrapper = mountSteps(2, 0);
+
+        expect(wrapper.findAll("[data-testid*='learn'], [data-testid*='lesson']")).toHaveLength(0);
+    });
+
     it("should say that Clear removes only the wrong digit", () => {
         const wrapper = mountWrongEntry();
 

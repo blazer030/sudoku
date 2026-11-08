@@ -22,7 +22,7 @@
 
 ## 3. App 內容（政策問卷）
 
-- [ ] 隱私權政策網址：`https://blazer030.github.io/sudoku/privacy-policy.html`
+- [ ] 隱私權政策網址：`https://sudoku.blazer030.dev/privacy-policy.html`
 - [ ] 廣告：無
 - [ ] App 存取權：不需要登入
 - [ ] 內容分級問卷（預期結果是 Everyone）

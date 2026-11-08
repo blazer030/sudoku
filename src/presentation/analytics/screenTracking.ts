@@ -13,6 +13,8 @@ const SCREEN_BY_ROUTE_PATH: Record<string, ScreenName> = {
     [ROUTER_PATH.donate]: "donate",
     [ROUTER_PATH.gameReview]: "game_review",
     [ROUTER_PATH.solverWalkthrough]: "solver",
+    [ROUTER_PATH.lessons]: "lessons",
+    [ROUTER_PATH.lesson]: "lesson",
 };
 
 export const screenNameFor = (routePath: string): ScreenName | null =>

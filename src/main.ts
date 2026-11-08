@@ -34,6 +34,8 @@ import { STATISTICS_REPOSITORY_KEY, type StatisticsRepository } from "@/applicat
 import { IndexedDBStatisticsRepository } from "@/infrastructure/statistics/IndexedDBStatisticsRepository";
 import { GAME_REPOSITORY_KEY, type GameRepository } from "@/application/game/GameRepository";
 import { IndexedDBGameRepository } from "@/infrastructure/game/IndexedDBGameRepository";
+import { LocalStorageLessonProgressRepository } from "@/infrastructure/lessons/LocalStorageLessonProgressRepository";
+import { useLessonStore } from "@/stores/lessonStore";
 import type { BackButtonService } from "@/application/backButton/BackButtonService";
 import { CapacitorBackButtonAdapter } from "@/infrastructure/backButton/CapacitorBackButtonAdapter";
 import { NoopBackButtonAdapter } from "@/infrastructure/backButton/NoopBackButtonAdapter";
@@ -114,6 +116,7 @@ gameStore.setAnalytics(analytics);
 gameStore.setGameRepository(gameRepository);
 const statisticsStore = useStatisticsStore();
 statisticsStore.setRepository(statisticsRepository);
+useLessonStore().setRepository(new LocalStorageLessonProgressRepository());
 await Promise.all([
     statisticsStore.loadFromRepository(),
     gameStore.loadFromRepository(),

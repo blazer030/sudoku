@@ -28,6 +28,8 @@ describe("screenNameFor", () => {
         [ROUTER_PATH.donate, "donate"],
         [ROUTER_PATH.gameReview, "game_review"],
         [ROUTER_PATH.solverWalkthrough, "solver"],
+        [ROUTER_PATH.lessons, "lessons"],
+        [ROUTER_PATH.lesson, "lesson"],
     ])("maps %s to %s", (routePath, screen) => {
         expect(screenNameFor(routePath)).toBe(screen);
     });

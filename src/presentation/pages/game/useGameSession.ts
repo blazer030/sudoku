@@ -73,7 +73,9 @@ export const useGameSession = ({ onPlayAgain, onCellRevealed }: GameSessionOptio
     const handleCompleteAction = (action: GameCompleteAction) => {
         switch (action) {
         case "home":
-            router.back();
+            // A game can start elsewhere too, as from a lesson; going back would land there
+            if (router.options.history.state.back === ROUTER_PATH.home) router.back();
+            else void router.replace(ROUTER_PATH.home);
             break;
         case "review":
             // Replace, so Back from the review does not land on the finished game

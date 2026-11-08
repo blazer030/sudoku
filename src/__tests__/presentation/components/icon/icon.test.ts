@@ -18,7 +18,7 @@ const useSet = async (overrides: Partial<IconSet> = {}, drawing = "<path d=\"M0 
 describe("icons", () => {
     it("should export a component for each of the app's icons", () => {
         expect(Object.keys(icons).sort()).toEqual([...ICON_NAMES].sort());
-        expect(ICON_NAMES).toHaveLength(43);
+        expect(ICON_NAMES).toHaveLength(44);
     });
 
     it("should pass size and class through to the drawing", () => {

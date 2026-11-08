@@ -23,6 +23,7 @@ export const useSettingsStore = defineStore("settings", () => {
     const floatingDigitPad = ref(settings.floatingDigitPad);
     const doubleTapFill = ref(settings.doubleTapFill);
     const autoNotesAtStart = ref(settings.autoNotesAtStart);
+    const handheldLessonNoticeDismissed = ref(settings.handheldLessonNoticeDismissed);
 
     // Installed web apps keep the light icon; the favicon also follows light or dark, so appearanceSync keeps it
     const applyColorTheme = () => {
@@ -48,6 +49,7 @@ export const useSettingsStore = defineStore("settings", () => {
             floatingDigitPad: floatingDigitPad.value,
             doubleTapFill: doubleTapFill.value,
             autoNotesAtStart: autoNotesAtStart.value,
+            handheldLessonNoticeDismissed: handheldLessonNoticeDismissed.value,
         });
     };
 
@@ -121,9 +123,16 @@ export const useSettingsStore = defineStore("settings", () => {
         persistAll();
     };
 
+    const dismissHandheldLessonNotice = () => {
+        handheldLessonNoticeDismissed.value = true;
+        persistAll();
+    };
+
     applyColorTheme();
 
     return {
+        handheldLessonNoticeDismissed,
+        dismissHandheldLessonNotice,
         colorTheme,
         highlightSameDigit,
         motionEffects,

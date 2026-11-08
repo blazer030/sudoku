@@ -16,7 +16,7 @@ import type { Difficulty } from "@/domain/generator/SudokuGenerator";
 import { useStatisticsStore } from "@/stores/statisticsStore";
 import { Sudoku } from "@/domain/game/Sudoku";
 import type { PuzzleCell } from "@/domain/board/PuzzleCell";
-import { createMultiStepSudoku } from "@/__tests__/fixtures/multiStepPuzzle";
+import { createMultiStepSudoku, createSudokuWithHintLines } from "@/__tests__/fixtures/multiStepPuzzle";
 import { ANALYTICS_KEY, type AnalyticsService } from "@/application/analytics/AnalyticsService";
 import { expectKeyRowsToShrinkToFit } from "@/__tests__/fixtures/digitKeyRows";
 import { STYLE_MOMENTS, type GroupEffect } from "@/presentation/components/style-moments/styleMoments";
@@ -1351,6 +1351,23 @@ describe("Game", () => {
             expect(wrapper.find("[data-testid='cell-0-2']").text()).toBe("4");
         });
 
+        it("should draw a hint's lines under the digits, only on a step that has them", async () => {
+            const { sudoku, stepIndex } = createSudokuWithHintLines();
+            const wrapper = mountGameWith(sudoku);
+            const grid = () => wrapper.get("[data-skin='board-grid']");
+            await openRevealCell(wrapper);
+            expect(stepIndex).toBeGreaterThan(0);
+            expect(grid().classes()).not.toContain("has-step-links");
+
+            for (let step = 0; step < stepIndex; step++) {
+                await wrapper.get("[data-testid='hint-next']").trigger("click");
+                await flushPromises();
+            }
+
+            expect(wrapper.find("[data-testid='step-link-overlay']").exists()).toBe(true);
+            expect(grid().classes()).toContain("has-step-links");
+        });
+
         it("should count a long run of steps with a counter that fits the panel", async () => {
             const plan = multiStepPlan();
             const wrapper = mountGameWith(createMultiStepSudoku());
@@ -1759,8 +1776,8 @@ describe("Game", () => {
             const wrapper = mountGame();
             const digitKey = (digit: number) => wrapper.get(`[data-testid='number-${digit}']`);
             const glyph = (digit: number) => wrapper.get(`[data-testid='number-${digit}-glyph']`);
-            const normalSize = "text-[length:calc(var(--text-2xl)*var(--key-scale,1))]";
-            const noteSize = "text-[length:calc(var(--text-lg)*var(--key-scale,1))]";
+            const normalSize = "text-[length:calc(var(--digit-key-text)*var(--key-scale,1))]";
+            const noteSize = "text-[length:calc(var(--digit-key-note-text)*var(--key-scale,1))]";
             expect(digitKey(8).classes()).toContain(normalSize);
             for (const digit of [1, 5, 9]) expect(glyph(digit).attributes("style") ?? "").not.toContain("translate");
 

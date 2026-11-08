@@ -1,12 +1,12 @@
 <template>
     <div
-        class="flex flex-col gap-3"
+        class="flex flex-col gap-(--digit-key-row-gap)"
         data-testid="digit-pad"
     >
-        <!-- Each row is five square keys of at most 56px; in a window narrower than the
-             312px row they shrink together instead of the outer keys being cut off -->
+        <!-- Each row is five square keys of at most --digit-key-size; in a window narrower than
+             the row they shrink together instead of the outer keys being cut off -->
         <div
-            class="grid grid-cols-[repeat(5,minmax(0,3.5rem))] justify-center gap-2"
+            class="grid grid-cols-[repeat(5,minmax(0,var(--digit-key-size)))] justify-center gap-2"
             data-testid="digit-key-row"
         >
             <div
@@ -46,7 +46,7 @@
             </div>
         </div>
         <div
-            class="grid grid-cols-[repeat(5,minmax(0,3.5rem))] justify-center gap-2"
+            class="grid grid-cols-[repeat(5,minmax(0,var(--digit-key-size)))] justify-center gap-2"
             data-testid="digit-key-row"
         >
             <div
@@ -143,8 +143,8 @@ const digitLabel = (digit: number): string =>
 // Sizes go through --key-scale, which a style may raise for a narrower face; it defaults to 1.
 // The line box is the glyph's, so a larger face cannot push the digit.
 const digitSizeClasses = computed(() => (props.noteMode
-    ? "text-[length:calc(var(--text-lg)*var(--key-scale,1))]"
-    : "text-[length:calc(var(--text-2xl)*var(--key-scale,1))]"));
+    ? "text-[length:calc(var(--digit-key-note-text)*var(--key-scale,1))]"
+    : "text-[length:calc(var(--digit-key-text)*var(--key-scale,1))]"));
 
 // In note mode each digit moves to its note place, and the remaining counts fade so they do not cover the
 // corner digits; the keys still speak them.

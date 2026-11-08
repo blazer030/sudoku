@@ -2,8 +2,10 @@ import type { TechniqueId } from "@/domain/solver/SolveStep";
 import type { Difficulty } from "@/domain/generator/SudokuGenerator";
 import type { DonateTier } from "@/application/analytics/AnalyticsService";
 import type { GameStepAction } from "@/domain/game/GameStep";
+import { lessonsEn } from "./lessons/en";
 
 export const en = {
+    lessons: lessonsEn,
     common: {
         back: "Back",
         cancel: "Cancel",
@@ -126,7 +128,9 @@ export const en = {
         entries: {
             winRate: "Win rate {percent}%",
             noGames: "No games yet",
-            walkthrough: "Enter a puzzle, see the steps",
+            walkthrough: "See any puzzle's steps",
+            lessonsFirst: "First time? Start here",
+            lessonsProgress: "{done} of {total} learned",
             settings: "Theme, mode, language",
         },
         generatingPuzzle: "Generating puzzle…",
@@ -136,6 +140,7 @@ export const en = {
             continue: "Continue That Game",
             confirm: "Give Up & Start New",
             stay: "Stay here",
+            stayInLessons: "Stay in Lessons",
         },
     },
     game: {

@@ -5,6 +5,9 @@ import { STYLE_IDS, type StyleId } from "@/theme/themeIds";
 // Press feedback every style must give the v-press states and the segmented indicator
 const PRESS = ["[data-pressed]", "[data-press-motion][data-pressed]", "[data-press-bounce]", ".segmented-indicator-motion"] as const;
 
+// A style whose secondary buttons are painted alike whatever their classes must mark the lesson's notes toggle when on
+const LESSON_TOGGLE = ['[data-skin~="lesson-toggle"][aria-pressed="true"]'] as const;
+
 // Each fragment must occur in some selector of that style's sheet
 const REQUIRED_SELECTORS: Record<StyleId, readonly string[]> = {
     minimal: [
@@ -18,6 +21,8 @@ const REQUIRED_SELECTORS: Record<StyleId, readonly string[]> = {
         ".minimal-loader-square",
     ],
     tactile: [
+        '[data-skin~="lesson-mark"]',
+        '[data-skin~="cell-cross"]',
         '[data-skin~="floating-pad"]',
         ...PRESS,
         '[data-skin~="key"]',
@@ -36,6 +41,8 @@ const REQUIRED_SELECTORS: Record<StyleId, readonly string[]> = {
         ".tactile-loader-tile",
     ],
     paper: [
+        '[data-skin~="lesson-mark"]',
+        '[data-skin~="cell-cross"]',
         '[data-skin~="floating-pad"]',
         ...PRESS,
         '[data-skin~="page-ruled"]',
@@ -61,6 +68,9 @@ const REQUIRED_SELECTORS: Record<StyleId, readonly string[]> = {
         ".paper-stamp",
     ],
     pixel: [
+        ...LESSON_TOGGLE,
+        '[data-skin~="lesson-mark"]',
+        '[data-skin~="cell-cross"]',
         '[data-skin~="floating-pad"]',
         ...PRESS,
         "[data-group]",
@@ -72,6 +82,9 @@ const REQUIRED_SELECTORS: Record<StyleId, readonly string[]> = {
         ".pixel-stage-letter",
     ],
     cyber: [
+        ...LESSON_TOGGLE,
+        '[data-skin~="lesson-mark"]',
+        '[data-skin~="cell-cross"]',
         '[data-skin~="floating-pad"]',
         '[data-floating-pad-past]',
         ...PRESS,
@@ -85,6 +98,9 @@ const REQUIRED_SELECTORS: Record<StyleId, readonly string[]> = {
         ".cyber-mission",
     ],
     ink: [
+        ...LESSON_TOGGLE,
+        '[data-skin~="lesson-mark"]',
+        '[data-skin~="cell-cross"]',
         '[data-skin~="floating-pad"]',
         ...PRESS,
         ".ink-loader-stroke",
@@ -103,6 +119,9 @@ const REQUIRED_SELECTORS: Record<StyleId, readonly string[]> = {
         '[data-skin~="hero-vertical"]',
     ],
     chalkboard: [
+        ...LESSON_TOGGLE,
+        '[data-skin~="lesson-mark"]',
+        '[data-skin~="cell-cross"]',
         '[data-skin~="floating-pad"]',
         ...PRESS,
         '[data-skin~="board"]',
@@ -136,6 +155,9 @@ const REQUIRED_SELECTORS: Record<StyleId, readonly string[]> = {
     ],
     // The press hooks, the shared pieces and the board for now; the moments add theirs
     blueprint: [
+        ...LESSON_TOGGLE,
+        '[data-skin~="lesson-mark"]',
+        '[data-skin~="cell-cross"]',
         '[data-skin~="floating-pad"]',
         ...PRESS,
         '[data-skin~="board"]',
@@ -161,6 +183,9 @@ const REQUIRED_SELECTORS: Record<StyleId, readonly string[]> = {
     ],
     // The press hooks and the drifting lights for now; the board, the moments and the pages add theirs
     aurora: [
+        ...LESSON_TOGGLE,
+        '[data-skin~="lesson-mark"]',
+        '[data-skin~="cell-cross"]',
         '[data-skin~="floating-pad"]',
         ...PRESS,
         "body::before",

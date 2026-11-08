@@ -36,6 +36,7 @@
     --color-primary-ink: #176037;
     --color-signal: #84DDA8;
     --color-signal-surface: #C8F0D8;
+    --color-lesson-dim: #BABABA;
 }
 
 :root[data-style="minimal"][data-color-theme="green"] {
@@ -75,6 +76,7 @@
     --color-primary-ink: #176037;
     --color-signal: #84DDA8;
     --color-signal-surface: #C8F0D8;
+    --color-lesson-dim: #BABABA;
 }
 
 :root.dark[data-style="minimal"][data-color-theme="green"] {
@@ -114,6 +116,7 @@
     --color-primary-ink: #7AC192;
     --color-signal: #344639;
     --color-signal-surface: #2E3B30;
+    --color-lesson-dim: #5D5D5A;
 }
 
 :root[data-style="minimal"][data-color-theme="blue"] {
@@ -153,6 +156,7 @@
     --color-primary-ink: #2C5689;
     --color-signal: #ABCEF1;
     --color-signal-surface: #D0E4F7;
+    --color-lesson-dim: #BABABA;
 }
 
 :root.dark[data-style="minimal"][data-color-theme="blue"] {
@@ -192,6 +196,7 @@
     --color-primary-ink: #85B5EE;
     --color-signal: #374350;
     --color-signal-surface: #303841;
+    --color-lesson-dim: #5D5D5A;
 }
 
 :root[data-style="minimal"][data-color-theme="purple"] {
@@ -231,6 +236,7 @@
     --color-primary-ink: #614887;
     --color-signal: #D6C3E8;
     --color-signal-surface: #E4D8F0;
+    --color-lesson-dim: #BABABA;
 }
 
 :root.dark[data-style="minimal"][data-color-theme="purple"] {
@@ -270,6 +276,7 @@
     --color-primary-ink: #C1A5EE;
     --color-signal: #463F50;
     --color-signal-surface: #3B3541;
+    --color-lesson-dim: #5D5D5A;
 }
 
 :root[data-style="minimal"][data-color-theme="orange"] {
@@ -309,6 +316,7 @@
     --color-primary-ink: #7D4800;
     --color-signal: #ECC395;
     --color-signal-surface: #F5E0C8;
+    --color-lesson-dim: #BABABA;
 }
 
 :root.dark[data-style="minimal"][data-color-theme="orange"] {
@@ -348,6 +356,7 @@
     --color-primary-ink: #E1A66C;
     --color-signal: #4E3F2F;
     --color-signal-surface: #40362A;
+    --color-lesson-dim: #5D5D5A;
 }
 
 :root[data-style="minimal"][data-color-theme="pink"] {
@@ -387,6 +396,7 @@
     --color-primary-ink: #863C55;
     --color-signal: #F3BCCC;
     --color-signal-surface: #F7D4DE;
+    --color-lesson-dim: #BABABA;
 }
 
 :root.dark[data-style="minimal"][data-color-theme="pink"] {
@@ -426,6 +436,7 @@
     --color-primary-ink: #ED9AB1;
     --color-signal: #513C41;
     --color-signal-surface: #423436;
+    --color-lesson-dim: #5D5D5A;
 }
 
 :root[data-style="minimal"][data-color-theme="teal"] {
@@ -465,6 +476,7 @@
     --color-primary-ink: #0A5E5F;
     --color-signal: #86D8D8;
     --color-signal-surface: #D0F0F0;
+    --color-lesson-dim: #BABABA;
 }
 
 :root.dark[data-style="minimal"][data-color-theme="teal"] {
@@ -504,6 +516,7 @@
     --color-primary-ink: #75BEBE;
     --color-signal: #334544;
     --color-signal-surface: #2D3A38;
+    --color-lesson-dim: #5D5D5A;
 }
 
 :root[data-style="tactile"][data-color-theme="green"] {
@@ -543,6 +556,7 @@
     --color-primary-ink: #1F5C3A;
     --color-signal: #8FD3A8;
     --color-signal-surface: #D3EBDB;
+    --color-lesson-dim: #BDBBB8;
 }
 
 :root.dark[data-style="tactile"][data-color-theme="green"] {
@@ -582,6 +596,7 @@
     --color-primary-ink: #9CDEB4;
     --color-signal: #455851;
     --color-signal-surface: #3D4B48;
+    --color-lesson-dim: #636466;
 }
 
 :root[data-style="tactile"][data-color-theme="blue"] {
@@ -621,6 +636,7 @@
     --color-primary-ink: #24508A;
     --color-signal: #A8C8EE;
     --color-signal-surface: #D5E3F4;
+    --color-lesson-dim: #BDBBB8;
 }
 
 :root.dark[data-style="tactile"][data-color-theme="blue"] {
@@ -660,6 +676,7 @@
     --color-primary-ink: #ADCDF5;
     --color-signal: #495461;
     --color-signal-surface: #404853;
+    --color-lesson-dim: #636466;
 }
 
 :root[data-style="tactile"][data-color-theme="rust"] {
@@ -699,6 +716,7 @@
     --color-primary-ink: #782F16;
     --color-signal: #EFBAA4;
     --color-signal-surface: #F4DDD3;
+    --color-lesson-dim: #BDBBB8;
 }
 
 :root.dark[data-style="tactile"][data-color-theme="rust"] {
@@ -738,6 +756,7 @@
     --color-primary-ink: #F7B89D;
     --color-signal: #5C4E4B;
     --color-signal-surface: #4D4444;
+    --color-lesson-dim: #636466;
 }
 
 :root[data-style="tactile"][data-color-theme="slate"] {
@@ -777,6 +796,7 @@
     --color-primary-ink: #34506E;
     --color-signal: #B3C5DA;
     --color-signal-surface: #DAE2EC;
+    --color-lesson-dim: #BDBBB8;
 }
 
 :root.dark[data-style="tactile"][data-color-theme="slate"] {
@@ -816,6 +836,7 @@
     --color-primary-ink: #B7CBE5;
     --color-signal: #4C535D;
     --color-signal-surface: #424851;
+    --color-lesson-dim: #636466;
 }
 
 :root[data-style="paper"][data-color-theme="blueInk"] {
@@ -855,6 +876,7 @@
     --color-primary-ink: #2B4A7A;
     --color-signal: #AFC3E2;
     --color-signal-surface: #DCE4F0;
+    --color-lesson-dim: #BEBAB7;
 }
 
 :root[data-style="paper"][data-color-theme="greenInk"] {
@@ -894,6 +916,7 @@
     --color-primary-ink: #235A3C;
     --color-signal: #9ECFAF;
     --color-signal-surface: #D8EBDD;
+    --color-lesson-dim: #BEBAB7;
 }
 
 :root[data-style="paper"][data-color-theme="redInk"] {
@@ -933,6 +956,7 @@
     --color-primary-ink: #8E2533;
     --color-signal: #EDB8BF;
     --color-signal-surface: #F5DCDF;
+    --color-lesson-dim: #BEBAB7;
 }
 
 :root[data-style="pixel"][data-color-theme="classic"] {
@@ -972,6 +996,7 @@
     --color-primary-ink: #0F380F;
     --color-signal: #8BAC0F;
     --color-signal-surface: #8BAC0F;
+    --color-lesson-dim: #306230;
 }
 
 :root.dark[data-style="pixel"][data-color-theme="classic"] {
@@ -1011,6 +1036,7 @@
     --color-primary-ink: #F8B800;
     --color-signal: #0058F8;
     --color-signal-surface: #1E1E3C;
+    --color-lesson-dim: #6C6C6C;
 }
 
 :root.dark[data-style="cyber"][data-color-theme="neon"] {
@@ -1050,6 +1076,7 @@
     --color-primary-ink: #FF5AE0;
     --color-signal: #FCEE0A;
     --color-signal-surface: #3A3506;
+    --color-lesson-dim: #4F5460;
 }
 
 :root[data-style="ink"][data-color-theme="vermilion"] {
@@ -1089,6 +1116,7 @@
     --color-primary-ink: #B3261E;
     --color-signal: #EBD6CA;
     --color-signal-surface: #F2DED5;
+    --color-lesson-dim: #B9B5AD;
 }
 
 :root[data-style="chalkboard"][data-color-theme="classic"] {
@@ -1128,6 +1156,7 @@
     --color-primary-ink: #B04A00;
     --color-signal: #EFE8E0;
     --color-signal-surface: #EFE8E0;
+    --color-lesson-dim: #BABBBC;
     --color-tray: #D7DADF;
     --color-tray-shade: #B5BAC2;
     --color-tray-edge: #E6E8EB;
@@ -1176,6 +1205,7 @@
     --color-primary-ink: #F7C873;
     --color-signal: #4A5D44;
     --color-signal-surface: #4A5D44;
+    --color-lesson-dim: #6B8072;
     --color-tray: #8A5A34;
     --color-tray-shade: #5E3B20;
     --color-tray-edge: #A06C42;
@@ -1224,6 +1254,7 @@
     --color-primary-ink: #B34A00;
     --color-signal: #F4EDE8;
     --color-signal-surface: #F4EDE8;
+    --color-lesson-dim: #B6C4D5;
     --color-grid-minor: #E6EDF6;
     --color-grid-major: #D6E1EF;
     --color-hatch: #E7ECF1;
@@ -1267,6 +1298,7 @@
     --color-primary-ink: #FFD166;
     --color-signal: #385675;
     --color-signal-surface: #2E5176;
+    --color-lesson-dim: #5C7CA4;
     --color-grid-minor: #214B81;
     --color-grid-major: #2E5688;
     --color-hatch: #2D5588;
@@ -1310,6 +1342,7 @@
     --color-primary-ink: #B34A00;
     --color-signal: #F4EDE8;
     --color-signal-surface: #F4EDE8;
+    --color-lesson-dim: #B5CCD0;
     --color-grid-minor: #E6EDF6;
     --color-grid-major: #D6E1EF;
     --color-hatch: #E7ECF1;
@@ -1353,6 +1386,7 @@
     --color-primary-ink: #FFD166;
     --color-signal: #35625E;
     --color-signal-surface: #2B5D5D;
+    --color-lesson-dim: #598592;
     --color-grid-minor: #1E5967;
     --color-grid-major: #2B6270;
     --color-hatch: #296170;
@@ -1396,6 +1430,7 @@
     --color-primary-ink: #B34A00;
     --color-signal: #F4EDE8;
     --color-signal-surface: #F4EDE8;
+    --color-lesson-dim: #BFC4CA;
     --color-grid-minor: #E6EDF6;
     --color-grid-major: #D6E1EF;
     --color-hatch: #E7ECF1;
@@ -1439,6 +1474,7 @@
     --color-primary-ink: #FFD166;
     --color-signal: #4D5252;
     --color-signal-surface: #444C51;
+    --color-lesson-dim: #6C7888;
     --color-grid-minor: #39475A;
     --color-grid-major: #445263;
     --color-hatch: #435163;
@@ -1482,6 +1518,7 @@
     --color-primary-ink: #B34A00;
     --color-signal: #F4EDE8;
     --color-signal-surface: #F4EDE8;
+    --color-lesson-dim: #D2C4BC;
     --color-grid-minor: #E6EDF6;
     --color-grid-major: #D6E1EF;
     --color-hatch: #E7ECF1;
@@ -1525,6 +1562,7 @@
     --color-primary-ink: #FFD166;
     --color-signal: #74522D;
     --color-signal-surface: #6E4C2A;
+    --color-lesson-dim: #8D786B;
     --color-grid-minor: #654730;
     --color-grid-major: #6E523D;
     --color-hatch: #6C513D;
@@ -1568,6 +1606,7 @@
     --color-primary-ink: #5B3FE0;
     --color-signal: #E2E2F5;
     --color-signal-surface: #EFEEFA;
+    --color-lesson-dim: #B4B6BE;
     --color-aurora-1: #E2DDFF;
     --color-aurora-2: #D2E1FE;
     --color-aurora-3: #FFCCEE;
@@ -1617,6 +1656,7 @@
     --color-primary-ink: #A897FF;
     --color-signal: #2A2848;
     --color-signal-surface: #1A1D37;
+    --color-lesson-dim: #525667;
     --color-aurora-1: #4A039B;
     --color-aurora-2: #21238E;
     --color-aurora-3: #8B1787;
@@ -1666,6 +1706,7 @@
     --color-primary-ink: #0A6F61;
     --color-signal: #DCE6EB;
     --color-signal-surface: #EAF1F3;
+    --color-lesson-dim: #B4B6BE;
     --color-aurora-1: #ACF8E2;
     --color-aurora-2: #CFECFF;
     --color-aurora-3: #A4F3FD;
@@ -1715,6 +1756,7 @@
     --color-primary-ink: #4FE3C1;
     --color-signal: #16393A;
     --color-signal-surface: #132332;
+    --color-lesson-dim: #525667;
     --color-aurora-1: #004A42;
     --color-aurora-2: #0E519E;
     --color-aurora-3: #08748F;
@@ -1764,6 +1806,7 @@
     --color-primary-ink: #C2185B;
     --color-signal: #EADFEB;
     --color-signal-surface: #F5EBF2;
+    --color-lesson-dim: #B4B6BE;
     --color-aurora-1: #C5FFDC;
     --color-aurora-2: #F2EDFF;
     --color-aurora-3: #C1FDFF;
@@ -1813,6 +1856,7 @@
     --color-primary-ink: #FF8CC6;
     --color-signal: #3D263B;
     --color-signal-surface: #211C33;
+    --color-lesson-dim: #525667;
     --color-aurora-1: #4F0031;
     --color-aurora-2: #02484F;
     --color-aurora-3: #9F39B5;
@@ -1862,6 +1906,7 @@
     --color-primary-ink: #A84808;
     --color-signal: #E8E3E4;
     --color-signal-surface: #F3EEED;
+    --color-lesson-dim: #B4B6BE;
     --color-aurora-1: #B3FFD6;
     --color-aurora-2: #FFEDBA;
     --color-aurora-3: #D9F2FF;
@@ -1911,6 +1956,7 @@
     --color-primary-ink: #FFB86B;
     --color-signal: #3D3027;
     --color-signal-surface: #211F2C;
+    --color-lesson-dim: #525667;
     --color-aurora-1: #4F1700;
     --color-aurora-2: #01644D;
     --color-aurora-3: #7A56C7;

@@ -851,11 +851,13 @@
 
 /* The same digit, and a step's pattern, take a flat tint of the primary in place of the glass and are written in it */
 [data-style="aurora"] [data-skin~="board"] [data-variant="same-digit"],
+[data-style="aurora"] [data-skin~="board"] [data-variant="target"],
 [data-style="aurora"] [data-skin~="board"] [data-variant="pattern"] {
     --aurora-cell-ground: color-mix(in srgb, var(--color-primary) var(--aurora-tint-same), transparent);
 }
 
 [data-style="aurora"] [data-skin~="board"] [data-variant="same-digit"][data-value-kind] > div,
+[data-style="aurora"] [data-skin~="board"] [data-variant="target"][data-value-kind] > div,
 [data-style="aurora"] [data-skin~="board"] [data-variant="pattern"][data-value-kind] > div {
     color: var(--color-primary);
 }
@@ -1450,4 +1452,34 @@
 
 [data-style="aurora"] [data-skin~="floating-pad"][data-note-mode="true"] [data-skin~="floating-key"]:nth-child(9) > span {
     translate: -5cqw -5cqw;
+}
+
+/* Lessons: the finished and next marks glow; a group's note lies on the lights, where only the text colour reads */
+[data-style="aurora"] [data-skin~="lesson-mark"][data-skin~="done"] {
+    box-shadow: 0 0 10px var(--color-primary);
+}
+
+[data-style="aurora"] [data-skin~="lesson-mark"][data-skin~="next"] {
+    box-shadow: inset 0 0 0 2px var(--color-primary), 0 0 10px color-mix(in srgb, var(--color-primary) 35%, transparent);
+}
+
+[data-style="aurora"] [data-skin~="lesson-mark"][data-skin~="rest"] {
+    background: color-mix(in srgb, var(--color-foreground) 3%, transparent);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-foreground) 30%, transparent);
+}
+
+[data-style="aurora"] [data-skin~="lesson-group-note"] {
+    color: var(--color-foreground);
+}
+
+[data-style="aurora"] [data-skin~="cell-cross"] {
+    color: var(--color-error);
+}
+
+/* The lesson's notes toggle: a secondary button here already lies in the primary's tint, so on is the chosen key's
+   solid primary */
+[data-style="aurora"] [data-skin~="button"][data-skin~="lesson-toggle"][aria-pressed="true"] {
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+    box-shadow: 0 0 22px color-mix(in srgb, var(--color-primary) 60%, transparent);
 }

@@ -1,6 +1,8 @@
 import type { MessageSchema } from "./en";
+import { lessonsZhHant } from "./lessons/zh-Hant";
 
 export const zhHant: MessageSchema = {
+    lessons: lessonsZhHant,
     common: {
         back: "返回",
         cancel: "取消",
@@ -124,6 +126,8 @@ export const zhHant: MessageSchema = {
             winRate: "勝率 {percent}%",
             noGames: "還沒有紀錄",
             walkthrough: "輸入題目看解法",
+            lessonsFirst: "第一次玩？從這裡開始",
+            lessonsProgress: "已學 {done}／{total} 課",
             settings: "主題、深淺色、語言",
         },
         generatingPuzzle: "正在產生題目…",
@@ -133,6 +137,7 @@ export const zhHant: MessageSchema = {
             continue: "繼續原本那局",
             confirm: "放棄並開新局",
             stay: "留在首頁",
+            stayInLessons: "留在教學",
         },
     },
     game: {

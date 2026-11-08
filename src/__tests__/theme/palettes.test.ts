@@ -325,6 +325,11 @@ describe("palettes", () => {
         expect(homeConsole.highlight).toBe("#0058F8");
     });
 
+    it("should dot a lesson's range in 8-bit with its border colour, dark green on the handheld and grey on the console", () => {
+        expect(getPalette("pixel", "classic", "light").border).toBe("#306230");
+        expect(getPalette("pixel", "classic", "dark").border).toBe("#6C6C6C");
+    });
+
     it("should give the console's light primary surface the navy card, not a tint of the gold", () => {
         expect(getPalette("pixel", "classic", "dark")["primary-light"]).toBe("#1E1E3C");
     });

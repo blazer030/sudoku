@@ -148,7 +148,8 @@
     color: var(--color-error);
 }
 
-[data-style="ink"] [data-skin~="board"] [data-variant="same-digit"][data-value-kind] > div {
+[data-style="ink"] [data-skin~="board"] [data-variant="same-digit"][data-value-kind] > div,
+[data-style="ink"] [data-skin~="board"] [data-variant="target"][data-value-kind] > div {
     color: var(--color-primary-ink);
 }
 
@@ -1196,4 +1197,31 @@
         -webkit-mask-repeat: no-repeat;
         mask-repeat: no-repeat;
     }
+}
+
+/* Lessons: a finished mark is a seal, the next lesson an open 圓相 */
+[data-style="ink"] [data-skin~="lesson-mark"][data-skin~="done"] {
+    border-radius: 48% 52% 50% 50% / 52% 48% 52% 48%;
+}
+
+[data-style="ink"] [data-skin~="lesson-mark"][data-skin~="next"] {
+    background: conic-gradient(from 300deg, transparent 0 14%, var(--color-primary) 14% 100%);
+    -webkit-mask-image: radial-gradient(farthest-side, transparent calc(100% - 2.2px), var(--color-foreground) calc(100% - 2px));
+    mask-image: radial-gradient(farthest-side, transparent calc(100% - 2.2px), var(--color-foreground) calc(100% - 2px));
+    box-shadow: none;
+}
+
+[data-style="ink"] [data-skin~="lesson-mark"][data-skin~="rest"] {
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-foreground) 40%, transparent);
+}
+
+[data-style="ink"] [data-skin~="cell-cross"] {
+    color: var(--color-primary);
+}
+
+/* The lesson's notes toggle, on: the game's notes control when on, the seal's wash ruled in the seal's colour */
+[data-style="ink"] [data-skin~="button"][data-skin~="lesson-toggle"][aria-pressed="true"] {
+    background-color: var(--color-primary-light);
+    box-shadow: inset 0 0 0 1px var(--color-primary);
+    color: var(--color-primary-ink);
 }

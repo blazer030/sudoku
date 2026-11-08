@@ -109,6 +109,7 @@
     --paper-wash-clue: color-mix(in srgb, var(--color-foreground) 12.5%, transparent);
     --paper-wash-peer: color-mix(in srgb, var(--color-primary) 10%, transparent);
     --paper-wash-same-digit: color-mix(in srgb, var(--color-highlight) 100%, transparent);
+    --paper-wash-target: color-mix(in srgb, var(--color-highlight) 100%, transparent);
     --paper-wash-selected: color-mix(in srgb, var(--color-primary) 16%, transparent);
     --paper-wash-focus: color-mix(in srgb, var(--color-primary) 22%, transparent);
     --paper-wash-scope: color-mix(in srgb, var(--color-primary) 8%, transparent);
@@ -158,6 +159,7 @@
 
 [data-style="paper"] [data-skin~="board"] [data-variant="peer"] { --paper-cell-wash: var(--paper-wash-peer); }
 [data-style="paper"] [data-skin~="board"] [data-variant="same-digit"] { --paper-cell-wash: var(--paper-wash-same-digit); }
+[data-style="paper"] [data-skin~="board"] [data-variant="target"] { --paper-cell-wash: var(--paper-wash-target); }
 [data-style="paper"] [data-skin~="board"] [data-variant="selected"] { --paper-cell-wash: var(--paper-wash-selected); }
 [data-style="paper"] [data-skin~="board"] [data-variant="focus"] { --paper-cell-wash: var(--paper-wash-focus); }
 [data-style="paper"] [data-skin~="board"] [data-variant="scope"] { --paper-cell-wash: var(--paper-wash-scope); }
@@ -736,4 +738,18 @@
 [data-style="paper"] [data-skin~="floating-pad"] [data-skin~="key"]:not([aria-pressed="true"]) {
     background-color: transparent;
     box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-primary) 50%, transparent);
+}
+
+/* Lessons: the next lesson is circled by hand, one not started a pale pencil ring; a cross is in the red pen */
+[data-style="paper"] [data-skin~="lesson-mark"][data-skin~="next"] {
+    border-radius: 50% 46% 52% 48%;
+    rotate: -4deg;
+}
+
+[data-style="paper"] [data-skin~="lesson-mark"][data-skin~="rest"] {
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-primary) 50%, transparent);
+}
+
+[data-style="paper"] [data-skin~="cell-cross"] {
+    color: var(--color-error);
 }

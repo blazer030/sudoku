@@ -2,6 +2,7 @@ import { Sudoku } from "@/domain/game/Sudoku";
 import { PuzzleCell } from "@/domain/board/PuzzleCell";
 import { BoardState } from "@/domain/solver/BoardState";
 import { TechniqueSolver } from "@/domain/solver/TechniqueSolver";
+import { stepLinks } from "@/presentation/components/step-presentation/stepCellView";
 import { SAMPLE_PUZZLES } from "@/presentation/pages/solver-walkthrough/samplePuzzles";
 
 /**
@@ -21,6 +22,18 @@ export const createMultiStepSudoku = (): Sudoku => {
         const plan = sudoku.planRevealHint();
         if (plan.kind !== "steps") throw new Error("no multi-step hint found");
         if (plan.steps.length > 1) return sudoku;
+        sudoku.fill(plan.target.row, plan.target.column, plan.digit);
+    }
+};
+
+/** The same puzzle played on until the next Reveal Cell hint has a step that draws lines, and the index of that step. */
+export const createSudokuWithHintLines = (): { sudoku: Sudoku; stepIndex: number } => {
+    const sudoku = createMultiStepSudoku();
+    for (;;) {
+        const plan = sudoku.planRevealHint();
+        if (plan.kind !== "steps") throw new Error("no hint with lines found");
+        const stepIndex = plan.steps.findIndex(step => stepLinks(step).length > 0);
+        if (stepIndex !== -1) return { sudoku, stepIndex };
         sudoku.fill(plan.target.row, plan.target.column, plan.digit);
     }
 };

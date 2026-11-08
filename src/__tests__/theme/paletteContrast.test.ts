@@ -913,6 +913,17 @@ const FLOATING_PAD_CASES = (Object.keys(FLOATING_PAD_KEY_SURFACE) as (keyof type
     })));
 
 describe("palette contrast", () => {
+    // A lesson's dimmed digits recede on purpose, but stay readable as the digits they are
+    it.each(STYLE_IDS.flatMap(style => STYLES[style].themes.flatMap(theme => STYLE_COLOR_MODES[style].map(mode => [style, theme.id, mode] as const))))(
+        "should keep a lesson's dimmed digits at 1.5:1 in %s %s %s",
+        (style, theme, mode) => {
+            const palette = getPalette(style, theme, mode);
+
+            expect(contrastRatio(palette["lesson-dim"], palette.card)).toBeGreaterThanOrEqual(1.5);
+            expect(contrastRatio(palette["lesson-dim"], palette.background)).toBeGreaterThanOrEqual(1.5);
+        },
+    );
+
     it("should check every style, theme and the modes the style has", () => {
         const expected = STYLE_IDS.flatMap(style => THEME_IDS_BY_STYLE[style].flatMap(theme =>
             STYLE_COLOR_MODES[style].map(mode => `${style}/${theme}/${mode}`)));

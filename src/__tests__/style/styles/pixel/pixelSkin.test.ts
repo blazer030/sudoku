@@ -315,9 +315,40 @@ describe("pixel skin", () => {
             expect(pressed.get("background-size")).toBe("auto, 4px 4px");
         });
 
-        it.each(["scope", "peer"])("should dither the %s cell in a 2px checker", (variant) => {
-            expect(declarationsOf(PIXEL_CSS, cell(variant)).get("--pixel-cell-pattern"))
+        it("should dither a peer cell in a 2px checker", () => {
+            expect(declarationsOf(PIXEL_CSS, cell("peer")).get("--pixel-cell-pattern"))
                 .toBe("repeating-conic-gradient(var(--pixel-pattern-shade) 0 25%, transparent 0 50%)");
+        });
+
+        it("should mark a step's range in dots of the mid ink, in 6px tiles", () => {
+            const scope = declarationsOf(PIXEL_CSS, cell("scope"));
+
+            expect(scope.get("--pixel-cell-pattern")).toContain("var(--color-border)");
+            expect(scope.get("background-size")).toBe("6px 6px");
+            expect(declarationsOf(PIXEL_CSS, `${cell("scope")}[data-pressed]`).get("background-size")).toBe("auto, 6px 6px");
+        });
+
+        it("should invert a lesson's target through the mode's own colours", () => {
+            const target = declarationsOf(PIXEL_CSS, cell("target"));
+
+            expect(target.get("--pixel-cell-fill")).toBe("var(--pixel-target-fill)");
+            expect(target.get("--pixel-clue-ink")).toBe("var(--pixel-target-ink)");
+            expect(declarationsOf(PIXEL_CSS, SCOPE).get("--pixel-target-fill")).toBe("var(--color-foreground)");
+            expect(declarationsOf(PIXEL_CSS, SCOPE).get("--pixel-target-ink")).toBe("var(--color-background)");
+            expect(declarationsOf(PIXEL_CSS, ':root.dark[data-style="pixel"]').get("--pixel-target-fill")).toBe("var(--color-highlight)");
+            expect(declarationsOf(PIXEL_CSS, ':root.dark[data-style="pixel"]').get("--pixel-target-ink")).toBe("var(--color-foreground)");
+        });
+
+        it("should keep the game's same-digit fill apart from a lesson's target", () => {
+            expect(declarationsOf(PIXEL_CSS, cell("same-digit")).get("--pixel-cell-fill")).toBe("var(--color-highlight)");
+        });
+
+        it("should keep a pattern cell light, so lines drawn across it show", () => {
+            expect(declarationsOf(PIXEL_CSS, cell("pattern")).get("--pixel-cell-fill")).toBe("var(--pixel-pattern-shade)");
+        });
+
+        it("should strike a candidate thicker than the shared line", () => {
+            expect(declarationsOf(PIXEL_CSS, '[data-style="pixel"] .strike-diagonal::after').get("background")).toContain("1.2px");
         });
 
         it.each(["error", "wrong"])("should hatch the %s cell diagonally", (variant) => {

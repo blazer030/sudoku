@@ -2,7 +2,7 @@ import { BOARD_SIZE, BOX_SIZE } from "@/domain/board/constants";
 import type { CellReference, ChainLink, Scope, SolveStep } from "@/domain/solver/SolveStep";
 import { sameCell } from "@/domain/solver/cellRelations";
 
-export type StepHighlight = "none" | "scope" | "pattern" | "answer" | "wrong";
+export type StepHighlight = "none" | "scope" | "pattern" | "answer" | "wrong" | "target";
 
 export interface StepCellView {
     highlight: StepHighlight;
@@ -10,6 +10,11 @@ export interface StepCellView {
     candidates: number[] | null;
     eliminated: number[];
     emphasized: number[];
+    /** Lessons only: the digit, or these notes, have nothing to do with this step. */
+    dimmed?: boolean;
+    dimmedNotes?: number[];
+    /** Lessons only: this empty cell has been ruled out. */
+    crossed?: boolean;
 }
 
 /** A solver step together with the board's candidates just before it, indexed [row][column]. */

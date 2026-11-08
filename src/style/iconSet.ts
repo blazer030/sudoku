@@ -13,6 +13,7 @@ export const ICON_NAMES = [
     "Eye",
     "EyeOff",
     "Gamepad2",
+    "GraduationCap",
     "Hash",
     "Highlighter",
     "History",

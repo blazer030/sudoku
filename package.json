@@ -1,7 +1,7 @@
 {
   "name": "sudoku",
   "private": true,
-  "version": "2.5.0",
+  "version": "2.6.0",
   "type": "module",
   "scripts": {
     "start": "vite",
@@ -15,6 +15,7 @@
     "generate:theme-css": "npx tsx scripts/generate-theme-css.ts",
     "generate:fonts": "npx tsx scripts/generate-fonts.ts",
     "prebuild": "npm run generate:icons",
+    "deploy:nas": "bash scripts/deploy-nas.sh",
     "android:sync": "cross-env VITE_BASE_URL=/ VITE_CAPACITOR=1 npm run build && npx cap sync android",
     "android:open": "npx cap open android",
     "android:run": "cross-env VITE_BASE_URL=/ VITE_CAPACITOR=1 npm run build && npx cap run android && npm run android:debug-firebase",

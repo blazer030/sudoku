@@ -14,6 +14,20 @@
 
 @variant dark (&:where(.dark, .dark *));
 
+/* Home on a short phone, and on a window too short for its tiles to keep their subtitles */
+@custom-variant home-short (@media (max-height: 623.98px) and (max-width: 640px));
+@custom-variant home-tiny (@media (max-height: 549.98px) and (max-width: 640px));
+/* Ink's vertical title takes its smaller size: from a taller window on a phone, whose Home needs the room; wider
+   windows keep the height they always had */
+@custom-variant home-ink-compact {
+  @media (max-height: 740px) {
+    @slot;
+  }
+  @media (max-height: 812px) and (max-width: 640px) {
+    @slot;
+  }
+}
+
 @custom-variant hover {
   @media (hover: hover) and (pointer: fine) {
     &:hover {
@@ -105,17 +119,107 @@
   padding-block: max(var(--safe-area-inset-top, env(safe-area-inset-top)), var(--safe-area-inset-bottom, env(safe-area-inset-bottom)));
 }
 
-/* The boards (game, review, walkthrough) give up width on a short screen so the game's digit keys
-   stay on it, and all three stay the same size. 331px is what the game screen needs besides the
-   board (page padding, header, gaps, controls and two rows of 56px keys), measured at 360×640;
-   the board is square, so its width is its height. It never goes under 15rem, which still fits a
-   640px phone after its system bars; a shorter window (a phone in landscape, split screen) scrolls.
+/* The boards give up width on a short screen so the game's digit keys stay on it; the board is square,
+   so its width is its height. --board-room is what the page needs besides the board. It never goes
+   under 15rem, which keeps a usable board in a very short window (a phone in landscape, split screen),
+   which scrolls instead.
    A style's board frame sets --board-frame-block on its own element to the height it adds round the
    board, and the board gives that up too. A frame that takes over the board's width (the board then
    fills it) also carries this utility and sets --board-frame-inline to the width it adds, so the frame
    grows by its sides and the board inside keeps the size the height allows. */
 @utility max-w-board-fit {
-  max-width: calc(max(15rem, calc(100dvh - 331px - var(--board-frame-block, 0px) - var(--safe-area-inset-top, env(safe-area-inset-top)) - var(--safe-area-inset-bottom, env(safe-area-inset-bottom)))) + var(--board-frame-inline, 0px));
+  max-width: calc(max(15rem, calc(100dvh - var(--board-room) - var(--board-frame-block, 0px) - var(--safe-area-inset-top, env(safe-area-inset-top)) - var(--safe-area-inset-bottom, env(safe-area-inset-bottom)))) + var(--board-frame-inline, 0px));
+}
+
+/* On a short window the game and the Walkthrough shrink what sits round the board, so the board keeps
+   its size. --game-step runs from 0px (everything at its smallest) to 1px (full size), and each size is
+   its smallest plus its share of the 111px there is to give back; a test holds the shares to that sum.
+   The room goes to the board first: the rest shrinks just enough for the board to reach the width of
+   the column (640px less 8px each side), and no further. A window 720px tall or more stays at full size,
+   and so does one wider than the column, however short: --wider-than-column is 1px there and 0px otherwise.
+   That is a tablet or a laptop, whose browser bars and status bar can leave it under 720px, not a small screen. */
+:root {
+  --usable-height: calc(100dvh - var(--safe-area-inset-top, env(safe-area-inset-top)) - var(--safe-area-inset-bottom, env(safe-area-inset-bottom)));
+  --wider-than-column: clamp(0px, 100vw - 640px, 1px);
+  --game-step: max(calc(clamp(0px, max(var(--usable-height) - (min(100vw, 640px) - 16px) - 220px, var(--usable-height) - 609px), 111px) / 111), var(--wider-than-column));
+  --board-room: calc(220px + 111 * var(--game-step));
+  --game-page-top: calc(8px + 16 * var(--game-step));
+  --game-page-bottom: calc(12px + 12 * var(--game-step));
+  --game-page-gap: calc(4px + 4 * var(--game-step));
+  --game-section-gap: calc(10px + 14 * var(--game-step));
+  --game-control-size: calc(36px + 8 * var(--game-step));
+  --game-control-label-gap: calc(2px + 2 * var(--game-step));
+  --game-control-label-text: calc(10px + 1 * var(--game-step));
+  --digit-key-size: calc(42px + 14 * var(--game-step));
+  --digit-key-row-gap: calc(8px + 4 * var(--game-step));
+  /* Not in the sum: a digit keeps its share of the key */
+  --digit-key-text: calc(18px + 6 * var(--game-step));
+  --digit-key-note-text: calc(13.5px + 4.5 * var(--game-step));
+}
+
+/* Home does the same on a short window, by a step of its own: 168px to give back, a pixel for each pixel
+   of window, so the gaps round its cards stay as they are from 720px down to 552px, and only then close.
+   A page with no saved game has no Continue card, so it needs --home-spare less and shrinks that much later.
+   A test holds the shares to that sum. */
+.home-sizes {
+  --home-step: max(calc(clamp(0px, var(--usable-height) + var(--home-spare, 0px) - 644px, 176px) / 176), var(--wider-than-column));
+  /* Not in the sum: what the spacers round the cards keep, on a window narrow enough to shrink */
+  --home-spacer-min: calc(12px - 12 * var(--wider-than-column));
+  --home-page-top: calc(12px + 68 * var(--home-step));
+  --home-page-bottom: calc(16px + 44 * var(--home-step));
+  --home-logo-size: calc(48px + 32 * var(--home-step));
+  --home-continue-padding: calc(12px + 4 * var(--home-step));
+  --home-new-game-height: calc(48px + 8 * var(--home-step));
+  --home-tile-padding: calc(8px + 4 * var(--home-step));
+  /* Not in the sum: a tile's words and icon take 64px, so it never holds more than its padding asks for */
+  --home-tile-min: calc(72px + 16 * var(--home-step));
+  /* Not in the sum: the mark stays its share of the logo */
+  --home-logo-mark: calc(28.8px + 19.2 * var(--home-step));
+}
+
+/* Under what the sizes above can reach, the words and the gaps round the cards close too */
+@media (max-height: 623.98px) and (max-width: 640px) {
+  .home-sizes {
+    --home-logo-size: 40px;
+    --home-logo-mark: 24px;
+    --home-spacer-min: 8px;
+    --home-continue-padding: 8px;
+    --home-new-game-height: 44px;
+    --home-tile-min: 0px;
+    --segmented-height: 44px;
+  }
+}
+
+/* Shorter still, the tiles lose their subtitles (Home.vue) and the page its margins */
+@media (max-height: 549.98px) and (max-width: 640px) {
+  .home-sizes {
+    --home-page-top: 6px;
+    --home-page-bottom: 8px;
+    --home-spacer-min: 4px;
+    --home-logo-size: 28px;
+    --home-logo-mark: 16.8px;
+  }
+}
+
+/* Game Review's board takes the game's room, so it is the game's size, and the page shrinks round it by a
+   step of its own: 158px to give back, once its smallest sizes fit. What it has left is the window less the
+   board, the game's room when the board stops short of the column's width. A window with all 378px to spare
+   stays at full size, and so does any window 720px tall or more or wider than the column, as the game's does,
+   though those can still scroll a little. The step-panel sizes are read by the shared panel, which falls back to
+   its full size, so the Walkthrough's stays as it is. */
+.review-sizes {
+  --review-step: max(calc(clamp(0px, max(var(--usable-height) - (min(100vw, 640px) - 16px), var(--board-room)) - 220px, 158px) / 158), clamp(0px, var(--usable-height) - 719px, 1px), var(--wider-than-column));
+  --review-page-top: calc(8px + 16 * var(--review-step));
+  --review-header-bottom: calc(0px + 4 * var(--review-step));
+  --review-page-gap: calc(4px + 12 * var(--review-step));
+  --review-card-padding: calc(2px + 6 * var(--review-step));
+  --review-section-gap: calc(8px + 16 * var(--review-step));
+  --review-page-bottom: calc(4px + 20 * var(--review-step));
+  --step-panel-top: calc(6px + 10 * var(--review-step));
+  --step-panel-row: calc(28px + 4 * var(--review-step));
+  --step-panel-gap: calc(4px + 8 * var(--review-step));
+  --step-panel-control: calc(36px + 8 * var(--review-step));
+  --step-panel-bottom: calc(8px + 4 * var(--review-step));
 }
 
 :root {
@@ -181,6 +285,16 @@
   opacity: 0;
 }
 
+/* One lesson fades out, its dialog with it, and the next fades in */
+.lesson-swap-enter-active,
+.lesson-swap-leave-active {
+  transition: opacity 220ms ease;
+}
+.lesson-swap-enter-from,
+.lesson-swap-leave-to {
+  opacity: 0;
+}
+
 /* A step's tag and explanation swap out, then in, as the step changes */
 .step-swap-enter-active,
 .step-swap-leave-active {
@@ -193,6 +307,12 @@
 .step-swap-leave-to {
   opacity: 0;
   transform: translateY(-4px);
+}
+
+/* A step's lines pass under the digits they cross, so the digits stay readable */
+.has-step-links .cell-digit {
+    position: relative;
+    z-index: 1;
 }
 
 /* Diagonal strike-through for eliminated candidates (top-left to bottom-right) */

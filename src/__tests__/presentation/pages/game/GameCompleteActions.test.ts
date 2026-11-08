@@ -26,13 +26,15 @@ vi.mock("@/presentation/components/puzzle-loader/usePuzzleLoader", async () => {
     };
 });
 
-const mountGameRoute = async (difficulty: Difficulty = "easy") => {
+const mountGameRoute = async (difficulty: Difficulty = "easy", visited: readonly string[] = ["/"]) => {
     localStorage.setItem("sudoku-settings", JSON.stringify({ motionEffects: false, autoNotesAtStart: false }));
     const pinia = createPinia();
     const router = createRouter({
         history: createMemoryHistory(),
         routes: [
             { path: "/", component: { template: "<div>Home</div>" } },
+            { path: "/lessons", component: { template: "<div>Lessons</div>" } },
+            { path: "/lessons/:lessonId", component: { template: "<div>Lesson</div>" } },
             { path: "/game", component: Game },
             { path: "/game-review/:index", component: { template: "<div>Review</div>" } },
         ],
@@ -41,7 +43,7 @@ const mountGameRoute = async (difficulty: Difficulty = "easy") => {
     await gameStore.startNewGame(difficulty);
     // Every test finishes the game, so it starts one move from the end
     if (gameStore.sudoku !== null) fillAllButLastKnownCell(gameStore.sudoku);
-    await router.push("/");
+    for (const path of visited) await router.push(path);
     await router.push("/game");
     await router.isReady();
     const wrapper = mount({ template: "<router-view />" }, { global: { plugins: [pinia, router] } });
@@ -144,5 +146,29 @@ describe("completion actions", () => {
         await flushPromises();
 
         expect(router.currentRoute.value.path).toBe("/");
+    });
+
+    it.each([
+        ["a lesson", ["/", "/lessons", "/lessons/nakedSingle"]],
+        ["the lesson list", ["/", "/lessons"]],
+    ])("should go home from a game started from %s, not back to it", async (_, visited) => {
+        const { wrapper, router } = await mountGameRoute("easy", visited);
+        await completeKnownGame(wrapper);
+
+        await wrapper.find("[data-testid='back-to-home-button']").trigger("click");
+        await flushPromises();
+
+        expect(router.currentRoute.value.path).toBe("/");
+    });
+
+    it("should go back in the history when Home is the page before, leaving no extra entry", async () => {
+        const { wrapper, router } = await mountGameRoute();
+        await completeKnownGame(wrapper);
+        router.options.history.state.back = "/";
+        const back = vi.spyOn(router, "back");
+
+        await wrapper.find("[data-testid='back-to-home-button']").trigger("click");
+
+        expect(back).toHaveBeenCalledOnce();
     });
 });

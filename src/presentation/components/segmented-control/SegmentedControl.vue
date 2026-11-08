@@ -3,7 +3,7 @@
         :data-skin="skin ? `segmented ${skin}` : 'segmented'"
         :class="inset ? 'bg-background' : 'bg-card shadow-card'"
         :style="{ gap: 'var(--segmented-gap, 0px)', paddingInline: 'var(--segmented-padding, 0.25rem)' }"
-        class="relative isolate flex h-12 w-full rounded-button"
+        class="relative isolate flex h-(--segmented-height,3rem) w-full rounded-button"
     >
         <div
             v-if="selectedIndex >= 0"

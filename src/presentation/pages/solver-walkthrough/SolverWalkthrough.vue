@@ -1,6 +1,6 @@
 <template>
     <div
-        class="flex flex-col gap-2 min-h-full py-6 px-5"
+        class="flex flex-col gap-(--game-page-gap) min-h-full pt-(--game-page-top) pb-(--game-page-bottom) px-5"
         data-testid="walkthrough-screen"
         @click="handleScreenTap"
     >
@@ -26,7 +26,7 @@
             <div class="w-18" />
         </div>
         <div class="flex-1" />
-        <div class="flex flex-col items-center gap-6">
+        <div class="flex flex-col items-center gap-(--game-section-gap)">
             <BoardFrame
                 :celebration="null"
                 :effect="null"
@@ -44,6 +44,7 @@
                     data-testid="walkthrough-board"
                 >
                     <div
+                        :class="{ 'has-step-links': inPlayback && links.length > 0 }"
                         class="relative flex flex-col border-3 border-foreground/20 rounded-xl"
                         data-skin="board-grid"
                     >
@@ -93,7 +94,7 @@
                 <div
                     :class="overlayShown ? 'opacity-0 pointer-events-none' : 'opacity-100 delay-100'"
                     :inert="overlayShown || checking || undefined"
-                    class="flex flex-col items-center gap-6 transition-opacity duration-200"
+                    class="flex flex-col items-center gap-(--game-section-gap) transition-opacity duration-200"
                     data-testid="walkthrough-inputs"
                 >
                     <DigitPad

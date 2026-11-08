@@ -23,6 +23,54 @@ describe("BoardCell", () => {
     const mountCell = (props: Record<string, unknown>) =>
         mount(BoardCell, { props: { row: 0, column: 0, value: 0, ...props } });
 
+    describe("lesson marks", () => {
+        it("should dim a digit through its style's dim colour, not opacity", () => {
+            const wrapper = mountCell({ value: 5, dimmed: true });
+            const digit = wrapper.get("[data-testid='cell-value']");
+
+            expect(digit.attributes("data-dimmed")).toBe("");
+            expect(digit.attributes("style")).toContain("var(--color-lesson-dim)");
+            expect(digit.attributes("style")).not.toContain("opacity");
+        });
+
+        it("should leave a digit undimmed by default", () => {
+            const wrapper = mountCell({ value: 5 });
+
+            expect(wrapper.get("[data-testid='cell-value']").attributes("data-dimmed")).toBeUndefined();
+        });
+
+        it("should dim only the notes it names", () => {
+            const wrapper = mountCell({ notes: [2, 3], noteTone: "solver", dimmedNotes: [3] });
+            const notes = wrapper.findAll("[data-note-dimmed]");
+
+            expect(notes.map(note => note.text())).toEqual(["3"]);
+        });
+
+        it("should keep an emphasized note undimmed", () => {
+            const wrapper = mountCell({ notes: [2], noteTone: "solver", dimmedNotes: [2], emphasizedDigits: [2] });
+
+            expect(wrapper.find("[data-note-dimmed]").exists()).toBe(false);
+        });
+
+        it("should draw the cross as the style's icon in an empty cell", () => {
+            const wrapper = mountCell({ crossed: true });
+
+            expect(wrapper.get("[data-testid='cell-cross']").attributes("data-icon")).toBe("X");
+        });
+
+        it("should not draw a cross over a digit", () => {
+            const wrapper = mountCell({ value: 5, crossed: true });
+
+            expect(wrapper.find("[data-testid='cell-cross']").exists()).toBe(false);
+        });
+
+        it("should keep a target apart from the same-digit highlight", () => {
+            const wrapper = mountCell({ value: 7, variant: "target" });
+
+            expect(wrapper.attributes("data-variant")).toBe("target");
+        });
+    });
+
     it("should display the value when value is non-zero", () => {
         const wrapper = mountCell({ value: 5 });
 

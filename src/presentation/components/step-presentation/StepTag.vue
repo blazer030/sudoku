@@ -8,13 +8,15 @@
             :class="strong ? 'bg-primary text-on-primary' : 'bg-primary-light text-primary'"
             :data-skin="strong ? 'tag step strong' : 'tag step'"
             :data-testid="testId"
-            class="inline-flex items-center gap-1.5 rounded-full text-[13px] font-semibold pl-2 pr-2.5 py-1 leading-none whitespace-nowrap"
+            class="inline-flex items-center gap-1.5 min-w-0 rounded-full text-[13px] font-semibold pl-2 pr-2.5 py-1 leading-none whitespace-nowrap"
         >
             <component
                 :is="icon"
                 :size="14"
+                class="shrink-0"
             />
-            {{ label }}
+            <!-- A tight row shortens the words, so the navigator beside the tag stays on screen -->
+            <span class="min-w-0 truncate">{{ label }}</span>
         </span>
     </Transition>
 </template>
