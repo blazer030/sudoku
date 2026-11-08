@@ -42,8 +42,10 @@ rsync -tz --chmod=Fu=rw,Fgo=r -e "$remote_shell" dist/index.html "$NAS_HOST:$NAS
 rsync -tz --chmod=Fu=rw,Fgo=r -e "$remote_shell" deploy/nas/compose.yaml deploy/nas/nginx.conf "$NAS_HOST:$NAS_DIR/"
 
 # The tunnel's token, readable by the owner only; sent on stdin so it never shows in a process list.
+# chmod, not umask: a Synology shared folder's ACL gives a new file its own permissions.
 if [[ -n "${NAS_TUNNEL_TOKEN:-}" ]]; then
-    printf 'TUNNEL_TOKEN=%s\n' "$NAS_TUNNEL_TOKEN" | ssh -p "$nas_port" "$NAS_HOST" "umask 077 && cat > '$NAS_DIR/.env'"
+    printf 'TUNNEL_TOKEN=%s\n' "$NAS_TUNNEL_TOKEN" |
+        ssh -p "$nas_port" "$NAS_HOST" "cat > '$NAS_DIR/.env' && chmod 600 '$NAS_DIR/.env'"
 fi
 
 echo "Deployed $(git rev-parse --short HEAD)$(git diff --quiet HEAD || echo ' with uncommitted changes') to $NAS_HOST:$NAS_DIR"
