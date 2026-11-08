@@ -79,7 +79,7 @@ Entering lessons in the 8-bit style's 掌機 mode SHALL first show a notice that
 #### Scenario: Opening a lesson by its address
 
 - **WHEN** the player in 掌機 opens a lesson by its address and has not chosen to carry on before
-- **THEN** the notice shows before the lesson, and backing out of it goes to the lesson list
+- **THEN** the notice shows before the lesson, and backing out of it leaves the lessons, to the page before or to Home, as backing out on the lesson list does; going to the list would only show the notice again
 
 #### Scenario: Switching to the dark mode
 

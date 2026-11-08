@@ -108,7 +108,7 @@
 
 ### The handheld notice is remembered in settings
 
-`Settings` 新增 `handheldLessonNoticeDismissed`。只有選「還是用掌機看」才記住；換配色或看其他風格之後，若又回到掌機，還會再提醒。提醒由 `useLessonNotice` 統一判斷，時機是進入課程列表，以及直接開課程網址時（`LessonPage` 掛載時檢查，取消就返回）。
+`Settings` 新增 `handheldLessonNoticeDismissed`。只有選「還是用掌機看」才記住；換配色或看其他風格之後，若又回到掌機，還會再提醒。提醒由 `useLessonNotice` 統一判斷，時機是進入課程列表，以及直接開課程網址時（`LessonPage` 掛載時檢查）。取消就離開課程，回上一頁，沒有上一頁就回首頁，和在課程列表取消一樣；回課程列表只會再問一次（review 2026-11-08 發現）。
 
 ## Implementation Contract
 

@@ -45,9 +45,10 @@ const goBack = () => {
     goBackOr(router, ROUTER_PATH.lessons);
 };
 
-// Lessons usually open from the list, which has asked already; this is for one opened by its address
+// Lessons usually open from the list, which has asked already; this is for one opened by its address.
+// Backing out leaves the lessons, as on the list: the list would only ask again.
 onMounted(async () => {
-    if (await notice.check() === "cancelled") goBack();
+    if (await notice.check() === "cancelled") goBackOr(router, ROUTER_PATH.home);
 });
 
 // In place of this entry, so Back from any lesson goes to the list

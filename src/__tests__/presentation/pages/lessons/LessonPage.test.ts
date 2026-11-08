@@ -163,7 +163,7 @@ describe("LessonPage", () => {
             expect(wrapper.find("[data-testid='lesson-notice']").exists()).toBe(true);
         });
 
-        it("should leave for the list when the notice is backed out of", async () => {
+        it("should leave the lessons for Home when the notice is backed out of, as the list would only ask again", async () => {
             useHandheld();
             const { wrapper, router } = await mountPage(["/lessons/rules"]);
             markOpenedByAddress(router);
@@ -172,7 +172,7 @@ describe("LessonPage", () => {
             await settled();
 
             expect(wrapper.find("[data-testid='lesson-notice']").exists()).toBe(false);
-            expect(router.currentRoute.value.path).toBe("/lessons");
+            expect(router.currentRoute.value.path).toBe("/");
         });
 
         it("should stay on the lesson when the player carries on", async () => {
