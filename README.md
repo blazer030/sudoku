@@ -12,8 +12,11 @@ progressive web app (PWA) and as a native Android app via Capacitor.
 - **Human-style technique solver** — naked/hidden singles & subsets,
   pointing/claiming, fish, wings (XY/XYZ/W/WXYZ), and X-/XY-chains — powering
   both difficulty rating and a step-by-step **Solver Walkthrough** page
+- **Technique Lessons** — 17 lessons covering all 19 solver techniques, in four
+  groups from the basics to chains; each explains on a real board, then has the
+  player follow along and find one on their own, with layered hints
 - **Notes** (manual and auto-notes), undo, erase, and live conflict highlighting
-- **Hints** — up to 4 per game, the first one free
+- **Hints** — unlimited, counted per game and averaged in Statistics
 - **Save & restore** with a running timer, persisted to IndexedDB
 - **Statistics** (best times, win rate, day streak) plus per-game **Review**
   with move replay
@@ -51,19 +54,22 @@ src/
 │   ├── board/         PuzzleCell, SudokuBoard, constants
 │   ├── game/          Sudoku engine, history/undo, conflicts, replay, hints
 │   ├── generator/     Puzzle generator + solution counting
-│   └── solver/        Technique solver, difficulty rater, techniques, chains
+│   ├── solver/        Technique solver, difficulty rater, techniques, chains
+│   └── lessons/       Technique lessons: curriculum, content, practice rules, board checks
 ├── application/     Ports (interfaces) + app services
 │   ├── game/          GameState, GameRepository port
 │   ├── settings/      Settings load/save
 │   ├── statistics/    StatisticsRepository port, play streak
+│   ├── lessons/       LessonProgressRepository port
 │   ├── puzzleGeneration/, puzzleCheck/   Web Worker services
 │   └── analytics/, billing/, icon/, systemBar/, appearanceBridge/, backButton/
 ├── infrastructure/  Adapters implementing the ports
 │   ├── game/, statistics/   IndexedDB repositories
+│   ├── lessons/       Lesson progress in localStorage
 │   └── analytics/, billing/, icon/, systemBar/, appearanceBridge/, backButton/
 │                      Capacitor / Firebase / Play Billing adapters + no-op web twins
 ├── presentation/    Pages, shared components, composables, i18n, appearance sync
-├── stores/          Pinia stores (game, statistics, settings, donate)
+├── stores/          Pinia stores (game, statistics, settings, donate, lesson)
 ├── theme/           Style and theme ids, palettes, launcher icons (shared with scripts/)
 ├── style/           Tailwind entry, fonts, one folder per visual style (styles/<id>/)
 ├── utils/           Feature toggle, app version, time formatting
@@ -86,7 +92,10 @@ npx vitest run    # Run tests once (CI mode)
 npm run lint      # ESLint (--max-warnings 0, must pass before commit)
 npm run build     # Type-check (vue-tsc) + production build
 npm run preview   # Preview the production build
+npm run deploy:nas # Build and copy a develop build to the NAS test server
 ```
+
+The NAS test server's setup is in `deploy/nas/README.md`.
 
 `@/` is a path alias for `src/`.
 
