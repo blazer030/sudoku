@@ -120,12 +120,13 @@
 - 自己找的題目提到第幾列、欄、宮時，盤面框出那一個範圍，其他都不標；沒有指定是哪一個就不框。
 - 刪候選數的課，自己找和跟著做一樣拆成兩步：先 `pick` 點出規律格，再 `remove`，第二步規律格已標好。這是新手教學，以引導明確為優先，不為熟練玩家省步驟（owner 2026-11-08）。
 - W-Wing 的跟著做和自己找都依講解順序拆三步：數對、連接格、刪候選數。自己找的盤面要讓該數對只有那兩格，才有唯一答案；跟著做直接說出是哪兩格。
+- 有順序的規律照順序點（owner 2026-11-08）：X 鏈、XY 鏈的格子從任一端沿著鏈點；XY-Wing、XYZ-Wing 先點樞紐，兩端不分先後；同時成立的格子（X-Wing 的四角、Swordfish 的六格、W-Wing 每一步的兩格）不分先後。
 - 點已填格亮起相同數字：`fill` 與 `place` 步驟會亮，亮起的數字不淡化；`pick`、`remove`、`note` 步驟沒有反應。
 - 解題演示和提示模式都沒有連到教學的入口：教學只從首頁和課程網址進入。
 
 **Interface / data shape**
 
-- `LessonStep` 種類：`show`（講解）、`place`（點格子，數字已定；`holdsDigit` 時點已填格不會改變亮的數字）、`light`（點任一個指定數字，把它點亮）、`pick`（點出規律格）、`remove`（點能刪候選數的格子）、`fill`（點格子再用懸浮鍵填數字）、`note`（「填數字與筆記」那課專用：打開筆記模式，在指定格寫下指定候選數）、`done`。
+- `LessonStep` 種類：`show`（講解）、`place`（點格子，數字已定；`holdsDigit` 時點已填格不會改變亮的數字）、`light`（點任一個指定數字，把它點亮）、`pick`（點出規律格；有 `order` 時照順序點：`chain` 從鏈的任一端開始一格接一格，`pivotFirst` 先點樞紐、其餘不分先後；點到還沒輪到的格子以 `order.key` 說明，已點的保留）、`remove`（點能刪候選數的格子）、`fill`（點格子再用懸浮鍵填數字）、`note`（「填數字與筆記」那課專用：打開筆記模式，在指定格寫下指定候選數）、`done`。
 - `LESSON_BY_TECHNIQUE: Record<TechniqueId, LessonId>`：19 個技巧都有對應，少一個就是型別錯誤。
 - `practiceReducer(step, state, action) => PracticeState`，答錯的原因放在 `state.feedback`，`action` 是 `{ kind: "tapCell", row, column }`、`{ kind: "pressDigit", digit }`、`{ kind: "toggleNoteMode" }` 或 `{ kind: "requestHint" }`。
 - `StepCellView` 新增選用的 `crossed`、`dimmed`、`dimmedNotes`，`StepHighlight` 新增 `"target"`。`BoardCell` 對應輸出 `data-dimmed`、`data-note-dimmed`、`data-variant="target"`，× 是帶 `data-skin="cell-cross"` 的圖示，沒有 `data-crossed`。

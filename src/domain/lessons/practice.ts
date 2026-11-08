@@ -130,11 +130,26 @@ const tapOnLight = (step: LightStep, state: PracticeState, cell: CellReference):
     return { ...state, sameDigit: value, solved: value === step.digit };
 };
 
+/** The cells a pick step takes next, given those picked so far. */
+const nextPicks = ({ targets, order }: PickStep, picked: readonly CellReference[]): readonly CellReference[] => {
+    if (order?.rule === "pivotFirst") return picked.length === 0 ? [targets[0]] : targets.slice(1);
+    if (order?.rule === "chain") {
+        const last = targets.length - 1;
+        if (picked.length === 0) return [targets[0], targets[last]];
+        const fromFirst = sameCell(picked[0], targets[0]);
+        return [targets[fromFirst ? picked.length : last - picked.length]];
+    }
+    return targets;
+};
+
 const tapOnPick = (step: PickStep, state: PracticeState, cell: CellReference): PracticeState => {
     if (includesCell(state.picked, cell)) return state;
     if (!includesCell(step.targets, cell)) {
         if (practiceValueAt(step.board, state, cell) !== 0) return state;
         return { ...state, feedback: { kind: "message", key: step.wrongKey } };
+    }
+    if (step.order && !includesCell(nextPicks(step, state.picked), cell)) {
+        return { ...state, feedback: { kind: "message", key: step.order.key } };
     }
     const picked = [...state.picked, cell];
     return { ...state, picked, solved: picked.length === step.targets.length };

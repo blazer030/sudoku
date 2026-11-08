@@ -98,6 +98,8 @@ An explanation SHALL show one idea per step on a board, with the digits and cand
 
 Practice SHALL be done by tapping cells, whatever the player's input settings. A step SHALL open the floating digit pad only when the player has to decide a digit, and SHALL open it regardless of the floating pad setting. Lessons SHALL NOT show a permanent digit pad.
 
+A pattern whose explanation follows an order SHALL be picked in that order: a chain's cells from either end, each joined to the last one picked, and a wing's pivot before its other cells. Cells that hold together, such as an X-Wing's corners, MAY be picked in any order. A cell of the pattern picked before its turn SHALL say why and keep the cells picked so far.
+
 #### Scenario: Placing a known digit
 
 - **WHEN** a step names digit 3 for box 2 and the player taps the one cell where it can go
@@ -107,6 +109,16 @@ Practice SHALL be done by tapping cells, whatever the player's input settings. A
 
 - **WHEN** a step asks which cell can lose a candidate and the player taps that cell
 - **THEN** the candidate is shown struck out, with no need to tap the note itself
+
+#### Scenario: A chain is picked in order
+
+- **WHEN** X-Chain's practice asks for the chain's four cells, and the player taps one end, then the other end
+- **THEN** the first end stays picked, the other is not, and the message says to go along the chain one cell at a time from an end; tapping the cells in order from either end solves the step
+
+#### Scenario: A wing's pivot comes first
+
+- **WHEN** XY-Wing's practice asks for the pivot and its two ends, and the player taps an end first
+- **THEN** nothing is picked and the message says to tap the pivot first; after the pivot, the ends may come in either order
 
 #### Scenario: Deciding a digit
 
@@ -174,6 +186,7 @@ A wrong tap SHALL leave the player on the same step, SHALL NOT change the board,
 | Cell outside the step's range | Look in the step's range first |
 | A cell of the pattern tapped during removal | This cell is part of the pattern and stays |
 | A cell without the candidates in question | This cell does not have those candidates |
+| A cell of an ordered pattern tapped before its turn | Start at an end and go one cell at a time, or tap the pivot first |
 
 #### Scenario: A cell that already holds a digit
 

@@ -5,6 +5,7 @@ import type { Lesson, LessonStep, PracticeStep, StepMarks } from "@/domain/lesso
 import { boardState } from "@/domain/lessons/lessonBoard";
 import { freshPracticeState, practiceReducer, practiceValueAt, type PracticeAction, type PracticeState } from "@/domain/lessons/practice";
 import { verifyLessonStep } from "@/domain/lessons/verifyLesson";
+import { arePeers } from "@/domain/solver/cellRelations";
 import type { CellReference } from "@/domain/solver/SolveStep";
 import { en } from "@/presentation/i18n/messages/en";
 import { zhHant } from "@/presentation/i18n/messages/zh-Hant";
@@ -22,6 +23,7 @@ const keysOf = (step: LessonStep): string[] => {
     const keys = [step.promptKey, step.successKey, ...step.hints.map(hint => hint.textKey)];
     if (step.kind === "remove") keys.push(step.keepKey, step.wrongKey);
     if (step.kind === "pick" || step.kind === "light") keys.push(step.wrongKey);
+    if (step.kind === "pick" && step.order) keys.push(step.order.key);
     if (step.kind === "place" && step.notYetKey !== undefined) keys.push(step.notYetKey);
     if (step.kind === "fill") {
         if (step.notYetKey !== undefined) keys.push(step.notYetKey);
@@ -237,6 +239,27 @@ describe.each(lessons.map(lesson => [lesson.id, lesson] as const))("lesson %s", 
         for (const step of lesson.steps) {
             if (isSingles) expect(step.board.showsCandidates).toBe(false);
             else if (lesson.id !== "fillingIn" && step.kind !== "done") expect(step.board.showsCandidates).toBe(true);
+        }
+    });
+});
+
+describe("the order a pattern is picked in", () => {
+    const ORDERS: Partial<Record<Lesson["id"], "chain" | "pivotFirst">> = { xChain: "chain", xyChain: "chain", xyWing: "pivotFirst", xyzWing: "pivotFirst" };
+    const picksOf = (lesson: Lesson) => lesson.steps.filter(step => step.kind === "pick");
+
+    it.each(lessons.map(lesson => [lesson.id, lesson] as const))("should give %s's picks an order only where its explanation has one", (id, lesson) => {
+        for (const step of picksOf(lesson)) expect(step.order?.rule).toBe(ORDERS[id]);
+    });
+
+    it.each(["xChain", "xyChain"] as const)("should list %s's picks along the chain, each cell seeing the next", (id) => {
+        for (const { targets } of picksOf(LESSONS[id])) {
+            for (let index = 1; index < targets.length; index++) expect(arePeers(targets[index - 1], targets[index])).toBe(true);
+        }
+    });
+
+    it.each(["xyWing", "xyzWing"] as const)("should list %s's pivot first, seeing every other cell", (id) => {
+        for (const { targets: [pivot, ...rest] } of picksOf(LESSONS[id])) {
+            for (const cell of rest) expect(arePeers(pivot, cell)).toBe(true);
         }
     });
 });

@@ -257,6 +257,74 @@ describe("practiceReducer", () => {
         });
     });
 
+    describe("picking a chain in order", () => {
+        const chain = [cell(0, 0), cell(0, 1), cell(0, 2), cell(1, 2)];
+        const step: PickStep = {
+            kind: "pick",
+            stage: "follow",
+            board: EASY_BOARD,
+            marks: {},
+            targets: chain,
+            order: { rule: "chain", key: "order" },
+            promptKey: "prompt",
+            successKey: "success",
+            wrongKey: "wrong",
+            hints: [],
+        };
+        const tapAll = (cells: readonly CellReference[]): PracticeState =>
+            cells.reduce((state, { row, column }) => practiceReducer(step, state, tap(row, column)), freshPracticeState());
+
+        it.each([["the first", chain], ["the last", [...chain].reverse()]])("should take the cells one after another from %s end", (_, cells) => {
+            expect(tapAll(cells).solved).toBe(true);
+        });
+
+        it("should say why for a cell in the middle tapped first", () => {
+            const state = tapAll([cell(0, 1)]);
+
+            expect(state.picked).toEqual([]);
+            expect(state.feedback).toEqual({ kind: "message", key: "order" });
+        });
+
+        it("should keep the cells picked so far when one is skipped", () => {
+            const state = tapAll([cell(0, 0), cell(1, 2)]);
+
+            expect(state.picked).toEqual([cell(0, 0)]);
+            expect(state.feedback).toEqual({ kind: "message", key: "order" });
+        });
+
+        it("should still call a cell off the chain wrong", () => {
+            expect(tapAll([cell(0, 0), cell(2, 2)]).feedback).toEqual({ kind: "message", key: "wrong" });
+        });
+    });
+
+    describe("picking a pivot first", () => {
+        const step: PickStep = {
+            kind: "pick",
+            stage: "follow",
+            board: EASY_BOARD,
+            marks: {},
+            targets: [cell(0, 1), cell(0, 0), cell(1, 2)],
+            order: { rule: "pivotFirst", key: "order" },
+            promptKey: "prompt",
+            successKey: "success",
+            wrongKey: "wrong",
+            hints: [],
+        };
+        const tapAll = (cells: readonly CellReference[]): PracticeState =>
+            cells.reduce((state, { row, column }) => practiceReducer(step, state, tap(row, column)), freshPracticeState());
+
+        it("should say why for an end tapped before the pivot", () => {
+            const state = tapAll([cell(1, 2)]);
+
+            expect(state.picked).toEqual([]);
+            expect(state.feedback).toEqual({ kind: "message", key: "order" });
+        });
+
+        it.each([[[cell(0, 0), cell(1, 2)]], [[cell(1, 2), cell(0, 0)]]])("should take the ends in either order after the pivot", ends => {
+            expect(tapAll([cell(0, 1), ...ends]).solved).toBe(true);
+        });
+    });
+
     describe("removing candidates", () => {
         // Row 8 (counted from 1) has the pair 5, 8 in columns 2 and 3; column 8 can lose 5
         const pairBoard: LessonBoard = {

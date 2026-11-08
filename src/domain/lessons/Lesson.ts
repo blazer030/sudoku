@@ -105,11 +105,22 @@ export interface LightStep extends PracticeStepBase {
     wrongKey: string;
 }
 
-/** Tap the cells of a pattern. */
+/**
+ * The order a pattern's cells are tapped in. `chain`: `targets` run along the chain, tapped from either end, each joined to the last.
+ * `pivotFirst`: `targets[0]` is the pivot, tapped before the rest, which come in any order.
+ */
+export interface PickOrder {
+    rule: "chain" | "pivotFirst";
+    /** Said for a cell of the pattern tapped before its turn. */
+    key: string;
+}
+
+/** Tap the cells of a pattern, in any order unless it has one. */
 export interface PickStep extends PracticeStepBase {
     kind: "pick";
     targets: readonly CellReference[];
     wrongKey: string;
+    order?: PickOrder;
 }
 
 /** Tap the cells that can lose a candidate. */
