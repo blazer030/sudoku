@@ -55,7 +55,7 @@
 
 ### Practice is a pure state machine in the domain
 
-`LessonPractice` 是純函式：輸入步驟、目前狀態與一次點格子或按數字，回傳新狀態與回饋原因（例如 `{ kind: "conflict", house: "column", number: 4, digit: 3 }`）。presentation 只負責把原因翻成文案。這樣每種答錯情境都能不開瀏覽器測試。
+`practiceReducer` 是純函式：輸入步驟、目前狀態與一次動作（點格子、按數字、切換筆記、要提示），回傳新的 `PracticeState`，答錯的原因放在 `state.feedback`（例如 `{ kind: "conflict", house: "column", number: 4, digit: 3 }`）。presentation 只負責把原因翻成文案。這樣每種答錯情境都能不開瀏覽器測試。
 
 ### Lesson boards reuse Cell and StepCellView
 
@@ -136,7 +136,7 @@
 
 - 網址的 `lessonId` 不存在時導回課程列表。
 - 進度資料壞掉或讀不到時視為全部未完成，不擋畫面。
-- 動態效果關閉時，所有轉場直接跳到結果；沒有依賴 WebGL 或 mask 的新效果，WebKit 上看起來相同。
+- 動態效果關閉時拿掉位移，淡入淡出保留（換課與完成彈窗），和專案其他畫面相同，沒有內容要等動畫結束才看得到；沒有依賴 WebGL 或 mask 的新效果，WebKit 上看起來相同。
 
 **Acceptance criteria**
 
