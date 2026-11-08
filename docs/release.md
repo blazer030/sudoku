@@ -2,7 +2,7 @@
 
 Every release ships two artifacts from the same commit:
 
-- **Web** — GitHub Pages, deployed automatically by `.github/workflows/gh-pages.yml` on every push to `master`.
+- **Web** — GitHub Pages at https://sudoku.blazer030.dev (its custom domain; the old `blazer030.github.io/sudoku/` redirects there), deployed automatically by `.github/workflows/gh-pages.yml` on every push to `master`.
 - **Android** — an AAB uploaded to Google Play by hand. The web assets are bundled inside the AAB, so the app on users' phones only changes when a new AAB is uploaded.
 
 Branching follows git flow (`master` / `develop`, `release/*`, `hotfix/*`, tags without a `v` prefix).

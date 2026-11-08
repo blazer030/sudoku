@@ -119,6 +119,6 @@ npm run android:build:release # Production release build + sync
 ## Environment
 
 - `.env` — `VITE_BASE_URL=/` (dev)
-- `.env.production` — `VITE_BASE_URL=/sudoku/` (deployed to a subdirectory)
+- `.env.production` — `VITE_BASE_URL=/` (served at the root of https://sudoku.blazer030.dev)
 - `VITE_CAPACITOR=1` switches the build to native (Capacitor) mode and skips
   the PWA service worker.

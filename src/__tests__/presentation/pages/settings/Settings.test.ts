@@ -531,7 +531,7 @@ describe("Settings.vue about group", () => {
         const wrapper = mountSettings();
         const link = wrapper.get("[data-testid='privacy-policy-link']");
 
-        expect(link.attributes("href")).toBe("https://blazer030.github.io/sudoku/privacy-policy.html");
+        expect(link.attributes("href")).toBe("https://sudoku.blazer030.dev/privacy-policy.html");
         expect(link.attributes("target")).toBe("_blank");
         expect(link.attributes("rel")).toContain("noopener");
         expect(link.text()).toBe("Privacy Policy");

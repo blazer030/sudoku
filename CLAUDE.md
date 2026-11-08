@@ -117,4 +117,4 @@ The app ships in English and Traditional Chinese (`src/presentation/i18n/message
 ## Environment
 
 - `.env` — `VITE_BASE_URL=/` (dev)
-- `.env.production` — `VITE_BASE_URL=/sudoku/` (deployed to subdirectory); also holds the `VITE_FIREBASE_*` web config (public identifiers)
+- `.env.production` — `VITE_BASE_URL=/` (served at the root of https://sudoku.blazer030.dev); also holds the `VITE_FIREBASE_*` web config (public identifiers)
