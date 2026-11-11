@@ -2,6 +2,7 @@ import type { lessonContentMediumEn } from "./contentMediumEn";
 
 export const lessonContentMediumZhHant: typeof lessonContentMediumEn = {
     pointing: {
+        toCandidates: "從這裡開始，多數技巧不是直接填數字，而是刪掉候選數，也就是一格還可能是的數字，所以盤面會把它們都列出來。玩遊戲時，可以在設定打開自動筆記，讓它幫你填好。",
         lookAtBox: "看第 3 宮的 2。這一宮還沒有 2，候選數裡的 2 只出現在兩格。",
         sameLine: "這兩格都在第 1 列。不管 2 落在哪一格，第 3 宮的 2 一定在第 1 列。",
         lineTaken: "一列只能有一個 2。第 1 列的 2 被第 3 宮占走了，這一列其他格就不能是 2。",

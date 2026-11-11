@@ -23,6 +23,7 @@ const POINTING_ALONE_PATTERN = cells([7, 4], [9, 4]);
 const POINTING: Lesson = {
     id: "pointing",
     steps: [
+        { kind: "show", stage: "explain", board: POINTING_SHOW_BOARD, marks: {}, textKey: key("pointing", "toCandidates") },
         {
             kind: "show",
             stage: "explain",

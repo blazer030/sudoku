@@ -417,6 +417,18 @@ describe("following a supposed digit to a dead end", () => {
     });
 });
 
+describe("the step into the Medium group", () => {
+    it("should open Pointing with the whole board and every candidate, nothing dimmed", () => {
+        const [first] = LESSONS.pointing.steps;
+
+        expect(first.kind).toBe("show");
+        expect(first.board.showsCandidates).toBe(true);
+        expect(first.marks.dimOthers).toBeUndefined();
+        expect(first.marks.noteDigit).toBeUndefined();
+        expect(first.marks.range).toBeUndefined();
+    });
+});
+
 describe("the Filling in lesson", () => {
     it("should point at its cells rather than name them, as it comes before the lesson on rows and columns", () => {
         for (const step of LESSONS.fillingIn.steps) {

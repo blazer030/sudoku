@@ -1,5 +1,6 @@
 export const lessonContentMediumEn = {
     pointing: {
+        toCandidates: "From here on, most techniques don't place a digit. They remove candidates, the digits a cell could still be, so lesson boards list them all. In a game, turn on Auto Notes in Settings to have them filled in.",
         lookAtBox: "Look at the 2s in box 3. The box has no 2 yet, and only two cells still have 2 as a candidate.",
         sameLine: "Both cells are in row 1. Whichever one gets the 2, box 3's 2 will be in row 1.",
         lineTaken: "A row holds only one 2. Box 3 has taken row 1's, so the other cells of row 1 can't be 2.",
