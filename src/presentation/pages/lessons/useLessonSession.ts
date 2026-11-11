@@ -53,6 +53,7 @@ export const useLessonSession = (lesson: Lesson) => {
         const state = practice.value;
         const cells = boardGrid(shownStep.value.board).map(row => row.map(digit => new PuzzleCell(digit)));
         (marks.value.answers ?? []).forEach(({ cell, digit }) => { cells[cell.row][cell.column].entry = digit; });
+        (marks.value.supposed ?? []).forEach(({ cell, digit }) => { cells[cell.row][cell.column].entry = digit; });
         state.placed.forEach(({ cell, digit }) => { cells[cell.row][cell.column].entry = digit; });
         if (state.wrong !== null) cells[state.wrong.cell.row][state.wrong.cell.column].entry = state.wrong.digit;
         const current = shownStep.value;

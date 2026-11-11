@@ -1,6 +1,6 @@
 ## 1. 假設的數字（模型、驗證、畫法）
 
-- [ ] 1.1 完成 Lesson boards are verified 對假設的數字與矛盾的檢查。依「假設的數字用標示表達，不放進盤面數字」與「矛盾的宣稱寫在步驟上，由測試證明」：
+- [x] 1.1 完成 Lesson boards are verified 對假設的數字與矛盾的檢查。依「假設的數字用標示表達，不放進盤面數字」與「矛盾的宣稱寫在步驟上，由測試證明」：
   - 在 `src/domain/lessons/Lesson.ts` 新增 `StepMarks.supposed`、`StepMarks.refuted` 與 `ShowStep.contradiction`。
   - `verifyLessonStep` 回報四種錯：假設格不是空格、假設跟盤面或前面的假設衝突、第一個假設是答案、之後的假設不是唯一數。
   - `verifyLessonStep` 也回報矛盾的範圍裡還有空格放得下。

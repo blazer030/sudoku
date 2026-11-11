@@ -121,6 +121,39 @@ describe("lessonCellViews", () => {
     });
 });
 
+describe("lessonCellViews with supposed digits", () => {
+    // Row 8, column 4 (counted from 1) is empty; a 7 fits there
+    const supposed = { cell: cell(7, 3), digit: 7 };
+
+    it("should show a supposed digit with the filled-in look", () => {
+        const views = lessonCellViews(BOARD, { supposed: [supposed] }, freshPracticeState());
+
+        expect(views[7][3].highlight).toBe("answer");
+    });
+
+    it("should show a refuted digit with the wrong-digit look", () => {
+        const views = lessonCellViews(BOARD, { supposed: [supposed], refuted: [cell(7, 3)] }, freshPracticeState());
+
+        expect(views[7][3].highlight).toBe("wrong");
+    });
+
+    it("should dim neither, even when the step dims other digits", () => {
+        const following = { cell: cell(5, 2), digit: 7 };
+        const marks = { supposed: [supposed, following], refuted: [cell(7, 3)], dimOthers: true, keepDigit: 2 };
+        const views = lessonCellViews(BOARD, marks, freshPracticeState());
+
+        expect(views[7][3].dimmed).toBe(false);
+        expect(views[5][2].dimmed).toBe(false);
+        expect(views[0][6].dimmed).toBe(true); // a board 7, not the kept digit
+    });
+
+    it("should list no candidates in a supposed cell", () => {
+        const views = lessonCellViews(CANDIDATE_BOARD, { supposed: [supposed] }, freshPracticeState());
+
+        expect(views[7][3].candidates).toBeNull();
+    });
+});
+
 describe("mergeMarks", () => {
     it("should add a hint's cells to the step's and let its digits win", () => {
         const merged = mergeMarks(

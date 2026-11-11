@@ -29,6 +29,8 @@ export const mergeMarks = (marks: StepMarks, hint: StepMarks | undefined): StepM
 
 const highlightOf = (marks: StepMarks, practice: PracticeState, cell: CellReference, value: number): StepHighlight => {
     if (practice.wrong !== null && sameCell(practice.wrong.cell, cell)) return "wrong";
+    if (has(marks.refuted, cell)) return "wrong";
+    if ((marks.supposed ?? []).some(supposed => sameCell(supposed.cell, cell))) return "answer";
     if (practice.selected !== null && sameCell(practice.selected, cell)) return "answer";
     if (has(marks.lit, cell)) return "answer";
     if ((marks.answers ?? []).some(answer => sameCell(answer.cell, cell))) return "answer";
@@ -47,7 +49,8 @@ export const lessonCellViews = (board: LessonBoard, marks: StepMarks, practice: 
     return Array.from({ length: BOARD_SIZE }, (_, row) => Array.from({ length: BOARD_SIZE }, (_, column): StepCellView => {
         const cell = { row, column };
         const answer = (marks.answers ?? []).find(item => sameCell(item.cell, cell));
-        const value = answer?.digit ?? practiceValueAt(board, practice, cell);
+        const supposed = (marks.supposed ?? []).find(item => sameCell(item.cell, cell));
+        const value = answer?.digit ?? supposed?.digit ?? practiceValueAt(board, practice, cell);
         const candidates = state !== null && value === 0 ? state.candidatesOf(row, column) : null;
         const isKept = has(marks.range, cell) || has(marks.pattern, cell) || has(marks.targets, cell) || has(marks.lit, cell)
             || has(practice.picked, cell) || removed.some(item => sameCell(item.cell, cell));
@@ -60,7 +63,7 @@ export const lessonCellViews = (board: LessonBoard, marks: StepMarks, practice: 
             emphasized: (has(marks.pattern, cell) || has(practice.picked, cell))
                 ? (candidates ?? []).filter(digit => (marks.emphasized ?? []).includes(digit))
                 : [],
-            dimmed: value !== 0 && isDimmedCell && value !== marks.keepDigit && value !== practice.sameDigit && answer === undefined,
+            dimmed: value !== 0 && isDimmedCell && value !== marks.keepDigit && value !== practice.sameDigit && answer === undefined && supposed === undefined,
             dimmedNotes: (candidates ?? []).filter(digit =>
                 isDimmedCell || (marks.noteDigit !== undefined && digit !== marks.noteDigit)),
             crossed: has(marks.crossed, cell),
