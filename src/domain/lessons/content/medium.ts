@@ -699,9 +699,24 @@ const NAKED_SUBSET: Lesson = {
     ],
 };
 
+// Row 8: 5, 7 and 8 fit only columns 2, 8 and 9, and the row's other empty cells, columns 4 to 6, hold only 1, 6 and 9
 const HIDDEN_TRIPLE_SHOW_BOARD: LessonBoard = {
-    values: "060384070087625031300179080090730065030910020870450010013047090608091040749063150",
-    removedCandidates: [removal(8, 7, 2), removal(8, 9, 2)],
+    values: "009002683600000000040065900100409805390150000005000104001580369403000200006073040",
+    // What the subsets in rows 1 and 5 already took, so row 8's triple is the one left to find
+    removedCandidates: [
+        removal(1, 1, 7),
+        removal(1, 2, 5),
+        removal(1, 2, 7),
+        removal(1, 5, 1),
+        removal(5, 3, 2),
+        removal(5, 3, 7),
+        removal(5, 3, 8),
+        removal(5, 6, 6),
+        removal(5, 6, 7),
+        removal(5, 8, 7),
+        removal(5, 9, 2),
+        removal(5, 9, 7),
+    ],
     showsCandidates: true,
 };
 const HIDDEN_QUAD_SHOW_BOARD: LessonBoard = {
@@ -733,7 +748,8 @@ const HIDDEN_SUBSET_ALONE_BOARD: LessonBoard = {
     showsCandidates: true,
 };
 
-const HIDDEN_TRIPLE_SHOW_PATTERN = cells([1, 7], [3, 7], [7, 7]);
+const HIDDEN_TRIPLE_SHOW_PATTERN = cells([8, 2], [8, 8], [8, 9]);
+const HIDDEN_TRIPLE_COMPLEMENT = cells([8, 4], [8, 5], [8, 6]);
 const HIDDEN_QUAD_SHOW_PATTERN = cells([1, 3], [4, 3], [5, 3], [7, 3]);
 const HIDDEN_SUBSET_FOLLOW_PATTERN = cells([4, 8], [4, 9], [6, 8]);
 const HIDDEN_SUBSET_ALONE_PATTERN = cells([1, 8], [2, 8], [9, 8]);
@@ -745,14 +761,14 @@ const HIDDEN_SUBSET: Lesson = {
             kind: "show",
             stage: "explain",
             board: HIDDEN_TRIPLE_SHOW_BOARD,
-            marks: { range: columnOf(7), pattern: HIDDEN_TRIPLE_SHOW_PATTERN, emphasized: [2, 5, 6], dimOthers: true },
+            marks: { range: rowOf(8), pattern: HIDDEN_TRIPLE_SHOW_PATTERN, emphasized: [5, 7, 8], dimOthers: true },
             textKey: key("hiddenSubset", "threeDigits"),
         },
         {
             kind: "show",
             stage: "explain",
             board: HIDDEN_TRIPLE_SHOW_BOARD,
-            marks: { range: columnOf(7), pattern: HIDDEN_TRIPLE_SHOW_PATTERN, emphasized: [2, 5, 6], dimOthers: true },
+            marks: { range: rowOf(8), pattern: HIDDEN_TRIPLE_SHOW_PATTERN, emphasized: [5, 7, 8], dimOthers: true },
             textKey: key("hiddenSubset", "onlyPlaces"),
         },
         {
@@ -760,14 +776,28 @@ const HIDDEN_SUBSET: Lesson = {
             stage: "explain",
             board: HIDDEN_TRIPLE_SHOW_BOARD,
             marks: {
-                range: columnOf(7),
+                range: rowOf(8),
                 pattern: HIDDEN_TRIPLE_SHOW_PATTERN,
-                emphasized: [2, 5, 6],
-                eliminated: [removal(1, 7, 9), removal(3, 7, 4), removal(7, 7, 8)],
+                emphasized: [5, 7, 8],
+                eliminated: [removal(8, 8, 1), removal(8, 9, 1)],
                 dimOthers: true,
             },
             textKey: key("hiddenSubset", "remove"),
             technique: "hiddenTriple",
+        },
+        {
+            kind: "show",
+            stage: "explain",
+            board: HIDDEN_TRIPLE_SHOW_BOARD,
+            marks: { range: rowOf(8), pattern: HIDDEN_TRIPLE_COMPLEMENT, emphasized: [1, 6, 9], dimOthers: true },
+            textKey: key("hiddenSubset", "complement"),
+        },
+        {
+            kind: "show",
+            stage: "explain",
+            board: HIDDEN_TRIPLE_SHOW_BOARD,
+            marks: { range: rowOf(8), pattern: [...HIDDEN_TRIPLE_SHOW_PATTERN, ...HIDDEN_TRIPLE_COMPLEMENT], dimOthers: true },
+            textKey: key("hiddenSubset", "complementWhy"),
         },
         {
             kind: "show",

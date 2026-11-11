@@ -521,6 +521,31 @@ describe("search tips", () => {
     });
 });
 
+describe("complementary subsets", () => {
+    const steps = LESSONS.hiddenSubset.steps;
+    const indexOf = (name: string) => steps.findIndex(step => step.kind === "show" && step.textKey === `lessons.content.hiddenSubset.${name}`);
+
+    it("should mark, after the hidden triple, the house's other empty cells as a naked group of two to four", () => {
+        const at = indexOf("complement");
+        expect(at).toBeGreaterThan(indexOf("remove"));
+        const step = steps[at];
+        const cells = step.marks.pattern ?? [];
+        const state = boardState(step.board);
+        const digits = new Set(cells.flatMap(cell => state.candidatesOf(cell.row, cell.column)));
+        const tripleCells = steps[indexOf("remove")].marks.pattern ?? [];
+        const [first] = tripleCells;
+        const sameRow = tripleCells.every(cell => cell.row === first.row);
+        const house = Array.from({ length: BOARD_SIZE }, (_, index) => (sameRow ? { row: first.row, column: index } : { row: index, column: first.column }));
+        const otherEmpty = house.filter(cell => state.valueAt(cell.row, cell.column) === 0
+            && !tripleCells.some(triple => triple.row === cell.row && triple.column === cell.column));
+
+        expect(cells.length).toBeGreaterThanOrEqual(2);
+        expect(cells.length).toBeLessThanOrEqual(4);
+        expect(digits.size).toBe(cells.length);
+        expect(sortedCells(cells)).toEqual(sortedCells(otherEmpty));
+    });
+});
+
 describe("the Filling in lesson", () => {
     it("should point at its cells rather than name them, as it comes before the lesson on rows and columns", () => {
         for (const step of LESSONS.fillingIn.steps) {

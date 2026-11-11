@@ -34,7 +34,7 @@
 - [x] 3.2 [after: 3.1] 完成 Counter-examples and search tips 的宮區塊摒除與行列區塊摒除兩個反例，依「反例與搜尋方法都是講解步驟」：
   - 各加一步講解，標出某數字在一宮（或一條線）裡分散的候選數，不標任何刪除。
   - 在 `lessonContent.test.ts` 加測試，證明宮區塊摒除反例的候選數不在同一列或欄、行列區塊摒除反例的候選數不在同一宮（新測試先失敗）。
-- [ ] 3.3 完成 Counter-examples and search tips 的 X-Wing 找法與 XY-Wing 找法、沒有可刪的例子：
+- [x] 3.3 完成 Counter-examples and search tips 的 X-Wing 找法與 XY-Wing 找法、沒有可刪的例子：
   - X-Wing 講解加一步，標出某數字剛好只剩兩格的列。
   - XY-Wing 講解加兩步：一步標出只有兩個候選數的格子；另一步標出一組 XY-Wing，說明看得到兩端的格子裡沒有共有的數字。
   - 在 `lessonContent.test.ts` 加測試證明三件事：標出的列都只剩兩格、標出的格子都只有兩個候選數、反例的 XY-Wing 形狀成立且沒有可刪（新測試先失敗）。
