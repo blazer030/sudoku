@@ -95,6 +95,8 @@ const cellsOfHouse = ({ house, number }: NamedHouse): CellReference[] => {
     return cells;
 };
 
+const sortedDigits = (digits: readonly number[]): number[] => [...digits].sort((first, second) => first - second);
+
 const sortedCells = (cells: readonly CellReference[]): CellReference[] =>
     [...cells].sort((first, second) => first.row - second.row || first.column - second.column);
 
@@ -467,6 +469,55 @@ describe("counter-examples", () => {
         const places = expectWholeHouse(step, cell => cell.row === row);
 
         expect(distinct(places.map(boxNumber))).toBeGreaterThan(1);
+    });
+});
+
+describe("search tips", () => {
+    const showStep = (lesson: Lesson, name: string): LessonStep | undefined =>
+        lesson.steps.find(step => step.kind === "show" && step.textKey === `lessons.content.${lesson.id}.${name}`);
+    const allCells = Array.from({ length: BOARD_SIZE * BOARD_SIZE }, (_, index) => ({ row: Math.floor(index / BOARD_SIZE), column: index % BOARD_SIZE }));
+
+    it("should mark only rows where X-Wing's digit has exactly two places, and those places", () => {
+        const step = showStep(LESSONS.xWing, "findIt");
+        expect(step).toBeDefined();
+        if (step === undefined) return;
+        const digit = step.marks.noteDigit ?? 0;
+        const state = boardState(step.board);
+        const rows = [...new Set((step.marks.range ?? []).map(cell => cell.row))];
+        const places = rows.map(row => allCells.filter(cell => cell.row === row && state.candidatesOf(row, cell.column).includes(digit)));
+
+        expect(rows.length).toBeGreaterThan(1);
+        for (const placesInRow of places) expect(placesInRow).toHaveLength(2);
+        expect(sortedCells(step.marks.pattern ?? [])).toEqual(sortedCells(places.flat()));
+    });
+
+    it("should mark XY-Wing's two-candidate cells, all of them and nothing else", () => {
+        const step = showStep(LESSONS.xyWing, "findIt");
+        expect(step).toBeDefined();
+        if (step === undefined) return;
+        const state = boardState(step.board);
+        const twoCandidates = allCells.filter(cell => state.candidatesOf(cell.row, cell.column).length === 2);
+
+        expect(sortedCells(step.marks.pattern ?? [])).toEqual(sortedCells(twoCandidates));
+    });
+
+    it("should show an XY-Wing whose shared digit is in no cell that sees both ends", () => {
+        const step = showStep(LESSONS.xyWing, "nothingToRemove");
+        expect(step).toBeDefined();
+        if (step === undefined) return;
+        const state = boardState(step.board);
+        const candidates = (cell: CellReference) => state.candidatesOf(cell.row, cell.column);
+        const [pivot, firstEnd, secondEnd] = step.marks.pattern ?? [];
+        const [shared] = step.marks.emphasized ?? [];
+        const [x, y] = candidates(pivot);
+
+        expect(candidates(pivot)).toHaveLength(2);
+        expect(arePeers(pivot, firstEnd) && arePeers(pivot, secondEnd)).toBe(true);
+        expect(sortedDigits(candidates(firstEnd))).toEqual(sortedDigits([x, shared]));
+        expect(sortedDigits(candidates(secondEnd))).toEqual(sortedDigits([y, shared]));
+        const seers = allCells.filter(cell => arePeers(cell, firstEnd) && arePeers(cell, secondEnd));
+        expect(seers.filter(cell => candidates(cell).includes(shared))).toEqual([]);
+        expect(step.marks.eliminated).toBeUndefined();
     });
 });
 

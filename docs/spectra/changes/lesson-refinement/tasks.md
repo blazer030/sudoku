@@ -31,7 +31,7 @@
   - 宮區塊摒除開頭加一步講解，用這課第一個盤面、列出全部候選數、不淡化任何數字。
   - 文案說明從這裡起多半是刪候選數，以及遊戲裡的自動筆記在設定。
   - 在 `lessonContent.test.ts` 加測試：宮區塊摒除第一步沒有 `dimOthers`，盤面列出候選數（新測試先失敗）。
-- [ ] 3.2 [after: 3.1] 完成 Counter-examples and search tips 的宮區塊摒除與行列區塊摒除兩個反例，依「反例與搜尋方法都是講解步驟」：
+- [x] 3.2 [after: 3.1] 完成 Counter-examples and search tips 的宮區塊摒除與行列區塊摒除兩個反例，依「反例與搜尋方法都是講解步驟」：
   - 各加一步講解，標出某數字在一宮（或一條線）裡分散的候選數，不標任何刪除。
   - 在 `lessonContent.test.ts` 加測試，證明宮區塊摒除反例的候選數不在同一列或欄、行列區塊摒除反例的候選數不在同一宮（新測試先失敗）。
 - [ ] 3.3 完成 Counter-examples and search tips 的 X-Wing 找法與 XY-Wing 找法、沒有可刪的例子：

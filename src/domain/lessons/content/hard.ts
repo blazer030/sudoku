@@ -79,6 +79,17 @@ export const X_WING: Lesson = {
             technique: "xWing",
         },
         {
+            kind: "show",
+            stage: "explain",
+            board: X_WING_SHOW_BOARD,
+            marks: {
+                ...X_WING_SHOW_MARKS,
+                range: [...rowOf(1), ...rowOf(2), ...rowOf(7)],
+                pattern: cells([1, 3], [1, 7], [2, 1], [2, 9], [7, 3], [7, 7]),
+            },
+            textKey: key("xWing", "findIt"),
+        },
+        {
             kind: "pick",
             stage: "follow",
             board: X_WING_FOLLOW_BOARD,
@@ -376,6 +387,28 @@ export const XY_WING: Lesson = {
             marks: { ...XY_WING_SHOW_MARKS, range: [...rowOf(4), ...columnOf(1)], eliminated: [removal(4, 1, 3)] },
             textKey: key("xyWing", "remove"),
             technique: "xyWing",
+        },
+        {
+            kind: "show",
+            stage: "explain",
+            board: XY_WING_SHOW_BOARD,
+            marks: {
+                pattern: cells([3, 4], [3, 5], [4, 1], [4, 4], [5, 2], [5, 5], [7, 1], [7, 2], [7, 5], [8, 1], [8, 2], [8, 4]),
+                dimOthers: true,
+            },
+            textKey: key("xyWing", "findIt"),
+        },
+        {
+            kind: "show",
+            stage: "explain",
+            board: XY_WING_SHOW_BOARD,
+            marks: {
+                pattern: cells([8, 4], [3, 4], [8, 2]),
+                links: [link([8, 4], [3, 4], 5), link([8, 4], [8, 2], 7)],
+                emphasized: [3],
+                dimOthers: true,
+            },
+            textKey: key("xyWing", "nothingToRemove"),
         },
         {
             kind: "pick",
