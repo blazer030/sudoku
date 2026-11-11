@@ -49,6 +49,10 @@ export interface StepMarks {
     /** Other candidates are dimmed, wherever they are. */
     noteDigit?: number;
     links?: readonly ChainLink[];
+    /** Digits supposed for the length of an argument, in the order it places them; never part of the board. */
+    supposed?: readonly Assignment[];
+    /** Supposed cells shown as refuted. */
+    refuted?: readonly CellReference[];
 }
 
 export interface LessonHint {
@@ -71,6 +75,13 @@ export interface ShowStep extends LessonStepBase {
     textKey: string;
     /** When set, the marks' eliminations are checked against this technique. */
     technique?: TechniqueId;
+    /** Claims that, with every supposed digit on the board, the range has no place left for the digit. */
+    contradiction?: Contradiction;
+}
+
+export interface Contradiction {
+    digit: number;
+    range: readonly CellReference[];
 }
 
 interface PracticeStepBase extends LessonStepBase {
