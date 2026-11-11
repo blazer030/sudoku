@@ -89,6 +89,11 @@ const SEVENS_OF_BOX_ONE = { keepDigit: 7, dimOthers: true };
 const SIXES_OF_ROW_NINE = { keepDigit: 6, dimOthers: true };
 const ROW_NINE_CROSSED_BY_BOX = cells([9, 4], [9, 7], [9, 8], [9, 9]);
 
+// A 7 fits row 8, column 4 (its answer is 9); it leaves row 6's 7 row 6, column 3, which takes box 1's only place
+const SUPPOSED_SEVEN = { cell: at(8, 4), digit: 7 };
+const FOLLOWING_SEVEN = { cell: at(6, 3), digit: 7 };
+const SEVENS = { keepDigit: 7, dimOthers: true };
+
 export const HIDDEN_SINGLE: Lesson = {
     id: "hiddenSingle",
     steps: [
@@ -176,6 +181,48 @@ export const HIDDEN_SINGLE: Lesson = {
             board: EASY_BOARD,
             marks: { ...SIXES_OF_ROW_NINE, range: [...rowOf(9), ...boxOf(9)], targets: [at(8, 9)], crossed: cells([9, 7], [9, 8], [9, 9]) },
             textKey: key("hiddenSingle", "boxesFirst"),
+        },
+        {
+            kind: "show",
+            stage: "explain",
+            board: EASY_BOARD,
+            marks: { ...SEVENS, range: [...rowOf(8), ...columnOf(4), ...boxOf(8)], supposed: [SUPPOSED_SEVEN] },
+            textKey: key("hiddenSingle", "supposeFits"),
+        },
+        {
+            kind: "show",
+            stage: "explain",
+            board: EASY_BOARD,
+            marks: {
+                ...SEVENS,
+                range: rowOf(6),
+                targets: cells([9, 1], [2, 5], [1, 7]),
+                crossed: cells([6, 1], [6, 4], [6, 5], [6, 7]),
+                supposed: [SUPPOSED_SEVEN, FOLLOWING_SEVEN],
+            },
+            textKey: key("hiddenSingle", "supposeFollows"),
+        },
+        {
+            kind: "show",
+            stage: "explain",
+            board: EASY_BOARD,
+            marks: {
+                ...SEVENS,
+                range: boxOf(1),
+                targets: cells([1, 7], [2, 5]),
+                crossed: cells([1, 1], [1, 2], [1, 3], [2, 3], [3, 3]),
+                supposed: [SUPPOSED_SEVEN, FOLLOWING_SEVEN],
+                refuted: [SUPPOSED_SEVEN.cell],
+            },
+            contradiction: { digit: 7, range: boxOf(1) },
+            textKey: key("hiddenSingle", "supposeFails"),
+        },
+        {
+            kind: "show",
+            stage: "explain",
+            board: EASY_BOARD,
+            marks: { ...SEVENS, lit: [SUPPOSED_SEVEN.cell] },
+            textKey: key("hiddenSingle", "onlyCertain"),
         },
         {
             kind: "show",

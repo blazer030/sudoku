@@ -387,6 +387,36 @@ describe("hidden singles in a row", () => {
     });
 });
 
+describe("following a supposed digit to a dead end", () => {
+    const steps = LESSONS.hiddenSingle.steps;
+    const indexOf = (name: string) => steps.findIndex(step => step.kind === "show" && step.textKey === `lessons.content.hiddenSingle.${name}`);
+    const supposing = steps.flatMap((step, index) => ((step.marks.supposed ?? []).length > 0 ? [index] : []));
+
+    it("should come after the row explanation and before the tip on lighting digits", () => {
+        expect(supposing.length).toBeGreaterThan(0);
+        expect(supposing[0]).toBeGreaterThan(indexOf("boxesFirst"));
+        expect(supposing[supposing.length - 1]).toBeLessThan(indexOf("tapToLight"));
+    });
+
+    it("should suppose one digit, add one at each step, and end on a contradiction that refutes the first", () => {
+        const runs = supposing.map(index => steps[index]);
+        const last = runs[runs.length - 1];
+        // The last step adds no digit: it frames the house the digits so far leave empty
+        runs.slice(0, -1).forEach((step, order) => { expect(step.marks.supposed).toHaveLength(order + 1); });
+        expect(last.marks.supposed).toHaveLength(runs.length - 1);
+
+        expect(last.kind === "show" && last.contradiction !== undefined).toBe(true);
+        expect(last.marks.refuted).toEqual([runs[0].marks.supposed?.[0].cell]);
+    });
+
+    it("should close with a step that supposes nothing", () => {
+        const after = steps[supposing[supposing.length - 1] + 1];
+
+        expect(after.kind).toBe("show");
+        expect(after.marks.supposed).toBeUndefined();
+    });
+});
+
 describe("the Filling in lesson", () => {
     it("should point at its cells rather than name them, as it comes before the lesson on rows and columns", () => {
         for (const step of LESSONS.fillingIn.steps) {

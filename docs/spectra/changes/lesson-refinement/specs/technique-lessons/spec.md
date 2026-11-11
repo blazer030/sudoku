@@ -25,9 +25,9 @@ The Hidden Single lesson's explanation SHALL show that a digit which fits a cell
 ##### Example: the steps of the demonstration
 | Step | Board shows | Text says |
 | ---- | ----------- | --------- |
-| 1 | A supposed 2 in an empty cell | It fits: no 2 in its row, column or box |
+| 1 | A supposed 7 in an empty cell | It fits: no 7 in its row, column or box |
 | 2 to n−1 | Each following single added | This digit follows from the one before |
-| n | A box framed, its empty cells crossed, the first 2 marked wrong | The box has no place left for a 2, so the first 2 was wrong |
+| n | A box framed, its empty cells crossed, the first 7 marked wrong | The box has no place left for a 7, so the first 7 was wrong |
 | n+1 | The board without the supposed digits | Fill a digit only when it must go there |
 
 ### Requirement: From placing digits to removing candidates
