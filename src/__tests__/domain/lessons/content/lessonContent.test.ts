@@ -352,6 +352,41 @@ describe("the Hidden Single lesson", () => {
     });
 });
 
+describe("hidden singles in a row", () => {
+    const steps = LESSONS.hiddenSingle.steps;
+    const tipAt = steps.findIndex(step => step.kind === "show" && step.textKey === "lessons.content.hiddenSingle.tapToLight");
+    const cellsOfRow = (row: number): CellReference[] => Array.from({ length: BOARD_SIZE }, (_, column) => ({ row, column }));
+    const cellsOfBox = ({ row, column }: CellReference): CellReference[] => Array.from({ length: BOARD_SIZE }, (_, index) => ({
+        row: Math.floor(row / 3) * 3 + Math.floor(index / 3),
+        column: Math.floor(column / 3) * 3 + (index % 3),
+    }));
+    // Where the digit can still go among these cells
+    const placesOf = (step: LessonStep, digit: number, among: CellReference[]): CellReference[] => {
+        const state = boardState(step.board);
+        return among.filter(cell => state.candidatesOf(cell.row, cell.column).includes(digit));
+    };
+    // Only the row gives the answer: it is the row's one place for the digit, while its box has more
+    const isRowOnly = (step: LessonStep, cell: CellReference, digit: number): boolean =>
+        placesOf(step, digit, cellsOfRow(cell.row)).length === 1 && placesOf(step, digit, cellsOfBox(cell)).length >= 2;
+
+    it("should show a hidden single that only its row gives, before the tip on lighting digits", () => {
+        const rowExamples = steps.slice(0, tipAt).filter(step => (step.marks.answers ?? [])
+            .some(({ cell, digit }) => isRowOnly(step, cell, digit)));
+
+        expect(rowExamples.length).toBeGreaterThan(0);
+    });
+
+    it("should have the player place a digit that only its row gives", () => {
+        const rowSteps = steps.filter(step => step.kind === "place" && step.stage === "follow" && isRowOnly(step, step.answer, step.digit));
+
+        expect(rowSteps).toHaveLength(1);
+        const [rowStep] = rowSteps;
+        if (rowStep.kind !== "place") return;
+        expect(sortedCells(rowStep.range ?? [])).toEqual(sortedCells(cellsOfRow(rowStep.answer.row)));
+        expect(rowStep.holdsDigit).toBe(true);
+    });
+});
+
 describe("the Filling in lesson", () => {
     it("should point at its cells rather than name them, as it comes before the lesson on rows and columns", () => {
         for (const step of LESSONS.fillingIn.steps) {

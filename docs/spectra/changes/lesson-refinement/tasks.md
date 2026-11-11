@@ -5,7 +5,7 @@
   - `verifyLessonStep` 回報四種錯：假設格不是空格、假設跟盤面或前面的假設衝突、第一個假設是答案、之後的假設不是唯一數。
   - `verifyLessonStep` 也回報矛盾的範圍裡還有空格放得下。
   - 先在 `src/__tests__/domain/lessons/verifyLesson.test.ts` 為每一種錯各寫一個故意寫錯的步驟，確認新測試先失敗再轉綠；現有測試全綠。
-- [ ] 1.2 [after: 1.1] 完成 Supposed digits 的畫法，依「假設的數字沿用現有的填入與填錯樣子」：
+- [x] 1.2 [after: 1.1] 完成 Supposed digits 的畫法，依「假設的數字沿用現有的填入與填錯樣子」：
   - `lessonCellViews` 對假設格顯示該數字，highlight 為 `answer`；`refuted` 的格子為 `wrong`。
   - 兩者都不淡化，即使步驟有 `dimOthers`。
   - 遊戲、提示模式、解題演示、遊戲回顧用的 `stepCellView` 不受影響。
@@ -13,7 +13,7 @@
 
 ## 2. 隱藏唯一數
 
-- [ ] 2.1 完成 Hidden Single in rows and columns，依「列／欄的隱藏唯一數放在宮的講解之後」：
+- [x] 2.1 完成 Hidden Single in rows and columns，依「列／欄的隱藏唯一數放在宮的講解之後」：
   - 講解在宮的四步之後加一個列的例子（框出列、打叉放不下的格、標出剩下那格），接著加一步說明先看宮的理由。
   - 跟著做在「第 2 宮找 3」之後加一個在列裡放數字的 `place` 步驟，提示分三層：列、打叉、答案格。
   - 盤面要讓列只剩一格，但答案格所在的宮還有兩格以上，必要時另用一個盤面。

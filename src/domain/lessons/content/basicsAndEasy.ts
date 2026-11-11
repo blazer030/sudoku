@@ -85,6 +85,10 @@ export const FILLING_IN: Lesson = {
 
 const SEVENS_OF_BOX_ONE = { keepDigit: 7, dimOthers: true };
 
+// Row 9's 6: column 4 and box 9 leave it row 9, column 2, while box 7 still has two places for it
+const SIXES_OF_ROW_NINE = { keepDigit: 6, dimOthers: true };
+const ROW_NINE_CROSSED_BY_BOX = cells([9, 4], [9, 7], [9, 8], [9, 9]);
+
 export const HIDDEN_SINGLE: Lesson = {
     id: "hiddenSingle",
     steps: [
@@ -136,6 +140,47 @@ export const HIDDEN_SINGLE: Lesson = {
             kind: "show",
             stage: "explain",
             board: EASY_BOARD,
+            marks: { ...SIXES_OF_ROW_NINE, range: rowOf(9) },
+            textKey: key("hiddenSingle", "lookAtRow"),
+        },
+        {
+            kind: "show",
+            stage: "explain",
+            board: EASY_BOARD,
+            marks: { ...SIXES_OF_ROW_NINE, range: [...rowOf(9), ...columnOf(4)], targets: [at(5, 4)], crossed: [at(9, 4)] },
+            textKey: key("hiddenSingle", "rowColumn"),
+        },
+        {
+            kind: "show",
+            stage: "explain",
+            board: EASY_BOARD,
+            marks: { ...SIXES_OF_ROW_NINE, range: [...rowOf(9), ...boxOf(9)], targets: cells([5, 4], [8, 9]), crossed: ROW_NINE_CROSSED_BY_BOX },
+            textKey: key("hiddenSingle", "rowBox"),
+        },
+        {
+            kind: "show",
+            stage: "explain",
+            board: EASY_BOARD,
+            marks: {
+                ...SIXES_OF_ROW_NINE,
+                range: rowOf(9),
+                targets: cells([5, 4], [8, 9]),
+                crossed: ROW_NINE_CROSSED_BY_BOX,
+                answers: [{ cell: at(9, 2), digit: 6 }],
+            },
+            textKey: key("hiddenSingle", "rowOnly"),
+        },
+        {
+            kind: "show",
+            stage: "explain",
+            board: EASY_BOARD,
+            marks: { ...SIXES_OF_ROW_NINE, range: [...rowOf(9), ...boxOf(9)], targets: [at(8, 9)], crossed: cells([9, 7], [9, 8], [9, 9]) },
+            textKey: key("hiddenSingle", "boxesFirst"),
+        },
+        {
+            kind: "show",
+            stage: "explain",
+            board: EASY_BOARD,
             marks: { targets: cells([1, 7], [2, 5], [7, 8], [9, 1]) },
             textKey: key("hiddenSingle", "tapToLight"),
         },
@@ -174,6 +219,28 @@ export const HIDDEN_SINGLE: Lesson = {
                 { textKey: key("hiddenSingle", "followHintColumns"), marks: { range: [...columnOf(4), ...columnOf(6)] } },
                 { textKey: key("hiddenSingle", "followHintCrossed"), marks: { crossed: cells([1, 6], [2, 4], [2, 6], [3, 4]) } },
                 { textKey: key("hiddenSingle", "followHintAnswer"), marks: { lit: [at(3, 5)] } },
+            ],
+        },
+        {
+            kind: "place",
+            stage: "follow",
+            board: EASY_BOARD,
+            marks: {
+                range: rowOf(7),
+                targets: cells([2, 2], [4, 1], [9, 6]),
+                keepDigit: 8,
+                dimOthers: true,
+            },
+            digit: 8,
+            answer: at(7, 7),
+            range: rowOf(7),
+            holdsDigit: true,
+            promptKey: key("hiddenSingle", "followRowPrompt"),
+            successKey: key("hiddenSingle", "followRowSuccess"),
+            hints: [
+                { textKey: key("hiddenSingle", "followRowHintDigits"), marks: { range: [...columnOf(1), ...columnOf(2), ...boxOf(8)] } },
+                { textKey: key("hiddenSingle", "followRowHintCrossed"), marks: { crossed: cells([7, 1], [7, 2], [7, 5], [7, 6]) } },
+                { textKey: key("hiddenSingle", "followRowHintAnswer"), marks: { lit: [at(7, 7)] } },
             ],
         },
         {
