@@ -429,6 +429,47 @@ describe("the step into the Medium group", () => {
     });
 });
 
+describe("counter-examples", () => {
+    const showStep = (lesson: Lesson, name: string): LessonStep | undefined =>
+        lesson.steps.find(step => step.kind === "show" && step.textKey === `lessons.content.${lesson.id}.${name}`);
+    const distinct = (values: number[]) => new Set(values).size;
+    const boxNumber = ({ row, column }: CellReference) => Math.floor(row / 3) * 3 + Math.floor(column / 3);
+
+    // The marked cells are every place the step's digit has in its house, and nothing is removed
+    const expectWholeHouse = (step: LessonStep | undefined, inHouse: (cell: CellReference) => boolean) => {
+        expect(step).toBeDefined();
+        if (step === undefined) return [];
+        const digit = step.marks.noteDigit ?? 0;
+        const state = boardState(step.board);
+        const places: CellReference[] = [];
+        for (let row = 0; row < BOARD_SIZE; row++) {
+            for (let column = 0; column < BOARD_SIZE; column++) {
+                if (inHouse({ row, column }) && state.candidatesOf(row, column).includes(digit)) places.push({ row, column });
+            }
+        }
+        expect(sortedCells(step.marks.pattern ?? [])).toEqual(sortedCells(places));
+        expect(step.marks.eliminated).toBeUndefined();
+        return places;
+    };
+
+    it("should show a box whose candidates for a digit lie on more than one row and column", () => {
+        const step = showStep(LESSONS.pointing, "notOneLine");
+        const box = step?.marks.pattern?.[0];
+        const places = expectWholeHouse(step, cell => box !== undefined && boxNumber(cell) === boxNumber(box));
+
+        expect(distinct(places.map(cell => cell.row))).toBeGreaterThan(1);
+        expect(distinct(places.map(cell => cell.column))).toBeGreaterThan(1);
+    });
+
+    it("should show a row whose candidates for a digit lie in more than one box", () => {
+        const step = showStep(LESSONS.claiming, "notOneBox");
+        const row = step?.marks.pattern?.[0]?.row;
+        const places = expectWholeHouse(step, cell => cell.row === row);
+
+        expect(distinct(places.map(boxNumber))).toBeGreaterThan(1);
+    });
+});
+
 describe("the Filling in lesson", () => {
     it("should point at its cells rather than name them, as it comes before the lesson on rows and columns", () => {
         for (const step of LESSONS.fillingIn.steps) {

@@ -60,6 +60,13 @@ const POINTING: Lesson = {
             technique: "pointing",
         },
         {
+            kind: "show",
+            stage: "explain",
+            board: POINTING_SHOW_BOARD,
+            marks: { range: boxOf(3), pattern: cells([1, 8], [1, 9], [3, 9]), emphasized: [3], noteDigit: 3, dimOthers: true },
+            textKey: key("pointing", "notOneLine"),
+        },
+        {
             kind: "pick",
             stage: "follow",
             board: POINTING_FOLLOW_BOARD,
@@ -188,6 +195,13 @@ const CLAIMING: Lesson = {
             },
             textKey: key("claiming", "remove"),
             technique: "claiming",
+        },
+        {
+            kind: "show",
+            stage: "explain",
+            board: CLAIMING_SHOW_BOARD,
+            marks: { range: rowOf(3), pattern: cells([3, 3], [3, 7]), emphasized: [2], noteDigit: 2, dimOthers: true },
+            textKey: key("claiming", "notOneBox"),
         },
         {
             kind: "pick",

@@ -27,7 +27,7 @@
 
 ## 3. 中等與困難的講解
 
-- [ ] 3.1 完成 From placing digits to removing candidates 與 Explanation steps 的例外，依「進中等組的過渡是宮區塊摒除的第一步」：
+- [x] 3.1 完成 From placing digits to removing candidates 與 Explanation steps 的例外，依「進中等組的過渡是宮區塊摒除的第一步」：
   - 宮區塊摒除開頭加一步講解，用這課第一個盤面、列出全部候選數、不淡化任何數字。
   - 文案說明從這裡起多半是刪候選數，以及遊戲裡的自動筆記在設定。
   - 在 `lessonContent.test.ts` 加測試：宮區塊摒除第一步沒有 `dimOthers`，盤面列出候選數（新測試先失敗）。
