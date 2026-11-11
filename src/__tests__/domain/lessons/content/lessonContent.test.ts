@@ -546,6 +546,36 @@ describe("complementary subsets", () => {
     });
 });
 
+describe("one claim per explanation step", () => {
+    const indexOf = (lesson: Lesson, name: string) =>
+        lesson.steps.findIndex(step => step.kind === "show" && step.textKey === `lessons.content.${lesson.id}.${name}`);
+
+    it.each(["caseFive", "caseNine"])("should light only XYZ-Wing's pivot and the end its %s step names", (name) => {
+        const lesson = LESSONS.xyzWing;
+        const step = lesson.steps[indexOf(lesson, name)];
+        const [pivot] = step.marks.pattern ?? [];
+
+        expect(step.marks.lit).toHaveLength(2);
+        expect(step.marks.lit).toContainEqual(pivot);
+    });
+
+    it.each([
+        ["fish", "jellyfish", "jellyfishRemove", "jellyfish"],
+        ["xyzWing", "wxyz", "wxyzRemove", "wxyzWing"],
+    ] as const)("should show %s's %s pattern with nothing removed, then the removal in its own step", (id, patternName, removalName, technique) => {
+        const lesson = LESSONS[id];
+        const at = indexOf(lesson, patternName);
+        const pattern = lesson.steps[at];
+        const removal = lesson.steps[at + 1];
+
+        expect(at).toBeGreaterThan(-1);
+        expect(pattern.marks.eliminated).toBeUndefined();
+        expect(removal.kind === "show" && removal.textKey).toBe(`lessons.content.${id}.${removalName}`);
+        expect(removal.kind === "show" && removal.technique).toBe(technique);
+        expect(removal.marks.eliminated?.length).toBeGreaterThan(0);
+    });
+});
+
 describe("the Filling in lesson", () => {
     it("should point at its cells rather than name them, as it comes before the lesson on rows and columns", () => {
         for (const step of LESSONS.fillingIn.steps) {
