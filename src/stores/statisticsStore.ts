@@ -54,8 +54,8 @@ export const useStatisticsStore = defineStore("statistics", () => {
     const history = ref<GameResult[]>([]);
     let repository: StatisticsRepository | null = null;
 
-    const setRepository = (repo: StatisticsRepository) => {
-        repository = repo;
+    const setRepository = (newRepository: StatisticsRepository) => {
+        repository = newRepository;
     };
 
     const loadFromRepository = async () => {

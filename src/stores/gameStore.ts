@@ -27,8 +27,8 @@ export const useGameStore = defineStore("game", () => {
         analytics = service;
     };
 
-    const setGameRepository = (repo: GameRepository) => {
-        gameRepository = repo;
+    const setGameRepository = (repository: GameRepository) => {
+        gameRepository = repository;
     };
 
     const loadFromRepository = async () => {

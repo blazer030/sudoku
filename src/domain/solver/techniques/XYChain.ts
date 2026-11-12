@@ -11,17 +11,17 @@ export class XYChain implements Technique {
     public find(state: BoardState): SolveStep | null {
         const bivalueCells = collectBivalueCells(state);
         for (const start of bivalueCells) {
-            const [v1, v2] = start.candidates;
-            const tryAssumeV1 = dfs(state, bivalueCells, start, v2, v1, [start.cell], []);
-            if (tryAssumeV1) return tryAssumeV1;
-            const tryAssumeV2 = dfs(state, bivalueCells, start, v1, v2, [start.cell], []);
-            if (tryAssumeV2) return tryAssumeV2;
+            const [firstDigit, secondDigit] = start.candidates;
+            const assumingFirst = searchChain(state, bivalueCells, start, secondDigit, firstDigit, [start.cell], []);
+            if (assumingFirst) return assumingFirst;
+            const assumingSecond = searchChain(state, bivalueCells, start, firstDigit, secondDigit, [start.cell], []);
+            if (assumingSecond) return assumingSecond;
         }
         return null;
     }
 }
 
-function dfs(
+function searchChain(
     state: BoardState,
     bivalueCells: BivalueCell[],
     head: BivalueCell,
@@ -58,7 +58,7 @@ function dfs(
             { from: tail, to: candidate.cell, digit: propagateDigit, type: "strong" },
         ];
         const newPath = [...path, candidate.cell];
-        const step = dfs(state, bivalueCells, head, targetZ, candidateExit, newPath, newChainLinks);
+        const step = searchChain(state, bivalueCells, head, targetZ, candidateExit, newPath, newChainLinks);
         if (step) return step;
     }
     return null;

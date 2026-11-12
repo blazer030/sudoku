@@ -144,7 +144,7 @@ function unionColumnsOf(rows: RowCandidates[]): number[] {
             set.add(column);
         }
     }
-    return Array.from(set).sort((a, b) => a - b);
+    return Array.from(set).sort((left, right) => left - right);
 }
 
 function unionRowsOf(columns: ColumnCandidates[]): number[] {
@@ -154,7 +154,7 @@ function unionRowsOf(columns: ColumnCandidates[]): number[] {
             set.add(row);
         }
     }
-    return Array.from(set).sort((a, b) => a - b);
+    return Array.from(set).sort((left, right) => left - right);
 }
 
 function collectColumnEliminations(
