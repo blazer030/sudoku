@@ -502,7 +502,7 @@ describe("search tips", () => {
     });
 
     it("should show an XY-Wing whose shared digit is in no cell that sees both ends", () => {
-        const step = showStep(LESSONS.xyWing, "nothingToRemove");
+        const step = showStep(LESSONS.xyWing, "nothingWhy");
         expect(step).toBeDefined();
         if (step === undefined) return;
         const state = boardState(step.board);
@@ -573,6 +573,39 @@ describe("one claim per explanation step", () => {
         expect(removal.kind === "show" && removal.textKey).toBe(`lessons.content.${id}.${removalName}`);
         expect(removal.kind === "show" && removal.technique).toBe(technique);
         expect(removal.marks.eliminated?.length).toBeGreaterThan(0);
+    });
+
+    it("should narrow X-Wing's search from the rows with two places to the two that share columns, in the next step", () => {
+        const lesson = LESSONS.xWing;
+        const at = indexOf(lesson, "findIt");
+        const search = lesson.steps[at];
+        const match = lesson.steps[at + 1];
+        const rowsOf = (cells: readonly CellReference[]) => [...new Set(cells.map(cell => cell.row))];
+        const columnsIn = (row: number) => (search.marks.pattern ?? []).filter(cell => cell.row === row).map(cell => cell.column).join();
+        const [first, ...others] = rowsOf(match.marks.pattern ?? []);
+
+        expect(match.kind === "show" && match.textKey).toBe("lessons.content.xWing.findMatch");
+        expect(others).toHaveLength(1);
+        expect(columnsIn(others[0])).toBe(columnsIn(first));
+        expect(sortedCells(match.marks.pattern ?? [])).toEqual(sortedCells((search.marks.pattern ?? []).filter(cell => cell.row === first || cell.row === others[0])));
+        expect(rowsOf(search.marks.range ?? []).length).toBeGreaterThan(2);
+    });
+
+    it.each([
+        ["pointing", "toCandidates", "autoNotes"],
+        ["hiddenSubset", "complementWhy", "complementSize"],
+        ["xyWing", "findIt", "findPivot"],
+        ["xyWing", "nothingToRemove", "nothingWhy"],
+    ] as const)("should follow %s's %s with %s, on the same board and marks", (id, name, nextName) => {
+        const lesson = LESSONS[id];
+        const at = indexOf(lesson, name);
+        const step = lesson.steps[at];
+        const next = lesson.steps[at + 1];
+
+        expect(at).toBeGreaterThan(-1);
+        expect(next.kind === "show" && next.textKey).toBe(`lessons.content.${id}.${nextName}`);
+        expect(next.board).toBe(step.board);
+        expect(next.marks).toEqual(step.marks);
     });
 });
 

@@ -2,7 +2,8 @@ import type { lessonContentMediumEn } from "./contentMediumEn";
 
 export const lessonContentMediumZhHant: typeof lessonContentMediumEn = {
     pointing: {
-        toCandidates: "從這裡開始，多數技巧不是直接填數字，而是刪掉候選數，也就是一格還可能填的數字，所以盤面會把它們都列出來。玩遊戲時，可以在設定打開自動筆記，讓它幫你填好。",
+        toCandidates: "從這裡開始，多數技巧不是直接填數字，而是刪掉候選數，也就是一格還可能填的數字，所以盤面會把它們都列出來。",
+        autoNotes: "玩遊戲時，可以在設定打開自動筆記，讓它幫你填好候選數。",
         lookAtBox: "看第 3 宮的 2。這一宮還沒有 2，候選數裡的 2 只出現在兩格。",
         sameLine: "這兩格都在第 1 列。不管 2 落在哪一格，第 3 宮的 2 一定在第 1 列。",
         lineTaken: "一列只能有一個 2。第 1 列的 2 被第 3 宮占走了，這一列其他格就不能是 2。這叫宮區塊摒除，是區塊摒除法的一種。",
@@ -157,7 +158,8 @@ export const lessonContentMediumZhHant: typeof lessonContentMediumEn = {
         onlyPlaces: "第 8 列一定要有這三個數字，卻只有這三格能放，所以這三格一定就是 5、7、8，這就是隱性三數組。",
         remove: "這三格放不下別的數字，所以第 8 列第 8 欄和第 8 列第 9 欄都刪去 1。",
         complement: "再看第 8 列其他的空格：第 4、5、6 欄。三格加起來只有 1、6、9，這是顯性三數組。",
-        complementWhy: "這不是巧合。隱性數組所在的列、欄或宮裡，其他空格一定組成一個顯性數組。一個區域只有 9 格，兩組裡一定有一組不超過 4 格，所以永遠不必找超過 4 格的組合。隱性的難找時，就改找比較小的顯性那一組。",
+        complementWhy: "這不是巧合。隱性數組所在的列、欄或宮裡，其他空格一定組成一個顯性數組。",
+        complementSize: "一個區域只有 9 格，兩組裡一定有一組不超過 4 格，所以不必找更大的組合。隱性的難找，就找比較小的顯性那一組。",
         quad: "四個數字也是一樣。第 3 欄的 2、3、6、9 只出現在四格：第 1、4、5、7 列。這就是隱性四數組。",
         quadRemove: "所以這四格只能是 2、3、6、9，格子裡其他的候選數都可以刪去。",
         pickPrompt: "第 6 宮的 1、4、9，都只出現在三格裡。點出這三格。",

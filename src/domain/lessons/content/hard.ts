@@ -90,6 +90,13 @@ export const X_WING: Lesson = {
             textKey: key("xWing", "findIt"),
         },
         {
+            kind: "show",
+            stage: "explain",
+            board: X_WING_SHOW_BOARD,
+            marks: { ...X_WING_SHOW_MARKS, range: [...rowOf(1), ...rowOf(7)], pattern: cells([1, 3], [1, 7], [7, 3], [7, 7]) },
+            textKey: key("xWing", "findMatch"),
+        },
+        {
             kind: "pick",
             stage: "follow",
             board: X_WING_FOLLOW_BOARD,
@@ -368,6 +375,17 @@ const XY_WING_SHOW_BOARD = board("2598614371632479587480096210210058464056087126
 const XY_WING_SHOW_CELLS = cells([8, 4], [8, 1], [4, 4]);
 const XY_WING_SHOW_LINKS = [link([8, 4], [8, 1], 5), link([8, 4], [4, 4], 7)];
 const XY_WING_SHOW_MARKS = { pattern: XY_WING_SHOW_CELLS, links: XY_WING_SHOW_LINKS, emphasized: [3], dimOthers: true };
+const XY_WING_TWO_CANDIDATE_MARKS = {
+    pattern: cells([3, 4], [3, 5], [4, 1], [4, 4], [5, 2], [5, 5], [7, 1], [7, 2], [7, 5], [8, 1], [8, 2], [8, 4]),
+    dimOthers: true,
+};
+// The same pivot with row 3, column 4 and row 8, column 2: no cell that sees both ends has their 3
+const XY_WING_NOTHING_MARKS = {
+    pattern: cells([8, 4], [3, 4], [8, 2]),
+    links: [link([8, 4], [3, 4], 5), link([8, 4], [8, 2], 7)],
+    emphasized: [3],
+    dimOthers: true,
+};
 
 // The pivot at row 4, column 2 (5, 7) hands 4 to row 4, column 9 or to row 6, column 3
 const XY_WING_FOLLOW_BOARD = board("863002419792431586541896723906108230200603971310029860429367158600915342135284697");
@@ -415,23 +433,29 @@ export const XY_WING: Lesson = {
             kind: "show",
             stage: "explain",
             board: XY_WING_SHOW_BOARD,
-            marks: {
-                pattern: cells([3, 4], [3, 5], [4, 1], [4, 4], [5, 2], [5, 5], [7, 1], [7, 2], [7, 5], [8, 1], [8, 2], [8, 4]),
-                dimOthers: true,
-            },
+            marks: XY_WING_TWO_CANDIDATE_MARKS,
             textKey: key("xyWing", "findIt"),
         },
         {
             kind: "show",
             stage: "explain",
             board: XY_WING_SHOW_BOARD,
-            marks: {
-                pattern: cells([8, 4], [3, 4], [8, 2]),
-                links: [link([8, 4], [3, 4], 5), link([8, 4], [8, 2], 7)],
-                emphasized: [3],
-                dimOthers: true,
-            },
+            marks: XY_WING_TWO_CANDIDATE_MARKS,
+            textKey: key("xyWing", "findPivot"),
+        },
+        {
+            kind: "show",
+            stage: "explain",
+            board: XY_WING_SHOW_BOARD,
+            marks: XY_WING_NOTHING_MARKS,
             textKey: key("xyWing", "nothingToRemove"),
+        },
+        {
+            kind: "show",
+            stage: "explain",
+            board: XY_WING_SHOW_BOARD,
+            marks: XY_WING_NOTHING_MARKS,
+            textKey: key("xyWing", "nothingWhy"),
         },
         {
             kind: "pick",

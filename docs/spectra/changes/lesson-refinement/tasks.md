@@ -64,11 +64,11 @@
 
 ## 5. 收尾
 
-- [ ] 5.1 [after: 4.2] 完成上線前的整合：
+- [x] 5.1 [after: 4.2] 完成上線前的整合：
   - 在 `UNRELEASED_CHANGES` 加一行兩種語言的「技巧教學內容優化」。
   - 跑 `npm run generate:fonts` 把新中文字加進字型子集。
   - `npx vitest run`、`npx vue-tsc --noEmit`、`npm run lint` 全過。
-- [ ] 5.2 [after: 5.1] 在 Chromium、WebKit、Firefox 檢查畫面：
+- [x] 5.2 [after: 5.1] 在 Chromium、WebKit、Firefox 檢查畫面：
   - 9 種風格下推出矛盾的示範：假設的數字和被推翻的樣子都看得清楚、彼此不同，動態效果關閉時也一樣。
   - 課程列表在 320 寬、兩種語言、9 種風格下，基礎組說明換行後不破版。
   - 360×640 下新加的講解步驟訊息能讀完，盤面位置跟其他步驟相同。

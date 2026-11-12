@@ -24,6 +24,7 @@ const POINTING: Lesson = {
     id: "pointing",
     steps: [
         { kind: "show", stage: "explain", board: POINTING_SHOW_BOARD, marks: {}, textKey: key("pointing", "toCandidates") },
+        { kind: "show", stage: "explain", board: POINTING_SHOW_BOARD, marks: {}, textKey: key("pointing", "autoNotes") },
         {
             kind: "show",
             stage: "explain",
@@ -750,6 +751,7 @@ const HIDDEN_SUBSET_ALONE_BOARD: LessonBoard = {
 
 const HIDDEN_TRIPLE_SHOW_PATTERN = cells([8, 2], [8, 8], [8, 9]);
 const HIDDEN_TRIPLE_COMPLEMENT = cells([8, 4], [8, 5], [8, 6]);
+const HIDDEN_TRIPLE_BOTH_MARKS = { range: rowOf(8), pattern: [...HIDDEN_TRIPLE_SHOW_PATTERN, ...HIDDEN_TRIPLE_COMPLEMENT], dimOthers: true };
 const HIDDEN_QUAD_SHOW_PATTERN = cells([1, 3], [4, 3], [5, 3], [7, 3]);
 const HIDDEN_SUBSET_FOLLOW_PATTERN = cells([4, 8], [4, 9], [6, 8]);
 const HIDDEN_SUBSET_ALONE_PATTERN = cells([1, 8], [2, 8], [9, 8]);
@@ -796,8 +798,15 @@ const HIDDEN_SUBSET: Lesson = {
             kind: "show",
             stage: "explain",
             board: HIDDEN_TRIPLE_SHOW_BOARD,
-            marks: { range: rowOf(8), pattern: [...HIDDEN_TRIPLE_SHOW_PATTERN, ...HIDDEN_TRIPLE_COMPLEMENT], dimOthers: true },
+            marks: HIDDEN_TRIPLE_BOTH_MARKS,
             textKey: key("hiddenSubset", "complementWhy"),
+        },
+        {
+            kind: "show",
+            stage: "explain",
+            board: HIDDEN_TRIPLE_SHOW_BOARD,
+            marks: HIDDEN_TRIPLE_BOTH_MARKS,
+            textKey: key("hiddenSubset", "complementSize"),
         },
         {
             kind: "show",

@@ -1,6 +1,7 @@
 export const lessonContentMediumEn = {
     pointing: {
-        toCandidates: "From here on, most techniques don't place a digit. They remove candidates, the digits a cell could still be, so lesson boards list them all. In a game, turn on Auto Notes in Settings to have them filled in.",
+        toCandidates: "From here on, most techniques don't place a digit. They remove candidates, the digits a cell could still be, so lesson boards list them all.",
+        autoNotes: "In a game, turn on Auto Notes in Settings to have the candidates filled in for you.",
         lookAtBox: "Look at the 2s in box 3. The box has no 2 yet, and only two cells still have 2 as a candidate.",
         sameLine: "Both cells are in row 1. Whichever one gets the 2, box 3's 2 will be in row 1.",
         lineTaken: "A row holds only one 2. Box 3 has taken row 1's, so the other cells of row 1 can't be 2. This is called pointing, one kind of locked candidates.",
@@ -155,7 +156,8 @@ export const lessonContentMediumEn = {
         onlyPlaces: "Row 8 needs all three digits, and only these cells can hold them. So they're 5, 7 and 8: a hidden triple.",
         remove: "These cells have no room for anything else, so row 8, column 8 and row 8, column 9 both lose their 1.",
         complement: "Now look at row 8's other empty cells, columns 4, 5 and 6. Between them they hold only 1, 6 and 9: a naked triple.",
-        complementWhy: "That's no accident. A hidden group always leaves a naked one in the rest of its row, column or box. With nine cells, one of the two has four cells or fewer, so you never need to look for a bigger group. If a hidden one is hard to spot, look for the smaller naked one.",
+        complementWhy: "That's no accident. A hidden group always leaves a naked one in the rest of its row, column or box.",
+        complementSize: "With nine cells, one of the two has four cells or fewer, so you never need a bigger group. If a hidden one is hard to spot, look for the smaller naked one.",
         quad: "Four digits work the same way. In column 3, 2, 3, 6 and 9 fit only rows 1, 4, 5 and 7: a hidden quad.",
         quadRemove: "So those four cells can only be 2, 3, 6 or 9, and every other candidate in them goes.",
         pickPrompt: "In box 6, the digits 1, 4 and 9 are candidates in only three cells. Tap those three cells.",
