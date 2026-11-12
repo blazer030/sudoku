@@ -1,14 +1,14 @@
 import { inject, type InjectionKey, onScopeDispose, provide, readonly, ref, type Ref, shallowRef, type ShallowRef } from "vue";
 import { registerBackDismissal } from "@/presentation/composables/backDismissal";
 
-type CloseFn<TResult> = undefined extends TResult
+type CloseDialog<TResult> = undefined extends TResult
     ? (result?: TResult) => void
     : (result: TResult) => void;
 
 interface DialogState<TParams, TResult> {
     visible: Readonly<Ref<boolean>>;
     params: Readonly<ShallowRef<TParams | undefined>>;
-    close: CloseFn<TResult>;
+    close: CloseDialog<TResult>;
 }
 
 interface DialogOptions<TResult> {
@@ -36,13 +36,13 @@ export const createDialog = <TParams = undefined, TResult = undefined>({ dismiss
             return new Promise(resolvePromise => { resolve = resolvePromise; });
         };
 
-        const close: CloseFn<TResult> = ((result?: TResult) => {
+        const close: CloseDialog<TResult> = ((result?: TResult) => {
             visible.value = false;
             withdrawBackDismissal?.();
             withdrawBackDismissal = null;
             resolve?.(result as TResult);
             resolve = null;
-        }) as CloseFn<TResult>;
+        }) as CloseDialog<TResult>;
         // A page that goes away with its dialog open must not leave Back closing it
         onScopeDispose(() => {
             withdrawBackDismissal?.();

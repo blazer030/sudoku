@@ -1,10 +1,5 @@
 import { onUnmounted, ref, type Ref } from "vue";
-
-export interface PlayState {
-    isPlaying: Ref<boolean>;
-    stopPlay: () => void;
-    startPlay: () => void;
-}
+import type { PlayState } from "@/presentation/components/playback/usePlaybackState";
 
 export const useProgressDrag = (
     progressRef: Ref<HTMLElement | null>,
@@ -15,11 +10,11 @@ export const useProgressDrag = (
     const isDragging = ref(false);
     let wasPlaying = false;
 
-    const calcStep = (clientX: number): number => {
-        const el = progressRef.value;
-        if (!el) return 0;
-        const rect = el.getBoundingClientRect();
-        const ratio = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+    const stepAt = (clientX: number): number => {
+        const bar = progressRef.value;
+        if (!bar) return 0;
+        const bounds = bar.getBoundingClientRect();
+        const ratio = Math.max(0, Math.min(1, (clientX - bounds.left) / bounds.width));
         return Math.round(ratio * totalSteps.value);
     };
 
@@ -35,13 +30,13 @@ export const useProgressDrag = (
             window.addEventListener("touchend", onPointerUp);
         }
         const clientX = "touches" in event ? event.touches[0].clientX : event.clientX;
-        onSeek(calcStep(clientX));
+        onSeek(stepAt(clientX));
     };
 
     const onPointerMove = (event: MouseEvent | TouchEvent) => {
         if (!isDragging.value) return;
         const clientX = "touches" in event ? event.touches[0].clientX : event.clientX;
-        onSeek(calcStep(clientX));
+        onSeek(stepAt(clientX));
     };
 
     const onPointerUp = () => {

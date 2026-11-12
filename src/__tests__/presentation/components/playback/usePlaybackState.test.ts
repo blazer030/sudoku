@@ -43,8 +43,8 @@ describe("usePlaybackState", () => {
     });
 
     it("should not advance beyond totalSteps via next", () => {
-        const { currentStep, next, goToLast } = mountComposable(3);
-        goToLast();
+        const { currentStep, next, goToStep } = mountComposable(3);
+        goToStep(3);
 
         next();
 
@@ -75,14 +75,6 @@ describe("usePlaybackState", () => {
         goToFirst();
 
         expect(currentStep.value).toBe(0);
-    });
-
-    it("should jump to totalSteps via goToLast", () => {
-        const { currentStep, goToLast } = mountComposable(5);
-
-        goToLast();
-
-        expect(currentStep.value).toBe(5);
     });
 
     it("togglePlay advances currentStep at intervalMs tick", () => {
@@ -124,8 +116,8 @@ describe("usePlaybackState", () => {
 
     it("togglePlay restarts from 0 when already at totalSteps", () => {
         vi.useFakeTimers();
-        const { currentStep, goToLast, togglePlay } = mountComposable(3, { intervalMs: 100 });
-        goToLast();
+        const { currentStep, goToStep, togglePlay } = mountComposable(3, { intervalMs: 100 });
+        goToStep(3);
 
         togglePlay();
 

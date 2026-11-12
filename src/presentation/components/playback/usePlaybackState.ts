@@ -1,5 +1,12 @@
 import { onUnmounted, ref, type Ref } from "vue";
 
+/** What a progress bar needs of playback: whether it plays, and how to pause and resume it around a drag. */
+export interface PlayState {
+    isPlaying: Ref<boolean>;
+    stopPlay: () => void;
+    startPlay: () => void;
+}
+
 export interface PlaybackStateOptions {
     intervalMs?: number;
     initialStep?: number;
@@ -42,11 +49,6 @@ export const usePlaybackState = (
         goToStep(0);
     };
 
-    const goToLast = () => {
-        goToStep(totalSteps.value);
-        stopPlay();
-    };
-
     const startPlay = () => {
         if (isPlaying.value || currentStep.value >= totalSteps.value) return;
         isPlaying.value = true;
@@ -66,16 +68,18 @@ export const usePlaybackState = (
 
     onUnmounted(stopPlay);
 
+    const playState: PlayState = { isPlaying, stopPlay, startPlay };
+
     return {
         currentStep,
         isPlaying,
         next,
         previous,
         goToFirst,
-        goToLast,
         goToStep,
         togglePlay,
         startPlay,
         stopPlay,
+        playState,
     };
 };

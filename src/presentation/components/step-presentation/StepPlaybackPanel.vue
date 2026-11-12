@@ -53,7 +53,7 @@
             <ProgressBar
                 :current-step="stepIndex"
                 :play-state="playState"
-                :testid-prefix="`${testIdPrefix}-`"
+                :test-id-prefix="testIdPrefix"
                 :total-steps="Math.max(0, totalSteps - 1)"
                 class="flex-1"
                 @seek="emit('goTo', $event)"
@@ -66,7 +66,7 @@
 import { nextTick, useTemplateRef, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { Pause, Play } from "@/presentation/components/icon";
-import type { PlayState } from "@/presentation/components/playback/useProgressDrag";
+import type { PlayState } from "@/presentation/components/playback/usePlaybackState";
 import ProgressBar from "@/presentation/components/playback/ProgressBar.vue";
 import StepNavigator from "@/presentation/components/step-presentation/StepNavigator.vue";
 import StepExplanation from "@/presentation/components/step-presentation/StepExplanation.vue";

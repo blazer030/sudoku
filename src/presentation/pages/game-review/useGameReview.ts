@@ -4,7 +4,6 @@ import type { GameReplayData } from "@/domain/game/GameReplay";
 import type { GameStep, GameStepAction } from "@/domain/game/GameStep";
 import type { CellReference } from "@/domain/solver/SolveStep";
 import { usePlaybackState } from "@/presentation/components/playback/usePlaybackState";
-import type { PlayState } from "@/presentation/components/playback/useProgressDrag";
 
 export interface ReviewDescription {
     keypath: string;
@@ -39,11 +38,7 @@ export const useGameReview = (replayData: GameReplayData, completed: boolean) =>
     const positionCount = computed(() => replay.totalSteps + 2);
 
     const playback = usePlaybackState(virtualTotalSteps);
-    const playState: PlayState = {
-        isPlaying: playback.isPlaying,
-        stopPlay: playback.stopPlay,
-        startPlay: playback.startPlay,
-    };
+    const { playState } = playback;
 
     const isAtFinalStep = computed(() => playback.currentStep.value === virtualTotalSteps.value);
 

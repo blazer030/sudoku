@@ -1,9 +1,9 @@
 <template>
     <div class="flex flex-col gap-1.5 w-full">
         <div
-            ref="progressBarRef"
+            ref="progressBar"
             class="group w-full h-6 flex items-center cursor-pointer"
-            :data-testid="`${testidPrefix}progress-bar`"
+            :data-testid="testIdOf('progress-bar')"
             @mousedown="onPointerDown"
             @touchstart="onPointerDown"
         >
@@ -17,7 +17,7 @@
                     :style="{ width: progressPercent }"
                     class="bg-primary rounded-full transition-all duration-150"
                     data-skin="progress-fill"
-                    :data-testid="`${testidPrefix}progress-fill`"
+                    :data-testid="testIdOf('progress-fill')"
                 />
             </div>
         </div>
@@ -25,23 +25,27 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, toRef } from "vue";
-import { type PlayState, useProgressDrag } from "@/presentation/components/playback/useProgressDrag";
+import { computed, toRef, useTemplateRef } from "vue";
+import type { PlayState } from "@/presentation/components/playback/usePlaybackState";
+import { useProgressDrag } from "@/presentation/components/playback/useProgressDrag";
 
 const props = withDefaults(defineProps<{
     currentStep: number;
     totalSteps: number;
     playState: PlayState;
-    testidPrefix?: string;
+    testIdPrefix?: string;
 }>(), {
-    testidPrefix: "",
+    testIdPrefix: "",
 });
 
 const emit = defineEmits<{
     seek: [step: number];
 }>();
 
-const progressBarRef = ref<HTMLElement | null>(null);
+const progressBar = useTemplateRef<HTMLElement>("progressBar");
+
+// The prefix names the page the bar is on: "review" gives "review-progress-bar"
+const testIdOf = (name: string): string => (props.testIdPrefix === "" ? name : `${props.testIdPrefix}-${name}`);
 const totalStepsRef = toRef(props, "totalSteps");
 
 const progressPercent = computed(() => {
@@ -50,7 +54,7 @@ const progressPercent = computed(() => {
 });
 
 const { isDragging, onPointerDown } = useProgressDrag(
-    progressBarRef,
+    progressBar,
     totalStepsRef,
     (step) => {
         emit("seek", step);

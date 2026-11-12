@@ -3,7 +3,6 @@ import { PuzzleCell } from "@/domain/board/PuzzleCell";
 import type { ChainLink } from "@/domain/solver/SolveStep";
 import type { SolvePathStep } from "@/domain/solver/SolvePath";
 import { usePlaybackState } from "@/presentation/components/playback/usePlaybackState";
-import type { PlayState } from "@/presentation/components/playback/useProgressDrag";
 import {
     type StepBoard,
     type StepCellView,
@@ -38,11 +37,7 @@ export const useWalkthroughPlayback = (givens: Ref<number[][]>) => {
     const playback = usePlaybackState(computed(() => Math.max(0, stepCount.value - 1)));
     const stepIndex = playback.currentStep;
     const isCompleted = computed(() => solved.value && stepIndex.value === stepCount.value - 1);
-    const playState: PlayState = {
-        isPlaying: playback.isPlaying,
-        stopPlay: playback.stopPlay,
-        startPlay: playback.startPlay,
-    };
+    const { playState } = playback;
 
     const currentStep = computed<SolvePathStep | null>(() => (isCompleted.value ? null : path.value?.[stepIndex.value] ?? null));
     const isLastStep = computed(() => stepCount.value > 0 && stepIndex.value === stepCount.value - 1);

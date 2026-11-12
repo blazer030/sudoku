@@ -42,9 +42,9 @@ describe("ProgressBar", () => {
         expect(wrapper.find("[data-testid='progress-fill']").attributes("style")).toContain("width: 0%");
     });
 
-    it("should prefix testids when testidPrefix is given", () => {
+    it("should prefix testids when testIdPrefix is given", () => {
         const wrapper = mount(ProgressBar, {
-            props: { currentStep: 1, totalSteps: 5, playState: noopPlayState(), testidPrefix: "review-" },
+            props: { currentStep: 1, totalSteps: 5, playState: noopPlayState(), testIdPrefix: "review" },
         });
 
         expect(wrapper.find("[data-testid='review-progress-bar']").exists()).toBe(true);
