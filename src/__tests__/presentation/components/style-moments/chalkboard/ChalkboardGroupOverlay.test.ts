@@ -1,37 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { mount } from "@vue/test-utils";
-import { createPinia, setActivePinia } from "pinia";
 import type { CompletedGroup } from "@/domain/game/Sudoku";
-import { STYLE_MOMENTS, type GroupEffect } from "@/presentation/components/style-moments/styleMoments";
-import { groupPlacement } from "@/presentation/components/style-moments/groupPlacement";
-import { useSettingsStore } from "@/stores/settingsStore";
-import GroupOverlay from "@/presentation/components/style-moments/GroupOverlay.vue";
+import { STYLE_MOMENTS } from "@/presentation/components/style-moments/styleMoments";
 import ChalkboardGroupOverlay from "@/presentation/components/style-moments/chalkboard/ChalkboardGroupOverlay.vue";
+import { effectOf, expectPlacedOver, mountInGroupOverlay } from "../../../../fixtures/groupOverlay";
 
 const ROW_AND_BOX: CompletedGroup[] = [{ kind: "row", index: 4 }, { kind: "box", index: 4 }];
-
-const effectOf = (groups: CompletedGroup[], id = 1): GroupEffect => ({ id, groups, origin: { row: 4, column: 4 } });
-
-const percentOf = (style: string | undefined, property: string): number =>
-    Number.parseFloat(new RegExp(`(?:^|;)\\s*${property}:\\s*(-?[\\d.]+)%`).exec(style ?? "")?.[1] ?? "NaN");
-
-// Anything with attributes: a found element, or one got with get()
-interface Styled {
-    attributes: (key: string) => string | undefined;
-}
-
-const expectPlacedOver = (line: Styled, group: CompletedGroup): void => {
-    for (const [property, value] of Object.entries(groupPlacement(group))) {
-        expect(percentOf(line.attributes("style"), property), property).toBeCloseTo(Number.parseFloat(value), 3);
-    }
-};
-
-const mountInGroupOverlay = (effect: GroupEffect) => {
-    const pinia = createPinia();
-    setActivePinia(pinia);
-    useSettingsStore().setStyle("chalkboard");
-    return mount(GroupOverlay, { props: { effect }, global: { plugins: [pinia] } });
-};
 
 // The point a path starts at, in its viewBox
 const startOf = (path: string): { x: number; y: number } => {
@@ -101,7 +75,7 @@ describe("ChalkboardGroupOverlay", () => {
     });
 
     it("should draw a new effect's lines afresh", async () => {
-        const wrapper = mountInGroupOverlay(effectOf(ROW_AND_BOX, 1));
+        const wrapper = mountInGroupOverlay("chalkboard", effectOf(ROW_AND_BOX, 1));
         const firstLine = wrapper.get(".chalkboard-group-line").element;
 
         await wrapper.setProps({ effect: effectOf(ROW_AND_BOX, 2) });

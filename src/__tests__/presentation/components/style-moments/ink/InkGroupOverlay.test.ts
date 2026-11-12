@@ -1,34 +1,14 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "fs";
 import { mount, type VueWrapper } from "@vue/test-utils";
-import { createPinia, setActivePinia } from "pinia";
 import type { CompletedGroup } from "@/domain/game/Sudoku";
-import type { GroupEffect } from "@/presentation/components/style-moments/styleMoments";
-import { groupPlacement } from "@/presentation/components/style-moments/groupPlacement";
-import { useSettingsStore } from "@/stores/settingsStore";
-import GroupOverlay from "@/presentation/components/style-moments/GroupOverlay.vue";
 import InkGroupOverlay from "@/presentation/components/style-moments/ink/InkGroupOverlay.vue";
 import { animationTimingOf, declarationsOf } from "../../../../style/styleSheetRules";
+import { effectOf, expectPlacedOver, mountInGroupOverlay } from "../../../../fixtures/groupOverlay";
 
 const INK_CSS = readFileSync("src/style/styles/ink/skin.css", "utf8");
 
 const ROW_AND_BOX: CompletedGroup[] = [{ kind: "row", index: 4 }, { kind: "box", index: 4 }];
-
-const effectOf = (groups: CompletedGroup[], id = 1): GroupEffect => ({ id, groups, origin: { row: 4, column: 4 } });
-
-const percentOf = (style: string | undefined, property: string): number =>
-    Number.parseFloat(new RegExp(`(?:^|;)\\s*${property}:\\s*(-?[\\d.]+)%`).exec(style ?? "")?.[1] ?? "NaN");
-
-// Anything with attributes: a found element, or one got with get()
-interface Styled {
-    attributes: (key: string) => string | undefined;
-}
-
-const expectPlacedOver = (brush: Styled, group: CompletedGroup): void => {
-    for (const [property, value] of Object.entries(groupPlacement(group))) {
-        expect(percentOf(brush.attributes("style"), property), property).toBeCloseTo(Number.parseFloat(value), 3);
-    }
-};
 
 // When the skin starts a brush of this kind, and its reveal
 const startsOf = (kind: string): { brush: number; reveal: number } => {
@@ -46,13 +26,6 @@ const maskIdsOf = (wrapper: VueWrapper): string[] => wrapper.findAll(".ink-group
     expect(brush.find(`[mask="url(#${id})"]`).exists()).toBe(true);
     return id;
 });
-
-const mountInGroupOverlay = (effect: GroupEffect) => {
-    const pinia = createPinia();
-    setActivePinia(pinia);
-    useSettingsStore().setStyle("ink");
-    return mount(GroupOverlay, { props: { effect }, global: { plugins: [pinia] } });
-};
 
 describe("InkGroupOverlay", () => {
     it("should sweep one brush over a completed row and ring the completed box, each over its group", () => {
@@ -93,7 +66,7 @@ describe("InkGroupOverlay", () => {
     });
 
     it("should draw a new effect's brushes afresh, with masks of their own", async () => {
-        const wrapper = mountInGroupOverlay(effectOf(ROW_AND_BOX, 1));
+        const wrapper = mountInGroupOverlay("ink", effectOf(ROW_AND_BOX, 1));
         const firstBrush = wrapper.get(".ink-group-brush").element;
         const firstIds = maskIdsOf(wrapper);
 

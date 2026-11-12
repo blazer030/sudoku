@@ -1,39 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { mount } from "@vue/test-utils";
-import { createPinia, setActivePinia } from "pinia";
 import type { CompletedGroup } from "@/domain/game/Sudoku";
 import { STYLE_MOMENTS, type GroupEffect } from "@/presentation/components/style-moments/styleMoments";
-import { groupPlacement } from "@/presentation/components/style-moments/groupPlacement";
-import { useSettingsStore } from "@/stores/settingsStore";
-import GroupOverlay from "@/presentation/components/style-moments/GroupOverlay.vue";
 import BlueprintGroupOverlay from "@/presentation/components/style-moments/blueprint/BlueprintGroupOverlay.vue";
+import { effectOf, expectPlacedOver, mountInGroupOverlay } from "../../../../fixtures/groupOverlay";
 
 const ROW_AND_BOX: CompletedGroup[] = [{ kind: "row", index: 4 }, { kind: "box", index: 4 }];
 
-const effectOf = (groups: CompletedGroup[], id = 1, origin = { row: 4, column: 4 }): GroupEffect => ({ id, groups, origin });
-
-const percentOf = (style: string | undefined, property: string): number =>
-    Number.parseFloat(new RegExp(`(?:^|;)\\s*${property}:\\s*(-?[\\d.]+)%`).exec(style ?? "")?.[1] ?? "NaN");
-
-// Anything with attributes: a found element, or one got with get()
-interface Styled {
-    attributes: (key: string) => string | undefined;
-}
-
-const expectPlacedOver = (dimension: Styled, group: CompletedGroup): void => {
-    for (const [property, value] of Object.entries(groupPlacement(group))) {
-        expect(percentOf(dimension.attributes("style"), property), property).toBeCloseTo(Number.parseFloat(value), 3);
-    }
-};
-
 const mountOverlay = (effect: GroupEffect) => mount(BlueprintGroupOverlay, { props: { effect } });
-
-const mountInGroupOverlay = (effect: GroupEffect) => {
-    const pinia = createPinia();
-    setActivePinia(pinia);
-    useSettingsStore().setStyle("blueprint");
-    return mount(GroupOverlay, { props: { effect }, global: { plugins: [pinia] } });
-};
 
 describe("BlueprintGroupOverlay", () => {
     it("should be blueprint's group overlay", () => {
@@ -120,7 +94,7 @@ describe("BlueprintGroupOverlay", () => {
     });
 
     it("should draw a new effect's dimensions afresh", async () => {
-        const wrapper = mountInGroupOverlay(effectOf(ROW_AND_BOX, 1));
+        const wrapper = mountInGroupOverlay("blueprint", effectOf(ROW_AND_BOX, 1));
         const first = wrapper.get(".blueprint-group-dimension").element;
 
         await wrapper.setProps({ effect: effectOf(ROW_AND_BOX, 2) });

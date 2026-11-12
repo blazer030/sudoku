@@ -1,9 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { mount } from "@vue/test-utils";
-import type { GroupEffect } from "@/presentation/components/style-moments/styleMoments";
 import PaperGroupOverlay from "@/presentation/components/style-moments/paper/PaperGroupOverlay.vue";
-
-const effectOf = (groups: GroupEffect["groups"]): GroupEffect => ({ id: 1, groups, origin: { row: 4, column: 4 } });
+import { effectOf } from "../../../../fixtures/groupOverlay";
 
 // Its left, top, width and height, as percentages of the board
 const placementOf = (style: string | undefined): number[] =>

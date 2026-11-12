@@ -1,9 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { mount } from "@vue/test-utils";
-import type { GroupEffect } from "@/presentation/components/style-moments/styleMoments";
 import PixelGroupOverlay from "@/presentation/components/style-moments/pixel/PixelGroupOverlay.vue";
-
-const effectOf = (groups: GroupEffect["groups"], origin = { row: 4, column: 4 }): GroupEffect => ({ id: 1, groups, origin });
+import { effectOf } from "../../../../fixtures/groupOverlay";
 
 // Its left, top, width and height, as percentages of the board
 const placementOf = (style: string | undefined): number[] =>
@@ -28,7 +26,7 @@ describe("PixelGroupOverlay", () => {
     });
 
     it("should spark at both ends of a completed column", () => {
-        const mark = mount(PixelGroupOverlay, { props: { effect: effectOf([{ kind: "column", index: 8 }], { row: 0, column: 8 }) } }).get(".pixel-group-mark");
+        const mark = mount(PixelGroupOverlay, { props: { effect: effectOf([{ kind: "column", index: 8 }], 1, { row: 0, column: 8 }) } }).get(".pixel-group-mark");
 
         expect(mark.classes()).toContain("pixel-group-column");
         expectPlacement(mark.attributes("style"), [800 / 9, 0, 100 / 9, 100]);
@@ -37,7 +35,7 @@ describe("PixelGroupOverlay", () => {
     });
 
     it("should spark at the four corners of a completed box, numbered from the top left", () => {
-        const mark = mount(PixelGroupOverlay, { props: { effect: effectOf([{ kind: "box", index: 5 }], { row: 4, column: 7 }) } }).get(".pixel-group-mark");
+        const mark = mount(PixelGroupOverlay, { props: { effect: effectOf([{ kind: "box", index: 5 }], 1, { row: 4, column: 7 }) } }).get(".pixel-group-mark");
 
         expect(mark.classes()).toContain("pixel-group-box");
         expectPlacement(mark.attributes("style"), [200 / 3, 100 / 3, 100 / 3, 100 / 3]);
