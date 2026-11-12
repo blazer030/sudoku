@@ -7,7 +7,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onBeforeUnmount, onMounted, ref } from "vue";
+import { onBeforeUnmount, onMounted, useTemplateRef } from "vue";
 import { FIREWORK_COLORS } from "@/theme/fireworkColors";
 import { useMotionAllowed } from "@/presentation/composables/useMotionAllowed";
 
@@ -45,10 +45,11 @@ const SHELL_SPEED = -8;
 const TRAIL_INTERVAL = 3;
 
 const motionAllowed = useMotionAllowed();
-const canvasRef = ref<HTMLCanvasElement | null>(null);
+const canvasRef = useTemplateRef<HTMLCanvasElement>("canvasRef");
 let fireworks: Firework[] = [];
 let animationFrameId = 0;
 let spawnTimeoutId = 0;
+let stopResizing: (() => void) | null = null;
 
 const getThemeColors = (): string[] => {
     const style = getComputedStyle(document.documentElement);
@@ -131,6 +132,9 @@ const startAnimation = () => {
     };
     resize();
     window.addEventListener("resize", resize);
+    stopResizing = () => {
+        window.removeEventListener("resize", resize);
+    };
 
     const colors = getThemeColors();
     fireworks.push(createFirework(window.innerWidth, window.innerHeight, colors));
@@ -140,20 +144,20 @@ const startAnimation = () => {
         context.clearRect(0, 0, window.innerWidth, window.innerHeight);
 
         for (const firework of fireworks) {
-            // 彈體上升階段
+            // The shell rises
             if (firework.shell) {
                 const shell = firework.shell;
                 shell.y += shell.velocityY;
                 shell.trailTimer++;
 
-                // 畫彈體
+                // Draw the shell
                 context.globalAlpha = 1;
                 context.fillStyle = shell.color;
                 context.beginPath();
                 context.arc(shell.x, shell.y, 3, 0, Math.PI * 2);
                 context.fill();
 
-                // 尾跡粒子
+                // Its trail
                 if (shell.trailTimer % TRAIL_INTERVAL === 0) {
                     firework.particles.push({
                         x: shell.x + (Math.random() - 0.5) * 2,
@@ -167,14 +171,14 @@ const startAnimation = () => {
                     });
                 }
 
-                // 到達目標高度 → 爆炸
+                // At its height it bursts
                 if (shell.y <= shell.targetY) {
                     firework.particles.push(...createExplosion(shell.x, shell.y, colors));
                     firework.shell = null;
                 }
             }
 
-            // 粒子更新
+            // Move and fade the particles
             for (const particle of firework.particles) {
                 particle.x += particle.velocityX;
                 particle.y += particle.velocityY;
@@ -197,14 +201,13 @@ const startAnimation = () => {
     };
 
     animationFrameId = requestAnimationFrame(animate);
-
-    onBeforeUnmount(() => {
-        cancelAnimationFrame(animationFrameId);
-        clearTimeout(spawnTimeoutId);
-        window.removeEventListener("resize", resize);
-        fireworks = [];
-    });
 };
 
 onMounted(startAnimation);
+onBeforeUnmount(() => {
+    cancelAnimationFrame(animationFrameId);
+    clearTimeout(spawnTimeoutId);
+    stopResizing?.();
+    fireworks = [];
+});
 </script>
