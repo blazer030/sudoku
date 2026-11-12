@@ -48,7 +48,7 @@ export const lessonsEn = {
         },
     },
     groups: {
-        basics: { name: "Basics", note: "Get to know the board and the controls" },
+        basics: { name: "Basics", note: "Get to know the board and the controls. Go at your own pace, in any order" },
         easy: { name: "Easy", note: "These solve every easy puzzle" },
         medium: { name: "Medium", note: "These solve every medium puzzle" },
         hard: { name: "Hard", note: "These solve every hard puzzle" },

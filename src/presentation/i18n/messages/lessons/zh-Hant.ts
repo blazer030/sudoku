@@ -49,7 +49,7 @@ export const lessonsZhHant: typeof lessonsEn = {
         },
     },
     groups: {
-        basics: { name: "基礎", note: "先認識棋盤和操作" },
+        basics: { name: "基礎", note: "先認識棋盤和操作。照自己的步調，想從哪課學都可以" },
         easy: { name: "簡單", note: "學完就能解開所有簡單題" },
         medium: { name: "中等", note: "學完就能解開所有中等題" },
         hard: { name: "困難", note: "學完就能解開所有困難題" },
