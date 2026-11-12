@@ -69,7 +69,7 @@ The Hidden Triple and Quad lesson SHALL show, after its hidden triple, that the 
 - **THEN** they fail if the marked cells' candidates, taken together, do not number exactly as many as the cells, or if there are fewer than two or more than four cells
 
 ### Requirement: Lesson copy that supports the learner
-Lesson copy SHALL tell the player, at the Rules lesson's first hint, that the hint action helps when stuck; SHALL tell the player in the Basics group's note on the lesson list that lessons can be taken at their own pace and in any order; SHALL end each lesson's last independent step's success message with encouragement; and SHALL give a common other name for Hidden Single, Naked Single, Pointing and Claiming where the explanation first names the technique. Lesson names and the fixed terms of the app's copy rules SHALL stay unchanged.
+Lesson copy SHALL tell the player in the Basics group's note on the lesson list that lessons can be taken at their own pace and in any order; SHALL end each lesson's last independent step's success message with encouragement; and SHALL give a common other name for Hidden Single, Naked Single, Pointing and Claiming where the explanation first names the technique. Lesson names and the fixed terms of the app's copy rules SHALL stay unchanged.
 
 #### Scenario: Other names in the explanation
 - **WHEN** Hidden Single's explanation first names the technique, in Traditional Chinese
@@ -93,6 +93,25 @@ An explanation step SHALL mark only the cells its text is about, besides the ran
 #### Scenario: The split is checked
 - **WHEN** the lesson content tests run
 - **THEN** they fail if either XYZ-Wing case step lights other than two cells, or if the Jellyfish or WXYZ-Wing pattern step removes a candidate
+
+### Requirement: Nudge toward the hint when stuck
+During a practice step that is not solved and still has a hint left, the lesson SHALL nudge the player toward the hint action after three wrong answers in a row or thirty seconds with no action. A wrong answer is an action that brings a correcting message; an action that moves the step forward resets the count, and neutral actions such as selecting a cell leave it as it is. While nudging, the message area SHALL say that the hint can help, and the hint button SHALL draw attention: flashing a few times in the style's primary colour when motion is allowed, and staying highlighted without flashing when it is not. Asking for a hint, solving the step or leaving it SHALL end the nudge and start the count again.
+
+#### Scenario: Three wrong answers in a row
+- **WHEN** the player taps three cells in a row that each bring a correcting message
+- **THEN** the message area says the hint can help and the hint button draws attention
+
+#### Scenario: Thirty seconds without an action
+- **WHEN** thirty seconds pass on an unsolved practice step with no action
+- **THEN** the nudge appears
+
+#### Scenario: Motion off
+- **WHEN** the nudge appears with motion effects off
+- **THEN** the hint button stays highlighted without flashing
+
+#### Scenario: A hint ends the nudge
+- **WHEN** the player asks for a hint while nudged
+- **THEN** the hint shows, the nudge ends, and the count starts again
 
 ## MODIFIED Requirements
 

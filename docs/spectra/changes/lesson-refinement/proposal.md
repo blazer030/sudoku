@@ -15,12 +15,12 @@
 - **講解的文字對得上格子**：一步的文字講了兩件以上、各自關於不同格子的事（例如兩種情況寫在同一步，或先介紹規律再刪某一格），就拆成幾步，每步只標文字講到的格子。拆的有 XYZ-Wing 的兩種情況、WXYZ-Wing 和 Jellyfish 的「規律」與「刪」。文字順著一條推論一格接一格講下去的步驟（例如 XY 鏈、X-Wing 的「如果…那麼…」），之後改用依序亮起的動畫輔助；動畫連同重播鈕與各風格的效果，owner 決定拆成另一個 change，這次不做。
 - **語氣與用詞**：
   - 自己找完成時的訊息帶鼓勵。
-  - 第一次有提示的練習告訴玩家卡住可以按提示。
+  - 練習卡住時提醒可以按提示：連錯 3 次或 30 秒沒動作，訊息區換成提醒文字，提示鈕閃幾下（動態效果關閉時改成亮著不閃）。
   - 課程列表的基礎組說明讓玩家知道可以照自己的步調、跳著學。
   - 隱藏唯一數、唯一候選數、宮區塊摒除／行列區塊摒除第一次出現時，順帶提玩家在別處常見的別名（例如摒除法、唯餘法、區塊摒除法）。
 - **驗證跟著擴充**：新的盤面和步驟也要由內容測試證明說的是真的，包括假設的數字確實不是答案、每一步推論都成立、反例確實不成立、互補的格子確實是一組。
 
-**影響的風格**：「假設的數字」沿用現有的填入與填錯樣子，不需要各風格另畫，但 9 種風格都要確認看得清楚。其他改動只動課程內容與文案，跟風格無關。**玩家看得到**：會在 `UNRELEASED_CHANGES` 加一行（目前是空的）。
+**影響的風格**：「假設的數字」沿用現有的填入與填錯樣子，提示鈕的提醒用各風格自己的主色，都不需要各風格另畫，但 9 種風格都要確認看得清楚。其他改動只動課程內容與文案，跟風格無關。**玩家看得到**：會在 `UNRELEASED_CHANGES` 加一行（目前是空的）。
 
 ## Capabilities
 
@@ -37,7 +37,8 @@
 
 - **課程內容**：`src/domain/lessons/content/basicsAndEasy.ts`、`src/domain/lessons/content/medium.ts`、`src/domain/lessons/content/hard.ts`。
 - **課程模型與驗證**：`src/domain/lessons/Lesson.ts`（`StepMarks` 加假設的數字）、`src/domain/lessons/verifyLesson.ts`。
-- **盤面呈現**：`src/presentation/pages/lessons/lessonCellView.ts`。
+- **盤面呈現**：`src/presentation/pages/lessons/lessonCellView.ts`、`src/presentation/pages/lessons/useLessonSession.ts`。
+- **卡住提醒**：`src/domain/lessons/practice.ts`（連錯次數）、`src/presentation/pages/lessons/` 下的課程畫面與面板（閒置計時、提示鈕的提醒）。
 - **文案與字型**：`src/presentation/i18n/messages/lessons/` 下的課程文案與 `en.ts`、`zh-Hant.ts`，`src/presentation/pages/settings/changelogData.ts`；新的中文字要重跑 npm run generate:fonts。
 - **測試**：`src/__tests__/domain/lessons/content/lessonContent.test.ts`、`src/__tests__/presentation/pages/lessons/lessonCellView.test.ts`。
 - 不需要新的相依套件。
