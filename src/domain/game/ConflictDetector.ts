@@ -1,5 +1,6 @@
 import { BOARD_SIZE, BOX_SIZE } from "@/domain/board/constants";
 import { PuzzleCell } from "@/domain/board/PuzzleCell";
+import { boxStart } from "@/domain/board/geometry";
 
 export interface Conflict {
     row: number;
@@ -67,8 +68,8 @@ export class ConflictDetector {
             }
         }
 
-        const boxRowStart = Math.floor(row / BOX_SIZE) * BOX_SIZE;
-        const boxColumnStart = Math.floor(column / BOX_SIZE) * BOX_SIZE;
+        const boxRowStart = boxStart(row);
+        const boxColumnStart = boxStart(column);
         for (let currentRow = boxRowStart; currentRow < boxRowStart + BOX_SIZE; currentRow++) {
             for (let currentColumn = boxColumnStart; currentColumn < boxColumnStart + BOX_SIZE; currentColumn++) {
                 if (currentRow !== row && currentColumn !== column && board[currentRow][currentColumn] === value) {

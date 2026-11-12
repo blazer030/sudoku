@@ -1,4 +1,5 @@
 import { BOARD_SIZE, BOX_SIZE } from "@/domain/board/constants";
+import { boxStart } from "@/domain/board/geometry";
 
 export class SudokuBoard {
     public isValidPlacement(board: number[][], row: number, column: number, digit: number): boolean {
@@ -11,7 +12,7 @@ export class SudokuBoard {
         for (let index = 0; index < BOARD_SIZE; index++) {
             const row = board[index];
             const column = board.map(row => row[index]);
-            const boxRowStart = Math.floor(index / BOX_SIZE) * BOX_SIZE;
+            const boxRowStart = boxStart(index);
             const boxColumnStart = (index % BOX_SIZE) * BOX_SIZE;
             const box = [];
             for (let currentRow = boxRowStart; currentRow < boxRowStart + BOX_SIZE; currentRow++) {
@@ -40,8 +41,8 @@ export class SudokuBoard {
     }
 
     private isValidInBox(board: number[][], row: number, column: number, digit: number): boolean {
-        const boxRowStart = Math.floor(row / BOX_SIZE) * BOX_SIZE;
-        const boxColumnStart = Math.floor(column / BOX_SIZE) * BOX_SIZE;
+        const boxRowStart = boxStart(row);
+        const boxColumnStart = boxStart(column);
         for (let currentRow = boxRowStart; currentRow < boxRowStart + BOX_SIZE; currentRow++) {
             for (let currentColumn = boxColumnStart; currentColumn < boxColumnStart + BOX_SIZE; currentColumn++) {
                 if (board[currentRow][currentColumn] === digit) return false;

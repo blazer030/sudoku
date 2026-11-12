@@ -1,15 +1,15 @@
-import { BOARD_SIZE, BOX_SIZE } from "@/domain/board/constants";
+import { BOARD_SIZE } from "@/domain/board/constants";
 import { SudokuSolver } from "@/domain/generator/SudokuSolver";
 import { boardGrid, boardState } from "@/domain/lessons/lessonBoard";
 import type { FillStep, LessonBoard, LessonHint, LightStep, NoteStep, PickStep, PlaceStep, PracticeStep, RemoveStep } from "@/domain/lessons/Lesson";
 import { sameCell } from "@/domain/solver/cellRelations";
 import type { Assignment, CellReference, Elimination } from "@/domain/solver/SolveStep";
-
-export type PracticeHouse = "row" | "column" | "box";
+import { boxIndexOf, type HouseKind } from "@/domain/board/geometry";
+import { boxHouse, columnHouse, rowHouse } from "@/domain/solver/houses";
 
 /** Why a tap was wrong, or what to do first. */
 export type PracticeFeedback =
-    | { kind: "conflict"; house: PracticeHouse; number: number; digit: number }
+    | { kind: "conflict"; house: HouseKind; number: number; digit: number }
     | { kind: "outsideRange" }
     | { kind: "noCandidates" }
     | { kind: "turnOnNotes" }
@@ -56,19 +56,11 @@ export const freshPracticeState = (): PracticeState => ({
 
 const DIGITS = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 
-const rowCells = (row: number): CellReference[] => Array.from({ length: BOARD_SIZE }, (_, column) => ({ row, column }));
-const columnCells = (column: number): CellReference[] => Array.from({ length: BOARD_SIZE }, (_, row) => ({ row, column }));
-const boxNumberOf = ({ row, column }: CellReference): number =>
-    Math.floor(row / BOX_SIZE) * BOX_SIZE + Math.floor(column / BOX_SIZE) + 1;
-const boxCells = (boxNumber: number): CellReference[] => {
-    const firstRow = Math.floor((boxNumber - 1) / BOX_SIZE) * BOX_SIZE;
-    const firstColumn = ((boxNumber - 1) % BOX_SIZE) * BOX_SIZE;
-    const cells: CellReference[] = [];
-    for (let row = firstRow; row < firstRow + BOX_SIZE; row++) {
-        for (let column = firstColumn; column < firstColumn + BOX_SIZE; column++) cells.push({ row, column });
-    }
-    return cells;
-};
+const rowCells = (row: number): readonly CellReference[] => rowHouse(row).cells;
+const columnCells = (column: number): readonly CellReference[] => columnHouse(column).cells;
+// Boxes count from 1 here, as the feedback names them
+const boxNumberOf = ({ row, column }: CellReference): number => boxIndexOf(row, column) + 1;
+const boxCells = (boxNumber: number): readonly CellReference[] => boxHouse(boxNumber - 1).cells;
 
 const includesCell = (cells: readonly CellReference[] | undefined, cell: CellReference): boolean =>
     (cells ?? []).some(other => sameCell(other, cell));
@@ -93,7 +85,7 @@ const canHold = (board: LessonBoard, state: PracticeState, cell: CellReference, 
 
 const isHiddenSingle = (board: LessonBoard, state: PracticeState, cell: CellReference, digit: number): boolean => {
     if (!canHold(board, state, cell, digit)) return false;
-    const openIn = (cells: CellReference[]) => cells.filter(other => canHold(board, state, other, digit)).length;
+    const openIn = (cells: readonly CellReference[]) => cells.filter(other => canHold(board, state, other, digit)).length;
     return openIn(boxCells(boxNumberOf(cell))) === 1 || openIn(rowCells(cell.row)) === 1 || openIn(columnCells(cell.column)) === 1;
 };
 

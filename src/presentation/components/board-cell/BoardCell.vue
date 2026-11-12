@@ -77,10 +77,11 @@
 </template>
 
 <script lang="ts" setup>
+import { boxIndexOf } from "@/domain/board/geometry";
 import { computed, nextTick, ref, toRef, useId, useTemplateRef, watch } from "vue";
 import { X } from "@/presentation/components/icon";
 import { BOX_SIZE } from "@/domain/board/constants";
-import type { GroupKind } from "@/domain/game/Sudoku";
+import type { HouseKind } from "@/domain/board/geometry";
 import { useMotionAllowed } from "@/presentation/composables/useMotionAllowed";
 import { useValueMotion } from "@/presentation/components/board-cell/useValueMotion";
 import { useStyleMoments } from "@/presentation/components/style-moments/styleMoments";
@@ -105,7 +106,7 @@ const props = withDefaults(defineProps<{
     valueFontWeight?: ValueFontWeight;
     highlightedNote?: number | null;
     /** The kinds of completed group (row, column, box) whose effect this cell is in; none outside one. */
-    groupKinds?: GroupKind[];
+    groupKinds?: HouseKind[];
     /** The running group effect's id; a new one restarts the cell's effect. */
     groupEffectId?: number | null;
     noteTone?: NoteTone;
@@ -201,7 +202,7 @@ watch(() => props.groupEffectId, (id, previousId) => {
 const placement = computed(() => ({
     "--cell-row": props.row,
     "--cell-column": props.column,
-    "--cell-box": Math.floor(props.row / BOX_SIZE) * BOX_SIZE + Math.floor(props.column / BOX_SIZE),
+    "--cell-box": boxIndexOf(props.row, props.column),
 }));
 const pops = computed(() => props.popping && motionAllowed());
 const { arriving, leaving, settle } = useValueMotion(toRef(props, "value"), toRef(props, "popping"));

@@ -122,7 +122,8 @@ let mountCount = 0;
 </script>
 
 <script lang="ts" setup>
-import type { CompletedGroup, GroupKind } from "@/domain/game/Sudoku";
+import type { HouseKind } from "@/domain/board/geometry";
+import type { CompletedGroup } from "@/domain/game/Sudoku";
 import type { GroupEffect } from "@/presentation/components/style-moments/styleMoments";
 import { groupPlacement } from "@/presentation/components/style-moments/groupPlacement";
 
@@ -156,7 +157,7 @@ interface Sheet {
     blotSolidTo: string;
 }
 
-const SHEETS: Record<GroupKind, Sheet> = {
+const SHEETS: Record<HouseKind, Sheet> = {
     row: {
         viewBox: "0 0 371 39",
         placement: { left: percentOfBoard(-STROKE_LEAD), top: "0%", width: percentOfBoard(STROKE_LENGTH), height: "100%" },

@@ -17,7 +17,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { GroupKind } from "@/domain/game/Sudoku";
+import type { HouseKind } from "@/domain/board/geometry";
 import type { GroupEffect } from "@/presentation/components/style-moments/styleMoments";
 import { groupPlacement } from "@/presentation/components/style-moments/groupPlacement";
 
@@ -26,7 +26,7 @@ defineProps<{
 }>();
 
 // One hand-drawn path per kind of group, drawn in its own box; the boxes keep a cell's proportions
-const MARKS: Record<GroupKind, { viewBox: string; path: string }> = {
+const MARKS: Record<HouseKind, { viewBox: string; path: string }> = {
     row: { viewBox: "0 0 351 39", path: "M6 21 C 90 17, 180 24, 345 18" },
     column: { viewBox: "0 0 39 351", path: "M20 6 C 17 90, 23 200, 19 345" },
     box: {

@@ -2,6 +2,7 @@ import { BOARD_SIZE, BOX_SIZE } from "@/domain/board/constants";
 import { BoardState } from "@/domain/solver/BoardState";
 import { CellReference, Elimination, SolveStep } from "@/domain/solver/SolveStep";
 import { Technique } from "@/domain/solver/techniques/Technique";
+import { boxStart } from "@/domain/board/geometry";
 
 export class Claiming implements Technique {
     public find(state: BoardState): SolveStep | null {
@@ -29,8 +30,8 @@ export class Claiming implements Technique {
         }
         if (candidateCells.length < 2) return null;
 
-        const boxStartRows = new Set(candidateCells.map((cell) => Math.floor(cell.row / BOX_SIZE) * BOX_SIZE));
-        const boxStartColumns = new Set(candidateCells.map((cell) => Math.floor(cell.column / BOX_SIZE) * BOX_SIZE));
+        const boxStartRows = new Set(candidateCells.map((cell) => boxStart(cell.row)));
+        const boxStartColumns = new Set(candidateCells.map((cell) => boxStart(cell.column)));
         if (boxStartRows.size !== 1 || boxStartColumns.size !== 1) return null;
 
         const boxStartRow = [...boxStartRows][0];
@@ -59,8 +60,8 @@ export class Claiming implements Technique {
         }
         if (candidateCells.length < 2) return null;
 
-        const boxStartRows = new Set(candidateCells.map((cell) => Math.floor(cell.row / BOX_SIZE) * BOX_SIZE));
-        const boxStartColumns = new Set(candidateCells.map((cell) => Math.floor(cell.column / BOX_SIZE) * BOX_SIZE));
+        const boxStartRows = new Set(candidateCells.map((cell) => boxStart(cell.row)));
+        const boxStartColumns = new Set(candidateCells.map((cell) => boxStart(cell.column)));
         if (boxStartRows.size !== 1 || boxStartColumns.size !== 1) return null;
 
         const boxStartRow = [...boxStartRows][0];

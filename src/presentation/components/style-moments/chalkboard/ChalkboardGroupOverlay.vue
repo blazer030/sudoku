@@ -33,7 +33,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { GroupKind } from "@/domain/game/Sudoku";
+import type { HouseKind } from "@/domain/board/geometry";
 import type { GroupEffect } from "@/presentation/components/style-moments/styleMoments";
 import { groupPlacement } from "@/presentation/components/style-moments/groupPlacement";
 
@@ -42,7 +42,7 @@ defineProps<{
 }>();
 
 // GroupChalk's strokes, each in its group's own box (a row's is a cell high, a column's a cell wide)
-const LINES: Record<GroupKind, { viewBox: string; path: string }> = {
+const LINES: Record<HouseKind, { viewBox: string; path: string }> = {
     row: { viewBox: "0 0 351 39", path: "M8 36 C 120 33, 230 39, 343 34" },
     column: { viewBox: "0 0 39 351", path: "M36 8 C 33 120, 39 230, 34 343" },
     box: {
@@ -52,7 +52,7 @@ const LINES: Record<GroupKind, { viewBox: string; path: string }> = {
 };
 
 // Where the dust drops: under a row and a box, beside a column, at three points along the stroke
-const DUST_PLACES: Record<GroupKind, string[]> = {
+const DUST_PLACES: Record<HouseKind, string[]> = {
     row: ["-bottom-1.5 left-[28%]", "-bottom-1.5 left-[58%]", "-bottom-1.5 left-[88%]"],
     column: ["-right-1.5 top-[28%]", "-right-1.5 top-[58%]", "-right-1.5 top-[88%]"],
     box: ["-bottom-1.5 left-[28%]", "-bottom-1.5 left-[58%]", "-bottom-1.5 left-[88%]"],

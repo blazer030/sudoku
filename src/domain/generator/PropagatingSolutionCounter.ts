@@ -1,28 +1,10 @@
 import { BOARD_SIZE, TOTAL_CELLS } from "@/domain/board/constants";
+import { HOUSES } from "@/domain/solver/houses";
 
 // Each cell keeps its candidates as a 9-bit mask: bit (digit - 1) is set while the digit is still possible.
 const ALL_DIGITS_MASK = (1 << BOARD_SIZE) - 1;
-const BOX_SIZE = 3;
-
-const buildUnits = (): number[][] => {
-    const units: number[][] = [];
-    for (let row = 0; row < BOARD_SIZE; row++) {
-        units.push(Array.from({ length: BOARD_SIZE }, (_, column) => row * BOARD_SIZE + column));
-    }
-    for (let column = 0; column < BOARD_SIZE; column++) {
-        units.push(Array.from({ length: BOARD_SIZE }, (_, row) => row * BOARD_SIZE + column));
-    }
-    for (let box = 0; box < BOARD_SIZE; box++) {
-        const startRow = Math.floor(box / BOX_SIZE) * BOX_SIZE;
-        const startColumn = (box % BOX_SIZE) * BOX_SIZE;
-        units.push(Array.from({ length: BOARD_SIZE }, (_, offset) =>
-            (startRow + Math.floor(offset / BOX_SIZE)) * BOARD_SIZE + startColumn + (offset % BOX_SIZE)));
-    }
-    return units;
-};
-
 /** The 27 rows, columns and boxes, each as its 9 cell indexes. */
-const UNITS = buildUnits();
+const UNITS: number[][] = HOUSES.map(house => house.cells.map(({ row, column }) => row * BOARD_SIZE + column));
 
 /** For each cell, the indexes into `UNITS` of its row, column and box. */
 const UNITS_OF_CELL: number[][] = Array.from({ length: TOTAL_CELLS }, (_, cell) =>

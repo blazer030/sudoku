@@ -1,4 +1,4 @@
-import { HOUSES, boxStart, combinationsOf } from "@/domain/solver/houses";
+import { HOUSES, boxHouse, combinationsOf } from "@/domain/solver/houses";
 
 describe("houses", () => {
     it("should list the 27 houses, rows then columns then boxes, each with nine cells in reading order", () => {
@@ -10,8 +10,8 @@ describe("houses", () => {
         expect(HOUSES[18 + 5].cells.map(({ row, column }) => `${row}${column}`)).toEqual(["36", "37", "38", "46", "47", "48", "56", "57", "58"]);
     });
 
-    it("should give the start of a box band", () => {
-        expect([0, 2, 3, 5, 8].map(boxStart)).toEqual([0, 0, 3, 3, 6]);
+    it("should give a single box by its number in reading order", () => {
+        expect(boxHouse(5)).toEqual(HOUSES[18 + 5]);
     });
 
     it("should pick combinations in lexicographic order", () => {

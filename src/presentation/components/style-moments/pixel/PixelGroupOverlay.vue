@@ -18,16 +18,18 @@
 
 <script lang="ts" setup>
 import { BOARD_SIZE, BOX_SIZE } from "@/domain/board/constants";
-import type { CompletedGroup, GroupKind } from "@/domain/game/Sudoku";
+import type { HouseKind } from "@/domain/board/geometry";
+import type { CompletedGroup } from "@/domain/game/Sudoku";
 import type { GroupEffect } from "@/presentation/components/style-moments/styleMoments";
-import { boxCorner, groupPlacement } from "@/presentation/components/style-moments/groupPlacement";
+import { boxOrigin } from "@/domain/board/geometry";
+import { groupPlacement } from "@/presentation/components/style-moments/groupPlacement";
 
 const props = defineProps<{
     effect: GroupEffect;
 }>();
 
 // Where each spark sits on its group: just past both ends of a line, on a box's four corners
-const SPARKS: Record<GroupKind, string[]> = {
+const SPARKS: Record<HouseKind, string[]> = {
     row: ["-left-2.5 top-1/2", "left-[calc(100%+10px)] top-1/2"],
     column: ["left-1/2 -top-2.5", "left-1/2 top-[calc(100%+10px)]"],
     box: ["left-0 top-0", "left-full top-0", "left-0 top-full", "left-full top-full"],
@@ -37,7 +39,7 @@ const cellsOf = (group: CompletedGroup): { row: number; column: number }[] => {
     const offsets = Array.from({ length: BOARD_SIZE }, (_, offset) => offset);
     if (group.kind === "row") return offsets.map(column => ({ row: group.index, column }));
     if (group.kind === "column") return offsets.map(row => ({ row, column: group.index }));
-    const corner = boxCorner(group.index);
+    const corner = boxOrigin(group.index);
     return offsets.map(offset => ({ row: corner.row + Math.floor(offset / BOX_SIZE), column: corner.column + (offset % BOX_SIZE) }));
 };
 

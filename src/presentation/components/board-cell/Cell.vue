@@ -38,7 +38,7 @@ import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import BoardCell, { type CellVariant, type ValueTextColor, type ValueFontWeight } from "@/presentation/components/board-cell/BoardCell.vue";
 import { PuzzleCell } from "@/domain/board/PuzzleCell";
-import type { GroupKind } from "@/domain/game/Sudoku";
+import type { HouseKind } from "@/domain/board/geometry";
 import { useLongPress } from "@/presentation/composables/useLongPress";
 import type { StepCellView, StepHighlight } from "@/presentation/components/step-presentation/stepCellView";
 import { vPress } from "@/presentation/directives/press";
@@ -53,7 +53,7 @@ const props = withDefaults(defineProps<{
     selectedDigit?: number | null;
     error?: boolean;
     /** The kinds of completed group whose effect this cell is in. */
-    groupKinds?: GroupKind[];
+    groupKinds?: HouseKind[];
     groupEffectId?: number | null;
     highlightSameDigit?: boolean;
     /** While hint mode is on, how the hint wants this cell shown; it replaces the normal highlights. */

@@ -42,10 +42,11 @@
 </template>
 
 <script lang="ts" setup>
+import { boxOrigin } from "@/domain/board/geometry";
 import { BOARD_SIZE, BOX_SIZE } from "@/domain/board/constants";
 import type { CompletedGroup } from "@/domain/game/Sudoku";
 import type { GroupEffect } from "@/presentation/components/style-moments/styleMoments";
-import { boxCorner, groupPlacement } from "@/presentation/components/style-moments/groupPlacement";
+import { groupPlacement } from "@/presentation/components/style-moments/groupPlacement";
 
 const props = defineProps<{
     effect: GroupEffect;
@@ -79,7 +80,7 @@ const snapOriginOf = (group: CompletedGroup): string => {
     const { origin } = props.effect;
     if (group.kind === "row") return `${percent(origin.column + 0.5, BOARD_SIZE)} 50%`;
     if (group.kind === "column") return `50% ${percent(origin.row + 0.5, BOARD_SIZE)}`;
-    const corner = boxCorner(group.index);
+    const corner = boxOrigin(group.index);
     return `${percent(origin.column - corner.column + 0.5, BOX_SIZE)} ${percent(origin.row - corner.row + 0.5, BOX_SIZE)}`;
 };
 

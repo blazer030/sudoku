@@ -1,7 +1,8 @@
 // What the ink canvas draws and when, free of WebGL so it can be tested: each effect is placed on the board in
 // board fractions (0–1 from the top left; a fill or a group mark by its cells) and timed from the moment it is
 // scheduled. The renderer only turns a frame's uniforms into pixels.
-import type { CompletedGroup, GroupKind } from "@/domain/game/Sudoku";
+import type { HouseKind } from "@/domain/board/geometry";
+import type { CompletedGroup } from "@/domain/game/Sudoku";
 
 /** A wash of ink dropped on wet paper: its front runs out from the centre, fast and then slow, and dries. */
 export interface InkBloom {
@@ -62,10 +63,10 @@ export const MAX_GROUPS = 4;
 const GROUP_SLOT_SIZE = 4;
 
 /** How long each kind's mark shows: a line's stroke from 80ms, a box's 圓相 from 160ms, each drawn on, held and faded. */
-export const INK_GROUP_MS: Readonly<Record<GroupKind, number>> = { row: 1080, column: 1080, box: 1220 };
+export const INK_GROUP_MS: Readonly<Record<HouseKind, number>> = { row: 1080, column: 1080, box: 1220 };
 
 /** The shader's code for each kind of group. */
-const GROUP_KIND_CODES: Readonly<Record<GroupKind, number>> = { row: 0, column: 1, box: 2 };
+const GROUP_KIND_CODES: Readonly<Record<HouseKind, number>> = { row: 0, column: 1, box: 2 };
 
 /** The cells a row, column or box spans. */
 const BOARD_CELLS = 9;

@@ -1,5 +1,6 @@
 import { BOARD_SIZE, BOX_SIZE } from "@/domain/board/constants";
 import type { SolveStep } from "@/domain/solver/SolveStep";
+import { boxStart } from "@/domain/board/geometry";
 
 const ALL_DIGITS_MASK = 0b111111111;
 
@@ -45,8 +46,8 @@ export class BoardState {
             newCandidates[row][index] &= ~digitBit;
             newCandidates[index][column] &= ~digitBit;
         }
-        const boxStartRow = Math.floor(row / BOX_SIZE) * BOX_SIZE;
-        const boxStartColumn = Math.floor(column / BOX_SIZE) * BOX_SIZE;
+        const boxStartRow = boxStart(row);
+        const boxStartColumn = boxStart(column);
         for (let boxRow = boxStartRow; boxRow < boxStartRow + BOX_SIZE; boxRow++) {
             for (let boxColumn = boxStartColumn; boxColumn < boxStartColumn + BOX_SIZE; boxColumn++) {
                 newCandidates[boxRow][boxColumn] &= ~digitBit;
@@ -109,8 +110,8 @@ export class BoardState {
             candidateMask = BoardState.removeDigit(candidateMask, puzzle[row][index]);
             candidateMask = BoardState.removeDigit(candidateMask, puzzle[index][column]);
         }
-        const boxStartRow = Math.floor(row / BOX_SIZE) * BOX_SIZE;
-        const boxStartColumn = Math.floor(column / BOX_SIZE) * BOX_SIZE;
+        const boxStartRow = boxStart(row);
+        const boxStartColumn = boxStart(column);
         for (let boxRow = boxStartRow; boxRow < boxStartRow + BOX_SIZE; boxRow++) {
             for (let boxColumn = boxStartColumn; boxColumn < boxStartColumn + BOX_SIZE; boxColumn++) {
                 candidateMask = BoardState.removeDigit(candidateMask, puzzle[boxRow][boxColumn]);

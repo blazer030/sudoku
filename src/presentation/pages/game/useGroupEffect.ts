@@ -1,7 +1,8 @@
 import { getCurrentScope, onScopeDispose, ref } from "vue";
-import { BOX_SIZE } from "@/domain/board/constants";
-import type { CompletedGroup, GroupKind } from "@/domain/game/Sudoku";
+import type { HouseKind } from "@/domain/board/geometry";
+import type { CompletedGroup } from "@/domain/game/Sudoku";
 import type { GroupEffect } from "@/presentation/components/style-moments/styleMoments";
+import { boxIndexOf } from "@/domain/board/geometry";
 
 /** How much later a cell's effect starts for each row and column between it and the origin. */
 export const GROUP_RIPPLE_STEP_MS = 60;
@@ -18,7 +19,7 @@ interface CellPosition {
  */
 export const useGroupEffect = (motionAllowed: () => boolean, durationMs: () => number) => {
     const effect = ref<GroupEffect | null>(null);
-    let cellKinds = new Map<string, GroupKind[]>();
+    let cellKinds = new Map<string, HouseKind[]>();
     let nextId = 1;
     let endTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -38,7 +39,7 @@ export const useGroupEffect = (motionAllowed: () => boolean, durationMs: () => n
         const isIn = (group: CompletedGroup, cell: CellPosition): boolean => {
             if (group.kind === "row") return cell.row === group.index;
             if (group.kind === "column") return cell.column === group.index;
-            return Math.floor(cell.row / BOX_SIZE) * BOX_SIZE + Math.floor(cell.column / BOX_SIZE) === group.index;
+            return boxIndexOf(cell.row, cell.column) === group.index;
         };
         cellKinds = new Map(cells.map(cell =>
             [`${cell.row},${cell.column}`, groups.filter(group => isIn(group, cell)).map(group => group.kind)]));
@@ -50,7 +51,7 @@ export const useGroupEffect = (motionAllowed: () => boolean, durationMs: () => n
     };
 
     // Reading `effect` makes callers re-render: every play and end replaces it, and the kinds with it
-    const isInEffect = (row: number, column: number): GroupKind[] => {
+    const isInEffect = (row: number, column: number): HouseKind[] => {
         if (effect.value === null) return [];
         return cellKinds.get(`${row},${column}`) ?? [];
     };

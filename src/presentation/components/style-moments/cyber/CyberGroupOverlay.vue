@@ -38,10 +38,11 @@
 </template>
 
 <script lang="ts" setup>
+import { boxOrigin } from "@/domain/board/geometry";
 import { BOARD_SIZE, BOX_SIZE } from "@/domain/board/constants";
 import type { CompletedGroup } from "@/domain/game/Sudoku";
 import type { GroupEffect } from "@/presentation/components/style-moments/styleMoments";
-import { boardPercent, boxCorner, groupPlacement } from "@/presentation/components/style-moments/groupPlacement";
+import { boardPercent, groupPlacement } from "@/presentation/components/style-moments/groupPlacement";
 
 const props = defineProps<{
     effect: GroupEffect;
@@ -84,7 +85,7 @@ const beamsOf = (group: CompletedGroup): { back: Record<string, string>; forward
 // lower line, where the board's edge does not cut them
 const tagLineOf = (group: CompletedGroup): number => {
     if (group.kind === "row") return group.index === 0 ? 1 : group.index;
-    const top = boxCorner(group.index).row;
+    const top = boxOrigin(group.index).row;
     return top === 0 ? BOX_SIZE : top;
 };
 
@@ -93,7 +94,7 @@ const tagTop = (line: number): string => `calc(${boardPercent(line)} - ${TAG_HAL
 // A box completed with a row holds that row, so a box at the row's head would have the row's tag inside its
 // outline, near its own tag: the row's moves to the far end
 const boxAtRowHead = (): boolean =>
-    props.effect.groups.some(group => group.kind === "box" && boxCorner(group.index).column === 0);
+    props.effect.groups.some(group => group.kind === "box" && boxOrigin(group.index).column === 0);
 
 const tagPlacementOf = (group: CompletedGroup): Record<string, string> => {
     if (group.kind === "row") {
@@ -105,7 +106,7 @@ const tagPlacementOf = (group: CompletedGroup): Record<string, string> => {
         if (group.index === BOARD_SIZE - 1) return { bottom: "18px", right: "2px" };
         return { bottom: "18px", left: boardPercent(group.index + 0.5), transform: "translateX(-50%)" };
     }
-    return { top: tagTop(tagLineOf(group)), left: `calc(${boardPercent(boxCorner(group.index).column)} + 6px)` };
+    return { top: tagTop(tagLineOf(group)), left: `calc(${boardPercent(boxOrigin(group.index).column)} + 6px)` };
 };
 
 const labelOf = (group: CompletedGroup): string => `${LABELS[group.kind]} ${group.index + 1} OK`;

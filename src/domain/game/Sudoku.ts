@@ -9,12 +9,12 @@ import { Difficulty, SudokuGenerator } from "@/domain/generator/SudokuGenerator"
 import { BoardState } from "@/domain/solver/BoardState";
 import { CellReference, Elimination } from "@/domain/solver/SolveStep";
 import { TechniqueSolver } from "@/domain/solver/TechniqueSolver";
+import { boxStart, boxIndexOf, type HouseKind } from "@/domain/board/geometry";
 
-export type GroupKind = "row" | "column" | "box";
 
 /** A completed row, column or box; boxes are numbered from 0 at the top left, in reading order. */
 export interface CompletedGroup {
-    kind: GroupKind;
+    kind: HouseKind;
     index: number;
 }
 
@@ -103,11 +103,11 @@ export class Sudoku {
         }
 
         if (this.isBoxComplete(row, column)) {
-            const boxRowStart = Math.floor(row / BOX_SIZE) * BOX_SIZE;
-            const boxColStart = Math.floor(column / BOX_SIZE) * BOX_SIZE;
-            groups.push({ kind: "box", index: boxRowStart + boxColStart / BOX_SIZE });
+            const boxRowStart = boxStart(row);
+            const boxColumnStart = boxStart(column);
+            groups.push({ kind: "box", index: boxIndexOf(row, column) });
             for (let boxRow = boxRowStart; boxRow < boxRowStart + BOX_SIZE; boxRow++) {
-                for (let boxColumn = boxColStart; boxColumn < boxColStart + BOX_SIZE; boxColumn++) {
+                for (let boxColumn = boxColumnStart; boxColumn < boxColumnStart + BOX_SIZE; boxColumn++) {
                     addCell(boxRow, boxColumn);
                 }
             }
@@ -132,10 +132,10 @@ export class Sudoku {
     }
 
     private isBoxComplete(row: number, column: number): boolean {
-        const boxRowStart = Math.floor(row / BOX_SIZE) * BOX_SIZE;
-        const boxColStart = Math.floor(column / BOX_SIZE) * BOX_SIZE;
+        const boxRowStart = boxStart(row);
+        const boxColumnStart = boxStart(column);
         for (let boxRow = boxRowStart; boxRow < boxRowStart + BOX_SIZE; boxRow++) {
-            for (let boxColumn = boxColStart; boxColumn < boxColStart + BOX_SIZE; boxColumn++) {
+            for (let boxColumn = boxColumnStart; boxColumn < boxColumnStart + BOX_SIZE; boxColumn++) {
                 const cell = this._puzzle[boxRow][boxColumn];
                 const value = cell.isClue ? cell.clue : cell.entry;
                 if (value !== this._answer[boxRow][boxColumn]) return false;
@@ -304,10 +304,10 @@ export class Sudoku {
             if (peerRow !== row) this._puzzle[peerRow][column].removeNote(value);
         }
         // 同宮
-        const boxRowStart = Math.floor(row / BOX_SIZE) * BOX_SIZE;
-        const boxColStart = Math.floor(column / BOX_SIZE) * BOX_SIZE;
+        const boxRowStart = boxStart(row);
+        const boxColumnStart = boxStart(column);
         for (let boxRow = boxRowStart; boxRow < boxRowStart + BOX_SIZE; boxRow++) {
-            for (let boxColumn = boxColStart; boxColumn < boxColStart + BOX_SIZE; boxColumn++) {
+            for (let boxColumn = boxColumnStart; boxColumn < boxColumnStart + BOX_SIZE; boxColumn++) {
                 if (boxRow !== row || boxColumn !== column) this._puzzle[boxRow][boxColumn].removeNote(value);
             }
         }
