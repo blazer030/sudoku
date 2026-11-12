@@ -1,7 +1,7 @@
 import { readFileSync } from "fs";
 import postcss, { type AtRule } from "postcss";
 import { animationTimingOf, declarationsOf, reducedMotionDeclarationsOf, splitTopLevel } from "../../styleSheetRules";
-import { ARRIVAL_SETTLE_MS } from "@/presentation/components/board-cell/useArrivalMotion";
+import { VALUE_MOTION_SETTLE_MS } from "@/presentation/components/board-cell/useValueMotion";
 
 const INK_CSS = readFileSync("src/style/styles/ink/skin.css", "utf8");
 const BRUSH_GRID_SVG = readFileSync("src/style/styles/ink/brush-grid.svg", "utf8");
@@ -804,7 +804,7 @@ describe("ink skin", () => {
             for (const [selector, name] of CELL_ANIMATIONS) {
                 const timing = animationTimingOf(declarationsOf(INK_CSS, selector).get("animation") ?? "", name);
                 expect(timing, name).not.toBeNull();
-                expect((timing?.durationMs ?? 0) + (timing?.fixedDelayMs ?? 0), name).toBeLessThanOrEqual(ARRIVAL_SETTLE_MS);
+                expect((timing?.durationMs ?? 0) + (timing?.fixedDelayMs ?? 0), name).toBeLessThanOrEqual(VALUE_MOTION_SETTLE_MS);
                 expect(reducedMotionDeclarationsOf(INK_CSS, selector).get("animation"), name).toBe("none");
             }
         });

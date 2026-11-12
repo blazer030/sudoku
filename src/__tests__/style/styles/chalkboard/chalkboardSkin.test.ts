@@ -1,6 +1,6 @@
 import { readFileSync } from "fs";
 import postcss, { type AtRule, type Rule } from "postcss";
-import { ARRIVAL_SETTLE_MS } from "@/presentation/components/board-cell/useArrivalMotion";
+import { VALUE_MOTION_SETTLE_MS } from "@/presentation/components/board-cell/useValueMotion";
 import { contrastRatio, mixColors } from "@/theme/contrast";
 import { getPalette } from "@/theme/palettes";
 import { animationTimingOf, declarationsOf, reducedMotionDeclarationsOf } from "../../styleSheetRules";
@@ -965,7 +965,7 @@ describe("chalkboard skin", () => {
                 const timing = animationTimingOf(declarationsOf(CHALKBOARD_CSS, selector).get("animation") ?? "", name);
 
                 expect(timing, name).not.toBeNull();
-                expect((timing?.durationMs ?? 0) + (timing?.fixedDelayMs ?? 0), name).toBeLessThanOrEqual(ARRIVAL_SETTLE_MS);
+                expect((timing?.durationMs ?? 0) + (timing?.fixedDelayMs ?? 0), name).toBeLessThanOrEqual(VALUE_MOTION_SETTLE_MS);
                 expect(declarationsOf(CHALKBOARD_CSS, selector).get("animation"), name).not.toContain("forwards");
                 expect(reducedMotionDeclarationsOf(CHALKBOARD_CSS, selector).get("animation"), name).toBe("none");
             }

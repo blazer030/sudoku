@@ -1,6 +1,6 @@
 import { readFileSync } from "fs";
 import postcss from "postcss";
-import { ARRIVAL_SETTLE_MS } from "@/presentation/components/board-cell/useArrivalMotion";
+import { VALUE_MOTION_SETTLE_MS } from "@/presentation/components/board-cell/useValueMotion";
 import { CHALKBOARD_DIGIT_DUST, CHALKBOARD_STROKE_FACE, DUST_SPECKS } from "@/presentation/components/style-moments/chalkboard/chalkboardDigitStrokes";
 import { STYLE_MOMENTS } from "@/presentation/components/style-moments/styleMoments";
 import { GROUP_RIPPLE_STEP_MS } from "@/presentation/pages/game/useGroupEffect";
@@ -675,7 +675,7 @@ describe("chalkboard moments", () => {
             const durationMs = Number.parseFloat(declarationsOf(CHALKBOARD_CSS, DARK_DUST).get("animation-duration") ?? "NaN");
             const lastFallMs = Math.max(...Object.values(CHALKBOARD_DIGIT_DUST).flatMap(falls => (falls ?? []).map(fall => fall.delayMs)));
 
-            expect(lastFallMs + durationMs).toBeLessThan(ARRIVAL_SETTLE_MS);
+            expect(lastFallMs + durationMs).toBeLessThan(VALUE_MOTION_SETTLE_MS);
         });
 
         // 白板 is markers: no dust (Review Focus 5)

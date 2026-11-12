@@ -2,9 +2,9 @@ import { readFileSync } from "fs";
 import postcss from "postcss";
 import { effectScope, nextTick, ref } from "vue";
 import { STYLE_IDS } from "@/theme/themeIds";
-import { ARRIVAL_SETTLE_MS, useArrivalMotion } from "@/presentation/components/board-cell/useArrivalMotion";
+import { VALUE_MOTION_SETTLE_MS, useValueMotion } from "@/presentation/components/board-cell/useValueMotion";
 
-describe("useArrivalMotion", () => {
+describe("useValueMotion", () => {
     beforeEach(() => {
         vi.useFakeTimers();
     });
@@ -16,8 +16,8 @@ describe("useArrivalMotion", () => {
     const startArrival = async () => {
         const scope = effectScope();
         const value = ref(0);
-        const motion = scope.run(() => useArrivalMotion(value, ref(false)));
-        if (motion === undefined) throw new Error("useArrivalMotion did not run");
+        const motion = scope.run(() => useValueMotion(value, ref(false)));
+        if (motion === undefined) throw new Error("useValueMotion did not run");
         value.value = 5;
         await nextTick();
         return { scope, value, ...motion };
@@ -27,14 +27,14 @@ describe("useArrivalMotion", () => {
         const { arriving } = await startArrival();
         expect(arriving.value).toBe(true);
 
-        vi.advanceTimersByTime(ARRIVAL_SETTLE_MS);
+        vi.advanceTimersByTime(VALUE_MOTION_SETTLE_MS);
 
         expect(arriving.value).toBe(false);
     });
 
     it("should keep a fresh arrival for its full time after an earlier one", async () => {
         const { arriving, value } = await startArrival();
-        vi.advanceTimersByTime(ARRIVAL_SETTLE_MS - 1);
+        vi.advanceTimersByTime(VALUE_MOTION_SETTLE_MS - 1);
         value.value = 0;
         await nextTick();
         value.value = 7;
@@ -61,8 +61,8 @@ describe("useArrivalMotion", () => {
         const startMotion = (initial: number, popping = false) => {
             const scope = effectScope();
             const value = ref(initial);
-            const motion = scope.run(() => useArrivalMotion(value, ref(popping)));
-            if (motion === undefined) throw new Error("useArrivalMotion did not run");
+            const motion = scope.run(() => useValueMotion(value, ref(popping)));
+            if (motion === undefined) throw new Error("useValueMotion did not run");
             return { scope, value, ...motion };
         };
 
@@ -73,7 +73,7 @@ describe("useArrivalMotion", () => {
             await nextTick();
             expect(leaving.value).toBe(true);
 
-            vi.advanceTimersByTime(ARRIVAL_SETTLE_MS);
+            vi.advanceTimersByTime(VALUE_MOTION_SETTLE_MS);
             expect(leaving.value).toBe(false);
         });
 
@@ -140,7 +140,7 @@ describe("useArrivalMotion", () => {
             const { arriving, value } = startMotion(5);
             value.value = 3;
             await nextTick();
-            vi.advanceTimersByTime(ARRIVAL_SETTLE_MS / 2);
+            vi.advanceTimersByTime(VALUE_MOTION_SETTLE_MS / 2);
 
             value.value = 7;
             await nextTick();
@@ -149,7 +149,7 @@ describe("useArrivalMotion", () => {
             vi.advanceTimersByTime(100);
 
             expect(arriving.value).toBe(true);
-            vi.advanceTimersByTime(ARRIVAL_SETTLE_MS - 100);
+            vi.advanceTimersByTime(VALUE_MOTION_SETTLE_MS - 100);
             expect(arriving.value).toBe(true);
             vi.advanceTimersByTime(100);
             expect(arriving.value).toBe(false);
@@ -208,7 +208,7 @@ describe("useArrivalMotion", () => {
                 const arrivalLayers = layersOf(declaration.value).filter(layer => !groupLayers.has(layer));
                 const durations = arrivalLayers.flatMap(layer => [...layer.matchAll(/(\d+(?:\.\d+)?)(ms|s)\b/g)])
                     .map(([, amount, unit]) => Number(amount) * (unit === "s" ? 1000 : 1));
-                for (const duration of durations) expect(duration, style).toBeLessThan(ARRIVAL_SETTLE_MS);
+                for (const duration of durations) expect(duration, style).toBeLessThan(VALUE_MOTION_SETTLE_MS);
                 for (const motionClass of MOTION_CLASSES) {
                     if ((rule as postcss.Rule).selector.includes(motionClass)) checked.add(`${style} ${motionClass}`);
                 }

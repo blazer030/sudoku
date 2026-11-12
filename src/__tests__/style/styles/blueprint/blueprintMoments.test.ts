@@ -1,6 +1,6 @@
 import { readFileSync } from "fs";
 import postcss from "postcss";
-import { ARRIVAL_SETTLE_MS } from "@/presentation/components/board-cell/useArrivalMotion";
+import { VALUE_MOTION_SETTLE_MS } from "@/presentation/components/board-cell/useValueMotion";
 import { STYLE_MOMENTS } from "@/presentation/components/style-moments/styleMoments";
 import { GROUP_RIPPLE_STEP_MS } from "@/presentation/pages/game/useGroupEffect";
 import { animationTimingOf, declarationsOf, reducedMotionDeclarationsOf } from "../../styleSheetRules";
@@ -211,7 +211,7 @@ describe("blueprint moments", () => {
 
             expect(timing?.durationMs).toBe(700);
             expect(animation).toContain("ease-in");
-            expect((timing?.durationMs ?? 0) + (timing?.fixedDelayMs ?? 0)).toBeLessThan(ARRIVAL_SETTLE_MS);
+            expect((timing?.durationMs ?? 0) + (timing?.fixedDelayMs ?? 0)).toBeLessThan(VALUE_MOTION_SETTLE_MS);
             expect(animation).not.toMatch(/forwards|both/);
         });
 
@@ -281,7 +281,7 @@ describe("blueprint moments", () => {
 
             expect(inkEndMs).toBe(840);
             expect(endOf(CROSSHAIRS, "blueprint-digit-crosshairs")).toBe(inkEndMs);
-            expect(inkEndMs).toBeLessThan(ARRIVAL_SETTLE_MS);
+            expect(inkEndMs).toBeLessThan(VALUE_MOTION_SETTLE_MS);
         });
 
         // Opacity and transform only: no mask, motion path or filter, so every engine draws it alike

@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { mount, type DOMWrapper } from "@vue/test-utils";
 import PaperDigitWriter from "@/presentation/components/style-moments/paper/PaperDigitWriter.vue";
 import { PAPER_DIGIT_STROKES } from "@/presentation/components/style-moments/paper/paperDigitStrokes";
-import { ARRIVAL_SETTLE_MS } from "@/presentation/components/board-cell/useArrivalMotion";
+import { VALUE_MOTION_SETTLE_MS } from "@/presentation/components/board-cell/useValueMotion";
 import { declarationsOf } from "@/__tests__/style/styleSheetRules";
 
 const DIGITS = [1, 2, 3, 4, 5, 6, 7, 8, 9];
@@ -56,7 +56,7 @@ describe("PaperDigitWriter", () => {
         const settle = writer.get(".paper-digit-settle");
         const settleEndMs = millisecondsOf(settle.attributes("style"), "animation-delay") + SETTLE_MS;
         expect(settleEndMs).toBe(lastStrokeEndMs);
-        expect(lastStrokeEndMs).toBeLessThan(ARRIVAL_SETTLE_MS);
+        expect(lastStrokeEndMs).toBeLessThan(VALUE_MOTION_SETTLE_MS);
     });
 
     it.each([1, 4, 7])("should lift the pen between the strokes of %i", (digit) => {

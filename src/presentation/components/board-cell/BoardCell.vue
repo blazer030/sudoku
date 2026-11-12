@@ -82,7 +82,7 @@ import { X } from "@/presentation/components/icon";
 import { BOX_SIZE } from "@/domain/board/constants";
 import type { GroupKind } from "@/domain/game/Sudoku";
 import { useMotionAllowed } from "@/presentation/composables/useMotionAllowed";
-import { useArrivalMotion } from "@/presentation/components/board-cell/useArrivalMotion";
+import { useValueMotion } from "@/presentation/components/board-cell/useValueMotion";
 import { useStyleMoments } from "@/presentation/components/style-moments/styleMoments";
 import { canMaskByReference } from "@/presentation/components/style-moments/maskReferenceSupport";
 
@@ -204,7 +204,7 @@ const placement = computed(() => ({
     "--cell-box": Math.floor(props.row / BOX_SIZE) * BOX_SIZE + Math.floor(props.column / BOX_SIZE),
 }));
 const pops = computed(() => props.popping && motionAllowed());
-const { arriving, leaving, settle } = useArrivalMotion(toRef(props, "value"), toRef(props, "popping"));
+const { arriving, leaving, settle } = useValueMotion(toRef(props, "value"), toRef(props, "popping"));
 
 // The digit a leaving cell last showed, for a style to draw as it goes
 const lastDigit = ref(props.value);

@@ -1,5 +1,5 @@
 import postcss from "postcss";
-import { ARRIVAL_SETTLE_MS } from "@/presentation/components/board-cell/useArrivalMotion";
+import { VALUE_MOTION_SETTLE_MS } from "@/presentation/components/board-cell/useValueMotion";
 import { STYLE_MOMENTS } from "@/presentation/components/style-moments/styleMoments";
 import { GROUP_RIPPLE_STEP_MS } from "@/presentation/pages/game/useGroupEffect";
 import { animationTimingOf, declarationsOf, reducedMotionDeclarationsOf } from "../../styleSheetRules";
@@ -99,7 +99,7 @@ describe("aurora moments", () => {
 
             expect(timing).toEqual({ durationMs: 800, fixedDelayMs: 0 });
             expect(animation).toContain(" ease-out");
-            expect((timing?.durationMs ?? Number.NaN) + (timing?.fixedDelayMs ?? Number.NaN)).toBeLessThan(ARRIVAL_SETTLE_MS);
+            expect((timing?.durationMs ?? Number.NaN) + (timing?.fixedDelayMs ?? Number.NaN)).toBeLessThan(VALUE_MOTION_SETTLE_MS);
             expect(frames.get("0%")).toEqual(new Map([["opacity", "0.95"], ["transform", "scale(0.4)"]]));
             expect(frames.get("100%")).toEqual(new Map([["opacity", "0"], ["transform", "scale(1.15)"]]));
         });
@@ -159,7 +159,7 @@ describe("aurora moments", () => {
 
             expect(timing).toEqual({ durationMs: 500, fixedDelayMs: 0 });
             expect(animation).toContain(" ease-in");
-            expect((timing?.durationMs ?? Number.NaN) + (timing?.fixedDelayMs ?? Number.NaN)).toBeLessThan(ARRIVAL_SETTLE_MS);
+            expect((timing?.durationMs ?? Number.NaN) + (timing?.fixedDelayMs ?? Number.NaN)).toBeLessThan(VALUE_MOTION_SETTLE_MS);
             expect(frames.get("0%")).toEqual(new Map([["opacity", "1"], ["transform", "none"]]));
             expect(frames.get("100%")).toEqual(new Map([["opacity", "0"], ["transform", "scale(0.6)"]]));
         });

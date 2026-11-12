@@ -2,7 +2,7 @@ import { readFileSync } from "fs";
 import postcss from "postcss";
 import { STYLE_MOMENTS } from "@/presentation/components/style-moments/styleMoments";
 import { GROUP_RIPPLE_STEP_MS } from "@/presentation/pages/game/useGroupEffect";
-import { ARRIVAL_SETTLE_MS } from "@/presentation/components/board-cell/useArrivalMotion";
+import { VALUE_MOTION_SETTLE_MS } from "@/presentation/components/board-cell/useValueMotion";
 import { animationTimingOf, declarationsOf, reducedMotionDeclarationsOf as reducedMotionDeclarationsIn } from "../../styleSheetRules";
 
 const PAPER_CSS = readFileSync("src/style/styles/paper/skin.css", "utf8");
@@ -100,7 +100,7 @@ describe("paper moments", () => {
         it("should end the rub before the leaving flag settles on its own", () => {
             const timing = animationTimingOf(declarationsOf(PAPER_CSS, RUB).get("animation") ?? "", "paper-digit-rub");
 
-            expect((timing?.fixedDelayMs ?? 0) + (timing?.durationMs ?? 0)).toBeLessThan(ARRIVAL_SETTLE_MS);
+            expect((timing?.fixedDelayMs ?? 0) + (timing?.durationMs ?? 0)).toBeLessThan(VALUE_MOTION_SETTLE_MS);
         });
 
         // The entered digit sits in its own completed group: a group rule animating the digit would

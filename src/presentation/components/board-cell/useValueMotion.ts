@@ -6,7 +6,7 @@ import { useMotionAllowed } from "@/presentation/composables/useMotionAllowed";
  * such an animation (minimal; tactile for leaving) never fire animationend; every style's animation
  * is shorter.
  */
-export const ARRIVAL_SETTLE_MS = 1000;
+export const VALUE_MOTION_SETTLE_MS = 1000;
 
 /**
  * Flags a digit placed after mount, or replaced by a different one, so a style can drop it in, and a
@@ -16,7 +16,7 @@ export const ARRIVAL_SETTLE_MS = 1000;
  * two frames and returns, so a style sheet replays its animation. It only toggles classes, so input
  * never waits for it.
  */
-export const useArrivalMotion = (
+export const useValueMotion = (
     value: Ref<number>,
     popping: Ref<boolean>,
 ): { arriving: Ref<boolean>; leaving: Ref<boolean>; settle: () => void } => {
@@ -44,7 +44,7 @@ export const useArrivalMotion = (
     };
 
     const startSettleTimer = () => {
-        settleTimer = setTimeout(settle, ARRIVAL_SETTLE_MS);
+        settleTimer = setTimeout(settle, VALUE_MOTION_SETTLE_MS);
     };
 
     // The browser must render a frame without the flag, or the class never looks removed

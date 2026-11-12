@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { defineComponent, h, nextTick } from "vue";
 import { mount } from "@vue/test-utils";
 import { useSettingsStore } from "@/stores/settingsStore";
-import { ARRIVAL_SETTLE_MS } from "@/presentation/components/board-cell/useArrivalMotion";
+import { VALUE_MOTION_SETTLE_MS } from "@/presentation/components/board-cell/useValueMotion";
 import BoardCell from "@/presentation/components/board-cell/BoardCell.vue";
 import { STYLE_MOMENTS } from "@/presentation/components/style-moments/styleMoments";
 import PaperDigitWriter from "@/presentation/components/style-moments/paper/PaperDigitWriter.vue";
@@ -233,7 +233,7 @@ describe("BoardCell", () => {
                 await wrapper.setProps({ value: 5 });
                 expect(wrapper.get("[data-testid='cell-value']").classes()).toContain("value-arrive");
 
-                vi.advanceTimersByTime(ARRIVAL_SETTLE_MS);
+                vi.advanceTimersByTime(VALUE_MOTION_SETTLE_MS);
                 await nextTick();
 
                 expect(wrapper.get("[data-testid='cell-value']").classes()).not.toContain("value-arrive");
@@ -343,7 +343,7 @@ describe("BoardCell", () => {
                 await wrapper.setProps({ value: 0 });
                 expect(wrapper.classes()).toContain("value-leave");
 
-                vi.advanceTimersByTime(ARRIVAL_SETTLE_MS);
+                vi.advanceTimersByTime(VALUE_MOTION_SETTLE_MS);
                 await nextTick();
 
                 expect(wrapper.classes()).not.toContain("value-leave");
@@ -371,7 +371,7 @@ describe("BoardCell", () => {
                 expect(wrapper.attributes("data-leaving-value")).toBe("7");
                 expect(wrapper.classes()).toContain("value-leave");
 
-                vi.advanceTimersByTime(ARRIVAL_SETTLE_MS);
+                vi.advanceTimersByTime(VALUE_MOTION_SETTLE_MS);
                 await nextTick();
 
                 expect(wrapper.attributes("data-leaving-value")).toBeUndefined();

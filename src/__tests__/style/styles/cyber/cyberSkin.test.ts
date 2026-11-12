@@ -1,6 +1,6 @@
 import { readFileSync } from "fs";
 import postcss, { type AtRule, type Declaration, type Rule } from "postcss";
-import { ARRIVAL_SETTLE_MS } from "@/presentation/components/board-cell/useArrivalMotion";
+import { VALUE_MOTION_SETTLE_MS } from "@/presentation/components/board-cell/useValueMotion";
 import { contrastRatio } from "@/theme/contrast";
 import { getPalette } from "@/theme/palettes";
 import { declarationsOf } from "../../styleSheetRules";
@@ -521,7 +521,7 @@ describe("cyber skin", () => {
                 if (!outsideReducedMotion(declaration) || declaration.value.includes("infinite")) continue;
                 const milliseconds = [...declaration.value.matchAll(/(\d+(?:\.\d+)?)(ms|s)\b/g)]
                     .map(([, amount, unit]) => Number(amount) * (unit === "s" ? 1000 : 1));
-                for (const duration of milliseconds) expect(duration, declaration.value).toBeLessThan(ARRIVAL_SETTLE_MS);
+                for (const duration of milliseconds) expect(duration, declaration.value).toBeLessThan(VALUE_MOTION_SETTLE_MS);
             }
         });
     });
