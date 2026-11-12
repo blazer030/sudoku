@@ -378,6 +378,20 @@ describe("hidden singles in a row", () => {
         expect(rowExamples.length).toBeGreaterThan(0);
     });
 
+    it("should cross out the row's other empty cells in its example, then say why boxes come first", () => {
+        const exampleAt = steps.findIndex(step => step.kind === "show" && (step.marks.answers ?? [])
+            .some(({ cell, digit }) => isRowOnly(step, cell, digit)));
+        const example = steps[exampleAt];
+        const [{ cell: answer }] = example.marks.answers ?? [];
+        const state = boardState(example.board);
+        const othersEmpty = cellsOfRow(answer.row)
+            .filter(cell => cell.column !== answer.column && state.candidatesOf(cell.row, cell.column).length > 0);
+
+        expect(sortedCells(example.marks.crossed ?? [])).toEqual(sortedCells(othersEmpty));
+        const next = steps[exampleAt + 1];
+        expect(next.kind === "show" && next.textKey).toBe("lessons.content.hiddenSingle.boxesFirst");
+    });
+
     it("should have the player place a digit that only its row gives", () => {
         const rowSteps = steps.filter(step => step.kind === "place" && step.stage === "follow" && isRowOnly(step, step.answer, step.digit));
 
