@@ -1,8 +1,7 @@
 import type { InjectionKey } from "vue";
 import type { Difficulty } from "@/domain/generator/SudokuGenerator";
 
-export type DonateTier = "coffee" | "lunch" | "coding_time";
-// Play Console SKU is always `donate_${tier}`.
+import type { DonateTier } from "@/application/billing/BillingService";
 
 export type AnalyticsEvent =
     | { name: "game_start"; difficulty: Difficulty }

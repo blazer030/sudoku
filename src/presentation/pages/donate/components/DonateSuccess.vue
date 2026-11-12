@@ -21,7 +21,7 @@
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import FireworkCanvas from "@/presentation/components/firework-canvas/FireworkCanvas.vue";
-import type { DonateTier } from "@/application/analytics/AnalyticsService";
+import type { DonateTier } from "@/application/billing/BillingService";
 
 const { t } = useI18n();
 const props = defineProps<{ tier: DonateTier }>();

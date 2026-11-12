@@ -1,10 +1,13 @@
-import type { BillingService, Product, PurchaseResult } from "@/application/billing/BillingService";
+import { DONATE_TIERS, productIdOf, type BillingService, type DonateTier, type Product, type PurchaseResult } from "@/application/billing/BillingService";
 
-const FAKE_PRODUCTS: Product[] = [
-    { id: "donate_coffee",       tier: "coffee",       priceText: "$2.99", amountUsd: 2.99 },
-    { id: "donate_lunch",        tier: "lunch",        priceText: "$5.99", amountUsd: 5.99 },
-    { id: "donate_coding_time",  tier: "coding_time",  priceText: "$9.99", amountUsd: 9.99 },
-];
+const FAKE_PRICES_USD: Record<DonateTier, number> = { coffee: 2.99, lunch: 5.99, coding_time: 9.99 };
+
+const FAKE_PRODUCTS: Product[] = DONATE_TIERS.map(tier => ({
+    id: productIdOf(tier),
+    tier,
+    priceText: "$" + FAKE_PRICES_USD[tier].toFixed(2),
+    amountUsd: FAKE_PRICES_USD[tier],
+}));
 
 export class NoopBillingAdapter implements BillingService {
     loadProducts(): Promise<Product[]> {

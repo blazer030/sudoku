@@ -1,15 +1,10 @@
 import { store, ProductType, Platform, ErrorCode, CdvPurchase } from "capacitor-plugin-cdv-purchase";
 import type { Transaction } from "capacitor-plugin-cdv-purchase";
-import type { BillingService, Product, PurchaseResult } from "@/application/billing/BillingService";
-import type { DonateTier } from "@/application/analytics/AnalyticsService";
+import { DONATE_TIERS, productIdOf, type BillingService, type DonateTier, type Product, type PurchaseResult } from "@/application/billing/BillingService";
 
-const TIER_META = new Map<string, { tier: DonateTier }>([
-    ["donate_coffee",      { tier: "coffee" }],
-    ["donate_lunch",       { tier: "lunch" }],
-    ["donate_coding_time", { tier: "coding_time" }],
-]);
+const TIER_BY_PRODUCT_ID = new Map<string, DonateTier>(DONATE_TIERS.map(tier => [productIdOf(tier), tier]));
 
-const PRODUCT_IDS = Array.from(TIER_META.keys());
+const PRODUCT_IDS = Array.from(TIER_BY_PRODUCT_ID.keys());
 
 // cdv-purchase retries Play connection and product loading indefinitely, so cap how long the page waits
 const LOAD_TIMEOUT_MILLISECONDS = 10_000;
@@ -61,12 +56,12 @@ export class PlayBillingAdapter implements BillingService {
     }
 
     private toProduct(productId: string): Product | undefined {
-        const meta = TIER_META.get(productId);
+        const tier = TIER_BY_PRODUCT_ID.get(productId);
         const pricing = store.get(productId, Platform.GOOGLE_PLAY)?.pricing;
-        if (meta === undefined || pricing === undefined) return undefined;
+        if (tier === undefined || pricing === undefined) return undefined;
         return {
             id: productId,
-            tier: meta.tier,
+            tier,
             priceText: pricing.price,
             amountUsd: pricing.priceMicros / 1_000_000,
         };

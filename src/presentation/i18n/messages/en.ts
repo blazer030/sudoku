@@ -1,6 +1,6 @@
 import type { TechniqueId } from "@/domain/solver/SolveStep";
 import type { Difficulty } from "@/domain/generator/SudokuGenerator";
-import type { DonateTier } from "@/application/analytics/AnalyticsService";
+import type { DonateTier } from "@/application/billing/BillingService";
 import type { GameStepAction } from "@/domain/game/GameStep";
 import { lessonsEn } from "./lessons/en";
 
