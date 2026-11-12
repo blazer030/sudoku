@@ -447,8 +447,8 @@
    settled (steps() applies to each keyframe interval, so one step each holds a frame). Eight pixels
    burst out of its cell meanwhile; a cleared digit bursts the same pixels in the leaving colour. The
    burst hangs off the cell, not the digit, so the pop's scaling never shrinks it and it outlives the
-   digit; it is drawn over the grid lines and the cursor. The arrival is the digit's class, so the cell
-   finds it with :has(); a WebView without :has() pops the digit without the burst. An error's blink
+   digit; it is drawn over the grid lines and the cursor. The cell carries data-arriving while its digit
+   arrives, so every engine draws the burst. An error's blink
    replaces the pop, and whichever animation ends first settles the cell. */
 @keyframes pixel-pop {
     0% { transform: scale(0.5); }
@@ -497,11 +497,11 @@
     animation: pixel-pop 480ms steps(1, end);
 }
 
-[data-style="pixel"] [data-skin~="board"] [data-variant]:is(.value-leave, :has(> .value-arrive)) {
+[data-style="pixel"] [data-skin~="board"] [data-variant]:is(.value-leave, [data-arriving]) {
     position: relative;
 }
 
-[data-style="pixel"] [data-skin~="board"] [data-variant]:is(.value-leave, :has(> .value-arrive))::after {
+[data-style="pixel"] [data-skin~="board"] [data-variant]:is(.value-leave, [data-arriving])::after {
     content: "";
     position: absolute;
     left: 50%;
@@ -513,8 +513,8 @@
     pointer-events: none;
 }
 
-/* Its own rule, so a WebView without :has() still reads the leaving one */
-[data-style="pixel"] [data-skin~="board"] [data-variant]:has(> .value-arrive)::after {
+/* The arrival's burst runs in, the leaving one out */
+[data-style="pixel"] [data-skin~="board"] [data-variant][data-arriving]::after {
     animation: pixel-burst-in 480ms steps(4, jump-start);
 }
 
@@ -1124,8 +1124,8 @@
         box-shadow: inset 0 0 0 2px var(--color-primary);
     }
 
-    /* Its own rule, so a WebView without :has() still reads the list above */
-    [data-style="pixel"] [data-skin~="board"] [data-variant]:has(> .value-arrive)::after {
+    /* The arriving burst holds still too */
+    [data-style="pixel"] [data-skin~="board"] [data-variant][data-arriving]::after {
         animation: none;
     }
 }

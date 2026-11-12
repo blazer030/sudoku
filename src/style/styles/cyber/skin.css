@@ -563,11 +563,11 @@
     100% { opacity: 1; transform: none; clip-path: inset(0); }
 }
 
-[data-style="cyber"] [data-skin~="board"] [data-variant]:is(.value-leave, :has(> .value-arrive)) {
+[data-style="cyber"] [data-skin~="board"] [data-variant]:is(.value-leave, [data-arriving]) {
     position: relative;
 }
 
-[data-style="cyber"] [data-skin~="board"] [data-variant]:is(.value-leave, :has(> .value-arrive))::before {
+[data-style="cyber"] [data-skin~="board"] [data-variant]:is(.value-leave, [data-arriving])::before {
     content: "";
     position: absolute;
     inset: 0;
@@ -575,8 +575,8 @@
     pointer-events: none;
 }
 
-/* Their own rules, so a WebView without :has() still reads the leaving one */
-[data-style="cyber"] [data-skin~="board"] [data-variant]:has(> .value-arrive)::before {
+/* The arrival scans down, the leaving one its own way */
+[data-style="cyber"] [data-skin~="board"] [data-variant][data-arriving]::before {
     background: linear-gradient(var(--color-accent), var(--color-accent)) top / 100% 2px no-repeat;
     filter: drop-shadow(0 0 4px var(--color-accent));
     animation: cyber-scan-down 480ms ease-out;
@@ -1087,8 +1087,8 @@
         transform: scaleX(0.64);
     }
 
-    /* Its own rule, so a WebView without :has() still reads the list above */
-    [data-style="cyber"] [data-skin~="board"] [data-variant]:has(> .value-arrive)::before {
+    /* The arriving scan holds still too */
+    [data-style="cyber"] [data-skin~="board"] [data-variant][data-arriving]::before {
         animation: none;
     }
 

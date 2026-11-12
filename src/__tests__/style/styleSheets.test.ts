@@ -2,10 +2,10 @@ import { existsSync, readdirSync, readFileSync } from "fs";
 import { STYLE_IDS, type StyleId } from "@/theme/themeIds";
 import { animationTimingOf, findCrossEngineHazards, findLayoutDeclarations, findScalesOutOfRange, findUnguardedMotion, findUnscopedSelectors, reducedMotionDeclarationsOf } from "./styleSheetRules";
 
-// The styles held to the cross-engine rules so far. paper, pixel and cyber still find a cell by :has(),
-// cyber's arrival and loader carry a drop-shadow while they animate, chalkboard's erase smear animates a
-// blur and blueprint's loader pen rides an offset-path; each joins the list once it is brought in line.
-const CROSS_ENGINE_STYLES: readonly StyleId[] = ["ink"];
+// The styles held to the cross-engine rules so far. paper still finds a cell by :has(), cyber's arrival and
+// loader carry a drop-shadow while they animate, chalkboard's erase smear animates a blur and blueprint's loader
+// pen rides an offset-path; each joins the list once it is brought in line.
+const CROSS_ENGINE_STYLES: readonly StyleId[] = ["ink", "pixel"];
 
 const sheetOf = (style: StyleId): string => readFileSync(`src/style/styles/${style}/skin.css`, "utf8");
 

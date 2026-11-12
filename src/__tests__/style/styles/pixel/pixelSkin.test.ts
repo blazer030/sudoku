@@ -496,7 +496,7 @@ describe("pixel skin", () => {
     describe("digit motion", () => {
         const ARRIVE = `${BOARD} .value-arrive`;
         // The cell whose digit arrives or leaves; the arrival is the digit's class, so the cell finds it with :has()
-        const BURST_CELL = `${BOARD} [data-variant]:is(.value-leave, :has(> .value-arrive))`;
+        const BURST_CELL = `${BOARD} [data-variant]:is(.value-leave, [data-arriving])`;
         const BURST = `${BURST_CELL}::after`;
 
         const keyframesOf = (name: string): Map<string, Map<string, string>> => {
@@ -532,7 +532,7 @@ describe("pixel skin", () => {
 
         // Arriving and leaving bursts run different keyframes, so a digit that flips from one to the
         // other before its burst ends starts a fresh burst rather than inheriting the old one's clock
-        const ARRIVE_BURST = `${BOARD} [data-variant]:has(> .value-arrive)::after`;
+        const ARRIVE_BURST = `${BOARD} [data-variant][data-arriving]::after`;
         const LEAVE_BURST = `${BOARD} [data-variant].value-leave::after`;
         const burstNameOf = (selector: string): string => /^(pixel-[\w-]+) /.exec(declarationsOf(PIXEL_CSS, selector).get("animation") ?? "")?.[1] ?? "";
 

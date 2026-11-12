@@ -465,18 +465,18 @@ describe("cyber skin", () => {
         });
 
         it("should run a cyan scan line down the cell as a digit arrives, and a magenta one up as it leaves, on the cell's ::before", () => {
-            const down = declarationsOf(CYBER_CSS, `${CELL}:has(> .value-arrive)::before`);
+            const down = declarationsOf(CYBER_CSS, `${CELL}[data-arriving]::before`);
             const up = declarationsOf(CYBER_CSS, `${CELL}.value-leave::before`);
 
             expect(down.get("animation")).toMatch(/^cyber-scan-down \d+ms /);
             expect(up.get("animation")).toMatch(/^cyber-scan-up \d+ms /);
             expect(down.get("background")).toContain("var(--color-accent)");
             expect(up.get("background")).toContain("var(--color-primary)");
-            expect(declarationsOf(CYBER_CSS, `${CELL}:is(.value-leave, :has(> .value-arrive))::before`).get("pointer-events")).toBe("none");
+            expect(declarationsOf(CYBER_CSS, `${CELL}:is(.value-leave, [data-arriving])::before`).get("pointer-events")).toBe("none");
         });
 
         it("should leave the cell's ::after to the selected brackets while a digit arrives or leaves", () => {
-            expect(declarationsOf(CYBER_CSS, `${CELL}:is(.value-leave, :has(> .value-arrive))::before`).get("content")).toBe('""');
+            expect(declarationsOf(CYBER_CSS, `${CELL}:is(.value-leave, [data-arriving])::before`).get("content")).toBe('""');
             expect(allRules().filter(rule => /value-(?:arrive|leave)[^,]*::after/.test(rule.selector))).toEqual([]);
         });
 
