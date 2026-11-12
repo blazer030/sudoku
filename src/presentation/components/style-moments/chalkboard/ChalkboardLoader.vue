@@ -101,7 +101,7 @@
             </svg>
         </div>
         <p class="chalkboard-loader-caption m-0 text-[15px] text-foreground">
-            {{ message ?? t("home.generatingPuzzle") }}
+            {{ message }}
         </p>
         <!-- The canvas's wiper: a soft smear round the duster, dragged across the sketch with it. It comes in from
              past the card's left edge and leaves past its right, so it lies in a layer over the card, inside its 2px
@@ -120,15 +120,12 @@
 
 <script lang="ts" setup>
 import { useId } from "vue";
-import { useI18n } from "vue-i18n";
 
-const { t } = useI18n();
 
-withDefaults(defineProps<{
-    message?: string;
-}>(), {
-    message: undefined,
-});
+defineProps<{
+    // What is being loaded, resolved by PuzzleLoader
+    message: string;
+}>();
 
 // One cell of the small board, in its 120-unit viewBox
 const CELL = 32;

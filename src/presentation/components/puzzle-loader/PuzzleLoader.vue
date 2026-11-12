@@ -8,15 +8,17 @@
         >
             <component
                 :is="moments.loader"
-                :message="message"
+                :message="message ?? t('home.generatingPuzzle')"
             />
         </div>
     </Transition>
 </template>
 
 <script lang="ts" setup>
+import { useI18n } from "vue-i18n";
 import { useStyleMoments } from "@/presentation/components/style-moments/styleMoments";
 
+const { t } = useI18n();
 const moments = useStyleMoments();
 
 withDefaults(defineProps<{

@@ -87,22 +87,19 @@
             <span class="ink-loader-seal absolute -right-4 -bottom-1.5 grid size-7 place-items-center rounded-[4px_2px_5px_3px] bg-primary text-[15px] font-black leading-none text-on-primary shadow-[inset_0_0_0_1.5px_var(--color-primary),inset_0_0_0_2.5px_var(--color-on-primary)]">題</span>
         </div>
         <p class="ink-loader-caption m-0 text-sm tracking-[0.2em] text-foreground-secondary">
-            {{ message ?? t("home.generatingPuzzle") }}
+            {{ message }}
         </p>
     </div>
 </template>
 
 <script lang="ts" setup>
 import { useId } from "vue";
-import { useI18n } from "vue-i18n";
 
-const { t } = useI18n();
 
-withDefaults(defineProps<{
-    message?: string;
-}>(), {
-    message: undefined,
-});
+defineProps<{
+    // What is being loaded, resolved by PuzzleLoader
+    message: string;
+}>();
 
 // One brush stroke laid along each line of the box, in the order it is brushed: the frame (top, left,
 // right, bottom), then the two inner lines down and the two across

@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { defineComponent, h, nextTick } from "vue";
+import { defineComponent, h } from "vue";
 import { mount } from "@vue/test-utils";
 import { i18n } from "@/presentation/i18n";
 import { STYLE_MOMENTS } from "@/presentation/components/style-moments/styleMoments";
@@ -17,7 +17,7 @@ describe("InkLoader", () => {
     });
 
     it("should brush each stroke through its own reveal mask, and write digits and a 「題」 seal, as decoration", () => {
-        const wrapper = mount(InkLoader);
+        const wrapper = mount(InkLoader, { props: { message: "Generating" } });
         const sketch = wrapper.get(".ink-loader-sketch");
         const strokes = sketch.findAll(".ink-loader-stroke");
         const reveals = sketch.findAll("mask .ink-loader-reveal");
@@ -46,21 +46,6 @@ describe("InkLoader", () => {
 
         expect(new Set(ids).size).toBe(ids.length);
         expect(references.sort()).toEqual([...ids].sort());
-    });
-
-    it("should caption the slip in the current language", async () => {
-        const wrapper = mount(InkLoader);
-        const caption = wrapper.get(".ink-loader-caption");
-        const english = caption.text();
-        const englishSeal = wrapper.get(".ink-loader-seal").text();
-
-        i18n.global.locale.value = "zh-Hant";
-        await nextTick();
-
-        expect(caption.text()).not.toBe(english);
-        expect(caption.text()).not.toBe("");
-        // The seal is an emblem: the same in both languages
-        expect(wrapper.get(".ink-loader-seal").text()).toBe(englishSeal);
     });
 
     it("should show a screen's own message instead", () => {

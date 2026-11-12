@@ -27,21 +27,16 @@
             >{{ digit.value }}</span>
         </div>
         <p class="m-0 text-[15px] font-medium">
-            {{ message ?? t("home.generatingPuzzle") }}
+            {{ message }}
         </p>
     </div>
 </template>
 
 <script lang="ts" setup>
-import { useI18n } from "vue-i18n";
-
-const { t } = useI18n();
-
-withDefaults(defineProps<{
-    message?: string;
-}>(), {
-    message: undefined,
-});
+defineProps<{
+    // What is being loaded, resolved by PuzzleLoader
+    message: string;
+}>();
 
 // The grid by hand: two wavering lines down, then two across
 const GRID_STROKES = [

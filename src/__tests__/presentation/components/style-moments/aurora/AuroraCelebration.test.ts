@@ -6,7 +6,7 @@ import AuroraCelebration from "@/presentation/components/style-moments/aurora/Au
 describe("AuroraCelebration", () => {
     it("should be aurora's celebration, with nothing drawn on the card itself", () => {
         expect(STYLE_MOMENTS.aurora.celebration).toBe(AuroraCelebration);
-        expect(STYLE_MOMENTS.aurora.cardDecoration).toBeNull();
+        expect(STYLE_MOMENTS.aurora.cardDecoration ?? null).toBeNull();
     });
 
     // It fills the scrim behind the card; the scrim centres the card, so the screen's centre is the card's

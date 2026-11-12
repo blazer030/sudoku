@@ -20,21 +20,16 @@
             </span>
         </div>
         <p class="m-0 text-sm font-medium text-foreground-secondary">
-            {{ message ?? t("home.generatingPuzzle") }}
+            {{ message }}
         </p>
     </div>
 </template>
 
 <script lang="ts" setup>
-import { useI18n } from "vue-i18n";
-
-const { t } = useI18n();
-
-withDefaults(defineProps<{
-    message?: string;
-}>(), {
-    message: undefined,
-});
+defineProps<{
+    // What is being loaded, resolved by PuzzleLoader
+    message: string;
+}>();
 
 // The tiles fill the tray in a snake: along the top row, back along the middle, along the bottom
 const DROP_STEP_BY_SQUARE = [0, 1, 2, 5, 4, 3, 6, 7, 8];

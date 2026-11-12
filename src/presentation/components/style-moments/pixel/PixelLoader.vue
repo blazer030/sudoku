@@ -25,7 +25,7 @@
                 class="pixel-loader-cursor block h-2.5 w-1.5 shrink-0"
                 aria-hidden="true"
             />
-            <span>{{ message ?? t("home.generatingPuzzle") }}</span>
+            <span>{{ message }}</span>
         </p>
         <div
             class="pixel-loader-bar h-4 w-full overflow-hidden p-1"
@@ -37,15 +37,10 @@
 </template>
 
 <script lang="ts" setup>
-import { useI18n } from "vue-i18n";
-
-const { t } = useI18n();
-
-withDefaults(defineProps<{
-    message?: string;
-}>(), {
-    message: undefined,
-});
+defineProps<{
+    // What is being loaded, resolved by PuzzleLoader
+    message: string;
+}>();
 
 // The squares light like a snake: across the top, back along the middle, across the bottom
 const LIGHTING_STEP_BY_SQUARE = [0, 1, 2, 5, 4, 3, 6, 7, 8];

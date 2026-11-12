@@ -22,21 +22,16 @@
             />
         </div>
         <p class="aurora-loader-message relative m-0 text-sm font-medium">
-            {{ message ?? t("home.generatingPuzzle") }}
+            {{ message }}
         </p>
     </div>
 </template>
 
 <script lang="ts" setup>
-import { useI18n } from "vue-i18n";
-
-const { t } = useI18n();
-
-withDefaults(defineProps<{
-    message?: string;
-}>(), {
-    message: undefined,
-});
+defineProps<{
+    // What is being loaded, resolved by PuzzleLoader
+    message: string;
+}>();
 
 // The 3×3 lights by position: the centre breathes first, then the edges, then the corners
 const RING_BY_POSITION = ["corner", "edge", "corner", "edge", "centre", "edge", "corner", "edge", "corner"] as const;

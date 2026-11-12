@@ -60,7 +60,7 @@
         <!-- The title block: the caption, the pen's X and Y ticking past, and the sheet's number -->
         <div class="grid grid-cols-[1fr_auto] border-t border-foreground">
             <p class="blueprint-loader-caption m-0 px-2.5 py-2 text-[13px] tracking-[0.06em] text-foreground">
-                {{ message ?? t("home.generatingPuzzle") }}
+                {{ message }}
             </p>
             <span
                 class="blueprint-loader-coordinates my-2 h-7 self-center overflow-hidden border-l border-foreground px-2.5 font-mono text-[10px] leading-[14px] font-medium text-foreground-secondary"
@@ -89,11 +89,10 @@ import { useI18n } from "vue-i18n";
 
 const { t } = useI18n();
 
-withDefaults(defineProps<{
-    message?: string;
-}>(), {
-    message: undefined,
-});
+defineProps<{
+    // What is being loaded, resolved by PuzzleLoader
+    message: string;
+}>();
 
 // The box in the 120-unit viewBox, in the order it is plotted: the outline in one stroke, then on along it to the
 // two lines down and the two across. The pen runs along this same path.

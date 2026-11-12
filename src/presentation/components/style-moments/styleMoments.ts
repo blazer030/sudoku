@@ -7,7 +7,7 @@ import AuroraLoader from "@/presentation/components/style-moments/aurora/AuroraL
 import MinimalLoader from "@/presentation/components/style-moments/minimal/MinimalLoader.vue";
 import TactileLoader from "@/presentation/components/style-moments/tactile/TactileLoader.vue";
 import PaperLoader from "@/presentation/components/style-moments/paper/PaperLoader.vue";
-import PaperCelebration from "@/presentation/components/style-moments/paper/PaperCelebration.vue";
+import PaperCardDecoration from "@/presentation/components/style-moments/paper/PaperCardDecoration.vue";
 import PaperGroupOverlay from "@/presentation/components/style-moments/paper/PaperGroupOverlay.vue";
 import PaperDigitWriter from "@/presentation/components/style-moments/paper/PaperDigitWriter.vue";
 import PixelLoader from "@/presentation/components/style-moments/pixel/PixelLoader.vue";
@@ -41,6 +41,7 @@ export interface GroupEffect {
 export type CelebrationPhase = "playing" | "done" | "still";
 
 export interface StyleMoments {
+    /** Shown while a puzzle loads, given `{ message }`, the caption PuzzleLoader resolves. */
     loader: Component;
     /**
      * Decoration drawn over the completion scene, given `{ still }`; null when the board's and the card's
@@ -103,7 +104,7 @@ const TACTILE_MOMENTS: StyleMoments = {
 const PAPER_MOMENTS: StyleMoments = {
     loader: PaperLoader,
     celebration: null,
-    cardDecoration: PaperCelebration,
+    cardDecoration: PaperCardDecoration,
     groupEffectMs: 920,
     groupOverlay: PaperGroupOverlay,
     celebrationBoardMs: 760,
@@ -173,6 +174,22 @@ const CHALKBOARD_MOMENTS: StyleMoments = {
     digitWriter: ChalkboardDigitWriter,
 };
 
+// From the boards: each cell of a completed group glows with the primary from 100ms for 600ms, 45ms a step. A line's
+// streak of the aurora sweeps out from 100ms and fades by 860ms; a box's ring goes out from 120ms and fades by 880ms
+// (AuroraGroupOverlay).
+// The solved board: the aurora surges behind it from 0ms over 1.8s, showing through its gaps and glass, while light rings
+// out through its panes from the centre cell (900ms each, 85ms a ring, the corners last by 1240ms). The dialog opens at
+// 800ms, as the outer panes are still glowing: the card focuses in from 100ms over 640ms, and behind it three rings go out
+// from its centre, 2.4s a round, while six sparks rise (AuroraCelebration).
+// While a puzzle loads, nine lights breathe outward from the centre under a slowly turning aurora (AuroraLoader).
+const AURORA_MOMENTS: StyleMoments = {
+    loader: AuroraLoader,
+    celebration: AuroraCelebration,
+    groupEffectMs: 900,
+    groupOverlay: AuroraGroupOverlay,
+    celebrationBoardMs: 800,
+};
+
 // From the boards: each cell is hatched in the primary from 100ms for 560ms, 45ms a step, and a completed line's
 // margin label lights for 900ms. A line's dimension snaps out from 100ms and fades by 980ms; a box's outline snaps
 // out from 140ms and fades by 1000ms, which a box completed alone from its centre (its farthest cell two steps out,
@@ -185,23 +202,6 @@ const CHALKBOARD_MOMENTS: StyleMoments = {
 // nothing is drawn over the scene.
 // While a puzzle loads, a plotter draws a sudoku box on a small drawing sheet, its pen running along the line as it
 // is plotted, and dimensions it in 3 columns (BlueprintLoader).
-// From the boards: each cell of a completed group glows with the primary from 100ms for 600ms, 45ms a step. A line's
-// streak of the aurora sweeps out from 100ms and fades by 860ms; a box's ring goes out from 120ms and fades by 880ms
-// (AuroraGroupOverlay).
-// The solved board: the aurora surges behind it from 0ms over 1.8s, showing through its gaps and glass, while light rings
-// out through its panes from the centre cell (900ms each, 85ms a ring, the corners last by 1240ms). The dialog opens at
-// 800ms, as the outer panes are still glowing: the card focuses in from 100ms over 640ms, and behind it three rings go out
-// from its centre, 2.4s a round, while six sparks rise (AuroraCelebration).
-// While a puzzle loads, nine lights breathe outward from the centre under a slowly turning aurora (AuroraLoader).
-const AURORA_MOMENTS: StyleMoments = {
-    loader: AuroraLoader,
-    celebration: AuroraCelebration,
-    cardDecoration: null,
-    groupEffectMs: 900,
-    groupOverlay: AuroraGroupOverlay,
-    celebrationBoardMs: 800,
-};
-
 const BLUEPRINT_MOMENTS: StyleMoments = {
     loader: BlueprintLoader,
     celebration: null,

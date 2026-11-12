@@ -1,5 +1,4 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { nextTick } from "vue";
 import { mount } from "@vue/test-utils";
 import { i18n } from "@/presentation/i18n";
 import CyberLoader from "@/presentation/components/style-moments/cyber/CyberLoader.vue";
@@ -10,7 +9,7 @@ describe("CyberLoader", () => {
     });
 
     it("should be a HUD panel with two rings round a 3×3 whose squares light at their own beats, as decoration", () => {
-        const wrapper = mount(CyberLoader);
+        const wrapper = mount(CyberLoader, { props: { message: "Generating" } });
 
         expect(wrapper.get(".cyber-loader").attributes("data-skin")).toBe("card");
         const ring = wrapper.get(".cyber-loader-ring");
@@ -23,7 +22,7 @@ describe("CyberLoader", () => {
     });
 
     it("should write the generator's log and its header in English, as decoration", () => {
-        const wrapper = mount(CyberLoader);
+        const wrapper = mount(CyberLoader, { props: { message: "Generating" } });
 
         expect(wrapper.get(".cyber-loader-head").text()).toContain("// GENERATING");
         expect(wrapper.get(".cyber-loader-head").attributes("aria-hidden")).toBe("true");
@@ -35,18 +34,6 @@ describe("CyberLoader", () => {
         // English in both languages: its tracking is inline, since Chinese drops the tracking classes
         expect(wrapper.get(".cyber-loader-head").attributes("style")).toContain("letter-spacing");
         expect(wrapper.get(".cyber-loader-head").classes().some(name => name.startsWith("tracking-"))).toBe(false);
-    });
-
-    it("should caption the panel in the current language", async () => {
-        const wrapper = mount(CyberLoader);
-        const caption = wrapper.get(".cyber-loader-caption");
-        const english = caption.text();
-
-        i18n.global.locale.value = "zh-Hant";
-        await nextTick();
-
-        expect(caption.text()).not.toBe(english);
-        expect(caption.text()).not.toBe("");
     });
 
     it("should show a screen's own message instead", () => {

@@ -19,14 +19,14 @@ describe("BlueprintLoader", () => {
 
     // The card's double frame is drawn 5.75px into the sheet, so the title block's rules start inside it
     it("should be a 276px drawing sheet in the cards' double frame, its content inside the frame", () => {
-        const sheet = mount(BlueprintLoader).get(".blueprint-loader");
+        const sheet = mount(BlueprintLoader, { props: { message: "Generating" } }).get(".blueprint-loader");
 
         expect(sheet.classes()).toEqual(expect.arrayContaining(["w-[276px]", "p-1.5"]));
         expect(sheet.attributes("data-skin")).toBe("card");
     });
 
     it("should plot a 3×3 box in one path, the outline and then the four inner lines, as decoration", () => {
-        const wrapper = mount(BlueprintLoader);
+        const wrapper = mount(BlueprintLoader, { props: { message: "Generating" } });
         const drawing = wrapper.get(".blueprint-loader-drawing");
         const plots = drawing.findAll(".blueprint-loader-plot");
 
@@ -40,7 +40,7 @@ describe("BlueprintLoader", () => {
     // The line is dashed on and the pen moved along the path at the same pace, so the pen always sits on the
     // line's end
     it("should run the pen along the plot's own path", () => {
-        const wrapper = mount(BlueprintLoader);
+        const wrapper = mount(BlueprintLoader, { props: { message: "Generating" } });
         const pen = wrapper.get(".blueprint-loader-drawing .blueprint-loader-pen");
 
         expect((pen.element as HTMLElement).style.getPropertyValue("--blueprint-loader-path")).toBe(`path("${PLOT}")`);
@@ -48,7 +48,7 @@ describe("BlueprintLoader", () => {
     });
 
     it("should dimension the box in 3 columns, in the current language", async () => {
-        const wrapper = mount(BlueprintLoader);
+        const wrapper = mount(BlueprintLoader, { props: { message: "Generating" } });
         const dimension = wrapper.get(".blueprint-loader-drawing .blueprint-loader-dimension");
         const english = dimension.text();
 
@@ -60,19 +60,6 @@ describe("BlueprintLoader", () => {
         expect(dimension.text()).not.toBe(english);
     });
 
-    it("should caption the title block in the current language", async () => {
-        const wrapper = mount(BlueprintLoader);
-        const caption = wrapper.get(".blueprint-loader-caption");
-        const english = caption.text();
-
-        i18n.global.locale.value = "zh-Hant";
-        await nextTick();
-
-        expect(caption.text()).not.toBe(english);
-        expect(caption.text()).not.toBe("");
-        expect(caption.attributes("aria-hidden")).toBeUndefined();
-    });
-
     it("should show a screen's own message instead", () => {
         const wrapper = mount(BlueprintLoader, { props: { message: "Checking…" } });
 
@@ -80,7 +67,7 @@ describe("BlueprintLoader", () => {
     });
 
     it("should read out the pen's X and Y beside the caption, as decoration", () => {
-        const wrapper = mount(BlueprintLoader);
+        const wrapper = mount(BlueprintLoader, { props: { message: "Generating" } });
         const coordinates = wrapper.get(".blueprint-loader-coordinates");
         const readings = coordinates.findAll("b").map(reading => reading.text());
 
@@ -93,7 +80,7 @@ describe("BlueprintLoader", () => {
     });
 
     it("should close the title block with the sheet's number, as decoration", () => {
-        const wrapper = mount(BlueprintLoader);
+        const wrapper = mount(BlueprintLoader, { props: { message: "Generating" } });
         const sheetNumber = wrapper.get(".blueprint-loader-sheet-number");
 
         expect(sheetNumber.text()).toBe("SDK-09 · SHT 01/01 · 1:1");

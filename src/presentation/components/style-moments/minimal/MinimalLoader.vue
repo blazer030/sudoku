@@ -15,21 +15,16 @@
             />
         </div>
         <p class="m-0 text-sm font-medium text-on-scrim">
-            {{ message ?? t("home.generatingPuzzle") }}
+            {{ message }}
         </p>
     </div>
 </template>
 
 <script lang="ts" setup>
-import { useI18n } from "vue-i18n";
-
-const { t } = useI18n();
-
-withDefaults(defineProps<{
-    message?: string;
-}>(), {
-    message: undefined,
-});
+defineProps<{
+    // What is being loaded, resolved by PuzzleLoader
+    message: string;
+}>();
 
 // The squares light like a solve: corners and centre first (1, 5, 9, 3, 7), then the edges (2, 6, 8, 4)
 const LIGHTING_STEP_BY_SQUARE = [0, 5, 3, 8, 1, 6, 4, 7, 2];

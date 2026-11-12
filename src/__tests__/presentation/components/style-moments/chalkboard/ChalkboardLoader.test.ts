@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { defineComponent, h, nextTick } from "vue";
+import { defineComponent, h } from "vue";
 import { mount } from "@vue/test-utils";
 import { i18n } from "@/presentation/i18n";
 import { STYLE_MOMENTS } from "@/presentation/components/style-moments/styleMoments";
@@ -17,7 +17,7 @@ describe("ChalkboardLoader", () => {
     });
 
     it("should chalk a 九宮 (its outline, then four inner lines), a ring, four digits, a duster and its smear, as decoration", () => {
-        const wrapper = mount(ChalkboardLoader);
+        const wrapper = mount(ChalkboardLoader, { props: { message: "Generating" } });
         const sketch = wrapper.get(".chalkboard-loader-sketch");
         const strokes = sketch.findAll(".chalkboard-loader-stroke");
         const digits = sketch.findAll(".chalkboard-loader-digit").map(digit => digit.text());
@@ -37,7 +37,7 @@ describe("ChalkboardLoader", () => {
     // its smear lie in a layer over the card, inside its 2px chalk edge, that clips them; never on the sketch, which
     // they overrun
     it("should drag the duster and its smear in a layer clipped to the card's edge", () => {
-        const wrapper = mount(ChalkboardLoader);
+        const wrapper = mount(ChalkboardLoader, { props: { message: "Generating" } });
         const card = wrapper.get(".chalkboard-loader");
         const wipe = card.get(".chalkboard-loader-wipe");
 
@@ -50,7 +50,7 @@ describe("ChalkboardLoader", () => {
     });
 
     it("should write each digit through its own reveal mask", () => {
-        const wrapper = mount(ChalkboardLoader);
+        const wrapper = mount(ChalkboardLoader, { props: { message: "Generating" } });
         const sketch = wrapper.get(".chalkboard-loader-sketch");
         const digits = sketch.findAll(".chalkboard-loader-digit");
 
@@ -70,18 +70,6 @@ describe("ChalkboardLoader", () => {
         expect(ids.length).toBeGreaterThan(0);
         expect(new Set(ids).size).toBe(ids.length);
         expect(references.sort()).toEqual([...ids].sort());
-    });
-
-    it("should caption the board in the current language", async () => {
-        const wrapper = mount(ChalkboardLoader);
-        const caption = wrapper.get(".chalkboard-loader-caption");
-        const english = caption.text();
-
-        i18n.global.locale.value = "zh-Hant";
-        await nextTick();
-
-        expect(caption.text()).not.toBe(english);
-        expect(caption.text()).not.toBe("");
     });
 
     it("should show a screen's own message instead", () => {

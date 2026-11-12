@@ -46,21 +46,16 @@
             <span class="cyber-loader-fill absolute inset-0 origin-left" />
         </div>
         <p class="cyber-loader-caption m-0 text-center text-sm font-medium tracking-[0.14em]">
-            {{ message ?? t("home.generatingPuzzle") }}
+            {{ message }}
         </p>
     </div>
 </template>
 
 <script lang="ts" setup>
-import { useI18n } from "vue-i18n";
-
-const { t } = useI18n();
-
-withDefaults(defineProps<{
-    message?: string;
-}>(), {
-    message: undefined,
-});
+defineProps<{
+    // What is being loaded, resolved by PuzzleLoader
+    message: string;
+}>();
 
 // From the board: each square lights at its own beat in a 1.5s round, so they seem to light at random
 const LIGHTING_DELAY_MS = [0, 900, 300, 1200, 600, 150, 1050, 450, 750];
