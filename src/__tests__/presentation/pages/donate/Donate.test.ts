@@ -198,7 +198,7 @@ describe("Donate.vue purchase feedback", () => {
         await wrapper.find("[data-testid='donate-tier-coffee']").trigger("click");
         await flushPromises();
 
-        expect(wrapper.find("[data-testid='donate-toast']").text()).toBe("Purchase failed. Please try again.");
+        expect(wrapper.find("[data-testid='donate-toast']").text()).toBe(i18n.global.t("donate.purchaseFailed"));
         expect(consoleError).toHaveBeenCalledWith("Donate purchase failed:", "Service disconnected");
     });
 });
@@ -233,7 +233,7 @@ describe("Donate.vue zh-Hant", () => {
         await flushPromises();
 
         const tier = wrapper.find("[data-testid='donate-tier-coffee']");
-        expect(tier.text()).toContain("一杯咖啡");
+        expect(tier.text()).toContain(i18n.global.t("donate.tiers.coffee"));
         expect(tier.text()).toContain("$2.99");
     });
 });

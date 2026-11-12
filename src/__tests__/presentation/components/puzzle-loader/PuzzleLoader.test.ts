@@ -41,11 +41,11 @@ describe("PuzzleLoader", () => {
         const wrapper = mount(PuzzleLoader, {
             props: { visible: true },
         });
-        expect(wrapper.text()).toContain("Generating puzzle…");
+        expect(wrapper.text()).toContain(i18n.global.t("home.generatingPuzzle"));
 
         i18n.global.locale.value = "zh-Hant";
         await nextTick();
 
-        expect(wrapper.text()).toContain("正在產生題目…");
+        expect(wrapper.text()).toContain(i18n.global.t("home.generatingPuzzle"));
     });
 });

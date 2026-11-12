@@ -75,7 +75,7 @@ describe("GameReview", () => {
     it("should describe a fill step in English with bold numbers", async () => {
         const wrapper = await mountReview();
 
-        expect(wrapper.text()).toContain("Filled 5 in Row 1, Col 2");
+        expect(wrapper.text()).toContain(i18n.global.t("review.fill", { value: 5, row: 1, column: 2 }));
         expect(boldTexts(wrapper)).toEqual(expect.arrayContaining(["5", "1", "2"]));
     });
 
@@ -85,7 +85,7 @@ describe("GameReview", () => {
         i18n.global.locale.value = "zh-Hant";
         await nextTick();
 
-        expect(wrapper.text()).toContain("在第 1 列第 2 欄填入 5");
+        expect(wrapper.text()).toContain(i18n.global.t("review.fill", { value: 5, row: 1, column: 2 }));
         expect(boldTexts(wrapper)).toEqual(expect.arrayContaining(["5", "1", "2"]));
     });
 
@@ -99,29 +99,29 @@ describe("GameReview", () => {
     it("should describe a hint step", async () => {
         const wrapper = await mountReview({ action: "hint" });
 
-        expect(wrapper.find("[data-testid='review-explanation']").text()).toBe("Hint 5 in Row 1, Col 2");
+        expect(wrapper.find("[data-testid='review-explanation']").text()).toBe(i18n.global.t("review.hint", { value: 5, row: 1, column: 2 }));
     });
 
     it("should describe an erase step", async () => {
         const wrapper = await mountReview({ action: "erase" });
 
-        expect(wrapper.find("[data-testid='review-action']").text()).toBe("Erase");
-        expect(wrapper.find("[data-testid='review-explanation']").text()).toBe("Erased Row 1, Col 2");
+        expect(wrapper.find("[data-testid='review-action']").text()).toBe(i18n.global.t("review.actions.erase"));
+        expect(wrapper.find("[data-testid='review-explanation']").text()).toBe(i18n.global.t("review.erase", { row: 1, column: 2 }));
     });
 
     it("should tag each position with its stage or action", async () => {
         const initial = await mountReview({ nextClicks: 0 });
-        expect(initial.find("[data-testid='review-action']").text()).toBe("Initial Board");
-        expect(initial.find("[data-testid='review-explanation']").text()).toBe("The board when the game began");
+        expect(initial.find("[data-testid='review-action']").text()).toBe(i18n.global.t("review.stages.initial"));
+        expect(initial.find("[data-testid='review-explanation']").text()).toBe(i18n.global.t("review.initialBoard"));
 
         const fill = await mountReview({ nextClicks: 1 });
-        expect(fill.find("[data-testid='review-action']").text()).toBe("Fill");
+        expect(fill.find("[data-testid='review-action']").text()).toBe(i18n.global.t("review.actions.fill"));
 
         const completed = await mountReview({ completed: true, nextClicks: 2 });
-        expect(completed.find("[data-testid='review-action']").text()).toBe("Completed");
+        expect(completed.find("[data-testid='review-action']").text()).toBe(i18n.global.t("review.stages.completed"));
 
         const gaveUp = await mountReview({ completed: false, nextClicks: 2 });
-        expect(gaveUp.find("[data-testid='review-action']").text()).toBe("Gave Up");
+        expect(gaveUp.find("[data-testid='review-action']").text()).toBe(i18n.global.t("review.stages.gaveUp"));
     });
 
     it("should outline the cell the step changed", async () => {
@@ -181,10 +181,10 @@ describe("GameReview", () => {
         await wrapper.find("[data-testid='review-play']").trigger("click");
 
         await vi.advanceTimersByTimeAsync(800);
-        expect(wrapper.find("[data-testid='review-action']").text()).toBe("Fill");
+        expect(wrapper.find("[data-testid='review-action']").text()).toBe(i18n.global.t("review.actions.fill"));
 
         await vi.advanceTimersByTimeAsync(800);
-        expect(wrapper.find("[data-testid='review-action']").text()).toBe("Gave Up");
+        expect(wrapper.find("[data-testid='review-action']").text()).toBe(i18n.global.t("review.stages.gaveUp"));
         expect(wrapper.find("[data-testid='review-play']").attributes("aria-label")).toBe("Play");
     });
 
@@ -287,7 +287,7 @@ describe("GameReview", () => {
 
             const wrapper = await mountReview({ nextClicks: 1 });
 
-            expect(wrapper.find("[data-testid='review-action']").text()).toBe("Fill");
+            expect(wrapper.find("[data-testid='review-action']").text()).toBe(i18n.global.t("review.actions.fill"));
             // 50px to bring its bottom edge in, and 16px more so the board's frame below a bottom-row cell shows
             expect(scrollBy).toHaveBeenCalledExactlyOnceWith({ top: 66, behavior: "smooth" });
         });
@@ -330,7 +330,7 @@ describe("GameReview", () => {
             const wrapper = await mountReview({ nextClicks: 0 });
             await wrapper.find("[data-testid='review-dot-2']").trigger("click");
 
-            expect(wrapper.find("[data-testid='review-action']").text()).toBe("Gave Up");
+            expect(wrapper.find("[data-testid='review-action']").text()).toBe(i18n.global.t("review.stages.gaveUp"));
             expect(scrollBy).not.toHaveBeenCalled();
         });
 

@@ -232,10 +232,8 @@ describe("SolverWalkthrough", () => {
             const { wrapper } = mountWalkthrough();
 
             const intro = wrapper.find("[data-testid='walkthrough-intro']");
-            expect(intro.text()).toContain("Enter any Sudoku and see which techniques the solver uses to crack it, step by step.");
-            expect(intro.find("[data-testid='walkthrough-intro-caveat']").text()).toBe(
-                "It may not finish: the puzzle may need a more advanced technique, the input may have a mistake, or the puzzle may have no solution or more than one.",
-            );
+            expect(intro.text()).toContain(i18n.global.t("walkthrough.intro.description"));
+            expect(intro.find("[data-testid='walkthrough-intro-caveat']").text()).toBe(i18n.global.t("walkthrough.intro.caveat"));
             expect(wrapper.find("[data-testid='walkthrough-inputs']").attributes("inert")).toBeDefined();
         });
 
@@ -584,7 +582,7 @@ describe("SolverWalkthrough", () => {
 
             await solve(wrapper);
 
-            expect(wrapper.find("[data-testid='walkthrough-technique']").text()).toBe("Naked Single");
+            expect(wrapper.find("[data-testid='walkthrough-technique']").text()).toBe(i18n.global.t("technique.nakedSingle"));
             const explanation = wrapper.find("[data-testid='walkthrough-explanation']").text();
             expect(explanation).toContain(`Row ${cell.row + 1}, Col ${cell.column + 1}`);
             expect(explanation).toContain(String(digit));
@@ -715,7 +713,7 @@ describe("SolverWalkthrough", () => {
             expect(wrapper.find("[data-testid='step-link-overlay']").exists()).toBe(false);
             expect(wrapper.find("[data-testid='walkthrough-technique']").exists()).toBe(false);
             expect(wrapper.find("[data-testid='walkthrough-stage']").text()).toBe("Solved");
-            expect(wrapper.find("[data-testid='walkthrough-explanation']").text()).toBe("Solved. Every cell is filled.");
+            expect(wrapper.find("[data-testid='walkthrough-explanation']").text()).toBe(i18n.global.t("walkthrough.completed"));
             expect(wrapper.find("[data-testid='walkthrough-progress-fill']").attributes("style")).toContain("width: 100%");
         });
 
@@ -882,8 +880,8 @@ describe("SolverWalkthrough", () => {
 
             await wrapper.find("[data-testid='reset-button']").trigger("click");
 
-            expect(wrapper.find("[data-testid='walkthrough-dialog-title']").text()).toBe("Clear the Board?");
-            expect(wrapper.find("[data-testid='walkthrough-dialog-message']").text()).toBe("Every digit you entered will be removed.");
+            expect(wrapper.find("[data-testid='walkthrough-dialog-title']").text()).toBe(i18n.global.t("walkthrough.dialog.reset.title"));
+            expect(wrapper.find("[data-testid='walkthrough-dialog-message']").text()).toBe(i18n.global.t("walkthrough.dialog.reset.message"));
             expect(cellAt(wrapper, 3, 4).text()).toBe("7");
         });
 
@@ -966,7 +964,7 @@ describe("SolverWalkthrough", () => {
 
             await solve(wrapper);
 
-            expect(wrapper.find("[data-testid='walkthrough-dialog-message']").text()).toBe("This puzzle has no solution. Check what you entered.");
+            expect(wrapper.find("[data-testid='walkthrough-dialog-message']").text()).toBe(i18n.global.t("walkthrough.dialog.noSolution.message"));
             expect(wrapper.find("[data-testid='walkthrough-dialog-cancel']").exists()).toBe(false);
 
             await wrapper.find("[data-testid='walkthrough-dialog-confirm']").trigger("click");
@@ -985,7 +983,7 @@ describe("SolverWalkthrough", () => {
 
             await solve(wrapper);
 
-            expect(wrapper.find("[data-testid='walkthrough-dialog-message']").text()).toBe("This puzzle has no solution. Check what you entered.");
+            expect(wrapper.find("[data-testid='walkthrough-dialog-message']").text()).toBe(i18n.global.t("walkthrough.dialog.noSolution.message"));
         });
 
         it("should warn about more than one solution and still allow solving", async () => {
@@ -1025,12 +1023,12 @@ describe("SolverWalkthrough", () => {
             await solve(wrapper);
 
             expect(performance.now() - started).toBeLessThan(2000);
-            expect(wrapper.find("[data-testid='walkthrough-dialog-title']").text()).toBe("Couldn't Check This Puzzle");
+            expect(wrapper.find("[data-testid='walkthrough-dialog-title']").text()).toBe(i18n.global.t("walkthrough.dialog.solutionCountUnknown.title"));
             expect(wrapper.find("[data-testid='walkthrough-dialog-message']").text()).toBe(
                 "This puzzle is too open to confirm it has exactly one solution, so the steps may not be complete.",
             );
-            expect(wrapper.find("[data-testid='walkthrough-dialog-confirm']").text()).toBe("Solve Anyway");
-            expect(wrapper.find("[data-testid='walkthrough-dialog-cancel']").text()).toBe("Keep Editing");
+            expect(wrapper.find("[data-testid='walkthrough-dialog-confirm']").text()).toBe(i18n.global.t("walkthrough.dialog.solveAnyway"));
+            expect(wrapper.find("[data-testid='walkthrough-dialog-cancel']").text()).toBe(i18n.global.t("walkthrough.dialog.keepEditing"));
 
             await wrapper.find("[data-testid='walkthrough-dialog-confirm']").trigger("click");
             await flushPromises();
@@ -1209,7 +1207,7 @@ describe("SolverWalkthrough", () => {
             await pressSolve(wrapper);
 
             expect(loader(wrapper).exists()).toBe(true);
-            expect(loader(wrapper).text()).toContain("Checking the puzzle…");
+            expect(loader(wrapper).text()).toContain(i18n.global.t("walkthrough.checking"));
 
             await vi.advanceTimersByTimeAsync(PUZZLE_LOADER_MINIMUM_MS - 100);
             expect(loader(wrapper).exists()).toBe(true);
@@ -1241,7 +1239,7 @@ describe("SolverWalkthrough", () => {
             await flushPromises();
 
             expect(loader(wrapper).exists()).toBe(false);
-            expect(wrapper.find("[data-testid='walkthrough-dialog-title']").text()).toBe("Couldn't Check This Puzzle");
+            expect(wrapper.find("[data-testid='walkthrough-dialog-title']").text()).toBe(i18n.global.t("walkthrough.dialog.solutionCountUnknown.title"));
         });
 
         it("should cancel the check on Back and return to editing", async () => {
@@ -1309,7 +1307,7 @@ describe("SolverWalkthrough", () => {
 
             await solve(wrapper);
 
-            expect(wrapper.find("[data-testid='walkthrough-technique']").text()).toBe("唯一候選數");
+            expect(wrapper.find("[data-testid='walkthrough-technique']").text()).toBe(i18n.global.t("technique.nakedSingle"));
             const explanation = wrapper.find("[data-testid='walkthrough-explanation']").text();
             expect(explanation).toContain("第");
             expect(explanation).toContain("列");

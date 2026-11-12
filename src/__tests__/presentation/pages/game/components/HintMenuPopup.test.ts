@@ -34,14 +34,14 @@ describe("HintMenuPopup", () => {
         i18n.global.locale.value = "zh-Hant";
         await nextTick();
 
-        expect(wrapper.find("[data-testid='hint-check-conflicts']").text()).toContain("檢查衝突");
-        expect(wrapper.find("[data-testid='hint-reveal-cell']").text()).toBe("揭示一格");
+        expect(wrapper.find("[data-testid='hint-check-conflicts']").text()).toContain(i18n.global.t("game.hints.checkConflicts"));
+        expect(wrapper.find("[data-testid='hint-reveal-cell']").text()).toBe(i18n.global.t("game.hints.revealCell"));
     });
 
     it("should explain that Check Conflicts looks for repeated digits", () => {
         const wrapper = mountPopup();
 
-        expect(wrapper.find("[data-testid='hint-check-conflicts-description']").text()).toBe("Finds repeated digits in a row, column or box");
+        expect(wrapper.find("[data-testid='hint-check-conflicts-description']").text()).toBe(i18n.global.t("game.hints.checkConflictsDescription"));
     });
 
     it("should close when clicking overlay", async () => {

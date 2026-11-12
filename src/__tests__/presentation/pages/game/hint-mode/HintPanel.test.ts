@@ -46,7 +46,7 @@ describe("HintPanel", () => {
     it("should say that Clear removes only the wrong digit", () => {
         const wrapper = mountWrongEntry();
 
-        expect(wrapper.find("[data-testid='hint-wrong-entry-note']").text()).toBe("Clearing removes just this digit.");
+        expect(wrapper.find("[data-testid='hint-wrong-entry-note']").text()).toBe(i18n.global.t("hintMode.panel.wrongEntryNote"));
     });
 
     it("should call the steps phase exit Close, not Cancel", async () => {
@@ -113,11 +113,11 @@ describe("HintPanel", () => {
         const wrapper = mountSteps(7, 2);
 
         expect(wrapper.find("[data-testid='hint-step-counter']").attributes("aria-hidden")).toBe("true");
-        expect(wrapper.find("[data-testid='hint-step-counter-label']").text()).toBe("Step 3 of 7");
+        expect(wrapper.find("[data-testid='hint-step-counter-label']").text()).toBe(i18n.global.t("stepPanel.stepCounter", { current: 3, total: 7 }));
 
         i18n.global.locale.value = "zh-Hant";
         await nextTick();
 
-        expect(wrapper.find("[data-testid='hint-step-counter-label']").text()).toBe("第 3 步，共 7 步");
+        expect(wrapper.find("[data-testid='hint-step-counter-label']").text()).toBe(i18n.global.t("stepPanel.stepCounter", { current: 3, total: 7 }));
     });
 });

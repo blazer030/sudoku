@@ -148,8 +148,8 @@ describe("Statistics", () => {
         const { wrapper } = mountStatistics();
 
         const hard = wrapper.find("[data-testid='difficulty-stats-hard']");
-        expect(hard.text()).toContain("Hard");
-        expect(hard.text()).toContain("Not played yet");
+        expect(hard.text()).toContain(i18n.global.t("difficulty.hard"));
+        expect(hard.text()).toContain(i18n.global.t("statistics.notPlayed"));
         expect(wrapper.find("[data-testid='difficulty-best-hard']").exists()).toBe(false);
     });
 
@@ -163,9 +163,9 @@ describe("Statistics", () => {
 
         const games = wrapper.findAll("[data-testid='recent-game']");
         expect(games).toHaveLength(2);
-        expect(games[0].text()).toContain("Hard");
-        expect(games[0].text()).toContain("Gave up");
-        expect(games[1].text()).toContain("Easy");
+        expect(games[0].text()).toContain(i18n.global.t("difficulty.hard"));
+        expect(games[0].text()).toContain(i18n.global.t("statistics.gaveUp"));
+        expect(games[1].text()).toContain(i18n.global.t("difficulty.easy"));
         expect(games[1].text()).toContain("05:32");
     });
 
@@ -206,7 +206,7 @@ describe("Statistics", () => {
         const games = wrapper.findAll("[data-testid='recent-game']");
         expect(games).toHaveLength(2);
         for (const item of games) {
-            expect(item.text()).toContain("Easy");
+            expect(item.text()).toContain(i18n.global.t("difficulty.easy"));
         }
     });
 
@@ -234,7 +234,7 @@ describe("Statistics", () => {
 
         await wrapper.find("[data-testid='recent-filter-hard']").trigger("click");
 
-        expect(wrapper.find("[data-testid='recent-games-empty']").text()).toBe("No games at this difficulty yet");
+        expect(wrapper.find("[data-testid='recent-games-empty']").text()).toBe(i18n.global.t("statistics.filteredEmpty"));
         expect(wrapper.find("[data-testid='recent-game']").exists()).toBe(false);
     });
 
@@ -297,8 +297,8 @@ describe("Statistics", () => {
         }
         expect(wrapper.text()).not.toMatch(/\d/);
         const emptyState = wrapper.find("[data-testid='empty-state']");
-        expect(emptyState.text()).toContain("No games played yet");
-        expect(emptyState.text()).toContain("Play Your First Game");
+        expect(emptyState.text()).toContain(i18n.global.t("statistics.empty.title"));
+        expect(emptyState.text()).toContain(i18n.global.t("statistics.empty.action"));
     });
 
     it("should go home from the first game button", async () => {

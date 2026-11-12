@@ -260,7 +260,7 @@ describe("useHintExplanation", () => {
         const explain = mountExplanation();
         await useChinese();
 
-        expect(explain("nakedSingle")).toBe("第 3 列第 5 欄只剩 7 這個候選數，所以填入 7。");
+        expect(explain("nakedSingle")).toBe(i18n.global.t("hintMode.explanation.nakedSingle", { cell: i18n.global.t("hintMode.place.cell", { row: 3, column: 5 }), digit: 7 }));
     });
 
     it("should number boxes from the top left to the bottom right", () => {

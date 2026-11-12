@@ -359,7 +359,7 @@ describe("Home", () => {
     it("should say no games yet instead of a 0% win rate", () => {
         const { wrapper } = mountHome();
 
-        expect(wrapper.get("[data-testid='statistics-subtitle']").text()).toBe("No games yet");
+        expect(wrapper.get("[data-testid='statistics-subtitle']").text()).toBe(i18n.global.t("home.entries.noGames"));
     });
 
     it("should show the win rate on the statistics tile", async () => {
@@ -370,7 +370,7 @@ describe("Home", () => {
         statisticsStore.recordGame({ difficulty: "easy", elapsedSeconds: 100, completed: false });
         await nextTick();
 
-        expect(wrapper.get("[data-testid='statistics-subtitle']").text()).toBe("Win rate 67%");
+        expect(wrapper.get("[data-testid='statistics-subtitle']").text()).toBe(i18n.global.t("home.entries.winRate", { percent: 67 }));
     });
 
     it("should describe the walkthrough and settings tiles", () => {
@@ -531,7 +531,7 @@ describe("Home", () => {
             await wrapper.find("[data-testid='new-game-button']").trigger("click");
 
             expect(wrapper.find("[data-testid='new-game-confirm-dialog']").exists()).toBe(true);
-            expect(wrapper.find("[data-testid='new-game-confirm-dialog']").text()).toContain("Unfinished Game");
+            expect(wrapper.find("[data-testid='new-game-confirm-dialog']").text()).toContain(i18n.global.t("home.giveUp.title"));
         });
 
         it("should show which game would be given up and what that costs", async () => {
@@ -539,8 +539,8 @@ describe("Home", () => {
 
             await wrapper.find("[data-testid='new-game-button']").trigger("click");
 
-            expect(wrapper.find("[data-testid='new-game-saved-summary']").text()).toBe("Easy · 03:24 played");
-            expect(wrapper.find("[data-testid='new-game-give-up-note']").text()).toBe("Giving up counts as an unfinished game and lowers your win rate.");
+            expect(wrapper.find("[data-testid='new-game-saved-summary']").text()).toBe(i18n.global.t("home.giveUp.summary", { difficulty: i18n.global.t("difficulty.easy"), time: "03:24" }));
+            expect(wrapper.find("[data-testid='new-game-give-up-note']").text()).toBe(i18n.global.t("common.giveUpConsequence"));
         });
 
         it("should make continuing the primary choice and giving up a quiet text button", async () => {
@@ -549,7 +549,7 @@ describe("Home", () => {
             await wrapper.find("[data-testid='new-game-button']").trigger("click");
 
             const continueButton = wrapper.find("[data-testid='new-game-continue-button']");
-            expect(continueButton.text()).toBe("Continue That Game");
+            expect(continueButton.text()).toBe(i18n.global.t("home.giveUp.continue"));
             expect(continueButton.classes()).toContain("bg-primary");
             const giveUp = wrapper.find("[data-testid='give-up-and-start-new-button']");
             expect(giveUp.classes()).toContain("text-danger");
@@ -581,7 +581,7 @@ describe("Home", () => {
                 const { wrapper } = await openDialog();
 
                 const stay = wrapper.find("[data-testid='new-game-stay-button']");
-                expect(stay.text()).toBe("Stay here");
+                expect(stay.text()).toBe(i18n.global.t("home.giveUp.stay"));
                 expect(stay.classes()).not.toContain("bg-primary");
                 expect(stay.classes()).not.toContain("text-danger");
             });

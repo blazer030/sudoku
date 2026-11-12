@@ -2,8 +2,11 @@ import { mount } from "@vue/test-utils";
 import { Sparkles } from "lucide-vue-next";
 import OptionTile from "@/presentation/components/option-tile/OptionTile.vue";
 
+const LABEL = "Completion Flash";
+const DESCRIPTION = "Flash a finished row or box";
+
 const mountTile = (pressed: boolean) => mount(OptionTile, {
-    props: { pressed, label: "Completion Flash", description: "Flash a finished row or box", icon: Sparkles },
+    props: { pressed, label: LABEL, description: DESCRIPTION, icon: Sparkles },
     attrs: { "data-testid": "toggle-motionEffects" },
     attachTo: document.body,
 });
@@ -50,8 +53,8 @@ describe("OptionTile", () => {
     it("should render label and description", () => {
         const wrapper = mountTile(false);
 
-        expect(wrapper.text()).toContain("Completion Flash");
-        expect(wrapper.text()).toContain("Flash a finished row or box");
+        expect(wrapper.text()).toContain(LABEL);
+        expect(wrapper.text()).toContain(DESCRIPTION);
         expect(wrapper.attributes("data-testid")).toBe("toggle-motionEffects");
         expect(wrapper.find("button").element).toBe(wrapper.element);
         expect(wrapper.attributes("type")).toBe("button");

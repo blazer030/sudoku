@@ -67,19 +67,19 @@ describe("StepPlaybackPanel", () => {
         const wrapper = mountPanel(0, 3);
         const play = wrapper.find("[data-testid='demo-play']");
 
-        expect(play.attributes("aria-label")).toBe("Play");
+        expect(play.attributes("aria-label")).toBe(i18n.global.t("stepPanel.play"));
         expect(play.attributes("aria-pressed")).toBe("false");
         await play.trigger("click");
         expect(wrapper.emitted("togglePlay")).toHaveLength(1);
 
         const playing = mountPanel(0, 3, true);
-        expect(playing.find("[data-testid='demo-play']").attributes("aria-label")).toBe("Pause");
+        expect(playing.find("[data-testid='demo-play']").attributes("aria-label")).toBe(i18n.global.t("stepPanel.pause"));
         expect(playing.find("[data-testid='demo-play']").attributes("aria-pressed")).toBe("true");
 
         i18n.global.locale.value = "zh-Hant";
         await nextTick();
-        expect(wrapper.find("[data-testid='demo-play']").attributes("aria-label")).toBe("播放");
-        expect(playing.find("[data-testid='demo-play']").attributes("aria-label")).toBe("暫停");
+        expect(wrapper.find("[data-testid='demo-play']").attributes("aria-label")).toBe(i18n.global.t("stepPanel.play"));
+        expect(playing.find("[data-testid='demo-play']").attributes("aria-label")).toBe(i18n.global.t("stepPanel.pause"));
     });
 
     it("should render the explanation slot in the live region", () => {

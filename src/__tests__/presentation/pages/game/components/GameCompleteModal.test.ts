@@ -40,7 +40,7 @@ describe("GameCompleteModal", () => {
         const wrapper = mountModal({ hintsUsed });
 
         expect(wrapper.get("[data-testid='hints-count']").text()).toBe(String(hintsUsed));
-        expect(wrapper.text()).toContain("Hints");
+        expect(wrapper.text()).toContain(i18n.global.t("game.complete.hints"));
     });
 
     it("should render the stat labels in Traditional Chinese", async () => {
@@ -48,26 +48,26 @@ describe("GameCompleteModal", () => {
         i18n.global.locale.value = "zh-Hant";
         await nextTick();
 
-        expect(wrapper.text()).toContain("時間");
-        expect(wrapper.find("[data-testid='complete-difficulty']").text()).toBe("簡單");
-        expect(wrapper.text()).toContain("提示");
+        expect(wrapper.text()).toContain(i18n.global.t("game.complete.time"));
+        expect(wrapper.find("[data-testid='complete-difficulty']").text()).toBe(i18n.global.t("difficulty.easy"));
+        expect(wrapper.text()).toContain(i18n.global.t("game.complete.hints"));
         expect(wrapper.text()).not.toContain("Congratulations!");
     });
 
     it("should show the difficulty as a tag under the title, not as a stat", () => {
         const wrapper = mountModal({ difficulty: "medium" });
 
-        expect(wrapper.find("[data-testid='complete-difficulty']").text()).toBe("Medium");
+        expect(wrapper.find("[data-testid='complete-difficulty']").text()).toBe(i18n.global.t("difficulty.medium"));
         const stats = wrapper.find("[data-testid='complete-stats']");
         expect(stats.classes()).toContain("grid-cols-2");
-        expect(stats.text()).not.toContain("Medium");
+        expect(stats.text()).not.toContain(i18n.global.t("difficulty.medium"));
         expect(stats.text()).not.toContain("Difficulty");
     });
 
     it("should celebrate a new record", () => {
         const wrapper = mountModal({ isNewRecord: true });
 
-        expect(wrapper.find("[data-testid='new-record-badge']").text()).toBe("New record!");
+        expect(wrapper.find("[data-testid='new-record-badge']").text()).toBe(i18n.global.t("game.complete.newRecord"));
     });
 
     it("should tag the card, the trophy, the difficulty and the record badge for styles to decorate", () => {
@@ -210,10 +210,10 @@ describe("GameCompleteModal", () => {
     it("should offer Play Again first, then this game's review and home", () => {
         const wrapper = mountModal();
 
-        expect(wrapper.find("[data-testid='play-again-button']").text()).toBe("Play Again");
+        expect(wrapper.find("[data-testid='play-again-button']").text()).toBe(i18n.global.t("game.complete.playAgain"));
         expect(wrapper.find("[data-testid='play-again-button']").classes()).toContain("bg-primary");
-        expect(wrapper.find("[data-testid='review-game-button']").text()).toBe("Review This Game");
-        expect(wrapper.find("[data-testid='back-to-home-button']").text()).toBe("Back to Home");
+        expect(wrapper.find("[data-testid='review-game-button']").text()).toBe(i18n.global.t("game.complete.review"));
+        expect(wrapper.find("[data-testid='back-to-home-button']").text()).toBe(i18n.global.t("game.complete.backToHome"));
     });
 
     it.each([

@@ -131,7 +131,7 @@ describe("Changelog", () => {
                 expect(text).not.toContain(change);
             }
         }
-        expect(wrapper.text()).toContain("更新日誌");
+        expect(wrapper.text()).toContain(i18n.global.t("changelog.title"));
     });
 
     it("should have the same number of changes in every language", () => {
@@ -176,7 +176,7 @@ describe("Changelog", () => {
     it("should explain the App badge", () => {
         const wrapper = mountChangelog();
 
-        expect(wrapper.find("[data-testid='changelog-app-note']").text()).toBe("Items marked App apply to the Android app only.");
+        expect(wrapper.find("[data-testid='changelog-app-note']").text()).toBe(i18n.global.t("changelog.appNote"));
     });
 
     it("should mark the App note for the skins", () => {

@@ -157,18 +157,18 @@ describe("Settings.vue language switcher", () => {
             await nextTick();
 
             expect(i18n.global.locale.value).toBe("zh-Hant");
-            expect(wrapper.text()).toContain("設定");
-            expect(wrapper.text()).toContain("跟隨系統");
-            expect(wrapper.text()).toContain("標示相同數字");
+            expect(wrapper.text()).toContain(i18n.global.t("settings.title"));
+            expect(wrapper.text()).toContain(i18n.global.t("settings.language.system"));
+            expect(wrapper.text()).toContain(i18n.global.t("settings.toggles.highlightSameDigit.label"));
             expect(wrapper.find("[data-testid='language-zh-Hant']").text()).toBe("繁體中文");
             expect(wrapper.find("[data-testid='language-en']").text()).toBe("English");
             expect(wrapper.find("[data-testid='language-zh-Hant']").attributes("aria-pressed")).toBe("true");
             const display = wrapper.get("[data-testid='settings-group-display']").text();
-            expect(display).toContain("顯示");
-            expect(display).toContain("標示同列、欄、宮");
+            expect(display).toContain(i18n.global.t("settings.groups.display"));
+            expect(display).toContain(i18n.global.t("settings.toggles.highlightScope.label"));
             const input = wrapper.get("[data-testid='settings-group-input']").text();
-            expect(input).toContain("操作");
-            expect(input).toContain("懸浮數字鍵");
+            expect(input).toContain(i18n.global.t("settings.groups.input"));
+            expect(input).toContain(i18n.global.t("settings.toggles.floatingDigitPad.label"));
         } finally {
             stopLocaleSync();
         }

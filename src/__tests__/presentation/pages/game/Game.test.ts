@@ -372,10 +372,10 @@ describe("Game", () => {
 
         const modal = wrapper.find("[data-testid='game-complete-modal']");
         expect(modal.exists()).toBe(true);
-        expect(modal.text()).toContain("Congratulations!");
-        expect(modal.text()).toContain("You solved the puzzle!");
+        expect(modal.text()).toContain(i18n.global.t("game.complete.title"));
+        expect(modal.text()).toContain(i18n.global.t("game.complete.message"));
         expect(modal.text()).toContain("00:00");
-        expect(modal.text()).toContain("Easy");
+        expect(modal.text()).toContain(i18n.global.t("difficulty.easy"));
         expect(modal.find("[data-testid='back-to-home-button']").exists()).toBe(true);
     });
 
@@ -1162,7 +1162,7 @@ describe("Game", () => {
             await wrapper.find("[data-testid='hint-check-conflicts']").trigger("click");
             await flushPromises();
 
-            expect(wrapper.find("[data-testid='game-toast']").text()).toBe("No repeated digits found");
+            expect(wrapper.find("[data-testid='game-toast']").text()).toBe(i18n.global.t("game.toast.noConflicts"));
         });
 
         it("should mark only the player cell when an entry repeats a clue", async () => {
@@ -1318,7 +1318,7 @@ describe("Game", () => {
 
             await openRevealCell(wrapper);
 
-            expect(wrapper.find("[data-testid='hint-panel']").text()).toContain("第 2 列第 2 欄填錯了");
+            expect(wrapper.find("[data-testid='hint-panel']").text()).toContain(i18n.global.t("hintMode.panel.wrongEntry", { cell: i18n.global.t("hintMode.place.cell", { row: 2, column: 2 }) }));
             expect(wrapper.find("[data-testid='hint-clear']").exists()).toBe(true);
             expect(wrapper.find("[data-testid='hint-close']").exists()).toBe(true);
             expect(wrapper.find("[data-testid='hint-primary']").exists()).toBe(false);
@@ -1434,10 +1434,10 @@ describe("Game", () => {
 
             const primary = () => wrapper.find("[data-testid='hint-primary']");
             for (let index = 0; index < plan.steps.length - 1; index++) {
-                expect(primary().text()).toBe("下一步");
+                expect(primary().text()).toBe(i18n.global.t("hintMode.panel.next"));
                 await primary().trigger("click");
             }
-            expect(primary().text()).toBe(`${plan.digit} 填入答案`);
+            expect(primary().text()).toBe(i18n.global.t("hintMode.panel.fill", { digit: plan.digit }));
 
             await primary().trigger("click");
 
@@ -1700,7 +1700,7 @@ describe("Game", () => {
 
             expect(wrapper.find("[data-testid='save-and-leave-button']").classes()).toContain("bg-primary");
             const giveUp = wrapper.find("[data-testid='give-up-and-leave-button']");
-            expect(giveUp.text()).toBe("Give Up This Game");
+            expect(giveUp.text()).toBe(i18n.global.t("game.leave.giveUp"));
             expect(giveUp.classes()).toContain("text-danger");
             expect(giveUp.classes()).not.toContain("bg-danger");
         });
@@ -1716,7 +1716,7 @@ describe("Game", () => {
         it("should spell out what giving up costs", async () => {
             const wrapper = await openLeaveDialog();
 
-            expect(wrapper.find("[data-testid='leave-give-up-note']").text()).toBe("Giving up counts as an unfinished game and lowers your win rate.");
+            expect(wrapper.find("[data-testid='leave-give-up-note']").text()).toBe(i18n.global.t("common.giveUpConsequence"));
         });
     });
 
