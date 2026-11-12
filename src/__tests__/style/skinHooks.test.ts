@@ -1,15 +1,8 @@
-import { readdirSync, readFileSync, statSync } from "fs";
-import { join } from "path";
+import { readFileSync } from "fs";
+import { collectFiles } from "@/__tests__/fixtures/collectFiles";
 
-const collectFiles = (directory: string, extension: string): string[] =>
-    readdirSync(directory).flatMap((name) => {
-        const path = join(directory, name);
-        if (statSync(path).isDirectory()) return collectFiles(path, extension);
-        return name.endsWith(extension) ? [path] : [];
-    });
-
-const VUE_FILES = collectFiles("src/presentation", ".vue");
-const STYLE_SHEETS = collectFiles("src/style/styles", ".css");
+const VUE_FILES = collectFiles("src/presentation", [".vue"]);
+const STYLE_SHEETS = collectFiles("src/style/styles", [".css"]);
 
 const FILLED_SURFACE = /\bbg-(?:primary|primary-light|card)\b/;
 

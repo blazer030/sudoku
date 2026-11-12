@@ -1,8 +1,7 @@
 import { BoardState } from "@/domain/solver/BoardState";
 import { XYChain } from "@/domain/solver/techniques/XYChain";
+import { emptyBoard } from "@/__tests__/fixtures/emptyBoard";
 
-const emptyBoard = (): number[][] =>
-    Array.from({ length: 9 }, () => Array<number>(9).fill(0));
 
 describe("XYChain", () => {
     it("should return null when there are no bivalue cells", () => {

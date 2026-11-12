@@ -1,10 +1,11 @@
 import { BoardState } from "@/domain/solver/BoardState";
 import { XYZWing } from "@/domain/solver/techniques/XYZWing";
+import { emptyBoard } from "@/__tests__/fixtures/emptyBoard";
 
 describe("XYZWing", () => {
     it("should eliminate Z from cells seeing all of pivot {X,Y,Z}, pincer {X,Z}, pincer {Y,Z}", () => {
         let state = BoardState.fromPuzzle(
-            Array.from({ length: 9 }, () => Array<number>(9).fill(0)),
+            emptyBoard(),
         );
         for (const digit of [4, 5, 6, 7, 8, 9]) {
             state = state.eliminate(0, 0, digit);
@@ -36,7 +37,7 @@ describe("XYZWing", () => {
 
     it("should return null when no XYZ-Wing pattern exists", () => {
         const state = BoardState.fromPuzzle(
-            Array.from({ length: 9 }, () => Array<number>(9).fill(0)),
+            emptyBoard(),
         );
 
         const step = new XYZWing().find(state);

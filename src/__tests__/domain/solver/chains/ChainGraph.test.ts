@@ -1,8 +1,7 @@
 import { BoardState } from "@/domain/solver/BoardState";
 import { ChainGraph } from "@/domain/solver/chains/ChainGraph";
+import { emptyBoard } from "@/__tests__/fixtures/emptyBoard";
 
-const emptyBoard = (): number[][] =>
-    Array.from({ length: 9 }, () => Array<number>(9).fill(0));
 
 describe("ChainGraph", () => {
     it("should find a strong link when a digit has exactly two candidates in a row", () => {

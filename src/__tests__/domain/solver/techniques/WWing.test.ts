@@ -1,10 +1,11 @@
 import { BoardState } from "@/domain/solver/BoardState";
 import { WWing } from "@/domain/solver/techniques/WWing";
+import { emptyBoard } from "@/__tests__/fixtures/emptyBoard";
 
 describe("WWing", () => {
     it("should eliminate Y from cells seeing both bivalue endpoints when a strong link on X connects them", () => {
         let state = BoardState.fromPuzzle(
-            Array.from({ length: 9 }, () => Array<number>(9).fill(0)),
+            emptyBoard(),
         );
         for (const digit of [3, 4, 5, 6, 7, 8, 9]) {
             state = state.eliminate(0, 0, digit);
@@ -37,7 +38,7 @@ describe("WWing", () => {
 
     it("should return null when no W-Wing pattern exists", () => {
         const state = BoardState.fromPuzzle(
-            Array.from({ length: 9 }, () => Array<number>(9).fill(0)),
+            emptyBoard(),
         );
 
         const step = new WWing().find(state);
@@ -47,7 +48,7 @@ describe("WWing", () => {
 
     it("should not match when bivalue endpoints see each other directly", () => {
         let state = BoardState.fromPuzzle(
-            Array.from({ length: 9 }, () => Array<number>(9).fill(0)),
+            emptyBoard(),
         );
         for (const digit of [3, 4, 5, 6, 7, 8, 9]) {
             state = state.eliminate(0, 0, digit);

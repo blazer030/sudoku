@@ -1,10 +1,11 @@
 import { BoardState } from "@/domain/solver/BoardState";
 import { Fish } from "@/domain/solver/techniques/Fish";
+import { emptyBoard } from "@/__tests__/fixtures/emptyBoard";
 
 describe("Fish", () => {
     it("should eliminate digit from columns when two rows share the same candidate pair of columns", () => {
         let state = BoardState.fromPuzzle(
-            Array.from({ length: 9 }, () => Array<number>(9).fill(0)),
+            emptyBoard(),
         );
         for (const column of [1, 2, 3, 5, 6, 7, 8]) {
             state = state.eliminate(0, column, 1);
@@ -49,7 +50,7 @@ describe("Fish", () => {
 
     it("should eliminate digit from rows when two columns share the same candidate pair of rows", () => {
         let state = BoardState.fromPuzzle(
-            Array.from({ length: 9 }, () => Array<number>(9).fill(0)),
+            emptyBoard(),
         );
         for (const row of [1, 2, 3, 5, 6, 7, 8]) {
             state = state.eliminate(row, 0, 2);
@@ -94,7 +95,7 @@ describe("Fish", () => {
 
     it("should return null when no fish pattern exists", () => {
         const state = BoardState.fromPuzzle(
-            Array.from({ length: 9 }, () => Array<number>(9).fill(0)),
+            emptyBoard(),
         );
 
         const step = new Fish(2).find(state);
@@ -104,7 +105,7 @@ describe("Fish", () => {
 
     it("should return null when no swordfish pattern exists", () => {
         const state = BoardState.fromPuzzle(
-            Array.from({ length: 9 }, () => Array<number>(9).fill(0)),
+            emptyBoard(),
         );
 
         const step = new Fish(3).find(state);
@@ -114,7 +115,7 @@ describe("Fish", () => {
 
     it("should detect a size-3 swordfish across three rows sharing three columns", () => {
         let state = BoardState.fromPuzzle(
-            Array.from({ length: 9 }, () => Array<number>(9).fill(0)),
+            emptyBoard(),
         );
         for (const column of [3, 4, 5, 6, 7, 8]) {
             state = state.eliminate(0, column, 1);
@@ -171,7 +172,7 @@ describe("Fish", () => {
 
     it("should return null when no jellyfish pattern exists", () => {
         const state = BoardState.fromPuzzle(
-            Array.from({ length: 9 }, () => Array<number>(9).fill(0)),
+            emptyBoard(),
         );
 
         const step = new Fish(4).find(state);
@@ -181,7 +182,7 @@ describe("Fish", () => {
 
     it("should detect a size-4 jellyfish across four rows sharing four columns", () => {
         let state = BoardState.fromPuzzle(
-            Array.from({ length: 9 }, () => Array<number>(9).fill(0)),
+            emptyBoard(),
         );
         for (const column of [4, 5, 6, 7, 8]) {
             state = state.eliminate(0, column, 1);

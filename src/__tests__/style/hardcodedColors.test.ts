@@ -1,5 +1,5 @@
-import { readdirSync, readFileSync, statSync } from "fs";
-import { join } from "path";
+import { readFileSync } from "fs";
+import { collectFiles } from "@/__tests__/fixtures/collectFiles";
 
 // Colours live in src/theme/ and the generated CSS; everything else uses tokens
 const HARDCODED_COLOR_PATTERNS: readonly RegExp[] = [
@@ -17,13 +17,6 @@ const CSS_NAMED_COLOR_PATTERN = /(?:[:(,]\s*|\s)(?:white|black)(?=[\s;),!]|$)/g;
 const findHardcodedColors = (line: string, isCss = false): string[] =>
     [...HARDCODED_COLOR_PATTERNS, ...(isCss ? [CSS_NAMED_COLOR_PATTERN] : [])]
         .flatMap(pattern => [...line.matchAll(pattern)].map(match => match[0].trim()));
-
-const collectFiles = (directory: string, extensions: readonly string[]): string[] =>
-    readdirSync(directory).flatMap((name) => {
-        const path = join(directory, name);
-        if (statSync(path).isDirectory()) return collectFiles(path, extensions);
-        return extensions.some(extension => name.endsWith(extension)) ? [path] : [];
-    });
 
 const scanFile = (path: string): string[] => {
     let inStyleBlock = path.endsWith(".css");

@@ -1,5 +1,6 @@
 import { BoardState } from "@/domain/solver/BoardState";
 import { singlesPuzzle } from "@/__tests__/fixtures/singlesPuzzle";
+import { emptyBoard } from "@/__tests__/fixtures/emptyBoard";
 
 describe("BoardState", () => {
     it("should initialize candidates for an empty cell with all digits except peer values", () => {
@@ -108,7 +109,7 @@ describe("BoardState", () => {
 
 describe("BoardState.apply", () => {
     it("should place a step's digits, then take its candidates out", () => {
-        const empty = BoardState.fromPuzzle(Array.from({ length: 9 }, () => Array<number>(9).fill(0)));
+        const empty = BoardState.fromPuzzle(emptyBoard());
 
         const applied = empty.apply({
             assignments: [{ cell: { row: 0, column: 0 }, digit: 5 }],
@@ -122,7 +123,7 @@ describe("BoardState.apply", () => {
     });
 
     it("should call a board solved only once every cell holds a digit", () => {
-        const empty = BoardState.fromPuzzle(Array.from({ length: 9 }, () => Array<number>(9).fill(0)));
+        const empty = BoardState.fromPuzzle(emptyBoard());
 
         expect(empty.isSolved()).toBe(false);
     });

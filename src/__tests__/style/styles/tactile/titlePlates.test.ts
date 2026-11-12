@@ -1,5 +1,6 @@
 import { readFileSync } from "fs";
 import postcss from "postcss";
+import { splitTopLevel } from "../../styleSheetRules";
 
 // Home's heading is text-4xl (36px) and sits gap-2 (8px) above the subtitle
 const TITLE_FONT_PX = 36;
@@ -7,24 +8,6 @@ const TITLE_TO_SUBTITLE_PX = 8;
 const TITLE_GLYPH = '[data-style="tactile"] [data-skin~="title-glyph"]';
 
 // Splits on commas or spaces that are not inside parentheses
-const splitTopLevel = (value: string, separator: RegExp): string[] => {
-    const parts: string[] = [];
-    let depth = 0;
-    let current = "";
-    for (const character of value) {
-        if (character === "(") depth += 1;
-        if (character === ")") depth -= 1;
-        if (depth === 0 && separator.test(character)) {
-            if (current.trim() !== "") parts.push(current.trim());
-            current = "";
-        } else {
-            current += character;
-        }
-    }
-    if (current.trim() !== "") parts.push(current.trim());
-    return parts;
-};
-
 /** A px or em length, a custom property holding one, or a calc() sum of them, in px. */
 const toPixels = (token: string, variables: ReadonlyMap<string, string>): number | null => {
     const variable = /^var\((--[\w-]+)\)$/.exec(token);

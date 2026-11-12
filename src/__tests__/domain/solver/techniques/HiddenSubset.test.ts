@@ -1,10 +1,11 @@
 import { BoardState } from "@/domain/solver/BoardState";
 import { HiddenSubset } from "@/domain/solver/techniques/HiddenSubset";
+import { emptyBoard } from "@/__tests__/fixtures/emptyBoard";
 
 describe("HiddenSubset", () => {
     it("should not match a pair when one digit has no candidates anywhere in the scope", () => {
         let state = BoardState.fromPuzzle(
-            Array.from({ length: 9 }, () => Array<number>(9).fill(0)),
+            emptyBoard(),
         );
         state = state.assign(0, 3, 2);
         state = state.assign(0, 4, 1);

@@ -1,17 +1,10 @@
-import { readdirSync, readFileSync, statSync } from "fs";
-import { join } from "path";
+import { readFileSync } from "fs";
+import { collectFiles } from "@/__tests__/fixtures/collectFiles";
 
 // A dialog's card is centred on its scrim. On a window shorter than the card (split screen, a short
 // landscape strip) the scrim scrolls it instead, from the card's top, so no part is cut off out of reach.
 
-const collectVueFiles = (directory: string): string[] =>
-    readdirSync(directory).flatMap((name) => {
-        const path = join(directory, name);
-        if (statSync(path).isDirectory()) return collectVueFiles(path);
-        return name.endsWith(".vue") ? [path] : [];
-    });
-
-const scrimTags = collectVueFiles("src/presentation").flatMap(path =>
+const scrimTags = collectFiles("src/presentation", [".vue"]).flatMap(path =>
     [...readFileSync(path, "utf8").matchAll(/<\w+\b(?:[^>"']|"[^"]*"|'[^']*')*>/g)]
         .map(([tag]) => tag)
         .filter(tag => tag.includes('data-skin="dialog-scrim"'))

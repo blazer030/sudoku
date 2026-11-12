@@ -1,8 +1,7 @@
 import { BoardState } from "@/domain/solver/BoardState";
 import { XChain } from "@/domain/solver/techniques/XChain";
+import { emptyBoard } from "@/__tests__/fixtures/emptyBoard";
 
-const emptyBoard = (): number[][] =>
-    Array.from({ length: 9 }, () => Array<number>(9).fill(0));
 
 describe("XChain", () => {
     it("should return null when the board has no strong link", () => {

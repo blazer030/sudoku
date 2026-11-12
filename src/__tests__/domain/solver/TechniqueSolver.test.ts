@@ -3,6 +3,7 @@ import type { SolveStep } from "@/domain/solver/SolveStep";
 import { TechniqueSolver } from "@/domain/solver/TechniqueSolver";
 import { singlesPuzzle, singlesSolution } from "@/__tests__/fixtures/singlesPuzzle";
 import { SAMPLE_PUZZLES } from "@/presentation/pages/solver-walkthrough/samplePuzzles";
+import { emptyBoard } from "@/__tests__/fixtures/emptyBoard";
 
 // Unique solution, but after its last assignment the solver finds two X-Chain eliminations and then stalls.
 const stallingPuzzle: number[][] = [
@@ -100,7 +101,7 @@ describe("TechniqueSolver", () => {
 
     it("nextStep should find an X-Wing when no simpler technique applies", () => {
         let state = BoardState.fromPuzzle(
-            Array.from({ length: 9 }, () => Array<number>(9).fill(0)),
+            emptyBoard(),
         );
         for (const column of [1, 2, 3, 5, 6, 7, 8]) {
             state = state.eliminate(0, column, 1);
@@ -115,7 +116,7 @@ describe("TechniqueSolver", () => {
 
     it("nextStep should find an XY-Wing when no simpler technique applies", () => {
         let state = BoardState.fromPuzzle(
-            Array.from({ length: 9 }, () => Array<number>(9).fill(0)),
+            emptyBoard(),
         );
         for (const digit of [3, 4, 5, 6, 7, 8, 9]) {
             state = state.eliminate(0, 0, digit);
@@ -135,7 +136,7 @@ describe("TechniqueSolver", () => {
 
     it("nextStep should find a W-Wing when no simpler technique applies", () => {
         let state = BoardState.fromPuzzle(
-            Array.from({ length: 9 }, () => Array<number>(9).fill(0)),
+            emptyBoard(),
         );
         for (const digit of [3, 4, 5, 6, 7, 8, 9]) {
             state = state.eliminate(0, 0, digit);
@@ -153,7 +154,7 @@ describe("TechniqueSolver", () => {
 
     it("nextStep should find an XYZ-Wing when no simpler technique applies", () => {
         let state = BoardState.fromPuzzle(
-            Array.from({ length: 9 }, () => Array<number>(9).fill(0)),
+            emptyBoard(),
         );
         for (const digit of [4, 5, 6, 7, 8, 9]) {
             state = state.eliminate(0, 0, digit);
@@ -228,7 +229,7 @@ describe("TechniqueSolver", () => {
 
     it("the steps to the next assignment should return null when the solver is stuck", () => {
         const state = BoardState.fromPuzzle(
-            Array.from({ length: 9 }, () => Array<number>(9).fill(0)),
+            emptyBoard(),
         );
         const solver = new TechniqueSolver();
 
@@ -307,7 +308,7 @@ describe("TechniqueSolver", () => {
                 }
                 return { technique: "pointing", focus: [], assignments: [], eliminations: [{ cell, digit: 1 }], scopes: [] };
             });
-            const state = BoardState.fromPuzzle(Array.from({ length: 9 }, () => Array<number>(9).fill(0)));
+            const state = BoardState.fromPuzzle(emptyBoard());
 
             const steps = solver.stepsToNextAssignment(state);
 
@@ -317,7 +318,7 @@ describe("TechniqueSolver", () => {
 
         it("should return an empty list when no technique applies", () => {
             const state = BoardState.fromPuzzle(
-                Array.from({ length: 9 }, () => Array<number>(9).fill(0)),
+                emptyBoard(),
             );
 
             expect(new TechniqueSolver().stepsToNextAssignment(state)).toEqual([]);

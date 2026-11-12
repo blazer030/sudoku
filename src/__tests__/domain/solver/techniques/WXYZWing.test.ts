@@ -1,10 +1,11 @@
 import { BoardState } from "@/domain/solver/BoardState";
 import { WXYZWing } from "@/domain/solver/techniques/WXYZWing";
+import { emptyBoard } from "@/__tests__/fixtures/emptyBoard";
 
 describe("WXYZWing", () => {
     it("should return null when no WXYZ-Wing pattern exists", () => {
         const state = BoardState.fromPuzzle(
-            Array.from({ length: 9 }, () => Array<number>(9).fill(0)),
+            emptyBoard(),
         );
 
         const step = new WXYZWing().find(state);
@@ -14,7 +15,7 @@ describe("WXYZWing", () => {
 
     it("should return null when three pincers do not share a common Z digit", () => {
         let state = BoardState.fromPuzzle(
-            Array.from({ length: 9 }, () => Array<number>(9).fill(0)),
+            emptyBoard(),
         );
         for (const digit of [5, 6, 7, 8, 9]) {
             state = state.eliminate(0, 0, digit);
@@ -36,7 +37,7 @@ describe("WXYZWing", () => {
 
     it("should eliminate Z from cells seeing pivot {W,X,Y,Z} and three pincers {W,Z}, {X,Z}, {Y,Z}", () => {
         let state = BoardState.fromPuzzle(
-            Array.from({ length: 9 }, () => Array<number>(9).fill(0)),
+            emptyBoard(),
         );
         for (const digit of [5, 6, 7, 8, 9]) {
             state = state.eliminate(0, 0, digit);

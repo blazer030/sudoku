@@ -1,5 +1,6 @@
-import { readdirSync, readFileSync, statSync } from "fs";
+import { readFileSync } from "fs";
 import { join } from "path";
+import { collectFiles } from "@/__tests__/fixtures/collectFiles";
 
 // The app draws edge to edge on every API level: both system bars are transparent over the page, which
 // keeps content clear of them by the safe-area insets. Google Play flags the bar-colour calls Android 15
@@ -10,12 +11,6 @@ import { join } from "path";
 
 const MAIN_PATH = "android/app/src/main";
 const JAVA_PATH = join(MAIN_PATH, "java/io/github/blazer030/sudoku");
-
-const collectFiles = (directory: string): string[] =>
-    readdirSync(directory).flatMap((name) => {
-        const path = join(directory, name);
-        return statSync(path).isDirectory() ? collectFiles(path) : [path];
-    });
 
 const styleBody = (path: string, name: string): string =>
     new RegExp(`<style name="${name.replace(".", "\\.")}"[^>]*>([\\s\\S]*?)</style>`).exec(readFileSync(path, "utf8"))?.[1] ?? "";

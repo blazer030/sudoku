@@ -1,6 +1,6 @@
 import { readFileSync } from "fs";
 import postcss, { type AtRule, type Declaration, type Node, type Rule } from "postcss";
-import { declarationsOf, reducedMotionDeclarationsOf as reducedMotionDeclarationsIn } from "../../styleSheetRules";
+import { declarationsOf, reducedMotionDeclarationsOf as reducedMotionDeclarationsIn, splitTopLevel } from "../../styleSheetRules";
 
 const PIXEL_CSS = readFileSync("src/style/styles/pixel/skin.css", "utf8");
 
@@ -8,24 +8,6 @@ const SCOPE = '[data-style="pixel"]';
 const FONTS_READY = '[data-style="pixel"][data-pixel-fonts="ready"]';
 
 // Splits on a separator outside parentheses, so var(), calc() and colour functions stay whole
-const splitTopLevel = (value: string, separator: RegExp): string[] => {
-    const parts: string[] = [];
-    let depth = 0;
-    let current = "";
-    for (const character of value) {
-        if (character === "(") depth += 1;
-        if (character === ")") depth -= 1;
-        if (depth === 0 && separator.test(character)) {
-            parts.push(current);
-            current = "";
-        } else {
-            current += character;
-        }
-    }
-    parts.push(current);
-    return parts.map(part => part.trim()).filter(part => part !== "");
-};
-
 interface ShadowLayer { inset: boolean; offsetX: number; offsetY: number; blur: number; spread: number }
 
 // The scope's own custom properties (the shared frames) substituted in, as the browser would

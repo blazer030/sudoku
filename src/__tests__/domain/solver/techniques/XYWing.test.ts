@@ -1,10 +1,11 @@
 import { BoardState } from "@/domain/solver/BoardState";
 import { XYWing } from "@/domain/solver/techniques/XYWing";
+import { emptyBoard } from "@/__tests__/fixtures/emptyBoard";
 
 describe("XYWing", () => {
     it("should eliminate Z from cells seeing both pincers when pivot {X,Y} has pincers {X,Z} and {Y,Z}", () => {
         let state = BoardState.fromPuzzle(
-            Array.from({ length: 9 }, () => Array<number>(9).fill(0)),
+            emptyBoard(),
         );
         for (const digit of [3, 4, 5, 6, 7, 8, 9]) {
             state = state.eliminate(0, 0, digit);
@@ -35,7 +36,7 @@ describe("XYWing", () => {
 
     it("should return null when no XY-Wing pattern exists", () => {
         const state = BoardState.fromPuzzle(
-            Array.from({ length: 9 }, () => Array<number>(9).fill(0)),
+            emptyBoard(),
         );
 
         const step = new XYWing().find(state);
@@ -45,7 +46,7 @@ describe("XYWing", () => {
 
     it("should not match when pincers carry mismatched Z digits", () => {
         let state = BoardState.fromPuzzle(
-            Array.from({ length: 9 }, () => Array<number>(9).fill(0)),
+            emptyBoard(),
         );
         for (const digit of [3, 4, 5, 6, 7, 8, 9]) {
             state = state.eliminate(0, 0, digit);

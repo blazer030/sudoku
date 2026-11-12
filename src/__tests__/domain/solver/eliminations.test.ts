@@ -1,7 +1,8 @@
 import { BoardState } from "@/domain/solver/BoardState";
 import { eliminationsSeenByAll } from "@/domain/solver/eliminations";
+import { emptyBoard } from "@/__tests__/fixtures/emptyBoard";
 
-const emptyState = () => BoardState.fromPuzzle(Array.from({ length: 9 }, () => Array<number>(9).fill(0)));
+const emptyState = () => BoardState.fromPuzzle(emptyBoard());
 
 describe("eliminationsSeenByAll", () => {
     it("should take the digit from every cell that sees all the seers, in reading order", () => {
