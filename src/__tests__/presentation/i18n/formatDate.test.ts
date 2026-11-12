@@ -16,4 +16,19 @@ describe("formatDate", () => {
     ])("should format %s in %s as %s", (date, locale, expected) => {
         expect(formatDate(date.toISOString(), locale as AppLocale, now)).toBe(expected);
     });
+
+    describe("across a daylight saving change", () => {
+        afterEach(() => {
+            vi.unstubAllEnvs();
+        });
+
+        // The night clocks spring forward is 23 hours long, which used to make the day before it "today"
+        it("should still call the day before the change yesterday", () => {
+            vi.stubEnv("TZ", "America/New_York");
+            const morningAfter = new Date(2026, 2, 9, 9, 0);
+
+            expect(formatDate(new Date(2026, 2, 8, 20, 0).toISOString(), "zh-Hant", morningAfter)).toBe("昨天 20:00");
+            expect(formatDate(new Date(2026, 2, 7, 20, 0).toISOString(), "zh-Hant", morningAfter)).toBe("3/7 20:00");
+        });
+    });
 });

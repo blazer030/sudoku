@@ -24,7 +24,8 @@ export const formatDate = (dateString: string, locale: AppLocale, now: Date = ne
     const date = new Date(dateString);
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const gameDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-    const diffDays = Math.floor((today.getTime() - gameDay.getTime()) / MILLISECONDS_PER_DAY);
+    // Rounded, as a day that moves the clocks for daylight saving is 23 or 25 hours long
+    const diffDays = Math.round((today.getTime() - gameDay.getTime()) / MILLISECONDS_PER_DAY);
 
     const time = formatClockTime(date, locale);
 
