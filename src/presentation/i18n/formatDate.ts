@@ -6,7 +6,7 @@ const MILLISECONDS_PER_DAY = 86400000;
 const pad = (value: number): string => String(value).padStart(2, "0");
 
 // zh-Hant builds its own text: Intl output differs by platform (e.g. adds 下午)
-const formatTime = (date: Date, locale: AppLocale): string => {
+const formatClockTime = (date: Date, locale: AppLocale): string => {
     if (locale === "en") {
         return date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
     }
@@ -26,7 +26,7 @@ export const formatDate = (dateString: string, locale: AppLocale, now: Date = ne
     const gameDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
     const diffDays = Math.floor((today.getTime() - gameDay.getTime()) / MILLISECONDS_PER_DAY);
 
-    const time = formatTime(date, locale);
+    const time = formatClockTime(date, locale);
 
     if (diffDays === 0) return i18n.global.t("date.today", { time }, { locale });
     if (diffDays === 1) return i18n.global.t("date.yesterday", { time }, { locale });
