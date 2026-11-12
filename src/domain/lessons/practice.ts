@@ -29,6 +29,8 @@ export interface PracticeState {
     hintLevel: number;
     solved: boolean;
     feedback: PracticeFeedback | null;
+    /** Actions in a row that brought a correcting message; one that moves the step on, or a hint, starts it again. */
+    missesInARow: number;
 }
 
 export type PracticeAction =
@@ -49,6 +51,7 @@ export const freshPracticeState = (): PracticeState => ({
     hintLevel: 0,
     solved: false,
     feedback: null,
+    missesInARow: 0,
 });
 
 const DIGITS = [1, 2, 3, 4, 5, 6, 7, 8, 9];
@@ -276,8 +279,26 @@ const pressDigit = (step: PracticeStep, state: PracticeState, digit: number): Pr
 };
 
 /** What one tap or key does to a practice step. Returns `state` itself when nothing changes. */
+const movedOn = (before: PracticeState, after: PracticeState): boolean =>
+    after.solved
+    || after.placed.length > before.placed.length
+    || after.picked.length > before.picked.length
+    || after.removed.length > before.removed.length
+    || after.notes.length > before.notes.length;
+
+const countMisses = (before: PracticeState, after: PracticeState, action: PracticeAction): PracticeState => {
+    const missesInARow = action.kind === "requestHint" || movedOn(before, after) ? 0
+        : after.feedback !== null ? before.missesInARow + 1
+            : before.missesInARow;
+    return missesInARow === after.missesInARow ? after : { ...after, missesInARow };
+};
+
 export const practiceReducer = (step: PracticeStep, state: PracticeState, action: PracticeAction): PracticeState => {
     if (state.solved) return state;
+    return countMisses(state, reduce(step, state, action), action);
+};
+
+const reduce = (step: PracticeStep, state: PracticeState, action: PracticeAction): PracticeState => {
     // A new tap or key clears what the last one said; if it changes nothing else, the screen shows nothing new
     const cleared: PracticeState = state.feedback === null && state.wrong === null ? state : { ...state, feedback: null, wrong: null };
 

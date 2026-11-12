@@ -20,6 +20,7 @@ export const lessonsEn = {
     common: {
         stages: { explain: "Explanation", follow: "Follow along", alone: "On your own", done: "Done" },
         progress: "{stage} {done} / {total}",
+        nudge: "Stuck? Tap Hint.",
         actions: {
             next: "Next",
             tryIt: "Your turn",

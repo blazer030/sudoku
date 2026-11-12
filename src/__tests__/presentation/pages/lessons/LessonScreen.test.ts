@@ -611,4 +611,51 @@ describe("LessonScreen", () => {
 
         expect(explanation(wrapper)).not.toBe(before);
     });
+
+    describe("pointing a stuck player to the hint", () => {
+        const nudgeText = () => i18n.global.messages.value.en.lessons.common.nudge;
+        // Row 1, column 6 is empty, but column 6 has a 3
+        const missThreeTimes = async (wrapper: Screen) => {
+            for (let miss = 0; miss < 3; miss++) await tap(wrapper, 0, 5);
+        };
+
+        afterEach(() => { vi.useRealTimers(); });
+
+        it("should flash the hint button and add a word on the hint after three wrong answers", async () => {
+            const wrapper = mountScreen();
+            await toPractice(wrapper);
+            await tap(wrapper, 0, 5);
+            expect(secondary(wrapper).attributes("data-nudge")).toBeUndefined();
+
+            await missThreeTimes(wrapper);
+
+            expect(secondary(wrapper).attributes("data-nudge")).toBe("flash");
+            expect(explanation(wrapper)).toContain(nudgeText());
+        });
+
+        it("should keep the hint button lit without flashing when motion is off", async () => {
+            useSettingsStore().motionEffects = false;
+            const wrapper = mountScreen();
+            await toPractice(wrapper);
+
+            await missThreeTimes(wrapper);
+
+            expect(secondary(wrapper).attributes("data-nudge")).toBe("still");
+        });
+
+        it("should leave a hint's own words alone while it nudges", async () => {
+            vi.useFakeTimers();
+            const wrapper = mountScreen();
+            await toPractice(wrapper);
+            await secondary(wrapper).trigger("click");
+            await flushPromises();
+
+            vi.advanceTimersByTime(30_000);
+            await flushPromises();
+
+            expect(secondary(wrapper).attributes("data-nudge")).toBe("flash");
+            expect(explanation(wrapper)).toContain(nameOf("nakedPair"));
+            expect(explanation(wrapper)).not.toContain(nudgeText());
+        });
+    });
 });

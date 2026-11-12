@@ -51,6 +51,14 @@ describe("reduced motion", () => {
         expect(minimalBlock).toContain(".segmented-indicator-motion");
     });
 
+    // The nudge says it in words too; the flash only draws the eye, so reduced motion keeps the button lit and still
+    it("should stop the hint button's nudge from flashing", () => {
+        const [block] = reducedMotionBlocks(css);
+
+        expect(block).toContain('[data-nudge="flash"]');
+        expect(declarationsOf(css, "[data-nudge]").get("outline")).toBeDefined();
+    });
+
     // A lesson says everything through its marks and its one message, so none of them may wait on an animation
     it("should show lessons' states without any animation of their own", () => {
         for (const page of readdirSync("src/presentation/pages/lessons").filter(file => file.endsWith(".vue"))) {

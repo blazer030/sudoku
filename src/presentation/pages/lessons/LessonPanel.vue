@@ -40,7 +40,11 @@
                     :size="16"
                     class="shrink-0 mt-1"
                 />
-                <span>{{ messageText }}</span>
+                <span>{{ messageText }}<span
+                    v-if="nudgeText !== null"
+                    class="ms-1 text-foreground"
+                    data-testid="lesson-nudge"
+                >{{ nudgeText }}</span></span>
             </span>
             <span
                 v-else-if="messageKind === 'hint'"
@@ -54,7 +58,11 @@
                 <span>{{ messageText }}</span>
             </span>
             <template v-else>
-                {{ messageText }}
+                {{ messageText }}<span
+                    v-if="nudgeText !== null"
+                    class="ms-1"
+                    data-testid="lesson-nudge"
+                >{{ nudgeText }}</span>
             </template>
         </StepExplanation>
 
@@ -75,6 +83,7 @@
             <button
                 v-if="secondaryLabel !== null"
                 v-press
+                :data-nudge="nudge ?? undefined"
                 :disabled="secondaryDisabled"
                 class="hint-secondary"
                 data-skin="button"
@@ -123,6 +132,10 @@ const props = defineProps<{
     noteMode: boolean;
     secondaryLabel: string | null;
     secondaryDisabled: boolean;
+    /** Points a stuck player to the hint button: flashing, or lit while motion is not allowed. */
+    nudge: "flash" | "still" | null;
+    /** Said after the message while nudging, unless a hint is showing. */
+    nudgeText: string | null;
     primaryLabel: string;
     primaryDisabled: boolean;
 }>();

@@ -21,6 +21,7 @@ export const lessonsZhHant: typeof lessonsEn = {
     common: {
         stages: { explain: "講解", follow: "跟著做", alone: "自己找", done: "完成" },
         progress: "{stage} {done}／{total}",
+        nudge: "卡住了嗎？可以按「提示」。",
         actions: {
             next: "下一步",
             tryIt: "換你試試",

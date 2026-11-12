@@ -51,7 +51,7 @@
 
 ## 4. 文案
 
-- [ ] 4.1 完成 Lesson copy that supports the learner，依「語氣與別名只改文案，不改版面」：
+- [x] 4.1 完成 Lesson copy that supports the learner，依「語氣與別名只改文案，不改版面」：
   - 課程列表基礎組的說明改成可以照自己的步調、跳著學。
   - 15 課自己找最後一步的成功訊息帶一句鼓勵。
   - 隱藏唯一數、唯一候選數、宮區塊摒除、行列區塊摒除第一次講到名稱時附別名：中文摒除法、唯餘法、區塊摒除法；英文 crosshatching、sole candidate、locked candidates。
@@ -59,7 +59,7 @@
 - [ ] 4.3 [after: 4.1] 完成 Nudge toward the hint when stuck，依「卡住時提醒可以按提示」：
   - `PracticeState` 加 `missesInARow`，`practiceReducer` 在出現糾正訊息時加一、步驟前進時歸零、中性動作不變、按提示時歸零；先在 `src/__tests__/domain/lessons/practice.test.ts` 寫這四點的測試（新測試先失敗）。
   - 課程畫面加閒置計時：30 秒沒有練習動作就提醒，任何動作或換步重新計時；連錯 3 次也提醒；答對、按提示、換步、提示用完就不提醒。用假時鐘的元件或 composable 測試涵蓋這些分支（新測試先失敗）。
-  - 提醒時訊息區換成兩種語言的提醒文字；提示鈕帶 `data-nudge`，動態效果允許時用主色閃幾下，不允許時亮著不閃，`reducedMotion.test.ts` 涵蓋不閃的規則。
+  - 提醒時訊息後面加一句兩種語言的提醒（正在顯示提示時不加）；提示鈕帶 `data-nudge`，動態效果允許時用主色閃幾下，不允許時亮著不閃，`reducedMotion.test.ts` 涵蓋不閃的規則。
 - [ ] 4.2 [after: 2.2, 3.4, 3.5, 4.1, 4.3] 檢查課程文案的整體語氣：通讀 17 課兩種語言的講解、提示與成功訊息，用詞跟 CLAUDE.md 的中文規則一致（列／欄／宮、固定用詞），新加的句子跟原有的語氣一致。以 `lessonContent.test.ts` 全綠，加上逐課走一次的人工檢查完成。
 
 ## 5. 收尾

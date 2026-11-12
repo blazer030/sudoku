@@ -371,7 +371,27 @@
    Enter and leave transitions (modals, popups, toasts, hint steps) keep their opacity
    fade but lose their movement, including the ones in component styles. Each style's
    stylesheet turns off its own motion in its own block. */
+/* A lesson's hint button, pointed out to a stuck player: lit in the style's primary, flashing a few times while motion is allowed */
+[data-nudge] {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
+[data-nudge="flash"] {
+    animation: hint-nudge 0.9s ease-in-out 3;
+}
+
+@keyframes hint-nudge {
+    50% {
+        outline-color: transparent;
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
+    [data-nudge="flash"] {
+        animation: none;
+    }
+
     [class*="-enter-from"],
     [class*="-leave-to"],
     [class*="-enter-from"] > *,

@@ -85,6 +85,8 @@
                 :message-kind="session.message.value.kind"
                 :message-text="messageText"
                 :note-mode="session.practice.value.noteMode"
+                :nudge="nudge"
+                :nudge-text="nudgeText"
                 :primary-disabled="primaryDisabled"
                 :primary-label="primaryLabel"
                 :progress="progress"
@@ -128,9 +130,11 @@ import Cell from "@/presentation/components/board-cell/Cell.vue";
 import FloatingDigitPad from "@/presentation/components/floating-digit-pad/FloatingDigitPad.vue";
 import { ChevronLeft } from "@/presentation/components/icon";
 import StepLinkOverlay from "@/presentation/components/step-presentation/StepLinkOverlay.vue";
+import { useMotionAllowed } from "@/presentation/composables/useMotionAllowed";
 import { useDifficultyLabel } from "@/presentation/i18n/difficultyLabels";
 import LessonCompleteDialog from "@/presentation/pages/lessons/LessonCompleteDialog.vue";
 import LessonPanel from "@/presentation/pages/lessons/LessonPanel.vue";
+import { useStuckNudge } from "@/presentation/pages/lessons/useStuckNudge";
 import { useLessonSession } from "@/presentation/pages/lessons/useLessonSession";
 import { useLessonStore } from "@/stores/lessonStore";
 
@@ -176,6 +180,16 @@ const messageText = computed(() => {
     if (message.kind === "hint") return t(message.hint.textKey, message.hint.params ?? {});
     return t(message.key);
 });
+
+const stuck = useStuckNudge(session);
+const motionAllowed = useMotionAllowed();
+const nudge = computed((): "flash" | "still" | null => {
+    if (!stuck.value) return null;
+    return motionAllowed() ? "flash" : "still";
+});
+
+// A hint keeps its own words; anything else gets a word on the hint after it
+const nudgeText = computed(() => (stuck.value && session.message.value.kind !== "hint" ? t("lessons.common.nudge") : null));
 
 // A new message swaps in; the same message on a new step does too
 const messageKey = computed(() => `${session.stepIndex.value}-${messageText.value}`);

@@ -607,3 +607,38 @@ describe("practiceReducer", () => {
         });
     });
 });
+
+describe("misses in a row", () => {
+    const act = (state: PracticeState, row: number, column: number) => practiceReducer(placeStep, state, tap(row, column));
+
+    it("should count each tap that brings a correcting message", () => {
+        // Row 1, column 6 (counted from 1) is in box 2, but column 6 has a 3
+        const once = act(freshPracticeState(), 0, 5);
+        const twice = act(once, 0, 5);
+
+        expect(once.feedback).not.toBeNull();
+        expect(once.missesInARow).toBe(1);
+        expect(twice.missesInARow).toBe(2);
+    });
+
+    it("should start again when the step moves forward", () => {
+        const missed = act(act(freshPracticeState(), 0, 5), 0, 5);
+
+        expect(act(missed, 2, 4).missesInARow).toBe(0);
+    });
+
+    it("should leave the count alone for a tap that corrects nothing", () => {
+        const missed = act(freshPracticeState(), 0, 5);
+        // Row 1, column 4 holds a 2: tapping it lights the 2s
+        const lit = act(missed, 0, 3);
+
+        expect(lit.feedback).toBeNull();
+        expect(lit.missesInARow).toBe(1);
+    });
+
+    it("should start again when the player asks for a hint", () => {
+        const missed = act(freshPracticeState(), 0, 5);
+
+        expect(practiceReducer(placeStep, missed, { kind: "requestHint" }).missesInARow).toBe(0);
+    });
+});
