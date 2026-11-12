@@ -1,7 +1,7 @@
 // Relative imports only: scripts/ import this file through src/theme/palettes.ts.
 import { themeBuilder, type DarkThemeColors, type LightThemeColors, type Neutrals, type StyleDefinition } from "../../../theme/paletteBuilder";
 import { mixColors } from "../../../theme/contrast";
-import type { ColorMode, ColorThemeId } from "../../../theme/themeIds";
+import { THEME_IDS_BY_STYLE, type ColorMode, type ColorThemeId } from "../../../theme/themeIds";
 
 // Aurora Glass: four lights drifting behind panes of frosted glass, from the style-research canvas (Aurora.dc.html).
 // 夜空 (dark) is a deep night sky with pale text; 晨光 (light) is a dawn with dark text and softer lights. A theme
@@ -202,5 +202,5 @@ const auroraTheme = (id: ColorThemeId, accents: Record<ColorMode, AuroraAccent>)
 
 export const AURORA_STYLE: StyleDefinition = {
     id: "aurora",
-    themes: (["purple", "teal", "pink", "orange"] as const).map(id => auroraTheme(id, AURORA_ACCENTS[id])),
+    themes: THEME_IDS_BY_STYLE.aurora.map(id => auroraTheme(id, AURORA_ACCENTS[id])),
 };

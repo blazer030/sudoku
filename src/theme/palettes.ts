@@ -41,9 +41,8 @@ export const rememberedThemeFor = (style: StyleId, remembered: RememberedThemes)
 
 /** The mode a style comes back to: the one remembered for it, or the style's first mode. */
 export const rememberedAppearanceFor = (style: StyleId, remembered: RememberedAppearances): ColorMode => {
-    const modes = STYLE_COLOR_MODES[style];
     const mode = remembered[style];
-    return mode !== undefined && modes.includes(mode) ? mode : modes[0];
+    return mode === undefined ? STYLE_COLOR_MODES[style][0] : effectiveColorMode(style, mode);
 };
 
 /** The palette the style shows for a mode; a style with one mode answers with that mode's palette. */

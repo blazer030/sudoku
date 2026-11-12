@@ -1,7 +1,7 @@
 // Relative imports only: scripts/ import this file through src/theme/palettes.ts.
 import { themeBuilder, type DarkThemeColors, type LightThemeColors, type Neutrals, type StyleDefinition, type ThemePalette } from "../../../theme/paletteBuilder";
 import { mixColors } from "../../../theme/contrast";
-import type { ColorThemeId } from "../../../theme/themeIds";
+import { THEME_IDS_BY_STYLE, type ColorThemeId } from "../../../theme/themeIds";
 
 // Blueprint: an engineering drawing on graph paper, from the style-research canvas (Blueprint.dc.html, .m-dark and
 // .m-light). 藍曬圖 (dark) is white lines on a blueprint whose paper each theme changes, with amber for everything
@@ -168,5 +168,5 @@ const blueprintTheme = (id: ColorThemeId, papers: BlueprintPaper, inks: Drafting
 
 export const BLUEPRINT_STYLE: StyleDefinition = {
     id: "blueprint",
-    themes: (["blue", "teal", "slate", "rust"] as const).map(id => blueprintTheme(id, BLUEPRINT_PAPERS[id], DRAFTING_INKS[id])),
+    themes: THEME_IDS_BY_STYLE.blueprint.map(id => blueprintTheme(id, BLUEPRINT_PAPERS[id], DRAFTING_INKS[id])),
 };
