@@ -31,11 +31,11 @@ The Hidden Single lesson's explanation SHALL show that a digit which fits a cell
 | n+1 | The board without the supposed digits | Fill a digit only when it must go there |
 
 ### Requirement: From placing digits to removing candidates
-The first lesson of the Medium group, Pointing, SHALL open with an explanation step that says that from here on most techniques remove candidates rather than place digits, that lesson boards show every candidate, and that Auto Notes in Settings fills them in a game. The step is about the whole board and SHALL dim nothing.
+The first lesson of the Medium group, Pointing, SHALL open with two explanation steps: the first says that from here on most techniques remove candidates rather than place digits and that lesson boards show every candidate; the second says that Auto Notes in Settings fills them in a game. Both steps are about the whole board and SHALL dim nothing.
 
 #### Scenario: Opening Pointing
 - **WHEN** the player opens Pointing
-- **THEN** the first step shows its board with every candidate and nothing dimmed, and the text explains the move to removing candidates and where to find Auto Notes
+- **THEN** the first two steps show the board with every candidate and nothing dimmed; the first explains the move to removing candidates and the second where to find Auto Notes
 
 ### Requirement: Counter-examples and search tips
 Explanations SHALL show where a pattern does not hold and how to look for it, as explanation steps only, leaving the practice steps unchanged:
@@ -51,7 +51,7 @@ Explanations SHALL show where a pattern does not hold and how to look for it, as
 
 #### Scenario: An XY-Wing with nothing to remove
 - **WHEN** the player reaches XY-Wing's counter-example
-- **THEN** the pivot and both ends are marked, and the text says no cell that sees both ends holds the shared digit
+- **THEN** two steps mark the pivot and both ends: the first says they make an XY-Wing, the second that no cell that sees both ends holds the shared digit
 
 #### Scenario: The claims are checked
 - **WHEN** the lesson content tests run
