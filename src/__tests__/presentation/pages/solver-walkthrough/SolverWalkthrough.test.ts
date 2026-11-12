@@ -20,6 +20,7 @@ import { handleBackButton } from "@/presentation/composables/backDismissal";
 import { ANALYTICS_KEY, type AnalyticsEvent } from "@/application/analytics/AnalyticsService";
 import { createAnalyticsSpy } from "@/__tests__/fixtures/analyticsSpy";
 import { StubBoardFrame, frameMinimalWithStubInEachTest, frameTarget } from "@/__tests__/fixtures/boardFrameStub";
+import StepPlaybackPanel from "@/presentation/components/step-presentation/StepPlaybackPanel.vue";
 
 const samplePuzzle = (id: string): number[][] => {
     const sample = SAMPLE_PUZZLES.find((candidate) => candidate.id === id);
@@ -681,12 +682,11 @@ describe("SolverWalkthrough", () => {
             expect(checkedScopeCells).toBeGreaterThan(0);
         });
 
+        // Jumps to the last position as the progress bar does, rather than stepping through every one
         const goToEnd = async (wrapper: VueWrapper) => {
-            for (let guard = 0; guard < 200; guard++) {
-                const next = wrapper.find("[data-testid='walkthrough-next']");
-                if (next.attributes("disabled") !== undefined) break;
-                await next.trigger("click");
-            }
+            const panel = wrapper.findComponent(StepPlaybackPanel);
+            panel.vm.$emit("goTo", (panel.props("totalSteps") as number) - 1);
+            await flushPromises();
         };
 
         // A two-solution board the solver stalls on, with one more cell blanked that a single fills first

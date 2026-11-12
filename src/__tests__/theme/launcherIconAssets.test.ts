@@ -28,9 +28,20 @@ const monochromeName = (style: StyleId): string => `ic_launcher_${style}_monochr
 const hexOf = (red: number, green: number, blue: number): string =>
     `#${[red, green, blue].map(channel => channel.toString(16).padStart(2, "0")).join("")}`.toUpperCase();
 
+// Each image decoded once, however many points a test samples on it
+const decoded = new Map<string, Promise<{ data: Buffer; info: sharp.OutputInfo }>>();
+const decode = (path: string) => {
+    let image = decoded.get(path);
+    if (image === undefined) {
+        image = sharp(path).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+        decoded.set(path, image);
+    }
+    return image;
+};
+
 // Samples the pixel at a fraction of the image's width and height
 const pixelAt = async (path: string, across: number, down: number): Promise<{ color: string; alpha: number }> => {
-    const { data, info } = await sharp(path).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+    const { data, info } = await decode(path);
     const offset = (Math.round(info.height * down) * info.width + Math.round(info.width * across)) * info.channels;
     return { color: hexOf(data[offset], data[offset + 1], data[offset + 2]), alpha: data[offset + 3] };
 };

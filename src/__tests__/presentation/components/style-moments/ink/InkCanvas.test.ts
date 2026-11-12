@@ -26,9 +26,10 @@ const mountCanvas = async (celebration: CelebrationPhase | null = null) => {
     return wrapper;
 };
 
-// Runs the frames the canvas has asked for, and gives the last frame it drew
+// Runs the frames the canvas has asked for so far, and gives the last frame it drew. A copy of the calls, as each
+// frame asks for the next: walking the live list would spin on real time until the ink settles.
 const runFrames = (renderer: InkRenderer): InkFrame | undefined => {
-    for (const [callback] of vi.mocked(window.requestAnimationFrame).mock.calls) callback(performance.now() + 100);
+    for (const [callback] of [...vi.mocked(window.requestAnimationFrame).mock.calls]) callback(performance.now() + 100);
     return vi.mocked(renderer.draw).mock.lastCall?.[0];
 };
 
