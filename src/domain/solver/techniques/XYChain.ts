@@ -1,9 +1,9 @@
-import { BOARD_SIZE } from "@/domain/board/constants";
 import { BoardState } from "@/domain/solver/BoardState";
-import { CellReference, ChainLink, Elimination, SolveStep } from "@/domain/solver/SolveStep";
+import { CellReference, ChainLink, SolveStep } from "@/domain/solver/SolveStep";
 import { Technique } from "@/domain/solver/techniques/Technique";
 import { arePeers, sameCell } from "@/domain/solver/cellRelations";
 import { collectBivalueCells, type BivalueCell } from "@/domain/solver/bivalueCells";
+import { eliminationsSeenByAll } from "@/domain/solver/eliminations";
 
 const MAX_CHAIN_CELLS = 12;
 
@@ -32,7 +32,7 @@ function dfs(
 ): SolveStep | null {
     if (path.length >= 4 && propagateDigit === targetZ) {
         const tail = path[path.length - 1];
-        const eliminations = collectEndpointEliminations(state, head.cell, tail, targetZ, path);
+        const eliminations = eliminationsSeenByAll(state, [head.cell, tail], targetZ, path);
         if (eliminations.length > 0) {
             return {
                 technique: "xyChain",
@@ -62,25 +62,4 @@ function dfs(
         if (step) return step;
     }
     return null;
-}
-
-function collectEndpointEliminations(
-    state: BoardState,
-    head: CellReference,
-    tail: CellReference,
-    digit: number,
-    chainCells: CellReference[],
-): Elimination[] {
-    const eliminations: Elimination[] = [];
-    for (let row = 0; row < BOARD_SIZE; row++) {
-        for (let column = 0; column < BOARD_SIZE; column++) {
-            const candidate: CellReference = { row, column };
-            if (chainCells.some((cell) => sameCell(cell, candidate))) continue;
-            if (!arePeers(candidate, head)) continue;
-            if (!arePeers(candidate, tail)) continue;
-            if (!state.candidatesOf(row, column).includes(digit)) continue;
-            eliminations.push({ cell: candidate, digit });
-        }
-    }
-    return eliminations;
 }

@@ -1,9 +1,10 @@
 import { BOARD_SIZE } from "@/domain/board/constants";
 import { BoardState } from "@/domain/solver/BoardState";
-import { CellReference, Elimination, SolveStep } from "@/domain/solver/SolveStep";
+import { CellReference, SolveStep } from "@/domain/solver/SolveStep";
 import { Technique } from "@/domain/solver/techniques/Technique";
-import { arePeers, sameCell } from "@/domain/solver/cellRelations";
+import { arePeers } from "@/domain/solver/cellRelations";
 import { collectBivalueCells } from "@/domain/solver/bivalueCells";
+import { eliminationsSeenByAll } from "@/domain/solver/eliminations";
 
 interface QuadvalueCell {
     cell: CellReference;
@@ -37,12 +38,9 @@ export class WXYZWing implements Technique {
                         );
                         if (digitZ === null) continue;
 
-                        const eliminations = collectEliminations(
+                        const eliminations = eliminationsSeenByAll(
                             state,
-                            pivot.cell,
-                            pincerOne.cell,
-                            pincerTwo.cell,
-                            pincerThree.cell,
+                            [pivot.cell, pincerOne.cell, pincerTwo.cell, pincerThree.cell],
                             digitZ,
                         );
                         if (eliminations.length === 0) continue;
@@ -104,31 +102,4 @@ function sharedZDigit(
         return candidate;
     }
     return null;
-}
-
-function collectEliminations(
-    state: BoardState,
-    pivot: CellReference,
-    pincerOne: CellReference,
-    pincerTwo: CellReference,
-    pincerThree: CellReference,
-    digit: number,
-): Elimination[] {
-    const eliminations: Elimination[] = [];
-    for (let row = 0; row < BOARD_SIZE; row++) {
-        for (let column = 0; column < BOARD_SIZE; column++) {
-            const candidate: CellReference = { row, column };
-            if (sameCell(candidate, pivot)) continue;
-            if (sameCell(candidate, pincerOne)) continue;
-            if (sameCell(candidate, pincerTwo)) continue;
-            if (sameCell(candidate, pincerThree)) continue;
-            if (!arePeers(candidate, pivot)) continue;
-            if (!arePeers(candidate, pincerOne)) continue;
-            if (!arePeers(candidate, pincerTwo)) continue;
-            if (!arePeers(candidate, pincerThree)) continue;
-            if (!state.candidatesOf(row, column).includes(digit)) continue;
-            eliminations.push({ cell: candidate, digit });
-        }
-    }
-    return eliminations;
 }

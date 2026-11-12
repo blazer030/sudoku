@@ -1,9 +1,10 @@
 import { BOARD_SIZE, BOX_SIZE } from "@/domain/board/constants";
 import { BoardState } from "@/domain/solver/BoardState";
-import { CellReference, Elimination, Scope, SolveStep } from "@/domain/solver/SolveStep";
+import { CellReference, Scope, SolveStep } from "@/domain/solver/SolveStep";
 import { Technique } from "@/domain/solver/techniques/Technique";
 import { arePeers, sameCell } from "@/domain/solver/cellRelations";
 import { collectBivalueCells, type BivalueCell } from "@/domain/solver/bivalueCells";
+import { eliminationsSeenByAll } from "@/domain/solver/eliminations";
 
 interface StrongLink {
     first: CellReference;
@@ -44,12 +45,11 @@ export class WWing implements Technique {
             const pair = matchLinkToEndpoints(link, endpointA.cell, endpointB.cell);
             if (!pair) continue;
 
-            const eliminations = collectEliminations(
+            const eliminations = eliminationsSeenByAll(
                 state,
-                endpointA.cell,
-                endpointB.cell,
-                [pair.supporterForA, pair.supporterForB],
+                [endpointA.cell, endpointB.cell],
                 eliminationDigit,
+                [pair.supporterForA, pair.supporterForB],
             );
             if (eliminations.length === 0) continue;
 
@@ -107,27 +107,6 @@ function matchLinkToEndpoints(
         return { supporterForA: second, supporterForB: first };
     }
     return null;
-}
-
-function collectEliminations(
-    state: BoardState,
-    endpointA: CellReference,
-    endpointB: CellReference,
-    supporters: [CellReference, CellReference],
-    digit: number,
-): Elimination[] {
-    const eliminations: Elimination[] = [];
-    for (let row = 0; row < BOARD_SIZE; row++) {
-        for (let column = 0; column < BOARD_SIZE; column++) {
-            const candidate: CellReference = { row, column };
-            if (sameCell(candidate, endpointA) || sameCell(candidate, endpointB)) continue;
-            if (sameCell(candidate, supporters[0]) || sameCell(candidate, supporters[1])) continue;
-            if (!arePeers(candidate, endpointA) || !arePeers(candidate, endpointB)) continue;
-            if (!state.candidatesOf(row, column).includes(digit)) continue;
-            eliminations.push({ cell: candidate, digit });
-        }
-    }
-    return eliminations;
 }
 
 function cellsWithCandidateInRow(state: BoardState, row: number, digit: number): CellReference[] {

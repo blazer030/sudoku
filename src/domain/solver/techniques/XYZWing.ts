@@ -1,9 +1,10 @@
 import { BOARD_SIZE } from "@/domain/board/constants";
 import { BoardState } from "@/domain/solver/BoardState";
-import { CellReference, Elimination, SolveStep } from "@/domain/solver/SolveStep";
+import { CellReference, SolveStep } from "@/domain/solver/SolveStep";
 import { Technique } from "@/domain/solver/techniques/Technique";
 import { arePeers, sameCell } from "@/domain/solver/cellRelations";
 import { collectBivalueCells } from "@/domain/solver/bivalueCells";
+import { eliminationsSeenByAll } from "@/domain/solver/eliminations";
 
 interface TrivalueCell {
     cell: CellReference;
@@ -25,13 +26,7 @@ export class XYZWing implements Technique {
                     const digitZ = sharedZDigit(pivot.candidates, pincerOne.candidates, pincerTwo.candidates);
                     if (digitZ === null) continue;
 
-                    const eliminations = collectEliminations(
-                        state,
-                        pivot.cell,
-                        pincerOne.cell,
-                        pincerTwo.cell,
-                        digitZ,
-                    );
+                    const eliminations = eliminationsSeenByAll(state, [pivot.cell, pincerOne.cell, pincerTwo.cell], digitZ);
                     if (eliminations.length === 0) continue;
 
                     return {
@@ -82,28 +77,4 @@ function sharedZDigit(
         return digit;
     }
     return null;
-}
-
-function collectEliminations(
-    state: BoardState,
-    pivot: CellReference,
-    pincerOne: CellReference,
-    pincerTwo: CellReference,
-    digit: number,
-): Elimination[] {
-    const eliminations: Elimination[] = [];
-    for (let row = 0; row < BOARD_SIZE; row++) {
-        for (let column = 0; column < BOARD_SIZE; column++) {
-            const candidate: CellReference = { row, column };
-            if (sameCell(candidate, pivot)) continue;
-            if (sameCell(candidate, pincerOne)) continue;
-            if (sameCell(candidate, pincerTwo)) continue;
-            if (!arePeers(candidate, pivot)) continue;
-            if (!arePeers(candidate, pincerOne)) continue;
-            if (!arePeers(candidate, pincerTwo)) continue;
-            if (!state.candidatesOf(row, column).includes(digit)) continue;
-            eliminations.push({ cell: candidate, digit });
-        }
-    }
-    return eliminations;
 }
