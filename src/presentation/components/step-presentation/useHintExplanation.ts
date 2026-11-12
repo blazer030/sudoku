@@ -35,6 +35,12 @@ type ListEnding = "hintMode.list.last" | "hintMode.list.or";
  * Returns a function that explains a solver step in plain words, in the current locale.
  * `candidatesBefore` is the board's candidates before the step, indexed [row][column].
  */
+/** Names a cell in the player's language, as the hint copy does: "R4C7", 「第 4 列第 7 欄」. */
+export const useCellName = (): ((cell: CellReference) => string) => {
+    const { t } = useI18n();
+    return cell => t("hintMode.place.cell", { row: cell.row + 1, column: cell.column + 1 });
+};
+
 export const useHintExplanation = (): ((step: SolveStep, candidatesBefore: number[][][]) => string) => {
     const { t } = useI18n();
 
@@ -45,8 +51,7 @@ export const useHintExplanation = (): ((step: SolveStep, candidatesBefore: numbe
 
     const digitsName = (digits: number[], ending?: ListEnding): string => joinAll(digits.map(String), ending);
 
-    const cellName = (cell: CellReference): string =>
-        t("hintMode.place.cell", { row: cell.row + 1, column: cell.column + 1 });
+    const cellName = useCellName();
 
     // Names one or two cells outright; longer lists name the first cell and count the rest.
     const cellsName = (cells: CellReference[]): string => {

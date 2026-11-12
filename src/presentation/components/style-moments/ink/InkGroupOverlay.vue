@@ -116,12 +116,8 @@
     </span>
 </template>
 
-<script lang="ts">
-// Counts mounts across instances, so each mount's masks are its own and a new effect never borrows the last one's
-let mountCount = 0;
-</script>
-
 <script lang="ts" setup>
+import { useId } from "vue";
 import type { HouseKind } from "@/domain/board/geometry";
 import type { CompletedGroup } from "@/domain/game/Sudoku";
 import type { GroupEffect } from "@/presentation/components/style-moments/styleMoments";
@@ -131,8 +127,8 @@ defineProps<{
     effect: GroupEffect;
 }>();
 
-mountCount += 1;
-const mountId = mountCount;
+// Each mount's masks are its own, so a new effect never borrows the last one's
+const mountId = useId();
 const maskIdOf = (group: CompletedGroup): string => `ink-group-${mountId}-${group.kind}-${group.index}`;
 const blotIdOf = (group: CompletedGroup): string => `${maskIdOf(group)}-blot`;
 

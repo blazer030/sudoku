@@ -43,21 +43,20 @@ export const useNewGameFlow = (origin: NewGameOrigin = "home") => {
                 continueGame();
                 return;
             }
-            const saved = gameStore.savedGame;
-            const { progressPct, correctPct, incorrectPct } = computeAbandonProgress(saved.cells, saved.answer);
+            const { progressPct, correctPct, incorrectPct } = computeAbandonProgress(unfinished.cells, unfinished.answer);
             void analytics?.logEvent({
                 name: "game_abandon",
-                difficulty: saved.difficulty,
+                difficulty: unfinished.difficulty,
                 progress_pct: progressPct,
                 correct_pct: correctPct,
                 incorrect_pct: incorrectPct,
             });
             statisticsStore.recordGame({
-                difficulty: saved.difficulty,
-                elapsedSeconds: saved.elapsedSeconds,
+                difficulty: unfinished.difficulty,
+                elapsedSeconds: unfinished.elapsedSeconds,
                 completed: false,
-                hintsUsed: saved.hintsUsed,
-                replay: saved.replay,
+                hintsUsed: unfinished.hintsUsed,
+                replay: unfinished.replay,
             });
             await gameStore.clearSavedGame();
         }

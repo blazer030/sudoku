@@ -81,7 +81,7 @@
 import { boxIndexOf } from "@/domain/board/geometry";
 import { computed, nextTick, ref, toRef, useId, useTemplateRef, watch } from "vue";
 import { X } from "@/presentation/components/icon";
-import { BOX_SIZE } from "@/domain/board/constants";
+import { BOARD_SIZE, BOX_SIZE } from "@/domain/board/constants";
 import type { HouseKind } from "@/domain/board/geometry";
 import { useMotionAllowed } from "@/presentation/composables/useMotionAllowed";
 import { useValueMotion } from "@/presentation/components/board-cell/useValueMotion";
@@ -280,22 +280,26 @@ const noteClass = (digit: number): string => {
 const positionClasses = computed(() => {
     const classes: string[] = [];
 
+    const last = BOARD_SIZE - 1;
+    // A box's last row or column, short of the board's edge
+    const endsBox = (index: number): boolean => index % BOX_SIZE === BOX_SIZE - 1 && index < last;
+
     if (props.row === 0 && props.column === 0) classes.push("rounded-tl-lg");
-    if (props.row === 0 && props.column === 8) classes.push("rounded-tr-lg");
-    if (props.row === 8 && props.column === 0) classes.push("rounded-bl-lg");
-    if (props.row === 8 && props.column === 8) classes.push("rounded-br-lg");
+    if (props.row === 0 && props.column === last) classes.push("rounded-tr-lg");
+    if (props.row === last && props.column === 0) classes.push("rounded-bl-lg");
+    if (props.row === last && props.column === last) classes.push("rounded-br-lg");
 
     // Thin lines are translucent ink rather than the border token, so they still show on clue cells.
     // Their colours are custom properties (index.css), so a style can redraw the grid.
-    if (props.column === 2 || props.column === 5) {
+    if (endsBox(props.column)) {
         classes.push("border-r-3 border-r-(color:--board-box-line)");
-    } else if (props.column < 8) {
+    } else if (props.column < last) {
         classes.push("border-r border-r-(color:--board-line)");
     }
 
-    if (props.row === 2 || props.row === 5) {
+    if (endsBox(props.row)) {
         classes.push("border-b-3 border-b-(color:--board-box-line)");
-    } else if (props.row < 8) {
+    } else if (props.row < last) {
         classes.push("border-b border-b-(color:--board-line)");
     }
 

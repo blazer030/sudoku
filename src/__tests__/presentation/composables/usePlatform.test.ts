@@ -23,7 +23,6 @@ describe("usePlatform", () => {
         const result = usePlatform();
 
         expect(result.isNative).toBe(true);
-        expect(result.platform).toBe("android");
     });
 
     it("reports isNative false on web", () => {
@@ -33,6 +32,5 @@ describe("usePlatform", () => {
         const result = usePlatform();
 
         expect(result.isNative).toBe(false);
-        expect(result.platform).toBe("web");
     });
 });

@@ -141,7 +141,7 @@ import { ChevronRight, CircleAlert, Eraser, EyeOff, ListFilter, PencilLine } fro
 import type { RevealHintStep } from "@/domain/game/RevealHint";
 import type { CellReference } from "@/domain/solver/SolveStep";
 import type { HintPhase } from "@/presentation/pages/game/hint-mode/useHintMode";
-import { useHintExplanation } from "@/presentation/components/step-presentation/useHintExplanation";
+import { useCellName, useHintExplanation } from "@/presentation/components/step-presentation/useHintExplanation";
 import { useTechniqueLabel } from "@/presentation/i18n/techniqueLabels";
 import StepTag from "@/presentation/components/step-presentation/StepTag.vue";
 import StepNavigator from "@/presentation/components/step-presentation/StepNavigator.vue";
@@ -172,8 +172,7 @@ const { t } = useI18n();
 const techniqueLabel = useTechniqueLabel();
 const explain = useHintExplanation();
 
-const cellName = (cell: CellReference): string =>
-    t("hintMode.place.cell", { row: cell.row + 1, column: cell.column + 1 });
+const cellName = useCellName();
 
 const explanation = computed(() =>
     props.step === null ? "" : explain(props.step.step, props.step.candidatesBefore));
