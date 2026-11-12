@@ -1,6 +1,6 @@
 import { PuzzleCell } from "@/domain/board/PuzzleCell";
 import { Sudoku } from "@/domain/game/Sudoku";
-import type { GameReplayData } from "@/application/statistics/StatisticsRepository";
+import type { GameReplayData } from "@/domain/game/GameReplay";
 
 export interface ReplaySummary {
     undoCount: number;

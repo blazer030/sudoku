@@ -1,12 +1,6 @@
 import type { InjectionKey } from "vue";
 import type { Difficulty } from "@/domain/generator/SudokuGenerator";
-import type { GameStep } from "@/domain/game/GameStep";
-import type { CellState } from "@/application/game/GameState";
-
-export interface GameReplayData {
-    initialBoard: CellState[][];
-    steps: GameStep[];
-}
+import type { GameReplayData } from "@/domain/game/GameReplay";
 
 export interface GameResult {
     difficulty: Difficulty;

@@ -1,11 +1,8 @@
 import { computed, ref } from "vue";
 import { defineStore } from "pinia";
 import type { Difficulty } from "@/domain/generator/SudokuGenerator";
-import type {
-    GameReplayData,
-    GameResult,
-    StatisticsRepository,
-} from "@/application/statistics/StatisticsRepository";
+import type { GameReplayData } from "@/domain/game/GameReplay";
+import type { GameResult, StatisticsRepository } from "@/application/statistics/StatisticsRepository";
 
 export interface RecordGameInput {
     difficulty: Difficulty;

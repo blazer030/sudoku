@@ -7,7 +7,7 @@ import { useGameStore } from "@/stores/gameStore";
 import { useStatisticsStore } from "@/stores/statisticsStore";
 import { ROUTER_PATH } from "@/routerPaths";
 import { captureInitialBoard } from "@/application/game/GameState";
-import type { GameReplayData } from "@/application/statistics/StatisticsRepository";
+import type { GameReplayData } from "@/domain/game/GameReplay";
 import { useGameTimer } from "@/presentation/pages/game/useGameTimer";
 import { useGameCompletion, type CompletionOutcome } from "@/presentation/pages/game/useGameCompletion";
 import { useLeaveGame } from "@/presentation/pages/game/useLeaveGame";

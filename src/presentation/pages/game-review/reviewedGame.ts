@@ -1,4 +1,5 @@
-import type { GameReplayData, GameResult } from "@/application/statistics/StatisticsRepository";
+import type { GameReplayData } from "@/domain/game/GameReplay";
+import type { GameResult } from "@/application/statistics/StatisticsRepository";
 
 export type ReviewedGame = GameResult & { replay: GameReplayData };
 

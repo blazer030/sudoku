@@ -3,7 +3,7 @@ import type { Difficulty } from "@/domain/generator/SudokuGenerator";
 import type { Sudoku } from "@/domain/game/Sudoku";
 import { useGameStore } from "@/stores/gameStore";
 import { useStatisticsStore } from "@/stores/statisticsStore";
-import type { GameReplayData } from "@/application/statistics/StatisticsRepository";
+import type { GameReplayData } from "@/domain/game/GameReplay";
 import { summarizeReplay } from "@/application/analytics/summarizeReplay";
 import type { AnalyticsService } from "@/application/analytics/AnalyticsService";
 

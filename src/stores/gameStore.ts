@@ -7,7 +7,7 @@ import { GameStateConverter, type GameState } from "@/application/game/GameState
 import { generatePuzzleAsync } from "@/application/puzzleGeneration/PuzzleGenerationService";
 import type { AnalyticsService } from "@/application/analytics/AnalyticsService";
 import type { GameRepository } from "@/application/game/GameRepository";
-import type { GameReplayData } from "@/application/statistics/StatisticsRepository";
+import type { GameReplayData } from "@/domain/game/GameReplay";
 import { useSettingsStore } from "@/stores/settingsStore";
 
 export const useGameStore = defineStore("game", () => {

@@ -10,7 +10,7 @@ import { PuzzleCell } from "@/domain/board/PuzzleCell";
 import { useLeaveGame } from "@/presentation/pages/game/useLeaveGame";
 import { useGameStore } from "@/stores/gameStore";
 import type { AnalyticsService } from "@/application/analytics/AnalyticsService";
-import type { GameReplayData } from "@/application/statistics/StatisticsRepository";
+import type { GameReplayData } from "@/domain/game/GameReplay";
 
 beforeEach(() => {
     setActivePinia(createPinia());

@@ -1,5 +1,5 @@
 import { summarizeReplay } from "@/application/analytics/summarizeReplay";
-import type { GameReplayData } from "@/application/statistics/StatisticsRepository";
+import type { GameReplayData } from "@/domain/game/GameReplay";
 import type { GameStep, GameStepAction } from "@/domain/game/GameStep";
 import { createKnownSudoku, knownAnswer, knownPuzzle } from "@/__tests__/fixtures/knownPuzzle";
 

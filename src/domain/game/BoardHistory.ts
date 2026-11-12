@@ -1,10 +1,7 @@
 import { BOARD_SIZE } from "@/domain/board/constants";
 import { PuzzleCell } from "@/domain/board/PuzzleCell";
 
-interface CellSnapshot {
-    entry: number;
-    notes: number[];
-}
+import { snapshotOf, type CellSnapshot } from "@/domain/board/cellState";
 
 type BoardSnapshot = CellSnapshot[][];
 
@@ -13,9 +10,7 @@ export class BoardHistory {
 
     public save(puzzle: PuzzleCell[][]): void {
         this._history.push(
-            puzzle.map(row =>
-                row.map(cell => ({ entry: cell.entry, notes: [...cell.notes] }))
-            )
+            puzzle.map(row => row.map(snapshotOf))
         );
     }
 

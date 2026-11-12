@@ -5,7 +5,8 @@ import { createPinia, setActivePinia } from "pinia";
 import ContinueButton from "@/presentation/components/continue-button/ContinueButton.vue";
 import { useGameStore } from "@/stores/gameStore";
 import { useSettingsStore } from "@/stores/settingsStore";
-import type { CellState, GameState } from "@/application/game/GameState";
+import type { CellState } from "@/domain/board/cellState";
+import type { GameState } from "@/application/game/GameState";
 import { i18n } from "@/presentation/i18n";
 import type { StyleId } from "@/theme/themeIds";
 

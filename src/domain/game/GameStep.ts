@@ -1,7 +1,6 @@
-export interface CellSnapshot {
-    entry: number;
-    notes: number[];
-}
+import type { CellSnapshot } from "@/domain/board/cellState";
+
+export type { CellSnapshot };
 
 export type GameStepAction = "fill" | "erase" | "toggleNote" | "autoNotes" | "undo" | "hint";
 

@@ -1,3 +1,4 @@
+import { snapshotOf } from "@/domain/board/cellState";
 import type { PuzzleCell } from "@/domain/board/PuzzleCell";
 import type { GameStep, GameStepAction } from "@/domain/game/GameStep";
 
@@ -6,7 +7,7 @@ export class StepRecorder {
 
     public record(puzzle: PuzzleCell[][], action: GameStepAction, row: number, column: number, value: number): void {
         this._steps.push({
-            board: puzzle.map(row => row.map(cell => ({ entry: cell.entry, notes: [...cell.notes] }))),
+            board: puzzle.map(row => row.map(snapshotOf)),
             action,
             row,
             column,

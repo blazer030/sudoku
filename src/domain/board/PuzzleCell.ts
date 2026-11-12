@@ -1,3 +1,5 @@
+import type { CellState } from "@/domain/board/cellState";
+
 export class PuzzleCell {
     private readonly _clue: number;
     private _entry: number;
@@ -44,6 +46,13 @@ export class PuzzleCell {
         this._clue = clue;
         this._entry = 0;
         this._notes = [];
+    }
+
+    /** A cell rebuilt from its saved state. */
+    public static fromState(state: CellState): PuzzleCell {
+        const cell = new PuzzleCell(state.clue);
+        cell.restore(state.entry, state.notes);
+        return cell;
     }
 
     public raw(): this {

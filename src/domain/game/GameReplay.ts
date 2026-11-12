@@ -1,19 +1,19 @@
+import type { CellState } from "@/domain/board/cellState";
 import { PuzzleCell } from "@/domain/board/PuzzleCell";
 import type { GameStep } from "@/domain/game/GameStep";
 
-// 與 application/GameState 的 CellState 結構相同，但 domain 層不可引入 application 層
-interface InitialCell {
-    clue: number;
-    entry: number;
-    notes: number[];
+/** A game's moves as kept for Game Review: the board it started from and each step after. */
+export interface GameReplayData {
+    initialBoard: CellState[][];
+    steps: GameStep[];
 }
 
 export class GameReplay {
-    private readonly _initialBoard: InitialCell[][];
+    private readonly _initialBoard: CellState[][];
     private readonly _steps: GameStep[];
     private _currentStep = 0;
 
-    public constructor(initialBoard: InitialCell[][], steps: GameStep[]) {
+    public constructor(initialBoard: CellState[][], steps: GameStep[]) {
         this._initialBoard = initialBoard;
         this._steps = steps;
     }
@@ -63,23 +63,11 @@ export class GameReplay {
     }
 
     private buildBoardFromInitial(): PuzzleCell[][] {
-        return this._initialBoard.map(row =>
-            row.map(cell => {
-                const puzzleCell = new PuzzleCell(cell.clue);
-                puzzleCell.restore(cell.entry, cell.notes);
-                return puzzleCell;
-            })
-        );
+        return this._initialBoard.map(row => row.map(cell => PuzzleCell.fromState(cell)));
     }
 
     private buildBoardFromStep(step: GameStep): PuzzleCell[][] {
         return this._initialBoard.map((row, rowIndex) =>
-            row.map((cell, columnIndex) => {
-                const puzzleCell = new PuzzleCell(cell.clue);
-                const snapshot = step.board[rowIndex][columnIndex];
-                puzzleCell.restore(snapshot.entry, snapshot.notes);
-                return puzzleCell;
-            })
-        );
+            row.map((cell, columnIndex) => PuzzleCell.fromState({ clue: cell.clue, ...step.board[rowIndex][columnIndex] })));
     }
 }

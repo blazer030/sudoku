@@ -5,7 +5,7 @@ import type { Sudoku } from "@/domain/game/Sudoku";
 import { GameStateConverter } from "@/application/game/GameState";
 import { useGameStore } from "@/stores/gameStore";
 import { useStatisticsStore } from "@/stores/statisticsStore";
-import type { GameReplayData } from "@/application/statistics/StatisticsRepository";
+import type { GameReplayData } from "@/domain/game/GameReplay";
 import { provideLeaveDialog } from "@/presentation/pages/game/components/useLeaveDialog";
 import type { AnalyticsService } from "@/application/analytics/AnalyticsService";
 import { computeAbandonProgress } from "@/application/analytics/computeAbandonProgress";

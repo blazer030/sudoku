@@ -9,7 +9,7 @@ import { useStatisticsStore } from "@/stores/statisticsStore";
 import { createKnownSudoku } from "@/__tests__/fixtures/knownPuzzle";
 import type { AnalyticsEvent } from "@/application/analytics/AnalyticsService";
 import type { GameStep } from "@/domain/game/GameStep";
-import type { GameReplayData } from "@/application/statistics/StatisticsRepository";
+import type { GameReplayData } from "@/domain/game/GameReplay";
 
 const SOLVED_BOARD: number[][] = [
     [5, 3, 4, 6, 7, 8, 9, 1, 2],
