@@ -80,7 +80,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onBeforeUnmount, onMounted } from "vue";
+import { computed } from "vue";
 import { Play, TriangleAlert } from "@/presentation/components/icon";
 import { useI18n } from "vue-i18n";
 import { useNewGameDialog } from "@/presentation/components/new-game-dialog/useNewGameDialog";
@@ -91,16 +91,6 @@ import { vPress } from "@/presentation/directives/press";
 const { t } = useI18n();
 const { visible, params, close } = useNewGameDialog();
 const difficultyLabel = useDifficultyLabel();
-
-const closeOnEscape = (event: KeyboardEvent) => {
-    if (visible.value && event.key === "Escape") close("stay");
-};
-onMounted(() => {
-    document.addEventListener("keydown", closeOnEscape);
-});
-onBeforeUnmount(() => {
-    document.removeEventListener("keydown", closeOnEscape);
-});
 
 const summary = computed(() => {
     if (params.value === undefined) return "";

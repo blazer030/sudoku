@@ -503,6 +503,19 @@ describe("Settings.vue data group", () => {
         expect(useStatisticsStore().history).toHaveLength(1);
     });
 
+    it("should keep records when Escape closes the clear records dialog", async () => {
+        const wrapper = mountSettings();
+        recordOneGame();
+        await nextTick();
+
+        await wrapper.get("[data-testid='clear-records-button']").trigger("click");
+        document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+        await flushPromises();
+
+        expect(wrapper.find("[data-testid='clear-records-dialog']").exists()).toBe(false);
+        expect(useStatisticsStore().history).toHaveLength(1);
+    });
+
     it("should keep the unfinished game and settings when clearing records", async () => {
         const wrapper = mountSettings();
         useGameStore().persistGame(dummySave);

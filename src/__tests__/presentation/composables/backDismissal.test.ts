@@ -79,4 +79,39 @@ describe("backDismissal", () => {
 
         expect(back).not.toHaveBeenCalled();
     });
+
+    describe("Escape", () => {
+        const pressKey = (key: string) => {
+            document.dispatchEvent(new KeyboardEvent("keydown", { key }));
+        };
+
+        it("should close only the most recently opened dialog with its dismiss result", async () => {
+            const first = mountDialog<"cancel">("cancel").dialog;
+            const second = mountDialog<"cancel">("cancel").dialog;
+            void first.open();
+            const result = second.open();
+
+            pressKey("Escape");
+
+            await expect(result).resolves.toBe("cancel");
+            expect(first.visible.value).toBe(true);
+            first.close("cancel");
+        });
+
+        it("should leave a dialog without a dismiss result open, and ignore other keys", () => {
+            const { dialog } = mountDialog<"done">();
+            const dismissable = mountDialog<"cancel">("cancel").dialog;
+            void dialog.open();
+            void dismissable.open();
+
+            pressKey("Enter");
+            expect(dismissable.visible.value).toBe(true);
+
+            pressKey("Escape");
+            pressKey("Escape");
+            expect(dismissable.visible.value).toBe(false);
+            expect(dialog.visible.value).toBe(true);
+            dialog.close("done");
+        });
+    });
 });
