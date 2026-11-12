@@ -26,7 +26,8 @@ export const useGameCompletion = ({ sudoku, difficulty, getElapsedSeconds, getRe
     const gameStore = useGameStore();
 
     const checkAndComplete = () => {
-        if (!sudoku.isCompleted()) return;
+        // A solved game is recorded once; the board ignores the player from then on
+        if (completed.value || !sudoku.isCompleted()) return;
         completed.value = true;
         // Compared before this game joins the history
         const isNewRecord = statisticsStore.isNewBestTime(difficulty.value, getElapsedSeconds());

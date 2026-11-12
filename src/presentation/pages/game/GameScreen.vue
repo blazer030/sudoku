@@ -274,7 +274,8 @@ const {
     checkAndComplete,
     onGroupCompleted: playGroupEffect,
     autoRemoveNotes: () => settingsStore.autoRemoveNotes,
-    isLocked: () => hintMode.active.value || singleNoteFill.running.value,
+    // A solved board takes no more input, while it celebrates as after
+    isLocked: () => completed.value || hintMode.active.value || singleNoteFill.running.value,
 });
 
 const { isDoubleTap } = useBlankDoubleTap();

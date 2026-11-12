@@ -957,6 +957,21 @@ describe("Game", () => {
             expect(boardOfGame(wrapper).attributes("data-celebration")).toBe("playing");
         });
 
+        // Undo during the board phase used to take the solving entry back, so solving again recorded the game twice
+        it("should ignore the board while the solved board celebrates", async () => {
+            vi.useFakeTimers();
+            const wrapper = mountGame("easy", nearlySolvedSudoku());
+            await fillLastCell(wrapper);
+            const solved = boardOf(wrapper);
+
+            await wrapper.find("[data-testid='undo-button']").trigger("click");
+            await fillLastCell(wrapper);
+            await vi.advanceTimersByTimeAsync(BOARD_MS);
+
+            expect(boardOf(wrapper)).toEqual(solved);
+            expect(useStatisticsStore().history).toHaveLength(1);
+        });
+
         it("should open the dialog once the board phase has run, and keep the board's end state", async () => {
             vi.useFakeTimers();
             const wrapper = mountGame("easy", nearlySolvedSudoku());

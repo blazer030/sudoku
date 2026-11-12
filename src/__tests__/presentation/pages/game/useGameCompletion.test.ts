@@ -54,6 +54,23 @@ describe("useGameCompletion", () => {
         localStorage.clear();
     });
 
+    it("records a completed game only once, however often it is checked", () => {
+        const onCompleted = vi.fn();
+        const { checkAndComplete } = useGameCompletion({
+            sudoku: buildCompleteSudoku(),
+            difficulty: ref("easy"),
+            getElapsedSeconds: () => 60,
+            getReplayData: emptyReplay,
+            onCompleted,
+        });
+
+        checkAndComplete();
+        checkAndComplete();
+
+        expect(useStatisticsStore().history).toHaveLength(1);
+        expect(onCompleted).toHaveBeenCalledTimes(1);
+    });
+
     it("emits game_complete analytics event when sudoku is completed", () => {
         const analytics = createAnalyticsSpy();
         const sudoku = buildCompleteSudoku();
