@@ -3,7 +3,6 @@ import {
     ALL_LAUNCHER_ALIASES,
     isPwaIconFile,
     LAUNCHER_ICONS,
-    LEGACY_LAUNCHER_ALIASES,
     launcherIconKey,
     pwaIconKey,
     launcherResourceName,
@@ -101,21 +100,8 @@ describe("launcher icons", () => {
         expect(LAUNCHER_ICONS.filter(icon => icon.style === "paper").map(icon => icon.mode)).toEqual(["light", "light", "light"]);
     });
 
-    // Users who matched their icon to paper in dark sit on these aliases; removing them would
-    // leave those users without a launcher entry after the update
-    it("should keep the old paper dark aliases, each drawing its light twin's icon", () => {
-        expect(LEGACY_LAUNCHER_ALIASES).toEqual([
-            { key: "paperBlueInkDark", icon: "paperBlueInk" },
-            { key: "paperGreenInkDark", icon: "paperGreenInk" },
-            { key: "paperRedInkDark", icon: "paperRedInk" },
-        ]);
-    });
-
-    it("should list every icon's alias and then the legacy aliases", () => {
-        expect(ALL_LAUNCHER_ALIASES).toEqual([
-            ...LAUNCHER_ICONS.map(icon => icon.key),
-            ...LEGACY_LAUNCHER_ALIASES.map(alias => alias.key),
-        ]);
+    it("should list one alias per icon, named by its key", () => {
+        expect(ALL_LAUNCHER_ALIASES).toEqual(LAUNCHER_ICONS.map(icon => icon.key));
     });
 
     it("should not repeat a launcher alias", () => {

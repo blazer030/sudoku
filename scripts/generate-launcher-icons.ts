@@ -3,7 +3,7 @@ import { mkdirSync, readFileSync, writeFileSync } from "fs";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
 import { ICON_VARIANTS, roundedIconSvg, roundedSvg, type IconVariant } from "./iconArtwork";
-import { LEGACY_LAUNCHER_ALIASES, launcherResourceName, type LauncherIconKey } from "../src/theme/launcherIcon";
+import { launcherResourceName, type LauncherIconKey } from "../src/theme/launcherIcon";
 import { styleIconBackground, styleIconForeground, styleIconMonochrome } from "../src/theme/styleIcons";
 import { STYLE_IDS, type StyleId } from "../src/theme/themeIds";
 import { BRAND_ICON_BACKGROUND, BRAND_ICON_RESOURCE, brandIconForeground, brandIconMonochrome, brandIconSvg } from "../src/theme/brandIcon";
@@ -68,8 +68,8 @@ ${ICON_VARIANTS.map(variant => `    <color name="${launcherResourceName(variant.
 `;
 
 // No roundIcon: adaptive icons are masked by the launcher, and the legacy icon is already rounded
-const aliasXml = (alias: string, icon: LauncherIconKey): string => `        <activity-alias
-            android:name=".${alias}"
+const aliasXml = (icon: LauncherIconKey): string => `        <activity-alias
+            android:name=".${icon}"
             android:enabled="false"
             android:icon="@mipmap/${launcherResourceName(icon)}"
             android:label="@string/title_activity_main"
@@ -86,11 +86,8 @@ const writeManifestAliases = () => {
     const start = manifest.indexOf(ALIASES_BEGIN);
     const end = manifest.indexOf(ALIASES_END);
     if (start === -1 || end === -1) throw new Error("AndroidManifest.xml lacks the launcher alias markers");
-    // Each icon's own alias, then the legacy aliases drawing an icon of another key
-    const aliases = [
-        ...ICON_VARIANTS.map(variant => aliasXml(variant.id, variant.id)),
-        ...LEGACY_LAUNCHER_ALIASES.map(alias => aliasXml(alias.key, alias.icon)),
-    ].join("\n\n");
+    // Each icon's own alias, named by its key
+    const aliases = ICON_VARIANTS.map(variant => aliasXml(variant.id)).join("\n\n");
     writeFileSync(MANIFEST_PATH, `${manifest.slice(0, start + ALIASES_BEGIN.length)}\n${aliases}\n        ${manifest.slice(end)}`);
 };
 
@@ -143,7 +140,7 @@ const main = async () => {
     await writeLegacyIcon(BRAND_ICON_RESOURCE, roundedSvg(brandIconSvg()));
 
     writeManifestAliases();
-    console.log(`Done! ${ICON_VARIANTS.length} launcher icons and ${ICON_VARIANTS.length + LEGACY_LAUNCHER_ALIASES.length} aliases generated.`);
+    console.log(`Done! ${ICON_VARIANTS.length} launcher icons and ${ICON_VARIANTS.length} aliases generated.`);
 };
 
 main().catch((err: unknown) => {

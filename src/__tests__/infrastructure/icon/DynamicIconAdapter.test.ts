@@ -58,17 +58,6 @@ describe("DynamicIconAdapter", () => {
         expect(disable).not.toContain("tactileRustDark");
     });
 
-    // A user on an old paper dark alias moves to the light twin; leaving the old alias on would
-    // show two launcher entries
-    it("disables the legacy paper dark aliases when moving to a paper icon", async () => {
-        const adapter = new DynamicIconAdapter();
-        await adapter.setIcon("paperBlueInk");
-        triggerPause();
-        const { disable } = change.mock.calls[0][0] as { disable: string[] };
-        expect(disable).toEqual(expect.arrayContaining(["paperBlueInkDark", "paperGreenInkDark", "paperRedInkDark"]));
-        expect(disable).not.toContain("paperBlueInk");
-    });
-
     it("applies only the last requested icon", async () => {
         const adapter = new DynamicIconAdapter();
         await adapter.setIcon("blue");

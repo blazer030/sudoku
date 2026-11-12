@@ -4,7 +4,6 @@ import {
     effectiveColorMode,
     STYLE_COLOR_MODES,
     STYLE_IDS,
-    THEME_IDS_BY_STYLE,
     type ColorMode,
     type ColorThemeId,
     type StyleId,
@@ -55,28 +54,8 @@ export const LAUNCHER_ICONS: readonly LauncherIcon[] = STYLE_IDS.flatMap(style =
 export const isPwaIconFile = (fileName: string): boolean =>
     LAUNCHER_ICONS.some(icon => Object.values(pwaIconFiles(icon.key)).includes(fileName));
 
-/** A launcher alias kept for users already on it, drawing another icon. */
-export interface LegacyLauncherAlias {
-    key: string;
-    icon: LauncherIconKey;
-}
-
-/**
- * Paper had dark icons before it became light only. A user who matched the icon to paper in dark
- * sits on one of these aliases, and removing an enabled alias would leave no launcher entry, so
- * they stay in the manifest drawing the light twin. While matching is on, the app moves that user
- * to the light alias on its next pause.
- */
-export const LEGACY_LAUNCHER_ALIASES: readonly LegacyLauncherAlias[] = THEME_IDS_BY_STYLE.paper.map(themeId => ({
-    key: launcherIconKey("paper", themeId, "dark"),
-    icon: launcherIconKey("paper", themeId, "light"),
-}));
-
-/** Every Android launcher alias the manifest declares: the icons' then the legacy ones. */
-export const ALL_LAUNCHER_ALIASES: readonly string[] = [
-    ...LAUNCHER_ICONS.map(icon => icon.key),
-    ...LEGACY_LAUNCHER_ALIASES.map(alias => alias.key),
-];
+/** Every Android launcher alias the manifest declares, one per icon and named by its key. */
+export const ALL_LAUNCHER_ALIASES: readonly string[] = LAUNCHER_ICONS.map(icon => icon.key);
 
 /** The Android resource name for an icon: "tactileRustDark" is ic_launcher_tactile_rust_dark. */
 export const launcherResourceName = (key: LauncherIconKey): string =>

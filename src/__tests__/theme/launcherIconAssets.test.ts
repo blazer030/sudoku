@@ -1,7 +1,7 @@
 import { readdirSync, readFileSync } from "fs";
 import sharp from "sharp";
 import { getPalette } from "@/theme/palettes";
-import { ALL_LAUNCHER_ALIASES, LAUNCHER_ICONS, LEGACY_LAUNCHER_ALIASES, launcherResourceName } from "@/theme/launcherIcon";
+import { ALL_LAUNCHER_ALIASES, LAUNCHER_ICONS, launcherResourceName } from "@/theme/launcherIcon";
 import { styleIconBackground } from "@/theme/styleIcons";
 import { BRAND_ICON_BACKGROUND, BRAND_ICON_RESOURCE, brandTileColors } from "@/theme/brandIcon";
 import { ICON_THEME_IDS, type ColorMode, type StyleId } from "@/theme/themeIds";
@@ -209,7 +209,7 @@ describe("launcher icon assets", () => {
         }
     });
 
-    it("should declare one launcher alias per icon and per legacy alias, keeping minimal's light alias names", () => {
+    it("should declare one launcher alias per icon, keeping minimal's light alias names", () => {
         const aliases = manifestAliases();
 
         expect(aliases.map(({ alias }) => alias)).toEqual(ALL_LAUNCHER_ALIASES);
@@ -218,14 +218,6 @@ describe("launcher icon assets", () => {
         }
         for (const id of ICON_THEME_IDS) {
             expect(aliases.map(({ alias }) => alias)).toContain(id);
-        }
-    });
-
-    it("should draw each legacy alias with its light twin's icon", () => {
-        const aliases = manifestAliases();
-
-        for (const { key, icon } of LEGACY_LAUNCHER_ALIASES) {
-            expect(aliases, key).toContainEqual({ alias: key, icon: launcherResourceName(icon) });
         }
     });
 
