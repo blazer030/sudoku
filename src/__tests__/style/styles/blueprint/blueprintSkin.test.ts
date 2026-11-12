@@ -1,6 +1,6 @@
 import { readFileSync } from "fs";
 import postcss, { type AtRule } from "postcss";
-import { declarationsOf } from "../../styleSheetRules";
+import { allRules, collapse, declarationsOf, isPseudoElement } from "../../styleSheetRules";
 
 const BLUEPRINT_CSS = readFileSync("src/style/styles/blueprint/skin.css", "utf8");
 
@@ -12,26 +12,8 @@ const skin = (tokens: string): string => `${SCOPE} [data-skin~="${tokens.split("
 const RAW_COLOUR = /#[0-9a-fA-F]{3,8}\b|rgba?\(|hsla?\(|\bwhite\b|\bblack\b/;
 const SCRIM = "color-mix(in srgb, var(--color-background) 72%, transparent)";
 
-const collapse = (text: string): string => text.replace(/\s+/g, " ").trim();
-
-// Every rule outside @keyframes, with its collapsed selectors and declarations
-const allRules = (): { selectors: string[]; declarations: Map<string, string> }[] => {
-    const rules: { selectors: string[]; declarations: Map<string, string> }[] = [];
-    postcss.parse(BLUEPRINT_CSS).walkRules((rule) => {
-        if (rule.parent?.type === "atrule" && (rule.parent as AtRule).name.endsWith("keyframes")) return;
-        const declarations = new Map<string, string>();
-        rule.walkDecls((declaration) => {
-            declarations.set(declaration.prop, collapse(declaration.value));
-        });
-        rules.push({ selectors: rule.selectors.map(collapse), declarations });
-    });
-    return rules;
-};
-
 // The index of the last rule that lists the selector, so the sheet's order can be checked
-const lastRuleIndexOf = (selector: string): number => allRules().map(rule => rule.selectors.includes(selector)).lastIndexOf(true);
-
-const isPseudoElement = (selector: string): boolean => /::(?:before|after)$/.test(selector);
+const lastRuleIndexOf = (selector: string): number => allRules(BLUEPRINT_CSS).map(rule => rule.selectors.includes(selector)).lastIndexOf(true);
 
 describe("blueprint skin", () => {
     describe("frames", () => {
@@ -114,7 +96,7 @@ describe("blueprint skin", () => {
         });
 
         it("should set no letter-spacing, font-size or border on any element (only placed decorations size themselves)", () => {
-            const offending = allRules().flatMap(rule => rule.selectors
+            const offending = allRules(BLUEPRINT_CSS).flatMap(rule => rule.selectors
                 .filter(selector => !isPseudoElement(selector))
                 .flatMap(selector => ["letter-spacing", "font-size", "border"]
                     .filter(property => rule.declarations.has(property))
@@ -124,7 +106,7 @@ describe("blueprint skin", () => {
         });
 
         it("should name every colour by a token, in both modes", () => {
-            const raw = allRules().flatMap(rule => Array.from(rule.declarations.entries())
+            const raw = allRules(BLUEPRINT_CSS).flatMap(rule => Array.from(rule.declarations.entries())
                 .filter(([, value]) => RAW_COLOUR.test(value))
                 .map(([property]) => `${rule.selectors.join(", ")} → ${property}`));
 

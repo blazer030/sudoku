@@ -5,7 +5,7 @@ import { CHALKBOARD_DIGIT_DUST, CHALKBOARD_STROKE_FACE, DUST_SPECKS } from "@/pr
 import { STYLE_MOMENTS } from "@/presentation/components/style-moments/styleMoments";
 import { GROUP_RIPPLE_STEP_MS } from "@/presentation/pages/game/useGroupEffect";
 import ChalkboardDigitWriter from "@/presentation/components/style-moments/chalkboard/ChalkboardDigitWriter.vue";
-import { animationTimingOf, declarationsOf, reducedMotionDeclarationsOf as reducedMotionDeclarationsIn } from "../../styleSheetRules";
+import { animationTimingOf, collapse, declarationsOf, keyframeOffsetsOf, reducedMotionDeclarationsOf as reducedMotionDeclarationsIn, type KeyframeOffsets } from "../../styleSheetRules";
 
 const CHALKBOARD_CSS = readFileSync("src/style/styles/chalkboard/skin.css", "utf8");
 
@@ -71,25 +71,6 @@ const GROUP_STROKE_OF = {
 const GROUP_DUST = `${SCOPE} .chalkboard-group-dust`;
 const DARK_GROUP_DUST_STEPS = [0, 1, 2].map(step => `${DARK} .chalkboard-group-dust[data-step="${step}"]`);
 
-const collapse = (text: string): string => text.replace(/\s+/g, " ").trim();
-
-interface Frame { offsets: number[]; declarations: Map<string, string> }
-
-// A keyframes block's frames in order, each with its offsets as percentages
-const framesOf = (name: string): Frame[] => {
-    const frames: Frame[] = [];
-    postcss.parse(CHALKBOARD_CSS).walkAtRules("keyframes", (atRule) => {
-        if (atRule.params.trim() !== name) return;
-        atRule.walkRules((frame) => {
-            const declarations = new Map<string, string>();
-            frame.walkDecls((declaration) => { declarations.set(declaration.prop, collapse(declaration.value)); });
-            const offsets = frame.selectors.map(offset => (offset.trim() === "from" ? 0 : offset.trim() === "to" ? 100 : Number.parseFloat(offset)));
-            frames.push({ offsets, declarations });
-        });
-    });
-    return frames;
-};
-
 interface LoaderAnimation { selector: string; step: number | null; animation: string; name: string }
 
 // Every animated loader rule outside @keyframes and reduced motion: its selector, its step and its animation
@@ -114,9 +95,9 @@ const animationsOf = (piece: string): LoaderAnimation[] =>
         .sort((first, second) => (first.step ?? 0) - (second.step ?? 0));
 
 // The last offset at which a piece is still hidden, and the first at which it shows whole
-const hiddenUntil = (name: string): number => framesOf(name)[0]?.offsets.reduce((latest, offset) => Math.max(latest, offset), 0) ?? 0;
+const hiddenUntil = (name: string): number => keyframeOffsetsOf(CHALKBOARD_CSS, name)[0]?.offsets.reduce((latest, offset) => Math.max(latest, offset), 0) ?? 0;
 const wholeFrom = (name: string, property: string, whole: string): number =>
-    framesOf(name).find(frame => frame.declarations.get(property) === whole)?.offsets[0] ?? Infinity;
+    keyframeOffsetsOf(CHALKBOARD_CSS, name).find(frame => frame.declarations.get(property) === whole)?.offsets[0] ?? Infinity;
 
 
 interface Span { startMs: number; endMs: number }
@@ -128,9 +109,9 @@ const spanOf = (selector: string, name: string): Span => {
     return { startMs: timing.fixedDelayMs, endMs: timing.fixedDelayMs + timing.durationMs };
 };
 
-const lastFrameOf = (name: string): Frame | undefined => framesOf(name)[framesOf(name).length - 1];
+const lastFrameOf = (name: string): KeyframeOffsets | undefined => keyframeOffsetsOf(CHALKBOARD_CSS, name)[keyframeOffsetsOf(CHALKBOARD_CSS, name).length - 1];
 
-const animatedPropertiesOf = (name: string): Set<string> => new Set(framesOf(name).flatMap(frame => [...frame.declarations.keys()]));
+const animatedPropertiesOf = (name: string): Set<string> => new Set(keyframeOffsetsOf(CHALKBOARD_CSS, name).flatMap(frame => [...frame.declarations.keys()]));
 
 // The z-index a selector sets anywhere outside keyframes and reduced motion
 const zIndexOf = (selector: string): number => {
@@ -264,7 +245,7 @@ describe("chalkboard moments", () => {
         });
 
         it("should drag a line's chalk along it, hold it and fade it, as GroupChalk does", () => {
-            const frames = framesOf("chalkboard-group-line");
+            const frames = keyframeOffsetsOf(CHALKBOARD_CSS, "chalkboard-group-line");
             const dash = declarationsOf(CHALKBOARD_CSS, `${SCOPE} .chalkboard-group-stroke`);
 
             expect([...animatedPropertiesOf("chalkboard-group-line")].sort()).toEqual(["opacity", "stroke-dashoffset"]);
@@ -324,7 +305,7 @@ describe("chalkboard moments", () => {
             expect(Number.parseFloat(step)).toBeLessThanOrEqual(GROUP_RIPPLE_STEP_MS);
             expect(flash).toContain("var(--group-delay");
             expect([...animatedPropertiesOf("chalkboard-group-flash")]).toEqual(["color"]);
-            expect(framesOf("chalkboard-group-flash").some(frame => frame.declarations.get("color") === "var(--color-primary)")).toBe(true);
+            expect(keyframeOffsetsOf(CHALKBOARD_CSS, "chalkboard-group-flash").some(frame => frame.declarations.get("color") === "var(--color-primary)")).toBe(true);
         });
 
         // The entered digit is in its own completed group (CLAUDE.md's trap). Chalk writes it through a mask, not
@@ -473,7 +454,7 @@ describe("chalkboard moments", () => {
                 // Drawn whole unless it is being drawn, also where the property is not registered
                 expect(registered.get("initial-value")).toBe("360deg");
                 expect(ring.get("--chalkboard-ring-sweep")).toBe("360deg");
-                expect(framesOf("chalkboard-board-ring")[0]?.declarations.get("--chalkboard-ring-sweep")).toBe("0deg");
+                expect(keyframeOffsetsOf(CHALKBOARD_CSS, "chalkboard-board-ring")[0]?.declarations.get("--chalkboard-ring-sweep")).toBe("0deg");
                 expect(lastFrameOf("chalkboard-board-ring")?.declarations.get("--chalkboard-ring-sweep")).toBe("360deg");
                 expect(drawn).toBe("chalkboard-board-ring 900ms cubic-bezier(0.5, 0, 0.4, 1) 60ms backwards");
             });
@@ -511,7 +492,7 @@ describe("chalkboard moments", () => {
             // ch-up: from a little small and askew to its place, as the scrim settles
             it("should land like a note stuck on the board, as the scrim comes in", () => {
                 const landing = spanOf(LANDING_CARD, "chalkboard-card-stick");
-                const [first, last] = [framesOf("chalkboard-card-stick")[0], lastFrameOf("chalkboard-card-stick")];
+                const [first, last] = [keyframeOffsetsOf(CHALKBOARD_CSS, "chalkboard-card-stick")[0], lastFrameOf("chalkboard-card-stick")];
 
                 expect(landing).toEqual({ startMs: 60, endMs: 440 });
                 expect(first.declarations.get("opacity")).toBe("0");
@@ -539,7 +520,7 @@ describe("chalkboard moments", () => {
 
             it("should write it left to right a step at a time, after the card has landed", () => {
                 const written = spanOf(WRITTEN_CHEER, "chalkboard-cheer-write");
-                const frames = framesOf("chalkboard-cheer-write");
+                const frames = keyframeOffsetsOf(CHALKBOARD_CSS, "chalkboard-cheer-write");
 
                 expect(written).toEqual({ startMs: 380, endMs: 1080 });
                 expect(written.startMs).toBeGreaterThanOrEqual(spanOf(LANDING_CARD, "chalkboard-card-stick").endMs - 100);
@@ -589,7 +570,7 @@ describe("chalkboard moments", () => {
                 const ring = spanOf(DRAWN_BOARD_RING, "chalkboard-board-ring");
                 const doodles = DRAWN_DOODLE_STEPS.map(selector => spanOf(selector, "chalkboard-doodle-draw"));
                 const doodle = declarationsOf(CHALKBOARD_CSS, DOODLE);
-                const frames = framesOf("chalkboard-doodle-draw");
+                const frames = keyframeOffsetsOf(CHALKBOARD_CSS, "chalkboard-doodle-draw");
 
                 expect(doodles.map(span => span.startMs)).toEqual([580, 780, 980, 1180]);
                 for (const span of doodles) {
@@ -710,7 +691,7 @@ describe("chalkboard moments", () => {
             expect(declarationsOf(CHALKBOARD_CSS, LOADER_RING).get("stroke-dasharray")).toBe(dashLength);
             expect(declarationsOf(CHALKBOARD_CSS, LOADER_REVEAL).get("stroke-dasharray")).toBe(dashLength);
             for (const { name } of loaderAnimations()) {
-                const frames = framesOf(name);
+                const frames = keyframeOffsetsOf(CHALKBOARD_CSS, name);
                 const first = frames[0]?.declarations ?? new Map<string, string>();
                 const last = frames[frames.length - 1]?.declarations ?? new Map<string, string>();
 
@@ -729,7 +710,7 @@ describe("chalkboard moments", () => {
         it("should animate only opacity, transform and the dash offsets", () => {
             expect(loaderAnimations().length).toBeGreaterThan(0);
             for (const { name } of loaderAnimations()) {
-                const properties = new Set(framesOf(name).flatMap(frame => [...frame.declarations.keys()]));
+                const properties = new Set(keyframeOffsetsOf(CHALKBOARD_CSS, name).flatMap(frame => [...frame.declarations.keys()]));
 
                 expect([...properties].every(property => ["opacity", "transform", "stroke-dashoffset"].includes(property)), name).toBe(true);
             }
@@ -775,7 +756,7 @@ describe("chalkboard moments", () => {
         it("should drag the smear across with the duster", () => {
             const [duster] = animationsOf(LOADER_DUSTER);
             const [smear] = animationsOf(LOADER_SMEAR);
-            const travelOf = (name: string) => framesOf(name).map(frame => ({ offsets: frame.offsets, transform: frame.declarations.get("transform") }));
+            const travelOf = (name: string) => keyframeOffsetsOf(CHALKBOARD_CSS, name).map(frame => ({ offsets: frame.offsets, transform: frame.declarations.get("transform") }));
 
             expect(travelOf(smear.name)).toEqual(travelOf(duster.name));
         });

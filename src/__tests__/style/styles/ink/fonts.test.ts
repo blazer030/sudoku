@@ -1,24 +1,12 @@
 import { readFileSync } from "fs";
 import postcss, { type Rule } from "postcss";
 import { syncInkFonts } from "@/style/styles/ink/fonts";
-
-// The font tokens declared in index.css's @theme
-const themeFonts = (): Map<string, string> => {
-    const fonts = new Map<string, string>();
-    postcss.parse(readFileSync("src/style/index.css", "utf8")).walkAtRules("theme", (atRule) => {
-        atRule.walkDecls(/^--font-/, (declaration) => {
-            fonts.set(declaration.prop, declaration.value.trim());
-        });
-    });
-    return fonts;
-};
-
-const families = (stack: string): string[] => stack.split(",").map(family => family.trim().replace(/"/g, ""));
+import { familiesOf, themeFonts } from "../../styleSheetRules";
 
 describe("ink font stacks", () => {
     // Ink Brush (Yuji Boku) is cut to the brush strings: any other character, such as 「產」 in a new title, falls to a 楷 face
     it("should fall from Yuji Boku to LXGW WenKai TC, which covers every character the app writes", () => {
-        const brush = families(themeFonts().get("--font-ink-brush") ?? "");
+        const brush = familiesOf(themeFonts().get("--font-ink-brush") ?? "");
 
         expect(brush.slice(0, 2)).toEqual(["Ink Brush", "LXGW WenKai TC"]);
     });
@@ -26,8 +14,8 @@ describe("ink font stacks", () => {
     it("should set ink's text in its Noto Serif TC and its digits in its EB Garamond", () => {
         const fonts = themeFonts();
 
-        expect(families(fonts.get("--font-ink-serif") ?? "")[0]).toBe("Ink Serif TC");
-        expect(families(fonts.get("--font-ink-digits") ?? "")[0]).toBe("Ink Garamond");
+        expect(familiesOf(fonts.get("--font-ink-serif") ?? "")[0]).toBe("Ink Serif TC");
+        expect(familiesOf(fonts.get("--font-ink-digits") ?? "")[0]).toBe("Ink Garamond");
     });
 
     // The print stack names the system's Noto Serif TC; a bundled face of that name would fetch the 250 KB subset
@@ -35,9 +23,9 @@ describe("ink font stacks", () => {
         const others = [...themeFonts()].filter(([token]) => !token.startsWith("--font-ink-"));
 
         for (const [token, stack] of others) {
-            expect(families(stack), token).not.toEqual(expect.arrayContaining(["Ink Brush"]));
-            expect(families(stack), token).not.toEqual(expect.arrayContaining(["Ink Serif TC"]));
-            expect(families(stack), token).not.toEqual(expect.arrayContaining(["Ink Garamond"]));
+            expect(familiesOf(stack), token).not.toEqual(expect.arrayContaining(["Ink Brush"]));
+            expect(familiesOf(stack), token).not.toEqual(expect.arrayContaining(["Ink Serif TC"]));
+            expect(familiesOf(stack), token).not.toEqual(expect.arrayContaining(["Ink Garamond"]));
         }
     });
 });

@@ -1,6 +1,6 @@
 import { readFileSync } from "fs";
 import postcss, { type AtRule } from "postcss";
-import { animationTimingOf, declarationsOf, reducedMotionDeclarationsOf, splitTopLevel } from "../../styleSheetRules";
+import { allRules, animationTimingOf, collapse, declarationsOf, isPseudoElement, keyframesOf, reducedMotionDeclarationsOf, splitTopLevel } from "../../styleSheetRules";
 import { VALUE_MOTION_SETTLE_MS } from "@/presentation/components/board-cell/useValueMotion";
 
 const INK_CSS = readFileSync("src/style/styles/ink/skin.css", "utf8");
@@ -30,24 +30,6 @@ const HERO = `${SCOPE} [data-skin~="hero-vertical"]`;
 const HERO_SEAL = `${SCOPE} [data-skin~="hero-seal"]`;
 // The pieces v-press washes by a background-image; none of them may set one of its own
 const PRESSABLE_TOKENS = ["card", "tile", "key", "button", "control", "segment", "chip", "continue", "new-game"];
-
-const collapse = (text: string): string => text.replace(/\s+/g, " ").trim();
-
-// Every rule outside @keyframes, with its collapsed selectors and declarations
-const allRules = (): { selectors: string[]; declarations: Map<string, string> }[] => {
-    const rules: { selectors: string[]; declarations: Map<string, string> }[] = [];
-    postcss.parse(INK_CSS).walkRules((rule) => {
-        if (rule.parent?.type === "atrule" && (rule.parent as AtRule).name.endsWith("keyframes")) return;
-        const declarations = new Map<string, string>();
-        rule.walkDecls((declaration) => {
-            declarations.set(declaration.prop, collapse(declaration.value));
-        });
-        rules.push({ selectors: rule.selectors.map(collapse), declarations });
-    });
-    return rules;
-};
-
-const isPseudoElement = (selector: string): boolean => /::(?:before|after)$/.test(selector);
 
 const parseSvg = (source: string): Document => new DOMParser().parseFromString(source, "image/svg+xml");
 
@@ -348,7 +330,7 @@ describe("ink skin", () => {
 
     describe("type", () => {
         it("should brush only the Home title, the completion title and the dialog titles, once the faces have loaded", () => {
-            const brushed = allRules()
+            const brushed = allRules(INK_CSS)
                 .filter(rule => Array.from(rule.declarations.values()).some(value => value.includes("--font-ink-brush")))
                 .flatMap(rule => rule.selectors);
 
@@ -390,7 +372,7 @@ describe("ink skin", () => {
         });
 
         it("should give no pressable piece a background-image of its own, so the press wash is never painted over", () => {
-            const offending = allRules().flatMap(rule => rule.selectors
+            const offending = allRules(INK_CSS).flatMap(rule => rule.selectors
                 .filter(selector => !isPseudoElement(selector))
                 .filter(selector => PRESSABLE_TOKENS.some(token => selector.includes(`[data-skin~="${token}"]`)))
                 .filter(() => rule.declarations.has("background-image") || rule.declarations.has("background")));
@@ -595,7 +577,7 @@ describe("ink skin", () => {
 
             // Plain notes, a hint's candidates and its struck ones keep their own looks
             it("should draw a pseudo-element on no note but a highlighted one", () => {
-                const noteLayers = allRules().flatMap(rule => rule.selectors)
+                const noteLayers = allRules(INK_CSS).flatMap(rule => rule.selectors)
                     .filter(selector => isPseudoElement(selector) && /note|strike-diagonal/.test(selector));
 
                 expect(new Set(noteLayers)).toEqual(new Set([RING_LAYER]));
@@ -630,23 +612,8 @@ describe("ink skin", () => {
         const GHOST = `${BOARD} [data-variant].value-leave::before`;
         const CELL_ANIMATIONS: [string, string][] = [[DIGIT, "ink-bleed"], [HALO, "ink-halo"], [GHOST, "ink-wash"]];
 
-        // Each keyframe's selector and its declarations, in order
-        const keyframesOf = (name: string): Map<string, Map<string, string>> => {
-            const frames = new Map<string, Map<string, string>>();
-            postcss.parse(INK_CSS).walkAtRules("keyframes", (atRule) => {
-                if (atRule.params !== name) return;
-                atRule.walkRules((frame) => {
-                    const declarations = new Map<string, string>();
-                    frame.walkDecls((declaration) => {
-                        declarations.set(declaration.prop, collapse(declaration.value));
-                    });
-                    frames.set(collapse(frame.selector), declarations);
-                });
-            });
-            return frames;
-        };
         const animatedPropertiesOf = (name: string): Set<string> =>
-            new Set([...keyframesOf(name).values()].flatMap(frame => [...frame.keys()]));
+            new Set([...keyframesOf(INK_CSS, name).values()].flatMap(frame => [...frame.keys()]));
         const opacityOf = (frame: Map<string, string> | undefined): number => Number(frame?.get("opacity"));
         // A frame's soft mask's size in % (both prefixes alike), and its scale (1 without one)
         const maskSizeOf = (frame: Map<string, string> | undefined): number => {
@@ -670,7 +637,7 @@ describe("ink skin", () => {
         });
 
         it("should soak an entered digit in, a size up with its edge soft, to the sharp digit", () => {
-            const frames = keyframesOf("ink-bleed");
+            const frames = keyframesOf(INK_CSS, "ink-bleed");
 
             expect(opacityOf(frames.get("0%"))).toBe(0);
             expect(scaleOf(frames.get("0%"))).toBeGreaterThan(1);
@@ -707,7 +674,7 @@ describe("ink skin", () => {
         });
 
         it("should soak the digit in from a thin fill among spread copies to its own ink", () => {
-            const frames = keyframesOf("ink-bleed");
+            const frames = keyframesOf(INK_CSS, "ink-bleed");
             const first = frames.get("0%");
             const last = frames.get("100%");
 
@@ -732,7 +699,7 @@ describe("ink skin", () => {
 
         it("should spread an ink halo from under the arriving digit, without taking taps", () => {
             const halo = declarationsOf(INK_CSS, HALO);
-            const frames = keyframesOf("ink-halo");
+            const frames = keyframesOf(INK_CSS, "ink-halo");
 
             expect(halo.get("content")).toBe('""');
             expect(halo.get("pointer-events")).toBe("none");
@@ -750,17 +717,17 @@ describe("ink skin", () => {
 
         // Every engine reads the cell's data-arriving, so the halo needs no :has()
         it("should find the arriving digit's cell by its data-arriving hook", () => {
-            expect(allRules().flatMap(rule => rule.selectors).filter(selector => selector.includes(":has("))).toEqual([]);
+            expect(allRules(INK_CSS).flatMap(rule => rule.selectors).filter(selector => selector.includes(":has("))).toEqual([]);
         });
 
         it("should leave the cell's ::after to the 圓相 while a digit arrives or leaves", () => {
-            expect(allRules().flatMap(rule => rule.selectors).filter(selector => /value-(?:arrive|leave)[^,]*::after/.test(selector))).toEqual([]);
+            expect(allRules(INK_CSS).flatMap(rule => rule.selectors).filter(selector => /value-(?:arrive|leave)[^,]*::after/.test(selector))).toEqual([]);
         });
 
         it("should wash the erased digit off as a ghost in the entered digit's ink and face", () => {
             const ghost = declarationsOf(INK_CSS, GHOST);
             const entered = declarationsOf(INK_CSS, `${BOARD} [data-value-kind="entered"] > div`);
-            const frames = keyframesOf("ink-wash");
+            const frames = keyframesOf(INK_CSS, "ink-wash");
 
             expect(ghost.get("content")).toBe("attr(data-leaving-value)");
             expect(ghost.get("pointer-events")).toBe("none");

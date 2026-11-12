@@ -1,19 +1,7 @@
 import { readFileSync } from "fs";
 import postcss from "postcss";
 import { syncAuroraFonts } from "@/style/styles/aurora/fonts";
-
-// The font tokens declared in index.css's @theme
-const themeFonts = (): Map<string, string> => {
-    const fonts = new Map<string, string>();
-    postcss.parse(readFileSync("src/style/index.css", "utf8")).walkAtRules("theme", (atRule) => {
-        atRule.walkDecls(/^--font-/, (declaration) => {
-            fonts.set(declaration.prop, declaration.value.trim());
-        });
-    });
-    return fonts;
-};
-
-const families = (stack: string): string[] => stack.split(",").map(family => family.trim().replace(/"/g, ""));
+import { familiesOf, themeFonts } from "../../styleSheetRules";
 
 const skinDeclarations = (selector: string): Map<string, string> => {
     const declarations = new Map<string, string>();
@@ -26,18 +14,18 @@ const skinDeclarations = (selector: string): Map<string, string> => {
 
 describe("aurora font stack", () => {
     it("should lead with Outfit, then Aurora Sans TC", () => {
-        expect(families(themeFonts().get("--font-aurora-sans") ?? "").slice(0, 2)).toEqual(["Outfit", "Aurora Sans TC"]);
+        expect(familiesOf(themeFonts().get("--font-aurora-sans") ?? "").slice(0, 2)).toEqual(["Outfit", "Aurora Sans TC"]);
     });
 
     it("should keep Aurora Sans TC out of every other style's stack", () => {
         for (const [token, stack] of themeFonts()) {
             if (token === "--font-aurora-sans") continue;
-            expect(families(stack), token).not.toContain("Aurora Sans TC");
+            expect(familiesOf(stack), token).not.toContain("Aurora Sans TC");
         }
     });
 
     it("should keep Blueprint Sans TC out of aurora's stack", () => {
-        expect(families(themeFonts().get("--font-aurora-sans") ?? "")).not.toContain("Blueprint Sans TC");
+        expect(familiesOf(themeFonts().get("--font-aurora-sans") ?? "")).not.toContain("Blueprint Sans TC");
     });
 });
 

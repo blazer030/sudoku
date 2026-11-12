@@ -1,16 +1,6 @@
 import { readFileSync } from "fs";
 import postcss, { type Rule } from "postcss";
-
-// The font tokens declared in index.css's @theme
-const themeFonts = (): Map<string, string> => {
-    const fonts = new Map<string, string>();
-    postcss.parse(readFileSync("src/style/index.css", "utf8")).walkAtRules("theme", (atRule) => {
-        atRule.walkDecls(/^--font-/, (declaration) => {
-            fonts.set(declaration.prop, declaration.value.trim());
-        });
-    });
-    return fonts;
-};
+import { themeFonts } from "../../styleSheetRules";
 
 const paperDeclarations = (): Map<string, string> => {
     const declarations = new Map<string, string>();

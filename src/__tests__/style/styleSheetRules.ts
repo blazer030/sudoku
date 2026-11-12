@@ -1,8 +1,15 @@
 // Static checks over the per-style stylesheets (src/style/styles/<id>/skin.css). A style may change
 // material, shape, thickness, shadow, texture, type and motion, never layout; it stays inside its
 // own [data-style] scope; and every movement it adds stops under reduced motion.
+import { readFileSync } from "fs";
 import postcss, { type AtRule, type ChildNode, type Declaration, type Node, type Rule } from "postcss";
 import type { StyleId } from "@/theme/themeIds";
+
+/** The text with every run of whitespace made one space, trimmed. */
+export const collapse = (text: string): string => text.replace(/\s+/g, " ").trim();
+
+/** Whether the selector ends in a ::before or ::after pseudo-element. */
+export const isPseudoElement = (selector: string): boolean => /::(?:before|after)$/.test(selector);
 
 const REDUCED_MOTION_PARAMS = "(prefers-reduced-motion: reduce)";
 
@@ -261,3 +268,76 @@ export const findCrossEngineHazards = (css: string): string[] => {
     });
     return hits;
 };
+
+export interface SheetRule {
+    selectors: string[];
+    declarations: Map<string, string>;
+}
+
+/** Every rule outside @keyframes, with its collapsed selectors and declarations. */
+export const allRules = (css: string): SheetRule[] => {
+    const rules: SheetRule[] = [];
+    postcss.parse(css).walkRules((rule) => {
+        if (rule.parent?.type === "atrule" && (rule.parent as AtRule).name.endsWith("keyframes")) return;
+        const declarations = new Map<string, string>();
+        rule.walkDecls((declaration) => {
+            declarations.set(declaration.prop, collapse(declaration.value));
+        });
+        rules.push({ selectors: rule.selectors.map(collapse), declarations });
+    });
+    return rules;
+};
+
+/** The animation of the top-level rules that list `selector`, or "" without one. */
+export const animationOf = (css: string, selector: string): string => declarationsOf(css, selector).get("animation") ?? "";
+
+/** Each frame of the @keyframes block called `name`, by its collapsed selector, with its collapsed declarations. */
+export const keyframesOf = (css: string, name: string): Map<string, Map<string, string>> => {
+    const frames = new Map<string, Map<string, string>>();
+    postcss.parse(css).walkAtRules("keyframes", (atRule) => {
+        if (atRule.params.trim() !== name) return;
+        atRule.walkRules((frame) => {
+            const declarations = new Map<string, string>();
+            frame.walkDecls((declaration) => {
+                declarations.set(declaration.prop, collapse(declaration.value));
+            });
+            frames.set(collapse(frame.selector), declarations);
+        });
+    });
+    return frames;
+};
+
+export interface KeyframeOffsets {
+    /** The frame's offsets as percentages: from is 0, to is 100. */
+    offsets: number[];
+    declarations: Map<string, string>;
+}
+
+/** The frames of the @keyframes block called `name` in order, each with its offsets as percentages. */
+export const keyframeOffsetsOf = (css: string, name: string): KeyframeOffsets[] => {
+    const frames: KeyframeOffsets[] = [];
+    postcss.parse(css).walkAtRules("keyframes", (atRule) => {
+        if (atRule.params.trim() !== name) return;
+        atRule.walkRules((frame) => {
+            const declarations = new Map<string, string>();
+            frame.walkDecls((declaration) => { declarations.set(declaration.prop, collapse(declaration.value)); });
+            const offsets = frame.selectors.map(offset => (offset.trim() === "from" ? 0 : offset.trim() === "to" ? 100 : Number.parseFloat(offset)));
+            frames.push({ offsets, declarations });
+        });
+    });
+    return frames;
+};
+
+/** The font tokens declared in index.css's @theme. */
+export const themeFonts = (): Map<string, string> => {
+    const fonts = new Map<string, string>();
+    postcss.parse(readFileSync("src/style/index.css", "utf8")).walkAtRules("theme", (atRule) => {
+        atRule.walkDecls(/^--font-/, (declaration) => {
+            fonts.set(declaration.prop, declaration.value.trim());
+        });
+    });
+    return fonts;
+};
+
+/** The families of a font stack, in order, without their quotes. */
+export const familiesOf = (stack: string): string[] => stack.split(",").map(family => family.trim().replace(/"/g, ""));

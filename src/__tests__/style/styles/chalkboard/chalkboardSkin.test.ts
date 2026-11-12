@@ -3,7 +3,7 @@ import postcss, { type AtRule, type Rule } from "postcss";
 import { VALUE_MOTION_SETTLE_MS } from "@/presentation/components/board-cell/useValueMotion";
 import { contrastRatio, mixColors } from "@/theme/contrast";
 import { getPalette } from "@/theme/palettes";
-import { animationTimingOf, declarationsOf, reducedMotionDeclarationsOf } from "../../styleSheetRules";
+import { allRules, animationTimingOf, collapse, declarationsOf, isPseudoElement, keyframesOf, reducedMotionDeclarationsOf } from "../../styleSheetRules";
 
 const CHALKBOARD_CSS = readFileSync("src/style/styles/chalkboard/skin.css", "utf8");
 const GRID_SVG = readFileSync("src/style/styles/chalkboard/chalkboard-grid.svg", "utf8");
@@ -52,8 +52,6 @@ const CHALK_OUTLINE = /^inset 0 0 0 [\d.]+px var\(--color-border\)$/;
 const PRESSABLE_TOKENS = ["card", "tile", "key", "button", "control", "segment", "chip", "continue", "new-game"];
 const RAW_COLOUR = /#[0-9a-fA-F]{3,8}\b|rgba?\(|hsla?\(|\bwhite\b|\bblack\b/;
 
-const collapse = (text: string): string => text.replace(/\s+/g, " ").trim();
-
 const isInMaskSupports = (rule: Rule): boolean => {
     const parent = rule.parent;
     if (parent?.type !== "atrule" || (parent as AtRule).name !== "supports") return false;
@@ -84,22 +82,6 @@ const allDeclarations = (): { selectors: string[]; property: string; value: stri
     });
     return found;
 };
-
-// Every rule outside @keyframes and @supports, with its collapsed selectors and declarations
-const allRules = (): { selectors: string[]; declarations: Map<string, string> }[] => {
-    const rules: { selectors: string[]; declarations: Map<string, string> }[] = [];
-    postcss.parse(CHALKBOARD_CSS).walkRules((rule) => {
-        if (rule.parent?.type === "atrule" && (rule.parent as AtRule).name.endsWith("keyframes")) return;
-        const declarations = new Map<string, string>();
-        rule.walkDecls((declaration) => {
-            declarations.set(declaration.prop, collapse(declaration.value));
-        });
-        rules.push({ selectors: rule.selectors.map(collapse), declarations });
-    });
-    return rules;
-};
-
-const isPseudoElement = (selector: string): boolean => /::(?:before|after)$/.test(selector);
 
 const parseSvg = (source: string): Document => new DOMParser().parseFromString(source, "image/svg+xml");
 const viewBoxOf = (svg: Document): number[] => (svg.documentElement.getAttribute("viewBox") ?? "").split(/\s+/).map(Number);
@@ -314,7 +296,7 @@ describe("chalkboard skin", () => {
 
             expect(cell.get("box-shadow")).toBe("none");
             expect(cell.get("background-color")).toBe("color-mix(in srgb, var(--color-primary) var(--chalkboard-answer-wash), transparent)");
-            expect(allRules().flatMap(rule => rule.selectors).filter(selector => selector.includes(ANSWER_RING))).toEqual([]);
+            expect(allRules(CHALKBOARD_CSS).flatMap(rule => rule.selectors).filter(selector => selector.includes(ANSWER_RING))).toEqual([]);
         });
 
         // As light as each mode's candidates need: 黑板's emphasised one holds 4.5:1 at 15%, 白板's at 8%
@@ -396,7 +378,7 @@ describe("chalkboard skin", () => {
         // 白板 is markers on a clean board: no dust and no smears (Review Focus 5)
         it("should leave the whiteboard without dust or smears", () => {
             const sheet = declarationsOf(CHALKBOARD_CSS, SHEET);
-            const dusty = allRules().filter(rule => Array.from(rule.declarations.values())
+            const dusty = allRules(CHALKBOARD_CSS).filter(rule => Array.from(rule.declarations.values())
                 .some(value => value.includes("chalkboard-smears.svg") || value.includes("--color-smear")));
 
             expect(sheet.get("background-size")).toBeUndefined();
@@ -541,7 +523,7 @@ describe("chalkboard skin", () => {
 
         // The canvas has no logo, only the title and its swoosh; the logo would carry a logo look no screen shows
         it("should style no logo, since chalkboard's Home has none", () => {
-            const logoRules = allRules().flatMap(rule => rule.selectors).filter(selector => selector.includes('[data-skin~="logo"]'));
+            const logoRules = allRules(CHALKBOARD_CSS).flatMap(rule => rule.selectors).filter(selector => selector.includes('[data-skin~="logo"]'));
 
             expect(logoRules).toEqual([]);
         });
@@ -599,7 +581,7 @@ describe("chalkboard skin", () => {
         });
 
         it("should set no letter-spacing, font-size or border on any element (only placed decorations size themselves)", () => {
-            const offending = allRules().flatMap(rule => rule.selectors
+            const offending = allRules(CHALKBOARD_CSS).flatMap(rule => rule.selectors
                 .filter(selector => !isPseudoElement(selector))
                 .flatMap(selector => ["letter-spacing", "font-size", "border"]
                     .filter(property => rule.declarations.has(property))
@@ -665,7 +647,7 @@ describe("chalkboard skin", () => {
         });
 
         it("should give no pressable piece a background-image of its own, so the press wash is never painted over", () => {
-            const offending = allRules().flatMap(rule => rule.selectors
+            const offending = allRules(CHALKBOARD_CSS).flatMap(rule => rule.selectors
                 .filter(selector => !isPseudoElement(selector))
                 .filter(selector => PRESSABLE_TOKENS.some(token => selector.includes(`[data-skin~="${token}"]`)))
                 .filter(() => rule.declarations.has("background-image") || rule.declarations.has("background")));
@@ -791,7 +773,7 @@ describe("chalkboard skin", () => {
         // The canvas grains a key's digit (.key .kd), never its outline or its fill
         it("should grain only the keys' digits in 黑板, not the key with its outline and fill", () => {
             const digit = declarationsOf(CHALKBOARD_CSS, `${DARK} [data-skin~="key"].font-key > span`);
-            const masked = allRules().filter(rule => rule.declarations.has("mask-image")).flatMap(rule => rule.selectors);
+            const masked = allRules(CHALKBOARD_CSS).filter(rule => rule.declarations.has("mask-image")).flatMap(rule => rule.selectors);
 
             expect(digit.get("-webkit-mask-image")).toBe(GRAIN);
             expect(digit.get("mask-image")).toBe(GRAIN);
@@ -903,20 +885,6 @@ describe("chalkboard skin", () => {
         const GHOST = `${BOARD} [data-variant].value-leave::before`;
         const DARK_GHOST = `${DARK_BOARD} [data-variant].value-leave::before`;
 
-        const framesOf = (name: string): Map<string, Map<string, string>> => {
-            const frames = new Map<string, Map<string, string>>();
-            postcss.parse(CHALKBOARD_CSS).walkAtRules("keyframes", (atRule) => {
-                if (atRule.params !== name) return;
-                atRule.walkRules((frame) => {
-                    const declarations = new Map<string, string>();
-                    frame.walkDecls((declaration) => {
-                        declarations.set(declaration.prop, collapse(declaration.value));
-                    });
-                    frames.set(collapse(frame.selector), declarations);
-                });
-            });
-            return frames;
-        };
         const opacityOf = (frame: Map<string, string> | undefined): number => Number(frame?.get("opacity"));
 
         it("should smear the erased digit in the entered digit's face and colour, untouchable", () => {
@@ -933,7 +901,7 @@ describe("chalkboard skin", () => {
 
         it("should smear sideways through a faint layer to nothing, without a hold that keeps it visible", () => {
             for (const name of ["chalkboard-smear", "chalkboard-wipe"]) {
-                const frames = framesOf(name);
+                const frames = keyframesOf(CHALKBOARD_CSS, name);
                 const transform = frames.get("100%")?.get("transform") ?? "";
 
                 expect(opacityOf(frames.get("0%")), name).toBe(1);
@@ -945,10 +913,10 @@ describe("chalkboard skin", () => {
         });
 
         it("should blur the smear in 黑板 and wipe it by a marker, with no blur, in 白板", () => {
-            const smear = [...framesOf("chalkboard-smear").values()];
-            const wipe = [...framesOf("chalkboard-wipe").values()];
+            const smear = [...keyframesOf(CHALKBOARD_CSS, "chalkboard-smear").values()];
+            const wipe = [...keyframesOf(CHALKBOARD_CSS, "chalkboard-wipe").values()];
 
-            expect(framesOf("chalkboard-smear").get("100%")?.get("filter")).toBe("blur(3px)");
+            expect(keyframesOf(CHALKBOARD_CSS, "chalkboard-smear").get("100%")?.get("filter")).toBe("blur(3px)");
             expect(smear.some(frame => frame.has("filter"))).toBe(true);
             expect(wipe.some(frame => frame.has("filter"))).toBe(false);
             expect(declarationsOf(CHALKBOARD_CSS, GHOST).get("animation")).toContain("chalkboard-wipe");

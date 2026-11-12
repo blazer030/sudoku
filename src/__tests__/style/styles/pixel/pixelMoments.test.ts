@@ -2,7 +2,7 @@ import { readFileSync } from "fs";
 import postcss, { type AtRule, type Node, type Rule } from "postcss";
 import { STYLE_MOMENTS } from "@/presentation/components/style-moments/styleMoments";
 import { BOARD_SIZE } from "@/domain/board/constants";
-import { animationTimingOf, declarationsOf, reducedMotionDeclarationsOf as reducedMotionDeclarationsIn } from "../../styleSheetRules";
+import { animationOf, animationTimingOf, declarationsOf, keyframesOf, reducedMotionDeclarationsOf as reducedMotionDeclarationsIn } from "../../styleSheetRules";
 
 const PIXEL_CSS = readFileSync("src/style/styles/pixel/skin.css", "utf8");
 
@@ -34,24 +34,6 @@ const isInside = (rule: Rule, name: string): boolean => {
     return false;
 };
 
-// Each keyframe's selector and its declarations, in order
-const keyframesOf = (name: string): Map<string, Map<string, string>> => {
-    const frames = new Map<string, Map<string, string>>();
-    postcss.parse(PIXEL_CSS).walkAtRules("keyframes", (atRule) => {
-        if (atRule.params.trim() !== name) return;
-        atRule.walkRules((frame) => {
-            const declarations = new Map<string, string>();
-            frame.walkDecls((declaration) => {
-                declarations.set(declaration.prop, declaration.value.replace(/\s+/g, " ").trim());
-            });
-            frames.set(frame.selector.replace(/\s+/g, " ").trim(), declarations);
-        });
-    });
-    return frames;
-};
-
-const animationOf = (selector: string): string => declarationsOf(PIXEL_CSS, selector).get("animation") ?? "";
-
 // The cell inverted: the flash's fill, solid, under its ink
 const expectLit = (frame: Map<string, string> | undefined): void => {
     expect(frame?.get("background-color")).toBe("var(--pixel-flash-fill)");
@@ -64,13 +46,13 @@ const expectLit = (frame: Map<string, string> | undefined): void => {
 describe("pixel moments", () => {
     describe("group completion", () => {
         it("should blink a completed group's cells inverted, outward from the entered cell", () => {
-            expect(animationOf(GROUP_CELL)).toMatch(/^pixel-group-blink \d+ms steps\(1, jump-start\) calc\(100ms \+ var\(--group-delay, 0ms\)\) 2$/);
+            expect(animationOf(PIXEL_CSS, GROUP_CELL)).toMatch(/^pixel-group-blink \d+ms steps\(1, jump-start\) calc\(100ms \+ var\(--group-delay, 0ms\)\) 2$/);
         });
 
         // Lit for the first half of each round, the cell's own look for the second: nothing at 100%, so
         // each round returns to whatever the cell is (its pattern, its selection, its own ink)
         it("should light the cell for half of each of its two rounds and show its own look between them", () => {
-            const frames = keyframesOf("pixel-group-blink");
+            const frames = keyframesOf(PIXEL_CSS, "pixel-group-blink");
 
             expect([...frames.keys()]).toEqual(["0%, 50%"]);
             expectLit(frames.get("0%, 50%"));
@@ -92,8 +74,8 @@ describe("pixel moments", () => {
         });
 
         it("should end both blinks within the group effect's own time", () => {
-            const timing = animationTimingOf(animationOf(GROUP_CELL), "pixel-group-blink");
-            const rounds = Number(/ (\d+)$/.exec(animationOf(GROUP_CELL))?.[1]);
+            const timing = animationTimingOf(animationOf(PIXEL_CSS, GROUP_CELL), "pixel-group-blink");
+            const rounds = Number(/ (\d+)$/.exec(animationOf(PIXEL_CSS, GROUP_CELL))?.[1]);
 
             expect(timing).not.toBeNull();
             expect(rounds).toBe(2);
@@ -125,13 +107,13 @@ describe("pixel moments", () => {
 
             expect(spark.get("opacity")).toBe("0");
             expect(spark.get("animation")).toMatch(/^pixel-group-spark \d+ms steps\(3, end\) calc\(100ms \+ var\(--pixel-spark-reach\) \* var\(--group-ripple-step, 60ms\)\)$/);
-            expect(keyframesOf("pixel-group-spark").get("0%")?.get("box-shadow")).toContain("var(--pixel-spark)");
+            expect(keyframesOf(PIXEL_CSS, "pixel-group-spark").get("0%")?.get("box-shadow")).toContain("var(--pixel-spark)");
             expect(declarationsOf(PIXEL_CSS, SCOPE).get("--pixel-spark")).toBe("var(--color-primary)");
         });
 
         // A group's reach is never past the effect's farthest cell, so the sparks end with the effect
         it("should end the sparks within the group effect's own time after its farthest cell starts", () => {
-            const timing = animationTimingOf(animationOf(SPARK), "pixel-group-spark");
+            const timing = animationTimingOf(animationOf(PIXEL_CSS, SPARK), "pixel-group-spark");
 
             expect((timing?.fixedDelayMs ?? 0) + (timing?.durationMs ?? 0)).toBeLessThanOrEqual(STYLE_MOMENTS.pixel.groupEffectMs);
         });
@@ -153,18 +135,18 @@ describe("pixel moments", () => {
             });
 
             expect(stillGroupRules).toEqual([]);
-            expect(keyframesOf("pixel-completion-flash").size).toBe(0);
+            expect(keyframesOf(PIXEL_CSS, "pixel-completion-flash").size).toBe(0);
         });
     });
 
     describe("celebration", () => {
         it("should clear the board row by row from the top, like a line clear", () => {
-            expect(animationOf(CELEBRATING_CELL)).toMatch(/^pixel-row-clear \d+ms steps\(1, end\) calc\(var\(--cell-row\) \* \d+ms\)$/);
+            expect(animationOf(PIXEL_CSS, CELEBRATING_CELL)).toMatch(/^pixel-row-clear \d+ms steps\(1, end\) calc\(var\(--cell-row\) \* \d+ms\)$/);
         });
 
         // Two flashes per row at most: lit, dimmed, lit, then back to the cell's own look
         it("should flash each row twice, with the dim shade between", () => {
-            const frames = keyframesOf("pixel-row-clear");
+            const frames = keyframesOf(PIXEL_CSS, "pixel-row-clear");
 
             expect([...frames.keys()]).toEqual(["0%", "33.33%", "66.67%, 100%"]);
             expectLit(frames.get("0%"));
@@ -176,23 +158,23 @@ describe("pixel moments", () => {
         // 紅白機 rows are only 80ms apart, so two flashes a row swung any band of rows several times a
         // second: there each row lights once, for the first half of its turn, then shows its own look
         it("should flash each row once in 紅白機", () => {
-            const frames = keyframesOf("pixel-row-clear-once");
+            const frames = keyframesOf(PIXEL_CSS, "pixel-row-clear-once");
 
-            expect(animationOf(CONSOLE_CELEBRATING_CELL)).toMatch(/^pixel-row-clear-once \d+ms steps\(1, jump-start\) calc\(var\(--cell-row\) \* 80ms\)$/);
+            expect(animationOf(PIXEL_CSS, CONSOLE_CELEBRATING_CELL)).toMatch(/^pixel-row-clear-once \d+ms steps\(1, jump-start\) calc\(var\(--cell-row\) \* 80ms\)$/);
             expect([...frames.keys()]).toEqual(["0%, 50%"]);
             expectLit(frames.get("0%, 50%"));
             expect(reducedMotionDeclarationsOf(CONSOLE_CELEBRATING_CELL).get("animation")).toBe("none");
         });
 
         it("should start the last row's clear before the dialog opens", () => {
-            const delay = /\* (\d+)ms/.exec(animationOf(CELEBRATING_CELL))?.[1];
+            const delay = /\* (\d+)ms/.exec(animationOf(PIXEL_CSS, CELEBRATING_CELL))?.[1];
 
             expect(Number(delay) * (BOARD_SIZE - 1)).toBeLessThan(STYLE_MOMENTS.pixel.celebrationBoardMs);
         });
 
         it("should open the window in four steps, held closed only until it starts", () => {
-            expect(animationOf(OPENING_CARD)).toMatch(/^pixel-card-open \d+ms steps\(4, end\) \d+ms backwards$/);
-            expect(keyframesOf("pixel-card-open").get("0%")?.get("transform")).toBe("scaleY(0)");
+            expect(animationOf(PIXEL_CSS, OPENING_CARD)).toMatch(/^pixel-card-open \d+ms steps\(4, end\) \d+ms backwards$/);
+            expect(keyframesOf(PIXEL_CSS, "pixel-card-open").get("0%")?.get("transform")).toBe("scaleY(0)");
             expect(declarationsOf(PIXEL_CSS, CARD).get("box-shadow")).toContain("8px 8px 0 0 var(--pixel-drop)");
         });
 
@@ -202,19 +184,19 @@ describe("pixel moments", () => {
             expect(trophy.get("background-color")).toBe("var(--color-primary)");
             expect(declarationsOf(PIXEL_CSS, `${CARD} [data-skin~="trophy"] > svg`).get("color")).toBe("var(--color-on-primary)");
             for (const piece of ['[data-skin~="trophy"]', '[data-skin~="new-record"]']) {
-                expect(animationOf(`${OPENING_CARD} ${piece}`), piece).toMatch(/^pixel-blink 1000ms steps\(2, jump-none\) \d+ms infinite$/);
+                expect(animationOf(PIXEL_CSS, `${OPENING_CARD} ${piece}`), piece).toMatch(/^pixel-blink 1000ms steps\(2, jump-none\) \d+ms infinite$/);
             }
         });
 
         it("should drop STAGE CLEAR letter by letter and pop pixel bursts", () => {
-            expect(animationOf(`${PLAYING} .pixel-stage-letter`)).toMatch(/^pixel-stage-drop \d+ms steps\(1, end\) calc\(\d+ms \+ var\(--pixel-letter-step\) \* \d+ms\) both$/);
-            expect(keyframesOf("pixel-stage-drop").get("1%")?.get("animation-timing-function")).toBe("steps(4, end)");
-            expect(animationOf(`${PLAYING} .pixel-burst`)).toMatch(/^pixel-celebration-burst \d+ms steps\(1, end\) var\(--pixel-burst-delay\) infinite$/);
+            expect(animationOf(PIXEL_CSS, `${PLAYING} .pixel-stage-letter`)).toMatch(/^pixel-stage-drop \d+ms steps\(1, end\) calc\(\d+ms \+ var\(--pixel-letter-step\) \* \d+ms\) both$/);
+            expect(keyframesOf(PIXEL_CSS, "pixel-stage-drop").get("1%")?.get("animation-timing-function")).toBe("steps(4, end)");
+            expect(animationOf(PIXEL_CSS, `${PLAYING} .pixel-burst`)).toMatch(/^pixel-celebration-burst \d+ms steps\(1, end\) var\(--pixel-burst-delay\) infinite$/);
         });
 
         // Never more than three flashes a second
         it("should twinkle the stars no faster than three times a second", () => {
-            const timing = animationTimingOf(animationOf(`${PLAYING} .pixel-celebration-stars`), "pixel-celebration-twinkle");
+            const timing = animationTimingOf(animationOf(PIXEL_CSS, `${PLAYING} .pixel-celebration-stars`), "pixel-celebration-twinkle");
 
             expect(timing?.durationMs ?? 0).toBeGreaterThanOrEqual(1000 / 3);
             expect(declarationsOf(PIXEL_CSS, `${PLAYING} .pixel-celebration-stars`).get("opacity")).toBe("0");
@@ -254,7 +236,7 @@ describe("pixel moments", () => {
 
     describe("loader", () => {
         it("should light the mark's squares one at a time, snaking down it, on a loop", () => {
-            expect(animationOf(LOADER_SQUARE)).toMatch(/^pixel-loader-hop \d+ms steps\(1, end\) calc\(var\(--pixel-loader-step\) \* \d+ms\) infinite$/);
+            expect(animationOf(PIXEL_CSS, LOADER_SQUARE)).toMatch(/^pixel-loader-hop \d+ms steps\(1, end\) calc\(var\(--pixel-loader-step\) \* \d+ms\) infinite$/);
             expect(declarationsOf(PIXEL_CSS, LOADER_SQUARE).get("background-color")).toBe("var(--pixel-loader-unlit)");
         });
 
@@ -266,9 +248,9 @@ describe("pixel moments", () => {
         });
 
         it("should count NOW LOADING's dots, fill the bar a block at a time and blink the cursor", () => {
-            expect(animationOf(LOADER_DOTS)).toMatch(/^pixel-loader-dots \d+ms steps\(4, end\) infinite$/);
-            expect(animationOf(LOADER_BAR)).toMatch(/^pixel-loader-fill \d+ms steps\(11, end\) infinite$/);
-            expect(animationOf(LOADER_CURSOR)).toMatch(/^pixel-blink 1000ms steps\(2, jump-none\) infinite$/);
+            expect(animationOf(PIXEL_CSS, LOADER_DOTS)).toMatch(/^pixel-loader-dots \d+ms steps\(4, end\) infinite$/);
+            expect(animationOf(PIXEL_CSS, LOADER_BAR)).toMatch(/^pixel-loader-fill \d+ms steps\(11, end\) infinite$/);
+            expect(animationOf(PIXEL_CSS, LOADER_CURSOR)).toMatch(/^pixel-blink 1000ms steps\(2, jump-none\) infinite$/);
         });
 
         it("should hold a still mark, the dots and a part-filled bar under reduced motion", () => {

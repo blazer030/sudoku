@@ -3,7 +3,7 @@ import postcss, { type AtRule, type Declaration, type Rule } from "postcss";
 import { VALUE_MOTION_SETTLE_MS } from "@/presentation/components/board-cell/useValueMotion";
 import { contrastRatio } from "@/theme/contrast";
 import { getPalette } from "@/theme/palettes";
-import { declarationsOf } from "../../styleSheetRules";
+import { collapse, declarationsOf } from "../../styleSheetRules";
 
 const CYBER_CSS = readFileSync("src/style/styles/cyber/skin.css", "utf8");
 
@@ -14,8 +14,6 @@ const PAINT_SCOPE = ':root[data-style="cyber"]';
 
 const skin = (token: string): string => `${SCOPE} [data-skin~="${token}"]`;
 const paintOf = (token: string): Map<string, string> => declarationsOf(CYBER_CSS, `${PAINT_SCOPE} [data-skin~="${token}"]`);
-
-const collapse = (text: string): string => text.replace(/\s+/g, " ").trim();
 
 const allRules = (): Rule[] => {
     const rules: Rule[] = [];

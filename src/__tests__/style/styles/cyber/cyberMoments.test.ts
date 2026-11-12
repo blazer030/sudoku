@@ -1,8 +1,7 @@
 import { readFileSync } from "fs";
-import postcss from "postcss";
 import { STYLE_MOMENTS } from "@/presentation/components/style-moments/styleMoments";
 import { GROUP_RIPPLE_STEP_MS } from "@/presentation/pages/game/useGroupEffect";
-import { animationTimingOf, declarationsOf, reducedMotionDeclarationsOf as reducedMotionDeclarationsIn } from "../../styleSheetRules";
+import { animationOf, animationTimingOf, declarationsOf, keyframesOf, reducedMotionDeclarationsOf as reducedMotionDeclarationsIn } from "../../styleSheetRules";
 
 const CYBER_CSS = readFileSync("src/style/styles/cyber/skin.css", "utf8");
 
@@ -32,29 +31,11 @@ const LOADER = `${SCOPE} .cyber-loader`;
 
 const reducedMotionDeclarationsOf = (selector: string): Map<string, string> => reducedMotionDeclarationsIn(CYBER_CSS, selector);
 
-const animationOf = (selector: string): string => declarationsOf(CYBER_CSS, selector).get("animation") ?? "";
-
-// Each keyframe's selector and its declarations, in order
-const keyframesOf = (name: string): Map<string, Map<string, string>> => {
-    const frames = new Map<string, Map<string, string>>();
-    postcss.parse(CYBER_CSS).walkAtRules("keyframes", (atRule) => {
-        if (atRule.params.trim() !== name) return;
-        atRule.walkRules((frame) => {
-            const declarations = new Map<string, string>();
-            frame.walkDecls((declaration) => {
-                declarations.set(declaration.prop, declaration.value.replace(/\s+/g, " ").trim());
-            });
-            frames.set(frame.selector.replace(/\s+/g, " ").trim(), declarations);
-        });
-    });
-    return frames;
-};
-
 const propertiesOf = (name: string): Set<string> =>
-    new Set([...keyframesOf(name).values()].flatMap(frame => [...frame.keys()]));
+    new Set([...keyframesOf(CYBER_CSS, name).values()].flatMap(frame => [...frame.keys()]));
 
 const endOf = (selector: string, name: string): number => {
-    const timing = animationTimingOf(animationOf(selector), name);
+    const timing = animationTimingOf(animationOf(CYBER_CSS, selector), name);
     if (timing === null) throw new Error(`${selector} does not run ${name}`);
     return timing.fixedDelayMs + timing.durationMs;
 };
@@ -70,7 +51,7 @@ describe("cyber moments", () => {
 
         // Only the peak, on the cell's own background: the digit keeps its own glitch when it arrives
         it("should hold only the cyan peak, on the cell, and leave the digit's arrival alone", () => {
-            const frames = keyframesOf("cyber-group-hit");
+            const frames = keyframesOf(CYBER_CSS, "cyber-group-hit");
 
             expect([...frames.keys()]).toEqual(["0%"]);
             expect(frames.get("0%")?.get("background-color")).toBe("color-mix(in srgb, var(--color-accent) 26%, var(--color-card))");
@@ -78,8 +59,8 @@ describe("cyber moments", () => {
         });
 
         it("should shoot a scan beam both ways from the entered cell, moving by transform only", () => {
-            expect(animationOf(BEAM_FORWARD)).toMatch(/^cyber-group-beam-forward \d+ms linear 100ms$/);
-            expect(animationOf(BEAM_BACK)).toMatch(/^cyber-group-beam-back \d+ms linear 100ms$/);
+            expect(animationOf(CYBER_CSS, BEAM_FORWARD)).toMatch(/^cyber-group-beam-forward \d+ms linear 100ms$/);
+            expect(animationOf(CYBER_CSS, BEAM_BACK)).toMatch(/^cyber-group-beam-back \d+ms linear 100ms$/);
             for (const name of ["cyber-group-beam-forward", "cyber-group-beam-back"]) {
                 expect(propertiesOf(name)).toEqual(new Set(["opacity", "transform"]));
             }
@@ -87,10 +68,10 @@ describe("cyber moments", () => {
         });
 
         it("should step a box's outline out from the entered cell, and flash its OK tag", () => {
-            expect(animationOf(FRAME)).toMatch(/^cyber-group-box \d+ms steps\(8, end\) 100ms$/);
+            expect(animationOf(CYBER_CSS, FRAME)).toMatch(/^cyber-group-box \d+ms steps\(8, end\) 100ms$/);
             expect(propertiesOf("cyber-group-box")).toEqual(new Set(["opacity", "transform"]));
-            expect(keyframesOf("cyber-group-box").get("0%")?.get("transform")).toBe("scale(0.3333)");
-            expect(animationOf(TAG)).toMatch(/^cyber-group-tag \d+ms steps\(1, end\) \d+ms$/);
+            expect(keyframesOf(CYBER_CSS, "cyber-group-box").get("0%")?.get("transform")).toBe("scale(0.3333)");
+            expect(animationOf(CYBER_CSS, TAG)).toMatch(/^cyber-group-tag \d+ms steps\(1, end\) \d+ms$/);
             expect(declarationsOf(CYBER_CSS, TAG).get("opacity")).toBe("0");
         });
 
@@ -120,8 +101,8 @@ describe("cyber moments", () => {
 
     describe("celebration", () => {
         it("should light the solved board row by row from the top as the scan passes", () => {
-            expect(animationOf(CELEBRATING_CELL)).toMatch(/^cyber-row-light \d+ms ease-out calc\(var\(--cell-row\) \* \d+ms\)$/);
-            expect([...keyframesOf("cyber-row-light").keys()]).toEqual(["0%"]);
+            expect(animationOf(CYBER_CSS, CELEBRATING_CELL)).toMatch(/^cyber-row-light \d+ms ease-out calc\(var\(--cell-row\) \* \d+ms\)$/);
+            expect([...keyframesOf(CYBER_CSS, "cyber-row-light").keys()]).toEqual(["0%"]);
         });
 
         it("should scan a cyan beam down the grid on its ::after, by transform, before the dialog opens", () => {
@@ -134,7 +115,7 @@ describe("cyber moments", () => {
             expect(propertiesOf("cyber-board-scan")).toEqual(new Set(["opacity", "transform"]));
             expect(endOf(SCAN, "cyber-board-scan")).toBeLessThanOrEqual(STYLE_MOMENTS.cyber.celebrationBoardMs);
             // Each row lights as the beam reaches it
-            const rowStep = Number(/\* (\d+)ms/.exec(animationOf(CELEBRATING_CELL))?.[1]);
+            const rowStep = Number(/\* (\d+)ms/.exec(animationOf(CYBER_CSS, CELEBRATING_CELL))?.[1]);
             const scanMs = animationTimingOf(scan.get("animation") ?? "", "cyber-board-scan")?.durationMs ?? 0;
             expect(Math.abs(rowStep * 9 - scanMs)).toBeLessThanOrEqual(20);
         });
@@ -145,13 +126,13 @@ describe("cyber moments", () => {
             expect(brackets.get("content")).toBe('""');
             expect(brackets.get("pointer-events")).toBe("none");
             expect((brackets.get("background") ?? "").match(/var\(--color-signal\)/g)?.length).toBeGreaterThanOrEqual(8);
-            expect(animationOf(LOCKING)).toMatch(/^cyber-bracket-lock \d+ms steps\(3, end\) \d+ms backwards$/);
+            expect(animationOf(CYBER_CSS, LOCKING)).toMatch(/^cyber-bracket-lock \d+ms steps\(3, end\) \d+ms backwards$/);
             expect(propertiesOf("cyber-bracket-lock")).toEqual(new Set(["opacity", "transform"]));
         });
 
         it("should open the card like a CRT, from a line across its middle, held closed until it starts", () => {
-            expect(animationOf(OPENING_CARD)).toMatch(/^cyber-crt-open \d+ms linear \d+ms backwards$/);
-            const frames = keyframesOf("cyber-crt-open");
+            expect(animationOf(CYBER_CSS, OPENING_CARD)).toMatch(/^cyber-crt-open \d+ms linear \d+ms backwards$/);
+            const frames = keyframesOf(CYBER_CSS, "cyber-crt-open");
             expect(frames.get("0%")?.get("clip-path")).toContain("50%");
             expect(propertiesOf("cyber-crt-open")).toEqual(new Set(["clip-path", "opacity"]));
             // The first button is ready about when the board's is (1440ms after the solving entry)
@@ -163,7 +144,7 @@ describe("cyber moments", () => {
         it("should split the title's shadow into magenta and cyan, glitching it in and then now and then only with motion", () => {
             expect(declarationsOf(CYBER_CSS, TITLE).get("text-shadow")).toBe("2px 0 var(--color-primary), -2px 0 var(--color-accent)");
             expect(declarationsOf(CYBER_CSS, TITLE).get("animation")).toBeUndefined();
-            expect(animationOf(GLITCHING_TITLE)).toMatch(/^cyber-glitch \d+ms steps\(1, end\) \d+ms backwards, cyber-title-glitch [\d.]+s steps\(1, end\) \d+ms infinite$/);
+            expect(animationOf(CYBER_CSS, GLITCHING_TITLE)).toMatch(/^cyber-glitch \d+ms steps\(1, end\) \d+ms backwards, cyber-title-glitch [\d.]+s steps\(1, end\) \d+ms infinite$/);
         });
 
         it("should set the trophy in yellow on a deep yellow wash with cut corners", () => {
@@ -176,9 +157,9 @@ describe("cyber moments", () => {
 
         it("should turn the HUD ring in behind the dialog and glitch MISSION COMPLETE in, then now and then", () => {
             expect(declarationsOf(CYBER_CSS, RING).get("border-color")).toContain("var(--color-accent)");
-            expect(animationOf(`${PLAYING} .cyber-celebration-ring-in`)).toMatch(/^cyber-ring-in \d+ms cubic-bezier\([^)]*\) \d+ms backwards$/);
-            expect(animationOf(`${PLAYING} .cyber-celebration-ring`)).toMatch(/^cyber-spin \d+s linear infinite$/);
-            const mission = animationOf(`${PLAYING} .cyber-mission`);
+            expect(animationOf(CYBER_CSS, `${PLAYING} .cyber-celebration-ring-in`)).toMatch(/^cyber-ring-in \d+ms cubic-bezier\([^)]*\) \d+ms backwards$/);
+            expect(animationOf(CYBER_CSS, `${PLAYING} .cyber-celebration-ring`)).toMatch(/^cyber-spin \d+s linear infinite$/);
+            const mission = animationOf(CYBER_CSS, `${PLAYING} .cyber-mission`);
             expect(mission).toMatch(/^cyber-glitch \d+ms steps\(1, end\) \d+ms backwards, cyber-title-glitch [\d.]+s steps\(1, end\) \d+ms infinite$/);
             expect(declarationsOf(CYBER_CSS, MISSION).get("color")).toBe("var(--color-signal)");
         });
@@ -207,23 +188,23 @@ describe("cyber moments", () => {
 
     describe("loader", () => {
         it("should counter-rotate the two rings", () => {
-            expect(animationOf(`${LOADER}-orbit`)).toMatch(/^cyber-spin [\d.]+s linear infinite$/);
-            expect(animationOf(`${LOADER}-arc`)).toMatch(/^cyber-spin [\d.]+s linear infinite reverse$/);
+            expect(animationOf(CYBER_CSS, `${LOADER}-orbit`)).toMatch(/^cyber-spin [\d.]+s linear infinite$/);
+            expect(animationOf(CYBER_CSS, `${LOADER}-arc`)).toMatch(/^cyber-spin [\d.]+s linear infinite reverse$/);
         });
 
         it("should light the 3×3's squares magenta at their own beats, in held frames", () => {
-            expect(animationOf(`${LOADER}-square`)).toMatch(/^cyber-loader-lit [\d.]+m?s steps\(1, end\) var\(--cyber-loader-delay\) infinite$/);
+            expect(animationOf(CYBER_CSS, `${LOADER}-square`)).toMatch(/^cyber-loader-lit [\d.]+m?s steps\(1, end\) var\(--cyber-loader-delay\) infinite$/);
         });
 
         it("should type the generator's log a line at a time, by clip only", () => {
             for (const line of [1, 2, 3]) {
-                expect(animationOf(`${LOADER}-line:nth-child(${line})`)).toMatch(new RegExp(`^cyber-loader-type-${line} [\\d.]+s linear infinite$`));
+                expect(animationOf(CYBER_CSS, `${LOADER}-line:nth-child(${line})`)).toMatch(new RegExp(`^cyber-loader-type-${line} [\\d.]+s linear infinite$`));
                 expect(propertiesOf(`cyber-loader-type-${line}`)).toEqual(new Set(["clip-path", "animation-timing-function"]));
             }
         });
 
         it("should run the bar up, jump it back once and run it on, by transform only", () => {
-            expect(animationOf(`${LOADER}-fill`)).toMatch(/^cyber-loader-progress [\d.]+s linear infinite$/);
+            expect(animationOf(CYBER_CSS, `${LOADER}-fill`)).toMatch(/^cyber-loader-progress [\d.]+s linear infinite$/);
             expect(propertiesOf("cyber-loader-progress")).toEqual(new Set(["transform"]));
         });
 

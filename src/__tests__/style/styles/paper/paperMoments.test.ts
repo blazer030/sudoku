@@ -3,7 +3,7 @@ import postcss from "postcss";
 import { STYLE_MOMENTS } from "@/presentation/components/style-moments/styleMoments";
 import { GROUP_RIPPLE_STEP_MS } from "@/presentation/pages/game/useGroupEffect";
 import { VALUE_MOTION_SETTLE_MS } from "@/presentation/components/board-cell/useValueMotion";
-import { animationTimingOf, declarationsOf, reducedMotionDeclarationsOf as reducedMotionDeclarationsIn } from "../../styleSheetRules";
+import { animationOf, animationTimingOf, declarationsOf, reducedMotionDeclarationsOf as reducedMotionDeclarationsIn } from "../../styleSheetRules";
 
 const PAPER_CSS = readFileSync("src/style/styles/paper/skin.css", "utf8");
 
@@ -32,8 +32,6 @@ const LOADER_LINE = `${SCOPE} .paper-loader-line`;
 const LOADER_DIGIT = `${SCOPE} .paper-loader-digit`;
 
 const reducedMotionDeclarationsOf = (selector: string): Map<string, string> => reducedMotionDeclarationsIn(PAPER_CSS, selector);
-
-const animationOf = (selector: string): string => declarationsOf(PAPER_CSS, selector).get("animation") ?? "";
 
 // The first and last frames of a keyframes block, as "property: value" lists
 const keyframeEnds = (name: string): { from: Map<string, string>; to: Map<string, string> } => {
@@ -114,7 +112,7 @@ describe("paper moments", () => {
             });
 
             expect(groupDigitAnimations).toEqual([]);
-            expect(animationOf(GROUP_CELL)).toMatch(/^paper-group-wash /);
+            expect(animationOf(PAPER_CSS, GROUP_CELL)).toMatch(/^paper-group-wash /);
         });
 
         it("should stop the writing and the rub under reduced motion, showing the digit unmasked", () => {
@@ -127,11 +125,11 @@ describe("paper moments", () => {
 
     describe("group completion", () => {
         it("should wash a completed group's cells in pale ink, rippling from the entered cell", () => {
-            expect(animationOf(GROUP_CELL)).toMatch(/^paper-group-wash .*var\(--group-delay/);
+            expect(animationOf(PAPER_CSS, GROUP_CELL)).toMatch(/^paper-group-wash .*var\(--group-delay/);
         });
 
         it("should end the wash within the group effect's own time, rippling no slower than its timer counts", () => {
-            const timing = animationTimingOf(animationOf(GROUP_CELL), "paper-group-wash");
+            const timing = animationTimingOf(animationOf(PAPER_CSS, GROUP_CELL), "paper-group-wash");
             const rippleStep = declarationsOf(PAPER_CSS, GROUP_CELL).get("--group-ripple-step") ?? "";
 
             expect(timing).not.toBeNull();
@@ -141,8 +139,8 @@ describe("paper moments", () => {
         });
 
         it("should strike a row or column through and loop a box a beat later, in the theme's ink", () => {
-            const strike = animationTimingOf(animationOf(STRIKE), "paper-group-strike");
-            const loop = animationTimingOf(animationOf(LOOP), "paper-group-strike");
+            const strike = animationTimingOf(animationOf(PAPER_CSS, STRIKE), "paper-group-strike");
+            const loop = animationTimingOf(animationOf(PAPER_CSS, LOOP), "paper-group-strike");
 
             expect(strike).not.toBeNull();
             expect(loop?.fixedDelayMs).toBe((strike?.fixedDelayMs ?? 0) + 80);
@@ -151,7 +149,7 @@ describe("paper moments", () => {
 
         // The overlay lives as long as the effect: at least a box's, entered at its centre (two steps out)
         it.each([STRIKE, LOOP])("should draw and fade %s before the shortest effect ends", (selector) => {
-            const timing = animationTimingOf(animationOf(selector), "paper-group-strike");
+            const timing = animationTimingOf(animationOf(PAPER_CSS, selector), "paper-group-strike");
             const shortestEffect = 2 * GROUP_RIPPLE_STEP_MS + STYLE_MOMENTS.paper.groupEffectMs;
 
             expect((timing?.fixedDelayMs ?? 0) + (timing?.durationMs ?? 0)).toBeLessThanOrEqual(shortestEffect);
@@ -171,13 +169,13 @@ describe("paper moments", () => {
 
             expect(check.get("background-color")).toBe("var(--paper-check-ink)");
             expect(check.get("mask")).toContain("data:image/svg+xml");
-            expect(animationOf(DRAWING_CHECK)).toMatch(/^paper-circle-draw .* backwards$/);
+            expect(animationOf(PAPER_CSS, DRAWING_CHECK)).toMatch(/^paper-circle-draw .* backwards$/);
             expect(keyframeEnds("paper-circle-draw").from.get("clip-path")).toBe("inset(0 100% 0 0)");
         });
 
         it("should land the card slightly tilted, then sink it as the stamp lands", () => {
-            const card = animationOf(LANDING_CARD);
-            const stamp = animationTimingOf(animationOf(STAMPING), "paper-stamp-thud");
+            const card = animationOf(PAPER_CSS, LANDING_CARD);
+            const stamp = animationTimingOf(animationOf(PAPER_CSS, STAMPING), "paper-stamp-thud");
             const sink = animationTimingOf(card, "paper-card-sink");
 
             expect(card).toMatch(/^paper-card-land [^,]* backwards,/);
@@ -186,21 +184,21 @@ describe("paper moments", () => {
         });
 
         it("should underline the title by hand once the card has landed", () => {
-            const land = animationTimingOf(animationOf(LANDING_CARD), "paper-card-land");
-            const underline = animationTimingOf(animationOf(DRAWING_UNDERLINE), "paper-circle-draw");
+            const land = animationTimingOf(animationOf(PAPER_CSS, LANDING_CARD), "paper-card-land");
+            const underline = animationTimingOf(animationOf(PAPER_CSS, DRAWING_UNDERLINE), "paper-circle-draw");
 
             expect(declarationsOf(PAPER_CSS, UNDERLINE).get("background-color")).toBe("var(--color-primary)");
             expect(underline?.fixedDelayMs).toBeGreaterThanOrEqual((land?.fixedDelayMs ?? 0) + (land?.durationMs ?? 0) - 100);
-            expect(animationOf(DRAWING_UNDERLINE)).toMatch(/ backwards$/);
+            expect(animationOf(PAPER_CSS, DRAWING_UNDERLINE)).toMatch(/ backwards$/);
         });
 
         it("should stamp last, keeping the stamp and its ring hidden until then", () => {
-            const underline = animationTimingOf(animationOf(DRAWING_UNDERLINE), "paper-circle-draw");
-            const stamp = animationTimingOf(animationOf(STAMPING), "paper-stamp-thud");
-            const splat = animationTimingOf(animationOf(SPREADING_SPLAT), "paper-stamp-splat");
+            const underline = animationTimingOf(animationOf(PAPER_CSS, DRAWING_UNDERLINE), "paper-circle-draw");
+            const stamp = animationTimingOf(animationOf(PAPER_CSS, STAMPING), "paper-stamp-thud");
+            const splat = animationTimingOf(animationOf(PAPER_CSS, SPREADING_SPLAT), "paper-stamp-splat");
 
             expect(stamp?.fixedDelayMs).toBeGreaterThan((underline?.fixedDelayMs ?? 0) + (underline?.durationMs ?? 0) - 200);
-            expect(animationOf(STAMPING)).toMatch(/ both$/);
+            expect(animationOf(PAPER_CSS, STAMPING)).toMatch(/ both$/);
             expect(keyframeEnds("paper-stamp-thud").from.get("opacity")).toBe("0");
             expect(splat?.fixedDelayMs).toBeGreaterThan(stamp?.fixedDelayMs ?? Infinity);
             expect(declarationsOf(PAPER_CSS, SPLAT).get("opacity")).toBe("0");
@@ -232,8 +230,8 @@ describe("paper moments", () => {
 
     describe("loader", () => {
         it.each([0, 1, 2, 3])("should draw grid line and write digit %i in turn on one 3.4s loop", (step) => {
-            const line = animationOf(`${LOADER_LINE}:nth-child(${step + 1})`);
-            const digit = animationOf(`${LOADER_DIGIT}:nth-of-type(${step + 1})`);
+            const line = animationOf(PAPER_CSS, `${LOADER_LINE}:nth-child(${step + 1})`);
+            const digit = animationOf(PAPER_CSS, `${LOADER_DIGIT}:nth-of-type(${step + 1})`);
 
             expect(line).toMatch(new RegExp(`^paper-loader-line-${step} 3400ms .*infinite`));
             expect(digit).toMatch(new RegExp(`^paper-loader-digit-${step} 3400ms .*infinite`));

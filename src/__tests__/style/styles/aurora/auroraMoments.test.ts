@@ -2,7 +2,7 @@ import postcss from "postcss";
 import { VALUE_MOTION_SETTLE_MS } from "@/presentation/components/board-cell/useValueMotion";
 import { STYLE_MOMENTS } from "@/presentation/components/style-moments/styleMoments";
 import { GROUP_RIPPLE_STEP_MS } from "@/presentation/pages/game/useGroupEffect";
-import { animationTimingOf, declarationsOf, reducedMotionDeclarationsOf } from "../../styleSheetRules";
+import { animationOf, animationTimingOf, collapse, declarationsOf, keyframesOf, reducedMotionDeclarationsOf } from "../../styleSheetRules";
 import { AURORA_CSS, AURORA_DARK, AURORA_LIGHT, AURORA_SCOPE, auroraProperty } from "./auroraSheet";
 
 const BOARD = `${AURORA_SCOPE} [data-skin~="board"]`;
@@ -11,27 +11,7 @@ const PULSE = `${BOARD} [data-variant][data-arriving]::before`;
 const GHOST = `${BOARD} [data-variant].value-leave::before`;
 const SELECTED_GHOST = `${BOARD} [data-variant="selected"].value-leave::before`;
 
-const collapse = (text: string): string => text.replace(/\s+/g, " ").trim();
-
-// Each frame of a @keyframes block, by its collapsed selector
-const framesOf = (name: string): Map<string, Map<string, string>> => {
-    const frames = new Map<string, Map<string, string>>();
-    postcss.parse(AURORA_CSS).walkAtRules("keyframes", (atRule) => {
-        if (atRule.params !== name) return;
-        atRule.walkRules((frame) => {
-            const declarations = new Map<string, string>();
-            frame.walkDecls((declaration) => {
-                declarations.set(declaration.prop, collapse(declaration.value));
-            });
-            frames.set(collapse(frame.selector), declarations);
-        });
-    });
-    return frames;
-};
-
-const animationOf = (selector: string): string => declarationsOf(AURORA_CSS, selector).get("animation") ?? "";
-
-const propertiesOf = (name: string): string[] => [...framesOf(name).values()].flatMap(frame => [...frame.keys()]);
+const propertiesOf = (name: string): string[] => [...keyframesOf(AURORA_CSS, name).values()].flatMap(frame => [...frame.keys()]);
 
 // The top-level rules in source order, by their collapsed selectors
 const ruleOrder = (): string[][] => {
@@ -56,9 +36,9 @@ describe("aurora moments", () => {
         // The canvas's 550ms softA, run over the pulse's 800ms so the digit never settles the arrival before the pulse:
         // 330ms is 41.25% and 550ms 68.75% of 800ms, each segment keeping its length and easing
         it("should grow the digit in from 55% by 550ms, its own colour's 6px glow drawn in to nothing by 330ms, on an 800ms run", () => {
-            const frames = framesOf("aurora-arrive");
+            const frames = keyframesOf(AURORA_CSS, "aurora-arrive");
 
-            expect(animationTimingOf(animationOf(ARRIVING_DIGIT), "aurora-arrive")).toEqual({ durationMs: 800, fixedDelayMs: 0 });
+            expect(animationTimingOf(animationOf(AURORA_CSS, ARRIVING_DIGIT), "aurora-arrive")).toEqual({ durationMs: 800, fixedDelayMs: 0 });
             expect(frames.get("0%")).toEqual(new Map([
                 ["opacity", "0"],
                 ["transform", "scale(0.55)"],
@@ -71,7 +51,7 @@ describe("aurora moments", () => {
         // The digit's animationend settles the arrival too (BoardCell), so ending first would cut the pulse short
         it("should end the digit's arrival no earlier than the pulse", () => {
             const endOf = (selector: string, name: string): number => {
-                const timing = animationTimingOf(animationOf(selector), name);
+                const timing = animationTimingOf(animationOf(AURORA_CSS, selector), name);
                 return (timing?.durationMs ?? Number.NaN) + (timing?.fixedDelayMs ?? Number.NaN);
             };
 
@@ -93,9 +73,9 @@ describe("aurora moments", () => {
 
         // The pulse is the cell's ::before, whose animationend settles the arrival before the timer would
         it("should swell the pulse from 40% to 115% and fade it from 0.95 over 800ms ease-out, ending before the arrival settles on its own", () => {
-            const animation = animationOf(PULSE);
+            const animation = animationOf(AURORA_CSS, PULSE);
             const timing = animationTimingOf(animation, "aurora-pulse");
-            const frames = framesOf("aurora-pulse");
+            const frames = keyframesOf(AURORA_CSS, "aurora-pulse");
 
             expect(timing).toEqual({ durationMs: 800, fixedDelayMs: 0 });
             expect(animation).toContain(" ease-out");
@@ -153,9 +133,9 @@ describe("aurora moments", () => {
         });
 
         it("should shrink it to 60% and fade it over 500ms ease-in, ending before the cell settles on its own", () => {
-            const animation = animationOf(GHOST);
+            const animation = animationOf(AURORA_CSS, GHOST);
             const timing = animationTimingOf(animation, "aurora-leave");
-            const frames = framesOf("aurora-leave");
+            const frames = keyframesOf(AURORA_CSS, "aurora-leave");
 
             expect(timing).toEqual({ durationMs: 500, fixedDelayMs: 0 });
             expect(animation).toContain(" ease-in");
@@ -169,7 +149,7 @@ describe("aurora moments", () => {
         // Neither pseudo-element keeps its last frame, so no glow or ghost stays on the board
         it("should leave nothing behind on either pseudo-element", () => {
             for (const selector of [PULSE, GHOST]) {
-                expect(animationOf(selector), selector).not.toMatch(/forwards|both/);
+                expect(animationOf(AURORA_CSS, selector), selector).not.toMatch(/forwards|both/);
                 expect(declarationsOf(AURORA_CSS, selector).get("opacity"), selector).toBe("0");
             }
         });
@@ -209,7 +189,7 @@ describe("aurora moments", () => {
             + "color-mix(in srgb, var(--color-aurora-2) 70%, transparent) 70%, transparent)";
 
         const spanOf = (selector: string, name: string): { startMs: number; endMs: number } => {
-            const timing = animationTimingOf(animationOf(selector), name);
+            const timing = animationTimingOf(animationOf(AURORA_CSS, selector), name);
             if (timing === null) throw new Error(`${selector} does not run ${name}`);
             return { startMs: timing.fixedDelayMs, endMs: timing.fixedDelayMs + timing.durationMs };
         };
@@ -231,7 +211,7 @@ describe("aurora moments", () => {
         // Review Focus 1: the glow starts and ends on the cell's own ground, so a selected or error cell never flashes
         // back to plain glass
         it("should light each cell of the group with the mode's peak of the primary from its own ground and back, with no shadow", () => {
-            const frames = framesOf("aurora-group-glow");
+            const frames = keyframesOf(AURORA_CSS, "aurora-group-glow");
 
             expect(frames.get("0%")).toEqual(new Map([["background-color", GROUND]]));
             expect(frames.get("35%")).toEqual(new Map([["background-color", `color-mix(in srgb, var(--color-primary) var(--aurora-glow-peak), ${GROUND})`]]));
@@ -253,7 +233,7 @@ describe("aurora moments", () => {
             expect(step).toBe("45ms");
             expect(Number.parseFloat(step)).toBeLessThanOrEqual(GROUP_RIPPLE_STEP_MS);
             expect(spanOf(GROUP_CELL, "aurora-group-glow")).toEqual({ startMs: 100, endMs: 700 });
-            expect(animationOf(GROUP_CELL)).toContain("calc(100ms + var(--group-delay))");
+            expect(animationOf(AURORA_CSS, GROUP_CELL)).toContain("calc(100ms + var(--group-delay))");
         });
 
         // CLAUDE.md's trap: the entered cell lies in its own group and arrives at once. The glow is the cell's own
@@ -265,8 +245,8 @@ describe("aurora moments", () => {
             for (const { selector } of animated) {
                 expect(selector, selector).not.toMatch(/> div|::before|::after|value-arrive/);
             }
-            expect(animationOf(ARRIVING_DIGIT)).toMatch(/^aurora-arrive /);
-            expect(animationOf(PULSE)).toMatch(/^aurora-pulse /);
+            expect(animationOf(AURORA_CSS, ARRIVING_DIGIT)).toMatch(/^aurora-arrive /);
+            expect(animationOf(AURORA_CSS, PULSE)).toMatch(/^aurora-pulse /);
         });
 
         it("should lay the canvas's streak of aurora-1, the primary and aurora-2 along a row, its top and bottom faded by a gradient mask", () => {
@@ -289,7 +269,7 @@ describe("aurora moments", () => {
             expect(spanOf(RIBBON_OF.row, "aurora-group-sweep-x")).toEqual({ startMs: 100, endMs: 860 });
             expect(spanOf(RIBBON_OF.column, "aurora-group-sweep-y")).toEqual({ startMs: 100, endMs: 860 });
             for (const [name, axis] of [["aurora-group-sweep-x", "X"], ["aurora-group-sweep-y", "Y"]] as const) {
-                const frames = framesOf(name);
+                const frames = keyframesOf(AURORA_CSS, name);
                 expect(frames.get("0%"), name).toEqual(new Map([["opacity", "0"], ["transform", `scale${axis}(0.1)`]]));
                 expect(frames.get("35%"), name).toEqual(new Map([["opacity", "0.9"]]));
                 expect(frames.get("100%"), name).toEqual(new Map([["opacity", "0"], ["transform", `scale${axis}(1.1)`]]));
@@ -298,7 +278,7 @@ describe("aurora moments", () => {
 
         it("should ring a box in 2px of 80% of the primary under a still soft light of aurora-1, sent out from 120ms over 760ms", () => {
             const ring = declarationsOf(AURORA_CSS, RING);
-            const frames = framesOf("aurora-group-ring");
+            const frames = keyframesOf(AURORA_CSS, "aurora-group-ring");
 
             expect(ring.get("box-shadow")).toBe("inset 0 0 0 2px color-mix(in srgb, var(--color-primary) 80%, transparent), "
                 + "0 0 24px color-mix(in srgb, var(--color-aurora-1) 60%, transparent)");
@@ -386,20 +366,20 @@ describe("aurora moments", () => {
             expect(halo.get("opacity")).toBe("0.55");
             expect(animationTimingOf(halo.get("animation") ?? "", "aurora-loader-spin")).toEqual({ durationMs: 7000, fixedDelayMs: 0 });
             expect(halo.get("animation")).toContain("linear infinite");
-            expect([...framesOf("aurora-loader-spin")]).toEqual([["100%", new Map([["transform", "rotate(360deg)"]])]]);
+            expect([...keyframesOf(AURORA_CSS, "aurora-loader-spin")]).toEqual([["100%", new Map([["transform", "rotate(360deg)"]])]]);
         });
 
         it("should breathe each light in 2.4s, the centre first, then the edges, then the corners", () => {
-            expect(animationTimingOf(animationOf(DOT), "aurora-loader-breathe")).toEqual({ durationMs: 2400, fixedDelayMs: 0 });
-            expect(animationOf(DOT)).toContain("infinite");
+            expect(animationTimingOf(animationOf(AURORA_CSS, DOT), "aurora-loader-breathe")).toEqual({ durationMs: 2400, fixedDelayMs: 0 });
+            expect(animationOf(AURORA_CSS, DOT)).toContain("infinite");
             for (const ring of RINGS) {
                 expect(declarationsOf(AURORA_CSS, `${DOT}[data-ring="${ring}"]`).get("--aurora-loader-delay"), ring).toBe(DELAYS[ring]);
             }
-            expect(animationOf(DOT)).toContain("var(--aurora-loader-delay)");
+            expect(animationOf(AURORA_CSS, DOT)).toContain("var(--aurora-loader-delay)");
         });
 
         it("should scale the light from 0.7 up to 1.2 at 30% and to 1 at 60%, back to 0.7, and nothing else", () => {
-            const frames = framesOf("aurora-loader-breathe");
+            const frames = keyframesOf(AURORA_CSS, "aurora-loader-breathe");
 
             expect(frames.get("0%, 100%")).toEqual(new Map([["transform", "scale(0.7)"]]));
             expect(frames.get("30%")).toEqual(new Map([["transform", "scale(1.2)"]]));
@@ -409,15 +389,15 @@ describe("aurora moments", () => {
 
         // The bright colour and the glow are drawn once and only faded, so no colour or shadow is repainted
         it("should light the primary on the ::before and its soft glow on the ::after, each only fading in step with the breath", () => {
-            const frames = framesOf("aurora-loader-glow");
+            const frames = keyframesOf(AURORA_CSS, "aurora-loader-glow");
 
             expect(declarationsOf(AURORA_CSS, BRIGHT).get("background-color")).toBe("var(--color-primary)");
             expect(declarationsOf(AURORA_CSS, GLOW).get("background-image")).toBe(
                 "radial-gradient(circle, color-mix(in srgb, var(--color-primary) 70%, transparent) 0, transparent 70%)",
             );
             for (const selector of [BRIGHT, GLOW]) {
-                expect(animationTimingOf(animationOf(selector), "aurora-loader-glow"), selector).toEqual({ durationMs: 2400, fixedDelayMs: 0 });
-                expect(animationOf(selector), selector).toContain("var(--aurora-loader-delay)");
+                expect(animationTimingOf(animationOf(AURORA_CSS, selector), "aurora-loader-glow"), selector).toEqual({ durationMs: 2400, fixedDelayMs: 0 });
+                expect(animationOf(AURORA_CSS, selector), selector).toContain("var(--aurora-loader-delay)");
                 expect(declarationsOf(AURORA_CSS, selector).get("opacity"), selector).toBe("0");
             }
             expect(propertiesOf("aurora-loader-glow").every(property => property === "opacity")).toBe(true);
@@ -518,10 +498,10 @@ describe("aurora moments", () => {
         });
 
         it("should swell the surge from 60% and nothing to 0.9 at 40% and to 110% at its still 0.4, over 1.8s from the start", () => {
-            const frames = framesOf("aurora-surge");
+            const frames = keyframesOf(AURORA_CSS, "aurora-surge");
 
-            expect(animationTimingOf(animationOf(`${CELEBRATING}::before`), "aurora-surge")).toEqual({ durationMs: 1800, fixedDelayMs: 0 });
-            expect(animationOf(`${CELEBRATING}::before`)).toContain(" both");
+            expect(animationTimingOf(animationOf(AURORA_CSS, `${CELEBRATING}::before`), "aurora-surge")).toEqual({ durationMs: 1800, fixedDelayMs: 0 });
+            expect(animationOf(AURORA_CSS, `${CELEBRATING}::before`)).toContain(" both");
             expect(frames.get("0%")).toEqual(new Map([["opacity", "0"], ["transform", "scale(0.6)"]]));
             expect(frames.get("40%")).toEqual(new Map([["opacity", "0.9"]]));
             expect(frames.get("100%")).toEqual(new Map([["opacity", "var(--aurora-surge-still)"], ["transform", "scale(1.1)"]]));
@@ -531,8 +511,8 @@ describe("aurora moments", () => {
 
         // Spec ruling 19: ring by ring from the centre cell, 85ms a ring, by max() alone; the farthest ends at 1240ms
         it("should glow each pane with the mode's peak of the primary from its own ground and back over 900ms, 85ms a ring from the centre", () => {
-            const animation = animationOf(GLOWING_CELL);
-            const frames = framesOf("aurora-celebration-glow");
+            const animation = animationOf(AURORA_CSS, GLOWING_CELL);
+            const frames = keyframesOf(AURORA_CSS, "aurora-celebration-glow");
 
             // The delay is all ring steps, no fixed part (the helper would read its 85ms step as one)
             expect(animationTimingOf(animation, "aurora-celebration-glow")?.durationMs).toBe(900);
@@ -557,14 +537,14 @@ describe("aurora moments", () => {
             const celebrationSelectors = ruleOrder().flat().filter(selector => selector.includes("data-celebration"));
 
             expect(celebrationSelectors.some(selector => /\[data-variant\][^ ]*(?:::before|::after| > )/.test(selector))).toBe(false);
-            expect(animationOf(`${BOARD} [data-variant] > .value-arrive`)).toContain("aurora-arrive");
-            expect(animationOf(`${BOARD} [data-variant][data-arriving]::before`)).toContain("aurora-pulse");
+            expect(animationOf(AURORA_CSS, `${BOARD} [data-variant] > .value-arrive`)).toContain("aurora-arrive");
+            expect(animationOf(AURORA_CSS, `${BOARD} [data-variant][data-arriving]::before`)).toContain("aurora-pulse");
         });
 
         it("should focus the card in from 104% and nothing over 640ms from 100ms, with no blur", () => {
-            const frames = framesOf("aurora-card-focus");
+            const frames = keyframesOf(AURORA_CSS, "aurora-card-focus");
 
-            expect(animationTimingOf(animationOf(CARD), "aurora-card-focus")).toEqual({ durationMs: 640, fixedDelayMs: 100 });
+            expect(animationTimingOf(animationOf(AURORA_CSS, CARD), "aurora-card-focus")).toEqual({ durationMs: 640, fixedDelayMs: 100 });
             expect(frames.get("0%")).toEqual(new Map([["opacity", "0"], ["transform", "scale(1.04)"]]));
             expect(frames.get("100%")).toEqual(new Map([["opacity", "1"], ["transform", "none"]]));
         });
@@ -580,13 +560,13 @@ describe("aurora moments", () => {
 
         it("should send each ring out from 60% to 260% and fade it every 2.4s, 0.1s, 0.9s and 1.7s in, under a still glow of aurora-1", () => {
             const ring = declarationsOf(AURORA_CSS, RING);
-            const frames = framesOf("aurora-celebration-ring");
+            const frames = keyframesOf(AURORA_CSS, "aurora-celebration-ring");
 
             expect(ring.get("box-shadow")).toBe("0 0 30px color-mix(in srgb, var(--color-aurora-1) 50%, transparent)");
             expect(ring.get("opacity")).toBe("0");
-            expect(animationTimingOf(animationOf(MOVING_RING), "aurora-celebration-ring")?.durationMs).toBe(2400);
-            expect(animationOf(MOVING_RING)).toContain("infinite");
-            expect(animationOf(MOVING_RING)).toContain("var(--aurora-ring-delay)");
+            expect(animationTimingOf(animationOf(AURORA_CSS, MOVING_RING), "aurora-celebration-ring")?.durationMs).toBe(2400);
+            expect(animationOf(AURORA_CSS, MOVING_RING)).toContain("infinite");
+            expect(animationOf(AURORA_CSS, MOVING_RING)).toContain("var(--aurora-ring-delay)");
             expect(["0", "1", "2"].map(index => declarationsOf(AURORA_CSS, `${RING}[data-index="${index}"]`).get("--aurora-ring-delay")))
                 .toEqual(["0.1s", "0.9s", "1.7s"]);
             expect(frames.get("0%")).toEqual(new Map([["opacity", "0.9"], ["transform", "scale(0.6)"]]));
@@ -601,12 +581,12 @@ describe("aurora moments", () => {
         });
 
         it("should float each spark up 640px over 5.5s, moving only its transform and opacity", () => {
-            const frames = framesOf("aurora-celebration-rise");
+            const frames = keyframesOf(AURORA_CSS, "aurora-celebration-rise");
 
-            expect(animationTimingOf(animationOf(SPARK), "aurora-celebration-rise")?.durationMs).toBe(5500);
-            expect(animationOf(SPARK)).toContain("linear");
-            expect(animationOf(SPARK)).toContain("var(--aurora-spark-delay)");
-            expect(animationOf(SPARK)).toContain("infinite");
+            expect(animationTimingOf(animationOf(AURORA_CSS, SPARK), "aurora-celebration-rise")?.durationMs).toBe(5500);
+            expect(animationOf(AURORA_CSS, SPARK)).toContain("linear");
+            expect(animationOf(AURORA_CSS, SPARK)).toContain("var(--aurora-spark-delay)");
+            expect(animationOf(AURORA_CSS, SPARK)).toContain("infinite");
             expect(declarationsOf(AURORA_CSS, SPARK).get("opacity")).toBe("0");
             for (const light of ["aurora-1", "aurora-2"]) {
                 expect(declarationsOf(AURORA_CSS, `${SPARK}[data-light="${light}"]`).get("background-color"), light).toBe(`var(--color-${light})`);

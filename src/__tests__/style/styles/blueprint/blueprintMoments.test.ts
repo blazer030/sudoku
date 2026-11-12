@@ -3,7 +3,7 @@ import postcss from "postcss";
 import { VALUE_MOTION_SETTLE_MS } from "@/presentation/components/board-cell/useValueMotion";
 import { STYLE_MOMENTS } from "@/presentation/components/style-moments/styleMoments";
 import { GROUP_RIPPLE_STEP_MS } from "@/presentation/pages/game/useGroupEffect";
-import { animationTimingOf, declarationsOf, reducedMotionDeclarationsOf } from "../../styleSheetRules";
+import { animationOf, animationTimingOf, collapse, declarationsOf, keyframesOf, reducedMotionDeclarationsOf } from "../../styleSheetRules";
 
 const BLUEPRINT_CSS = readFileSync("src/style/styles/blueprint/skin.css", "utf8");
 
@@ -17,24 +17,6 @@ const LOADER_PEN = `${SCOPE} .blueprint-loader-pen`;
 const LOADER_DIMENSION = `${SCOPE} .blueprint-loader-dimension`;
 const LOADER_READINGS = `${SCOPE} .blueprint-loader-coordinates > span`;
 const PEN_SUPPORT = 'offset-path: path("M0 0")';
-
-const collapse = (text: string): string => text.replace(/\s+/g, " ").trim();
-
-// Each frame of a @keyframes block, by its collapsed selector
-const framesOf = (name: string): Map<string, Map<string, string>> => {
-    const frames = new Map<string, Map<string, string>>();
-    postcss.parse(BLUEPRINT_CSS).walkAtRules("keyframes", (atRule) => {
-        if (atRule.params !== name) return;
-        atRule.walkRules((frame) => {
-            const declarations = new Map<string, string>();
-            frame.walkDecls((declaration) => {
-                declarations.set(declaration.prop, collapse(declaration.value));
-            });
-            frames.set(collapse(frame.selector), declarations);
-        });
-    });
-    return frames;
-};
 
 interface LoaderAnimation { selector: string; animation: string; name: string; supports: string | null }
 
@@ -74,7 +56,7 @@ describe("blueprint moments", () => {
     describe("loader", () => {
         const LOADER_PIECES = [LOADER_PLOT, LOADER_PEN, LOADER_DIMENSION, LOADER_READINGS];
         const frameOf = (selector: string, offset: string): Map<string, string> | undefined =>
-            framesOf(loaderAnimationOf(selector)?.name ?? "").get(offset);
+            keyframesOf(BLUEPRINT_CSS, loaderAnimationOf(selector)?.name ?? "").get(offset);
 
         it("should run every piece on one 3.8s infinite loop", () => {
             for (const piece of LOADER_PIECES) {
@@ -124,7 +106,7 @@ describe("blueprint moments", () => {
 
             expect(loaderAnimations().length).toBeGreaterThan(0);
             for (const { name } of loaderAnimations()) {
-                const properties = [...framesOf(name).values()].flatMap(frame => [...frame.keys()]);
+                const properties = [...keyframesOf(BLUEPRINT_CSS, name).values()].flatMap(frame => [...frame.keys()]);
                 expect(properties.every(property => allowed.includes(property)), name).toBe(true);
             }
         });
@@ -197,7 +179,7 @@ describe("blueprint moments", () => {
         });
 
         it("should hold still for the first 60%, then fade to nothing, with no filter or ghost", () => {
-            const frames = framesOf("blueprint-strike");
+            const frames = keyframesOf(BLUEPRINT_CSS, "blueprint-strike");
 
             expect(frames.get("0%, 60%")?.get("opacity")).toBe("1");
             expect(frames.get("100%")?.get("opacity")).toBe("0");
@@ -254,7 +236,7 @@ describe("blueprint moments", () => {
         // The canvas's headA over 0.8 of its 0.8s; the lines then stay away until the ink is in, so their end
         // (a cell pseudo-element's, which settles the arrival) never comes before the digit's
         it("should sweep the crosshairs along the canvas's headA over 0–640ms, linearly, gone until 840ms", () => {
-            const frames = framesOf("blueprint-digit-crosshairs");
+            const frames = keyframesOf(BLUEPRINT_CSS, "blueprint-digit-crosshairs");
 
             expect(timingOf(CROSSHAIRS, "blueprint-digit-crosshairs")).toEqual({ durationMs: 840, fixedDelayMs: 0 });
             expect(declarationsOf(BLUEPRINT_CSS, CROSSHAIRS).get("animation")).toContain(" linear");
@@ -272,8 +254,8 @@ describe("blueprint moments", () => {
             expect(timingOf(ARRIVING_DIGIT, "blueprint-digit-ink")).toEqual({ durationMs: 235, fixedDelayMs: 605 });
             expect(digit.get("animation")).toContain(" ease ");
             expect(digit.get("animation")).toContain(" both");
-            expect(framesOf("blueprint-digit-ink").get("from")).toEqual(new Map([["opacity", "0"]]));
-            expect(framesOf("blueprint-digit-ink").get("to")).toEqual(new Map([["opacity", "1"]]));
+            expect(keyframesOf(BLUEPRINT_CSS, "blueprint-digit-ink").get("from")).toEqual(new Map([["opacity", "0"]]));
+            expect(keyframesOf(BLUEPRINT_CSS, "blueprint-digit-ink").get("to")).toEqual(new Map([["opacity", "1"]]));
         });
 
         it("should settle from the ink, the crosshairs ending with it, all before the arrival settles on its own", () => {
@@ -287,7 +269,7 @@ describe("blueprint moments", () => {
         // Opacity and transform only: no mask, motion path or filter, so every engine draws it alike
         it("should animate only opacity and transform, with no mask, motion path or filter", () => {
             for (const name of ["blueprint-digit-crosshairs", "blueprint-digit-ink"]) {
-                const properties = [...framesOf(name).values()].flatMap(frame => [...frame.keys()]);
+                const properties = [...keyframesOf(BLUEPRINT_CSS, name).values()].flatMap(frame => [...frame.keys()]);
                 expect(properties.length, name).toBeGreaterThan(0);
                 expect(properties.every(property => ["opacity", "transform"].includes(property)), name).toBe(true);
             }
@@ -322,14 +304,13 @@ describe("blueprint moments", () => {
         const HATCH = "repeating-linear-gradient(45deg, color-mix(in srgb, var(--color-primary) 45%, transparent) 0 1px, transparent 1px 5px)";
         const PRIMARY = "var(--color-primary)";
 
-        const animationOf = (selector: string): string => declarationsOf(BLUEPRINT_CSS, selector).get("animation") ?? "";
         const spanOf = (selector: string, name: string): { startMs: number; endMs: number } => {
-            const timing = animationTimingOf(animationOf(selector), name);
+            const timing = animationTimingOf(animationOf(BLUEPRINT_CSS, selector), name);
             if (timing === null) throw new Error(`${selector} does not run ${name}`);
             return { startMs: timing.fixedDelayMs, endMs: timing.fixedDelayMs + timing.durationMs };
         };
         const animatedPropertiesOf = (name: string): string[] =>
-            [...new Set([...framesOf(name).values()].flatMap(frame => [...frame.keys()]))].sort();
+            [...new Set([...keyframesOf(BLUEPRINT_CSS, name).values()].flatMap(frame => [...frame.keys()]))].sort();
 
         // Every rule outside @keyframes and reduced motion that names a group piece, with its declarations
         const groupRules = (): { selector: string; declarations: Map<string, string> }[] => {
@@ -346,28 +327,28 @@ describe("blueprint moments", () => {
         };
 
         it("should snap a row's dimension out in three steps from 100ms over 240ms, and fade it from 780ms over 200ms", () => {
-            const animation = animationOf(DIMENSION_OF.row);
+            const animation = animationOf(BLUEPRINT_CSS, DIMENSION_OF.row);
 
             expect(spanOf(DIMENSION_OF.row, "blueprint-group-snap-x")).toEqual({ startMs: 100, endMs: 340 });
             expect(spanOf(DIMENSION_OF.row, "blueprint-group-fade")).toEqual({ startMs: 780, endMs: 980 });
             expect(animation).toContain("steps(3, end)");
-            expect(framesOf("blueprint-group-snap-x").get("0%")).toEqual(new Map([["opacity", "1"], ["transform", "scaleX(0)"]]));
-            expect(framesOf("blueprint-group-snap-x").get("100%")).toEqual(new Map([["opacity", "1"], ["transform", "none"]]));
+            expect(keyframesOf(BLUEPRINT_CSS, "blueprint-group-snap-x").get("0%")).toEqual(new Map([["opacity", "1"], ["transform", "scaleX(0)"]]));
+            expect(keyframesOf(BLUEPRINT_CSS, "blueprint-group-snap-x").get("100%")).toEqual(new Map([["opacity", "1"], ["transform", "none"]]));
         });
 
         it("should snap a column's dimension down it as a row's along it", () => {
             expect(spanOf(DIMENSION_OF.column, "blueprint-group-snap-y")).toEqual({ startMs: 100, endMs: 340 });
             expect(spanOf(DIMENSION_OF.column, "blueprint-group-fade")).toEqual({ startMs: 780, endMs: 980 });
-            expect(animationOf(DIMENSION_OF.column)).toContain("steps(3, end)");
-            expect(framesOf("blueprint-group-snap-y").get("0%")).toEqual(new Map([["opacity", "1"], ["transform", "scaleY(0)"]]));
+            expect(animationOf(BLUEPRINT_CSS, DIMENSION_OF.column)).toContain("steps(3, end)");
+            expect(keyframesOf(BLUEPRINT_CSS, "blueprint-group-snap-y").get("0%")).toEqual(new Map([["opacity", "1"], ["transform", "scaleY(0)"]]));
         });
 
         it("should snap a box's outline out from a third from 140ms, and fade it from 800ms", () => {
             expect(spanOf(DIMENSION_OF.box, "blueprint-group-snap-box")).toEqual({ startMs: 140, endMs: 380 });
             expect(spanOf(DIMENSION_OF.box, "blueprint-group-fade")).toEqual({ startMs: 800, endMs: 1000 });
-            expect(animationOf(DIMENSION_OF.box)).toContain("steps(3, end)");
-            expect(framesOf("blueprint-group-snap-box").get("0%")).toEqual(new Map([["opacity", "1"], ["transform", "scale(0.333)"]]));
-            expect(framesOf("blueprint-group-fade").get("to")).toEqual(new Map([["opacity", "0"]]));
+            expect(animationOf(BLUEPRINT_CSS, DIMENSION_OF.box)).toContain("steps(3, end)");
+            expect(keyframesOf(BLUEPRINT_CSS, "blueprint-group-snap-box").get("0%")).toEqual(new Map([["opacity", "1"], ["transform", "scale(0.333)"]]));
+            expect(keyframesOf(BLUEPRINT_CSS, "blueprint-group-fade").get("to")).toEqual(new Map([["opacity", "0"]]));
         });
 
         it("should leave every dimension unseen without its animation, over the board's lines and untouchable", () => {
@@ -383,13 +364,13 @@ describe("blueprint moments", () => {
 
         it("should light a completed line's margin label in the primary for 900ms, held in one step", () => {
             expect(spanOf(LIT_LABEL, "blueprint-group-lit")).toEqual({ startMs: 0, endMs: 900 });
-            expect(animationOf(LIT_LABEL)).toContain("steps(1, end)");
-            expect(framesOf("blueprint-group-lit").get("0%, 100%")).toEqual(new Map([["color", PRIMARY]]));
+            expect(animationOf(BLUEPRINT_CSS, LIT_LABEL)).toContain("steps(1, end)");
+            expect(keyframesOf(BLUEPRINT_CSS, "blueprint-group-lit").get("0%, 100%")).toEqual(new Map([["color", PRIMARY]]));
         });
 
         it("should hatch the group's cells in 45% of the primary, 5px apart, from 100ms for 560ms, rippling out 45ms a step", () => {
             const step = declarationsOf(BLUEPRINT_CSS, GROUP_CELL).get("--group-ripple-step") ?? "";
-            const hatch = animationOf(GROUP_CELL);
+            const hatch = animationOf(BLUEPRINT_CSS, GROUP_CELL);
 
             expect(Number.parseFloat(step)).toBe(45);
             expect(Number.parseFloat(step)).toBeLessThanOrEqual(GROUP_RIPPLE_STEP_MS);
@@ -397,7 +378,7 @@ describe("blueprint moments", () => {
             expect(hatch).toContain("var(--group-delay, 0ms)");
             expect(hatch).toContain(" linear ");
             expect(animatedPropertiesOf("blueprint-group-hatch")).toEqual(["background-image"]);
-            expect(framesOf("blueprint-group-hatch").get("20%, 70%")).toEqual(new Map([["background-image", HATCH]]));
+            expect(keyframesOf(BLUEPRINT_CSS, "blueprint-group-hatch").get("20%, 70%")).toEqual(new Map([["background-image", HATCH]]));
         });
 
         // The entered digit is in its own completed group (CLAUDE.md's trap): the hatch is on the cell's background, so
@@ -407,8 +388,8 @@ describe("blueprint moments", () => {
                 if (!declarations.has("animation")) continue;
                 expect(selector, selector).not.toMatch(/> div|::before|::after|value-arrive/);
             }
-            expect(animationOf(`${BOARD} [data-variant] > .value-arrive`)).toMatch(/^blueprint-digit-ink /);
-            expect(animationOf(CROSSHAIRS)).toMatch(/^blueprint-digit-crosshairs /);
+            expect(animationOf(BLUEPRINT_CSS, `${BOARD} [data-variant] > .value-arrive`)).toMatch(/^blueprint-digit-ink /);
+            expect(animationOf(BLUEPRINT_CSS, CROSSHAIRS)).toMatch(/^blueprint-digit-crosshairs /);
         });
 
         it("should end each piece within the group effect", () => {
@@ -471,13 +452,12 @@ describe("blueprint moments", () => {
         const PRIMARY_LINE = (angle: string): string =>
             `linear-gradient(${angle}, transparent, color-mix(in srgb, var(--color-primary) 60%, transparent) 3px, var(--color-primary) 3px 4px, color-mix(in srgb, var(--color-primary) 60%, transparent) 4px, transparent)`;
 
-        const animationOf = (selector: string): string => declarationsOf(BLUEPRINT_CSS, selector).get("animation") ?? "";
         const spanOf = (selector: string, name: string): { startMs: number; endMs: number } => {
-            const timing = animationTimingOf(animationOf(selector), name);
+            const timing = animationTimingOf(animationOf(BLUEPRINT_CSS, selector), name);
             if (timing === null) throw new Error(`${selector} does not run ${name}`);
             return { startMs: timing.fixedDelayMs, endMs: timing.fixedDelayMs + timing.durationMs };
         };
-        const nameOf = (selector: string): string => animationOf(selector).split(" ")[0] ?? "";
+        const nameOf = (selector: string): string => animationOf(BLUEPRINT_CSS, selector).split(" ")[0] ?? "";
 
         it("should open the dialog at 1300ms, as the lock is closing", () => {
             const boardMs = STYLE_MOMENTS.blueprint.celebrationBoardMs;
@@ -507,23 +487,23 @@ describe("blueprint moments", () => {
             });
 
             it("should sweep both from the top left to the bottom right in 760ms, linearly, gone at the end", () => {
-                const frames = framesOf("blueprint-celebration-sweep");
+                const frames = keyframesOf(BLUEPRINT_CSS, "blueprint-celebration-sweep");
 
                 expect(spanOf(SWEEP, "blueprint-celebration-sweep")).toEqual({ startMs: 0, endMs: 760 });
-                expect(animationOf(SWEEP)).toContain(" linear");
+                expect(animationOf(BLUEPRINT_CSS, SWEEP)).toContain(" linear");
                 expect(frames.get("0%")).toEqual(new Map([["opacity", "1"], ["background-position", "10.5px 0, 0 10.5px"]]));
                 expect(frames.get("92%")).toEqual(new Map([["opacity", "1"]]));
                 expect(frames.get("100%")).toEqual(new Map([["opacity", "0"], ["background-position", "calc(100% - 10.5px) 0, 0 calc(100% - 10.5px)"]]));
             });
 
             it("should flash each digit in the primary as the lines cross it, 42ms a step from the top left, for 420ms", () => {
-                const flash = animationOf(FLASH);
+                const flash = animationOf(BLUEPRINT_CSS, FLASH);
 
                 expect(nameOf(FLASH)).toBe("blueprint-group-sweep");
                 expect(animationTimingOf(flash, "blueprint-group-sweep")?.durationMs).toBe(420);
                 expect(flash).toContain("calc((var(--cell-row) + var(--cell-column)) * 42ms)");
                 expect(flash).toContain(" ease-out ");
-                expect(framesOf("blueprint-group-sweep").get("from")).toEqual(new Map([["color", "var(--color-primary)"]]));
+                expect(keyframesOf(BLUEPRINT_CSS, "blueprint-group-sweep").get("from")).toEqual(new Map([["color", "var(--color-primary)"]]));
                 // The farthest cell (16 steps) has flashed before the dialog opens
                 expect(16 * 42 + 420).toBeLessThanOrEqual(STYLE_MOMENTS.blueprint.celebrationBoardMs);
             });
@@ -531,28 +511,28 @@ describe("blueprint moments", () => {
             // CLAUDE.md's trap: the last digit entered is still arriving, so the flash would replace its ink; named
             // *-group-*, the flash's end never settles the arrival either
             it("should keep the arriving digit's ink beside its flash", () => {
-                const both = animationOf(FLASH_ARRIVING);
+                const both = animationOf(BLUEPRINT_CSS, FLASH_ARRIVING);
 
-                expect(animationTimingOf(both, "blueprint-group-sweep")).toEqual(animationTimingOf(animationOf(FLASH), "blueprint-group-sweep"));
-                expect(animationTimingOf(both, "blueprint-digit-ink")).toEqual(animationTimingOf(animationOf(ARRIVING_DIGIT), "blueprint-digit-ink"));
+                expect(animationTimingOf(both, "blueprint-group-sweep")).toEqual(animationTimingOf(animationOf(BLUEPRINT_CSS, FLASH), "blueprint-group-sweep"));
+                expect(animationTimingOf(both, "blueprint-digit-ink")).toEqual(animationTimingOf(animationOf(BLUEPRINT_CSS, ARRIVING_DIGIT), "blueprint-digit-ink"));
                 expect(both).toContain(" both");
             });
             // A Reveal Cell answer may be the last digit: its pop (index.css) stays beside its flash
             it("should keep a revealed digit's pop beside its flash", () => {
-                const both = animationOf(FLASH_POPPING);
+                const both = animationOf(BLUEPRINT_CSS, FLASH_POPPING);
 
-                expect(animationTimingOf(both, "blueprint-group-sweep")).toEqual(animationTimingOf(animationOf(FLASH), "blueprint-group-sweep"));
+                expect(animationTimingOf(both, "blueprint-group-sweep")).toEqual(animationTimingOf(animationOf(BLUEPRINT_CSS, FLASH), "blueprint-group-sweep"));
                 expect(both).toContain("hint-reveal-pop 450ms cubic-bezier(0.2, 0.8, 0.2, 1)");
             });
         });
 
         describe("the lock", () => {
             it("should march the lock's dashes on from 720ms over 700ms, coming in over its first 12%", () => {
-                const frames = framesOf("blueprint-celebration-lock");
+                const frames = keyframesOf(BLUEPRINT_CSS, "blueprint-celebration-lock");
 
                 expect(spanOf(MARCHING_LOCK, "blueprint-celebration-lock")).toEqual({ startMs: 720, endMs: 1420 });
-                expect(animationOf(MARCHING_LOCK)).toContain(" linear ");
-                expect(animationOf(MARCHING_LOCK)).toContain(" both");
+                expect(animationOf(BLUEPRINT_CSS, MARCHING_LOCK)).toContain(" linear ");
+                expect(animationOf(BLUEPRINT_CSS, MARCHING_LOCK)).toContain(" both");
                 // Six of its 6 4 dashes
                 expect(frames.get("0%")).toEqual(new Map([["opacity", "0"], ["stroke-dashoffset", "60"]]));
                 expect(frames.get("12%")).toEqual(new Map([["opacity", "1"]]));
@@ -562,22 +542,22 @@ describe("blueprint moments", () => {
 
             it("should pull the verdict's leader out from 1000ms over 260ms and show its words from 1220ms", () => {
                 expect(spanOf(LEADER, "blueprint-celebration-lead")).toEqual({ startMs: 1000, endMs: 1260 });
-                expect(animationOf(LEADER)).toContain(" ease-out ");
-                expect(framesOf("blueprint-celebration-lead").get("from")).toEqual(new Map([["transform", "rotate(-140deg) scaleX(0)"]]));
-                expect(framesOf("blueprint-celebration-lead").get("to")).toEqual(new Map([["transform", "rotate(-140deg) scaleX(1)"]]));
+                expect(animationOf(BLUEPRINT_CSS, LEADER)).toContain(" ease-out ");
+                expect(keyframesOf(BLUEPRINT_CSS, "blueprint-celebration-lead").get("from")).toEqual(new Map([["transform", "rotate(-140deg) scaleX(0)"]]));
+                expect(keyframesOf(BLUEPRINT_CSS, "blueprint-celebration-lead").get("to")).toEqual(new Map([["transform", "rotate(-140deg) scaleX(1)"]]));
                 expect(spanOf(VERDICT_TEXT, "blueprint-celebration-fade-in")).toEqual({ startMs: 1220, endMs: 1420 });
-                expect(framesOf("blueprint-celebration-fade-in").get("from")).toEqual(new Map([["opacity", "0"]]));
+                expect(keyframesOf(BLUEPRINT_CSS, "blueprint-celebration-fade-in").get("from")).toEqual(new Map([["opacity", "0"]]));
             });
         });
 
         describe("the dialog", () => {
             // Clipped 64px out, and 120px above, so the stamp standing on the card's top edge comes whole
             it("should plot the card in from the left from 60ms over 520ms, its frame, shadow and stamp whole at the end", () => {
-                const frames = framesOf("blueprint-celebration-draw");
+                const frames = keyframesOf(BLUEPRINT_CSS, "blueprint-celebration-draw");
 
                 expect(spanOf(DRAWN_CARD, "blueprint-celebration-draw")).toEqual({ startMs: 60, endMs: 580 });
-                expect(animationOf(DRAWN_CARD)).toContain(" linear ");
-                expect(animationOf(DRAWN_CARD)).toContain(" both");
+                expect(animationOf(BLUEPRINT_CSS, DRAWN_CARD)).toContain(" linear ");
+                expect(animationOf(BLUEPRINT_CSS, DRAWN_CARD)).toContain(" both");
                 expect(frames.get("0%")).toEqual(new Map([["clip-path", "inset(-120px 100% -64px -64px)"]]));
                 expect(frames.get("100%")).toEqual(new Map([["clip-path", "inset(-120px -64px -64px -64px)"]]));
             });
@@ -599,21 +579,21 @@ describe("blueprint moments", () => {
 
             it("should draw the trophy's ring in from 580ms over 1s", () => {
                 expect(spanOf(DRAWN_RING, "blueprint-celebration-trophy")).toEqual({ startMs: 580, endMs: 1580 });
-                expect(animationOf(DRAWN_RING)).toContain(" ease-out ");
-                expect(framesOf("blueprint-celebration-trophy").get("from")).toEqual(new Map([["border-color", "transparent"]]));
-                expect(framesOf("blueprint-celebration-trophy").get("to")).toEqual(new Map([["border-color", "var(--color-primary)"]]));
+                expect(animationOf(BLUEPRINT_CSS, DRAWN_RING)).toContain(" ease-out ");
+                expect(keyframesOf(BLUEPRINT_CSS, "blueprint-celebration-trophy").get("from")).toEqual(new Map([["border-color", "transparent"]]));
+                expect(keyframesOf(BLUEPRINT_CSS, "blueprint-celebration-trophy").get("to")).toEqual(new Map([["border-color", "var(--color-primary)"]]));
             });
 
             // Ruling 12: the stamp at −12°, pressed from large, on a ground of 92% of the paper
             it("should press the stamp on from 700ms over 460ms, from large, turned −12°, on 92% of the paper", () => {
                 const stamp = declarationsOf(BLUEPRINT_CSS, STAMP);
-                const frames = framesOf("blueprint-celebration-stamp");
+                const frames = keyframesOf(BLUEPRINT_CSS, "blueprint-celebration-stamp");
 
                 expect(stamp.get("transform")).toBe("rotate(-12deg)");
                 expect(stamp.get("background-color")).toBe("color-mix(in srgb, var(--color-background) 92%, transparent)");
                 expect(spanOf(PRESSED_STAMP, "blueprint-celebration-stamp")).toEqual({ startMs: 700, endMs: 1160 });
-                expect(animationOf(PRESSED_STAMP)).toContain(" cubic-bezier(0.2, 0.8, 0.2, 1) ");
-                expect(animationOf(PRESSED_STAMP)).toContain(" both");
+                expect(animationOf(BLUEPRINT_CSS, PRESSED_STAMP)).toContain(" cubic-bezier(0.2, 0.8, 0.2, 1) ");
+                expect(animationOf(BLUEPRINT_CSS, PRESSED_STAMP)).toContain(" both");
                 expect(frames.get("0%")).toEqual(new Map([["opacity", "0"], ["transform", "rotate(-6deg) scale(1.6)"]]));
                 expect(frames.get("70%")).toEqual(new Map([["opacity", "1"], ["transform", "rotate(-12deg) scale(0.95)"]]));
                 expect(frames.get("100%")).toEqual(new Map([["opacity", "1"], ["transform", "rotate(-12deg) scale(1)"]]));
@@ -623,7 +603,7 @@ describe("blueprint moments", () => {
         // A still board neither sweeps nor flashes, and a still lock, verdict, card and stamp stand at their end
         it("should animate only a moving celebration, so a still board shows the end at once", () => {
             for (const selector of ANIMATED) {
-                expect(animationOf(selector), selector).not.toBe("");
+                expect(animationOf(BLUEPRINT_CSS, selector), selector).not.toBe("");
                 expect(selector.split(":not([data-still])").join(""), selector).not.toMatch(/still/);
             }
             for (const selector of [SWEEP, FLASH, FLASH_ARRIVING, FLASH_POPPING]) {
@@ -632,9 +612,9 @@ describe("blueprint moments", () => {
         });
 
         it("should move nothing through a filter, a mask or a motion path", () => {
-            const names = ANIMATED.flatMap(selector => animationOf(selector).split(",").map(layer => layer.trim().split(" ")[0] ?? ""));
+            const names = ANIMATED.flatMap(selector => animationOf(BLUEPRINT_CSS, selector).split(",").map(layer => layer.trim().split(" ")[0] ?? ""));
             for (const name of names) {
-                const properties = [...framesOf(name).values()].flatMap(frame => [...frame.keys()]);
+                const properties = [...keyframesOf(BLUEPRINT_CSS, name).values()].flatMap(frame => [...frame.keys()]);
                 expect(properties.some(property => /filter|mask|offset-/.test(property)), name).toBe(false);
             }
             for (const selector of ANIMATED) {

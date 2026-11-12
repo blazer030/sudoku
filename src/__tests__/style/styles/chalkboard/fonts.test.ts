@@ -1,30 +1,18 @@
 import { readFileSync } from "fs";
 import postcss from "postcss";
 import { syncChalkboardFonts } from "@/style/styles/chalkboard/fonts";
-
-// The font tokens declared in index.css's @theme
-const themeFonts = (): Map<string, string> => {
-    const fonts = new Map<string, string>();
-    postcss.parse(readFileSync("src/style/index.css", "utf8")).walkAtRules("theme", (atRule) => {
-        atRule.walkDecls(/^--font-/, (declaration) => {
-            fonts.set(declaration.prop, declaration.value.trim());
-        });
-    });
-    return fonts;
-};
-
-const families = (stack: string): string[] => stack.split(",").map(family => family.trim().replace(/"/g, ""));
+import { familiesOf, themeFonts } from "../../styleSheetRules";
 
 describe("chalkboard font stack", () => {
     it("should set chalk's digits in Chalk Digits and fall to WenKai", () => {
-        expect(families(themeFonts().get("--font-chalkboard-digits") ?? "").slice(0, 2)).toEqual(["Chalk Digits", "LXGW WenKai TC"]);
+        expect(familiesOf(themeFonts().get("--font-chalkboard-digits") ?? "").slice(0, 2)).toEqual(["Chalk Digits", "LXGW WenKai TC"]);
     });
 
     it("should keep Chalk Digits out of every other style's stacks", () => {
         const others = [...themeFonts()].filter(([token]) => !token.startsWith("--font-chalkboard-"));
 
         for (const [token, stack] of others) {
-            expect(families(stack), token).not.toContain("Chalk Digits");
+            expect(familiesOf(stack), token).not.toContain("Chalk Digits");
         }
     });
 });
@@ -56,14 +44,14 @@ describe("chalkboard's two faces on one Caveat Brush file", () => {
     });
 
     it("should set the cheer in Chalk Cheer and fall to WenKai", () => {
-        expect(families(themeFonts().get("--font-chalkboard-cheer") ?? "").slice(0, 2)).toEqual(["Chalk Cheer", "LXGW WenKai TC"]);
+        expect(familiesOf(themeFonts().get("--font-chalkboard-cheer") ?? "").slice(0, 2)).toEqual(["Chalk Cheer", "LXGW WenKai TC"]);
     });
 
     it("should keep Chalk Cheer out of every other stack", () => {
         const others = [...themeFonts()].filter(([token]) => token !== "--font-chalkboard-cheer");
 
         for (const [token, stack] of others) {
-            expect(families(stack), token).not.toContain("Chalk Cheer");
+            expect(familiesOf(stack), token).not.toContain("Chalk Cheer");
         }
     });
 });

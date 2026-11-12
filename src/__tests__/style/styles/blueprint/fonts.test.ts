@@ -1,33 +1,21 @@
 import { readFileSync } from "fs";
 import postcss from "postcss";
 import { syncBlueprintFonts } from "@/style/styles/blueprint/fonts";
+import { familiesOf, themeFonts } from "../../styleSheetRules";
 
 const BLUEPRINT_FAMILIES = ["Blueprint Mono", "Blueprint Hand", "Blueprint Sans TC"];
 
-// The font tokens declared in index.css's @theme
-const themeFonts = (): Map<string, string> => {
-    const fonts = new Map<string, string>();
-    postcss.parse(readFileSync("src/style/index.css", "utf8")).walkAtRules("theme", (atRule) => {
-        atRule.walkDecls(/^--font-/, (declaration) => {
-            fonts.set(declaration.prop, declaration.value.trim());
-        });
-    });
-    return fonts;
-};
-
-const families = (stack: string): string[] => stack.split(",").map(family => family.trim().replace(/"/g, ""));
-
 describe("blueprint font stacks", () => {
     it("should set mono text in Blueprint Mono, falling to Blueprint Sans TC", () => {
-        expect(families(themeFonts().get("--font-blueprint-mono") ?? "").slice(0, 2)).toEqual(["Blueprint Mono", "Blueprint Sans TC"]);
+        expect(familiesOf(themeFonts().get("--font-blueprint-mono") ?? "").slice(0, 2)).toEqual(["Blueprint Mono", "Blueprint Sans TC"]);
     });
 
     it("should set the player's digits in Blueprint Hand, falling to Mono and then Sans TC", () => {
-        expect(families(themeFonts().get("--font-blueprint-hand") ?? "").slice(0, 3)).toEqual(["Blueprint Hand", "Blueprint Mono", "Blueprint Sans TC"]);
+        expect(familiesOf(themeFonts().get("--font-blueprint-hand") ?? "").slice(0, 3)).toEqual(["Blueprint Hand", "Blueprint Mono", "Blueprint Sans TC"]);
     });
 
     it("should set other text in Blueprint Sans TC, falling to system faces", () => {
-        expect(families(themeFonts().get("--font-blueprint-sans") ?? "").slice(0, 3)).toEqual(["Blueprint Sans TC", "PingFang TC", "Microsoft JhengHei"]);
+        expect(familiesOf(themeFonts().get("--font-blueprint-sans") ?? "").slice(0, 3)).toEqual(["Blueprint Sans TC", "PingFang TC", "Microsoft JhengHei"]);
     });
 
     it("should keep the blueprint families out of every other style's stacks", () => {
@@ -35,7 +23,7 @@ describe("blueprint font stacks", () => {
 
         for (const [token, stack] of others) {
             for (const family of BLUEPRINT_FAMILIES) {
-                expect(families(stack), `${token} ${family}`).not.toContain(family);
+                expect(familiesOf(stack), `${token} ${family}`).not.toContain(family);
             }
         }
     });

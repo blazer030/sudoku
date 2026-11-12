@@ -2,7 +2,7 @@ import { readFileSync } from "fs";
 import postcss, { type AtRule } from "postcss";
 import { STYLE_MOMENTS } from "@/presentation/components/style-moments/styleMoments";
 import { GROUP_RIPPLE_STEP_MS } from "@/presentation/pages/game/useGroupEffect";
-import { animationTimingOf, declarationsOf, reducedMotionDeclarationsOf as reducedMotionDeclarationsIn } from "../../styleSheetRules";
+import { animationOf, animationTimingOf, collapse, declarationsOf, keyframeOffsetsOf, reducedMotionDeclarationsOf as reducedMotionDeclarationsIn } from "../../styleSheetRules";
 
 const INK_CSS = readFileSync("src/style/styles/ink/skin.css", "utf8");
 
@@ -42,26 +42,7 @@ const PRESSING_SEAL = `${UNROLLING_CARD} .ink-seal-stamp`;
 const TROPHY = `${CARD} [data-skin~="trophy"]`;
 const CELEBRATION_ANIMATED = [FIRST_WASH, SECOND_WASH, TAKING_DIGIT, UNROLLING_CARD, BRUSHING_TITLE, TRAVELLING_ROD, PRESSING_SEAL];
 
-const collapse = (text: string): string => text.replace(/\s+/g, " ").trim();
-
 const reducedMotionDeclarationsOf = (selector: string): Map<string, string> => reducedMotionDeclarationsIn(INK_CSS, selector);
-
-interface Frame { offsets: number[]; declarations: Map<string, string> }
-
-// A keyframes block's frames in order, each with its offsets as percentages
-const framesOf = (name: string): Frame[] => {
-    const frames: Frame[] = [];
-    postcss.parse(INK_CSS).walkAtRules("keyframes", (atRule) => {
-        if (atRule.params.trim() !== name) return;
-        atRule.walkRules((frame) => {
-            const declarations = new Map<string, string>();
-            frame.walkDecls((declaration) => { declarations.set(declaration.prop, collapse(declaration.value)); });
-            const offsets = frame.selectors.map(offset => (offset.trim() === "from" ? 0 : offset.trim() === "to" ? 100 : Number.parseFloat(offset)));
-            frames.push({ offsets, declarations });
-        });
-    });
-    return frames;
-};
 
 // Every animated loader rule outside the reduced-motion block: its selector, its step and its animation
 const loaderAnimations = (): { selector: string; step: number | null; animation: string; name: string }[] => {
@@ -83,26 +64,24 @@ const loaderAnimations = (): { selector: string; step: number | null; animation:
 const animationsOf = (piece: string) => loaderAnimations().filter(animation => animation.selector.startsWith(piece));
 
 // The last offset at which a piece is still hidden, and the first at which it shows whole
-const hiddenUntil = (name: string): number => framesOf(name)[0]?.offsets.reduce((latest, offset) => Math.max(latest, offset), 0) ?? 0;
+const hiddenUntil = (name: string): number => keyframeOffsetsOf(INK_CSS, name)[0]?.offsets.reduce((latest, offset) => Math.max(latest, offset), 0) ?? 0;
 const wholeFrom = (name: string, property: string, whole: string): number =>
-    framesOf(name).find(frame => frame.declarations.get(property) === whole)?.offsets[0] ?? Infinity;
+    keyframeOffsetsOf(INK_CSS, name).find(frame => frame.declarations.get(property) === whole)?.offsets[0] ?? Infinity;
 // The last offset at which a piece still shows, before it fades for the next round
 const fadeFrom = (name: string): number =>
-    Math.max(...framesOf(name).filter(frame => frame.declarations.get("opacity") !== "0").flatMap(frame => frame.offsets));
+    Math.max(...keyframeOffsetsOf(INK_CSS, name).filter(frame => frame.declarations.get("opacity") !== "0").flatMap(frame => frame.offsets));
 
 const byStep = <T extends { step: number | null }>(animations: T[]): T[] => [...animations].sort((first, second) => (first.step ?? 0) - (second.step ?? 0));
-
-const animationOf = (selector: string): string => declarationsOf(INK_CSS, selector).get("animation") ?? "";
 
 interface Span { startMs: number; endMs: number }
 
 const spanOf = (selector: string, name: string): Span => {
-    const timing = animationTimingOf(animationOf(selector), name);
+    const timing = animationTimingOf(animationOf(INK_CSS, selector), name);
     if (timing === null) throw new Error(`${selector} does not run ${name}`);
     return { startMs: timing.fixedDelayMs, endMs: timing.fixedDelayMs + timing.durationMs };
 };
 
-const animatedPropertiesOf = (name: string): Set<string> => new Set(framesOf(name).flatMap(frame => [...frame.declarations.keys()]));
+const animatedPropertiesOf = (name: string): Set<string> => new Set(keyframeOffsetsOf(INK_CSS, name).flatMap(frame => [...frame.declarations.keys()]));
 
 // The z-index a selector sets anywhere outside keyframes and reduced motion (the grid lines sit in @supports)
 const zIndexOf = (selector: string): number => {
@@ -153,7 +132,7 @@ const evaluate = (expression: string): number => {
 
 // A digit's ink-take delay in a given cell, from its calc() over the cell's row and column
 const takeDelayAt = (row: number, column: number): number => {
-    const delay = /ink-take \S+ \S+ calc\((.*)\) \S+$/.exec(animationOf(TAKING_DIGIT))?.[1] ?? "";
+    const delay = /ink-take \S+ \S+ calc\((.*)\) \S+$/.exec(animationOf(INK_CSS, TAKING_DIGIT))?.[1] ?? "";
     if (delay === "") throw new Error("the take has no calc() delay");
     return evaluate(delay
         .replace(/var\(--cell-row\)/g, String(row))
@@ -172,7 +151,7 @@ describe("ink moments", () => {
         });
 
         it("should draw each stroke along its mask as it shows, and finish it while the brush is held", () => {
-            const lastHeld = Math.max(...framesOf("ink-brush-life").filter(frame => frame.declarations.get("opacity") === "1").flatMap(frame => frame.offsets));
+            const lastHeld = Math.max(...keyframeOffsetsOf(INK_CSS, "ink-brush-life").filter(frame => frame.declarations.get("opacity") === "1").flatMap(frame => frame.offsets));
             for (const kind of KINDS) {
                 const life = spanOf(BRUSH_OF[kind], "ink-brush-life");
                 const reveal = spanOf(REVEAL_OF[kind], "ink-brush-reveal");
@@ -180,7 +159,7 @@ describe("ink moments", () => {
                 expect(reveal.startMs, kind).toBe(life.startMs);
                 expect(reveal.endMs, kind).toBeLessThanOrEqual(life.startMs + ((life.endMs - life.startMs) * lastHeld) / 100);
                 // Hidden along its whole length until it starts
-                expect(animationOf(REVEAL_OF[kind]), kind).toMatch(/ both$/);
+                expect(animationOf(INK_CSS, REVEAL_OF[kind]), kind).toMatch(/ both$/);
             }
             const dash = declarationsOf(INK_CSS, `${SCOPE} .ink-group-reveal`);
             expect(dash.get("stroke-dashoffset")).toBe(dash.get("stroke-dasharray"));
@@ -190,11 +169,11 @@ describe("ink moments", () => {
 
         it("should reveal the strokes by their dash offset only, and show the brush by opacity only", () => {
             expect([...animatedPropertiesOf("ink-brush-reveal")]).toEqual(["stroke-dashoffset"]);
-            expect(framesOf("ink-brush-reveal").slice(-1)[0]?.declarations.get("stroke-dashoffset")).toBe("0");
+            expect(keyframeOffsetsOf(INK_CSS, "ink-brush-reveal").slice(-1)[0]?.declarations.get("stroke-dashoffset")).toBe("0");
             expect([...animatedPropertiesOf("ink-brush-life")]).toEqual(["opacity"]);
             // Unseen without its animation, so a stopped effect leaves nothing on the board
             expect(declarationsOf(INK_CSS, BRUSH).get("opacity")).toBe("0");
-            const frames = framesOf("ink-brush-life");
+            const frames = keyframeOffsetsOf(INK_CSS, "ink-brush-life");
             expect(frames[0]?.declarations.get("opacity")).toBe("0");
             expect(frames[frames.length - 1]?.declarations.get("opacity")).toBe("0");
         });
@@ -207,7 +186,7 @@ describe("ink moments", () => {
         });
 
         it("should halo a completed group's digits in the paper's colour while the brush is over them", () => {
-            const frames = framesOf("ink-group-halo");
+            const frames = keyframeOffsetsOf(INK_CSS, "ink-group-halo");
             const life = spanOf(BRUSH_OF.row, "ink-brush-life");
             const halo = spanOf(GROUP_DIGIT, "ink-group-halo");
 
@@ -221,11 +200,11 @@ describe("ink moments", () => {
 
         // The entered digit is in its own completed group: the group's halo must not replace its bleed
         it("should bleed the entered digit in under the group's halo", () => {
-            const combined = animationOf(ARRIVING_GROUP_DIGIT);
+            const combined = animationOf(INK_CSS, ARRIVING_GROUP_DIGIT);
 
-            expect(animationTimingOf(combined, "ink-bleed")).toEqual(animationTimingOf(animationOf(ARRIVING_DIGIT), "ink-bleed"));
-            expect(animationTimingOf(combined, "ink-group-halo")).toEqual(animationTimingOf(animationOf(GROUP_DIGIT), "ink-group-halo"));
-            expect(combined).toContain(animationOf(ARRIVING_DIGIT));
+            expect(animationTimingOf(combined, "ink-bleed")).toEqual(animationTimingOf(animationOf(INK_CSS, ARRIVING_DIGIT), "ink-bleed"));
+            expect(animationTimingOf(combined, "ink-group-halo")).toEqual(animationTimingOf(animationOf(INK_CSS, GROUP_DIGIT), "ink-group-halo"));
+            expect(combined).toContain(animationOf(INK_CSS, ARRIVING_DIGIT));
             expect(reducedMotionDeclarationsOf(ARRIVING_GROUP_DIGIT).get("animation")).toBe("none");
         });
 
@@ -311,14 +290,14 @@ describe("ink moments", () => {
         it("should bloom two ink washes on the board's own layers, the second a beat later, and keep them under the dialog", () => {
             const first = spanOf(FIRST_WASH, "ink-board-wash");
             const second = spanOf(SECOND_WASH, "ink-board-wash");
-            const frames = framesOf("ink-board-wash");
+            const frames = keyframeOffsetsOf(INK_CSS, "ink-board-wash");
 
             expect(second.endMs - second.startMs).toBe(first.endMs - first.startMs);
             expect(second.startMs).toBeGreaterThan(first.startMs);
             // Hidden until it blooms, and still there once it has
             expect(frames[0]?.declarations.get("opacity")).toBe("0");
             expect(Number(frames[frames.length - 1]?.declarations.get("opacity"))).toBeGreaterThan(0);
-            expect(animationOf(FIRST_WASH)).toMatch(/ both$/);
+            expect(animationOf(INK_CSS, FIRST_WASH)).toMatch(/ both$/);
             for (const wash of [FIRST_WASH, SECOND_WASH]) {
                 expect(declarationsOf(INK_CSS, wash).get("opacity"), wash).toBe("0");
             }
@@ -341,7 +320,7 @@ describe("ink moments", () => {
 
         // The washes swell past the board's box; unclipped, they widened the page scroller while celebrating
         it("should keep the blooming washes inside the board's box", () => {
-            const scaledBeyond = framesOf("ink-board-wash").some((frame) => {
+            const scaledBeyond = keyframeOffsetsOf(INK_CSS, "ink-board-wash").some((frame) => {
                 const scale = /scale\(([\d.]+)\)/.exec(frame.declarations.get("transform") ?? "")?.[1];
                 return scale !== undefined && Number(scale) > 1;
             });
@@ -374,7 +353,7 @@ describe("ink moments", () => {
         });
 
         it("should let the digits take the ink from the centre outward, all before the dialog opens", () => {
-            const take = animationTimingOf(animationOf(TAKING_DIGIT), "ink-take");
+            const take = animationTimingOf(animationOf(INK_CSS, TAKING_DIGIT), "ink-take");
             const farthest = takeDelayAt(0, 0);
 
             expect(takeDelayAt(4, 4)).toBe(0);
@@ -386,19 +365,19 @@ describe("ink moments", () => {
         });
 
         it("should leave each digit sharp, in a halo of paper, once it has taken the ink", () => {
-            const frames = framesOf("ink-take");
+            const frames = keyframeOffsetsOf(INK_CSS, "ink-take");
             const last = frames[frames.length - 1]?.declarations ?? new Map<string, string>();
 
             expect(last.get("opacity")).toBe("1");
             expect(last.get("transform")).toBe("none");
             expect(declarationsOf(INK_CSS, TAKING_DIGIT).get("text-shadow")).toContain("var(--color-card)");
-            expect(animationOf(TAKING_DIGIT)).toMatch(/ both$/);
+            expect(animationOf(INK_CSS, TAKING_DIGIT)).toMatch(/ both$/);
         });
 
         // Every digit on the board takes the ink at once, and a shadow in the keyframes repaints them all on
         // every frame: on the Android emulator that alone dropped the celebration to about 6 frames a second
         it("should move the taking digits by opacity and transform alone", () => {
-            const animated = framesOf("ink-take").flatMap(frame => [...frame.declarations.keys()]);
+            const animated = keyframeOffsetsOf(INK_CSS, "ink-take").flatMap(frame => [...frame.declarations.keys()]);
 
             expect(new Set(animated)).toEqual(new Set(["opacity", "transform"]));
         });
@@ -423,17 +402,17 @@ describe("ink moments", () => {
         it("should unroll the card from its top by its clip, the bottom rod travelling with the edge", () => {
             const unroll = spanOf(UNROLLING_CARD, "ink-unroll");
             const rod = spanOf(TRAVELLING_ROD, "ink-rod");
-            const frames = framesOf("ink-unroll");
+            const frames = keyframeOffsetsOf(INK_CSS, "ink-unroll");
 
             expect(unroll.startMs).toBeGreaterThan(0);
             expect(rod).toEqual(unroll);
-            expect(animationOf(TRAVELLING_ROD).replace("ink-rod", "")).toBe(animationOf(UNROLLING_CARD).replace("ink-unroll", ""));
+            expect(animationOf(INK_CSS, TRAVELLING_ROD).replace("ink-rod", "")).toBe(animationOf(INK_CSS, UNROLLING_CARD).replace("ink-unroll", ""));
             expect(frames[0]?.declarations.get("clip-path")).toMatch(/^inset\(\S+ \S+ calc\(100% - [\d.]+px\) \S+\)$/);
             expect(frames[frames.length - 1]?.declarations.get("clip-path")).toMatch(/^inset\((-[\d.]+px ?){4}\)$/);
             // Held rolled up until it starts; the rod starts at the top and ends where the card's foot is
-            expect(animationOf(UNROLLING_CARD)).toMatch(/ both$/);
-            expect(framesOf("ink-rod")[0]?.declarations.get("transform")).toBe("translateY(-100%)");
-            expect(framesOf("ink-rod").slice(-1)[0]?.declarations.get("transform")).toBe("none");
+            expect(animationOf(INK_CSS, UNROLLING_CARD)).toMatch(/ both$/);
+            expect(keyframeOffsetsOf(INK_CSS, "ink-rod")[0]?.declarations.get("transform")).toBe("translateY(-100%)");
+            expect(keyframeOffsetsOf(INK_CSS, "ink-rod").slice(-1)[0]?.declarations.get("transform")).toBe("none");
             expect([...animatedPropertiesOf("ink-rod")]).toEqual(["transform"]);
         });
 
@@ -441,7 +420,7 @@ describe("ink moments", () => {
             const unroll = spanOf(UNROLLING_CARD, "ink-unroll");
             const title = spanOf(BRUSHING_TITLE, "ink-brush");
             const press = spanOf(PRESSING_SEAL, "ink-press");
-            const brush = framesOf("ink-brush");
+            const brush = keyframeOffsetsOf(INK_CSS, "ink-brush");
 
             expect(title.startMs).toBeGreaterThan(unroll.startMs);
             expect(title.startMs).toBeLessThan(unroll.endMs);
@@ -449,14 +428,14 @@ describe("ink moments", () => {
             expect(press.startMs).toBeGreaterThanOrEqual(unroll.endMs);
             expect(brush[0]?.declarations.get("clip-path")).toBe("inset(0 100% 0 0)");
             expect(brush[brush.length - 1]?.declarations.get("clip-path")).toBe("inset(0 0 0 0)");
-            expect(framesOf("ink-press")[0]?.declarations.get("opacity")).toBe("0");
+            expect(keyframeOffsetsOf(INK_CSS, "ink-press")[0]?.declarations.get("opacity")).toBe("0");
             for (const selector of [BRUSHING_TITLE, PRESSING_SEAL]) {
-                expect(animationOf(selector), selector).toMatch(/ both$/);
+                expect(animationOf(INK_CSS, selector), selector).toMatch(/ both$/);
             }
         });
 
         it("should show the still card's end state: open, titled and sealed", () => {
-            const pressed = framesOf("ink-press").slice(-1)[0]?.declarations ?? new Map<string, string>();
+            const pressed = keyframeOffsetsOf(INK_CSS, "ink-press").slice(-1)[0]?.declarations ?? new Map<string, string>();
 
             for (const selector of [CARD, TITLE, SEAL_STAMP, ROD, ROD_TRACK]) {
                 const declarations = declarationsOf(INK_CSS, selector);
@@ -527,7 +506,7 @@ describe("ink moments", () => {
 
             expect(dashLength).toBeDefined();
             for (const { name } of loaderAnimations()) {
-                const frames = framesOf(name);
+                const frames = keyframeOffsetsOf(INK_CSS, name);
                 const first = frames[0]?.declarations ?? new Map<string, string>();
                 const last = frames[frames.length - 1]?.declarations ?? new Map<string, string>();
 
@@ -545,7 +524,7 @@ describe("ink moments", () => {
         it("should animate only opacity, transform and the reveals' dash offset", () => {
             expect(loaderAnimations().length).toBeGreaterThan(0);
             for (const { name } of loaderAnimations()) {
-                const properties = new Set(framesOf(name).flatMap(frame => [...frame.declarations.keys()]));
+                const properties = new Set(keyframeOffsetsOf(INK_CSS, name).flatMap(frame => [...frame.declarations.keys()]));
 
                 expect([...properties].every(property => ["opacity", "transform", "stroke-dashoffset"].includes(property)), name).toBe(true);
             }
@@ -583,9 +562,9 @@ describe("ink moments", () => {
                 expect(reducedMotionDeclarationsOf(selector).get("animation"), selector).toBe("none");
             }
             const [stroke] = animationsOf(STROKE);
-            const heldStroke = framesOf(stroke.name).find(frame => frame.declarations.get("opacity") !== "0")?.declarations.get("opacity");
+            const heldStroke = keyframeOffsetsOf(INK_CSS, stroke.name).find(frame => frame.declarations.get("opacity") !== "0")?.declarations.get("opacity");
             const [seal] = animationsOf(SEAL);
-            const pressedSeal = framesOf(seal.name).find(frame => frame.declarations.get("opacity") === "1" && frame.offsets.length > 1)?.declarations.get("transform");
+            const pressedSeal = keyframeOffsetsOf(INK_CSS, seal.name).find(frame => frame.declarations.get("opacity") === "1" && frame.offsets.length > 1)?.declarations.get("transform");
 
             expect(reducedMotionDeclarationsOf(STROKE).get("opacity")).toBe(heldStroke);
             expect(reducedMotionDeclarationsOf(REVEAL).get("stroke-dashoffset")).toBe("0");
