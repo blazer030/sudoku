@@ -968,3 +968,62 @@ tests:
   - src/__tests__/theme/palettes.test.ts
   - src/__tests__/presentation/pages/game/Game.test.ts
 -->
+
+---
+### Requirement: Supposed digits
+A lesson board SHALL be able to show supposed digits, placed only for the length of an argument and never part of the board. A supposed digit SHALL use the look of a digit the player has filled in, and a refuted one SHALL use the look of a wrong digit in practice, so every style already draws both and no style needs a hook of its own. Supposed and refuted digits SHALL NOT be dimmed. Only lesson boards show them; hint mode, the Walkthrough and Game Review are unchanged.
+
+#### Scenario: A supposed digit
+- **WHEN** an explanation step supposes a 2 in an empty cell
+- **THEN** the cell shows 2 with the filled-in look, and is not dimmed even when the step dims other digits
+
+#### Scenario: A refuted digit
+- **WHEN** a later step refutes that 2
+- **THEN** the cell shows 2 with the wrong-digit look
+
+#### Scenario: Every style draws them
+- **WHEN** the demonstration is shown in each of the nine styles, with motion on and off
+- **THEN** the supposed and refuted digits are readable and look different from each other, with nothing to wait for
+
+<!-- @trace
+source: lesson-refinement
+updated: 2026-11-12
+code:
+  - src/assets/fonts/noto-serif-tc.woff2
+  - src/assets/fonts/noto-sans-tc.woff2
+  - src/domain/lessons/practice.ts
+  - src/presentation/i18n/messages/lessons/en.ts
+  - src/assets/fonts/lxgw-wenkai-tc-bold.woff2
+  - src/domain/lessons/verifyLesson.ts
+  - src/presentation/pages/lessons/LessonPanel.vue
+  - src/presentation/i18n/messages/lessons/contentHardZhHant.ts
+  - src/style/index.css
+  - src/assets/fonts/lxgw-wenkai-tc-characters.txt
+  - src/domain/lessons/content/basicsAndEasy.ts
+  - src/presentation/i18n/messages/lessons/contentMediumEn.ts
+  - src/assets/fonts/cubic-11.woff2
+  - src/presentation/i18n/messages/lessons/contentMediumZhHant.ts
+  - src/presentation/pages/settings/changelogData.ts
+  - src/presentation/pages/lessons/useLessonSession.ts
+  - src/presentation/i18n/messages/lessons/contentZhHant.ts
+  - src/presentation/pages/lessons/LessonScreen.vue
+  - src/assets/fonts/cubic-11-characters.txt
+  - src/presentation/pages/lessons/lessonCellView.ts
+  - src/domain/lessons/content/hard.ts
+  - src/presentation/pages/lessons/useStuckNudge.ts
+  - src/domain/lessons/Lesson.ts
+  - src/assets/fonts/lxgw-wenkai-tc-regular.woff2
+  - src/domain/lessons/content/medium.ts
+  - src/presentation/i18n/messages/lessons/zh-Hant.ts
+  - src/presentation/i18n/messages/lessons/contentEn.ts
+  - src/presentation/i18n/messages/lessons/contentHardEn.ts
+tests:
+  - src/__tests__/presentation/pages/lessons/lessonCellView.test.ts
+  - src/__tests__/domain/lessons/verifyLesson.test.ts
+  - src/__tests__/domain/lessons/practiceReducer.test.ts
+  - src/__tests__/presentation/pages/lessons/LessonScreen.test.ts
+  - src/__tests__/presentation/pages/lessons/useStuckNudge.test.ts
+  - src/__tests__/domain/lessons/content/lessonContent.test.ts
+  - src/__tests__/presentation/pages/lessons/useLessonSession.test.ts
+  - src/__tests__/style/reducedMotion.test.ts
+-->
