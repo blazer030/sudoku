@@ -1,7 +1,5 @@
-import { at, boxOf, cells, columnOf, rowOf } from "@/domain/lessons/content/helpers";
+import { at, boxOf, cells, columnOf, key, rowOf } from "@/domain/lessons/content/helpers";
 import type { Lesson, LessonBoard } from "@/domain/lessons/Lesson";
-
-const key = (lesson: string, name: string) => `lessons.content.${lesson}.${name}`;
 
 /*
  . . .  2 6 .  7 . 1

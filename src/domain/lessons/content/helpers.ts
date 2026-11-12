@@ -1,4 +1,5 @@
 import { boxHouse, columnHouse, rowHouse } from "@/domain/solver/houses";
+import type { LessonBoard } from "@/domain/lessons/Lesson";
 import type { CellReference, ChainLink, Elimination } from "@/domain/solver/SolveStep";
 
 // Rows, columns and boxes count from 1 here, as the lessons' copy does.
@@ -22,3 +23,13 @@ export const link = (
     digit: number,
     type: ChainLink["type"] = "strong",
 ): ChainLink => ({ from: at(from[0], from[1]), to: at(to[0], to[1]), digit, type });
+
+/** A lesson's message key: `lessons.content.<lesson>.<name>`. */
+export const key = (lesson: string, name: string): string => `lessons.content.${lesson}.${name}`;
+
+/** A board shown with its candidates, less any already ruled out. */
+export const candidateBoard = (values: string, ...removedCandidates: readonly Elimination[]): LessonBoard => ({
+    values,
+    showsCandidates: true,
+    ...(removedCandidates.length > 0 ? { removedCandidates } : {}),
+});

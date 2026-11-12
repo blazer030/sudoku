@@ -1,29 +1,20 @@
-import { at, boxOf, cells, columnOf, link, removal, rowOf } from "@/domain/lessons/content/helpers";
-import type { Lesson, LessonBoard } from "@/domain/lessons/Lesson";
-import type { Elimination } from "@/domain/solver/SolveStep";
-
-const key = (lesson: string, name: string) => `lessons.content.${lesson}.${name}`;
-
-const board = (values: string, ...removedCandidates: readonly Elimination[]): LessonBoard => ({
-    values,
-    showsCandidates: true,
-    ...(removedCandidates.length > 0 ? { removedCandidates } : {}),
-});
+import { at, boxOf, candidateBoard, cells, columnOf, key, link, removal, rowOf } from "@/domain/lessons/content/helpers";
+import type { Lesson } from "@/domain/lessons/Lesson";
 
 // X-Wing: rows 1 and 7 hold the 4s in columns 3 and 7
-const X_WING_SHOW_BOARD = board("280165039061938520359472861138594276672381945945627183890716052500040600006050000");
+const X_WING_SHOW_BOARD = candidateBoard("280165039061938520359472861138594276672381945945627183890716052500040600006050000");
 const X_WING_SHOW_CORNERS = cells([1, 3], [1, 7], [7, 3], [7, 7]);
 const X_WING_SHOW_ROW_LINKS = [link([1, 3], [1, 7], 4), link([7, 3], [7, 7], 4)];
 const X_WING_SHOW_LINKS = [...X_WING_SHOW_ROW_LINKS, link([1, 3], [7, 3], 4, "weak"), link([1, 7], [7, 7], 4, "weak")];
 const X_WING_SHOW_MARKS = { noteDigit: 4, emphasized: [4], dimOthers: true };
 
 // Rows 3 and 6 hold the 6s in columns 2 and 7
-const X_WING_FOLLOW_BOARD = board("804269105290175480105348092058794201419632857702851049927480510080517924541920008");
+const X_WING_FOLLOW_BOARD = candidateBoard("804269105290175480105348092058794201419632857702851049927480510080517924541920008");
 const X_WING_FOLLOW_CORNERS = cells([3, 2], [3, 7], [6, 2], [6, 7]);
 const X_WING_FOLLOW_LINKS = [link([3, 2], [3, 7], 6), link([6, 2], [6, 7], 6), link([3, 2], [6, 2], 6, "weak"), link([3, 7], [6, 7], 6, "weak")];
 
 // This time columns 3 and 4 hold the 1s, in rows 5 and 7
-const X_WING_ALONE_BOARD = board("954317286312468579867952134073094821420080097089270045230049768048726903796830402");
+const X_WING_ALONE_BOARD = candidateBoard("954317286312468579867952134073094821420080097089270045230049768048726903796830402");
 const X_WING_ALONE_CORNERS = cells([5, 3], [7, 3], [5, 4], [7, 4]);
 
 export const X_WING: Lesson = {
@@ -172,7 +163,7 @@ export const X_WING: Lesson = {
 };
 
 // Swordfish: rows 1, 3 and 6 hold the 9s in columns 1, 4 and 8
-const SWORDFISH_SHOW_BOARD = board("032570801105308702874012503703800015501703084048051237387465129256139478419287356");
+const SWORDFISH_SHOW_BOARD = candidateBoard("032570801105308702874012503703800015501703084048051237387465129256139478419287356");
 const SWORDFISH_SHOW_CELLS = cells([1, 1], [1, 8], [3, 4], [3, 8], [6, 1], [6, 4]);
 const SWORDFISH_SHOW_ROWS = [...rowOf(1), ...rowOf(3), ...rowOf(6)];
 const SWORDFISH_SHOW_COLUMNS = [...columnOf(1), ...columnOf(4), ...columnOf(8)];
@@ -186,7 +177,7 @@ const SWORDFISH_SHOW_LINKS = [
 const SWORDFISH_SHOW_MARKS = { pattern: SWORDFISH_SHOW_CELLS, noteDigit: 9, emphasized: [9], dimOthers: true };
 
 // Jellyfish: rows 2, 3, 6 and 7 hold the 6s in columns 1, 3, 5 and 9
-const JELLYFISH_SHOW_BOARD = board(
+const JELLYFISH_SHOW_BOARD = candidateBoard(
     "438510000591007340070934158805391004719450803043008591950103280300005010187629435",
     removal(1, 8, 2),
     removal(1, 9, 7),
@@ -194,11 +185,11 @@ const JELLYFISH_SHOW_BOARD = board(
 );
 
 // Rows 3, 6 and 9 hold the 5s in columns 2, 3 and 6
-const SWORDFISH_FOLLOW_BOARD = board("001036479379814256460970183196008347200067590700049620900601735017403962603790814", removal(6, 4, 5));
+const SWORDFISH_FOLLOW_BOARD = candidateBoard("001036479379814256460970183196008347200067590700049620900601735017403962603790814", removal(6, 4, 5));
 const SWORDFISH_FOLLOW_CELLS = cells([3, 3], [3, 6], [6, 2], [6, 3], [9, 2], [9, 6]);
 
 // Rows 3, 6 and 9 hold the 4s in columns 2, 5 and 7
-const SWORDFISH_ALONE_BOARD = board("010074362060002709700006018080007106174369825006008073007601084091085637608703001", removal(3, 5, 9), removal(6, 4, 4));
+const SWORDFISH_ALONE_BOARD = candidateBoard("010074362060002709700006018080007106174369825006008073007601084091085637608703001", removal(3, 5, 9), removal(6, 4, 4));
 const SWORDFISH_ALONE_CELLS = cells([3, 2], [3, 7], [6, 5], [6, 7], [9, 2], [9, 5]);
 
 export const FISH: Lesson = {
@@ -371,7 +362,7 @@ export const FISH: Lesson = {
 };
 
 // XY-Wing: the pivot at row 8, column 4 (5, 7) hands 3 to row 8, column 1 or to row 4, column 4
-const XY_WING_SHOW_BOARD = board("259861437163247958748009621021005846405608712687412593006103284002084169814926375");
+const XY_WING_SHOW_BOARD = candidateBoard("259861437163247958748009621021005846405608712687412593006103284002084169814926375");
 const XY_WING_SHOW_CELLS = cells([8, 4], [8, 1], [4, 4]);
 const XY_WING_SHOW_LINKS = [link([8, 4], [8, 1], 5), link([8, 4], [4, 4], 7)];
 const XY_WING_SHOW_MARKS = { pattern: XY_WING_SHOW_CELLS, links: XY_WING_SHOW_LINKS, emphasized: [3], dimOthers: true };
@@ -388,11 +379,11 @@ const XY_WING_NOTHING_MARKS = {
 };
 
 // The pivot at row 4, column 2 (5, 7) hands 4 to row 4, column 9 or to row 6, column 3
-const XY_WING_FOLLOW_BOARD = board("863002419792431586541896723906108230200603971310029860429367158600915342135284697");
+const XY_WING_FOLLOW_BOARD = candidateBoard("863002419792431586541896723906108230200603971310029860429367158600915342135284697");
 const XY_WING_FOLLOW_CELLS = cells([4, 2], [4, 9], [6, 3]);
 
 // The pivot at row 8, column 1 (2, 5) hands 8 to row 8, column 4 or to row 7, column 2
-const XY_WING_ALONE_BOARD = board("418539762973462815006187439842796153695341287731000694104970326067003940309604570");
+const XY_WING_ALONE_BOARD = candidateBoard("418539762973462815006187439842796153695341287731000694104970326067003940309604570");
 const XY_WING_ALONE_CELLS = cells([8, 1], [8, 4], [7, 2]);
 const XY_WING_ALONE_LINKS = [link([8, 1], [8, 4], 2), link([8, 1], [7, 2], 5)];
 
@@ -535,7 +526,7 @@ export const XY_WING: Lesson = {
 };
 
 // W-Wing: the 8s of row 9 join two 5-8 cells
-const W_WING_SHOW_BOARD = board("648215379325479618917368254456792183091034062032601490584127936273906041169043020");
+const W_WING_SHOW_BOARD = candidateBoard("648215379325479618917368254456792183091034062032601490584127936273906041169043020");
 const W_WING_SHOW_ENDS = cells([5, 4], [8, 7]);
 const W_WING_SHOW_LINK_CELLS = cells([9, 4], [9, 7]);
 const W_WING_SHOW_ROW_LINK = link([9, 4], [9, 7], 8);
@@ -543,12 +534,12 @@ const W_WING_SHOW_LINKS = [link([5, 4], [9, 4], 8, "weak"), W_WING_SHOW_ROW_LINK
 const W_WING_SHOW_MARKS = { pattern: W_WING_SHOW_ENDS, targets: W_WING_SHOW_LINK_CELLS, emphasized: [5], dimOthers: true };
 
 // The 2s of row 5 join two 2-5 cells
-const W_WING_FOLLOW_BOARD = board("569738124814962573237415869740309018180047390392186457478601930603094781901873040");
+const W_WING_FOLLOW_BOARD = candidateBoard("569738124814962573237415869740309018180047390392186457478601930603094781901873040");
 const W_WING_FOLLOW_ENDS = cells([4, 5], [7, 9]);
 const W_WING_FOLLOW_LINK_CELLS = cells([5, 4], [5, 9]);
 
 // The 3s of column 8 join two 3-6 cells
-const W_WING_ALONE_BOARD = board("953860240127354986008029153875693421219400000034015090781040369540937812392006074");
+const W_WING_ALONE_BOARD = candidateBoard("953860240127354986008029153875693421219400000034015090781040369540937812392006074");
 const W_WING_ALONE_ENDS = cells([5, 5], [6, 9]);
 const W_WING_ALONE_LINK_CELLS = cells([5, 7], [6, 7]);
 const W_WING_ALONE_LINKS = [link([5, 5], [5, 7], 7, "weak"), link([5, 7], [6, 7], 7), link([6, 7], [6, 9], 7, "weak")];
@@ -696,20 +687,20 @@ export const W_WING: Lesson = {
 };
 
 // XYZ-Wing: the pivot at row 7, column 1 (3, 5, 9), with 3 shared by all three cells
-const XYZ_WING_SHOW_BOARD = board("798324516123856749645791382259138467007642951400579238000487600000963100000215800");
+const XYZ_WING_SHOW_BOARD = candidateBoard("798324516123856749645791382259138467007642951400579238000487600000963100000215800");
 const XYZ_WING_SHOW_CELLS = cells([7, 1], [7, 9], [9, 1]);
 const XYZ_WING_SHOW_LINKS = [link([7, 1], [7, 9], 5), link([7, 1], [9, 1], 9)];
 const XYZ_WING_SHOW_MARKS = { pattern: XYZ_WING_SHOW_CELLS, links: XYZ_WING_SHOW_LINKS, emphasized: [3], dimOthers: true };
 
 // WXYZ-Wing: the pivot at row 3, column 1 (6, 7, 8, 9), with 6 shared by all four cells
-const WXYZ_WING_SHOW_BOARD = board("010403709340789001000510340053107490420950137179340000001805924080204613204601875");
+const WXYZ_WING_SHOW_BOARD = candidateBoard("010403709340789001000510340053107490420950137179340000001805924080204613204601875");
 
 // The pivot at row 4, column 4 (4, 6, 7), with 6 shared
-const XYZ_WING_FOLLOW_BOARD = board("618943257395827614742000398200000130903001420150002870421569783839274561567008942");
+const XYZ_WING_FOLLOW_BOARD = candidateBoard("618943257395827614742000398200000130903001420150002870421569783839274561567008942");
 const XYZ_WING_FOLLOW_CELLS = cells([4, 4], [4, 3], [5, 4]);
 
 // The pivot at row 8, column 6 (2, 4, 5), with 2 shared
-const XYZ_WING_ALONE_BOARD = board("489001756615987234732060981940108507250749010178650490894016370367090100521070009");
+const XYZ_WING_ALONE_BOARD = candidateBoard("489001756615987234732060981940108507250749010178650490894016370367090100521070009");
 const XYZ_WING_ALONE_CELLS = cells([8, 6], [7, 4], [8, 8]);
 const XYZ_WING_ALONE_LINKS = [link([8, 6], [7, 4], 5), link([8, 6], [8, 8], 4)];
 
@@ -859,17 +850,17 @@ export const XYZ_WING: Lesson = {
 };
 
 // X-Chain: the 7s of row 1 and of column 8, joined in box 3
-const X_CHAIN_SHOW_BOARD = board("541390060620541300930026541179652834264030105853014026495283617316475080782169453");
+const X_CHAIN_SHOW_BOARD = candidateBoard("541390060620541300930026541179652834264030105853014026495283617316475080782169453");
 const X_CHAIN_SHOW_CELLS = cells([1, 6], [1, 7], [2, 8], [5, 8]);
 const X_CHAIN_SHOW_LINKS = [link([1, 6], [1, 7], 7), link([1, 7], [2, 8], 7, "weak"), link([2, 8], [5, 8], 7)];
 const X_CHAIN_SHOW_MARKS = { noteDigit: 7, emphasized: [7], dimOthers: true };
 
 // The 2s of row 1 and of column 2, joined in box 1
-const X_CHAIN_FOLLOW_BOARD = board("780140653401035978300070241173564829096017435004390167038401796910706384647983512");
+const X_CHAIN_FOLLOW_BOARD = candidateBoard("780140653401035978300070241173564829096017435004390167038401796910706384647983512");
 const X_CHAIN_FOLLOW_CELLS = cells([1, 6], [1, 3], [2, 2], [6, 2]);
 
 // The 3s of row 1 and of column 7, joined in box 3. Other short chains remove other 3s here, so the prompt names row 4.
-const X_CHAIN_ALONE_BOARD = board("409506870705040096638719542941600050287051960563097200352964000894173625176285439");
+const X_CHAIN_ALONE_BOARD = candidateBoard("409506870705040096638719542941600050287051960563097200352964000894173625176285439");
 const X_CHAIN_ALONE_CELLS = cells([1, 5], [1, 9], [2, 7], [4, 7]);
 const X_CHAIN_ALONE_LINKS = [link([1, 5], [1, 9], 3), link([1, 9], [2, 7], 3, "weak"), link([2, 7], [4, 7], 3)];
 
@@ -997,7 +988,7 @@ export const X_CHAIN: Lesson = {
 };
 
 // XY-Chain: six two-candidate cells, from row 2, column 5 to row 7, column 1, with 9 at both ends
-const XY_CHAIN_SHOW_BOARD = board("469182753731504028825370140174635080392748010586921437018407360657213894043800071");
+const XY_CHAIN_SHOW_BOARD = candidateBoard("469182753731504028825370140174635080392748010586921437018407360657213894043800071");
 const XY_CHAIN_SHOW_CELLS = cells([2, 5], [2, 7], [3, 9], [5, 9], [7, 9], [7, 1]);
 const XY_CHAIN_SHOW_LINKS = [
     link([2, 5], [2, 7], 6),
@@ -1009,11 +1000,11 @@ const XY_CHAIN_SHOW_LINKS = [
 const XY_CHAIN_SHOW_MARKS = { pattern: XY_CHAIN_SHOW_CELLS, dimOthers: true };
 
 // Four cells, from row 4, column 1 to row 5, column 8, with 7 at both ends
-const XY_CHAIN_FOLLOW_BOARD = board("278100634435826719916437285092301400301600900004902351147268593009713840803500107", removal(4, 1, 6));
+const XY_CHAIN_FOLLOW_BOARD = candidateBoard("278100634435826719916437285092301400301600900004902351147268593009713840803500107", removal(4, 1, 6));
 const XY_CHAIN_FOLLOW_CELLS = cells([4, 1], [5, 2], [5, 9], [5, 8]);
 
 // Five cells, from row 4, column 1 to row 5, column 8, with 1 at both ends: the only chain that removes a 1 here
-const XY_CHAIN_ALONE_BOARD = board("246080937985376124731492568050769002670000009090000756429853671813627495567914283");
+const XY_CHAIN_ALONE_BOARD = candidateBoard("246080937985376124731492568050769002670000009090000756429853671813627495567914283");
 const XY_CHAIN_ALONE_CELLS = cells([4, 1], [4, 7], [5, 7], [5, 5], [5, 8]);
 const XY_CHAIN_ALONE_LINKS = [link([4, 1], [4, 7], 3), link([4, 7], [5, 7], 8), link([5, 7], [5, 5], 3), link([5, 5], [5, 8], 4)];
 
