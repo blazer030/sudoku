@@ -82,36 +82,25 @@
                 :effect="null"
                 :target="changedCell"
             >
-                <div
-                    :data-selected-cell="changedCellName"
-                    data-skin="board"
-                    class="bg-card rounded-2xl shadow-card-lg p-2 self-center w-[calc(100%+1.5rem)] max-w-board-fit pointer-events-none"
+                <SudokuBoard
+                    ref="reviewBoard"
+                    :cells="board"
+                    class="pointer-events-none"
+                    :selected-cell="changedCell"
                     data-testid="review-board"
                 >
-                    <div
-                        ref="boardGrid"
-                        class="flex flex-col border-3 border-foreground/20 rounded-xl"
-                        data-skin="board-grid"
-                    >
-                        <div
-                            v-for="(row, rowIndex) in board"
-                            :key="rowIndex"
-                            class="grid grid-cols-9"
-                        >
-                            <Cell
-                                v-for="(puzzleCell, columnIndex) in row"
-                                :key="`cell-${rowIndex}-${columnIndex}`"
-                                :column="columnIndex"
-                                :data-testid="`review-cell-${rowIndex}-${columnIndex}`"
-                                :highlight-same-digit="false"
-                                :interactive="false"
-                                :puzzle-cell="puzzleCell"
-                                :row="rowIndex"
-                                :selected="isChanged(rowIndex, columnIndex)"
-                            />
-                        </div>
-                    </div>
-                </div>
+                    <template #cell="{ cell: puzzleCell, row: rowIndex, column: columnIndex }">
+                        <Cell
+                            :column="columnIndex"
+                            :data-testid="`review-cell-${rowIndex}-${columnIndex}`"
+                            :highlight-same-digit="false"
+                            :interactive="false"
+                            :puzzle-cell="puzzleCell"
+                            :row="rowIndex"
+                            :selected="isChanged(rowIndex, columnIndex)"
+                        />
+                    </template>
+                </SudokuBoard>
             </BoardFrame>
             <StepPlaybackPanel
                 :label="t('review.title')"
@@ -170,7 +159,7 @@ import { formatDate } from "@/presentation/i18n/formatDate";
 import { useDifficultyLabel } from "@/presentation/i18n/difficultyLabels";
 import Cell from "@/presentation/components/board-cell/Cell.vue";
 import BoardFrame from "@/presentation/components/board-frame/BoardFrame.vue";
-import { cellName } from "@/presentation/components/board-cell/cellName";
+import SudokuBoard from "@/presentation/components/sudoku-board/SudokuBoard.vue";
 import StepPlaybackPanel from "@/presentation/components/step-presentation/StepPlaybackPanel.vue";
 import StepTag from "@/presentation/components/step-presentation/StepTag.vue";
 import { useGameReview } from "@/presentation/pages/game-review/useGameReview";
@@ -226,7 +215,6 @@ const tag = computed((): { label: string; icon: Component } => {
     return { label: t(`review.actions.${step.action}`), icon: ACTION_ICONS[step.action] };
 });
 
-const changedCellName = computed(() => changedCell.value === null ? undefined : cellName(changedCell.value.row, changedCell.value.column));
 
 const isChanged = (row: number, column: number): boolean => {
     const cell = changedCell.value;
@@ -238,11 +226,12 @@ const isChanged = (row: number, column: number): boolean => {
 const scrollArea = useTemplateRef<HTMLElement>("scrollArea");
 const header = useTemplateRef<HTMLElement>("header");
 const headerScrolled = useScrolledHeader(header);
-const boardGrid = useTemplateRef<HTMLElement>("boardGrid");
+// SudokuBoard is generic, which the template ref cannot follow, so its exposed method is named here
+const reviewBoard = useTemplateRef<{ cellElement: (row: number, column: number) => HTMLElement | null }>("reviewBoard");
 watch(currentStep, () => {
     const cell = changedCell.value;
-    const cellElement = cell === null ? null : boardGrid.value?.children[cell.row]?.children[cell.column];
-    if (!(cellElement instanceof HTMLElement) || !scrollArea.value) return;
+    const cellElement = cell === null ? null : reviewBoard.value?.cellElement(cell.row, cell.column);
+    if (!cellElement || !scrollArea.value) return;
     revealInScroller(scrollArea.value, cellElement, header.value?.getBoundingClientRect().bottom ?? 0);
 }, { flush: "post" });
 

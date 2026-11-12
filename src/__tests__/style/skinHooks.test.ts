@@ -152,10 +152,12 @@ describe("skin hooks", () => {
     });
 
     it("should keep the skin hooks GameScreen measures", () => {
-        const source = readFileSync("src/presentation/pages/game/GameScreen.vue", "utf8");
-        const boardTag = openingTags(source, "\\w+").find(tag => tag.includes('data-testid="game-board"'));
+        const gameScreen = readFileSync("src/presentation/pages/game/GameScreen.vue", "utf8");
+        const boardTag = openingTags(gameScreen, "\\w+").find(tag => tag.includes('data-testid="game-board"'));
+        const sudokuBoard = readFileSync("src/presentation/components/sudoku-board/SudokuBoard.vue", "utf8");
 
-        expect(boardTag).toBeDefined();
-        expect(hasSkinToken(boardTag ?? "", "board")).toBe(true);
+        // The game's board is SudokuBoard, whose root carries the board hook
+        expect(boardTag).toMatch(/^<SudokuBoard\b/);
+        expect(hasSkinToken(openingTags(sudokuBoard, "div")[0] ?? "", "board")).toBe(true);
     });
 });

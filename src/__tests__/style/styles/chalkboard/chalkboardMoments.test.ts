@@ -176,7 +176,8 @@ const RING_ANCHOR = "--chalkboard-solved-grid";
 // Every anchor feature the lifted loop uses, so a browser with only some of them keeps the absolute loop
 const ANCHOR_SUPPORTS = `(anchor-name: ${RING_ANCHOR}) and (position-area: center) and (width: anchor-size(width))`;
 // The live board's grid, whose border the anchor's box takes in and the loop's drawing does not
-const GAME_SCREEN = readFileSync("src/presentation/pages/game/GameScreen.vue", "utf8");
+// Every board draws its grid through SudokuBoard
+const SUDOKU_BOARD = readFileSync("src/presentation/components/sudoku-board/SudokuBoard.vue", "utf8");
 
 // The declarations of the rules inside an @supports block with `params` that list `selector`
 const supportsDeclarationsOf = (params: string, selector: string): Map<string, string> => {
@@ -431,7 +432,7 @@ describe("chalkboard moments", () => {
                 const grid = supportsDeclarationsOf(ANCHOR_SUPPORTS, SOLVED_GRID);
                 const ring = supportsDeclarationsOf(ANCHOR_SUPPORTS, BOARD_RING);
                 const [minX = 0, , width = 0] = (/viewBox="([^"]+)"/.exec(BOARD_RING_SVG)?.[1] ?? "").split(/\s+/).map(Number);
-                const gridBorderPx = Number(/class="[^"]*\bborder-(\d+)\b[^"]*"\s+data-skin="board-grid"/.exec(GAME_SCREEN)?.[1] ?? Number.NaN);
+                const gridBorderPx = Number(/class="[^"]*\bborder-(\d+)\b[^"]*"\s+data-skin="board-grid"/.exec(SUDOKU_BOARD)?.[1] ?? Number.NaN);
 
                 expect(grid.get("anchor-name")).toBe(RING_ANCHOR);
                 expect(ring.get("position")).toBe("fixed");

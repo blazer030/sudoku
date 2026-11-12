@@ -35,46 +35,35 @@
             :effect="null"
             :target="frameTarget"
         >
-            <div
+            <SudokuBoard
+                :cells="session.puzzleCells.value"
                 :class="{ 'relative z-20': session.padCell.value !== null }"
-                class="bg-card rounded-2xl shadow-card-lg p-2 self-center shrink-0 w-[calc(100%+1.5rem)] max-w-board-fit"
-                data-skin="board"
+                class="shrink-0"
+                :has-step-links="links.length > 0"
                 data-testid="lesson-board"
             >
-                <div
-                    :class="{ 'has-step-links': links.length > 0 }"
-                    class="relative flex flex-col border-3 border-foreground/20 rounded-xl"
-                    data-skin="board-grid"
-                >
-                    <div
-                        v-for="(row, rowIndex) in session.puzzleCells.value"
-                        :key="`row-${rowIndex}`"
-                        class="grid grid-cols-9"
-                    >
-                        <Cell
-                            v-for="(puzzleCell, columnIndex) in row"
-                            :key="`cell-${rowIndex}-${columnIndex}`"
-                            :column="columnIndex"
-                            :data-testid="`lesson-cell-${rowIndex}-${columnIndex}`"
-                            :hint="session.cellViews.value[rowIndex][columnIndex]"
-                            :interactive="isPractising"
-                            :puzzle-cell="puzzleCell"
-                            :row="rowIndex"
-                            @click="session.tapCell(rowIndex, columnIndex)"
-                        />
-                    </div>
-                    <StepLinkOverlay :links="links" />
-                    <FloatingDigitPad
-                        v-if="session.padCell.value !== null"
-                        :cell="session.padCell.value"
-                        :current-notes="[...session.practice.value.notes]"
-                        :digit-counts="NO_DIGITS_USED_UP"
-                        :erase-disabled="true"
-                        :note-mode="session.practice.value.noteMode"
-                        @select-digit="session.pressDigit"
+                <template #cell="{ cell: puzzleCell, row: rowIndex, column: columnIndex }">
+                    <Cell
+                        :column="columnIndex"
+                        :data-testid="`lesson-cell-${rowIndex}-${columnIndex}`"
+                        :hint="session.cellViews.value[rowIndex][columnIndex]"
+                        :interactive="isPractising"
+                        :puzzle-cell="puzzleCell"
+                        :row="rowIndex"
+                        @click="session.tapCell(rowIndex, columnIndex)"
                     />
-                </div>
-            </div>
+                </template>
+                <StepLinkOverlay :links="links" />
+                <FloatingDigitPad
+                    v-if="session.padCell.value !== null"
+                    :cell="session.padCell.value"
+                    :current-notes="[...session.practice.value.notes]"
+                    :digit-counts="NO_DIGITS_USED_UP"
+                    :erase-disabled="true"
+                    :note-mode="session.practice.value.noteMode"
+                    @select-digit="session.pressDigit"
+                />
+            </SudokuBoard>
         </BoardFrame>
 
         <div class="flex-[2_1_calc(219px+var(--game-section-gap))] min-h-0 flex flex-col justify-end pt-(--game-section-gap)">
@@ -127,6 +116,7 @@ import type { PracticeFeedback } from "@/domain/lessons/practice";
 import type { CellReference, Elimination } from "@/domain/solver/SolveStep";
 import BoardFrame from "@/presentation/components/board-frame/BoardFrame.vue";
 import Cell from "@/presentation/components/board-cell/Cell.vue";
+import SudokuBoard from "@/presentation/components/sudoku-board/SudokuBoard.vue";
 import FloatingDigitPad from "@/presentation/components/floating-digit-pad/FloatingDigitPad.vue";
 import { ChevronLeft } from "@/presentation/components/icon";
 import StepLinkOverlay from "@/presentation/components/step-presentation/StepLinkOverlay.vue";

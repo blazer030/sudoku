@@ -2,25 +2,22 @@ import { readFileSync } from "fs";
 import { mount } from "@vue/test-utils";
 import BoardCell from "@/presentation/components/board-cell/BoardCell.vue";
 
-// Every board draws its rows from a v-for over rows; the row element is the tag that holds it
-const BOARDS = [
-    "src/presentation/pages/game/GameScreen.vue",
-    "src/presentation/pages/game-review/GameReview.vue",
-    "src/presentation/pages/solver-walkthrough/SolverWalkthrough.vue",
-];
+// Every page draws its board through SudokuBoard, whose rows come from a v-for over rows
+const SUDOKU_BOARD = "src/presentation/components/sudoku-board/SudokuBoard.vue";
 
-const rowTag = (path: string): string => {
-    const source = readFileSync(path, "utf8");
-    const tags = [...source.matchAll(/<\w+\b(?:[^>"']|"[^"]*"|'[^']*')*>/g)].map(([tag]) => tag);
-    const row = tags.find(tag => tag.includes('v-for="(row, rowIndex)'));
-    if (row === undefined) throw new Error(`${path} has no board row`);
+const tagsOf = (path: string): string[] =>
+    [...readFileSync(path, "utf8").matchAll(/<\w+\b(?:[^>"']|"[^"]*"|'[^']*')*>/g)].map(([tag]) => tag);
+
+const rowTag = (): string => {
+    const row = tagsOf(SUDOKU_BOARD).find(tag => tag.includes('v-for="(row, rowIndex)'));
+    if (row === undefined) throw new Error("SudokuBoard has no board row");
     return row;
 };
 
 describe("board geometry", () => {
-    it.each(BOARDS)("%s lays each row out as nine equal columns", (path) => {
+    it("lays each row out as nine equal columns", () => {
         // Equal grid tracks keep every cell the same width whatever its border, so square cells stay square
-        expect(rowTag(path)).toMatch(/class="[^"]*\bgrid grid-cols-9\b/);
+        expect(rowTag()).toMatch(/class="[^"]*\bgrid grid-cols-9\b/);
     });
 
     it("should size a cell by its grid column, not by flexing around its borders", () => {
@@ -31,20 +28,25 @@ describe("board geometry", () => {
     });
 
     const boardTagOf = (path: string, testId: string): string =>
-        [...readFileSync(path, "utf8").matchAll(/<\w+\b(?:[^>"']|"[^"]*"|'[^']*')*>/g)].map(([tag]) => tag)
-            .find(tag => tag.includes(`data-testid="${testId}"`)) ?? "";
+        tagsOf(path).find(tag => tag.includes(`data-testid="${testId}"`)) ?? "";
+
+    it("widens the board past the page gutter, but no further than a short screen allows", () => {
+        // Centred and 24px wider than the page's content, so it reaches 8px from the screen edges
+        const boardTag = tagsOf(SUDOKU_BOARD).find(tag => tag.includes('data-skin="board"')) ?? "";
+        expect(boardTag).toMatch(/class="[^"]*\bself-center\b/);
+        expect(boardTag).toMatch(/class="[^"]*\bw-\[calc\(100%\+1\.5rem\)\]/);
+        expect(boardTag).toMatch(/class="[^"]*\bmax-w-board-fit\b/);
+    });
 
     it.each([
         ["src/presentation/pages/game/GameScreen.vue", "game-board"],
         ["src/presentation/pages/game-review/GameReview.vue", "review-board"],
         ["src/presentation/pages/solver-walkthrough/SolverWalkthrough.vue", "walkthrough-board"],
-    ])("%s widens its board past the page gutter, but no further than a short screen allows", (path, testId) => {
-        // Centred and 24px wider than the page's content, so it reaches 8px from the screen edges
+        ["src/presentation/pages/lessons/LessonScreen.vue", "lesson-board"],
+    ])("%s draws that board, with no width of its own", (path, testId) => {
         const boardTag = boardTagOf(path, testId);
-        expect(boardTag).toMatch(/class="[^"]*\bself-center\b/);
-        expect(boardTag).toMatch(/class="[^"]*\bw-\[calc\(100%\+1\.5rem\)\]/);
-        expect(boardTag).toMatch(/class="[^"]*\bmax-w-board-fit\b/);
-        expect(boardTag).not.toMatch(/class="[^"]*\b(?:w-full|-mx-3)\b/);
+        expect(boardTag).toMatch(/^<SudokuBoard\b/);
+        expect(boardTag).not.toMatch(/class="[^"]*\b(?:w-full|-mx-3|w-\[|max-w-)/);
     });
 
     it("should cap the boards by the screen's height, with a floor for short but wide windows", () => {

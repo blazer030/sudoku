@@ -32,58 +32,46 @@
                 :effect="null"
                 :target="frameTarget"
             >
-                <div
-                    :data-selected-cell="selectedCellName"
-                    data-skin="board"
+                <SudokuBoard
+                    :cells="puzzleCells"
                     :class="[
                         boardEditable ? '' : 'pointer-events-none',
                         // On a small board the pad runs past the board, over the inputs
                         { 'relative z-20': floatingPadCell !== null },
                     ]"
-                    class="bg-card rounded-2xl shadow-card-lg p-2 self-center w-[calc(100%+1.5rem)] max-w-board-fit"
+                    :has-step-links="inPlayback && links.length > 0"
+                    row-test-id-prefix="solver-row-"
+                    :selected-cell="boardEditable ? selectedCell : null"
                     data-testid="walkthrough-board"
                 >
-                    <div
-                        :class="{ 'has-step-links': inPlayback && links.length > 0 }"
-                        class="relative flex flex-col border-3 border-foreground/20 rounded-xl"
-                        data-skin="board-grid"
-                    >
-                        <div
-                            v-for="(row, rowIndex) in puzzleCells"
-                            :key="`row-${rowIndex}`"
-                            :data-testid="`solver-row-${rowIndex}`"
-                            class="grid grid-cols-9"
-                        >
-                            <Cell
-                                v-for="(puzzleCell, columnIndex) in row"
-                                :key="`cell-${rowIndex}-${columnIndex}`"
-                                :column="columnIndex"
-                                :data-testid="`solver-cell-${rowIndex}-${columnIndex}`"
-                                :hint="cellViews?.[rowIndex][columnIndex] ?? null"
-                                :interactive="boardEditable"
-                                :puzzle-cell="puzzleCell"
-                                :row="rowIndex"
-                                :selected="boardEditable && isSelectedCell(rowIndex, columnIndex)"
-                                :selected-digit="boardEditable ? selectedDigit : null"
-                                @click="selectCell(rowIndex, columnIndex)"
-                            />
-                        </div>
-                        <StepLinkOverlay
-                            v-if="inPlayback"
-                            :links="links"
+                    <template #cell="{ cell: puzzleCell, row: rowIndex, column: columnIndex }">
+                        <Cell
+                            :column="columnIndex"
+                            :data-testid="`solver-cell-${rowIndex}-${columnIndex}`"
+                            :hint="cellViews?.[rowIndex][columnIndex] ?? null"
+                            :interactive="boardEditable"
+                            :puzzle-cell="puzzleCell"
+                            :row="rowIndex"
+                            :selected="boardEditable && isSelectedCell(rowIndex, columnIndex)"
+                            :selected-digit="boardEditable ? selectedDigit : null"
+                            @click="selectCell(rowIndex, columnIndex)"
                         />
-                        <FloatingDigitPad
-                            v-if="floatingPadCell !== null"
-                            :cell="floatingPadCell"
-                            :current-entry="userValues[floatingPadCell.row][floatingPadCell.column]"
-                            :digit-counts="emptyDigitCounts"
-                            :disabled-digits="invalidDigitsForSelectedCell"
-                            :erase-disabled="eraseDisabledForSelectedCell"
-                            @erase="toggleEraseMode"
-                            @select-digit="pickDigit"
-                        />
-                    </div>
-                </div>
+                    </template>
+                    <StepLinkOverlay
+                        v-if="inPlayback"
+                        :links="links"
+                    />
+                    <FloatingDigitPad
+                        v-if="floatingPadCell !== null"
+                        :cell="floatingPadCell"
+                        :current-entry="userValues[floatingPadCell.row][floatingPadCell.column]"
+                        :digit-counts="emptyDigitCounts"
+                        :disabled-digits="invalidDigitsForSelectedCell"
+                        :erase-disabled="eraseDisabledForSelectedCell"
+                        @erase="toggleEraseMode"
+                        @select-digit="pickDigit"
+                    />
+                </SudokuBoard>
             </BoardFrame>
 
             <!-- The playback panel covers the inputs in place, so the board never moves. -->
@@ -259,7 +247,7 @@ import { usePuzzleLoader } from "@/presentation/components/puzzle-loader/usePuzz
 import { useTechniqueLabel } from "@/presentation/i18n/techniqueLabels";
 import Cell from "@/presentation/components/board-cell/Cell.vue";
 import BoardFrame from "@/presentation/components/board-frame/BoardFrame.vue";
-import { cellName } from "@/presentation/components/board-cell/cellName";
+import SudokuBoard from "@/presentation/components/sudoku-board/SudokuBoard.vue";
 import DigitPad from "@/presentation/components/digit-pad/DigitPad.vue";
 import FloatingDigitPad from "@/presentation/components/floating-digit-pad/FloatingDigitPad.vue";
 import { isBlankTap } from "@/presentation/composables/isBlankTap";
@@ -355,7 +343,6 @@ const handleScreenTap = (event: MouseEvent) => {
     if (settingsStore.floatingDigitPad && boardEditable.value && isBlankTap(event.target)) selectedCell.value = null;
 };
 
-const selectedCellName = computed(() => boardEditable.value && selectedCell.value !== null ? cellName(selectedCell.value.row, selectedCell.value.column) : undefined);
 
 // The cell a style's board frame points at: the selected one while entering a puzzle, a playing step's first
 // assigned cell, and none on a step that only removes candidates, on the solved board or under the guide
