@@ -7,6 +7,7 @@ import { knownAnswer, knownPuzzle } from "@/__tests__/fixtures/knownPuzzle";
 import { summarizeReplay } from "@/application/analytics/summarizeReplay";
 import { useGameStore } from "@/stores/gameStore";
 import { useStatisticsStore } from "@/stores/statisticsStore";
+import { ROUTER_PATH } from "@/routerPaths";
 
 vi.mock("@/application/puzzleGeneration/PuzzleGenerationService", () => ({
     generatePuzzleAsync: vi.fn(() => Promise.resolve({
@@ -22,7 +23,7 @@ const startGameWithAutoNotes = async () => {
     const pinia = createPinia();
     const router = createRouter({
         history: createMemoryHistory(),
-        routes: [{ path: "/", component: { template: "<div/>" } }, { path: "/game", component: Game }],
+        routes: [{ path: ROUTER_PATH.home, component: { template: "<div/>" } }, { path: ROUTER_PATH.game, component: Game }],
     });
     const gameStore = useGameStore(pinia);
     await gameStore.startNewGame("hard");

@@ -8,6 +8,7 @@ import type { Difficulty } from "@/domain/generator/SudokuGenerator";
 import { useGameStore } from "@/stores/gameStore";
 import { useStatisticsStore } from "@/stores/statisticsStore";
 import { useSettingsStore } from "@/stores/settingsStore";
+import { ROUTER_PATH } from "@/routerPaths";
 
 vi.mock("@/application/puzzleGeneration/PuzzleGenerationService", () => ({
     generatePuzzleAsync: vi.fn(() => Promise.resolve({
@@ -32,11 +33,11 @@ const mountGameRoute = async (difficulty: Difficulty = "easy", visited: readonly
     const router = createRouter({
         history: createMemoryHistory(),
         routes: [
-            { path: "/", component: { template: "<div>Home</div>" } },
-            { path: "/lessons", component: { template: "<div>Lessons</div>" } },
-            { path: "/lessons/:lessonId", component: { template: "<div>Lesson</div>" } },
-            { path: "/game", component: Game },
-            { path: "/game-review/:index", component: { template: "<div>Review</div>" } },
+            { path: ROUTER_PATH.home, component: { template: "<div>Home</div>" } },
+            { path: ROUTER_PATH.lessons, component: { template: "<div>Lessons</div>" } },
+            { path: ROUTER_PATH.lesson, component: { template: "<div>Lesson</div>" } },
+            { path: ROUTER_PATH.game, component: Game },
+            { path: ROUTER_PATH.gameReview, component: { template: "<div>Review</div>" } },
         ],
     });
     const gameStore = useGameStore(pinia);

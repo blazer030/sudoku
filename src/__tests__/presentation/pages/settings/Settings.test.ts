@@ -53,11 +53,11 @@ const mountSettingsWithRouter = (billing?: BillingService) => {
     const router = createRouter({
         history: createMemoryHistory(),
         routes: [
-            { path: "/", component: { template: "<div />" } },
-            { path: "/settings", component: Settings },
-            { path: "/settings/changelog", component: { template: "<div />" } },
-            { path: "/settings/appearance", component: { template: "<div />" } },
-            { path: "/donate", component: { template: "<div />" } },
+            { path: ROUTER_PATH.home, component: { template: "<div />" } },
+            { path: ROUTER_PATH.settings, component: Settings },
+            { path: ROUTER_PATH.changelog, component: { template: "<div />" } },
+            { path: ROUTER_PATH.appearance, component: { template: "<div />" } },
+            { path: ROUTER_PATH.donate, component: { template: "<div />" } },
         ],
     });
     return { router, wrapper: mount(Settings, { global: { plugins: [router] } }) };

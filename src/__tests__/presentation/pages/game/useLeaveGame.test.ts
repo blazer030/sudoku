@@ -11,6 +11,7 @@ import { useLeaveGame } from "@/presentation/pages/game/useLeaveGame";
 import { useGameStore } from "@/stores/gameStore";
 import type { AnalyticsService } from "@/application/analytics/AnalyticsService";
 import type { GameReplayData } from "@/domain/game/GameReplay";
+import { ROUTER_PATH } from "@/routerPaths";
 
 beforeEach(() => {
     setActivePinia(createPinia());
@@ -88,7 +89,7 @@ const mountLeaveHarnessWithRouter = async ({ sudoku, analytics, dismissOverlay, 
     const router = createRouter({
         history: createMemoryHistory(),
         routes: [
-            { path: "/", component: Harness },
+            { path: ROUTER_PATH.home, component: Harness },
             { path: "/home", component: { template: "<div />" } },
         ],
     });

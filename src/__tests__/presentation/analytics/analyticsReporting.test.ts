@@ -1,20 +1,9 @@
 import { ref } from "vue";
-import { createMemoryHistory, createRouter } from "vue-router";
 import { createAnalyticsSpy } from "@/__tests__/fixtures/analyticsSpy";
 import { ROUTER_PATH } from "@/routerPaths";
 import { startAnalyticsReporting } from "@/presentation/analytics/analyticsReporting";
 import type { ColorMode, ColorThemeId, StyleId } from "@/theme/themeIds";
-
-const createTestRouter = () => {
-    const stub = { render: () => null };
-    return createRouter({
-        history: createMemoryHistory(),
-        routes: [
-            { path: ROUTER_PATH.home, component: stub },
-            { path: ROUTER_PATH.settings, component: stub },
-        ],
-    });
-};
+import { createTestRouter } from "@/__tests__/fixtures/testRouter";
 
 const createSources = () => ({
     style: ref<StyleId>("minimal"),

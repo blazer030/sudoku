@@ -28,6 +28,7 @@ import { styleIconSvg } from "@/theme/styleIcons";
 import { STYLE_IDS, type StyleId } from "@/theme/themeIds";
 import Appearance from "@/presentation/pages/settings/Appearance.vue";
 import Settings from "@/presentation/pages/settings/Settings.vue";
+import { ROUTER_PATH } from "@/routerPaths";
 
 const t = i18n.global.t;
 
@@ -36,9 +37,9 @@ const mountAppearance = () => {
     const router = createRouter({
         history: createMemoryHistory(),
         routes: [
-            { path: "/", component: { template: "<div />" } },
-            { path: "/settings", component: { template: "<div />" } },
-            { path: "/settings/appearance", component: Appearance },
+            { path: ROUTER_PATH.home, component: { template: "<div />" } },
+            { path: ROUTER_PATH.settings, component: { template: "<div />" } },
+            { path: ROUTER_PATH.appearance, component: Appearance },
         ],
     });
     return mount(Appearance, { global: { plugins: [router] } });
@@ -432,9 +433,9 @@ describe("Appearance.vue going back", () => {
         const router = createRouter({
             history: createWebHistory(),
             routes: [
-                { path: "/", component: { template: "<div data-testid='home' />" } },
-                { path: "/settings", component: Settings },
-                { path: "/settings/appearance", component: Appearance },
+                { path: ROUTER_PATH.home, component: { template: "<div data-testid='home' />" } },
+                { path: ROUTER_PATH.settings, component: Settings },
+                { path: ROUTER_PATH.appearance, component: Appearance },
             ],
         });
         await router.push("/");

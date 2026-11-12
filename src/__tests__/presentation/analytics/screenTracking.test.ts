@@ -1,22 +1,10 @@
-import { createMemoryHistory, createRouter } from "vue-router";
 import { createAnalyticsSpy } from "@/__tests__/fixtures/analyticsSpy";
 import { router } from "@/router";
 import { ROUTER_PATH } from "@/routerPaths";
 import { screenNameFor, startScreenTracking } from "@/presentation/analytics/screenTracking";
+import { createTestRouter } from "@/__tests__/fixtures/testRouter";
 
 const CATCH_ALL_PATH = "/:pathMatch(.*)*";
-
-const createTestRouter = () => {
-    const stub = { render: () => null };
-    return createRouter({
-        history: createMemoryHistory(),
-        routes: [
-            { path: ROUTER_PATH.home, component: stub },
-            { path: ROUTER_PATH.gameReview, component: stub },
-            { path: ROUTER_PATH.statistics, component: stub },
-        ],
-    });
-};
 
 describe("screenNameFor", () => {
     it.each([

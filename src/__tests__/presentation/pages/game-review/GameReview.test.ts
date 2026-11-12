@@ -8,6 +8,7 @@ import { useStatisticsStore } from "@/stores/statisticsStore";
 import { i18n } from "@/presentation/i18n";
 import type { GameStep } from "@/domain/game/GameStep";
 import { StubBoardFrame, frameMinimalWithStubInEachTest, frameTarget } from "@/__tests__/fixtures/boardFrameStub";
+import { ROUTER_PATH } from "@/routerPaths";
 
 const emptyBoard = () => Array.from({ length: 9 }, () =>
     Array.from({ length: 9 }, () => ({ clue: 0, entry: 0, notes: [] as number[] }))
@@ -34,7 +35,7 @@ const mountReview = async (options: { action?: GameStep["action"]; completed?: b
     });
     const router = createRouter({
         history: createMemoryHistory(),
-        routes: [{ path: "/", component: { template: "<div />" } }],
+        routes: [{ path: ROUTER_PATH.home, component: { template: "<div />" } }],
     });
     const pinia = getActivePinia();
     if (pinia === undefined) throw new Error("pinia not active");
@@ -362,9 +363,9 @@ describe("GameReview with an index that names no game", () => {
         const router = createRouter({
             history: createMemoryHistory(),
             routes: [
-                { path: "/", component: { template: "<div />" } },
-                { path: "/statistics", component: { template: "<div />" } },
-                { path: "/game-review/:index", component: { template: "<div />" } },
+                { path: ROUTER_PATH.home, component: { template: "<div />" } },
+                { path: ROUTER_PATH.statistics, component: { template: "<div />" } },
+                { path: ROUTER_PATH.gameReview, component: { template: "<div />" } },
             ],
         });
         await router.push(`/game-review/${index}`);

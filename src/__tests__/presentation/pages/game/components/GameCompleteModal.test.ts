@@ -10,11 +10,12 @@ import { provideGameCompleteModal } from "@/presentation/pages/game/components/u
 import type { GameCompleteParams } from "@/presentation/pages/game/components/useGameCompleteModal";
 import { STYLE_MOMENTS } from "@/presentation/components/style-moments/styleMoments";
 import { STYLE_IDS } from "@/theme/themeIds";
+import { ROUTER_PATH } from "@/routerPaths";
 
 const mountModal = (overrides: Partial<GameCompleteParams> = {}, onResult: (result: unknown) => void = () => { /* ignored */ }, pinia: Pinia = createPinia()) => {
     const router = createRouter({
         history: createMemoryHistory(),
-        routes: [{ path: "/", component: { template: "<div/>" } }],
+        routes: [{ path: ROUTER_PATH.home, component: { template: "<div/>" } }],
     });
     const Host = defineComponent({
         components: { GameCompleteModal },

@@ -2,25 +2,14 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { nextTick } from "vue";
 import { flushPromises, mount } from "@vue/test-utils";
 import { createPinia, setActivePinia, getActivePinia } from "pinia";
-import { createRouter, createMemoryHistory } from "vue-router";
 import Statistics from "@/presentation/pages/statistics/Statistics.vue";
 import { useStatisticsStore, type RecordGameInput } from "@/stores/statisticsStore";
 import { i18n } from "@/presentation/i18n";
 import { formatTime } from "@/utils/formatTime";
-
-const createTestRouter = () => {
-    return createRouter({
-        history: createMemoryHistory(),
-        routes: [
-            { path: "/statistics", component: Statistics },
-            { path: "/", component: { template: "<div>Home</div>" } },
-            { path: "/game-review/:index", component: { template: "<div>Review</div>" } },
-        ],
-    });
-};
+import { createTestRouter } from "@/__tests__/fixtures/testRouter";
 
 const mountStatistics = () => {
-    const router = createTestRouter();
+    const router = createTestRouter({ statistics: Statistics });
     const pinia = getActivePinia();
     if (pinia === undefined) throw new Error("pinia not active");
     const wrapper = mount(Statistics, {

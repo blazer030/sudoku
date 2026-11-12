@@ -11,6 +11,7 @@ import type { Difficulty } from "@/domain/generator/SudokuGenerator";
 import type { Sudoku } from "@/domain/game/Sudoku";
 import { useGameStore } from "@/stores/gameStore";
 import { useStatisticsStore } from "@/stores/statisticsStore";
+import { ROUTER_PATH } from "@/routerPaths";
 
 const SCREEN = "[data-testid='game-screen']";
 const TOAST = "[data-testid='game-toast']";
@@ -53,7 +54,7 @@ const mountGame = async ({ difficulty = "hard", sudoku = sudokuWithSingleNotes()
     const pinia = createPinia();
     const router = createRouter({
         history: createMemoryHistory(),
-        routes: [{ path: "/", component: { template: "<div/>" } }, { path: "/game", component: Game }],
+        routes: [{ path: ROUTER_PATH.home, component: { template: "<div/>" } }, { path: ROUTER_PATH.game, component: Game }],
     });
     const gameStore = useGameStore(pinia);
     gameStore.sudoku = sudoku;

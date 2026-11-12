@@ -33,11 +33,11 @@ const mountList = async (finished: LessonId[] = []) => {
     const router = createRouter({
         history: createMemoryHistory(),
         routes: [
-            { path: "/", component: Blank },
-            { path: "/lessons", component: LessonList },
-            { path: "/lessons/:lessonId", component: Blank },
-            { path: "/game", component: Blank },
-            { path: "/settings/appearance", component: Blank },
+            { path: ROUTER_PATH.home, component: Blank },
+            { path: ROUTER_PATH.lessons, component: LessonList },
+            { path: ROUTER_PATH.lesson, component: Blank },
+            { path: ROUTER_PATH.game, component: Blank },
+            { path: ROUTER_PATH.appearance, component: Blank },
         ],
     });
     await router.push("/lessons");

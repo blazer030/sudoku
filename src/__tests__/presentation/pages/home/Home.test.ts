@@ -4,7 +4,6 @@ import { createAnalyticsSpy } from "@/__tests__/fixtures/analyticsSpy";
 import { nextTick } from "vue";
 import { flushPromises, mount, type VueWrapper } from "@vue/test-utils";
 import { createPinia, setActivePinia } from "pinia";
-import { createRouter, createMemoryHistory } from "vue-router";
 import { ALL_LESSON_IDS } from "@/domain/lessons/curriculum";
 import Home from "@/presentation/pages/home/Home.vue";
 import { ROUTER_PATH } from "@/routerPaths";
@@ -20,6 +19,7 @@ import { handleBackButton } from "@/presentation/composables/backDismissal";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { STYLE_IDS, type StyleId } from "@/theme/themeIds";
 import { STYLE_HOME_HEROES } from "@/presentation/pages/home/homeHeroes";
+import { createTestRouter } from "@/__tests__/fixtures/testRouter";
 
 vi.mock("@/application/puzzleGeneration/PuzzleGenerationService", () => ({
     generatePuzzleAsync: vi.fn(() => Promise.resolve({
@@ -38,21 +38,8 @@ vi.mock("@/presentation/components/puzzle-loader/usePuzzleLoader", async () => {
     };
 });
 
-const createTestRouter = () => {
-    return createRouter({
-        history: createMemoryHistory(),
-        routes: [
-            { path: "/", component: Home },
-            { path: "/game", component: { template: "<div>Game</div>" } },
-            { path: "/solver", component: { template: "<div>Solver</div>" } },
-            { path: "/statistics", component: { template: "<div>Statistics</div>" } },
-            { path: "/settings", component: { template: "<div>Settings</div>" } },
-        ],
-    });
-};
-
 const mountHome = ({ savedGame, analytics, style }: { savedGame?: GameState; analytics?: AnalyticsService; style?: StyleId } = {}) => {
-    const router = createTestRouter();
+    const router = createTestRouter({ home: Home });
     const pinia = createPinia();
     setActivePinia(pinia);
     if (style !== undefined) {

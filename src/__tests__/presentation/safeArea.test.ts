@@ -3,6 +3,7 @@ import { join } from "path";
 import { mount } from "@vue/test-utils";
 import { createMemoryHistory, createRouter } from "vue-router";
 import App from "@/presentation/App.vue";
+import { ROUTER_PATH } from "@/routerPaths";
 
 // The app draws edge to edge, so the page background sits under the Android system bars.
 // Content is kept clear of them with the safe-area insets.
@@ -22,7 +23,7 @@ describe("safe area", () => {
     });
 
     it("should pad the app root by every safe-area inset", () => {
-        const router = createRouter({ history: createMemoryHistory(), routes: [{ path: "/", component: { template: "<div />" } }] });
+        const router = createRouter({ history: createMemoryHistory(), routes: [{ path: ROUTER_PATH.home, component: { template: "<div />" } }] });
         const wrapper = mount(App, { global: { plugins: [router] } });
         const css = readFileSync("src/style/index.css", "utf8");
         const rule = /\.app-safe-area\s*\{([^}]*)\}/.exec(css)?.[1] ?? "";
@@ -36,7 +37,7 @@ describe("safe area", () => {
 
     it("should scroll a page taller than the safe area inside the padded root", () => {
         const page = { template: '<div data-testid="page" />' };
-        const router = createRouter({ history: createMemoryHistory(), routes: [{ path: "/", component: page }] });
+        const router = createRouter({ history: createMemoryHistory(), routes: [{ path: ROUTER_PATH.home, component: page }] });
         const wrapper = mount(App, { global: { plugins: [router] } });
         const scroller = wrapper.find('[data-testid="page-scroller"]');
 

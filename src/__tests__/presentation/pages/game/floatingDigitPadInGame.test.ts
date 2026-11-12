@@ -6,6 +6,7 @@ import Game from "@/presentation/pages/game/Game.vue";
 import { createKnownSudoku, fillAllButLastKnownCell, lastKnownEmptyCell } from "@/__tests__/fixtures/knownPuzzle";
 import type { Sudoku } from "@/domain/game/Sudoku";
 import { useGameStore } from "@/stores/gameStore";
+import { ROUTER_PATH } from "@/routerPaths";
 
 const PAD = "[data-testid='floating-digit-pad']";
 const SCREEN = "[data-testid='game-screen']";
@@ -17,7 +18,7 @@ const mountGame = async ({ floatingDigitPad = true, sudoku = createKnownSudoku()
     const pinia = createPinia();
     const router = createRouter({
         history: createMemoryHistory(),
-        routes: [{ path: "/", component: { template: "<div/>" } }, { path: "/game", component: Game }],
+        routes: [{ path: ROUTER_PATH.home, component: { template: "<div/>" } }, { path: ROUTER_PATH.game, component: Game }],
     });
     const gameStore = useGameStore(pinia);
     gameStore.sudoku = sudoku;

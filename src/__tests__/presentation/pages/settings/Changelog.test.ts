@@ -5,13 +5,14 @@ import Changelog from "@/presentation/pages/settings/Changelog.vue";
 import { i18n } from "@/presentation/i18n";
 import { CHANGELOG, UNRELEASED_CHANGES } from "@/presentation/pages/settings/changelogData";
 import { APP_LOCALES } from "@/application/settings/SettingsStorage";
+import { ROUTER_PATH } from "@/routerPaths";
 
 const mountChangelog = () => {
     const router = createRouter({
         history: createMemoryHistory(),
         routes: [
-            { path: "/", component: { template: "<div>Home</div>" } },
-            { path: "/settings/changelog", component: Changelog },
+            { path: ROUTER_PATH.home, component: { template: "<div>Home</div>" } },
+            { path: ROUTER_PATH.changelog, component: Changelog },
         ],
     });
     return mount(Changelog, { global: { plugins: [router] } });

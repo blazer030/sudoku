@@ -6,7 +6,7 @@ import { createAnalyticsSpy } from "@/__tests__/fixtures/analyticsSpy";
 import { flushPromises, mount } from "@vue/test-utils";
 import { createPinia } from "pinia";
 import { useSettingsStore } from "@/stores/settingsStore";
-import { createMemoryHistory, createRouter, onBeforeRouteLeave } from "vue-router";
+import { onBeforeRouteLeave } from "vue-router";
 import Game from "@/presentation/pages/game/Game.vue";
 import { knownAnswer, knownPuzzle, createKnownSudoku, fillAllButLastKnownCell, lastKnownEmptyCell } from "@/__tests__/fixtures/knownPuzzle";
 import type { GameState } from "@/application/game/GameState";
@@ -22,17 +22,11 @@ import { expectKeyRowsToShrinkToFit } from "@/__tests__/fixtures/digitKeyRows";
 import { STYLE_MOMENTS, type GroupEffect } from "@/presentation/components/style-moments/styleMoments";
 import { GROUP_RIPPLE_STEP_MS } from "@/presentation/pages/game/useGroupEffect";
 import { StubBoardFrame, frameMinimalWithStubInEachTest, frameTarget } from "@/__tests__/fixtures/boardFrameStub";
-
-const createTestRouter = () => {
-    return createRouter({
-        history: createMemoryHistory(),
-        routes: [{ path: "/game", component: Game }, { path: "/", component: { template: "<div/>" } }],
-    });
-};
+import { createTestRouter } from "@/__tests__/fixtures/testRouter";
 
 const mountGame = (difficulty: Difficulty = "easy", sudoku: Sudoku = createKnownSudoku()) => {
     const pinia = createPinia();
-    const router = createTestRouter();
+    const router = createTestRouter({ game: Game });
     const gameStore = useGameStore(pinia);
     gameStore.sudoku = sudoku;
     gameStore.setDifficulty(difficulty);
@@ -47,7 +41,7 @@ const knownSudokuWithNotes = (): Sudoku => {
 
 const mountContinueGame = (savedState: GameState) => {
     const pinia = createPinia();
-    const router = createTestRouter();
+    const router = createTestRouter({ game: Game });
     const gameStore = useGameStore(pinia);
     gameStore.persistGame(savedState);
     gameStore.loadSavedGame(savedState);
@@ -56,7 +50,7 @@ const mountContinueGame = (savedState: GameState) => {
 
 const mountGameWith = (sudoku: Sudoku, analytics?: AnalyticsService) => {
     const pinia = createPinia();
-    const router = createTestRouter();
+    const router = createTestRouter({ game: Game });
     const gameStore = useGameStore(pinia);
     gameStore.sudoku = sudoku;
     gameStore.setDifficulty("hard");
@@ -134,7 +128,7 @@ describe("Game", () => {
 
     it("should redirect to home when store has no active game", async () => {
         const pinia = createPinia();
-        const router = createTestRouter();
+        const router = createTestRouter({ game: Game });
         await router.push("/game");
         await router.isReady();
         mount(Game, { global: { plugins: [pinia, router] } });
@@ -146,7 +140,7 @@ describe("Game", () => {
     it("should start timer from store elapsedSeconds", async () => {
         vi.useFakeTimers();
         const pinia = createPinia();
-        const router = createTestRouter();
+        const router = createTestRouter({ game: Game });
         const gameStore = useGameStore(pinia);
         gameStore.sudoku = createKnownSudoku();
         gameStore.setDifficulty("easy");
@@ -1004,7 +998,7 @@ describe("Game", () => {
             const gameStore = useGameStore(pinia);
             gameStore.sudoku = nearlySolvedSudoku();
             gameStore.setDifficulty("easy");
-            const wrapper = mount(Game, { global: { plugins: [pinia, createTestRouter()] } });
+            const wrapper = mount(Game, { global: { plugins: [pinia, createTestRouter({ game: Game })] } });
 
             await fillLastCell(wrapper);
 
@@ -1060,7 +1054,7 @@ describe("Game", () => {
             const gameStore = useGameStore(pinia);
             gameStore.sudoku = nearlySolvedSudoku();
             gameStore.setDifficulty("easy");
-            const wrapper = mount(Game, { global: { plugins: [pinia, createTestRouter()] } });
+            const wrapper = mount(Game, { global: { plugins: [pinia, createTestRouter({ game: Game })] } });
             // The renderer loads apart from the page, and finds no WebGL
             await vi.waitFor(() => { expect(getContext).toHaveBeenCalled(); });
             await flushPromises();
@@ -1252,7 +1246,7 @@ describe("Game", () => {
 
         it("should include hintsUsed in save (Save & Leave)", async () => {
             const pinia = createPinia();
-            const router = createTestRouter();
+            const router = createTestRouter({ game: Game });
             const gameStore = useGameStore(pinia);
             gameStore.sudoku = createKnownSudoku();
             gameStore.setDifficulty("easy");
@@ -1631,7 +1625,7 @@ describe("Game", () => {
 
     describe("Replay across Save & Leave", () => {
         const visitGame = (pinia: ReturnType<typeof createPinia>) =>
-            mount(Game, { global: { plugins: [pinia, createTestRouter()] } });
+            mount(Game, { global: { plugins: [pinia, createTestRouter({ game: Game })] } });
 
         const giveUp = async (wrapper: ReturnType<typeof visitGame>) => {
             await wrapper.find("[data-testid='back-button']").trigger("click");

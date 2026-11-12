@@ -7,14 +7,15 @@ import { createKnownSudoku, fillAllButLastKnownCell, lastKnownEmptyCell } from "
 import { useGameStore } from "@/stores/gameStore";
 import { useStatisticsStore } from "@/stores/statisticsStore";
 import { STYLE_MOMENTS } from "@/presentation/components/style-moments/styleMoments";
+import { ROUTER_PATH } from "@/routerPaths";
 
 const mountWithRouterView = async ({ nearlySolved = false, fromHome = false } = {}) => {
     const pinia = createPinia();
     const router = createRouter({
         history: createMemoryHistory(),
         routes: [
-            { path: "/game", component: Game },
-            { path: "/", component: { template: "<div>Home</div>" } },
+            { path: ROUTER_PATH.game, component: Game },
+            { path: ROUTER_PATH.home, component: { template: "<div>Home</div>" } },
         ],
     });
     const gameStore = useGameStore(pinia);

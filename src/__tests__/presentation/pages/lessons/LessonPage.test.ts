@@ -11,6 +11,7 @@ import LessonPage from "@/presentation/pages/lessons/LessonPage.vue";
 import LessonScreen from "@/presentation/pages/lessons/LessonScreen.vue";
 import { useGameStore } from "@/stores/gameStore";
 import { useSettingsStore } from "@/stores/settingsStore";
+import { ROUTER_PATH } from "@/routerPaths";
 
 vi.mock("@/presentation/components/puzzle-loader/usePuzzleLoader", async () => {
     const { ref } = await import("vue");
@@ -29,11 +30,11 @@ const mountPage = async (entries: readonly string[]) => {
     const router = createRouter({
         history: createMemoryHistory(),
         routes: [
-            { path: "/", component: Blank },
-            { path: "/lessons", component: Blank },
-            { path: "/lessons/:lessonId", component: Blank },
-            { path: "/game", component: Blank },
-            { path: "/settings/appearance", component: Blank },
+            { path: ROUTER_PATH.home, component: Blank },
+            { path: ROUTER_PATH.lessons, component: Blank },
+            { path: ROUTER_PATH.lesson, component: Blank },
+            { path: ROUTER_PATH.game, component: Blank },
+            { path: ROUTER_PATH.appearance, component: Blank },
         ],
     });
     for (const entry of entries) await router.push(entry);

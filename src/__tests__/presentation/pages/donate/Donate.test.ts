@@ -9,6 +9,7 @@ import Donate from "@/presentation/pages/donate/Donate.vue";
 import { ANALYTICS_KEY, type AnalyticsService } from "@/application/analytics/AnalyticsService";
 import { useDonateStore } from "@/stores/donateStore";
 import type { BillingService, Product, PurchaseResult } from "@/application/billing/BillingService";
+import { ROUTER_PATH } from "@/routerPaths";
 
 const fakeProducts: Product[] = [
     { id: "donate_coffee", tier: "coffee", priceText: "$2.99", amountUsd: 2.99 },
@@ -27,9 +28,9 @@ const mountDonate = (analytics: AnalyticsService, billing: BillingService) => {
     const router = createRouter({
         history: createMemoryHistory(),
         routes: [
-            { path: "/", component: { template: "<div />" } },
-            { path: "/settings", component: { template: "<div />" } },
-            { path: "/donate", component: Donate },
+            { path: ROUTER_PATH.home, component: { template: "<div />" } },
+            { path: ROUTER_PATH.settings, component: { template: "<div />" } },
+            { path: ROUTER_PATH.donate, component: Donate },
         ],
     });
 

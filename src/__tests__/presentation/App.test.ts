@@ -1,12 +1,13 @@
 import { mount } from "@vue/test-utils";
 import { createMemoryHistory, createRouter } from "vue-router";
 import App from "@/presentation/App.vue";
+import { ROUTER_PATH } from "@/routerPaths";
 
 const mountApp = async () => {
     const page = { template: "<div />" };
     const router = createRouter({
         history: createMemoryHistory(),
-        routes: [{ path: "/", component: page }],
+        routes: [{ path: ROUTER_PATH.home, component: page }],
     });
     await router.push("/");
     await router.isReady();
@@ -65,8 +66,8 @@ describe("App page scroller", () => {
         const router = createRouter({
             history: createMemoryHistory(),
             routes: [
-                { path: "/", component: page },
-                { path: "/game", component: page },
+                { path: ROUTER_PATH.home, component: page },
+                { path: ROUTER_PATH.game, component: page },
             ],
         });
         await router.push("/");

@@ -2,7 +2,6 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { nextTick } from "vue";
 import { i18n } from "@/presentation/i18n";
 import { flushPromises, mount, type VueWrapper } from "@vue/test-utils";
-import { createMemoryHistory, createRouter } from "vue-router";
 import { readFileSync } from "fs";
 import { createPinia, setActivePinia } from "pinia";
 import FloatingDigitPad from "@/presentation/components/floating-digit-pad/FloatingDigitPad.vue";
@@ -21,6 +20,7 @@ import { ANALYTICS_KEY, type AnalyticsEvent } from "@/application/analytics/Anal
 import { createAnalyticsSpy } from "@/__tests__/fixtures/analyticsSpy";
 import { StubBoardFrame, frameMinimalWithStubInEachTest, frameTarget } from "@/__tests__/fixtures/boardFrameStub";
 import StepPlaybackPanel from "@/presentation/components/step-presentation/StepPlaybackPanel.vue";
+import { createTestRouter } from "@/__tests__/fixtures/testRouter";
 
 const samplePuzzle = (id: string): number[][] => {
     const sample = SAMPLE_PUZZLES.find((candidate) => candidate.id === id);
@@ -34,16 +34,8 @@ const singlesStepCount = buildSolvePath(singlesPuzzle).length;
 // The singles puzzle is solved by its path, so playback ends on one more position: the solved board
 const singlesPositionCount = singlesStepCount + 1;
 
-const createTestRouter = () => createRouter({
-    history: createMemoryHistory(),
-    routes: [
-        { path: "/", component: { template: "<div>Home</div>" } },
-        { path: "/solver", component: SolverWalkthrough },
-    ],
-});
-
 const mountWalkthrough = (props: { initialPuzzle?: number[][] } = {}) => {
-    const router = createTestRouter();
+    const router = createTestRouter({ solverWalkthrough: SolverWalkthrough });
     const analytics = createAnalyticsSpy();
     const wrapper = mount(SolverWalkthrough, {
         props,
@@ -1289,7 +1281,7 @@ describe("SolverWalkthrough", () => {
         });
 
         it("should cancel the check on the system Back key and stay to edit", async () => {
-            const router = createTestRouter();
+            const router = createTestRouter({ solverWalkthrough: SolverWalkthrough });
             await router.push("/");
             await router.push("/solver");
             await router.isReady();

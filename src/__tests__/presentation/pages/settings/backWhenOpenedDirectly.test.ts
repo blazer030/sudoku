@@ -20,6 +20,7 @@ vi.mock("@/application/pwaTheme/PwaThemeUpdater", () => ({
 import Appearance from "@/presentation/pages/settings/Appearance.vue";
 import Changelog from "@/presentation/pages/settings/Changelog.vue";
 import Settings from "@/presentation/pages/settings/Settings.vue";
+import { ROUTER_PATH } from "@/routerPaths";
 
 let router: Router;
 
@@ -30,10 +31,10 @@ const openDirectly = async (path: string) => {
     router = createRouter({
         history: createWebHistory(),
         routes: [
-            { path: "/", component: { template: "<div data-testid='home' />" } },
-            { path: "/settings", component: Settings },
-            { path: "/settings/changelog", component: Changelog },
-            { path: "/settings/appearance", component: Appearance },
+            { path: ROUTER_PATH.home, component: { template: "<div data-testid='home' />" } },
+            { path: ROUTER_PATH.settings, component: Settings },
+            { path: ROUTER_PATH.changelog, component: Changelog },
+            { path: ROUTER_PATH.appearance, component: Appearance },
         ],
     });
     await router.push(path);
