@@ -1,4 +1,3 @@
-import type { InjectionKey } from "vue";
 import type { DonateTier } from "@/application/analytics/AnalyticsService";
 
 export interface Product {
@@ -18,5 +17,3 @@ export interface BillingService {
     purchase(productId: string): Promise<PurchaseResult>;
     consumeAll(): Promise<void>;
 }
-
-export const BILLING_KEY: InjectionKey<BillingService> = Symbol("BillingService");

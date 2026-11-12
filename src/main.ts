@@ -18,10 +18,10 @@ import { useStatisticsStore } from "@/stores/statisticsStore";
 import { ANALYTICS_KEY } from "@/application/analytics/AnalyticsService";
 import { chooseAnalytics } from "@/infrastructure/analytics/chooseAnalytics";
 import { readWebFirebaseConfig } from "@/infrastructure/analytics/webFirebaseConfig";
-import { BILLING_KEY, type BillingService } from "@/application/billing/BillingService";
+import type { BillingService } from "@/application/billing/BillingService";
 import { NoopBillingAdapter } from "@/infrastructure/billing/NoopBillingAdapter";
 import { PlayBillingAdapter } from "@/infrastructure/billing/PlayBillingAdapter";
-import { ICON_KEY, type IconService } from "@/application/icon/IconService";
+import type { IconService } from "@/application/icon/IconService";
 import { DynamicIconAdapter } from "@/infrastructure/icon/DynamicIconAdapter";
 import { NoopIconAdapter } from "@/infrastructure/icon/NoopIconAdapter";
 import type { SystemBarService } from "@/application/systemBar/SystemBarService";
@@ -30,9 +30,9 @@ import { NoopSystemBarAdapter } from "@/infrastructure/systemBar/NoopSystemBarAd
 import type { AppearanceBridgeService } from "@/application/appearanceBridge/AppearanceBridgeService";
 import { CapacitorAppearanceBridgeAdapter } from "@/infrastructure/appearanceBridge/CapacitorAppearanceBridgeAdapter";
 import { NoopAppearanceBridgeAdapter } from "@/infrastructure/appearanceBridge/NoopAppearanceBridgeAdapter";
-import { STATISTICS_REPOSITORY_KEY, type StatisticsRepository } from "@/application/statistics/StatisticsRepository";
+import type { StatisticsRepository } from "@/application/statistics/StatisticsRepository";
 import { IndexedDBStatisticsRepository } from "@/infrastructure/statistics/IndexedDBStatisticsRepository";
-import { GAME_REPOSITORY_KEY, type GameRepository } from "@/application/game/GameRepository";
+import type { GameRepository } from "@/application/game/GameRepository";
 import { IndexedDBGameRepository } from "@/infrastructure/game/IndexedDBGameRepository";
 import { LocalStorageLessonProgressRepository } from "@/infrastructure/lessons/LocalStorageLessonProgressRepository";
 import { useLessonStore } from "@/stores/lessonStore";
@@ -42,7 +42,10 @@ import { NoopBackButtonAdapter } from "@/infrastructure/backButton/NoopBackButto
 import { startAnalyticsReporting } from "@/presentation/analytics/analyticsReporting";
 import { handleBackButton } from "@/presentation/composables/backDismissal";
 
-if (Capacitor.isNativePlatform() && "serviceWorker" in navigator) {
+// The Android app, as against the web build: it picks every native adapter below
+const isNative = Capacitor.isNativePlatform();
+
+if (isNative && "serviceWorker" in navigator) {
     void navigator.serviceWorker.getRegistrations().then((registrations) => {
         registrations.forEach((registration) => {
             void registration.unregister();
@@ -51,7 +54,7 @@ if (Capacitor.isNativePlatform() && "serviceWorker" in navigator) {
 }
 
 const analytics = await chooseAnalytics({
-    isNative: Capacitor.isNativePlatform(),
+    isNative,
     webConfig: readWebFirebaseConfig(import.meta.env),
     initializeWebFirebase: async (config) => {
         const [{ initializeApp }, { initializeAnalytics }] = await Promise.all([
@@ -65,23 +68,23 @@ const analytics = await chooseAnalytics({
     },
 });
 
-const billing: BillingService = Capacitor.isNativePlatform()
+const billing: BillingService = isNative
     ? new PlayBillingAdapter()
     : new NoopBillingAdapter();
 
-const icon: IconService = Capacitor.isNativePlatform()
+const icon: IconService = isNative
     ? new DynamicIconAdapter()
     : new NoopIconAdapter();
 
-const systemBar: SystemBarService = Capacitor.isNativePlatform()
+const systemBar: SystemBarService = isNative
     ? new CapacitorSystemBarAdapter()
     : new NoopSystemBarAdapter();
 
-const appearanceBridge: AppearanceBridgeService = Capacitor.isNativePlatform()
+const appearanceBridge: AppearanceBridgeService = isNative
     ? new CapacitorAppearanceBridgeAdapter()
     : new NoopAppearanceBridgeAdapter();
 
-const backButton: BackButtonService = Capacitor.isNativePlatform()
+const backButton: BackButtonService = isNative
     ? new CapacitorBackButtonAdapter()
     : new NoopBackButtonAdapter();
 
@@ -92,23 +95,20 @@ const app = createApp(App);
 app.use(createPinia());
 // Before the router is installed: that starts the first navigation, whose screen view must already
 // carry the resolved language and the rest of the player's setup
-startLocaleSync(storeToRefs(useSettingsStore()).language);
+const settings = storeToRefs(useSettingsStore());
+startLocaleSync(settings.language);
 startAnalyticsReporting({
     router,
     analytics,
-    userProperties: { ...storeToRefs(useSettingsStore()), locale: i18n.global.locale },
-    reportsIconSetting: Capacitor.isNativePlatform(),
+    userProperties: { ...settings, locale: i18n.global.locale },
+    reportsIconSetting: isNative,
 });
 app.use(router);
 app.use(i18n);
 app.provide(ANALYTICS_KEY, analytics);
-app.provide(BILLING_KEY, billing);
-app.provide(ICON_KEY, icon);
-app.provide(STATISTICS_REPOSITORY_KEY, statisticsRepository);
-app.provide(GAME_REPOSITORY_KEY, gameRepository);
 
-startAppearanceSync(storeToRefs(useSettingsStore()), systemBar, appearanceBridge);
-startLauncherIconSync(storeToRefs(useSettingsStore()), icon);
+startAppearanceSync(settings, systemBar, appearanceBridge);
+startLauncherIconSync(settings, icon);
 backButton.listen(handleBackButton);
 useDonateStore().setBilling(billing);
 const gameStore = useGameStore();
