@@ -137,11 +137,9 @@ describe("skin hooks", () => {
     });
 
     it("should mark every dialog heading as a dialog title", () => {
+        // The new-game, leave, clear-records, Walkthrough and lesson-notice dialogs draw their heading through it
         const dialogs = [
-            "src/presentation/components/new-game-dialog/NewGameDialog.vue",
-            "src/presentation/pages/game/components/LeaveGameDialog.vue",
-            "src/presentation/pages/settings/components/ClearRecordsDialog.vue",
-            "src/presentation/pages/solver-walkthrough/WalkthroughDialog.vue",
+            "src/presentation/components/dialog-shell/DialogShell.vue",
         ];
 
         for (const path of dialogs) {

@@ -23,7 +23,8 @@ describe("dialog scrims", () => {
     it("should reach every dialog, the completion card's among them", () => {
         expect(scrimTags.map(([path]) => path)).toEqual(expect.arrayContaining([
             "src/presentation/pages/game/components/GameCompleteModal.vue",
-            "src/presentation/pages/game/components/LeaveGameDialog.vue",
+            // The confirm dialogs' scrim
+            "src/presentation/components/dialog-shell/DialogShell.vue",
         ]));
     });
 
