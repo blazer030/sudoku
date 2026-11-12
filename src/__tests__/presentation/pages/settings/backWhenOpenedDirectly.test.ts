@@ -10,7 +10,7 @@ vi.mock("@capacitor/core", () => ({
     },
 }));
 
-vi.mock("@/application/PwaThemeUpdater", () => ({
+vi.mock("@/application/pwaTheme/PwaThemeUpdater", () => ({
     updateMetaThemeColor: vi.fn(),
     updateFavicon: vi.fn(),
     updateManifestLink: vi.fn(),

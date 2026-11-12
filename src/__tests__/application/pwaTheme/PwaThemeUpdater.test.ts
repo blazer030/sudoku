@@ -1,4 +1,4 @@
-import { updateMetaThemeColor, updateFavicon, updateManifestLink, updateAppleTouchIcon } from "@/application/PwaThemeUpdater";
+import { updateMetaThemeColor, updateFavicon, updateManifestLink, updateAppleTouchIcon } from "@/application/pwaTheme/PwaThemeUpdater";
 
 describe("PwaThemeUpdater", () => {
     describe("updateMetaThemeColor", () => {

@@ -4,7 +4,7 @@ import type { ColorMode, ColorThemeId, RememberedAppearances, RememberedThemes, 
 import { loadSettings, saveSettings, type LanguagePreference } from "@/application/settings/SettingsStorage";
 import { rememberedAppearanceFor, rememberedThemeFor } from "@/theme/palettes";
 import { pwaIconKey } from "@/theme/launcherIcon";
-import { updateManifestLink, updateAppleTouchIcon } from "@/application/PwaThemeUpdater";
+import { updateManifestLink, updateAppleTouchIcon } from "@/application/pwaTheme/PwaThemeUpdater";
 
 export const useSettingsStore = defineStore("settings", () => {
     const settings = loadSettings();

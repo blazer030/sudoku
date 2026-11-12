@@ -1,6 +1,6 @@
 import { watch, type Ref } from "vue";
 import { getPalette, systemBarColor } from "@/theme/palettes";
-import { updateFavicon, updateMetaThemeColor } from "@/application/PwaThemeUpdater";
+import { updateFavicon, updateMetaThemeColor } from "@/application/pwaTheme/PwaThemeUpdater";
 import { launcherIconKey } from "@/theme/launcherIcon";
 import { syncPaperFonts } from "@/style/styles/paper/fonts";
 import { syncCyberFonts } from "@/style/styles/cyber/fonts";

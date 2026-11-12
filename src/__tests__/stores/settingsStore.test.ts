@@ -1,12 +1,12 @@
 import { createPinia, setActivePinia } from "pinia";
 import { useSettingsStore } from "@/stores/settingsStore";
-import { updateManifestLink, updateAppleTouchIcon } from "@/application/PwaThemeUpdater";
+import { updateManifestLink, updateAppleTouchIcon } from "@/application/pwaTheme/PwaThemeUpdater";
 import { STYLE_IDS, THEME_IDS_BY_STYLE } from "@/theme/themeIds";
 import { pwaIconKey } from "@/theme/launcherIcon";
 
 // Spies that still update the page links, so tests can read the hrefs too
-vi.mock("@/application/PwaThemeUpdater", async (importOriginal) => {
-    const actual = await importOriginal<typeof import("@/application/PwaThemeUpdater")>();
+vi.mock("@/application/pwaTheme/PwaThemeUpdater", async (importOriginal) => {
+    const actual = await importOriginal<typeof import("@/application/pwaTheme/PwaThemeUpdater")>();
     return {
         updateMetaThemeColor: vi.fn(),
         updateManifestLink: vi.fn(actual.updateManifestLink),
