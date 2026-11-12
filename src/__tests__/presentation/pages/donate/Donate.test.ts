@@ -1,5 +1,5 @@
-import { createAnalyticsSpy } from "@/__tests__/fixtures/analyticsSpy";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { createAnalyticsSpy } from "@/__tests__/fixtures/analyticsSpy";
 import { mount, flushPromises } from "@vue/test-utils";
 import { nextTick } from "vue";
 import { i18n } from "@/presentation/i18n";

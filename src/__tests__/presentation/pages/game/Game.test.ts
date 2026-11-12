@@ -1,8 +1,8 @@
-import { createAnalyticsSpy } from "@/__tests__/fixtures/analyticsSpy";
 import { setPageVisibility } from "@/__tests__/fixtures/pageVisibility";
 import { defineComponent, h, nextTick, watch } from "vue";
 import { i18n } from "@/presentation/i18n";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { createAnalyticsSpy } from "@/__tests__/fixtures/analyticsSpy";
 import { flushPromises, mount } from "@vue/test-utils";
 import { createPinia } from "pinia";
 import { useSettingsStore } from "@/stores/settingsStore";

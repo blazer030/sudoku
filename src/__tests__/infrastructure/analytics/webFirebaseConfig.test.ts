@@ -29,11 +29,15 @@ describe("readWebFirebaseConfig", () => {
     });
 
     it.each(Object.keys(keyToOption))("returns null when %s is missing", (key) => {
-        const { [key]: _omitted, ...env } = completeEnv();
+        const env = Object.fromEntries(Object.entries(completeEnv()).filter(([name]) => name !== key));
         expect(readWebFirebaseConfig(env)).toBeNull();
     });
 
     it.each(Object.keys(keyToOption))("returns null when %s is empty", (key) => {
         expect(readWebFirebaseConfig({ ...completeEnv(), [key]: "" })).toBeNull();
+    });
+
+    it.each(Object.keys(keyToOption))("returns null when %s is not a string", (key) => {
+        expect(readWebFirebaseConfig({ ...completeEnv(), [key]: 42 })).toBeNull();
     });
 });

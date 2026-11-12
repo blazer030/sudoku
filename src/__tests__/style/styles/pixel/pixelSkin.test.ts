@@ -247,6 +247,28 @@ describe("pixel skin", () => {
         expect(declarationsOf(PIXEL_CSS, `${SCOPE} .rounded-full`).get("border-radius")).toBe("0");
     });
 
+    it("should frame the board in four notched bars and a hard drop shadow", () => {
+        const layers = shadowLayers(declarationsOf(PIXEL_CSS, BOARD).get("--tw-shadow") ?? "");
+
+        expect(layers.filter(layer => layer.blur !== 0)).toEqual([]);
+        expect(layers.filter(layer => !layer.inset && (layer.offsetX === 0) !== (layer.offsetY === 0))).toHaveLength(4);
+        expect(layers.some(layer => layer.offsetX > 0 && layer.offsetY > 0 && layer.spread === 0)).toBe(true);
+    });
+
+    // The cells' 1px and 3px borders are redrawn 2px and 4px by one overlay over the grid, which never takes a tap
+    it("should redraw the board's inner lines in an overlay that lets taps through", () => {
+        const overlay = declarationsOf(PIXEL_CSS, `${BOARD} > div::before`);
+        const gradients = (overlay.get("background-image") ?? "").match(/linear-gradient\(/g) ?? [];
+
+        expect(declarationsOf(PIXEL_CSS, `${BOARD} > div`).get("position")).toBe("relative");
+        expect(overlay.get("position")).toBe("absolute");
+        expect(overlay.get("inset")).toBe("0");
+        expect(overlay.get("pointer-events")).toBe("none");
+        expect(gradients).toHaveLength(4);
+        expect(overlay.get("background-image")).toContain("var(--board-box-line)");
+        expect(overlay.get("background-image")).toContain("var(--board-line)");
+    });
+
     it("should draw hint mode on the board as a doubled frame that blinks in, instead of the shared ring", () => {
         const board = declarationsOf(PIXEL_CSS, skin("board"));
         const hint = declarationsOf(PIXEL_CSS, `${skin("board")}[data-hint-mode]`);

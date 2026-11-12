@@ -1,6 +1,6 @@
 import { readFileSync } from "fs";
-import { createAnalyticsSpy } from "@/__tests__/fixtures/analyticsSpy";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { createAnalyticsSpy } from "@/__tests__/fixtures/analyticsSpy";
 import { nextTick } from "vue";
 import { flushPromises, mount, type VueWrapper } from "@vue/test-utils";
 import { createPinia, setActivePinia } from "pinia";
@@ -715,8 +715,6 @@ describe("Home", () => {
     });
 
     describe("game_abandon analytics", () => {
-        const createAnalytics = () => (createAnalyticsSpy());
-
         const savedGameWithEntries: GameState = {
             ...dummySave,
             difficulty: "hard",
@@ -729,7 +727,7 @@ describe("Home", () => {
         };
 
         it("should log game_abandon with difficulty and progress when giving up the saved game", async () => {
-            const analytics = createAnalytics();
+            const analytics = createAnalyticsSpy();
             const { wrapper, router } = mountHome({ savedGame: savedGameWithEntries, analytics });
             await router.push("/");
             await router.isReady();
@@ -748,7 +746,7 @@ describe("Home", () => {
         });
 
         it("should not log game_abandon when starting a new game without a saved game", async () => {
-            const analytics = createAnalytics();
+            const analytics = createAnalyticsSpy();
             const { wrapper, router } = mountHome({ analytics });
             await router.push("/");
             await router.isReady();
