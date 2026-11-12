@@ -111,7 +111,7 @@ const main = async (): Promise<void> => {
             // month/day on the completion card; any other text falls through to WenKai. Paper's stroke writing
             // (style-moments/paper/paperDigitStrokes.ts) holds Caveat's digit advances and baseline: re-measure
             // them if this face changes
-            jobs: [{ output: "caveat.woff2", source: "ofl/caveat/Caveat[wght].ttf", text: "0123456789/SOLVED", weights: { min: 500, max: 700 } }],
+            jobs: [{ output: "caveat.woff2", source: "ofl/caveat/Caveat[wght].ttf", text: "0123456789/" + en.game.complete.stamp, weights: { min: 500, max: 700 } }],
         },
         {
             licence: "ofl/lxgwwenkaitc/OFL.txt",
