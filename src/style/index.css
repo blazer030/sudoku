@@ -176,8 +176,8 @@
 }
 
 /* Under what the sizes above can reach, the words and the gaps round the cards close too */
-@media (max-height: 623.98px) and (max-width: 640px) {
-  .home-sizes {
+.home-sizes {
+  @variant home-short {
     --home-logo-size: 40px;
     --home-logo-mark: 24px;
     --home-spacer-min: 8px;
@@ -189,8 +189,8 @@
 }
 
 /* Shorter still, the tiles lose their subtitles (Home.vue) and the page its margins */
-@media (max-height: 549.98px) and (max-width: 640px) {
-  .home-sizes {
+.home-sizes {
+  @variant home-tiny {
     --home-page-top: 6px;
     --home-page-bottom: 8px;
     --home-spacer-min: 4px;
@@ -322,28 +322,28 @@
 
 /* A step's lines pass under the digits they cross, so the digits stay readable */
 .has-step-links .cell-digit {
-    position: relative;
-    z-index: 1;
+  position: relative;
+  z-index: 1;
 }
 
 /* Diagonal strike-through for eliminated candidates (top-left to bottom-right) */
 .strike-diagonal {
-    position: relative;
-    display: inline-block;
+  position: relative;
+  display: inline-block;
 }
 
 .strike-diagonal::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-        to top right,
-        transparent calc(50% - 0.5px),
-        currentColor calc(50% - 0.5px),
-        currentColor calc(50% + 0.5px),
-        transparent calc(50% + 0.5px)
-    );
-    pointer-events: none;
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top right,
+    transparent calc(50% - 0.5px),
+    currentColor calc(50% - 0.5px),
+    currentColor calc(50% + 0.5px),
+    transparent calc(50% + 0.5px)
+  );
+  pointer-events: none;
 }
 
 /* A group effect ripples out from the cell that completed it: a cell starts one ripple step later for
@@ -369,8 +369,8 @@
    under reduced motion. */
 @keyframes hint-reveal-glow {
   0%, 45% {
-    background-color: var(--color-primary-light);
-    box-shadow: inset 0 0 0 2px var(--color-primary);
+  background-color: var(--color-primary-light);
+  box-shadow: inset 0 0 0 2px var(--color-primary);
   }
 }
 
@@ -390,7 +390,7 @@
 
 @keyframes hint-nudge {
   50% {
-    outline-color: transparent;
+  outline-color: transparent;
   }
 }
 
@@ -399,51 +399,51 @@
    fade but lose their movement, including the ones in component styles. Each style's
    stylesheet turns off its own motion in its own block. */
 @media (prefers-reduced-motion: reduce) {
-    [data-nudge="flash"] {
-        animation: none;
-    }
+  [data-nudge="flash"] {
+    animation: none;
+  }
 
-    [class*="-enter-from"],
-    [class*="-leave-to"],
-    [class*="-enter-from"] > *,
-    [class*="-leave-to"] > * {
-        transform: none !important;
-    }
+  [class*="-enter-from"],
+  [class*="-leave-to"],
+  [class*="-enter-from"] > *,
+  [class*="-leave-to"] > * {
+    transform: none !important;
+  }
 
-    .animate-hint-reveal-pop {
-        animation: none;
-    }
+  .animate-hint-reveal-pop {
+    animation: none;
+  }
 }
 
 /* Subtle, thin scrollbars so the centred max-w-screen-sm column doesn't get
    a chunky default scrollbar floating in the middle of wide viewports. */
 :root {
-    --scrollbar-thumb: color-mix(in srgb, var(--color-foreground) 18%, transparent);
-    --scrollbar-thumb-hover: color-mix(in srgb, var(--color-foreground) 32%, transparent);
+  --scrollbar-thumb: color-mix(in srgb, var(--color-foreground) 18%, transparent);
+  --scrollbar-thumb-hover: color-mix(in srgb, var(--color-foreground) 32%, transparent);
 }
 /* Touch devices keep overlay scrollbars; a classic 8px gutter shifts content in Android WebView */
 @media (pointer: fine) {
-    * {
-        scrollbar-width: thin;
-        scrollbar-color: var(--scrollbar-thumb) transparent;
-    }
-    *::-webkit-scrollbar {
-        width: 8px;
-        height: 8px;
-    }
-    *::-webkit-scrollbar-track {
-        background: transparent;
-    }
-    *::-webkit-scrollbar-thumb {
-        background: var(--scrollbar-thumb);
-        border-radius: 4px;
-    }
-    *::-webkit-scrollbar-thumb:hover {
-        background: var(--scrollbar-thumb-hover);
-    }
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-thumb) transparent;
+  }
+  *::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  *::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thumb);
+    border-radius: 4px;
+  }
+  *::-webkit-scrollbar-thumb:hover {
+    background: var(--scrollbar-thumb-hover);
+  }
 }
 
 /* CJK glyphs are already evenly spaced; Latin-style tracking looks loose */
 html:lang(zh-Hant) [class*="tracking-"] {
-    letter-spacing: normal;
+  letter-spacing: normal;
 }
