@@ -381,7 +381,7 @@ describe("cyber skin", () => {
 
         it("should set a hint's candidate notes in cyan and its eliminated notes in red", () => {
             expect(cell(".font-note.text-primary").get("color")).toBe("var(--color-accent)");
-            expect(cell('[data-testid^="eliminated-note-"]').get("color")).toBe("var(--color-error)");
+            expect(cell("[data-eliminated-note]").get("color")).toBe("var(--color-error)");
         });
     });
 

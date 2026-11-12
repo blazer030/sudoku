@@ -968,7 +968,7 @@
     color: var(--color-accent);
 }
 
-[data-style="cyber"] [data-skin~="board"] [data-testid^="eliminated-note-"] {
+[data-style="cyber"] [data-skin~="board"] [data-eliminated-note] {
     color: var(--color-error);
 }
 

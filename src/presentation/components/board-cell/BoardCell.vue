@@ -51,6 +51,7 @@
                     :data-note-dimmed="isNoteDimmed(noteDigit) ? '' : undefined"
                     :data-note-highlight="isNoteHighlighted(noteDigit) ? '' : undefined"
                     :style="isNoteDimmed(noteDigit) ? DIMMED_COLOR : undefined"
+                    :data-eliminated-note="eliminatedDigits.includes(noteDigit) ? '' : undefined"
                     :data-testid="eliminatedDigits.includes(noteDigit) ? `eliminated-note-${noteDigit}` : undefined"
                 >
                     {{ noteDigit }}
