@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { SudokuBoard } from "@/domain/board/SudokuBoard";
+import { isValidSolution } from "@/__tests__/fixtures/validSolution";
 import { SudokuGenerator } from "@/domain/generator/SudokuGenerator";
 import { SudokuSolver } from "@/domain/generator/SudokuSolver";
 import { BoardState } from "@/domain/solver/BoardState";
@@ -10,7 +10,6 @@ afterEach(() => {
     vi.restoreAllMocks();
 });
 
-const sudokuBoard = new SudokuBoard();
 const generator = new SudokuGenerator();
 const solver = new SudokuSolver();
 
@@ -71,7 +70,7 @@ describe("SudokuGenerator", () => {
             const generated = new SudokuGenerator().generatePuzzle(difficulty);
 
             const { puzzle, answer } = generated;
-            expect(sudokuBoard.isValidSolution(answer)).toBe(true);
+            expect(isValidSolution(answer)).toBe(true);
             puzzle.flat().forEach((cell, index) => {
                 if (cell !== 0) expect(cell).toBe(answer[Math.floor(index / 9)][index % 9]);
             });
@@ -91,7 +90,7 @@ describe("SudokuGenerator", () => {
         board.forEach(row => {
             expect(row).toHaveLength(9);
         });
-        expect(sudokuBoard.isValidSolution(board)).toBe(true);
+        expect(isValidSolution(board)).toBe(true);
     });
 
     it("should retry generating when rater.matches returns false", () => {

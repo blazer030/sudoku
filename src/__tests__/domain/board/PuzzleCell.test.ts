@@ -9,7 +9,6 @@ describe("PuzzleCell", () => {
             expect(cell.clue).toBe(5);
             expect(cell.entry).toBe(0);
             expect(cell.isClue).toBe(true);
-            expect(cell.isSlot).toBe(false);
             expect(cell.hasEntry).toBe(false);
         });
 
@@ -19,7 +18,6 @@ describe("PuzzleCell", () => {
             expect(cell.clue).toBe(0);
             expect(cell.entry).toBe(0);
             expect(cell.isClue).toBe(false);
-            expect(cell.isSlot).toBe(true);
             expect(cell.hasEntry).toBe(false);
         });
 
@@ -32,7 +30,6 @@ describe("PuzzleCell", () => {
 
             expect(cell.entry).toBe(3);
             expect(cell.hasEntry).toBe(true);
-            expect(cell.isSlot).toBe(true);
         });
 
         it("should clear notes after inputting a number", () => {

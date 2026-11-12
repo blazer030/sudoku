@@ -109,7 +109,7 @@ The app ships in English and Traditional Chinese (`src/presentation/i18n/message
 ## Key Domain Concepts
 
 - **`PuzzleCell`**: Has `clue` (given), `entry` (player input), `notes` (candidates). `isClue` cells cannot be modified.
-- **`Sudoku`**: Main game engine — `generate()`, `fill()`, `erase()`, `toggleNote()`, `undo()`, `isCompleted()`, `planRevealHint()` / `applyRevealHint()`.
+- **`Sudoku`**: Main game engine (built from a generated puzzle with `restoreSave()`) — `fill()`, `erase()`, `toggleNote()`, `undo()`, `isCompleted()`, `planRevealHint()` / `applyRevealHint()`.
 - **`HintTracker`**: Counts the hints used in a game, with no limit. Tracked in game state; Statistics shows the average per difficulty over completed games.
 - **`BoardHistory`**: Stores snapshots for undo. Records state before each `fill`/`erase`/`toggleNote`.
 - **Difficulty levels**: `easy`, `medium`, `hard` — controls number of clues removed during generation.

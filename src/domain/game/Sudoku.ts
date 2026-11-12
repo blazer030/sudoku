@@ -5,7 +5,6 @@ import { BoardHistory } from "@/domain/game/BoardHistory";
 import { ConflictDetector } from "@/domain/game/ConflictDetector";
 import { HintTracker } from "@/domain/game/HintTracker";
 import { RevealHintPlan, RevealHintStep } from "@/domain/game/RevealHint";
-import { Difficulty, SudokuGenerator } from "@/domain/generator/SudokuGenerator";
 import { BoardState } from "@/domain/solver/BoardState";
 import { Elimination } from "@/domain/solver/SolveStep";
 import { TechniqueSolver } from "@/domain/solver/TechniqueSolver";
@@ -28,7 +27,6 @@ export class Sudoku {
     private _answer: number[][] = [];
     private _puzzle: PuzzleCell[][] = [];
     private history = new BoardHistory();
-    private generator = new SudokuGenerator();
     private conflictDetector = new ConflictDetector();
     private board = new SudokuBoard();
     private _hintTracker = new HintTracker();
@@ -58,17 +56,6 @@ export class Sudoku {
 
     public raw() {
         return this;
-    }
-
-    public generate(difficulty: Difficulty = "easy"): void {
-        const { puzzle, answer } = this.generator.generatePuzzle(difficulty);
-        this._answer = answer;
-
-        this._puzzle = puzzle.map((row) => {
-            return row.map((puzzleValue) => {
-                return new PuzzleCell(puzzleValue);
-            });
-        });
     }
 
     public isCompleted(): boolean {

@@ -22,10 +22,6 @@ export class PuzzleCell {
         return this._clue > 0;
     }
 
-    public get isSlot(): boolean {
-        return this._clue === 0;
-    }
-
     public get hasEntry(): boolean {
         return this._entry > 0;
     }

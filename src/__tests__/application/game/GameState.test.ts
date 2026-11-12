@@ -1,8 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { Sudoku } from "@/domain/game/Sudoku";
 import type { CellState } from "@/domain/board/cellState";
 import { GameStateConverter, captureInitialBoard } from "@/application/game/GameState";
-import { knownAnswer, knownPuzzle, spyGeneratePuzzle } from "@/__tests__/fixtures/knownPuzzle";
+import { createKnownSudoku, knownAnswer, knownPuzzle } from "@/__tests__/fixtures/knownPuzzle";
 
 afterEach(() => {
     vi.restoreAllMocks();
@@ -11,9 +10,7 @@ afterEach(() => {
 describe("GameStateConverter", () => {
     describe("fromSudoku", () => {
         it("should convert Sudoku to GameState with answer and cells", () => {
-            spyGeneratePuzzle();
-            const sudoku = new Sudoku();
-            sudoku.generate("easy");
+            const sudoku = createKnownSudoku();
 
             const state = GameStateConverter.fromSudoku(sudoku, {
                 difficulty: "easy",
@@ -34,9 +31,7 @@ describe("GameStateConverter", () => {
         });
 
         it("should include player input and notes", () => {
-            spyGeneratePuzzle();
-            const sudoku = new Sudoku();
-            sudoku.generate("easy");
+            const sudoku = createKnownSudoku();
             sudoku.fill(0, 2, 4);
             sudoku.toggleNote(0, 3, 1);
             sudoku.toggleNote(0, 3, 6);
@@ -52,9 +47,7 @@ describe("GameStateConverter", () => {
         });
 
         it("should include hintsUsed from hintTracker", () => {
-            spyGeneratePuzzle();
-            const sudoku = new Sudoku();
-            sudoku.generate("easy");
+            const sudoku = createKnownSudoku();
             sudoku.hintTracker.useHint();
             sudoku.hintTracker.useHint();
 
@@ -123,9 +116,7 @@ describe("GameStateConverter", () => {
 
     describe("captureInitialBoard", () => {
         it("should snapshot clue, entry, and notes for all cells", () => {
-            spyGeneratePuzzle();
-            const sudoku = new Sudoku();
-            sudoku.generate("easy");
+            const sudoku = createKnownSudoku();
 
             const board = captureInitialBoard(sudoku);
 

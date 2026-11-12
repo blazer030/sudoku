@@ -24,11 +24,6 @@ export class TechniqueSolver {
         return findFirstStep(state, techniques);
     }
 
-    public nextAssignment(state: BoardState): SolveStep | null {
-        const steps = this.stepsToNextAssignment(state);
-        return steps.length > 0 ? steps[steps.length - 1] : null;
-    }
-
     public stepsToNextAssignment(state: BoardState): SolveStep[] {
         const steps: SolveStep[] = [];
         let currentState = state;

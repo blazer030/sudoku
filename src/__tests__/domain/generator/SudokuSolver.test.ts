@@ -1,10 +1,10 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { SudokuBoard } from "@/domain/board/SudokuBoard";
+import { isValidSolution } from "@/__tests__/fixtures/validSolution";
 import { SudokuSolver, UNKNOWN_SOLUTION_COUNT } from "@/domain/generator/SudokuSolver";
 import { contradictorySparsePuzzle, openNoSolutionPuzzle, openTwoSolutionPuzzle } from "@/__tests__/fixtures/openPuzzles";
 import { singlesPuzzle } from "@/__tests__/fixtures/singlesPuzzle";
 
-const sudokuBoard = new SudokuBoard();
 const solver = new SudokuSolver();
 
 // A minimal 17-clue puzzle with exactly one solution (the walkthrough's medium sample).
@@ -172,6 +172,6 @@ describe("SudokuSolver", () => {
 
         expect(result).not.toBeNull();
         if (!result) return;
-        expect(sudokuBoard.isValidSolution(result)).toBe(true);
+        expect(isValidSolution(result)).toBe(true);
     });
 });

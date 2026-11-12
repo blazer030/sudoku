@@ -21,6 +21,12 @@ afterEach(() => {
     vi.restoreAllMocks();
 });
 
+// The step that places the next digit, after any elimination-only steps before it
+const lastStepToAssignment = (solver: TechniqueSolver, state: BoardState): SolveStep | null => {
+    const steps = solver.stepsToNextAssignment(state);
+    return steps.length > 0 ? steps[steps.length - 1] : null;
+};
+
 describe("TechniqueSolver", () => {
     it("nextStep should find the first applicable technique", () => {
         const puzzle: number[][] = [
@@ -165,7 +171,7 @@ describe("TechniqueSolver", () => {
         expect(step?.technique).toBe("xyzWing");
     });
 
-    it("nextAssignment should return the first step containing an assignment", () => {
+    it("the steps to the next assignment should return the first step containing an assignment", () => {
         const puzzle: number[][] = [
             [0, 2, 3, 4, 5, 6, 7, 8, 9],
             [0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -180,13 +186,13 @@ describe("TechniqueSolver", () => {
         const state = BoardState.fromPuzzle(puzzle);
         const solver = new TechniqueSolver();
 
-        const step = solver.nextAssignment(state);
+        const step = lastStepToAssignment(solver, state);
 
         expect(step?.technique).toBe("nakedSingle");
         expect(step?.assignments).toEqual([{ cell: { row: 0, column: 0 }, digit: 1 }]);
     });
 
-    it("nextAssignment should advance past elimination-only steps to reach an assignment", () => {
+    it("the steps to the next assignment should advance past elimination-only steps to reach an assignment", () => {
         const puzzle: number[][] = [
             [0, 0, 0, 0, 0, 6, 7, 8, 9],
             [0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -214,19 +220,19 @@ describe("TechniqueSolver", () => {
         }
         const solver = new TechniqueSolver();
 
-        const step = solver.nextAssignment(state);
+        const step = lastStepToAssignment(solver, state);
 
         expect(step?.technique).toBe("nakedSingle");
         expect(step?.assignments).toEqual([{ cell: { row: 0, column: 2 }, digit: 3 }]);
     });
 
-    it("nextAssignment should return null when the solver is stuck", () => {
+    it("the steps to the next assignment should return null when the solver is stuck", () => {
         const state = BoardState.fromPuzzle(
             Array.from({ length: 9 }, () => Array<number>(9).fill(0)),
         );
         const solver = new TechniqueSolver();
 
-        const step = solver.nextAssignment(state);
+        const step = lastStepToAssignment(solver, state);
 
         expect(step).toBeNull();
     });
