@@ -3,14 +3,10 @@ import type { HouseKind } from "@/domain/board/geometry";
 import type { CompletedGroup } from "@/domain/game/Sudoku";
 import type { GroupEffect } from "@/presentation/components/style-moments/styleMoments";
 import { boxIndexOf } from "@/domain/board/geometry";
+import type { CellReference } from "@/domain/board/CellReference";
 
 /** How much later a cell's effect starts for each row and column between it and the origin. */
 export const GROUP_RIPPLE_STEP_MS = 60;
-
-interface CellPosition {
-    row: number;
-    column: number;
-}
 
 /**
  * The effect a completed row, column or box plays. The cells are marked all at once with the kinds
@@ -31,12 +27,12 @@ export const useGroupEffect = (motionAllowed: () => boolean, durationMs: () => n
         cellKinds = new Map();
     };
 
-    const play = (groups: CompletedGroup[], cells: CellPosition[], origin: CellPosition) => {
+    const play = (groups: CompletedGroup[], cells: CellReference[], origin: CellReference) => {
         // A new effect replaces a running one
         if (effect.value !== null) stop();
         if (!motionAllowed() || cells.length === 0) return;
 
-        const isIn = (group: CompletedGroup, cell: CellPosition): boolean => {
+        const isIn = (group: CompletedGroup, cell: CellReference): boolean => {
             if (group.kind === "row") return cell.row === group.index;
             if (group.kind === "column") return cell.column === group.index;
             return boxIndexOf(cell.row, cell.column) === group.index;

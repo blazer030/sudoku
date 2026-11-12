@@ -46,6 +46,7 @@
 </template>
 
 <script lang="ts" setup>
+import type { CellReference } from "@/domain/board/CellReference";
 import { digitKeyLabelKey, isDigitKeyDisabled, remainingOf, type DigitCounts } from "@/presentation/components/digit-pad/digitKeys";
 import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef, watchPostEffect } from "vue";
 import { useI18n } from "vue-i18n";
@@ -57,7 +58,7 @@ import { useMotionAllowed } from "@/presentation/composables/useMotionAllowed";
 import { vPress } from "@/presentation/directives/press";
 
 const props = withDefaults(defineProps<{
-    cell: { row: number; column: number };
+    cell: CellReference;
     digitCounts: DigitCounts;
     noteMode?: boolean;
     /** The digit the cell holds, 0 for none. */

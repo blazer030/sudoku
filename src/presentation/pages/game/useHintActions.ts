@@ -2,17 +2,18 @@ import { ref } from "vue";
 import type { RevealOutcome } from "@/domain/game/RevealOutcome";
 import type { CompletedCells, Sudoku } from "@/domain/game/Sudoku";
 import type { StepRecorder } from "@/domain/game/StepRecorder";
-import type { CellReference } from "@/domain/solver/SolveStep";
 import { provideHintMenu, type HintAction } from "@/presentation/pages/game/components/useHintMenu";
 import type { AnalyticsEvent, AnalyticsService } from "@/application/analytics/AnalyticsService";
 import { useHintMode } from "@/presentation/pages/game/hint-mode/useHintMode";
+import type { CellReference } from "@/domain/board/CellReference";
+import { sameCell } from "@/domain/solver/cellRelations";
 
 interface HintActionsOptions {
     sudoku: Sudoku;
     stepRecorder: StepRecorder;
     autoRemoveNotes: () => boolean;
     onRevealComplete: () => void;
-    onGroupCompleted?: (completed: CompletedCells, origin: { row: number; column: number }) => void;
+    onGroupCompleted?: (completed: CompletedCells, origin: CellReference) => void;
     onHintReveal?: (outcome: RevealOutcome) => void;
     /** A hint put its answer in a cell. */
     onCellRevealed?: () => void;
@@ -43,7 +44,7 @@ export const useHintActions = ({
     analytics,
 }: HintActionsOptions) => {
     const hintMenu = provideHintMenu();
-    const errorCells = ref<{ row: number; column: number }[]>([]);
+    const errorCells = ref<CellReference[]>([]);
     const revealedCell = ref<CellReference | null>(null);
     let revealedCellTimeout: ReturnType<typeof setTimeout> | null = null;
 
@@ -52,10 +53,10 @@ export const useHintActions = ({
     };
 
     const isError = (row: number, column: number): boolean =>
-        errorCells.value.some(cell => cell.row === row && cell.column === column);
+        errorCells.value.some(cell => sameCell(cell, { row, column }));
 
     const isRevealed = (row: number, column: number): boolean =>
-        revealedCell.value?.row === row && revealedCell.value.column === column;
+        revealedCell.value !== null && sameCell(revealedCell.value, { row, column });
 
     const markRevealed = (cell: CellReference) => {
         if (revealedCellTimeout !== null) clearTimeout(revealedCellTimeout);

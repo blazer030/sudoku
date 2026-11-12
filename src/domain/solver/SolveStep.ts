@@ -1,7 +1,6 @@
-export interface CellReference {
-    row: number;
-    column: number;
-}
+import type { CellReference } from "@/domain/board/CellReference";
+
+export type { CellReference };
 
 export interface Assignment {
     cell: CellReference;

@@ -1,15 +1,11 @@
 import { BOARD_SIZE, BOX_SIZE } from "@/domain/board/constants";
 import { PuzzleCell } from "@/domain/board/PuzzleCell";
 import { boxStart } from "@/domain/board/geometry";
-
-export interface Conflict {
-    row: number;
-    column: number;
-}
+import type { CellReference } from "@/domain/board/CellReference";
 
 export class ConflictDetector {
-    public findAllConflicts(puzzle: PuzzleCell[][], board: number[][]): Conflict[] {
-        const conflicts: Conflict[] = [];
+    public findAllConflicts(puzzle: PuzzleCell[][], board: number[][]): CellReference[] {
+        const conflicts: CellReference[] = [];
         const seen = new Set<string>();
 
         for (let row = 0; row < BOARD_SIZE; row++) {
@@ -39,8 +35,8 @@ export class ConflictDetector {
         return conflicts;
     }
 
-    public findErrors(puzzle: PuzzleCell[][], answer: number[][]): Conflict[] {
-        const errors: Conflict[] = [];
+    public findErrors(puzzle: PuzzleCell[][], answer: number[][]): CellReference[] {
+        const errors: CellReference[] = [];
         for (let row = 0; row < BOARD_SIZE; row++) {
             for (let column = 0; column < BOARD_SIZE; column++) {
                 const cell = puzzle[row][column];
@@ -53,8 +49,8 @@ export class ConflictDetector {
         return errors;
     }
 
-    public findConflicts(board: number[][], row: number, column: number, value: number): Conflict[] {
-        const conflicts: Conflict[] = [];
+    public findConflicts(board: number[][], row: number, column: number, value: number): CellReference[] {
+        const conflicts: CellReference[] = [];
 
         for (let currentColumn = 0; currentColumn < BOARD_SIZE; currentColumn++) {
             if (currentColumn !== column && board[row][currentColumn] === value) {

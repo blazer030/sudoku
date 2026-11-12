@@ -17,6 +17,7 @@
 </template>
 
 <script lang="ts" setup>
+import type { CellReference } from "@/domain/board/CellReference";
 import { BOARD_SIZE, BOX_SIZE } from "@/domain/board/constants";
 import type { HouseKind } from "@/domain/board/geometry";
 import type { CompletedGroup } from "@/domain/game/Sudoku";
@@ -35,7 +36,7 @@ const SPARKS: Record<HouseKind, string[]> = {
     box: ["left-0 top-0", "left-full top-0", "left-0 top-full", "left-full top-full"],
 };
 
-const cellsOf = (group: CompletedGroup): { row: number; column: number }[] => {
+const cellsOf = (group: CompletedGroup): CellReference[] => {
     const offsets = Array.from({ length: BOARD_SIZE }, (_, offset) => offset);
     if (group.kind === "row") return offsets.map(column => ({ row: group.index, column }));
     if (group.kind === "column") return offsets.map(row => ({ row, column: group.index }));

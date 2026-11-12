@@ -3,6 +3,7 @@
 // scheduled. The renderer only turns a frame's uniforms into pixels.
 import type { HouseKind } from "@/domain/board/geometry";
 import type { CompletedGroup } from "@/domain/game/Sudoku";
+import type { CellReference } from "@/domain/board/CellReference";
 
 /** A wash of ink dropped on wet paper: its front runs out from the centre, fast and then slow, and dries. */
 export interface InkBloom {
@@ -20,7 +21,7 @@ export interface InkBloom {
 export interface InkFill {
     kind: "fill";
     /** The cell the digit was entered in, counted from 0. */
-    cell: { row: number; column: number };
+    cell: CellReference;
     /** Shapes the drop's outline, so no two drops are alike. */
     seed: number;
 }
@@ -86,7 +87,7 @@ export const INK_DRIFT_SETTLE_MS = 1700;
 const seedOf = (number: number): number => ((number * 0.6180339) % 1) * 7;
 
 /** The drop under a digit entered in `cell` at `nowMs`, shaped by its cell and its moment. */
-export const inkFillAt = (cell: { row: number; column: number }, nowMs: number): InkFill =>
+export const inkFillAt = (cell: CellReference, nowMs: number): InkFill =>
     ({ kind: "fill", cell, seed: seedOf(cell.row * BOARD_CELLS + cell.column + nowMs) });
 
 /** The marks of completed groups, each shaped by its kind and index. */

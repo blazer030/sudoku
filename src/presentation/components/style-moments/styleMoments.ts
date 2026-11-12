@@ -28,12 +28,13 @@ import BlueprintLoader from "@/presentation/components/style-moments/blueprint/B
 import BlueprintGroupOverlay from "@/presentation/components/style-moments/blueprint/BlueprintGroupOverlay.vue";
 import BlueprintCardDecoration from "@/presentation/components/style-moments/blueprint/BlueprintCardDecoration.vue";
 import type { CompletedGroup } from "@/domain/game/Sudoku";
+import type { CellReference } from "@/domain/board/CellReference";
 
 /** A group effect on the board: a new one gets a new id, which starts its drawings afresh. */
 export interface GroupEffect {
     id: number;
     groups: CompletedGroup[];
-    origin: { row: number; column: number };
+    origin: CellReference;
 }
 
 /** The board's part of the celebration: its phase playing, its end state after, or the still end state. */

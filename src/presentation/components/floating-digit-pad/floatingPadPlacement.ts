@@ -1,4 +1,5 @@
 import { BOARD_SIZE } from "@/domain/board/constants";
+import type { CellReference } from "@/domain/board/CellReference";
 
 /** The pad's usual size in cells: three rows of digits and the erase key's shorter row. */
 export const FLOATING_PAD_ROWS = 3.6;
@@ -49,7 +50,7 @@ const placeAlong = (position: number, length: number): number => {
  * covers none of the cell's row or column, only, at most, some of its box.
  */
 export const floatingPadPlacement = (
-    { row, column }: { row: number; column: number },
+    { row, column }: CellReference,
     size: FloatingPadSize = { rows: FLOATING_PAD_ROWS, columns: FLOATING_PAD_COLUMNS },
 ): FloatingPadPlacement => ({
     rowStart: placeAlong(row, size.rows),

@@ -1,16 +1,17 @@
 import { computed, ref } from "vue";
-import { BOX_SIZE } from "@/domain/board/constants";
 import type { CompletedCells, Sudoku } from "@/domain/game/Sudoku";
 import type { StepRecorder } from "@/domain/game/StepRecorder";
 import { InputMode } from "@/presentation/pages/game/InputMode";
 import { NO_DIGITS_USED_UP, isDigitUsedUp } from "@/presentation/components/digit-pad/digitKeys";
+import type { CellReference } from "@/domain/board/CellReference";
+import { arePeers, sameCell } from "@/domain/solver/cellRelations";
 
 interface GameInteractionOptions {
     sudoku: Sudoku;
     stepRecorder: StepRecorder;
     clearErrors: () => void;
     checkAndComplete: () => void;
-    onGroupCompleted?: (completed: CompletedCells, origin: { row: number; column: number }) => void;
+    onGroupCompleted?: (completed: CompletedCells, origin: CellReference) => void;
     autoRemoveNotes: () => boolean;
     /** True while the board ignores the player, e.g. during hint mode. */
     isLocked?: () => boolean;
@@ -25,7 +26,7 @@ export const useGameInteraction = ({
     autoRemoveNotes,
     isLocked = () => false,
 }: GameInteractionOptions) => {
-    const selectedCell = ref<{ row: number; column: number } | null>(null);
+    const selectedCell = ref<CellReference | null>(null);
     const selectedDigit = ref<number | null>(null);
     const inputMode = ref(InputMode.Normal);
 
@@ -126,21 +127,11 @@ export const useGameInteraction = ({
         return value > 0 ? value : null;
     });
 
-    const isSelected = (row: number, column: number) => {
-        if (selectedCell.value === null) return false;
-        if (selectedCell.value.row !== row) return false;
-        return selectedCell.value.column === column;
-    };
+    const isSelected = (row: number, column: number): boolean =>
+        selectedCell.value !== null && sameCell(selectedCell.value, { row, column });
 
-    const isPeerOfSelected = (row: number, column: number) => {
-        if (selectedCell.value === null) return false;
-        const selected = selectedCell.value;
-        if (selected.row === row && selected.column === column) return false;
-        if (selected.row === row || selected.column === column) return true;
-        const sameBoxRow = Math.floor(selected.row / BOX_SIZE) === Math.floor(row / BOX_SIZE);
-        const sameBoxColumn = Math.floor(selected.column / BOX_SIZE) === Math.floor(column / BOX_SIZE);
-        return sameBoxRow && sameBoxColumn;
-    };
+    const isPeerOfSelected = (row: number, column: number): boolean =>
+        selectedCell.value !== null && arePeers(selectedCell.value, { row, column });
 
     const digitCounts = computed(() => {
         const counts = [...NO_DIGITS_USED_UP];

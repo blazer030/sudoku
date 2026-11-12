@@ -2,14 +2,15 @@ import { BOARD_SIZE, BOX_SIZE } from "@/domain/board/constants";
 import { PuzzleCell } from "@/domain/board/PuzzleCell";
 import { SudokuBoard } from "@/domain/board/SudokuBoard";
 import { BoardHistory } from "@/domain/game/BoardHistory";
-import { Conflict, ConflictDetector } from "@/domain/game/ConflictDetector";
+import { ConflictDetector } from "@/domain/game/ConflictDetector";
 import { HintTracker } from "@/domain/game/HintTracker";
 import { RevealHintPlan, RevealHintStep } from "@/domain/game/RevealHint";
 import { Difficulty, SudokuGenerator } from "@/domain/generator/SudokuGenerator";
 import { BoardState } from "@/domain/solver/BoardState";
-import { CellReference, Elimination } from "@/domain/solver/SolveStep";
+import { Elimination } from "@/domain/solver/SolveStep";
 import { TechniqueSolver } from "@/domain/solver/TechniqueSolver";
 import { boxStart, boxIndexOf, type HouseKind } from "@/domain/board/geometry";
+import type { CellReference } from "@/domain/board/CellReference";
 
 
 /** A completed row, column or box; boxes are numbered from 0 at the top left, in reading order. */
@@ -19,7 +20,7 @@ export interface CompletedGroup {
 }
 
 export interface CompletedCells {
-    cells: { row: number; column: number }[];
+    cells: CellReference[];
     groups: CompletedGroup[];
 }
 
@@ -80,7 +81,7 @@ export class Sudoku {
     }
 
     public findCompletedGroups(row: number, column: number): CompletedCells {
-        const cells: { row: number; column: number }[] = [];
+        const cells: CellReference[] = [];
         const groups: CompletedGroup[] = [];
         const seen = new Set<string>();
 
@@ -206,7 +207,7 @@ export class Sudoku {
         }
     }
 
-    public checkAllConflicts(): Conflict[] {
+    public checkAllConflicts(): CellReference[] {
         return this.conflictDetector.findAllConflicts(this._puzzle, this.getCurrentBoard());
     }
 
@@ -266,8 +267,8 @@ export class Sudoku {
         return board;
     }
 
-    public revealRandomCell(): Conflict | null {
-        const candidates: Conflict[] = [];
+    public revealRandomCell(): CellReference | null {
+        const candidates: CellReference[] = [];
         for (let row = 0; row < BOARD_SIZE; row++) {
             for (let column = 0; column < BOARD_SIZE; column++) {
                 const cell = this._puzzle[row][column];
@@ -286,7 +287,7 @@ export class Sudoku {
         return target;
     }
 
-    public checkErrors(): Conflict[] {
+    public checkErrors(): CellReference[] {
         return this.conflictDetector.findErrors(this._puzzle, this._answer);
     }
 

@@ -1,6 +1,7 @@
 import { onScopeDispose, ref } from "vue";
 import type { CompletedCells, Sudoku } from "@/domain/game/Sudoku";
 import type { StepRecorder } from "@/domain/game/StepRecorder";
+import type { CellReference } from "@/domain/board/CellReference";
 
 /** How long after one cell of a run the next is filled, so each plays its arrival in turn. */
 export const SINGLE_NOTE_FILL_STEP_MS = 60;
@@ -11,7 +12,7 @@ interface SingleNoteFillOptions {
     autoRemoveNotes: () => boolean;
     motionAllowed: () => boolean;
     checkAndComplete: () => void;
-    onGroupCompleted?: (completed: CompletedCells, origin: { row: number; column: number }) => void;
+    onGroupCompleted?: (completed: CompletedCells, origin: CellReference) => void;
 }
 
 /**

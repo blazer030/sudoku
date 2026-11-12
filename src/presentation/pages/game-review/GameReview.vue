@@ -108,6 +108,7 @@
 </template>
 
 <script lang="ts" setup>
+import { sameCell } from "@/domain/solver/cellRelations";
 import GameResultHeading from "@/presentation/components/game-result/GameResultHeading.vue";
 import GameResultTime from "@/presentation/components/game-result/GameResultTime.vue";
 import { computed, useTemplateRef, watch, type Component } from "vue";
@@ -178,7 +179,7 @@ const tag = computed((): { label: string; icon: Component } => {
 
 const isChanged = (row: number, column: number): boolean => {
     const cell = changedCell.value;
-    return cell !== null && cell.row === row && cell.column === column;
+    return cell !== null && sameCell(cell, { row, column });
 };
 
 // Each step brings the cell it changed into view. Steps that touch no single

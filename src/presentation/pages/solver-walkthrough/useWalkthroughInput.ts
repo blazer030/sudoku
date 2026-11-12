@@ -1,15 +1,12 @@
 import { computed, ref, type Ref } from "vue";
 import { BOARD_SIZE } from "@/domain/board/constants";
 import { ConflictDetector } from "@/domain/game/ConflictDetector";
-
-interface CellPosition {
-    row: number;
-    column: number;
-}
+import type { CellReference } from "@/domain/board/CellReference";
+import { sameCell } from "@/domain/solver/cellRelations";
 
 /** Entering a puzzle in the walkthrough: cell first or digit first, with erase, never breaking the rules. */
 export const useWalkthroughInput = (userValues: Ref<number[][]>, boardEditable: Ref<boolean>) => {
-    const selectedCell = ref<CellPosition | null>(null);
+    const selectedCell = ref<CellReference | null>(null);
     const selectedDigit = ref<number | null>(null);
     const eraseMode = ref(false);
 
@@ -62,7 +59,7 @@ export const useWalkthroughInput = (userValues: Ref<number[][]>, boardEditable: 
 
     const isSelectedCell = (row: number, column: number): boolean => {
         const selected = selectedCell.value;
-        return selected !== null && selected.row === row && selected.column === column;
+        return selected !== null && sameCell(selected, { row, column });
     };
 
     const selectCell = (row: number, column: number) => {

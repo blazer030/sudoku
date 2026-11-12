@@ -19,6 +19,7 @@ import { useGroupEffect } from "@/presentation/pages/game/useGroupEffect";
 import { useStyleMoments, type CelebrationPhase } from "@/presentation/components/style-moments/styleMoments";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { ANALYTICS_KEY } from "@/application/analytics/AnalyticsService";
+import type { CellReference } from "@/domain/board/CellReference";
 
 interface GameSessionOptions {
     /** The player chose Play Again on the completion modal. */
@@ -66,7 +67,7 @@ export const useGameSession = ({ onPlayAgain, onCellRevealed }: GameSessionOptio
     });
 
     const groupEffect = useGroupEffect(motionAllowed, () => styleMoments.value.groupEffectMs);
-    const playGroupEffect = (completed: CompletedCells, origin: { row: number; column: number }) => {
+    const playGroupEffect = (completed: CompletedCells, origin: CellReference) => {
         groupEffect.play(completed.groups, completed.cells, origin);
     };
 
