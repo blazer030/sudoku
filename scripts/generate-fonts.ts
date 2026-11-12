@@ -201,7 +201,7 @@ const main = async (): Promise<void> => {
         {
             licence: "ofl/notosanstc/OFL.txt",
             licenceOutput: "NotoSansTC-OFL.txt",
-            // Blueprint's text, cut to the characters the app writes like WenKai
+            // Blueprint's and aurora's text (Blueprint Sans TC and Aurora Sans TC), cut to the characters the app writes like WenKai
             jobs: [{ output: "noto-sans-tc.woff2", source: "ofl/notosanstc/NotoSansTC[wght].ttf", text: chineseText, weights: { min: 300, max: 600 } }],
         },
     ];

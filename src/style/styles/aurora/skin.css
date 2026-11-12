@@ -1,5 +1,6 @@
 /* Aurora Glass: four lights drifting behind panes of frosted glass, in a night sky (夜空, dark) and a dawn
-   (晨光, light). For now: the lights, the press hooks and a reduced-motion block. Every rule is scoped by
+   (晨光, light): the lights, the glass panes, the board and every piece's look, its moments and a reduced-motion
+   block. Every rule is scoped by
    [data-style="aurora"]; keyframes start with aurora-. No filter, no backdrop-filter, no :has(), no masks by
    reference: the glass is plain translucent fills, so every engine paints it alike. */
 

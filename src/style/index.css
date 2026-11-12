@@ -37,7 +37,6 @@
 }
 
 @theme {
-  --container-2xl: 1400px;
   /* The interface face; a style may repoint it */
   --font-sans: "Outfit", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
   --font-mono: "Roboto Mono", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", monospace;
@@ -88,7 +87,6 @@
   --shadow-primary: 0 4px 12px color-mix(in srgb, var(--color-primary) 19%, transparent);
   --shadow-primary-lg: 0 4px 16px color-mix(in srgb, var(--color-primary) 19%, transparent);
   --shadow-primary-active: 0 2px 8px color-mix(in srgb, var(--color-primary) 25%, transparent);
-  --shadow-accent: 0 4px 12px color-mix(in srgb, var(--color-accent) 19%, transparent);
   --shadow-danger: 0 4px 12px color-mix(in srgb, var(--color-danger) 19%, transparent);
   --shadow-popup: 0 -4px 24px color-mix(in srgb, var(--color-shadow) 12.5%, transparent);
   --shadow-modal: 0 8px 32px color-mix(in srgb, var(--color-shadow) 12.5%, transparent);
@@ -157,8 +155,8 @@
   --digit-key-note-text: calc(13.5px + 4.5 * var(--game-step));
 }
 
-/* Home does the same on a short window, by a step of its own: 168px to give back, a pixel for each pixel
-   of window, so the gaps round its cards stay as they are from 720px down to 552px, and only then close.
+/* Home does the same on a short window, by a step of its own: 176px to give back, a pixel for each pixel
+   of window, so the gaps round its cards stay as they are from 820px down to 644px, and only then close.
    A page with no saved game has no Continue card, so it needs --home-spare less and shrinks that much later.
    A test holds the shares to that sum. */
 .home-sizes {
@@ -417,7 +415,7 @@
     }
 }
 
-/* Subtle, thin scrollbars so the centered max-w-sm layout doesn't get
+/* Subtle, thin scrollbars so the centred max-w-screen-sm column doesn't get
    a chunky default scrollbar floating in the middle of wide viewports. */
 :root {
     --scrollbar-thumb: color-mix(in srgb, var(--color-foreground) 18%, transparent);

@@ -1,7 +1,7 @@
 /* The app's web fonts, bundled so every style reads the same offline. Generated subsets: run
    npm run generate:fonts after adding copy with new Chinese characters. The installed web app's
    service worker precaches all of them and the Android app ships them, so they are there
-   offline; a page only reads Caveat and LXGW WenKai TC while paper's text uses them, and the pixel faces while the 8-bit style does, the cyberpunk faces while that style does, the ink faces while ink does, and Chalk Digits while chalkboard does. Each family's
+   offline; a page only reads Caveat and LXGW WenKai TC while paper's text uses them, and the pixel faces while the 8-bit style does, the cyberpunk faces while that style does, the ink faces while ink does, Chalk Digits while chalkboard does, the Blueprint faces while blueprint does and Aurora Sans TC while aurora does. Each family's
    licence (SIL Open Font License) is in public/fonts/licenses/. */
 
 @font-face {

@@ -33,7 +33,7 @@ const ADAPTIVE_BLEED = ADAPTIVE_INSET * ICON_SIZE / ADAPTIVE_VIEWPORT;
 const inAdaptiveViewport = (...content: string[]): string[] =>
     [`<g transform="translate(${ADAPTIVE_INSET} ${ADAPTIVE_INSET}) scale(${ADAPTIVE_VIEWPORT / ICON_SIZE})">`, ...content, "</g>"];
 
-// Minimal: today's icon, a checkerboard of solid and faint tiles in on-primary on the primary
+// Minimal: a checkerboard of solid and faint tiles in on-primary on the primary
 const MINIMAL_TILE_ORIGINS = [21.6, 45, 68.4];
 
 const minimalTiles = (tileColor: string): string[] =>

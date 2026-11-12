@@ -2,8 +2,8 @@
    paper (製圖紙, light), amber or an orange pen for everything chosen. Every screen lies on one sheet of graph paper
    inside a drawing frame; cards, buttons, pills and tags are square, drawn in lines of ink rather than filled,
    and only what is chosen or main is filled in the primary. Every rule is scoped by [data-style="blueprint"];
-   keyframes start with blueprint-. No pressable piece sets a background-image of its own, so the press wash
-   below is never painted over. */
+   keyframes start with blueprint-. A pressable piece that sets a background-image of its own (the hatched peer,
+   scope and error cells) lays the press wash over it again in its own pressed rule. */
 
 /* The frames every drawn piece shares: a 1px line of ink, a 1.5px one, and the canvas's double frame (a 1.5px
    frame, 5px of paper and a 0.75px line), all inset so no scroller or overflow clips them */

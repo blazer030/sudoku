@@ -21,7 +21,7 @@ const isDisabled = (element: HTMLElement): boolean =>
     element.matches(":disabled") || element.getAttribute("aria-disabled") === "true";
 
 /**
- * Press feedback for the minimal style: state goes on at pointerdown and comes off on
+ * Press feedback for every style, each skin drawing it its own way: state goes on at pointerdown and comes off on
  * release or cancel anywhere. It only sets attributes, so input never waits for it.
  */
 export const vPress: Directive<HTMLElement, undefined, string, PressFeedback> = {

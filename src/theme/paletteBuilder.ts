@@ -22,7 +22,7 @@ export type PaletteToken = typeof PALETTE_TOKENS[number];
 // lying in it (its back and its felt), its erase smudge and smear, its app icon's frame and the pink chalk it
 // doodles with on a solved board; blueprint's graph paper (its minor and major lines), the hatching it marks a
 // cell's row, column and box with, and the error-coloured hatching of an error cell; aurora's four lights, the
-// two colours of its ribbon and the glass (with the sheen laid on it) its panes are made of. A palette carries one only when its style sets it,
+// two colours of its ribbon, the ends of its icons' gradient and the glass (with the sheen laid on it) its panes are made of. A palette carries one only when its style sets it,
 // so no other style's blocks in themes.generated.css declare it.
 export const STYLE_OWN_TOKENS = [
     "tray", "tray-shade", "tray-edge", "duster", "duster-felt", "smudge", "smear", "icon-frame", "doodle",
