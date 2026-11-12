@@ -633,6 +633,19 @@ describe("LessonScreen", () => {
             expect(explanation(wrapper)).toContain(nudgeText());
         });
 
+        it("should start the count again when the player leaves the step and comes back", async () => {
+            const wrapper = mountScreen();
+            await toPractice(wrapper);
+            await missThreeTimes(wrapper);
+
+            await wrapper.get("[data-testid='lesson-previous']").trigger("click");
+            await wrapper.get("[data-testid='lesson-next']").trigger("click");
+            await flushPromises();
+
+            expect(secondary(wrapper).attributes("data-nudge")).toBeUndefined();
+            expect(explanation(wrapper)).not.toContain(nudgeText());
+        });
+
         it("should keep the hint button lit without flashing when motion is off", async () => {
             useSettingsStore().motionEffects = false;
             const wrapper = mountScreen();

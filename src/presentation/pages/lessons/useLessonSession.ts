@@ -15,7 +15,7 @@ const isPractice = (step: LessonStep): step is PracticeStep => step.kind !== "sh
 
 const EMPTY_MARKS: StepMarks = {};
 
-/** Where the player is in a lesson, and what each of its steps shows. Practice stays as it was left when they go back. */
+/** Where the player is in a lesson, and what each of its steps shows. Practice stays as it was left when they go back, but for its wrong answers in a row. */
 export const useLessonSession = (lesson: Lesson) => {
     const stepIndex = ref(0);
     const practices = ref<Record<number, PracticeState>>({});
@@ -89,8 +89,16 @@ export const useLessonSession = (lesson: Lesson) => {
 
     const canReach = (index: number): boolean => lesson.steps.slice(0, index).every((_, earlier) => canLeave(earlier));
 
+    // Leaving a step starts its wrong answers in a row again; the rest of its practice stays
+    const forgetMisses = (index: number) => {
+        const state = practiceAt(index);
+        if (state.missesInARow > 0) practices.value = { ...practices.value, [index]: { ...state, missesInARow: 0 } };
+    };
+
     const goTo = (index: number) => {
-        if (index >= 0 && index < lesson.steps.length && canReach(index)) stepIndex.value = index;
+        if (index === stepIndex.value || index < 0 || index >= lesson.steps.length || !canReach(index)) return;
+        forgetMisses(stepIndex.value);
+        stepIndex.value = index;
     };
     const next = () => { goTo(stepIndex.value + 1); };
     const previous = () => { goTo(stepIndex.value - 1); };

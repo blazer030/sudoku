@@ -73,6 +73,41 @@ describe("useStuckNudge", () => {
         stop();
     });
 
+    it("should count wrong answers again after the player leaves the step and comes back", async () => {
+        const { session, nudged, stop } = start();
+        tapEmpty(session);
+        tapEmpty(session);
+        tapEmpty(session);
+
+        session.previous();
+        session.next();
+        await nextTick();
+        expect(nudged.value).toBe(false);
+
+        tapEmpty(session);
+        await nextTick();
+        expect(nudged.value).toBe(false);
+        stop();
+    });
+
+    it("should end the nudge once the step is solved", async () => {
+        const { session, nudged, stop } = start();
+        const step = HIDDEN_SINGLE.steps[firstPractice];
+        tapEmpty(session);
+        tapEmpty(session);
+        tapEmpty(session);
+        await nextTick();
+        expect(nudged.value).toBe(true);
+
+        if (step.kind === "light") session.tapCell(step.answer.row, step.answer.column);
+        await nextTick();
+        vi.advanceTimersByTime(STUCK_IDLE_MS);
+
+        expect(session.practice.value.solved).toBe(true);
+        expect(nudged.value).toBe(false);
+        stop();
+    });
+
     it("should never nudge on an explanation step", async () => {
         const { session, nudged, stop } = start();
         session.goTo(0);
