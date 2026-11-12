@@ -411,6 +411,19 @@ describe("following a supposed digit to a dead end", () => {
         expect(last.marks.refuted).toEqual([runs[0].marks.supposed?.[0].cell]);
     });
 
+    it("should frame the contradiction's house and cross every cell in it the supposed digits leave empty", () => {
+        const last = steps[supposing[supposing.length - 1]];
+        const range = last.kind === "show" ? last.contradiction?.range ?? [] : [];
+        const state = boardState(last.board);
+        const supposed = (last.marks.supposed ?? []).map(({ cell }) => cell);
+        const empty = range.filter(cell => state.valueAt(cell.row, cell.column) === 0
+            && !supposed.some(other => other.row === cell.row && other.column === cell.column));
+
+        expect(range.length).toBeGreaterThan(0);
+        expect(sortedCells(last.marks.range ?? [])).toEqual(sortedCells(range));
+        expect(sortedCells(last.marks.crossed ?? [])).toEqual(sortedCells(empty));
+    });
+
     it("should close with a step that supposes nothing", () => {
         const after = steps[supposing[supposing.length - 1] + 1];
 
@@ -557,6 +570,19 @@ describe("one claim per explanation step", () => {
 
         expect(step.marks.lit).toHaveLength(2);
         expect(step.marks.lit).toContainEqual(pivot);
+    });
+
+    it("should light a different end of XYZ-Wing in each of its two cases", () => {
+        const lesson = LESSONS.xyzWing;
+        const endOf = (name: string) => {
+            const step = lesson.steps[indexOf(lesson, name)];
+            const [pivot] = step.marks.pattern ?? [];
+            const end = (step.marks.lit ?? []).find(cell => cell.row !== pivot.row || cell.column !== pivot.column);
+            expect(step.marks.pattern).toContainEqual(end);
+            return end;
+        };
+
+        expect(endOf("caseFive")).not.toEqual(endOf("caseNine"));
     });
 
     it.each([
