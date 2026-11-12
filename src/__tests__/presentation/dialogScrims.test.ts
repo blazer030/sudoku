@@ -22,7 +22,8 @@ const classesOf = (tag: string): string[] => /\bclass="([^"]*)"/.exec(tag)?.[1].
 describe("dialog scrims", () => {
     it("should reach every dialog, the completion card's among them", () => {
         expect(scrimTags.map(([path]) => path)).toEqual(expect.arrayContaining([
-            "src/presentation/pages/game/components/GameCompleteModal.vue",
+            // The completion cards' scrim, the game's and the lesson's
+            "src/presentation/components/celebration-card/CelebrationCard.vue",
             // The confirm dialogs' scrim
             "src/presentation/components/dialog-shell/DialogShell.vue",
         ]));
