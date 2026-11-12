@@ -7,7 +7,7 @@ import { createPinia, setActivePinia } from "pinia";
 import { createRouter, createMemoryHistory } from "vue-router";
 import { ALL_LESSON_IDS } from "@/domain/lessons/curriculum";
 import Home from "@/presentation/pages/home/Home.vue";
-import { ROUTER_PATH } from "@/router";
+import { ROUTER_PATH } from "@/routerPaths";
 import { useGameStore } from "@/stores/gameStore";
 import { useLessonStore } from "@/stores/lessonStore";
 import { useStatisticsStore } from "@/stores/statisticsStore";

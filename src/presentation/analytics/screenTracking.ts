@@ -1,7 +1,7 @@
 import type { Router } from "vue-router";
 import { isNavigationFailure } from "vue-router";
 import type { AnalyticsService, ScreenName } from "@/application/analytics/AnalyticsService";
-import { ROUTER_PATH } from "@/router";
+import { ROUTER_PATH } from "@/routerPaths";
 
 const SCREEN_BY_ROUTE_PATH: Record<string, ScreenName> = {
     [ROUTER_PATH.home]: "home",

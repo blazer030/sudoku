@@ -1,6 +1,7 @@
 import { createMemoryHistory, createRouter } from "vue-router";
 import { createAnalyticsSpy } from "@/__tests__/fixtures/analyticsSpy";
-import { ROUTER_PATH, router } from "@/router";
+import { router } from "@/router";
+import { ROUTER_PATH } from "@/routerPaths";
 import { screenNameFor, startScreenTracking } from "@/presentation/analytics/screenTracking";
 
 const CATCH_ALL_PATH = "/:pathMatch(.*)*";

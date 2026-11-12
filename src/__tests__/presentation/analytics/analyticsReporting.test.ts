@@ -1,7 +1,7 @@
 import { ref } from "vue";
 import { createMemoryHistory, createRouter } from "vue-router";
 import { createAnalyticsSpy } from "@/__tests__/fixtures/analyticsSpy";
-import { ROUTER_PATH } from "@/router";
+import { ROUTER_PATH } from "@/routerPaths";
 import { startAnalyticsReporting } from "@/presentation/analytics/analyticsReporting";
 import type { ColorMode, ColorThemeId, StyleId } from "@/theme/themeIds";
 

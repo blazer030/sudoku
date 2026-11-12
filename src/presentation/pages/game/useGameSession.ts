@@ -5,7 +5,7 @@ import { StepRecorder } from "@/domain/game/StepRecorder";
 import { useRouter } from "vue-router";
 import { useGameStore } from "@/stores/gameStore";
 import { useStatisticsStore } from "@/stores/statisticsStore";
-import { ROUTER_PATH } from "@/router";
+import { ROUTER_PATH } from "@/routerPaths";
 import { captureInitialBoard } from "@/application/game/GameState";
 import type { GameReplayData } from "@/application/statistics/StatisticsRepository";
 import { useGameTimer } from "@/presentation/pages/game/useGameTimer";

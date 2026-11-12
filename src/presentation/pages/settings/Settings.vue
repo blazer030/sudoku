@@ -167,7 +167,7 @@ import { goBackOr } from "@/presentation/composables/goBackOr";
 import { usePlatform } from "@/presentation/composables/usePlatform";
 import { appVersion } from "@/utils/appVersion";
 import { PRIVACY_POLICY_URL } from "@/presentation/pages/settings/externalLinks";
-import { ROUTER_PATH } from "@/router";
+import { ROUTER_PATH } from "@/routerPaths";
 import { effectiveColorMode, hasModeChoice, hasThemeChoice } from "@/theme/themeIds";
 import { useColorModeLabel } from "@/presentation/i18n/colorModeLabels";
 import type { LanguagePreference } from "@/application/settings/SettingsStorage";

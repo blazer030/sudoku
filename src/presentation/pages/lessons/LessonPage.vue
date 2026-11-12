@@ -30,7 +30,7 @@ import { useNewGameFlow } from "@/presentation/composables/useNewGameFlow";
 import LessonNoticeDialog from "@/presentation/pages/lessons/LessonNoticeDialog.vue";
 import LessonScreen from "@/presentation/pages/lessons/LessonScreen.vue";
 import { useLessonNotice } from "@/presentation/pages/lessons/useLessonNotice";
-import { ROUTER_PATH } from "@/router";
+import { ROUTER_PATH } from "@/routerPaths";
 
 const props = defineProps<{ lessonId: LessonId }>();
 

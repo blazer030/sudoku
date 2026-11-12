@@ -5,7 +5,7 @@ import { computeAbandonProgress } from "@/application/analytics/computeAbandonPr
 import type { Difficulty } from "@/domain/generator/SudokuGenerator";
 import { provideNewGameDialog, type NewGameOrigin } from "@/presentation/components/new-game-dialog/useNewGameDialog";
 import { usePuzzleLoader } from "@/presentation/components/puzzle-loader/usePuzzleLoader";
-import { ROUTER_PATH } from "@/router";
+import { ROUTER_PATH } from "@/routerPaths";
 import { useGameStore } from "@/stores/gameStore";
 import { useStatisticsStore } from "@/stores/statisticsStore";
 

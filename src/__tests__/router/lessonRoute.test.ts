@@ -4,7 +4,8 @@ vi.mock("@capacitor/core", () => ({
     Capacitor: { isNativePlatform: vi.fn(() => false), getPlatform: vi.fn(() => "web") },
 }));
 
-import { ROUTER_PATH, applyLessonGuard } from "@/router";
+import { applyLessonGuard } from "@/router";
+import { ROUTER_PATH } from "@/routerPaths";
 
 describe("applyLessonGuard", () => {
     it("should let a known lesson through", () => {

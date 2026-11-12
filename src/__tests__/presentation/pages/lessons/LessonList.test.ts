@@ -9,7 +9,7 @@ import { NoopAnalyticsAdapter } from "@/infrastructure/analytics/NoopAnalyticsAd
 import { i18n } from "@/presentation/i18n";
 import { handleBackButton } from "@/presentation/composables/backDismissal";
 import LessonList from "@/presentation/pages/lessons/LessonList.vue";
-import { ROUTER_PATH } from "@/router";
+import { ROUTER_PATH } from "@/routerPaths";
 import { useGameStore } from "@/stores/gameStore";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { useLessonStore } from "@/stores/lessonStore";

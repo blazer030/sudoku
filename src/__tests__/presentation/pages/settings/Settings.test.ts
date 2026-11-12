@@ -31,7 +31,7 @@ import type { BillingService, Product } from "@/application/billing/BillingServi
 import { getPalette } from "@/theme/palettes";
 import { styleIconSvg } from "@/theme/styleIcons";
 import type { StyleId } from "@/theme/themeIds";
-import { ROUTER_PATH } from "@/router";
+import { ROUTER_PATH } from "@/routerPaths";
 import Settings from "@/presentation/pages/settings/Settings.vue";
 import { appVersion } from "@/utils/appVersion";
 import { handleBackButton } from "@/presentation/composables/backDismissal";

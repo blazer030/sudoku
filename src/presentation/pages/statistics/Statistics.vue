@@ -251,7 +251,7 @@
 import { computed, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import { ChartBar, ChevronRight, Lightbulb, Trophy, X } from "@/presentation/components/icon";
-import { ROUTER_PATH } from "@/router";
+import { ROUTER_PATH } from "@/routerPaths";
 import { useStatisticsStore } from "@/stores/statisticsStore";
 import type { Difficulty } from "@/domain/generator/SudokuGenerator";
 import type { GameResult } from "@/application/statistics/StatisticsRepository";

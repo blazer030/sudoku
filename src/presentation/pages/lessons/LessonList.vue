@@ -131,7 +131,7 @@ import { vPress } from "@/presentation/directives/press";
 import { useDifficultyLabel } from "@/presentation/i18n/difficultyLabels";
 import LessonNoticeDialog from "@/presentation/pages/lessons/LessonNoticeDialog.vue";
 import { useLessonNotice } from "@/presentation/pages/lessons/useLessonNotice";
-import { ROUTER_PATH } from "@/router";
+import { ROUTER_PATH } from "@/routerPaths";
 import { useLessonStore } from "@/stores/lessonStore";
 
 type LessonMark = "done" | "next" | "rest";

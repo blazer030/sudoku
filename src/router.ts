@@ -12,32 +12,16 @@ import SolverWalkthrough from "@/presentation/pages/solver-walkthrough/SolverWal
 import LessonList from "@/presentation/pages/lessons/LessonList.vue";
 import LessonPage from "@/presentation/pages/lessons/LessonPage.vue";
 import { isLessonId } from "@/domain/lessons/curriculum";
-import type { LessonId } from "@/domain/lessons/Lesson";
+import { ROUTER_PATH } from "@/routerPaths";
 
 const baseUrl = import.meta.env.VITE_BASE_URL;
 
-export const ROUTER_PATH = {
-    home: "/",
-    game: "/game",
-    statistics: "/statistics",
-    settings: "/settings",
-    changelog: "/settings/changelog",
-    appearance: "/settings/appearance",
-    donate: "/donate",
-    gameReview: "/game-review/:index",
-    gameReviewFor: (index: number) => `/game-review/${index}`,
-    solverWalkthrough: "/solver",
-    lessons: "/lessons",
-    lesson: "/lessons/:lessonId",
-    lessonFor: (lessonId: LessonId) => `/lessons/${lessonId}`,
-};
-
-export const NATIVE_ONLY_ROUTES: string[] = ["/donate"];
+export const NATIVE_ONLY_ROUTES: string[] = [ROUTER_PATH.donate];
 
 export const applyNativeOnlyGuard = (to: { path: string }): string | undefined => {
     if (!NATIVE_ONLY_ROUTES.includes(to.path)) return undefined;
     if (Capacitor.isNativePlatform()) return undefined;
-    return "/";
+    return ROUTER_PATH.home;
 };
 
 export const applyLessonGuard = (to: { params: Record<string, unknown> }): string | undefined =>
@@ -46,18 +30,18 @@ export const applyLessonGuard = (to: { params: Record<string, unknown> }): strin
 export const router = createRouter({
     history: createWebHistory(baseUrl),
     routes: [
-        { path: "/", component: Home },
-        { path: "/game", component: Game },
-        { path: "/statistics", component: Statistics },
-        { path: "/settings", component: Settings },
-        { path: "/settings/changelog", component: Changelog },
-        { path: "/settings/appearance", component: Appearance },
-        { path: "/donate", component: Donate },
-        { path: "/game-review/:index", component: GameReview, props: true },
-        { path: "/solver", component: SolverWalkthrough },
-        { path: "/lessons", component: LessonList },
-        { path: "/lessons/:lessonId", component: LessonPage, props: true, beforeEnter: applyLessonGuard },
-        { path: "/:pathMatch(.*)*", redirect: "/" },
+        { path: ROUTER_PATH.home, component: Home },
+        { path: ROUTER_PATH.game, component: Game },
+        { path: ROUTER_PATH.statistics, component: Statistics },
+        { path: ROUTER_PATH.settings, component: Settings },
+        { path: ROUTER_PATH.changelog, component: Changelog },
+        { path: ROUTER_PATH.appearance, component: Appearance },
+        { path: ROUTER_PATH.donate, component: Donate },
+        { path: ROUTER_PATH.gameReview, component: GameReview, props: true },
+        { path: ROUTER_PATH.solverWalkthrough, component: SolverWalkthrough },
+        { path: ROUTER_PATH.lessons, component: LessonList },
+        { path: ROUTER_PATH.lesson, component: LessonPage, props: true, beforeEnter: applyLessonGuard },
+        { path: "/:pathMatch(.*)*", redirect: ROUTER_PATH.home },
     ],
 });
 

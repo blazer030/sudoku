@@ -1,6 +1,6 @@
 import { useRouter } from "vue-router";
 import { createDialog } from "@/presentation/composables/createDialog";
-import { ROUTER_PATH } from "@/router";
+import { ROUTER_PATH } from "@/routerPaths";
 import { useSettingsStore } from "@/stores/settingsStore";
 
 export const { provideDialog: provideLessonNoticeDialog, useDialog: useLessonNoticeDialog } =

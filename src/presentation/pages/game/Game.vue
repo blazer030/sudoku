@@ -13,7 +13,7 @@ import { useRouter } from "vue-router";
 import GameScreen from "@/presentation/pages/game/GameScreen.vue";
 import PuzzleLoader from "@/presentation/components/puzzle-loader/PuzzleLoader.vue";
 import { usePuzzleLoader } from "@/presentation/components/puzzle-loader/usePuzzleLoader";
-import { ROUTER_PATH } from "@/router";
+import { ROUTER_PATH } from "@/routerPaths";
 import { useGameStore } from "@/stores/gameStore";
 
 const router = useRouter();
