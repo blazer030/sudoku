@@ -98,8 +98,7 @@ const handleClick = () => {
 const isSameDigit = computed(() => {
     if (!props.highlightSameDigit) return false;
     if (!props.selectedDigit) return false;
-    const cellValue = props.puzzleCell.isClue ? props.puzzleCell.clue : props.puzzleCell.entry;
-    return cellValue === props.selectedDigit;
+    return value.value === props.selectedDigit;
 });
 
 const value = computed(() => {

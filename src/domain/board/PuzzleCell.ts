@@ -26,6 +26,11 @@ export class PuzzleCell {
         return this._entry > 0;
     }
 
+    /** The digit the cell shows: its clue, or else the player's entry (0 for none). */
+    public get value(): number {
+        return this.isClue ? this._clue : this._entry;
+    }
+
     public get clue(): number {
         return this._clue;
     }

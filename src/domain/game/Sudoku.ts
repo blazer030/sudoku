@@ -61,7 +61,7 @@ export class Sudoku {
     public isCompleted(): boolean {
         return this._puzzle.every((puzzleRow, rowIndex) =>
             puzzleRow.every((cell, columnIndex) => {
-                const value = cell.isClue ? cell.clue : cell.entry;
+                const value = cell.value;
                 return value === this._answer[rowIndex][columnIndex];
             })
         );
@@ -106,7 +106,7 @@ export class Sudoku {
 
     private isRowComplete(row: number): boolean {
         return this._puzzle[row].every((cell, columnIndex) => {
-            const value = cell.isClue ? cell.clue : cell.entry;
+            const value = cell.value;
             return value === this._answer[row][columnIndex];
         });
     }
@@ -114,7 +114,7 @@ export class Sudoku {
     private isColumnComplete(column: number): boolean {
         return this._puzzle.every((puzzleRow, rowIndex) => {
             const cell = puzzleRow[column];
-            const value = cell.isClue ? cell.clue : cell.entry;
+            const value = cell.value;
             return value === this._answer[rowIndex][column];
         });
     }
@@ -125,7 +125,7 @@ export class Sudoku {
         for (let boxRow = boxRowStart; boxRow < boxRowStart + BOX_SIZE; boxRow++) {
             for (let boxColumn = boxColumnStart; boxColumn < boxColumnStart + BOX_SIZE; boxColumn++) {
                 const cell = this._puzzle[boxRow][boxColumn];
-                const value = cell.isClue ? cell.clue : cell.entry;
+                const value = cell.value;
                 if (value !== this._answer[boxRow][boxColumn]) return false;
             }
         }
@@ -283,15 +283,15 @@ export class Sudoku {
     }
 
     private removeNoteFromPeers(row: number, column: number, value: number): void {
-        // 同行
+        // The same row
         for (let peerColumn = 0; peerColumn < BOARD_SIZE; peerColumn++) {
             if (peerColumn !== column) this._puzzle[row][peerColumn].removeNote(value);
         }
-        // 同列
+        // The same column
         for (let peerRow = 0; peerRow < BOARD_SIZE; peerRow++) {
             if (peerRow !== row) this._puzzle[peerRow][column].removeNote(value);
         }
-        // 同宮
+        // The same box
         const boxRowStart = boxStart(row);
         const boxColumnStart = boxStart(column);
         for (let boxRow = boxRowStart; boxRow < boxRowStart + BOX_SIZE; boxRow++) {
@@ -303,7 +303,7 @@ export class Sudoku {
 
     private getCurrentBoard(): number[][] {
         return this._puzzle.map(puzzleRow =>
-            puzzleRow.map(cell => cell.isClue ? cell.clue : cell.entry)
+            puzzleRow.map(cell => cell.value)
         );
     }
 }

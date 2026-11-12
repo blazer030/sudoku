@@ -123,7 +123,7 @@ export const useGameInteraction = ({
         if (selectedDigit.value !== null) return selectedDigit.value;
         if (selectedCell.value === null) return null;
         const cell = sudoku.puzzle[selectedCell.value.row][selectedCell.value.column];
-        const value = cell.isClue ? cell.clue : cell.entry;
+        const value = cell.value;
         return value > 0 ? value : null;
     });
 
@@ -137,7 +137,7 @@ export const useGameInteraction = ({
         const counts = [...NO_DIGITS_USED_UP];
         for (const row of sudoku.puzzle) {
             for (const cell of row) {
-                const value = cell.isClue ? cell.clue : cell.entry;
+                const value = cell.value;
                 if (value > 0) counts[value]++;
             }
         }
