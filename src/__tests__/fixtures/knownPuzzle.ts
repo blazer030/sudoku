@@ -1,4 +1,3 @@
-import { vi } from "vitest";
 import { SudokuGenerator } from "@/domain/generator/SudokuGenerator";
 import { Sudoku } from "@/domain/game/Sudoku";
 import { PuzzleCell } from "@/domain/board/PuzzleCell";

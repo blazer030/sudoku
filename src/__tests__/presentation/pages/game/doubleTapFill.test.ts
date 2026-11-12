@@ -1,5 +1,4 @@
 import { setPageVisibility } from "@/__tests__/fixtures/pageVisibility";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { flushPromises, mount, type VueWrapper } from "@vue/test-utils";
 import { createPinia } from "pinia";
 import { createMemoryHistory, createRouter } from "vue-router";

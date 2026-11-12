@@ -1,4 +1,3 @@
-import { afterEach, beforeEach } from "vitest";
 import { defineComponent, h, type PropType } from "vue";
 import type { VueWrapper } from "@vue/test-utils";
 import type { CellReference } from "@/domain/solver/SolveStep";

@@ -1,5 +1,4 @@
 import { readFileSync } from "fs";
-import { afterEach, describe, expect, it, vi } from "vitest";
 import { createAnalyticsSpy } from "@/__tests__/fixtures/analyticsSpy";
 import { nextTick } from "vue";
 import { flushPromises, mount, type VueWrapper } from "@vue/test-utils";

@@ -1,4 +1,3 @@
-import { describe, expect, it } from "vitest";
 import { mount } from "@vue/test-utils";
 import { STYLE_MOMENTS } from "@/presentation/components/style-moments/styleMoments";
 import AuroraCelebration from "@/presentation/components/style-moments/aurora/AuroraCelebration.vue";

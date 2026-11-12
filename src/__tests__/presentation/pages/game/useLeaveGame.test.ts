@@ -1,5 +1,4 @@
 import { setPageVisibility } from "@/__tests__/fixtures/pageVisibility";
-import { describe, it, expect, vi, beforeEach } from "vitest";
 import { createAnalyticsSpy } from "@/__tests__/fixtures/analyticsSpy";
 import { ref, defineComponent } from "vue";
 import { mount } from "@vue/test-utils";

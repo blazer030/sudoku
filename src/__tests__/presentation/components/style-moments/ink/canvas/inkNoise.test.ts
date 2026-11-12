@@ -1,4 +1,3 @@
-import { describe, expect, it } from "vitest";
 import { INK_NOISE_CHANNELS, INK_NOISE_SIZE, bakeInkNoise } from "@/presentation/components/style-moments/ink/canvas/inkNoise";
 
 const SIZE = 64;

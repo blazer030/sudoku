@@ -1,4 +1,3 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
 import { createInkRenderer } from "@/presentation/components/style-moments/ink/canvas/inkRenderer";
 import { DEFAULT_INK_COLOUR, DEFAULT_SEAL_COLOUR } from "@/presentation/components/style-moments/ink/canvas/inkSurface";
 import { MAX_BLOOMS, MAX_FILLS, MAX_GROUPS } from "@/presentation/components/style-moments/ink/canvas/inkTimeline";

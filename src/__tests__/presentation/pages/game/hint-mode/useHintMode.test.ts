@@ -1,4 +1,3 @@
-import { describe, expect, it, vi } from "vitest";
 import type { Sudoku } from "@/domain/game/Sudoku";
 import type { RevealHintPlan } from "@/domain/game/RevealHint";
 import type { CellReference } from "@/domain/solver/SolveStep";

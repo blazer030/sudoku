@@ -1,4 +1,3 @@
-import { describe, expect, it } from "vitest";
 import { mount, type DOMWrapper } from "@vue/test-utils";
 import CyberGroupOverlay from "@/presentation/components/style-moments/cyber/CyberGroupOverlay.vue";
 import { effectOf } from "../../../../fixtures/groupOverlay";

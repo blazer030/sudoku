@@ -1,4 +1,3 @@
-import { afterEach, describe, expect, it } from "vitest";
 import { mount } from "@vue/test-utils";
 import { i18n } from "@/presentation/i18n";
 import PaperLoader from "@/presentation/components/style-moments/paper/PaperLoader.vue";

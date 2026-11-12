@@ -1,4 +1,3 @@
-import { describe, expect, it } from "vitest";
 import { noteGlyphStyle } from "@/presentation/components/digit-pad/noteGlyphPlace";
 
 describe("noteGlyphStyle", () => {

@@ -1,5 +1,3 @@
-import { describe, expect, it, vi } from "vitest";
-
 vi.mock("@capacitor/core", () => ({
     Capacitor: { isNativePlatform: vi.fn(() => false), getPlatform: vi.fn(() => "web") },
 }));

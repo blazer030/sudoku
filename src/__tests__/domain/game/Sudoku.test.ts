@@ -1,4 +1,3 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
 import { Sudoku } from "@/domain/game/Sudoku";
 import { TechniqueSolver } from "@/domain/solver/TechniqueSolver";
 import { createKnownSudoku, knownAnswer, knownPuzzle } from "@/__tests__/fixtures/knownPuzzle";
@@ -514,7 +513,7 @@ describe("Sudoku", () => {
                 { row: 0, column: 3 }, { row: 0, column: 4 }, { row: 0, column: 5 },
                 { row: 0, column: 6 }, { row: 0, column: 7 }, { row: 0, column: 8 },
             ]));
-            expect(result.cells.filter(c => c.row === 0)).toHaveLength(9);
+            expect(result.cells.filter(cell => cell.row === 0)).toHaveLength(9);
         });
 
         it("should return column cells when column is fully correct", () => {
@@ -531,7 +530,7 @@ describe("Sudoku", () => {
                 { row: 3, column: 4 }, { row: 4, column: 4 }, { row: 5, column: 4 },
                 { row: 6, column: 4 }, { row: 7, column: 4 }, { row: 8, column: 4 },
             ]));
-            expect(result.cells.filter(c => c.column === 4)).toHaveLength(9);
+            expect(result.cells.filter(cell => cell.column === 4)).toHaveLength(9);
         });
 
         it("should return box cells when box is fully correct", () => {
@@ -567,7 +566,7 @@ describe("Sudoku", () => {
 
             const result = sudoku.findCompletedGroups(0, 8);
 
-            const uniqueKeys = new Set(result.cells.map(c => `${c.row},${c.column}`));
+            const uniqueKeys = new Set(result.cells.map(cell => `${cell.row},${cell.column}`));
             expect(uniqueKeys.size).toBe(17); // 9 + 9 - 1 shared
         });
 

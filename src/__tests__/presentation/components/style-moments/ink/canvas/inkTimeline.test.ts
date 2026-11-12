@@ -1,4 +1,3 @@
-import { describe, expect, it } from "vitest";
 import {
     INK_CELEBRATION_WASH,
     INK_DRIFT_SETTLE_MS,

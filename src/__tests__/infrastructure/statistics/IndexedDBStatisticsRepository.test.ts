@@ -1,4 +1,3 @@
-import { vi, describe, it, expect, beforeEach } from "vitest";
 import { reactive, isReactive } from "vue";
 import type { GameResult } from "@/application/statistics/StatisticsRepository";
 

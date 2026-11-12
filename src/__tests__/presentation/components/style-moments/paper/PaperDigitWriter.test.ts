@@ -1,5 +1,4 @@
 import { readFileSync } from "fs";
-import { describe, expect, it } from "vitest";
 import { mount, type DOMWrapper } from "@vue/test-utils";
 import PaperDigitWriter from "@/presentation/components/style-moments/paper/PaperDigitWriter.vue";
 import { PAPER_DIGIT_STROKES } from "@/presentation/components/style-moments/paper/paperDigitStrokes";

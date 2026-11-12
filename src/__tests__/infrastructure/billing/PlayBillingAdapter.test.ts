@@ -1,5 +1,3 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-
 interface FakeOffer {
     order: ReturnType<typeof vi.fn>;
 }
@@ -31,11 +29,11 @@ const mocks = vi.hoisted(() => {
         "initiated", "pending", "finished", "receiptsReady", "receiptsVerified",
         "storefrontUpdated", "updated",
     ];
-    const whenChain: Record<string, (cb: (arg: unknown) => void) => unknown> = {};
+    const whenChain: Record<string, (callback: (arg: unknown) => void) => unknown> = {};
     eventNames.forEach((event) => {
-        whenChain[event] = (cb) => {
+        whenChain[event] = (callback) => {
             const list = handlers.get(event) ?? [];
-            list.push(cb);
+            list.push(callback);
             handlers.set(event, list);
             return whenChain;
         };
@@ -48,8 +46,8 @@ const mocks = vi.hoisted(() => {
         minTimeBetweenUpdates: 600_000,
         when: () => whenChain,
         get: (id: string) => productById.get(id),
-        error: (cb: (error: { code: number; message: string }) => void) => {
-            errorHandlers.push(cb);
+        error: (callback: (error: { code: number; message: string }) => void) => {
+            errorHandlers.push(callback);
         },
         get localTransactions(): unknown[] {
             return localTransactions;
@@ -89,11 +87,11 @@ import { PlayBillingAdapter } from "@/infrastructure/billing/PlayBillingAdapter"
 
 const fireProductUpdated = (product: FakeProduct) => {
     mocks.productById.set(product.id, product);
-    mocks.handlers.get("productUpdated")?.forEach((cb) => { cb(product); });
+    mocks.handlers.get("productUpdated")?.forEach((callback) => { callback(product); });
 };
 
 const fireApproved = (transaction: FakeTransaction) => {
-    mocks.handlers.get("approved")?.forEach((cb) => { cb(transaction); });
+    mocks.handlers.get("approved")?.forEach((callback) => { callback(transaction); });
 };
 
 const buildProduct = (id: string, price: string, priceMicros: number): FakeProduct => {

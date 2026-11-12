@@ -1,4 +1,3 @@
-import { describe, it, expect, vi } from "vitest";
 import { createAnalyticsSpy } from "@/__tests__/fixtures/analyticsSpy";
 import { defineComponent } from "vue";
 import { mount } from "@vue/test-utils";

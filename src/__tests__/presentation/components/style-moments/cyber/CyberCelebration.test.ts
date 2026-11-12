@@ -1,4 +1,3 @@
-import { describe, expect, it } from "vitest";
 import { mount } from "@vue/test-utils";
 import CyberCelebration from "@/presentation/components/style-moments/cyber/CyberCelebration.vue";
 

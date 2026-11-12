@@ -1,4 +1,3 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
 import { usePuzzleLoader } from "@/presentation/components/puzzle-loader/usePuzzleLoader";
 
 afterEach(() => {

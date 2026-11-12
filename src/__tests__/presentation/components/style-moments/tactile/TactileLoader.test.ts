@@ -1,4 +1,3 @@
-import { describe, expect, it } from "vitest";
 import { mount } from "@vue/test-utils";
 import TactileLoader from "@/presentation/components/style-moments/tactile/TactileLoader.vue";
 

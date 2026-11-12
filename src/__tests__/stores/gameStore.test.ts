@@ -1,4 +1,3 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createAnalyticsSpy } from "@/__tests__/fixtures/analyticsSpy";
 import { createPinia, setActivePinia } from "pinia";
 import { useGameStore } from "@/stores/gameStore";

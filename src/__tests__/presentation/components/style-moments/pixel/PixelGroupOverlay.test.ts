@@ -1,4 +1,3 @@
-import { describe, expect, it } from "vitest";
 import { mount } from "@vue/test-utils";
 import PixelGroupOverlay from "@/presentation/components/style-moments/pixel/PixelGroupOverlay.vue";
 import { effectOf } from "../../../../fixtures/groupOverlay";

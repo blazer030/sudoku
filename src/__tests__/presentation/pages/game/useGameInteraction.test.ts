@@ -1,4 +1,3 @@
-import { describe, it, expect, vi } from "vitest";
 import { StepRecorder } from "@/domain/game/StepRecorder";
 import { createKnownSudoku } from "@/__tests__/fixtures/knownPuzzle";
 import { useGameInteraction } from "@/presentation/pages/game/useGameInteraction";

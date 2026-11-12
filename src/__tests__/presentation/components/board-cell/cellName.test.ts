@@ -1,4 +1,3 @@
-import { describe, expect, it } from "vitest";
 import { cellName } from "@/presentation/components/board-cell/cellName";
 
 describe("cellName", () => {

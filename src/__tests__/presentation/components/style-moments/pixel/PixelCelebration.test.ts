@@ -1,4 +1,3 @@
-import { describe, expect, it } from "vitest";
 import { mount } from "@vue/test-utils";
 import PixelCelebration from "@/presentation/components/style-moments/pixel/PixelCelebration.vue";
 

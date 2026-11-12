@@ -1,4 +1,3 @@
-import { describe, expect, it } from "vitest";
 import type { Difficulty } from "@/domain/generator/SudokuGenerator";
 import type { GameResult } from "@/application/statistics/StatisticsRepository";
 import { listRecentGames } from "@/presentation/pages/statistics/recentGames";

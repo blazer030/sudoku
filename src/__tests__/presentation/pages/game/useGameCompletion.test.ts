@@ -1,4 +1,3 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
 import { createAnalyticsSpy } from "@/__tests__/fixtures/analyticsSpy";
 import { ref } from "vue";
 import { createPinia, setActivePinia } from "pinia";

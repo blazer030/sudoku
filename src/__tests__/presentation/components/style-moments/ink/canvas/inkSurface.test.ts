@@ -1,4 +1,3 @@
-import { describe, expect, it } from "vitest";
 import {
     DEFAULT_INK_COLOUR,
     DEFAULT_SEAL_COLOUR,

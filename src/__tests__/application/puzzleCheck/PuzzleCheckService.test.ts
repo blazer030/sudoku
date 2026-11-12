@@ -1,4 +1,3 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
 import { checkPuzzleAsync } from "@/application/puzzleCheck/PuzzleCheckService";
 import { checkPuzzle, type PuzzleCheck } from "@/application/puzzleCheck/checkPuzzle";
 import { singlesPuzzle } from "@/__tests__/fixtures/singlesPuzzle";

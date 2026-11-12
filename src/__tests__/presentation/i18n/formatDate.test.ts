@@ -1,4 +1,3 @@
-import { describe, expect, it } from "vitest";
 import type { AppLocale } from "@/application/settings/SettingsStorage";
 import { formatDate } from "@/presentation/i18n/formatDate";
 

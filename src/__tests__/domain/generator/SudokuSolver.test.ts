@@ -1,4 +1,3 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
 import { SudokuBoard } from "@/domain/board/SudokuBoard";
 import { isValidSolution } from "@/__tests__/fixtures/validSolution";
 import { SudokuSolver, UNKNOWN_SOLUTION_COUNT } from "@/domain/generator/SudokuSolver";

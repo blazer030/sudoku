@@ -1,4 +1,3 @@
-import { describe, expect, it } from "vitest";
 import { StepRecorder } from "@/domain/game/StepRecorder";
 import { PuzzleCell } from "@/domain/board/PuzzleCell";
 

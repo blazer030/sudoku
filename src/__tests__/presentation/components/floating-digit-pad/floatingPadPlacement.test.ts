@@ -1,4 +1,3 @@
-import { describe, expect, it } from "vitest";
 import { FLOATING_PAD_COLUMNS, FLOATING_PAD_ROWS, floatingPadPlacement, floatingPadSize } from "@/presentation/components/floating-digit-pad/floatingPadPlacement";
 
 const BOARD_SIZE = 9;

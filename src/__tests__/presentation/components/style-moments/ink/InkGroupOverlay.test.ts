@@ -1,4 +1,3 @@
-import { describe, expect, it } from "vitest";
 import { readFileSync } from "fs";
 import { mount, type VueWrapper } from "@vue/test-utils";
 import type { CompletedGroup } from "@/domain/game/Sudoku";

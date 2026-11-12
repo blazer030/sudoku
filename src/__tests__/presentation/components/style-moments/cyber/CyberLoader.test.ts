@@ -1,4 +1,3 @@
-import { afterEach, describe, expect, it } from "vitest";
 import { mount } from "@vue/test-utils";
 import { i18n } from "@/presentation/i18n";
 import CyberLoader from "@/presentation/components/style-moments/cyber/CyberLoader.vue";

@@ -1,4 +1,3 @@
-import { describe, expect, it } from "vitest";
 import { mount } from "@vue/test-utils";
 import PaperGroupOverlay from "@/presentation/components/style-moments/paper/PaperGroupOverlay.vue";
 import { effectOf } from "../../../../fixtures/groupOverlay";

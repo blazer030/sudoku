@@ -1,4 +1,3 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
 import { createPinia, setActivePinia } from "pinia";
 import { useStatisticsStore } from "@/stores/statisticsStore";
 import type { GameResult, StatisticsRepository } from "@/application/statistics/StatisticsRepository";

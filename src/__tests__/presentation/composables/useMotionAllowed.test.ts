@@ -1,4 +1,3 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
 import { useMotionAllowed } from "@/presentation/composables/useMotionAllowed";
 import { useSettingsStore } from "@/stores/settingsStore";
 

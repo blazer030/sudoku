@@ -1,4 +1,3 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
 import { effectScope } from "vue";
 import { GROUP_RIPPLE_STEP_MS, useGroupEffect } from "@/presentation/pages/game/useGroupEffect";
 import type { CompletedGroup } from "@/domain/game/Sudoku";

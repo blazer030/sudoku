@@ -1,5 +1,4 @@
 import { effectScope } from "vue";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useLongPress } from "@/presentation/composables/useLongPress";
 
 const pointerAt = (clientX: number, clientY: number, extra: Partial<PointerEvent> = {}) =>

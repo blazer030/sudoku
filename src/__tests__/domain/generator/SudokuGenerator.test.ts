@@ -1,4 +1,3 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
 import { isValidSolution } from "@/__tests__/fixtures/validSolution";
 import { SudokuGenerator } from "@/domain/generator/SudokuGenerator";
 import { SudokuSolver } from "@/domain/generator/SudokuSolver";

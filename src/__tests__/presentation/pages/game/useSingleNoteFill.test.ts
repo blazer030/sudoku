@@ -1,4 +1,3 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { effectScope, type EffectScope } from "vue";
 import { StepRecorder } from "@/domain/game/StepRecorder";
 import type { CompletedCells, Sudoku } from "@/domain/game/Sudoku";

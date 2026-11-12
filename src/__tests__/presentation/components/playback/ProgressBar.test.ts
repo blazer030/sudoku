@@ -1,4 +1,3 @@
-import { describe, expect, it } from "vitest";
 import { ref } from "vue";
 import { mount } from "@vue/test-utils";
 import ProgressBar from "@/presentation/components/playback/ProgressBar.vue";

@@ -1,4 +1,3 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
 import type { CellState } from "@/domain/board/cellState";
 import { GameStateConverter, captureInitialBoard } from "@/application/game/GameState";
 import { createKnownSudoku, knownAnswer, knownPuzzle } from "@/__tests__/fixtures/knownPuzzle";

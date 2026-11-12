@@ -1,4 +1,3 @@
-import { expect } from "vitest";
 import type { VueWrapper } from "@vue/test-utils";
 
 // Five 56px keys and four 8px gaps make a 312px row. A letterboxed window can leave less than

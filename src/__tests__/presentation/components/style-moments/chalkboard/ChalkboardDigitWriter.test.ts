@@ -1,5 +1,4 @@
 import { readFileSync } from "fs";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { nextTick } from "vue";
 import { mount, type DOMWrapper } from "@vue/test-utils";
 import ChalkboardDigitWriter from "@/presentation/components/style-moments/chalkboard/ChalkboardDigitWriter.vue";

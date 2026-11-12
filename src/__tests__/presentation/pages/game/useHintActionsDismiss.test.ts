@@ -1,4 +1,3 @@
-import { describe, it, expect } from "vitest";
 import { defineComponent } from "vue";
 import { mount } from "@vue/test-utils";
 import { StepRecorder } from "@/domain/game/StepRecorder";
