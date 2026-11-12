@@ -3,7 +3,7 @@
  * that must stay on screen, the step row, one line of explanation, the buttons and the caption.
  */
 export const minimumPanelHeight = (panel: HTMLElement): number => {
-    const explanation = panel.querySelector<HTMLElement>("[data-testid='hint-explanation-region']");
+    const explanation = panel.querySelector<HTMLElement>("[data-step-explanation]");
     if (explanation === null) return panel.scrollHeight;
     const explanationMinimum = Number.parseFloat(getComputedStyle(explanation).minHeight) || 0;
     return panel.scrollHeight - Math.max(0, explanation.clientHeight - explanationMinimum);

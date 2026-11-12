@@ -1,6 +1,7 @@
 <template>
     <div
         class="blueprint-frame max-w-board-fit"
+        data-tap-area
         data-testid="board-frame"
     >
         <slot />

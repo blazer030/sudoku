@@ -83,6 +83,7 @@
                     :class="overlayShown ? 'opacity-0 pointer-events-none' : 'opacity-100 delay-100'"
                     :inert="overlayShown || checking || undefined"
                     class="flex flex-col items-center gap-(--game-section-gap) transition-opacity duration-200"
+                    data-tap-area
                     data-testid="walkthrough-inputs"
                 >
                     <DigitPad

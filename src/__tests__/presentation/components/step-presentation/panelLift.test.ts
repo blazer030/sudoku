@@ -5,7 +5,7 @@ const panelWith = (scrollHeight: number, explanation: { height: number; minHeigh
     Object.defineProperty(panel, "scrollHeight", { value: scrollHeight });
     if (explanation !== null) {
         const region = document.createElement("div");
-        region.dataset.testid = "hint-explanation-region";
+        region.dataset.stepExplanation = "";
         region.style.minHeight = explanation.minHeight;
         Object.defineProperty(region, "clientHeight", { value: explanation.height });
         panel.appendChild(region);

@@ -117,6 +117,7 @@
                         ref="hintPanelPosition"
                         :style="{ top: `${-hintPanelLift}px` }"
                         class="absolute inset-x-0 z-10"
+                        data-tap-area
                         data-testid="hint-panel-position"
                     >
                         <HintPanel

@@ -1,6 +1,7 @@
 <template>
     <div
         class="flex flex-col gap-(--digit-key-row-gap)"
+        data-tap-area
         data-testid="digit-pad"
     >
         <!-- Each row is five square keys of at most --digit-key-size; in a window narrower than

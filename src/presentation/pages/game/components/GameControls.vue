@@ -1,6 +1,7 @@
 <template>
     <div
         class="flex justify-center gap-6"
+        data-tap-area
         data-testid="game-controls"
     >
         <ControlButton

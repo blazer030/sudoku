@@ -4,6 +4,7 @@
     <div
         ref="box"
         :class="[clipped ? 'step-explanation-fade' : '', compact ? 'min-h-[1.45rem]' : 'min-h-[4.6rem]']"
+        data-step-explanation
         :data-testid="`${testIdPrefix}-explanation-region`"
         aria-live="polite"
         class="step-explanation-box shrink! overflow-y-auto"
