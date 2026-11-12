@@ -119,7 +119,7 @@
                     </div>
                 </div>
 
-                <Transition name="walkthrough-overlay">
+                <Transition name="panel-rise">
                     <div
                         v-if="introOpen && !inPlayback"
                         ref="introPosition"
@@ -188,7 +188,7 @@
                     </div>
                 </Transition>
 
-                <Transition name="walkthrough-overlay">
+                <Transition name="panel-rise">
                     <div
                         v-if="inPlayback"
                         class="absolute top-0 inset-x-0 z-10"
@@ -232,7 +232,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, inject, nextTick, onBeforeUnmount, ref, useTemplateRef, watch, type Component } from "vue";
+import { computed, inject, onBeforeUnmount, ref, useTemplateRef, watch, type Component } from "vue";
 import { onBeforeRouteLeave, useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { ChevronLeft, Info, ListFilter, Pencil, PencilLine, RotateCcw, Trophy, Wand2 } from "@/presentation/components/icon";
@@ -256,8 +256,7 @@ import StepLinkOverlay from "@/presentation/components/step-presentation/StepLin
 import StepPlaybackPanel from "@/presentation/components/step-presentation/StepPlaybackPanel.vue";
 import StepTag from "@/presentation/components/step-presentation/StepTag.vue";
 import { useHintExplanation } from "@/presentation/components/step-presentation/useHintExplanation";
-import { useRoomBelow } from "@/presentation/composables/useRoomBelow";
-import { panelLift } from "@/presentation/components/step-presentation/panelLift";
+import { usePanelLift } from "@/presentation/components/step-presentation/usePanelLift";
 import { useWalkthroughInput } from "@/presentation/pages/solver-walkthrough/useWalkthroughInput";
 import { useWalkthroughPlayback } from "@/presentation/pages/solver-walkthrough/useWalkthroughPlayback";
 import { provideWalkthroughDialog } from "@/presentation/pages/solver-walkthrough/useWalkthroughDialog";
@@ -366,29 +365,15 @@ const explanation = computed(() => {
     return currentStep.value === null ? "" : explain(currentStep.value.step, currentStep.value.candidatesBefore);
 });
 
-// The panel opens over the inputs; keep it on screen when an explanation runs long.
-const PANEL_BOTTOM_GAP = 24;
-const inputAreaElement = useTemplateRef<HTMLElement>("inputArea");
-const { room: roomBelowInputArea, measure: measureRoomBelowInputArea } = useRoomBelow(inputAreaElement, PANEL_BOTTOM_GAP);
-watch(inPlayback, (playing) => {
-    if (playing) measureRoomBelowInputArea();
-});
-
+// The panel opens over the inputs; keep it on screen when an explanation runs long
 const introPosition = useTemplateRef<HTMLElement>("introPosition");
-const introLift = ref(0);
-const introMaxHeight = computed(() =>
-    roomBelowInputArea.value === null ? null : roomBelowInputArea.value + introLift.value);
-
-const measureIntroLift = () => {
-    const intro = introPosition.value?.querySelector<HTMLElement>("[data-testid='walkthrough-intro']");
-    if (!intro || roomBelowInputArea.value === null) {
-        introLift.value = 0;
-        return;
-    }
-    introLift.value = panelLift(roomBelowInputArea.value, intro.scrollHeight);
-};
-
-watch([introOpen, inPlayback, roomBelowInputArea], () => { void nextTick(measureIntroLift); }, { immediate: true });
+const { room: roomBelowInputArea, lift: introLift, maxHeight: introMaxHeight } = usePanelLift({
+    inputArea: useTemplateRef<HTMLElement>("inputArea"),
+    bottomGap: 24,
+    open: inPlayback,
+    panelHeight: () => introPosition.value?.querySelector<HTMLElement>("[data-testid='walkthrough-intro']")?.scrollHeight ?? null,
+    remeasureOn: [introOpen, inPlayback],
+});
 
 const loadSample = (puzzle: number[][]) => {
     clearSelection();
@@ -478,19 +463,3 @@ const goBack = () => {
     void router.push(ROUTER_PATH.home);
 };
 </script>
-
-<style scoped>
-.walkthrough-overlay-enter-active {
-    transition: opacity 220ms ease, transform 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-
-.walkthrough-overlay-leave-active {
-    transition: opacity 150ms ease, transform 200ms ease;
-}
-
-.walkthrough-overlay-enter-from,
-.walkthrough-overlay-leave-to {
-    opacity: 0;
-    transform: translateY(16px);
-}
-</style>

@@ -285,6 +285,19 @@
   opacity: 0;
 }
 
+/* A panel opening over the controls (the hint panel, the Walkthrough's overlays) rises in and sinks out */
+.panel-rise-enter-active {
+  transition: opacity 220ms ease, transform 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.panel-rise-leave-active {
+  transition: opacity 150ms ease, transform 200ms ease;
+}
+.panel-rise-enter-from,
+.panel-rise-leave-to {
+  opacity: 0;
+  transform: translateY(16px);
+}
+
 /* One lesson fades out, its dialog with it, and the next fades in */
 .lesson-swap-enter-active,
 .lesson-swap-leave-active {

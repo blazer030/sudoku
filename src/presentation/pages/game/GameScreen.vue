@@ -110,7 +110,7 @@
                     />
                 </div>
 
-                <Transition name="hint-panel">
+                <Transition name="panel-rise">
                     <!-- On short screens the panel rises over the bottom of the board, so its buttons stay on screen. -->
                     <div
                         v-if="hintMode.active.value"
@@ -153,7 +153,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, nextTick, ref, useTemplateRef, watch } from "vue";
+import { computed, ref, useTemplateRef, watch } from "vue";
 import GameHeader from "@/presentation/pages/game/components/GameHeader.vue";
 import GameCompleteModal from "@/presentation/pages/game/components/GameCompleteModal.vue";
 import LeaveGameDialog from "@/presentation/pages/game/components/LeaveGameDialog.vue";
@@ -170,8 +170,8 @@ import BoardCanvas from "@/presentation/components/style-moments/BoardCanvas.vue
 import { GROUP_RIPPLE_STEP_MS } from "@/presentation/pages/game/useGroupEffect";
 import StepLinkOverlay from "@/presentation/components/step-presentation/StepLinkOverlay.vue";
 import HintPanel from "@/presentation/pages/game/hint-mode/HintPanel.vue";
-import { useRoomBelow } from "@/presentation/composables/useRoomBelow";
-import { minimumPanelHeight, panelLift } from "@/presentation/components/step-presentation/panelLift";
+import { minimumPanelHeight } from "@/presentation/components/step-presentation/panelLift";
+import { usePanelLift } from "@/presentation/components/step-presentation/usePanelLift";
 import { InputMode } from "@/presentation/pages/game/InputMode";
 import { isBlankTap } from "@/presentation/composables/isBlankTap";
 import { useBlankDoubleTap } from "@/presentation/pages/game/useBlankDoubleTap";
@@ -212,34 +212,19 @@ const settingsStore = useSettingsStore();
 // The moments the style's board canvas draws in the skin's place
 const boardCanvasTakes = ref<string | undefined>(undefined);
 
-// The panel opens over the controls; keep its buttons on screen when an explanation runs long.
-// It stops this many pixels short of the screen's bottom edge.
-const HINT_PANEL_BOTTOM_GAP = 16;
-const inputAreaElement = useTemplateRef<HTMLElement>("inputArea");
-const { room: roomBelowInputArea, measure: measureRoomBelowInputArea } = useRoomBelow(inputAreaElement, HINT_PANEL_BOTTOM_GAP);
-watch(() => hintMode.active.value, (active) => {
-    if (active) measureRoomBelowInputArea();
-});
-
+// The panel opens over the controls; keep its buttons on screen when an explanation runs long
 const hintPanelPosition = useTemplateRef<HTMLElement>("hintPanelPosition");
-const hintPanelLift = ref(0);
-const hintPanelMaxHeight = computed(() =>
-    roomBelowInputArea.value === null ? null : roomBelowInputArea.value + hintPanelLift.value);
-
-const measureHintPanelLift = () => {
-    const panel = hintPanelPosition.value?.querySelector<HTMLElement>("[data-testid='hint-panel']");
-    if (!panel || roomBelowInputArea.value === null) {
-        hintPanelLift.value = 0;
-        return;
-    }
-    hintPanelLift.value = panelLift(roomBelowInputArea.value, minimumPanelHeight(panel));
-};
-
-// Re-measured once the panel shows each step, and whenever the room changes
-watch(
-    () => [hintMode.active.value, hintMode.stepIndex.value, hintMode.phase.value, roomBelowInputArea.value],
-    () => { void nextTick(measureHintPanelLift); },
-);
+const { lift: hintPanelLift, maxHeight: hintPanelMaxHeight } = usePanelLift({
+    inputArea: useTemplateRef<HTMLElement>("inputArea"),
+    bottomGap: 16,
+    open: () => hintMode.active.value,
+    panelHeight: () => {
+        const panel = hintPanelPosition.value?.querySelector<HTMLElement>("[data-testid='hint-panel']");
+        return panel ? minimumPanelHeight(panel) : null;
+    },
+    // Measured again once the panel shows each step
+    remeasureOn: [() => hintMode.active.value, () => hintMode.stepIndex.value, () => hintMode.phase.value],
+});
 
 const {
     selectedCell,
@@ -318,19 +303,3 @@ const frameTarget = computed((): CellReference | null => {
     return selectedCell.value;
 });
 </script>
-
-<style scoped>
-.hint-panel-enter-active {
-    transition: opacity 220ms ease, transform 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-
-.hint-panel-leave-active {
-    transition: opacity 150ms ease, transform 200ms ease;
-}
-
-.hint-panel-enter-from,
-.hint-panel-leave-to {
-    opacity: 0;
-    transform: translateY(16px);
-}
-</style>
