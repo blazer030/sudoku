@@ -38,7 +38,7 @@ describe("useStuckNudge", () => {
         stop();
     });
 
-    it("should nudge after thirty seconds without an action, and not before", async () => {
+    it("should nudge after ten seconds without an action, and not before", async () => {
         const { nudged, stop } = start();
         await nextTick();
 
@@ -49,7 +49,7 @@ describe("useStuckNudge", () => {
         stop();
     });
 
-    it("should count the thirty seconds again after any action", async () => {
+    it("should count the ten seconds again after any action", async () => {
         const { session, nudged, stop } = start();
         await nextTick();
         vi.advanceTimersByTime(STUCK_IDLE_MS - 1000);
@@ -61,7 +61,7 @@ describe("useStuckNudge", () => {
         stop();
     });
 
-    it("should count the thirty seconds again after a key that changes nothing", async () => {
+    it("should count the ten seconds again after a key that changes nothing", async () => {
         const { session, nudged, stop } = start();
         // A digit means nothing on a step that lights a digit; the first keeps the step's state from then on
         session.pressDigit(5);

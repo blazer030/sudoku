@@ -664,12 +664,12 @@ describe("LessonScreen", () => {
             expect(explanation(wrapper)).not.toContain(nudgeText());
         });
 
-        it("should count the thirty seconds again after a tap that changes nothing", async () => {
+        it("should count the ten seconds again after a tap that changes nothing", async () => {
             vi.useFakeTimers();
             const wrapper = mountScreen(PICK_LESSON);
             // The first tap keeps the step's state from then on
             await tap(wrapper, 0, 3);
-            vi.advanceTimersByTime(29_000);
+            vi.advanceTimersByTime(9_000);
 
             await tap(wrapper, 0, 3);
             vi.advanceTimersByTime(1_000);
@@ -695,7 +695,7 @@ describe("LessonScreen", () => {
             await secondary(wrapper).trigger("click");
             await flushPromises();
 
-            vi.advanceTimersByTime(30_000);
+            vi.advanceTimersByTime(10_000);
             await flushPromises();
 
             expect(secondary(wrapper).attributes("data-nudge")).toBe("flash");

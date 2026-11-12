@@ -95,14 +95,14 @@ An explanation step SHALL mark only the cells its text is about, besides the ran
 - **THEN** they fail if either XYZ-Wing case step lights other than two cells, or if the Jellyfish or WXYZ-Wing pattern step removes a candidate
 
 ### Requirement: Nudge toward the hint when stuck
-During a practice step that is not solved and still has a hint left, the lesson SHALL nudge the player toward the hint action after three wrong answers in a row or thirty seconds with no action. A wrong answer is an action that brings a correcting message; an action that moves the step forward resets the count, and neutral actions such as selecting a cell leave it as it is. While nudging, the message area SHALL add, after what it already says, that the hint can help, unless it is showing a hint, whose words SHALL stay as they are; and the hint button SHALL draw attention: flashing a few times in the style's primary colour when motion is allowed, and staying highlighted without flashing when it is not. Asking for a hint, solving the step or leaving it SHALL end the nudge and start the count again.
+During a practice step that is not solved and still has a hint left, the lesson SHALL nudge the player toward the hint action after three wrong answers in a row or ten seconds with no action. A wrong answer is an action that brings a correcting message; an action that moves the step forward resets the count, and neutral actions such as selecting a cell leave it as it is. While nudging, the message area SHALL add, after what it already says, that the hint can help, unless it is showing a hint, whose words SHALL stay as they are; and the hint button SHALL draw attention: flashing a few times in the style's primary colour when motion is allowed, and staying highlighted without flashing when it is not. Asking for a hint, solving the step or leaving it SHALL end the nudge and start the count again.
 
 #### Scenario: Three wrong answers in a row
 - **WHEN** the player taps three cells in a row that each bring a correcting message
 - **THEN** the message area says the hint can help and the hint button draws attention
 
-#### Scenario: Thirty seconds without an action
-- **WHEN** thirty seconds pass on an unsolved practice step with no action
+#### Scenario: Ten seconds without an action
+- **WHEN** ten seconds pass on an unsolved practice step with no action
 - **THEN** the nudge appears
 
 #### Scenario: Motion off
@@ -114,7 +114,7 @@ During a practice step that is not solved and still has a hint left, the lesson 
 - **THEN** the hint shows, the nudge ends, and the count starts again
 
 #### Scenario: A hint on screen keeps its words
-- **WHEN** thirty seconds pass while a hint is shown
+- **WHEN** ten seconds pass while a hint is shown
 - **THEN** the hint button draws attention, and the hint's words stay without the added line
 
 ## MODIFIED Requirements

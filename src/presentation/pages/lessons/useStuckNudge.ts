@@ -3,7 +3,7 @@ import type { useLessonSession } from "@/presentation/pages/lessons/useLessonSes
 
 /** Wrong answers in a row, and time without an action, before the hint is pointed out: the owner's starting values. */
 export const STUCK_MISSES = 3;
-export const STUCK_IDLE_MS = 30_000;
+export const STUCK_IDLE_MS = 10_000;
 
 /**
  * Whether to point a stuck player to the hint: on a practice step with a hint left, after a few wrong answers in a row
