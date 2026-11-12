@@ -146,49 +146,9 @@
                         data-testid="recent-game"
                         @click="openReview(game, historyIndex)"
                     >
-                        <div class="flex items-center gap-3">
-                            <div
-                                :class="game.completed
-                                    ? 'bg-primary-light text-primary'
-                                    : 'bg-accent/10 text-accent'"
-                                :data-skin="game.completed ? 'icon-tile' : 'icon-tile gave-up'"
-                                class="w-9 h-9 rounded-icon flex items-center justify-center"
-                            >
-                                <Trophy
-                                    v-if="game.completed"
-                                    :size="18"
-                                />
-                                <X
-                                    v-else
-                                    :size="18"
-                                />
-                            </div>
-                            <div class="flex flex-col gap-0.5">
-                                <span class="text-sm font-semibold text-foreground">
-                                    {{ difficultyLabel(game.difficulty) }}
-                                </span>
-                                <span class="text-[11px] text-foreground-muted">
-                                    {{ formatDate(game.date, appLocale) }}
-                                </span>
-                            </div>
-                        </div>
+                        <GameResultHeading :game="game" />
                         <div class="flex items-center gap-2">
-                            <div class="flex flex-col items-end gap-0.5">
-                                <span
-                                    :class="game.completed ? 'text-primary' : 'text-accent'"
-                                    :data-skin="game.completed ? 'game-result' : 'game-result gave-up'"
-                                    class="text-base font-semibold font-mono"
-                                >
-                                    {{ game.completed ? formatTime(game.elapsedSeconds) : t("statistics.gaveUp") }}
-                                </span>
-                                <span
-                                    class="flex items-center gap-0.75 text-[11px] font-medium text-foreground-muted font-mono"
-                                    data-testid="hints-used"
-                                >
-                                    <Lightbulb :size="11" />
-                                    {{ game.hintsUsed }}
-                                </span>
-                            </div>
+                            <GameResultTime :game="game" />
                             <ChevronRight
                                 v-if="game.replay"
                                 :size="20"
@@ -248,9 +208,11 @@
 </template>
 
 <script lang="ts" setup>
+import GameResultHeading from "@/presentation/components/game-result/GameResultHeading.vue";
+import GameResultTime from "@/presentation/components/game-result/GameResultTime.vue";
 import { computed, ref, watch } from "vue";
 import { useRouter } from "vue-router";
-import { ChartBar, ChevronRight, Lightbulb, Trophy, X } from "@/presentation/components/icon";
+import { ChartBar, ChevronRight } from "@/presentation/components/icon";
 import { ROUTER_PATH } from "@/routerPaths";
 import { useStatisticsStore } from "@/stores/statisticsStore";
 import type { Difficulty } from "@/domain/generator/SudokuGenerator";
@@ -266,12 +228,9 @@ import PageHeader from "@/presentation/components/page-header/PageHeader.vue";
 import SegmentedControl, { type SegmentedOption } from "@/presentation/components/segmented-control/SegmentedControl.vue";
 import { vPress } from "@/presentation/directives/press";
 import { useI18n } from "vue-i18n";
-import { useAppLocale } from "@/presentation/i18n/useAppLocale";
-import { formatDate } from "@/presentation/i18n/formatDate";
 import { useDifficultyLabel } from "@/presentation/i18n/difficultyLabels";
 
 const { t } = useI18n();
-const appLocale = useAppLocale();
 const router = useRouter();
 const statisticsStore = useStatisticsStore();
 

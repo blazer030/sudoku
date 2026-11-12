@@ -32,45 +32,8 @@
             class="flex items-center justify-between bg-card rounded-xl py-(--review-card-padding) px-4 shadow-card-sm"
             data-skin="card"
         >
-            <div class="flex items-center gap-3">
-                <div
-                    :class="game.completed
-                        ? 'bg-primary-light text-primary'
-                        : 'bg-accent/10 text-accent'"
-                    :data-skin="game.completed ? 'icon-tile' : 'icon-tile gave-up'"
-                    class="w-9 h-9 rounded-icon flex items-center justify-center"
-                >
-                    <Trophy
-                        v-if="game.completed"
-                        :size="18"
-                    />
-                    <X
-                        v-else
-                        :size="18"
-                    />
-                </div>
-                <div class="flex flex-col gap-0.5">
-                    <span class="text-sm font-semibold text-foreground">
-                        {{ difficultyLabel(game.difficulty) }}
-                    </span>
-                    <span class="text-[11px] text-foreground-muted">
-                        {{ formatDate(game.date, appLocale) }}
-                    </span>
-                </div>
-            </div>
-            <div class="flex flex-col items-end gap-0.5">
-                <span
-                    :class="game.completed ? 'text-primary' : 'text-accent'"
-                    :data-skin="game.completed ? 'game-result' : 'game-result gave-up'"
-                    class="text-base font-semibold font-mono"
-                >
-                    {{ game.completed ? formatTime(game.elapsedSeconds) : t("statistics.gaveUp") }}
-                </span>
-                <span class="flex items-center gap-0.75 text-[11px] font-medium text-foreground-muted font-mono">
-                    <Lightbulb :size="11" />
-                    {{ game.hintsUsed }}
-                </span>
-            </div>
+            <GameResultHeading :game="game" />
+            <GameResultTime :game="game" />
         </div>
 
         <div class="flex-1" />
@@ -145,6 +108,8 @@
 </template>
 
 <script lang="ts" setup>
+import GameResultHeading from "@/presentation/components/game-result/GameResultHeading.vue";
+import GameResultTime from "@/presentation/components/game-result/GameResultTime.vue";
 import { computed, useTemplateRef, watch, type Component } from "vue";
 import { useRouter } from "vue-router";
 import { ChevronLeft, Eraser, LayoutGrid, Lightbulb, Pencil, Sparkles, StickyNote, Trophy, Undo2, X } from "@/presentation/components/icon";
@@ -152,11 +117,7 @@ import { ROUTER_PATH } from "@/routerPaths";
 import { useScrolledHeader } from "@/presentation/composables/useScrolledHeader";
 import type { GameStepAction } from "@/domain/game/GameStep";
 import { useStatisticsStore } from "@/stores/statisticsStore";
-import { formatTime } from "@/utils/formatTime";
 import { useI18n } from "vue-i18n";
-import { useAppLocale } from "@/presentation/i18n/useAppLocale";
-import { formatDate } from "@/presentation/i18n/formatDate";
-import { useDifficultyLabel } from "@/presentation/i18n/difficultyLabels";
 import Cell from "@/presentation/components/board-cell/Cell.vue";
 import BoardFrame from "@/presentation/components/board-frame/BoardFrame.vue";
 import SudokuBoard from "@/presentation/components/sudoku-board/SudokuBoard.vue";
@@ -171,7 +132,6 @@ const props = defineProps<{
 }>();
 
 const { t } = useI18n();
-const appLocale = useAppLocale();
 const router = useRouter();
 // A typed URL can name a game that isn't there, or one kept without its moves: back to Statistics
 const game = findReviewedGame(useStatisticsStore().history, props.index);
@@ -234,8 +194,6 @@ watch(currentStep, () => {
     if (!cellElement || !scrollArea.value) return;
     revealInScroller(scrollArea.value, cellElement, header.value?.getBoundingClientRect().bottom ?? 0);
 }, { flush: "post" });
-
-const difficultyLabel = useDifficultyLabel();
 
 const goBack = () => {
     void router.push(ROUTER_PATH.statistics);
