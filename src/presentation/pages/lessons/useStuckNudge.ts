@@ -18,8 +18,7 @@ export const useStuckNudge = (session: ReturnType<typeof useLessonSession>): Com
         timer = null;
     };
 
-    // The practice state is a new object after every action, so watching it sees each one
-    watch([session.stepIndex, session.practice], () => {
+    watch([session.stepIndex, session.actions], () => {
         stopTimer();
         idle.value = false;
         if (session.hintsLeft.value) timer = setTimeout(() => { idle.value = true; }, STUCK_IDLE_MS);

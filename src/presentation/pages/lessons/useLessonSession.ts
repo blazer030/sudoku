@@ -109,7 +109,11 @@ export const useLessonSession = (lesson: Lesson) => {
     const canSkipToPractice = computed(() => nextPracticeIndex.value > stepIndex.value + 1);
     const skipToPractice = () => { goTo(nextPracticeIndex.value); };
 
+    // Every tap and key, whether or not it changes the practice
+    const actions = ref(0);
+
     const dispatch = (action: PracticeAction) => {
+        actions.value++;
         const current = step.value;
         if (!isPractice(current)) return;
         practices.value = { ...practices.value, [stepIndex.value]: practiceReducer(current, practice.value, action) };
@@ -132,6 +136,7 @@ export const useLessonSession = (lesson: Lesson) => {
         padCell,
         canGoNext,
         hintsLeft,
+        actions,
         canSkipToPractice,
         goTo,
         next,

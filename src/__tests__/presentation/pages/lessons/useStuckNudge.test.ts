@@ -61,6 +61,20 @@ describe("useStuckNudge", () => {
         stop();
     });
 
+    it("should count the thirty seconds again after a key that changes nothing", async () => {
+        const { session, nudged, stop } = start();
+        // A digit means nothing on a step that lights a digit; the first keeps the step's state from then on
+        session.pressDigit(5);
+        await nextTick();
+        vi.advanceTimersByTime(STUCK_IDLE_MS - 1000);
+
+        session.pressDigit(5);
+        await nextTick();
+        vi.advanceTimersByTime(1000);
+        expect(nudged.value).toBe(false);
+        stop();
+    });
+
     it("should end the nudge when the player asks for a hint", async () => {
         const { session, nudged, stop } = start();
         await nextTick();

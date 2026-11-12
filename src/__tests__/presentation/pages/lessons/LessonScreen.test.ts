@@ -72,6 +72,24 @@ const NOTE_LESSON: Lesson = {
     ],
 };
 
+// Tapping a filled cell that is not a target changes nothing on a pick step
+const PICK_LESSON: Lesson = {
+    id: "pointing",
+    steps: [
+        {
+            kind: "pick",
+            stage: "follow",
+            board: BOARD,
+            marks: {},
+            targets: [cell(2, 4)],
+            wrongKey: "lessons.names.claiming",
+            promptKey: "lessons.names.xWing",
+            successKey: "lessons.names.fish",
+            hints: [{ textKey: "lessons.names.nakedPair" }],
+        },
+    ],
+};
+
 const FILL_LESSON: Lesson = {
     id: "fillingIn",
     steps: [
@@ -644,6 +662,20 @@ describe("LessonScreen", () => {
 
             expect(secondary(wrapper).attributes("data-nudge")).toBeUndefined();
             expect(explanation(wrapper)).not.toContain(nudgeText());
+        });
+
+        it("should count the thirty seconds again after a tap that changes nothing", async () => {
+            vi.useFakeTimers();
+            const wrapper = mountScreen(PICK_LESSON);
+            // The first tap keeps the step's state from then on
+            await tap(wrapper, 0, 3);
+            vi.advanceTimersByTime(29_000);
+
+            await tap(wrapper, 0, 3);
+            vi.advanceTimersByTime(1_000);
+            await flushPromises();
+
+            expect(secondary(wrapper).attributes("data-nudge")).toBeUndefined();
         });
 
         it("should keep the hint button lit without flashing when motion is off", async () => {
