@@ -142,5 +142,5 @@ export const useHintActions = ({
         return false;
     };
 
-    return { errorCells, clearErrors, isError, isRevealed, openHintMenu, hintMode, dismissOverlay };
+    return { clearErrors, isError, isRevealed, openHintMenu, hintMode, dismissOverlay };
 };

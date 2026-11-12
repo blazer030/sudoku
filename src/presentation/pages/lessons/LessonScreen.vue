@@ -111,7 +111,7 @@ import { computed, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import type { Difficulty } from "@/domain/generator/SudokuGenerator";
 import { ALL_LESSON_IDS, groupOfLesson } from "@/domain/lessons/curriculum";
-import type { Lesson, LessonId } from "@/domain/lessons/Lesson";
+import { isPracticeStep, type Lesson, type LessonId, type LessonStep } from "@/domain/lessons/Lesson";
 import type { PracticeFeedback } from "@/domain/lessons/practice";
 import type { CellReference, Elimination } from "@/domain/solver/SolveStep";
 import BoardFrame from "@/presentation/components/board-frame/BoardFrame.vue";
@@ -143,7 +143,7 @@ const difficultyLabel = useDifficultyLabel();
 const lessonStore = useLessonStore();
 const session = useLessonSession(props.lesson);
 
-const isPractising = computed(() => session.step.value.kind !== "show" && session.step.value.kind !== "done");
+const isPractising = computed(() => isPracticeStep(session.step.value));
 
 const links = computed(() => [...(session.marks.value.links ?? [])]);
 
@@ -197,8 +197,8 @@ const progress = computed(() => {
 });
 
 const nextIsPractice = computed(() => {
-    const following = props.lesson.steps[session.stepIndex.value + 1] as Lesson["steps"][number] | undefined;
-    return session.step.value.kind === "show" && following !== undefined && following.kind !== "show" && following.kind !== "done";
+    const following = props.lesson.steps[session.stepIndex.value + 1] as LessonStep | undefined;
+    return session.step.value.kind === "show" && following !== undefined && isPracticeStep(following);
 });
 
 const isDone = computed(() => session.step.value.kind === "done");

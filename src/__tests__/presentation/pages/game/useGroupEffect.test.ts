@@ -17,24 +17,24 @@ afterEach(() => {
 describe("useGroupEffect", () => {
     it("should mark every cell of the group with its kind at once, the ripple left to the cells' own delay", () => {
         vi.useFakeTimers();
-        const { play, isInEffect } = useGroupEffect(() => true, () => EFFECT_MS);
+        const { play, groupKindsAt } = useGroupEffect(() => true, () => EFFECT_MS);
 
         play(ROW_0, rowCells(0), { row: 0, column: 4 });
 
-        expect(isInEffect(0, 0)).toEqual(["row"]);
-        expect(isInEffect(0, 8)).toEqual(["row"]);
-        expect(isInEffect(1, 0)).toEqual([]);
+        expect(groupKindsAt(0, 0)).toEqual(["row"]);
+        expect(groupKindsAt(0, 8)).toEqual(["row"]);
+        expect(groupKindsAt(1, 0)).toEqual([]);
     });
 
     it("should give a cell every kind it completed, when a row and a column cross on it", () => {
         vi.useFakeTimers();
-        const { play, isInEffect } = useGroupEffect(() => true, () => EFFECT_MS);
+        const { play, groupKindsAt } = useGroupEffect(() => true, () => EFFECT_MS);
 
         const groups: CompletedGroup[] = [{ kind: "row", index: 0 }, { kind: "column", index: 8 }];
         play(groups, [...rowCells(0), ...columnCells(8)], { row: 0, column: 8 });
 
-        expect(isInEffect(0, 8)).toEqual(["row", "column"]);
-        expect(isInEffect(4, 8)).toEqual(["column"]);
+        expect(groupKindsAt(0, 8)).toEqual(["row", "column"]);
+        expect(groupKindsAt(4, 8)).toEqual(["column"]);
     });
 
     it("should hold the groups and the origin on the effect", () => {
@@ -50,7 +50,7 @@ describe("useGroupEffect", () => {
 
     it("should clear the effect once the farthest cell's effect has run", () => {
         vi.useFakeTimers();
-        const { play, effect, isInEffect } = useGroupEffect(() => true, () => EFFECT_MS);
+        const { play, effect, groupKindsAt } = useGroupEffect(() => true, () => EFFECT_MS);
 
         // The farthest cell is 4 steps from the origin
         play(ROW_0, rowCells(0), { row: 0, column: 4 });
@@ -61,7 +61,7 @@ describe("useGroupEffect", () => {
 
         vi.advanceTimersByTime(1);
         expect(effect.value).toBeNull();
-        expect(isInEffect(0, 0)).toEqual([]);
+        expect(groupKindsAt(0, 0)).toEqual([]);
     });
 
     it("should take each style's effect length from the duration it is given", () => {
@@ -80,12 +80,12 @@ describe("useGroupEffect", () => {
 
     it("should set nothing when motion is not allowed", () => {
         vi.useFakeTimers();
-        const { play, effect, isInEffect } = useGroupEffect(() => false, () => EFFECT_MS);
+        const { play, effect, groupKindsAt } = useGroupEffect(() => false, () => EFFECT_MS);
 
         play(ROW_0, rowCells(0), { row: 0, column: 0 });
 
         expect(effect.value).toBeNull();
-        expect(isInEffect(0, 0)).toEqual([]);
+        expect(groupKindsAt(0, 0)).toEqual([]);
         expect(vi.getTimerCount()).toBe(0);
     });
 
@@ -99,7 +99,7 @@ describe("useGroupEffect", () => {
 
     it("should replace a running effect with a new id, leaving no cell of the old one marked", () => {
         vi.useFakeTimers();
-        const { play, effect, isInEffect } = useGroupEffect(() => true, () => EFFECT_MS);
+        const { play, effect, groupKindsAt } = useGroupEffect(() => true, () => EFFECT_MS);
 
         play(ROW_0, rowCells(0), { row: 0, column: 0 });
         const firstId = effect.value?.id;
@@ -108,12 +108,12 @@ describe("useGroupEffect", () => {
         play([{ kind: "column", index: 8 }], columnCells(8), { row: 0, column: 8 });
 
         expect(effect.value?.id).not.toBe(firstId);
-        expect(isInEffect(0, 0)).toEqual([]);
-        expect(isInEffect(0, 8)).toEqual(["column"]);
+        expect(groupKindsAt(0, 0)).toEqual([]);
+        expect(groupKindsAt(0, 8)).toEqual(["column"]);
 
         // Both run 8 steps; the first effect's timer would have ended here, and the second still runs
         vi.advanceTimersByTime(8 * GROUP_RIPPLE_STEP_MS + EFFECT_MS - 200);
-        expect(isInEffect(4, 8)).toEqual(["column"]);
+        expect(groupKindsAt(4, 8)).toEqual(["column"]);
 
         vi.advanceTimersByTime(200);
         expect(effect.value).toBeNull();
@@ -122,13 +122,13 @@ describe("useGroupEffect", () => {
 
     it("should stop a running effect at once, leaving no timer", () => {
         vi.useFakeTimers();
-        const { play, stop, effect, isInEffect } = useGroupEffect(() => true, () => EFFECT_MS);
+        const { play, stop, effect, groupKindsAt } = useGroupEffect(() => true, () => EFFECT_MS);
         play(ROW_0, rowCells(0), { row: 0, column: 4 });
 
         stop();
 
         expect(effect.value).toBeNull();
-        expect(isInEffect(0, 0)).toEqual([]);
+        expect(groupKindsAt(0, 0)).toEqual([]);
         expect(vi.getTimerCount()).toBe(0);
     });
 

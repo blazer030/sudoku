@@ -48,7 +48,7 @@
                             :data-testid="`cell-${rowIndex}-${columnIndex}`"
                             :error="isError(rowIndex, columnIndex)"
                             :group-effect-id="groupEffect?.id ?? null"
-                            :group-kinds="isInGroupEffect(rowIndex, columnIndex)"
+                            :group-kinds="groupKindsAt(rowIndex, columnIndex)"
                             :highlight-same-digit="settingsStore.highlightSameDigit"
                             :hint="hintMode.cellViews.value?.[rowIndex][columnIndex] ?? null"
                             :peer="settingsStore.highlightScope && isPeerOfSelected(rowIndex, columnIndex)"
@@ -201,7 +201,7 @@ const {
     playGroupEffect,
     celebration,
     groupEffect,
-    isInGroupEffect,
+    groupKindsAt,
 } = useGameSession({
     onPlayAgain: () => { emit("playAgain"); },
     // Or the pad would come back on the old cell by itself and could cover the one the hint revealed

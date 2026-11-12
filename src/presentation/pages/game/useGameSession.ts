@@ -172,7 +172,6 @@ export const useGameSession = ({ onPlayAgain, onCellRevealed }: GameSessionOptio
     });
 
     return {
-        gameStore,
         sudoku,
         stepRecorder,
         difficulty,
@@ -188,11 +187,10 @@ export const useGameSession = ({ onPlayAgain, onCellRevealed }: GameSessionOptio
         hintMode,
         singleNoteFill,
         toastContent: gameToast.content,
-        showToast: gameToast.show,
         showLeaveDialog,
         playGroupEffect,
         celebration,
         groupEffect: groupEffect.effect,
-        isInGroupEffect: groupEffect.isInEffect,
+        groupKindsAt: groupEffect.groupKindsAt,
     };
 };

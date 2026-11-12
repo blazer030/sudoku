@@ -269,7 +269,7 @@ import { useDifficultyLabel } from "@/presentation/i18n/difficultyLabels";
 import type { CellReference } from "@/domain/solver/SolveStep";
 
 const props = defineProps<{
-    /** A puzzle to start from, such as one from the game history; the guide stays closed. */
+    /** A puzzle to start from, with the guide closed; no route passes one yet, the tests start from it. */
     initialPuzzle?: number[][];
 }>();
 

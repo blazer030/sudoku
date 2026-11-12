@@ -1,6 +1,6 @@
 import { computed, ref } from "vue";
 import { PuzzleCell } from "@/domain/board/PuzzleCell";
-import type { Lesson, LessonHint, LessonStep, PracticeStep, StepMarks } from "@/domain/lessons/Lesson";
+import { isPracticeStep, type Lesson, type LessonHint, type StepMarks } from "@/domain/lessons/Lesson";
 import { boardGrid } from "@/domain/lessons/lessonBoard";
 import { freshPracticeState, hintsFor, practiceReducer, type PracticeAction, type PracticeFeedback, type PracticeState } from "@/domain/lessons/practice";
 import type { CellReference } from "@/domain/solver/SolveStep";
@@ -10,8 +10,6 @@ export type LessonMessage =
     | { kind: "plain"; key: string }
     | { kind: "hint"; hint: LessonHint }
     | { kind: "wrong"; feedback: PracticeFeedback };
-
-const isPractice = (step: LessonStep): step is PracticeStep => step.kind !== "show" && step.kind !== "done";
 
 const EMPTY_MARKS: StepMarks = {};
 
@@ -26,7 +24,7 @@ export const useLessonSession = (lesson: Lesson) => {
     const shownIndex = computed(() => {
         if (step.value.kind !== "done") return stepIndex.value;
         const steps = lesson.steps.slice(0, stepIndex.value);
-        const last = steps.map(isPractice).lastIndexOf(true);
+        const last = steps.map(isPracticeStep).lastIndexOf(true);
         return last === -1 ? stepIndex.value : last;
     });
     const shownStep = computed(() => lesson.steps[shownIndex.value]);
@@ -36,7 +34,7 @@ export const useLessonSession = (lesson: Lesson) => {
 
     const hint = computed((): LessonHint | null => {
         const current = step.value;
-        if (!isPractice(current)) return null;
+        if (!isPracticeStep(current)) return null;
         const state = practice.value;
         if (state.solved || state.hintLevel === 0) return null;
         return hintsFor(current, state)[state.hintLevel - 1] ?? null;
@@ -83,7 +81,7 @@ export const useLessonSession = (lesson: Lesson) => {
 
     const canLeave = (index: number): boolean => {
         const candidate = lesson.steps[index];
-        return !isPractice(candidate) || practiceAt(index).solved;
+        return !isPracticeStep(candidate) || practiceAt(index).solved;
     };
     const canGoNext = computed(() => stepIndex.value < lesson.steps.length - 1 && canLeave(stepIndex.value));
 
@@ -104,7 +102,7 @@ export const useLessonSession = (lesson: Lesson) => {
     const previous = () => { goTo(stepIndex.value - 1); };
 
     // Only explanations lie between here and the next practice, so nothing unsolved is passed on the way
-    const nextPracticeIndex = computed(() => lesson.steps.findIndex((candidate, index) => index > stepIndex.value && isPractice(candidate)));
+    const nextPracticeIndex = computed(() => lesson.steps.findIndex((candidate, index) => index > stepIndex.value && isPracticeStep(candidate)));
     // Only where explanation lies between here and the practice; otherwise Next is the way there
     const canSkipToPractice = computed(() => nextPracticeIndex.value > stepIndex.value + 1);
     const skipToPractice = () => { goTo(nextPracticeIndex.value); };
@@ -115,13 +113,13 @@ export const useLessonSession = (lesson: Lesson) => {
     const dispatch = (action: PracticeAction) => {
         actions.value++;
         const current = step.value;
-        if (!isPractice(current)) return;
+        if (!isPracticeStep(current)) return;
         practices.value = { ...practices.value, [stepIndex.value]: practiceReducer(current, practice.value, action) };
     };
 
     const hintsLeft = computed(() => {
         const current = step.value;
-        if (!isPractice(current) || practice.value.solved) return false;
+        if (!isPracticeStep(current) || practice.value.solved) return false;
         return practice.value.hintLevel < hintsFor(current, practice.value).length;
     });
 

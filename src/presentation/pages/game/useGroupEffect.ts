@@ -47,7 +47,7 @@ export const useGroupEffect = (motionAllowed: () => boolean, durationMs: () => n
     };
 
     // Reading `effect` makes callers re-render: every play and end replaces it, and the kinds with it
-    const isInEffect = (row: number, column: number): HouseKind[] => {
+    const groupKindsAt = (row: number, column: number): HouseKind[] => {
         if (effect.value === null) return [];
         return cellKinds.get(`${row},${column}`) ?? [];
     };
@@ -60,5 +60,5 @@ export const useGroupEffect = (motionAllowed: () => boolean, durationMs: () => n
         });
     }
 
-    return { play, stop, effect, isInEffect };
+    return { play, stop, effect, groupKindsAt };
 };

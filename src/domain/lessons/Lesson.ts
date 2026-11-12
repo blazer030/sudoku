@@ -178,6 +178,9 @@ export type PracticeStep = PlaceStep | LightStep | PickStep | RemoveStep | FillS
 
 export type LessonStep = ShowStep | PracticeStep | DoneStep;
 
+/** Whether the player does the step, as against reading it or finishing the lesson. */
+export const isPracticeStep = (step: LessonStep): step is PracticeStep => step.kind !== "show" && step.kind !== "done";
+
 export interface Lesson {
     id: LessonId;
     steps: readonly LessonStep[];
