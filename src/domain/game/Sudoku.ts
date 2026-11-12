@@ -225,9 +225,7 @@ export class Sudoku {
         let currentState = initialState;
         for (const step of solveSteps) {
             steps.push({ step, candidatesBefore: currentState.candidateGrid() });
-            for (const elimination of step.eliminations) {
-                currentState = currentState.eliminate(elimination.cell.row, elimination.cell.column, elimination.digit);
-            }
+            currentState = currentState.apply(step);
         }
         const { cell, digit } = solveSteps[solveSteps.length - 1].assignments[0];
         return { kind: "steps", steps, target: cell, digit };

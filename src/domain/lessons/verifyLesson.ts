@@ -5,42 +5,7 @@ import type { Contradiction, LessonBoard, LessonStep } from "@/domain/lessons/Le
 import type { BoardState } from "@/domain/solver/BoardState";
 import { inSameBox, sameCell } from "@/domain/solver/cellRelations";
 import type { Assignment, CellReference, Elimination, TechniqueId } from "@/domain/solver/SolveStep";
-import { Claiming } from "@/domain/solver/techniques/Claiming";
-import { Fish } from "@/domain/solver/techniques/Fish";
-import { HiddenSingle } from "@/domain/solver/techniques/HiddenSingle";
-import { HiddenSubset } from "@/domain/solver/techniques/HiddenSubset";
-import { NakedSingle } from "@/domain/solver/techniques/NakedSingle";
-import { NakedSubset } from "@/domain/solver/techniques/NakedSubset";
-import { Pointing } from "@/domain/solver/techniques/Pointing";
-import type { Technique } from "@/domain/solver/techniques/Technique";
-import { WWing } from "@/domain/solver/techniques/WWing";
-import { WXYZWing } from "@/domain/solver/techniques/WXYZWing";
-import { XChain } from "@/domain/solver/techniques/XChain";
-import { XYChain } from "@/domain/solver/techniques/XYChain";
-import { XYWing } from "@/domain/solver/techniques/XYWing";
-import { XYZWing } from "@/domain/solver/techniques/XYZWing";
-
-const TECHNIQUES: Record<TechniqueId, () => Technique> = {
-    nakedSingle: () => new NakedSingle(),
-    hiddenSingle: () => new HiddenSingle(),
-    nakedPair: () => new NakedSubset(2),
-    nakedTriple: () => new NakedSubset(3),
-    nakedQuad: () => new NakedSubset(4),
-    hiddenPair: () => new HiddenSubset(2),
-    hiddenTriple: () => new HiddenSubset(3),
-    hiddenQuad: () => new HiddenSubset(4),
-    pointing: () => new Pointing(),
-    claiming: () => new Claiming(),
-    xWing: () => new Fish(2),
-    swordfish: () => new Fish(3),
-    jellyfish: () => new Fish(4),
-    xyWing: () => new XYWing(),
-    wWing: () => new WWing(),
-    xyzWing: () => new XYZWing(),
-    wxyzWing: () => new WXYZWing(),
-    xChain: () => new XChain(),
-    xyChain: () => new XYChain(),
-};
+import { TECHNIQUES } from "@/domain/solver/techniqueRegistry";
 
 const sameElimination = (first: Elimination, second: Elimination): boolean =>
     first.digit === second.digit && sameCell(first.cell, second.cell);

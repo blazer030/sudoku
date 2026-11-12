@@ -105,3 +105,25 @@ describe("BoardState", () => {
         expect(BoardState.fromPuzzle(singlesPuzzle).valueGrid()).toEqual(singlesPuzzle);
     });
 });
+
+describe("BoardState.apply", () => {
+    it("should place a step's digits, then take its candidates out", () => {
+        const empty = BoardState.fromPuzzle(Array.from({ length: 9 }, () => Array<number>(9).fill(0)));
+
+        const applied = empty.apply({
+            assignments: [{ cell: { row: 0, column: 0 }, digit: 5 }],
+            eliminations: [{ cell: { row: 8, column: 8 }, digit: 1 }],
+        });
+
+        expect(applied.valueAt(0, 0)).toBe(5);
+        expect(applied.candidatesOf(0, 1)).not.toContain(5);
+        expect(applied.candidatesOf(8, 8)).not.toContain(1);
+        expect(empty.valueAt(0, 0)).toBe(0);
+    });
+
+    it("should call a board solved only once every cell holds a digit", () => {
+        const empty = BoardState.fromPuzzle(Array.from({ length: 9 }, () => Array<number>(9).fill(0)));
+
+        expect(empty.isSolved()).toBe(false);
+    });
+});

@@ -1,4 +1,5 @@
 import { BOARD_SIZE, BOX_SIZE } from "@/domain/board/constants";
+import type { SolveStep } from "@/domain/solver/SolveStep";
 
 const ALL_DIGITS_MASK = 0b111111111;
 
@@ -60,6 +61,17 @@ export class BoardState {
         newCandidates[row][column] &= ~(1 << (digit - 1));
         const newValues = this._values.map((rowValues) => [...rowValues]);
         return new BoardState(newValues, newCandidates);
+    }
+
+    /** The board after a step: its digits placed, then its candidates removed. */
+    public apply(step: Pick<SolveStep, "assignments" | "eliminations">): BoardState {
+        const assigned = step.assignments.reduce<BoardState>((board, { cell, digit }) => board.assign(cell.row, cell.column, digit), this);
+        return step.eliminations.reduce((board, { cell, digit }) => board.eliminate(cell.row, cell.column, digit), assigned);
+    }
+
+    /** Whether every cell holds a digit. */
+    public isSolved(): boolean {
+        return this._values.every(rowValues => rowValues.every(value => value !== 0));
     }
 
     public candidatesOf(row: number, column: number): number[] {

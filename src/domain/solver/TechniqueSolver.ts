@@ -1,42 +1,9 @@
 import { BOARD_SIZE } from "@/domain/board/constants";
 import { BoardState } from "@/domain/solver/BoardState";
 import { SolveStep } from "@/domain/solver/SolveStep";
-import { Technique } from "@/domain/solver/techniques/Technique";
-import { NakedSingle } from "@/domain/solver/techniques/NakedSingle";
-import { HiddenSingle } from "@/domain/solver/techniques/HiddenSingle";
-import { NakedSubset } from "@/domain/solver/techniques/NakedSubset";
-import { HiddenSubset } from "@/domain/solver/techniques/HiddenSubset";
-import { Pointing } from "@/domain/solver/techniques/Pointing";
-import { Claiming } from "@/domain/solver/techniques/Claiming";
-import { Fish } from "@/domain/solver/techniques/Fish";
-import { XYWing } from "@/domain/solver/techniques/XYWing";
-import { WWing } from "@/domain/solver/techniques/WWing";
-import { XYZWing } from "@/domain/solver/techniques/XYZWing";
-import { WXYZWing } from "@/domain/solver/techniques/WXYZWing";
-import { XChain } from "@/domain/solver/techniques/XChain";
-import { XYChain } from "@/domain/solver/techniques/XYChain";
+import { TECHNIQUE_IDS, createTechniques, findFirstStep } from "@/domain/solver/techniqueRegistry";
 
-const techniques: Technique[] = [
-    new NakedSingle(),
-    new HiddenSingle(),
-    new NakedSubset(2),
-    new NakedSubset(3),
-    new NakedSubset(4),
-    new HiddenSubset(2),
-    new HiddenSubset(3),
-    new HiddenSubset(4),
-    new Pointing(),
-    new Claiming(),
-    new Fish(2),
-    new Fish(3),
-    new Fish(4),
-    new XYWing(),
-    new WWing(),
-    new XYZWing(),
-    new WXYZWing(),
-    new XChain(),
-    new XYChain(),
-];
+const techniques = createTechniques(TECHNIQUE_IDS);
 
 /** Receives a step the solver takes, with the board just before it. */
 export type StepListener = (step: SolveStep, stateBefore: BoardState) => void;
@@ -54,11 +21,7 @@ const MAX_ASSIGNMENT_ITERATIONS = BOARD_SIZE * BOARD_SIZE * BOARD_SIZE;
 
 export class TechniqueSolver {
     public nextStep(state: BoardState): SolveStep | null {
-        for (const technique of techniques) {
-            const step = technique.find(state);
-            if (step) return step;
-        }
-        return null;
+        return findFirstStep(state, techniques);
     }
 
     public nextAssignment(state: BoardState): SolveStep | null {
@@ -74,13 +37,7 @@ export class TechniqueSolver {
             if (step === null) return [];
             steps.push(step);
             if (step.assignments.length > 0) return steps;
-            for (const elimination of step.eliminations) {
-                currentState = currentState.eliminate(
-                    elimination.cell.row,
-                    elimination.cell.column,
-                    elimination.digit,
-                );
-            }
+            currentState = currentState.apply(step);
         }
         return [];
     }
@@ -93,30 +50,16 @@ export class TechniqueSolver {
         const steps: SolveStep[] = [];
         let currentState = initialState;
 
-        while (!this.isSolved(currentState)) {
+        while (!currentState.isSolved()) {
             const step = this.nextStep(currentState);
             if (!step) {
                 return { steps, finalState: currentState, solved: false, stuck: true };
             }
             onStep?.(step, currentState);
             steps.push(step);
-            for (const assignment of step.assignments) {
-                currentState = currentState.assign(assignment.cell.row, assignment.cell.column, assignment.digit);
-            }
-            for (const elimination of step.eliminations) {
-                currentState = currentState.eliminate(elimination.cell.row, elimination.cell.column, elimination.digit);
-            }
+            currentState = currentState.apply(step);
         }
 
         return { steps, finalState: currentState, solved: true, stuck: false };
-    }
-
-    private isSolved(state: BoardState): boolean {
-        for (let row = 0; row < BOARD_SIZE; row++) {
-            for (let column = 0; column < BOARD_SIZE; column++) {
-                if (state.valueAt(row, column) === 0) return false;
-            }
-        }
-        return true;
     }
 }
