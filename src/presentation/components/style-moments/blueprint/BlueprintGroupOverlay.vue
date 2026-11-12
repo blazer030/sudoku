@@ -46,13 +46,11 @@ import { boxOrigin } from "@/domain/board/geometry";
 import { BOARD_SIZE, BOX_SIZE } from "@/domain/board/constants";
 import type { CompletedGroup } from "@/domain/game/Sudoku";
 import type { GroupEffect } from "@/presentation/components/style-moments/styleMoments";
-import { groupPlacement } from "@/presentation/components/style-moments/groupPlacement";
+import { groupPlacement, lineOriginFrom, sharePercent, type LineKind } from "@/presentation/components/style-moments/groupPlacement";
 
 const props = defineProps<{
     effect: GroupEffect;
 }>();
-
-type LineKind = "row" | "column";
 
 // GroupBlueprint's .dim: a 10px band centred on the line's leading edge, its 1.5px line through the middle, a stop
 // across each end and the label on the line, on the paper (a column's turned to run down it)
@@ -73,15 +71,12 @@ const RULERS: Record<LineKind, { ruler: string; line: string; stops: string[]; l
 
 const LABEL_CLASSES = "blueprint-group-label absolute whitespace-nowrap bg-background px-1 font-mono text-[10px] leading-3 font-medium text-primary";
 
-const percent = (part: number, whole: number): string => `${(part / whole * 100).toFixed(4)}%`;
-
 // Each piece snaps out from the cell just filled: a line from that cell along it, a box from that cell's place in it
 const snapOriginOf = (group: CompletedGroup): string => {
     const { origin } = props.effect;
-    if (group.kind === "row") return `${percent(origin.column + 0.5, BOARD_SIZE)} 50%`;
-    if (group.kind === "column") return `50% ${percent(origin.row + 0.5, BOARD_SIZE)}`;
+    if (group.kind !== "box") return lineOriginFrom(group.kind, origin);
     const corner = boxOrigin(group.index);
-    return `${percent(origin.column - corner.column + 0.5, BOX_SIZE)} ${percent(origin.row - corner.row + 0.5, BOX_SIZE)}`;
+    return `${sharePercent(origin.column - corner.column + 0.5, BOX_SIZE)} ${sharePercent(origin.row - corner.row + 0.5, BOX_SIZE)}`;
 };
 
 // A drawing's codes, the same in both languages: a line's with its nine cells, a box's alone

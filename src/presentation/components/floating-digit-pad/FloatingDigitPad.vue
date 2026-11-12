@@ -46,6 +46,7 @@
 </template>
 
 <script lang="ts" setup>
+import { boardPercent } from "@/presentation/components/style-moments/groupPlacement";
 import type { CellReference } from "@/domain/board/CellReference";
 import { digitKeyLabelKey, isDigitKeyDisabled, remainingOf, type DigitCounts } from "@/presentation/components/digit-pad/digitKeys";
 import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef, watchPostEffect } from "vue";
@@ -85,7 +86,6 @@ const motionAllowed = useMotionAllowed();
 // Three rows of digits and the erase key's row
 const FLOATING_PAD_ROW_GAPS = 3;
 
-const asBoardShare = (cells: number): string => `${(cells / BOARD_SIZE) * 100}%`;
 
 // Undefined where the style's padding and gaps can't be read, and the usual room is assumed
 const measureChrome = (element: HTMLElement): FloatingPadChrome | undefined => {
@@ -120,10 +120,10 @@ const size = computed(() => floatingPadSize(cellSize.value, chrome.value));
 const placement = computed(() => floatingPadPlacement(props.cell, size.value));
 
 const placementStyle = computed(() => ({
-    top: asBoardShare(placement.value.rowStart),
-    left: asBoardShare(placement.value.columnStart),
-    width: asBoardShare(size.value.columns),
-    height: asBoardShare(size.value.rows),
+    top: boardPercent(placement.value.rowStart),
+    left: boardPercent(placement.value.columnStart),
+    width: boardPercent(size.value.columns),
+    height: boardPercent(size.value.rows),
 }));
 
 const runsPastBoard = computed(() => {

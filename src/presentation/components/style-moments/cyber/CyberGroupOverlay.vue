@@ -42,13 +42,11 @@ import { boxOrigin } from "@/domain/board/geometry";
 import { BOARD_SIZE, BOX_SIZE } from "@/domain/board/constants";
 import type { CompletedGroup } from "@/domain/game/Sudoku";
 import type { GroupEffect } from "@/presentation/components/style-moments/styleMoments";
-import { boardPercent, groupPlacement } from "@/presentation/components/style-moments/groupPlacement";
+import { boardPercent, groupPlacement, type LineKind } from "@/presentation/components/style-moments/groupPlacement";
 
 const props = defineProps<{
     effect: GroupEffect;
 }>();
-
-type LineKind = "row" | "column";
 
 // Each beam's 2px line sits on the edge at the entered cell, so it starts from that cell's centre
 const BEAM_LINES: Record<LineKind, { back: string; forward: string }> = {

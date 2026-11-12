@@ -78,6 +78,7 @@
 </template>
 
 <script lang="ts" setup>
+import { sharePercent } from "@/presentation/components/style-moments/groupPlacement";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import { cellName } from "@/presentation/components/board-cell/cellName";
@@ -98,7 +99,7 @@ const isLit = (kind: "row" | "column", index: number): boolean =>
     props.effect?.groups.some(group => group.kind === kind && group.index === index) ?? false;
 
 // The middle of a column, as a percentage of the grid's width
-const columnMiddle = (column: number): string => `${((column + 0.5) * 100 / INDICES.length).toFixed(4)}%`;
+const columnMiddle = (column: number): string => sharePercent(column + 0.5, INDICES.length);
 
 // The target cell's name stands in its column's label place, above the board, so it never covers a digit
 const callout = computed(() => {
