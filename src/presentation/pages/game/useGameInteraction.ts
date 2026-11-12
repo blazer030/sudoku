@@ -1,8 +1,9 @@
 import { computed, ref } from "vue";
-import { BOARD_SIZE, BOX_SIZE } from "@/domain/board/constants";
+import { BOX_SIZE } from "@/domain/board/constants";
 import type { CompletedCells, Sudoku } from "@/domain/game/Sudoku";
 import type { StepRecorder } from "@/domain/game/StepRecorder";
 import { InputMode } from "@/presentation/pages/game/InputMode";
+import { NO_DIGITS_USED_UP, isDigitUsedUp } from "@/presentation/components/digit-pad/digitKeys";
 
 interface GameInteractionOptions {
     sudoku: Sudoku;
@@ -142,23 +143,17 @@ export const useGameInteraction = ({
     };
 
     const digitCounts = computed(() => {
-        const counts = Array.from<number, number>({ length: 10 }, () => 0);
-        for (let row = 0; row < BOARD_SIZE; row++) {
-            for (let column = 0; column < BOARD_SIZE; column++) {
-                const cell = sudoku.puzzle[row][column];
-                // 明確存取兩個屬性，確保 Vue 追蹤 _clue 和 _entry
-                const clue = cell.clue;
-                const entry = cell.entry;
-                if (clue > 0) counts[clue]++;
-                else if (entry > 0) counts[entry]++;
+        const counts = [...NO_DIGITS_USED_UP];
+        for (const row of sudoku.puzzle) {
+            for (const cell of row) {
+                const value = cell.isClue ? cell.clue : cell.entry;
+                if (value > 0) counts[value]++;
             }
         }
         return counts;
     });
 
-    const isDigitCompleted = (digit: number): boolean => {
-        return digitCounts.value[digit] >= 9;
-    };
+    const isDigitCompleted = (digit: number): boolean => isDigitUsedUp(digitCounts.value, digit);
 
     // A selected cell with nothing on it (empty, or a clue) has nothing for Erase to clear
     const eraseDisabled = computed((): boolean => {

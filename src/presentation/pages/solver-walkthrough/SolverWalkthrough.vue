@@ -65,7 +65,7 @@
                         v-if="floatingPadCell !== null"
                         :cell="floatingPadCell"
                         :current-entry="userValues[floatingPadCell.row][floatingPadCell.column]"
-                        :digit-counts="emptyDigitCounts"
+                        :digit-counts="NO_DIGITS_USED_UP"
                         :disabled-digits="invalidDigitsForSelectedCell"
                         :erase-disabled="eraseDisabledForSelectedCell"
                         @erase="toggleEraseMode"
@@ -86,7 +86,7 @@
                     data-testid="walkthrough-inputs"
                 >
                     <DigitPad
-                        :digit-counts="emptyDigitCounts"
+                        :digit-counts="NO_DIGITS_USED_UP"
                         :disabled-digits="invalidDigitsForSelectedCell"
                         :erase-active="eraseMode"
                         :erase-disabled="eraseDisabledForSelectedCell"
@@ -232,6 +232,7 @@
 </template>
 
 <script lang="ts" setup>
+import { NO_DIGITS_USED_UP } from "@/presentation/components/digit-pad/digitKeys";
 import { computed, inject, onBeforeUnmount, ref, useTemplateRef, watch, type Component } from "vue";
 import { onBeforeRouteLeave, useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
@@ -283,7 +284,6 @@ const difficultyLabel = useDifficultyLabel();
 const userValues = ref<number[][]>(props.initialPuzzle?.map((rowValues) => [...rowValues]) ?? createEmptyBoard());
 // The guide covers the inputs until the player picks a way in.
 const introOpen = ref(props.initialPuzzle === undefined);
-const emptyDigitCounts = Array.from({ length: 10 }, () => 0);
 const { open: openDialog } = provideWalkthroughDialog();
 
 const isBoardEmpty = computed(() => userValues.value.every((rowValues) => rowValues.every((value) => value === 0)));

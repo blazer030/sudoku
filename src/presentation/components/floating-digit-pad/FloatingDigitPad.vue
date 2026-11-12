@@ -46,6 +46,7 @@
 </template>
 
 <script lang="ts" setup>
+import { digitKeyLabelKey, isDigitKeyDisabled, remainingOf, type DigitCounts } from "@/presentation/components/digit-pad/digitKeys";
 import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef, watchPostEffect } from "vue";
 import { useI18n } from "vue-i18n";
 import { BOARD_SIZE } from "@/domain/board/constants";
@@ -57,7 +58,7 @@ import { vPress } from "@/presentation/directives/press";
 
 const props = withDefaults(defineProps<{
     cell: { row: number; column: number };
-    digitCounts: number[];
+    digitCounts: DigitCounts;
     noteMode?: boolean;
     /** The digit the cell holds, 0 for none. */
     currentEntry?: number;
@@ -144,11 +145,10 @@ onBeforeUnmount(() => {
 const isMarked = (digit: number): boolean =>
     props.noteMode ? props.currentNotes.includes(digit) : props.currentEntry === digit;
 
-const isDigitDisabled = (digit: number): boolean =>
-    props.digitCounts[digit] >= BOARD_SIZE || props.disabledDigits.includes(digit);
+const isDigitDisabled = (digit: number): boolean => isDigitKeyDisabled(props.digitCounts, props.disabledDigits, digit);
 
 const digitLabel = (digit: number): string =>
-    t(props.noteMode ? "game.digitPad.note" : "game.digitPad.fill", { digit, count: BOARD_SIZE - props.digitCounts[digit] });
+    t(digitKeyLabelKey(props.noteMode), { digit, count: remainingOf(props.digitCounts, digit) });
 </script>
 
 <style scoped>

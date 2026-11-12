@@ -106,9 +106,9 @@
 </template>
 
 <script lang="ts" setup>
+import { NO_DIGITS_USED_UP } from "@/presentation/components/digit-pad/digitKeys";
 import { computed, watch } from "vue";
 import { useI18n } from "vue-i18n";
-import { BOARD_SIZE } from "@/domain/board/constants";
 import type { Difficulty } from "@/domain/generator/SudokuGenerator";
 import { ALL_LESSON_IDS, groupOfLesson } from "@/domain/lessons/curriculum";
 import type { Lesson, LessonId } from "@/domain/lessons/Lesson";
@@ -137,7 +137,6 @@ const emit = defineEmits<{
 }>();
 
 // No key is greyed out for having all nine on the board: that would give the answer away
-const NO_DIGITS_USED_UP = Array.from({ length: BOARD_SIZE + 1 }, () => 0);
 
 const { t } = useI18n();
 const difficultyLabel = useDifficultyLabel();
