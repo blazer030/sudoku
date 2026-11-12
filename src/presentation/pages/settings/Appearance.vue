@@ -53,7 +53,7 @@
 
         <!-- A style with one theme has nothing to choose -->
         <SettingsGroup
-            v-if="swatches.length > 1"
+            v-if="hasThemeChoice(settingsStore.style)"
             id="colour-theme"
             card-test-id="appearance-theme-card"
             heading-test-id="appearance-theme-label"
@@ -92,7 +92,7 @@
 
         <!-- A one-mode style has nothing to choose; the stored mode is kept for the next style that has both -->
         <SettingsGroup
-            v-if="modeOptions.length > 1"
+            v-if="hasModeChoice(settingsStore.style)"
             id="colour-mode"
             card-test-id="appearance-mode-card"
             heading-test-id="appearance-mode-label"
@@ -122,7 +122,7 @@ import { useSettingsStore } from "@/stores/settingsStore";
 import { goBackOr } from "@/presentation/composables/goBackOr";
 import { usePlatform } from "@/presentation/composables/usePlatform";
 import { ROUTER_PATH } from "@/router";
-import { STYLE_COLOR_MODES, STYLE_IDS, type ColorMode, type ColorThemeId, type StyleId } from "@/theme/themeIds";
+import { STYLE_COLOR_MODES, STYLE_IDS, hasModeChoice, hasThemeChoice, type ColorMode, type ColorThemeId, type StyleId } from "@/theme/themeIds";
 import { STYLES, getPalette, rememberedAppearanceFor, rememberedThemeFor, swatchColors } from "@/theme/palettes";
 import { useColorModeLabel } from "@/presentation/i18n/colorModeLabels";
 import { vPress } from "@/presentation/directives/press";

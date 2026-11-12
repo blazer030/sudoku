@@ -168,10 +168,10 @@ import { usePlatform } from "@/presentation/composables/usePlatform";
 import { appVersion } from "@/utils/appVersion";
 import { PRIVACY_POLICY_URL } from "@/presentation/pages/settings/externalLinks";
 import { ROUTER_PATH } from "@/router";
-import { STYLE_COLOR_MODES, effectiveColorMode } from "@/theme/themeIds";
+import { effectiveColorMode, hasModeChoice, hasThemeChoice } from "@/theme/themeIds";
 import { useColorModeLabel } from "@/presentation/i18n/colorModeLabels";
 import type { LanguagePreference } from "@/application/settings/SettingsStorage";
-import { STYLES, getPalette } from "@/theme/palettes";
+import { getPalette } from "@/theme/palettes";
 import { vPress } from "@/presentation/directives/press";
 import PageHeader from "@/presentation/components/page-header/PageHeader.vue";
 import SegmentedControl from "@/presentation/components/segmented-control/SegmentedControl.vue";
@@ -206,8 +206,8 @@ const languageOptions = computed((): { value: LanguagePreference; label: string 
 const currentPalette = computed(() => getPalette(settingsStore.style, settingsStore.colorTheme, settingsStore.appearance));
 
 const appearanceSummary = computed(() => {
-    const hasThemes = STYLES[settingsStore.style].themes.length > 1;
-    const hasModes = STYLE_COLOR_MODES[settingsStore.style].length > 1;
+    const hasThemes = hasThemeChoice(settingsStore.style);
+    const hasModes = hasModeChoice(settingsStore.style);
     const theme = t(`settings.colorThemes.${settingsStore.colorTheme}`);
     const mode = colorModeLabel(settingsStore.style, effectiveColorMode(settingsStore.style, settingsStore.appearance));
     if (hasThemes && hasModes) return t("settings.appearanceSummary", { mode, theme });
