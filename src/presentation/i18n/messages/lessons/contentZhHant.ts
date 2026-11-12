@@ -73,7 +73,7 @@ export const lessonContentZhHant: typeof lessonContentEn = {
         alonePrompt: "第 8 列有一格只能填一個數字。找到它，把數字填進去。",
         aloneArea: "先看第 8 列。",
         aloneNotYet: "這格還有別的可能，再看看第 8 列其他格。",
-        aloneSuccess: "學會了。這兩招已經足夠解開所有簡單題。去玩一盤簡單題試試身手吧！",
+        aloneSuccess: "學會了。這兩招已經足夠解開所有簡單題。去玩一局簡單題試試身手吧！",
         takeaway: "看一格的列、欄、宮缺什麼，只缺一個數字就是答案。",
     },
 };

@@ -56,7 +56,7 @@
   - 15 課自己找最後一步的成功訊息帶一句鼓勵。
   - 隱藏唯一數、唯一候選數、宮區塊摒除、行列區塊摒除第一次講到名稱時附別名：中文摒除法、唯餘法、區塊摒除法；英文 crosshatching、sole candidate、locked candidates。
   - 課程名稱與 CLAUDE.md 的固定用詞不變。不加釘死文案的測試；以現有的「兩種語言都有文案」與語言切換測試驗證。
-- [ ] 4.3 [after: 4.1] 完成 Nudge toward the hint when stuck，依「卡住時提醒可以按提示」：
+- [x] 4.3 [after: 4.1] 完成 Nudge toward the hint when stuck，依「卡住時提醒可以按提示」：
   - `PracticeState` 加 `missesInARow`，`practiceReducer` 在出現糾正訊息時加一、步驟前進時歸零、中性動作不變、按提示時歸零；先在 `src/__tests__/domain/lessons/practice.test.ts` 寫這四點的測試（新測試先失敗）。
   - 課程畫面加閒置計時：30 秒沒有練習動作就提醒，任何動作或換步重新計時；連錯 3 次也提醒；答對、按提示、換步、提示用完就不提醒。用假時鐘的元件或 composable 測試涵蓋這些分支（新測試先失敗）。
   - 提醒時訊息後面加一句兩種語言的提醒（正在顯示提示時不加）；提示鈕帶 `data-nudge`，動態效果允許時用主色閃幾下，不允許時亮著不閃，`reducedMotion.test.ts` 涵蓋不閃的規則。
