@@ -23,6 +23,12 @@ export const UNRELEASED_CHANGES: ChangelogChange[] = [
             "zh-Hant": "技巧教學內容優化",
         },
     },
+    {
+        text: {
+            en: "Small fixes to keep the game running smoothly",
+            "zh-Hant": "小幅修正，讓遊戲更穩定",
+        },
+    },
 ];
 
 export const CHANGELOG: ChangelogEntry[] = [
