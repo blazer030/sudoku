@@ -367,10 +367,6 @@
   animation: hint-reveal-glow 1000ms ease-out;
 }
 
-/* Reduced motion: no scaling, bouncing or sliding; colour changes and fades stay.
-   Enter and leave transitions (modals, popups, toasts, hint steps) keep their opacity
-   fade but lose their movement, including the ones in component styles. Each style's
-   stylesheet turns off its own motion in its own block. */
 /* A lesson's hint button, pointed out to a stuck player: lit in the style's primary, flashing a few times while motion is allowed */
 [data-nudge] {
     outline: 2px solid var(--color-primary);
@@ -387,6 +383,10 @@
     }
 }
 
+/* Reduced motion: no scaling, bouncing or sliding; colour changes and fades stay.
+   Enter and leave transitions (modals, popups, toasts, hint steps) keep their opacity
+   fade but lose their movement, including the ones in component styles. Each style's
+   stylesheet turns off its own motion in its own block. */
 @media (prefers-reduced-motion: reduce) {
     [data-nudge="flash"] {
         animation: none;

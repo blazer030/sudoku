@@ -278,7 +278,7 @@ const pressDigit = (step: PracticeStep, state: PracticeState, digit: number): Pr
     return state;
 };
 
-/** What one tap or key does to a practice step. Returns `state` itself when nothing changes. */
+// Whether a tap or key took the player a step further
 const movedOn = (before: PracticeState, after: PracticeState): boolean =>
     after.solved
     || after.placed.length > before.placed.length
@@ -286,6 +286,7 @@ const movedOn = (before: PracticeState, after: PracticeState): boolean =>
     || after.removed.length > before.removed.length
     || after.notes.length > before.notes.length;
 
+// A wrong answer adds to the count; a hint or a step further starts it again
 const countMisses = (before: PracticeState, after: PracticeState, action: PracticeAction): PracticeState => {
     const missesInARow = action.kind === "requestHint" || movedOn(before, after) ? 0
         : after.feedback !== null ? before.missesInARow + 1
@@ -293,6 +294,7 @@ const countMisses = (before: PracticeState, after: PracticeState, action: Practi
     return missesInARow === after.missesInARow ? after : { ...after, missesInARow };
 };
 
+/** What one tap or key does to a practice step. Returns `state` itself when it changes nothing, wrong answers in a row included. */
 export const practiceReducer = (step: PracticeStep, state: PracticeState, action: PracticeAction): PracticeState => {
     if (state.solved) return state;
     return countMisses(state, reduce(step, state, action), action);
