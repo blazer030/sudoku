@@ -2,6 +2,7 @@ import { BOARD_SIZE } from "@/domain/board/constants";
 import { BoardState } from "@/domain/solver/BoardState";
 import { CellReference, Elimination, SolveStep, TechniqueId } from "@/domain/solver/SolveStep";
 import { Technique } from "@/domain/solver/techniques/Technique";
+import { combinationsOf } from "@/domain/solver/houses";
 
 interface RowCandidates {
     row: number;
@@ -29,7 +30,7 @@ export class Fish implements Technique {
     private findRowBased(state: BoardState, digit: number): SolveStep | null {
         const candidateRows = collectCandidateRows(state, digit, this.size);
 
-        for (const combination of combinations(candidateRows, this.size)) {
+        for (const combination of combinationsOf(candidateRows, this.size)) {
             const unionColumns = unionColumnsOf(combination);
             if (unionColumns.length !== this.size) continue;
 
@@ -64,7 +65,7 @@ export class Fish implements Technique {
     private findColumnBased(state: BoardState, digit: number): SolveStep | null {
         const candidateColumns = collectCandidateColumns(state, digit, this.size);
 
-        for (const combination of combinations(candidateColumns, this.size)) {
+        for (const combination of combinationsOf(candidateColumns, this.size)) {
             const unionRows = unionRowsOf(combination);
             if (unionRows.length !== this.size) continue;
 
@@ -154,20 +155,6 @@ function unionRowsOf(columns: ColumnCandidates[]): number[] {
         }
     }
     return Array.from(set).sort((a, b) => a - b);
-}
-
-function combinations<T>(items: T[], size: number): T[][] {
-    if (size === 0) return [[]];
-    if (items.length < size) return [];
-    const result: T[][] = [];
-    for (let index = 0; index <= items.length - size; index++) {
-        const head = items[index];
-        const tailCombinations = combinations(items.slice(index + 1), size - 1);
-        for (const tail of tailCombinations) {
-            result.push([head, ...tail]);
-        }
-    }
-    return result;
 }
 
 function collectColumnEliminations(

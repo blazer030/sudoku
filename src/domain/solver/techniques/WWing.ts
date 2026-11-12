@@ -1,10 +1,10 @@
-import { BOARD_SIZE, BOX_SIZE } from "@/domain/board/constants";
 import { BoardState } from "@/domain/solver/BoardState";
 import { CellReference, Scope, SolveStep } from "@/domain/solver/SolveStep";
 import { Technique } from "@/domain/solver/techniques/Technique";
 import { arePeers, sameCell } from "@/domain/solver/cellRelations";
 import { collectBivalueCells, type BivalueCell } from "@/domain/solver/bivalueCells";
 import { eliminationsSeenByAll } from "@/domain/solver/eliminations";
+import { HOUSES, cellsWithCandidate } from "@/domain/solver/houses";
 
 interface StrongLink {
     first: CellReference;
@@ -68,25 +68,9 @@ export class WWing implements Technique {
 
 function collectStrongLinks(state: BoardState, digit: number): StrongLink[] {
     const links: StrongLink[] = [];
-    for (let row = 0; row < BOARD_SIZE; row++) {
-        const cells = cellsWithCandidateInRow(state, row, digit);
-        if (cells.length === 2) {
-            links.push({ first: cells[0], second: cells[1], scope: { kind: "row", row } });
-        }
-    }
-    for (let column = 0; column < BOARD_SIZE; column++) {
-        const cells = cellsWithCandidateInColumn(state, column, digit);
-        if (cells.length === 2) {
-            links.push({ first: cells[0], second: cells[1], scope: { kind: "column", column } });
-        }
-    }
-    for (let boxRow = 0; boxRow < BOARD_SIZE; boxRow += BOX_SIZE) {
-        for (let boxColumn = 0; boxColumn < BOARD_SIZE; boxColumn += BOX_SIZE) {
-            const cells = cellsWithCandidateInBox(state, boxRow, boxColumn, digit);
-            if (cells.length === 2) {
-                links.push({ first: cells[0], second: cells[1], scope: { kind: "box", boxRow, boxColumn } });
-            }
-        }
+    for (const house of HOUSES) {
+        const cells = cellsWithCandidate(state, house, digit);
+        if (cells.length === 2) links.push({ first: cells[0], second: cells[1], scope: house.scope });
     }
     return links;
 }
@@ -107,43 +91,6 @@ function matchLinkToEndpoints(
         return { supporterForA: second, supporterForB: first };
     }
     return null;
-}
-
-function cellsWithCandidateInRow(state: BoardState, row: number, digit: number): CellReference[] {
-    const cells: CellReference[] = [];
-    for (let column = 0; column < BOARD_SIZE; column++) {
-        if (state.candidatesOf(row, column).includes(digit)) {
-            cells.push({ row, column });
-        }
-    }
-    return cells;
-}
-
-function cellsWithCandidateInColumn(state: BoardState, column: number, digit: number): CellReference[] {
-    const cells: CellReference[] = [];
-    for (let row = 0; row < BOARD_SIZE; row++) {
-        if (state.candidatesOf(row, column).includes(digit)) {
-            cells.push({ row, column });
-        }
-    }
-    return cells;
-}
-
-function cellsWithCandidateInBox(
-    state: BoardState,
-    boxStartRow: number,
-    boxStartColumn: number,
-    digit: number,
-): CellReference[] {
-    const cells: CellReference[] = [];
-    for (let row = boxStartRow; row < boxStartRow + BOX_SIZE; row++) {
-        for (let column = boxStartColumn; column < boxStartColumn + BOX_SIZE; column++) {
-            if (state.candidatesOf(row, column).includes(digit)) {
-                cells.push({ row, column });
-            }
-        }
-    }
-    return cells;
 }
 
 function sameCandidates(left: [number, number], right: [number, number]): boolean {
