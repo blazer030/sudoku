@@ -24,15 +24,18 @@ export const useProgressDrag = (
     };
 
     const onPointerDown = (event: MouseEvent | TouchEvent) => {
-        isDragging.value = true;
-        wasPlaying = playState.isPlaying.value;
-        if (wasPlaying) playState.stopPlay();
+        // A second finger joins the drag under way, which has already paused playback
+        if (!isDragging.value) {
+            isDragging.value = true;
+            wasPlaying = playState.isPlaying.value;
+            if (wasPlaying) playState.stopPlay();
+            window.addEventListener("mousemove", onPointerMove);
+            window.addEventListener("mouseup", onPointerUp);
+            window.addEventListener("touchmove", onPointerMove);
+            window.addEventListener("touchend", onPointerUp);
+        }
         const clientX = "touches" in event ? event.touches[0].clientX : event.clientX;
         onSeek(calcStep(clientX));
-        window.addEventListener("mousemove", onPointerMove);
-        window.addEventListener("mouseup", onPointerUp);
-        window.addEventListener("touchmove", onPointerMove);
-        window.addEventListener("touchend", onPointerUp);
     };
 
     const onPointerMove = (event: MouseEvent | TouchEvent) => {

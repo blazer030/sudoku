@@ -48,7 +48,7 @@ export const usePlaybackState = (
     };
 
     const startPlay = () => {
-        if (currentStep.value >= totalSteps.value) return;
+        if (isPlaying.value || currentStep.value >= totalSteps.value) return;
         isPlaying.value = true;
         playInterval = setInterval(next, intervalMs);
     };

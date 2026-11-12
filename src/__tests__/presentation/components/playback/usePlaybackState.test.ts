@@ -131,4 +131,16 @@ describe("usePlaybackState", () => {
 
         expect(currentStep.value).toBe(0);
     });
+
+    // A second start used to leave the first timer running, so playback went on at double speed
+    it("should keep one timer when asked to play while already playing", () => {
+        vi.useFakeTimers();
+        const { currentStep, startPlay } = mountComposable(5);
+
+        startPlay();
+        startPlay();
+        vi.advanceTimersByTime(800);
+
+        expect(currentStep.value).toBe(1);
+    });
 });
