@@ -6,12 +6,9 @@
 // square and scaled down. Digits are Outfit Bold's outlines, not text: the fonts are not there
 // when the generator rasterises the icon.
 
-const ICON_SIZE = 108;
+import { ICON_SIZE, MONOCHROME_COLOR, inAdaptiveViewport, svgOf } from "./adaptiveIcon";
+
 const DESIGN_SIZE = 512;
-// An adaptive icon's 108dp layers show their middle 72dp
-const ADAPTIVE_VIEWPORT = 72;
-// Android tints the monochrome layer itself and reads only its alpha
-const MONOCHROME_COLOR = "#FFFFFF";
 
 export const BRAND_ICON_BACKGROUND = "#17171C";
 /** The icon's Android resource name; the app's main activity shows it. */
@@ -104,18 +101,6 @@ const boardTiles = (): string[] => CELLS.flatMap(({ row, column }) => {
 
 const designGroup = (content: string[]): string[] =>
     [`<g transform="scale(${ICON_SIZE / DESIGN_SIZE})">`, `<g transform="${PLACEMENT}">`, ...content, "</g>", "</g>"];
-
-const svgOf = (...content: string[]): string => [
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${ICON_SIZE} ${ICON_SIZE}">`,
-    ...content,
-    "</svg>",
-    "",
-].join("\n");
-
-const ADAPTIVE_INSET = (ICON_SIZE - ADAPTIVE_VIEWPORT) / 2;
-
-const inAdaptiveViewport = (...content: string[]): string[] =>
-    [`<g transform="translate(${ADAPTIVE_INSET} ${ADAPTIVE_INSET}) scale(${ADAPTIVE_VIEWPORT / ICON_SIZE})">`, ...content, "</g>"];
 
 /** The icon as a full 108-unit square SVG, unrounded. */
 export const brandIconSvg = (): string =>

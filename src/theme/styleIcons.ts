@@ -3,35 +3,19 @@
 //
 // The artwork is a 108-unit square with no rounding; callers mask it. Digits are paths, not text:
 // the fonts the app uses are not there when the generators rasterise the icon.
+import { ADAPTIVE_INSET, ADAPTIVE_VIEWPORT, ICON_SIZE, MONOCHROME_COLOR, inAdaptiveViewport, svgOf } from "./adaptiveIcon";
 import { contrastRatio, mixColors } from "./contrast";
 import { INK_SEAL_GLYPH_PATH } from "./inkSealGlyph";
 import type { Palette } from "./paletteBuilder";
 import type { StyleId } from "./themeIds";
-
-const ICON_SIZE = 108;
-// An adaptive icon's 108dp layers show their middle 72dp, so the foreground fits the artwork there
-const ADAPTIVE_VIEWPORT = 72;
-// Android tints the monochrome layer itself and reads only its alpha
-const MONOCHROME_COLOR = "#FFFFFF";
-
-const svgOf = (...content: string[]): string => [
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${ICON_SIZE} ${ICON_SIZE}">`,
-    ...content,
-    "</svg>",
-    "",
-].join("\n");
 
 // The square, or with a bleed a larger one past each edge
 const fillSquare = (color: string, bleed = 0): string => bleed === 0
     ? `<rect width="${ICON_SIZE}" height="${ICON_SIZE}" fill="${color}"/>`
     : `<rect x="${-bleed}" y="${-bleed}" width="${ICON_SIZE + 2 * bleed}" height="${ICON_SIZE + 2 * bleed}" fill="${color}"/>`;
 
-const ADAPTIVE_INSET = (ICON_SIZE - ADAPTIVE_VIEWPORT) / 2;
 // How far past the artwork's edges the rest of the 108dp layer reaches, in artwork units
 const ADAPTIVE_BLEED = ADAPTIVE_INSET * ICON_SIZE / ADAPTIVE_VIEWPORT;
-
-const inAdaptiveViewport = (...content: string[]): string[] =>
-    [`<g transform="translate(${ADAPTIVE_INSET} ${ADAPTIVE_INSET}) scale(${ADAPTIVE_VIEWPORT / ICON_SIZE})">`, ...content, "</g>"];
 
 // Minimal: a checkerboard of solid and faint tiles in on-primary on the primary
 const MINIMAL_TILE_ORIGINS = [21.6, 45, 68.4];
