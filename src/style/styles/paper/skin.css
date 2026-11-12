@@ -47,20 +47,15 @@
 }
 
 /* The app root paints it on its own box, which takes in the safe-area padding, so edge to edge it
-   runs on under the status bar. Page roots, which scroll, attach it to the viewport, so it lines up
-   with the app root behind them. */
+   runs on under the status bar. Page roots draw it under their ruling (below), fixed to the viewport,
+   so it lines up with the app root behind them. */
 [data-style="paper"] body,
-[data-style="paper"] .app-safe-area,
-[data-style="paper"] [data-skin~="page"] {
+[data-style="paper"] .app-safe-area {
     background-color: var(--color-background);
     background-image: var(--paper-texture);
     background-size: 9px 9px, 13px 13px;
     background-position: 0 0, 4px 6px;
     background-repeat: repeat, repeat;
-}
-
-[data-style="paper"] [data-skin~="page"] {
-    background-attachment: fixed;
 }
 
 /* A sticky header is clear at rest, so the notebook's ruled lines, margin line and grain run straight
