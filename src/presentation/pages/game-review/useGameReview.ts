@@ -1,4 +1,4 @@
-import { computed, watch } from "vue";
+import { computed } from "vue";
 import { GameReplay } from "@/domain/game/GameReplay";
 import type { GameReplayData } from "@/domain/game/GameReplay";
 import type { GameStep, GameStepAction } from "@/domain/game/GameStep";
@@ -48,25 +48,12 @@ export const useGameReview = (replayData: GameReplayData, completed: boolean) =>
         return "action";
     });
 
-    watch(playback.currentStep, (step) => {
-        if (step <= replay.totalSteps) {
-            replay.goToStep(step);
-        }
-    }, { immediate: true });
+    // The final position shows the board after the last action, as the game ended
+    const replayStep = computed(() => Math.min(playback.currentStep.value, replay.totalSteps));
 
-    const board = computed(() => {
-        if (isAtFinalStep.value) {
-            replay.goToLast();
-        }
-        void playback.currentStep.value;
-        return replay.board;
-    });
+    const board = computed(() => replay.boardAt(replayStep.value));
 
-    const gameStep = computed((): GameStep | null => {
-        if (isAtFinalStep.value) return null;
-        void playback.currentStep.value;
-        return replay.currentGameStep;
-    });
+    const gameStep = computed((): GameStep | null => (isAtFinalStep.value ? null : replay.gameStepAt(replayStep.value)));
 
     const changedCell = computed((): CellReference | null => {
         const step = gameStep.value;

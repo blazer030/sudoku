@@ -27,15 +27,23 @@ export class GameReplay {
     }
 
     public get board(): PuzzleCell[][] {
-        if (this._currentStep === 0) {
-            return this.buildBoardFromInitial();
-        }
-        return this.buildBoardFromStep(this._steps[this._currentStep - 1]);
+        return this.boardAt(this._currentStep);
     }
 
     public get currentGameStep(): GameStep | null {
-        if (this._currentStep === 0) return null;
-        return this._steps[this._currentStep - 1];
+        return this.gameStepAt(this._currentStep);
+    }
+
+    /** The board after `step` of the player's actions (0 for the board the game began with). */
+    public boardAt(step: number): PuzzleCell[][] {
+        if (step === 0) return this.buildBoardFromInitial();
+        return this.buildBoardFromStep(this._steps[step - 1]);
+    }
+
+    /** The action that brought the board to `step`, or null for the board the game began with. */
+    public gameStepAt(step: number): GameStep | null {
+        if (step === 0) return null;
+        return this._steps[step - 1];
     }
 
     public next(): void {
